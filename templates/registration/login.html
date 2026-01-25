@@ -4,187 +4,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Sistema Estancia Infantil</title>
+    <title>Acceso - Estancia Infantil UNACH</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <style>
-        /* FONDO: Imagen con capa oscura encima */
+        /* --- CONFIGURACIÓN GENERAL Y FONDO --- */
         body {
-            /* Capa negra al 50% para que el texto resalte */
+            /* Fondo con capa oscura al 60% para que se lean los textos */
             background: linear-gradient(rgba(0, 32, 66, 0.6), rgba(0, 32, 66, 0.6)),
-                        url("{% static 'img/fondo_login.jpg' %}"); /* <--- OJO AL NOMBRE SIN ESPACIOS */
+                        url("{% static 'img/fondo.png' %}"); /* <--- OJO: .png */
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
             height: 100vh;
+
+            /* --- ALINEACIÓN A LA IZQUIERDA --- */
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            overflow: hidden; /* Evita scrollbars innecesarias */
+            flex-direction: column; /* Uno debajo del otro */
+            justify-content: center; /* Centrados verticalmente */
+            align-items: flex-start; /* Alineados a la IZQUIERDA */
+            padding-left: 8%; /* Espacio desde el borde izquierdo */
+
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
-        /* LOGO SUPERIOR IZQUIERDA (Estilo Oficial) */
-        .header-logo-container {
-            position: absolute;
-            top: 25px;
-            left: 40px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        /* --- LOGO SUPERIOR IZQUIERDO --- */
+        .main-logo {
+            width: 280px; /* Tamaño ajustado para la izquierda */
+            height: auto;
+            margin-bottom: 2rem; /* Espacio debajo del logo */
+            /* Si el PNG tiene fondo blanco y quieres que se mezcle un poco: */
+            /* mix-blend-mode: screen; */
         }
 
-        .logo-unach {
-            height: 90px; /* Tamaño prominente como en la web oficial */
-            width: auto;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); /* Sombra para que se lea sobre cualquier fondo */
-            transition: transform 0.3s ease;
-        }
-
-        .logo-unach:hover {
-            transform: scale(1.05);
-        }
-
-        /* TEXTO JUNTO AL LOGO (Opcional, si quieres que diga el nombre al lado) */
-        .system-name-header {
-            color: white;
-            font-weight: 700;
-            font-size: 1.4rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            border-left: 2px solid #d1a928; /* Línea dorada separadora */
-            padding-left: 15px;
-            display: none; /* Quita este "none" si quieres que aparezca texto arriba también en pantallas grandes */
-        }
-
-        /* TARJETA DE LOGIN */
+        /* --- TARJETA DE LOGIN (CRISTAL) --- */
         .login-card {
             width: 100%;
-            max-width: 420px;
-            background: rgba(255, 255, 255, 0.98); /* Casi sólido */
-            padding: 3rem 2.5rem;
-            border-radius: 12px; /* Bordes no tan redondos, más serios */
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border-top: 5px solid #d1a928; /* El toque dorado UNACH */
-            animation: slideUp 0.8s ease-out;
+            max-width: 380px; /* Tarjeta compacta */
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+
+            /* Efecto Vidrio */
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* TIPOGRAFÍA Y COLORES */
-        h4 {
-            color: #1e2b3e; /* Azul oscuro institucional */
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #555;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
+        /* INPUTS */
         .form-control {
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background-color: #f8f9fa;
-        }
-
-        .form-control:focus {
-            background-color: #fff;
-            border-color: #d1a928;
-            box-shadow: 0 0 0 3px rgba(209, 169, 40, 0.2);
-        }
-
-        .btn-ingresar {
-            background-color: #1e2b3e;
-            color: white;
-            padding: 14px;
-            border-radius: 6px;
-            font-weight: 700;
+            background: rgba(255, 255, 255, 0.9);
             border: none;
-            transition: all 0.3s;
-            margin-top: 1rem;
+            padding: 12px;
+            font-size: 0.95rem;
+        }
+        .form-control:focus {
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(209, 169, 40, 0.5); /* Dorado UNACH */
+        }
+        .input-group-text {
+            background: rgba(255, 255, 255, 0.9); border: none; color: #555;
         }
 
+        /* BOTÓN */
+        .btn-ingresar {
+            background-color: #1e3a8a; /* Azul Institucional */
+            color: white; font-weight: 700; padding: 12px;
+            border-radius: 6px; border: none; width: 100%; margin-top: 10px;
+            transition: all 0.2s;
+        }
         .btn-ingresar:hover {
-            background-color: #d1a928; /* Cambio a dorado */
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(209, 169, 40, 0.4);
+            background-color: #d1a928; /* Dorado al pasar mouse */
+            transform: translateY(-2px); color: white;
         }
 
-        /* RESPONSIVO: En celulares el logo se ajusta */
+        /* TEXTOS */
+        .form-check-label { color: rgba(255,255,255,0.95); font-size: 0.9rem; }
+        .forgot-link {
+            color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem; margin-top: 1rem; display: inline-block;
+        }
+        .forgot-link:hover { color: #fff; text-decoration: underline; }
+
+        /* RESPONSIVO (Celulares) */
         @media (max-width: 768px) {
-            .header-logo-container {
-                top: 15px;
-                left: 50%;
-                transform: translateX(-50%); /* Centrado en celular */
-                width: 100%;
-                justify-content: center;
+            body {
+                align-items: center; /* En celular sí centramos todo */
+                padding-left: 0;
             }
-            .logo-unach {
-                height: 70px;
-            }
-            .login-card {
-                margin-top: 80px; /* Espacio para que no choque con el logo */
-            }
+            .main-logo { width: 220px; }
+            .login-card { width: 90%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-logo-container">
-        <img src="{% static 'img/logo_unach.png' %}" alt="Logo UNACH" class="logo-unach">
-        </div>
+    <img src="{% static 'img/logo.png' %}" alt="Logo Estancia UNACH" class="main-logo">
 
-    <div class="login-card text-center">
-
-        <h4 class="mb-1">BIENVENIDO</h4>
-        <p class="text-muted mb-4">Ingrese sus credenciales para continuar</p>
-
+    <div class="login-card">
         <form method="post">
             {% csrf_token %}
-
             {% if form.errors %}
-                <div class="alert alert-danger py-2 mb-4" role="alert" style="font-size: 0.9rem;">
-                    <i class="bi bi-x-circle-fill me-2"></i>Usuario o contraseña incorrectos
-                </div>
+                <div class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem;">Credenciales incorrectas</div>
             {% endif %}
-
-            <div class="mb-3 text-start">
-                <label for="id_username" class="form-label">Usuario</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-person text-muted"></i></span>
-                    <input type="text" name="username" class="form-control border-start-0 ps-0" id="id_username" placeholder="Matrícula o ID" required>
-                </div>
+            <div class="mb-3 input-group">
+                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                <input type="text" name="username" class="form-control" placeholder="Usuario" required>
             </div>
-
-            <div class="mb-4 text-start">
-                <label for="id_password" class="form-label">Contraseña</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-key text-muted"></i></span>
-                    <input type="password" name="password" class="form-control border-start-0 ps-0" id="id_password" placeholder="••••••••" required>
-                </div>
+            <div class="mb-3 input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
             </div>
-
-            <div class="d-grid">
-                <button type="submit" class="btn btn-ingresar">
-                    ACCEDER AL SISTEMA
-                </button>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Recuérdame</label>
             </div>
-
-            <div class="mt-4 text-muted" style="font-size: 0.75rem;">
-                &copy; 2026 Universidad Autónoma de Chiapas<br>
-                Estancia Infantil - Dirección de TI
+            <button type="submit" class="btn btn-ingresar">INICIAR SESIÓN</button>
+            <div class="text-center">
+                <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
             </div>
         </form>
     </div>
