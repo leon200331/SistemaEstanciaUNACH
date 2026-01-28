@@ -16,15 +16,32 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
-from django.contrib.auth import views as auth_views  # Importamos las vistas de autenticación
+from django.urls import path
+from django.contrib.auth import views as auth_views
+
+# --- IMPORTANTE: ESTA LÍNEA ARREGLA EL ERROR ROJO ---
+# Traemos tus vistas desde la carpeta 'usuarios'
+from usuarios import views as user_views
 
 urlpatterns = [
+    # 1. ADMIN DE DJANGO
     path('admin/', admin.site.urls),
 
-    # URL para el Login (La raíz del sitio)
-    path('', auth_views.LoginView.as_view(), name='login'),
+    # 2. EL LOGIN (Ahora vive en /login/)
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
 
-    # URL para Salir (Logout)
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # 3. EL SEMÁFORO (La Raíz "/")
+    # Cuando entran a la página principal, el semáforo decide a dónde van
+    path('', user_views.root_redirect_view, name='root'),
+
+    # 4. LOS DESTINOS (Tienen que existir para que el semáforo funcione)
+    path('panel-administrativo/', user_views.dashboard_admin, name='dashboard_admin'),
+    path('area-medica/', user_views.dashboard_medico, name='dashboard_medico'),
+    path('portal-padres/', user_views.portal_padres_home, name='portal_padres_home'),
+
+    # 5. TU NUEVO FORMULARIO DE INSCRIPCIÓN
+    path('inscripcion-nueva/', user_views.registro_inscripcion, name='registro_inscripcion'),
+
+    # 6. SALIR
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 ]

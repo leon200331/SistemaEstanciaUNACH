@@ -127,3 +127,23 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 # Redirecciones de Login
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# ==========================================
+# CONFIGURACIÓN DE SEGURIDAD (NIVEL 1)
+# Cierre de sesión automático por inactividad
+# ==========================================
+
+# 1. TIEMPO LÍMITE: 30 Minutos (en segundos)
+# 30 * 60 = 1800 segundos.
+# Si quieres ser más estricto, bájalo a 15 mins (900 seg).
+SESSION_COOKIE_AGE = 1800
+
+# 2. CANDADO DE NAVEGADOR
+# Si el usuario cierra la ventana o apaga la compu,
+# la sesión se muere instantáneamente (no queda guardada).
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# 3. RENOVACIÓN AUTOMÁTICA
+# Si el usuario sigue trabajando (dando clics), el contador
+# de 30 minutos se reinicia. Solo se cierra si se va a comer.
+SESSION_SAVE_EVERY_REQUEST = True

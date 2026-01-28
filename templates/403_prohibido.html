@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Denegado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f0f2f5; /* Un gris muy suavecito de fondo */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+        }
+
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Sombra suave */
+            animation: bounceIn 0.8s;
+        }
+
+        /* Animación de entrada simpática */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .jaguar-img {
+            max-width: 100%; /* Que no se salga del cuadro en celulares */
+            height: auto;
+            width: 400px; /* Tamaño ideal */
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #d32f2f; /* Rojo de advertencia */
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-regresar {
+            background-color: #1e3a8a; /* Azul institucional (como la camisa del jaguar) */
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px; /* Botón redondo moderno */
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+        }
+
+        .btn-regresar:hover {
+            background-color: #152c69;
+            color: white;
+            transform: translateY(-3px); /* Se levanta al pasar el mouse */
+            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="error-container">
+        <img src="{% static 'img/403.png' %}" alt="Acceso Prohibido" class="jaguar-img">
+
+        <h1>✋ Alto ahí</h1>
+        <p>No tienes los permisos necesarios para estar en esta zona.</p>
+
+        <a href="/" class="btn-regresar">
+            Regresar a mi panel
+        </a>
+    </div>
+
+</body>
+</html>
