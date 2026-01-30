@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Estancia Infantil UNACH{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    {% block content %}
+    {% endblock %}
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% if user.is_authenticated %}
+    <script>
+        // CONFIGURACIÓN DE TIEMPO
+        // 5000 = 5 Segundos (Para tu DEMO de mañana)
+        // 1800000 = 30 Minutos (Para producción)
+        const inactivityTime = 15000;
+
+        let time;
+
+        function resetTimer() {
+            clearTimeout(time);
+            time = setTimeout(logout, inactivityTime);
+        }
+
+        function logout() {
+            // Recargar la página forzará a Django a revisar la sesión.
+            // Como el tiempo ya expiró en el servidor, te mandará al Login.
+            location.reload();
+        }
+
+        // Eventos que reinician el reloj
+        window.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onkeypress = resetTimer;
+        document.onclick = resetTimer;
+        document.onscroll = resetTimer;
+    </script>
+    {% endif %}
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>
