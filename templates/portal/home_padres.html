@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal Padres - Estancia Infantil UNACH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        /* Barra de Navegación UNACH */
+        .navbar-unach {
+            background-color: #1e3a8a; /* Azul Institucional */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .navbar-brand { font-weight: bold; color: white !important; }
+
+        /* Tarjeta de Bienvenida */
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2980b9 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(30, 58, 138, 0.2);
+        }
+
+        /* Tarjetas de Acciones */
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .icon-box {
+            font-size: 3rem;
+            color: #d63384; /* Color secundario */
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-unach mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-backpack2-fill me-2"></i> Estancia Infantil UNACH
+            </a>
+            <div class="d-flex">
+                <span class="text-white me-3 align-self-center">
+                    <i class="bi bi-person-circle"></i> {{ request.user.username }} (Tutor)
+                </span>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> Salir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="welcome-card text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="fw-bold">¡Bienvenido(a), {{ request.user.first_name }}!</h1>
+                    <p class="lead mb-0">Ciclo Escolar 2026 - Panel de Gestión Familiar</p>
+                    <p class="small opacity-75 mt-2">Estamos listos para recibir a tus pequeños.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-house-heart-fill display-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-6">
+                <div class="card action-card p-4 text-center">
+                    <div class="icon-box">
+                        <i class="bi bi-file-earmark-person-fill"></i>
+                    </div>
+                    <h4 class="fw-bold text-primary">Nueva Inscripción</h4>
+                    <p class="text-muted">
+                        Llena la ficha de datos, alergias y contactos de emergencia para registrar a tu hijo(a).
+                    </p>
+                    <a href="{% url 'registro_inscripcion' %}" class="btn btn-primary w-100 py-2 fw-bold">
+                        Comenzar Registro <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card action-card p-4 text-center">
+                    <div class="icon-box" style="color: #198754;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h4 class="fw-bold text-success">Estatus de Solicitud</h4>
+                    <p class="text-muted">
+                        Consulta si la documentación ha sido aprobada por la Dirección o el Área Médica.
+                    </p>
+                    <button class="btn btn-outline-success w-100 py-2 fw-bold" disabled>
+                        No hay solicitudes activas
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

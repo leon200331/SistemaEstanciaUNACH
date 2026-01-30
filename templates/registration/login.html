@@ -13,34 +13,32 @@
         body {
             /* Fondo con capa oscura al 60% para que se lean los textos */
             background: linear-gradient(rgba(0, 32, 66, 0.6), rgba(0, 32, 66, 0.6)),
-                        url("{% static 'img/fondo.png' %}"); /* <--- OJO: .png */
+                        url("{% static 'img/fondo.png' %}");
             background-size: cover;
             background-position: center;
             height: 100vh;
 
             /* --- ALINEACIÓN A LA IZQUIERDA --- */
             display: flex;
-            flex-direction: column; /* Uno debajo del otro */
-            justify-content: center; /* Centrados verticalmente */
-            align-items: flex-start; /* Alineados a la IZQUIERDA */
-            padding-left: 8%; /* Espacio desde el borde izquierdo */
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 8%;
 
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
         /* --- LOGO SUPERIOR IZQUIERDO --- */
         .main-logo {
-            width: 280px; /* Tamaño ajustado para la izquierda */
+            width: 280px;
             height: auto;
-            margin-bottom: 2rem; /* Espacio debajo del logo */
-            /* Si el PNG tiene fondo blanco y quieres que se mezcle un poco: */
-            /* mix-blend-mode: screen; */
+            margin-bottom: 2rem;
         }
 
         /* --- TARJETA DE LOGIN (CRISTAL) --- */
         .login-card {
             width: 100%;
-            max-width: 380px; /* Tarjeta compacta */
+            max-width: 380px;
             padding: 2.5rem 2rem;
             border-radius: 12px;
 
@@ -61,13 +59,24 @@
         }
         .form-control:focus {
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(209, 169, 40, 0.5); /* Dorado UNACH */
-        }
-        .input-group-text {
-            background: rgba(255, 255, 255, 0.9); border: none; color: #555;
+            box-shadow: none; /* Quitamos sombra externa para que se vea limpio */
+            border-color: transparent;
         }
 
-        /* BOTÓN */
+        /* Estilo para los iconos (izq y der) para que coincidan con el input */
+        .input-group-text, .btn-ojito {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: #555;
+        }
+
+        /* Ajuste específico para el botón del ojito */
+        .btn-ojito:hover {
+            background: #fff;
+            color: #1e3a8a;
+        }
+
+        /* BOTÓN INGRESAR */
         .btn-ingresar {
             background-color: #1e3a8a; /* Azul Institucional */
             color: white; font-weight: 700; padding: 12px;
@@ -86,10 +95,10 @@
         }
         .forgot-link:hover { color: #fff; text-decoration: underline; }
 
-        /* RESPONSIVO (Celulares) */
+        /* RESPONSIVO */
         @media (max-width: 768px) {
             body {
-                align-items: center; /* En celular sí centramos todo */
+                align-items: center;
                 padding-left: 0;
             }
             .main-logo { width: 220px; }
@@ -104,27 +113,54 @@
     <div class="login-card">
         <form method="post">
             {% csrf_token %}
+
             {% if form.errors %}
-                <div class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem;">Credenciales incorrectas</div>
+                <div class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem;">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>Credenciales incorrectas
+                </div>
             {% endif %}
+
             <div class="mb-3 input-group">
                 <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
                 <input type="text" name="username" class="form-control" placeholder="Usuario" required>
             </div>
+
             <div class="mb-3 input-group">
                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
+                <input type="password" name="password" class="form-control" placeholder="Contraseña" required id="id_password">
+                <button class="btn btn-ojito" type="button" id="togglePassword">
+                    <i class="bi bi-eye-fill"></i>
+                </button>
             </div>
+
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="rememberMe">
                 <label class="form-check-label" for="rememberMe">Recuérdame</label>
             </div>
+
             <button type="submit" class="btn btn-ingresar">INICIAR SESIÓN</button>
+
             <div class="text-center">
-                <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                <a href="{% url 'password_reset' %}" class="forgot-link">¿Olvidaste tu contraseña?</a>
             </div>
         </form>
     </div>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#id_password');
+        const icon = togglePassword.querySelector('i');
+
+        togglePassword.addEventListener('click', function (e) {
+            // 1. Cambiar el tipo de atributo (password <-> text)
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+
+            // 2. Cambiar el ícono (Ojo lleno <-> Ojo tachado)
+            icon.classList.toggle('bi-eye-fill');
+            icon.classList.toggle('bi-eye-slash-fill');
+        });
+    </script>
 
 </body>
 </html>

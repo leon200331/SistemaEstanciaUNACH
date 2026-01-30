@@ -44,4 +44,12 @@ urlpatterns = [
 
     # 6. SALIR
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+# ... tus otras rutas (admin, login, etc) ...
+
+    # --- RUTAS DE RECUPERACIÓN DE CONTRASEÑA ---
+    path('reset-password/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('reset-password/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]

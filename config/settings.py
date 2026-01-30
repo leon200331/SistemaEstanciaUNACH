@@ -147,3 +147,20 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Si el usuario sigue trabajando (dando clics), el contador
 # de 30 minutos se reinicia. Solo se cierra si se va a comer.
 SESSION_SAVE_EVERY_REQUEST = True
+
+
+
+# ... (debajo de SESSION_COOKIE_AGE) ...
+
+# REDIRECCIONES DE LOGIN
+# Cuando alguien no tiene permiso, mándalo aquí:
+LOGIN_URL = 'login'
+
+# Cuando entran exitosamente, mándalos aquí (al semáforo):
+LOGIN_REDIRECT_URL = 'root'
+
+# settings.py (Al final)
+
+# --- CONFIGURACIÓN DE CORREO (MODO DESARROLLO) ---
+# Esto hace que el link de recuperación aparezca en tu consola de PyCharm/CMD
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
