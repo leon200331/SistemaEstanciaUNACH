@@ -23,7 +23,6 @@
       align-items:center;
       flex-wrap:wrap
     }
-
     .actions .btn{
       border-radius:8px;
       font-weight:500;
@@ -36,7 +35,6 @@
       border-color:#ced4da;
       background-color:#fff
     }
-
     .btn-outline-secondary:hover{
       background-color:#f1f3f5;
       border-color:#adb5bd;
@@ -52,10 +50,7 @@
       justify-content:center;
       padding:0
     }
-
-    .actions .text-muted{
-      font-size:.85rem
-    }
+    .actions .text-muted{ font-size:.85rem }
   </style>
 </head>
 
@@ -69,12 +64,20 @@
       <div class="muted">Listado de solicitudes y enlaces de captura.</div>
     </div>
 
-    <button class="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#modalCrear">
-      <i class="bi bi-plus-circle me-1"></i>
-      Crear solicitud y generar link
-    </button>
+    <div class="d-flex gap-2">
+      <!-- ✅ BOTÓN REGRESAR -->
+      <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Regresar
+      </a>
+
+      <!-- BOTÓN CREAR -->
+      <button class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCrear">
+        <i class="bi bi-plus-circle me-1"></i>
+        Crear solicitud y generar link
+      </button>
+    </div>
   </div>
 
   <!-- MENSAJES -->
@@ -133,7 +136,6 @@
               <div class="actions">
 
                 {% if link and not link.usado %}
-
 
                   <!-- ACCIÓN PRINCIPAL -->
                   <a class="btn btn-sm btn-primary"

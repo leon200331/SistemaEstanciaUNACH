@@ -209,3 +209,25 @@ def descargar_pdf_solicitud(request, solicitud_id):
         as_attachment=True,
         filename=f"FO301_{solicitud.folio}.pdf"
     )
+
+from django.shortcuts import render, redirect
+from .models import Solicitud
+
+def solicitud_publica_nueva(request):
+    """
+    Entrada pública para nuevos ingresos.
+    Crea una Solicitud (si tu modelo lo permite) y manda a captura/editar.
+    """
+    if request.method == "POST":
+        # Si tu Solicitud tiene estado/folio, ajusta aquí
+        kwargs = {}
+        if "estado" in [f.name for f in Solicitud._meta.fields]:
+            kwargs["estado"] = "CAPTURA"
+
+        s = Solicitud.objects.create(**kwargs)
+
+        # ✅ manda a la captura por ID (ajusta el name según tu urls)
+        return redirect("admisiones_captura", id=s.id)
+
+    return render(request, "admisiones/publico_nuevo_ingreso.html")
+

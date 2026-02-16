@@ -8,4 +8,5 @@ urlpatterns = [
     path("enviar-link/<int:solicitud_id>/", views.enviar_link_por_correo, name="enviar_link_por_correo"),
     path("editar/<int:solicitud_id>/", views.editar_solicitud, name="editar_solicitud"),
     path("pdf/<int:solicitud_id>/", views.descargar_pdf_solicitud, name="descargar_pdf_solicitud"),
+    path("publica/nueva/", views.solicitud_publica_nueva, name="solicitud_publica_nueva"),
 ]

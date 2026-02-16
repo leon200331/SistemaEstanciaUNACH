@@ -283,16 +283,22 @@ def portal_padres_home(request):
     )
 
 
-# --- VISTA DE INSCRIPCIÓN (con bloqueo + validación tutor si existe rol) ---
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
 @login_required
 def registro_inscripcion(request):
-    # Bloqueo por configuración TI
+    # Bloqueo por configuración TI (si existe)
     if request.session.get('sec_inscrip', False):
-        return render(request, '403_prohibido.html',
-                      {'mensaje': 'El periodo de inscripciones a la estancia está cerrado.'})
+        return render(request, '403_prohibido.html', {
+            'mensaje': 'El periodo de inscripciones a la estancia está cerrado.'
+        })
 
+    # Si existe rol, valida tutor; si no existe, no bloquea
     rol = getattr(request.user, 'rol', None)
     if rol is not None and rol != 'tutor':
         return render(request, '403_prohibido.html')
 
     return render(request, 'portal/registro_inscripcion.html')
+
+
