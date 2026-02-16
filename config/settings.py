@@ -103,12 +103,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+# En settings.py
+LANGUAGE_CODE = 'es-mx'
+TIME_ZONE = 'America/Mexico_City'  # <--- ESTO ARREGLA LA HORA
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -136,7 +134,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 # 1. TIEMPO LÍMITE: 30 Minutos (en segundos)
 # 30 * 60 = 1800 segundos.
 # Si quieres ser más estricto, bájalo a 15 mins (900 seg).
-SESSION_COOKIE_AGE = 15
+SESSION_COOKIE_AGE = 1800
 
 # 2. CANDADO DE NAVEGADOR
 # Si el usuario cierra la ventana o apaga la compu,

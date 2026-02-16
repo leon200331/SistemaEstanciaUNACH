@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Administración de Usuarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+    .navbar-ti { background-color: #1e3a8a; padding: 0.8rem 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .ti-brand-text { font-size: 1.2rem; font-weight: 700; color: white; letter-spacing: 0.5px; }
+
+    .container-panel { max-width: 1250px; margin: 0 auto; padding: 20px; margin-top: 80px; }
+    .sidebar-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 100px; overflow: hidden; }
+    .content-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 25px; margin-bottom: 20px; }
+
+    .nav-pills .nav-link { color: #555; padding: 12px 20px; font-weight: 500; border-radius: 0; border-left: 4px solid transparent; text-align: left; transition: 0.2s; cursor: pointer; }
+    .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #1e3a8a; }
+    .nav-pills .nav-link.active { background-color: #e3f2fd; color: #1e3a8a; border-left: 4px solid #1e3a8a; font-weight: 700; }
+
+    .table-custom th { background-color: #f8f9fa; text-transform: uppercase; font-size: 0.8rem; color: #666; }
+
+    /* ESTILOS MODAL JIRA */
+    .jira-label { font-size: 0.85rem; font-weight: 600; color: #44546f; margin-bottom: 4px; display: block; }
+    .jira-input { background: #f4f5f7; border: 2px solid #dfe1e6; border-radius: 4px; padding: 8px 12px; font-size: 0.9rem; color: #172b4d; width: 100%; transition: 0.2s; }
+    .jira-input:focus { background: white; border-color: #0c66e4; outline: none; }
+
+    /* TOAST (Notificación Flotante) */
+    #toast-notification {
+        visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px;
+        position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #toast-notification.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+    @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+    @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="toast-notification"><i class="bi bi-check-circle me-2"></i>Acción Realizada Correctamente</div>
+
+<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
+    <div class="container-fluid justify-content-center">
+        <div class="d-flex align-items-center" style="width: 100%; max-width: 1200px; padding: 0 20px;">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height: 45px; width: auto; object-fit: contain;">
+                <div class="text-white"><div class="ti-brand-text">PANEL DE ADMINISTRACIÓN DE USUARIOS</div></div>
+            </a>
+            <div class="ms-auto text-white d-none d-md-block">
+                <small class="me-2">Usuario: {{ user.username }} ({{ user.tipo_persona }})</small>
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-light border-0" onclick="localStorage.removeItem('activeTabID')"><i class="bi bi-power fs-5"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-panel">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="sidebar-card">
+                <div class="p-3 bg-light border-bottom text-center"><h6 class="m-0 fw-bold text-primary">GESTIÓN CENTRAL</h6></div>
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+
+                    <button class="nav-link active" id="tab-staff-btn" data-bs-toggle="pill" data-bs-target="#tab-staff" onclick="rememberTab(this.id)"><i class="bi bi-briefcase-fill me-2"></i> Personal Interno</button>
+                    <button class="nav-link" id="tab-alumnos-btn" data-bs-toggle="pill" data-bs-target="#tab-alumnos" onclick="rememberTab(this.id)"><i class="bi bi-mortarboard-fill me-2"></i> Alumnos Inscritos</button>
+
+                    {% if user.tipo_persona == 'ADMIN' or user.tipo_persona == 'SUPERVISOR' %}
+                    <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)"><i class="bi bi-diagram-3-fill me-2"></i> Asignación de Cargos y Permisos</button>
+                    <button class="nav-link" id="tab-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-logs" onclick="rememberTab(this.id)"><i class="bi bi-clock-history me-2"></i> Historial</button>
+                    {% endif %}
+
+                    {% if user.tipo_persona == 'ADMIN' %}
+                    <button class="nav-link" id="tab-sec-btn" data-bs-toggle="pill" data-bs-target="#tab-sec" onclick="rememberTab(this.id)"><i class="bi bi-lock-fill me-2"></i> Seguridad</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="tab-content">
+
+                <div class="tab-pane fade show active" id="tab-staff">
+                    <div class="content-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0">Directorio de Empleados</h5>
+
+                            {% if user.tipo_persona == 'ADMIN' %}
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearUser"><i class="bi bi-person-plus-fill me-1"></i> Nueva Persona</button>
+                            {% endif %}
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-custom">
+                                    <tr>
+                                        <th>Nombre Completo</th>
+                                        <th>Tipo Persona</th>
+                                        <th>Identificadores</th>
+                                        <th class="text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in lista_staff %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ u.nombre|default:"--" }} {{ u.apellido_paterno|default:"" }}</div>
+                                            <div class="small text-muted">{{ u.email }}</div>
+                                        </td>
+                                        <td>
+                                            {% if u.tipo_persona == 'ADMIN' %} <span class="badge bg-danger">ADMIN SISTEMA</span>
+                                            {% elif u.tipo_persona == 'SUPERVISOR' %} <span class="badge bg-warning text-dark">SUPERVISOR</span>
+                                            {% else %} <span class="badge bg-primary">PERSONAL</span> {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="small"><strong>CURP:</strong> {{ u.curp|default:"--" }}</div>
+                                            <div class="small text-muted"><strong>Nº Emp:</strong> {{ u.numero_empleado|default:"--" }}</div>
+                                        </td>
+                                        <td class="text-end">
+                                            {% if user.tipo_persona == 'ADMIN' %}
+                                                {% if u.id != user.id %}
+                                                <form onsubmit="submitAjax(event)" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action_type" value="delete_user">
+                                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                    <button class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash-fill"></i></button>
+                                                </form>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="small text-muted fst-italic">Sin permisos</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-alumnos">
+                    <div class="content-card"><h5 class="fw-bold">Padres y Alumnos</h5><p class="text-muted">Gestión de usuarios externos.</p></div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-roles">
+                    <div class="content-card mb-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-person-badge text-primary me-2"></i>1. Definición de Roles Secundarios</h5>
+                        <p class="small text-muted">Estos roles se asignan además del "Tipo de Persona" base.</p>
+                        <div class="p-3 bg-light rounded border mb-3">
+                            <form onsubmit="submitAjax(event)" class="row g-3 align-items-end">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="create_role">
+                                <div class="col-md-5">
+                                    <label class="fw-bold small">Nombre del Cargo</label>
+                                    <input type="text" name="nombre_rol" class="form-control" placeholder="Ej: Nutrióloga" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch p-2 bg-white rounded border">
+                                        <input class="form-check-input ms-0 me-2" type="checkbox" name="permiso_total">
+                                        <label class="form-check-label fw-bold text-purple" style="color: #6f42c1;">¿Es Jefe/Control Total?</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3"><button class="btn btn-success w-100">Crear</button></div>
+                            </form>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for rol in roles %}
+                                <span class="badge bg-white text-dark border p-2 d-flex align-items-center">
+                                    {% if "[MASTER]" in rol.name %} <i class="bi bi-star-fill text-warning me-1"></i> {% endif %}
+                                    {{ rol.name|cut:"[MASTER] " }}
+                                    <form onsubmit="submitAjax(event)" class="ms-2 m-0 d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="delete_role">
+                                        <input type="hidden" name="rol_id" value="{{ rol.id }}">
+                                        <button class="btn btn-sm p-0 text-muted hover-danger"><i class="bi bi-x-circle-fill"></i></button>
+                                    </form>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-logs">
+                    <div class="content-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0">Historial de Accesos</h5>
+                            <form onsubmit="submitAjax(event)">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="clear_history">
+                                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash-fill me-1"></i> Limpiar Historial</button>
+                            </form>
+                        </div>
+                        <table class="table table-sm table-striped small">
+                            <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr></thead>
+                            <tbody>{% for log in logs %} <tr><td>{{ log.fecha_acceso|date:"d/m/Y H:i" }}</td><td>{{ log.usuario.username }}</td><td>{{ log.accion }}</td></tr> {% endfor %}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-sec">
+                    <div class="content-card border-danger border-top border-4">
+                        <h5 class="text-danger fw-bold mb-4">Protocolos de Seguridad</h5>
+                        <p class="text-muted">Desarrollo pendiente en vistas.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrearUser" tabindex="-1">
+    <div class="modal-dialog modal-lg"> <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <form onsubmit="submitAjax(event)">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="create_user">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus me-2"></i>Registrar Nuevo Personal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">1. Identidad de la Persona</h6>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="jira-label">Nombre(s) *</label>
+                            <input type="text" name="nombre" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras" style="text-transform: capitalize;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="jira-label">Apellido Paterno *</label>
+                            <input type="text" name="apellido_paterno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="jira-label">Apellido Materno</label>
+                            <input type="text" name="apellido_materno" class="jira-input" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="jira-label">CURP *</label>
+                            <input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" pattern="[A-Za-z0-9]{18}" title="Deben ser 18 caracteres sin símbolos" style="text-transform: uppercase;">
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">2. Estructura Interna UNACH</h6>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="jira-label">Tipo de Persona *</label>
+                            <select name="tipo_persona" class="jira-input" required>
+                                <option value="PERSONAL" selected>Personal de la estancia</option>
+                                <option value="SUPERVISOR">Supervisor</option>
+                                <option value="ADMIN">Administrador de Sistema</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="jira-label">Número de Empleado *</label>
+                            <input type="text" name="numero_empleado" class="jira-input" required pattern="\d+" title="Solo ingrese números">
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">3. Credenciales de Acceso</h6>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="jira-label">Correo Electrónico *</label>
+                            <input type="email" name="email" class="jira-input" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="jira-label">Contraseña Temporal *</label>
+                            <input type="password" name="password" class="jira-input" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4">Registrar Personal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() { var savedTabID = localStorage.getItem('activeTabID'); if (savedTabID) { var btn = document.getElementById(savedTabID); if (btn) new bootstrap.Tab(btn).show(); } });
+    function rememberTab(id) { localStorage.setItem('activeTabID', id); }
+
+    function submitAjax(event) {
+        event.preventDefault();
+        fetch(window.location.href, { method: 'POST', body: new FormData(event.target), headers: {'X-Requested-With': 'XMLHttpRequest'} })
+        .then(r => r.json())
+        .then(d => {
+            if(d.status === 'success') {
+                showToast(d.msg);
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                alert("Error de validación: \n" + d.msg);
+            }
+        })
+        .catch(err => alert("Ocurrió un error en el servidor."));
+    }
+
+    function showToast(msg) { var x = document.getElementById("toast-notification"); x.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + msg; x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000); }
+</script>
+{% endblock %}
