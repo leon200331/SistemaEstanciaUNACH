@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Solicitud</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <style>
+    body { background:#f6f7fb; font-family:'Segoe UI',sans-serif; }
+    .page-wrap { max-width: 980px; }
+    .card-soft { border:0; border-radius:18px; box-shadow:0 12px 30px rgba(0,0,0,.08); }
+    .muted { color:#6c757d; }
+    .req { color:#dc3545; font-weight:700; }
+    .title { font-weight:800; letter-spacing:.2px; }
+    .form-control { border-radius:12px; padding:.7rem .9rem; }
+    .form-control:focus { box-shadow:0 0 0 .2rem rgba(13,110,253,.15); }
+    .btn-soft { border-radius:12px; padding:.65rem 1rem; }
+
+    /* IMPORTANTE: asegura que nada bloquee el click */
+    input, button, a { pointer-events: auto !important; }
+  </style>
+</head>
+
+<body>
+  <div class="container page-wrap py-4">
+
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h2 class="title mb-1">
+          <i class="bi bi-pencil-square me-2"></i>Editar Solicitud
+        </h2>
+        <div class="muted">Folio: <strong>{{ solicitud.folio }}</strong></div>
+      </div>
+
+      <a href="{% url 'panel_admisiones' %}" class="btn btn-outline-secondary btn-soft">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+      </a>
+    </div>
+
+    {% if messages %}
+      <div class="mb-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="card card-soft p-4" autocomplete="off">
+      {% csrf_token %}
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nombre(s) <span class="req">*</span></label>
+          <input
+            type="text"
+            name="nombres_tutor"
+            class="form-control w-100"
+            placeholder="Nombre(s)"
+            value="{{ solicitud.nombres_tutor|default:'' }}"
+          >
+          <div class="muted small mt-1">Solo letras y espacios.</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Apellido paterno <span class="req">*</span></label>
+          <input
+            type="text"
+            name="apellido_paterno_tutor"
+            class="form-control w-100"
+            placeholder="Apellido paterno"
+            value="{{ solicitud.apellido_paterno_tutor|default:'' }}"
+          >
+          <div class="muted small mt-1">Solo letras.</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Apellido materno</label>
+          <input
+            type="text"
+            name="apellido_materno_tutor"
+            class="form-control w-100"
+            placeholder="Apellido materno"
+            value="{{ solicitud.apellido_materno_tutor|default:'' }}"
+          >
+          <div class="muted small mt-1">Opcional.</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Matrícula</label>
+          <input
+            type="text"
+            name="matricula"
+            class="form-control w-100"
+            placeholder="Ej. A123456"
+            value="{{ solicitud.matricula|default:'' }}"
+          >
+          <div class="muted small mt-1">Ej: A123456</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Correo</label>
+          <input
+            type="email"
+            name="correo"
+            class="form-control w-100"
+            placeholder="correo@ejemplo.com"
+            value="{{ solicitud.correo|default:'' }}"
+          >
+          <div class="muted small mt-1">Ej: Gmail / Hotmail / Outlook / @unach.mx</div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary btn-soft fw-bold px-4">
+          Guardar cambios <i class="bi bi-check2-circle ms-1"></i>
+        </button>
+        <a href="{% url 'panel_admisiones' %}" class="btn btn-outline-secondary btn-soft px-4">
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+  </div>
+</body>
+</html>

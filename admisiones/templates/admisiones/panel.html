@@ -1,0 +1,281 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Admisiones</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body{background:#f8f9fa;font-family:'Segoe UI',sans-serif}
+    .card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none}
+    .muted{color:#6c757d}
+    .badge-captura{background:#ffc107;color:#000;font-weight:700}
+    .badge-recibida{background:#198754;color:#fff;font-weight:700}
+    .table thead th{font-weight:700}
+
+    /* ===== ACCIONES DEL PANEL (PRO) ===== */
+    .actions{
+      display:flex;
+      gap:.5rem;
+      align-items:center;
+      flex-wrap:wrap
+    }
+
+    .actions .btn{
+      border-radius:8px;
+      font-weight:500;
+      padding:.32rem .65rem
+    }
+
+    /* Botones secundarios discretos */
+    .btn-outline-secondary{
+      color:#495057;
+      border-color:#ced4da;
+      background-color:#fff
+    }
+
+    .btn-outline-secondary:hover{
+      background-color:#f1f3f5;
+      border-color:#adb5bd;
+      color:#212529
+    }
+
+    /* Botón icon-only */
+    .btn-icon{
+      width:38px;
+      height:38px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0
+    }
+
+    .actions .text-muted{
+      font-size:.85rem
+    }
+  </style>
+</head>
+
+<body>
+<div class="container py-4">
+
+  <!-- ENCABEZADO -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="mb-0">Panel Admisiones (temporal)</h3>
+      <div class="muted">Listado de solicitudes y enlaces de captura.</div>
+    </div>
+
+    <button class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#modalCrear">
+      <i class="bi bi-plus-circle me-1"></i>
+      Crear solicitud y generar link
+    </button>
+  </div>
+
+  <!-- MENSAJES -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'success' }} mb-3">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- TABLA -->
+  <div class="card card-panel p-3">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width:90px;">Folio</th>
+          <th>Nombre</th>
+          <th style="width:160px;">Matrícula</th>
+          <th style="width:170px;">Estado de Solicitud</th>
+          <th style="width:320px;">Link de Captura</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for s in solicitudes %}
+        <tr>
+          <td>{{ s.folio|default:"-" }}</td>
+
+          <td>
+            {% if s.nombres_tutor or s.apellido_paterno_tutor %}
+              {{ s.nombres_tutor|default:"" }} {{ s.apellido_paterno_tutor|default:"" }} {{ s.apellido_materno_tutor|default:"" }}
+            {% else %}
+              <span class="muted">Sin nombre</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if s.matricula %}
+              {{ s.matricula }}
+            {% else %}
+              <span class="muted">-</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if s.estado == "RECIBIDA" %}
+              <span class="badge badge-recibida">RECIBIDA</span>
+            {% else %}
+              <span class="badge badge-captura">CAPTURA</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% with link=s.links.all|dictsortreversed:"creado_en"|first %}
+              <div class="actions">
+
+                {% if link and not link.usado %}
+
+
+                  <!-- ACCIÓN PRINCIPAL -->
+                  <a class="btn btn-sm btn-primary"
+                     target="_blank"
+                     href="{% url 'captura_por_token' link.token %}">
+                    Abrir
+                  </a>
+
+                  <!-- SECUNDARIAS -->
+                  <button type="button"
+                          class="btn btn-sm btn-outline-secondary"
+                          onclick="copiarLink('{% url 'captura_por_token' link.token %}')">
+                    Copiar
+                  </button>
+
+                  {% if s.correo %}
+                    <a class="btn btn-sm btn-outline-secondary btn-icon"
+                       href="{% url 'enviar_link_por_correo' solicitud_id=s.id %}"
+                       title="Enviar correo">
+                      <i class="bi bi-envelope"></i>
+                    </a>
+                  {% else %}
+                    <span class="text-muted small align-self-center">Sin correo</span>
+                  {% endif %}
+
+                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
+                     class="btn btn-sm btn-outline-secondary btn-icon"
+                     title="Editar datos">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+
+                {% else %}
+
+                  <span class="text-muted small align-self-center">No activo</span>
+
+                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
+                     class="btn btn-sm btn-outline-secondary btn-icon"
+                     title="Editar datos">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+
+                {% endif %}
+              </div>
+
+              {% if link and not link.usado %}
+                <div class="muted small mt-1">Enlace de un solo uso</div>
+              {% endif %}
+            {% endwith %}
+          </td>
+        </tr>
+
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center muted py-4">
+            No hay solicitudes registradas.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-3 muted small">
+    Nota: Este panel es temporal para generar links sin usar el Admin.
+  </div>
+
+</div>
+
+<!-- MODAL CREAR SOLICITUD -->
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <form method="post" action="{% url 'crear_solicitud_y_link' %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Crear solicitud dirigida a</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label class="form-label">Nombre(s) <span class="text-danger">*</span></label>
+              <input type="text" name="nombres_tutor" class="form-control" required autocomplete="off">
+              <div class="form-text">Solo letras y espacios.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Apellido paterno <span class="text-danger">*</span></label>
+              <input type="text" name="apellido_paterno_tutor" class="form-control" required autocomplete="off">
+              <div class="form-text">Solo letras.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Apellido materno</label>
+              <input type="text" name="apellido_materno_tutor" class="form-control" autocomplete="off">
+              <div class="form-text">Opcional.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Matrícula</label>
+              <input type="text" name="matricula" class="form-control" autocomplete="off">
+              <div class="form-text">Ej: A123456</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Correo (opcional)</label>
+              <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" autocomplete="off">
+              <div class="form-text">Ej: Gmail / Hotmail / Outlook / @unach.mx</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Crear solicitud
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function copiarLink(path) {
+  const full = window.location.origin + path;
+  navigator.clipboard.writeText(full)
+    .then(() => alert("Link copiado correctamente ✅"))
+    .catch(() => alert("No se pudo copiar el link ❌"));
+}
+</script>
+
+</body>
+</html>

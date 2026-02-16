@@ -1,0 +1,334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Captura de Solicitud</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <style>
+    :root{
+      --brand:#1e3a8a;
+      --brand2:#2563eb;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --card:#ffffff;
+      --bg:#f6f8fc;
+    }
+    body { background:var(--bg); font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); }
+    .page-wrap { max-width: 1020px; }
+
+    /* Header */
+    .hero{
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+      color:#fff;
+      border-radius:18px;
+      padding:22px 22px;
+      box-shadow:0 18px 40px rgba(30,58,138,.18);
+    }
+    .hero .sub{opacity:.9; color:rgba(255,255,255,.85)}
+    .hero .pill{
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.25);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.85rem;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    /* Card */
+    .card-soft{
+      border:0;
+      border-radius:18px;
+      background:var(--card);
+      box-shadow:0 14px 30px rgba(2,6,23,.08);
+    }
+
+    /* Section header */
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .section-title{
+      font-weight:800;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .section-badge{
+      font-size:.78rem;
+      font-weight:700;
+      color:var(--brand);
+      background:rgba(37,99,235,.08);
+      border:1px solid rgba(37,99,235,.18);
+      padding:4px 10px;
+      border-radius:999px;
+    }
+    .divider{
+      height:1px;
+      background:linear-gradient(90deg, rgba(2,6,23,.08), rgba(2,6,23,.02));
+      margin:18px 0;
+    }
+
+    /* Labels + help text */
+    .form-label{ font-weight:700; color:#0f172a; }
+    .help-text{ font-size:.82rem; color:var(--muted); margin-top:6px; }
+    .req{ color:#ef4444; font-weight:900; }
+
+    /* Inputs */
+    .form-control, .form-select{
+      border-radius:12px !important;
+      padding:.70rem .85rem;
+      border:1px solid rgba(15,23,42,.14);
+      transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+      background:#fff;
+    }
+    .form-control:focus, .form-select:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow:0 0 0 .25rem rgba(37,99,235,.16);
+    }
+    .is-valid{ box-shadow:none !important; }
+    .is-invalid{ box-shadow:none !important; }
+
+    /* Buttons */
+    .btn-primary{
+      background:linear-gradient(135deg, var(--brand2), var(--brand));
+      border:0;
+      border-radius:12px;
+      padding:.72rem 1.05rem;
+      box-shadow:0 12px 22px rgba(37,99,235,.22);
+    }
+    .btn-outline-secondary{
+      border-radius:12px;
+      padding:.72rem 1.05rem;
+    }
+    .btn-primary:active{ transform: translateY(1px); }
+
+    /* Subtle container spacing */
+    .card-inner{ padding:22px; }
+    @media (min-width: 768px){
+      .card-inner{ padding:26px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container page-wrap py-4">
+
+  <!-- HERO -->
+  <div class="hero mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <i class="bi bi-clipboard-check fs-4"></i>
+          <h3 class="m-0 fw-bold">Captura de Solicitud</h3>
+        </div>
+        <div class="sub">Complete la información solicitada. Los campos con <span class="req">*</span> son obligatorios.</div>
+      </div>
+
+      <div class="pill">
+        <i class="bi bi-shield-check"></i>
+        <span>Validación automática</span>
+      </div>
+    </div>
+  </div>
+
+  <form method="post" class="card card-soft">
+    {% csrf_token %}
+
+    <div class="card-inner">
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <!-- ========= TUTOR ========= -->
+      <div class="section-head">
+        <div class="section-title">
+          <i class="bi bi-person-badge"></i>
+          <span>Datos del tutor</span>
+        </div>
+        <span class="section-badge">Información del solicitante</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nombre(s) <span class="req">*</span></label>
+          {{ form.nombres_tutor }}
+          <div class="help-text">Solo letras y espacios. No se aceptan números ni caracteres especiales.</div>
+          <div class="text-danger small mt-1">{{ form.nombres_tutor.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Apellido paterno <span class="req">*</span></label>
+          {{ form.apellido_paterno_tutor }}
+          <div class="help-text">Solo letras. Ejemplo: Pérez</div>
+          <div class="text-danger small mt-1">{{ form.apellido_paterno_tutor.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Apellido materno</label>
+          {{ form.apellido_materno_tutor }}
+          <div class="help-text">Solo letras. Campo opcional.</div>
+          <div class="text-danger small mt-1">{{ form.apellido_materno_tutor.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Matrícula</label>
+          {{ form.matricula }}
+          <div class="help-text">Ejemplo: A123456</div>
+          <div class="text-danger small mt-1">{{ form.matricula.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Programa educativo</label>
+          {{ form.programa_educativo }}
+          <div class="help-text">Seleccione su programa; si no aparece, elija “Otro”.</div>
+          <div class="text-danger small mt-1">{{ form.programa_educativo.errors }}</div>
+        </div>
+
+        <div class="col-md-4" id="box_prog_otro" style="display:none;">
+          <label class="form-label">Programa (Otro)</label>
+          {{ form.programa_educativo_otro }}
+          <div class="help-text">Escriba el nombre completo del programa.</div>
+          <div class="text-danger small mt-1">{{ form.programa_educativo_otro.errors }}</div>
+        </div>
+
+
+
+        <div class="col-md-6">
+          <label class="form-label">Correo electrónico</label>
+          {{ form.correo }}
+          <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional (@unach.mx).</div>
+          <div class="text-danger small mt-1">{{ form.correo.errors }}</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Celular</label>
+          {{ form.celular }}
+          <div class="help-text">Solo números. Exactamente 10 dígitos.</div>
+          <div class="text-danger small mt-1">{{ form.celular.errors }}</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Domicilio</label>
+          {{ form.domicilio }}
+          <div class="help-text">Calle, número, colonia y ciudad.</div>
+          <div class="text-danger small mt-1">{{ form.domicilio.errors }}</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Parentesco <span class="req">*</span></label>
+          {{ form.parentesco }}
+          <div class="help-text">Seleccione el parentesco con el menor.</div>
+          <div class="text-danger small mt-1">{{ form.parentesco.errors }}</div>
+        </div>
+
+        <div class="col-md-6" id="box_parent_otro" style="display:none;">
+          <label class="form-label">Parentesco (Otro)</label>
+          {{ form.parentesco_otro }}
+          <div class="help-text">Especifique el parentesco.</div>
+          <div class="text-danger small mt-1">{{ form.parentesco_otro.errors }}</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ========= MENOR ========= -->
+      <div class="section-head">
+        <div class="section-title">
+          <i class="bi bi-emoji-smile"></i>
+          <span>Datos del menor</span>
+        </div>
+        <span class="section-badge">Información del niño(a)</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Fecha de nacimiento <span class="req">*</span></label>
+          {{ form.fecha_nacimiento_menor }}
+          <div class="help-text">El menor debe tener entre 6 meses y 3 años.</div>
+          <div class="text-danger small mt-1">{{ form.fecha_nacimiento_menor.errors }}</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">CURP del menor</label>
+          {{ form.curp_menor }}
+          <div class="help-text">18 caracteres. Letras mayúsculas y números.</div>
+          <div class="text-danger small mt-1">{{ form.curp_menor.errors }}</div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary fw-bold px-4">
+          Guardar solicitud <i class="bi bi-check2-circle ms-1"></i>
+        </button>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
+          Volver
+        </a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  // Mostrar/ocultar "Otro"
+  const prog = document.getElementById("id_programa_educativo");
+  const boxProg = document.getElementById("box_prog_otro");
+  const par = document.getElementById("id_parentesco");
+  const boxPar = document.getElementById("box_parent_otro");
+
+  function toggleProg() {
+    if (!prog || !boxProg) return;
+    boxProg.style.display = (prog.value === "OTRO") ? "block" : "none";
+  }
+  function togglePar() {
+    if (!par || !boxPar) return;
+    boxPar.style.display = (par.value === "OTRO") ? "block" : "none";
+  }
+  if (prog) prog.addEventListener("change", toggleProg);
+  if (par) par.addEventListener("change", togglePar);
+  toggleProg(); togglePar();
+
+  // Solo letras (nombres y apellidos): rojo/verde
+  const soloLetras = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]*$/;
+  ["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      if (!soloLetras.test(el.value)) {
+        el.classList.add("is-invalid");
+        el.classList.remove("is-valid");
+      } else if (el.value.trim().length > 1) {
+        el.classList.add("is-valid");
+        el.classList.remove("is-invalid");
+      } else {
+        el.classList.remove("is-valid","is-invalid");
+      }
+    });
+  });
+
+  // Celular: solo números
+  const cel = document.getElementById("id_celular");
+  if (cel) {
+    cel.addEventListener("input", () => {
+      cel.value = cel.value.replace(/\D/g, "");
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

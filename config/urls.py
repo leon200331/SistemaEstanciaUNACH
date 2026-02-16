@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
 # --- IMPORTANTE: ESTA LÍNEA ARREGLA EL ERROR ROJO ---
@@ -52,4 +52,7 @@ urlpatterns = [
     path('reset-password/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path("solicitud/", include("admisiones.urls")),
+    path("solicitud/admisiones/", include("admisiones.urls")),
+
 ]

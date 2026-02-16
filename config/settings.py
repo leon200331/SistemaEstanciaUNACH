@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'usuarios',
+    'admisiones',
 ]
 
 MIDDLEWARE = [
@@ -164,3 +165,5 @@ LOGIN_REDIRECT_URL = 'root'
 # --- CONFIGURACIÓN DE CORREO (MODO DESARROLLO) ---
 # Esto hace que el link de recuperación aparezca en tu consola de PyCharm/CMD
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
