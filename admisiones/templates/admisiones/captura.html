@@ -18,15 +18,47 @@
       --bg:#f6f8fc;
     }
     body { background:var(--bg); font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); }
-    .page-wrap { max-width: 1020px; }
 
-    /* Header */
+    .navbar-ti{
+      background: #1e3a8a;
+      padding:.75rem 0;
+      box-shadow:0 4px 10px rgba(0,0,0,.12);
+    }
+    .ti-brand-text{
+      font-size:1.05rem;
+      font-weight:900;
+      color:#fff;
+      letter-spacing:.4px;
+      line-height:1.1;
+    }
+    .ti-subtext{ color:rgba(255,255,255,.78); font-size:.85rem; }
+    .btn-nav{
+      border-radius:10px;
+      font-weight:800;
+      padding:.5rem .9rem;
+    }
+
+    .page-wrap { max-width: 1020px; margin-top: 92px; }
+
     .hero{
       background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
       color:#fff;
       border-radius:18px;
       padding:22px 22px;
       box-shadow:0 18px 40px rgba(30,58,138,.18);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-90px;
+      top:-120px;
+      width:260px;
+      height:260px;
+      background:rgba(255,255,255,.12);
+      border-radius:50%;
+      filter: blur(1px);
     }
     .hero .sub{opacity:.9; color:rgba(255,255,255,.85)}
     .hero .pill{
@@ -38,9 +70,34 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
+      white-space:nowrap;
     }
 
-    /* Card */
+    .progress-wrap{
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:14px;
+      padding:10px 12px;
+      width: 320px;
+      max-width: 100%;
+    }
+    .progress{
+      height:8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+    }
+    .progress-bar{
+      background:rgba(255,255,255,.88);
+    }
+    .progress-meta{
+      display:flex;
+      justify-content:space-between;
+      margin-top:6px;
+      font-size:.82rem;
+      color:rgba(255,255,255,.88);
+      font-weight:700;
+    }
+
     .card-soft{
       border:0;
       border-radius:18px;
@@ -48,7 +105,6 @@
       box-shadow:0 14px 30px rgba(2,6,23,.08);
     }
 
-    /* Section header */
     .section-head{
       display:flex;
       align-items:center;
@@ -57,7 +113,7 @@
       margin-bottom:14px;
     }
     .section-title{
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
       display:flex;
       align-items:center;
@@ -65,12 +121,13 @@
     }
     .section-badge{
       font-size:.78rem;
-      font-weight:700;
+      font-weight:800;
       color:var(--brand);
       background:rgba(37,99,235,.08);
       border:1px solid rgba(37,99,235,.18);
       padding:4px 10px;
       border-radius:999px;
+      white-space:nowrap;
     }
     .divider{
       height:1px;
@@ -78,17 +135,15 @@
       margin:18px 0;
     }
 
-    /* Labels + help text */
-    .form-label{ font-weight:700; color:#0f172a; }
+    .form-label{ font-weight:800; color:#0f172a; }
     .help-text{ font-size:.82rem; color:var(--muted); margin-top:6px; }
     .req{ color:#ef4444; font-weight:900; }
 
-    /* Inputs */
     .form-control, .form-select{
       border-radius:12px !important;
       padding:.70rem .85rem;
       border:1px solid rgba(15,23,42,.14);
-      transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+      transition: box-shadow .15s ease, border-color .15s ease;
       background:#fff;
     }
     .form-control:focus, .form-select:focus{
@@ -98,32 +153,73 @@
     .is-valid{ box-shadow:none !important; }
     .is-invalid{ box-shadow:none !important; }
 
-    /* Buttons */
     .btn-primary{
       background:linear-gradient(135deg, var(--brand2), var(--brand));
       border:0;
       border-radius:12px;
       padding:.72rem 1.05rem;
       box-shadow:0 12px 22px rgba(37,99,235,.22);
+      font-weight:900;
     }
     .btn-outline-secondary{
       border-radius:12px;
       padding:.72rem 1.05rem;
+      font-weight:800;
     }
-    .btn-primary:active{ transform: translateY(1px); }
 
-    /* Subtle container spacing */
     .card-inner{ padding:22px; }
     @media (min-width: 768px){
       .card-inner{ padding:26px; }
     }
+
+    #toast-notification{
+      visibility:hidden; min-width:260px; max-width:92vw;
+      background:#111827; color:#fff; text-align:left;
+      border-radius:14px; padding:12px 14px;
+      position:fixed; z-index:9999;
+      left:50%; bottom:22px; transform:translateX(-50%);
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    #toast-notification.show{ visibility:visible; animation:fadein .25s, fadeout .25s 2.2s; }
+    @keyframes fadein{ from{ opacity:0; transform:translateX(-50%) translateY(10px);} to{ opacity:1; transform:translateX(-50%) translateY(0);} }
+    @keyframes fadeout{ from{ opacity:1;} to{ opacity:0;} }
   </style>
 </head>
 
 <body>
+
+<div id="toast-notification">
+  <i class="bi bi-exclamation-triangle-fill" style="font-size:1.15rem;"></i>
+  <div>
+    <div id="toast-title" class="fw-bold">Atención</div>
+    <div id="toast-msg" style="font-size:.92rem; opacity:.9;">Revisa los campos</div>
+  </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
+  <div class="container-fluid justify-content-center">
+    <div class="d-flex align-items-center" style="width:100%; max-width:1100px; padding:0 18px;">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3"
+             style="height:42px; width:auto; object-fit:contain;">
+        <div class="text-white">
+          <div class="ti-brand-text">CAPTURA DE SOLICITUD</div>
+          <div class="ti-subtext">Estancia Infantil • Universidad</div>
+        </div>
+      </a>
+
+      <div class="ms-auto d-flex gap-2">
+        <a href="javascript:history.back()" class="btn btn-outline-light btn-nav">
+          <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
 <div class="container page-wrap py-4">
 
-  <!-- HERO -->
   <div class="hero mb-4">
     <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
       <div>
@@ -131,19 +227,32 @@
           <i class="bi bi-clipboard-check fs-4"></i>
           <h3 class="m-0 fw-bold">Captura de Solicitud</h3>
         </div>
-        <div class="sub">Complete la información solicitada. Los campos con <span class="req">*</span> son obligatorios.</div>
+        <div class="sub">
+          Complete la información solicitada. Los campos con <span class="req">*</span> son obligatorios.
+        </div>
       </div>
 
-      <div class="pill">
-        <i class="bi bi-shield-check"></i>
-        <span>Validación automática</span>
+      <div class="d-flex flex-column gap-2 align-items-start align-items-md-end">
+        <div class="pill">
+          <i class="bi bi-shield-check"></i>
+          <span>Validación automática</span>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress">
+            <div class="progress-bar" style="width:50%"></div>
+          </div>
+          <div class="progress-meta">
+            <span>Paso 1 / 2</span>
+            <span>Datos generales</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <form method="post" class="card card-soft">
+  <form method="post" class="card card-soft" id="form-solicitud" novalidate>
     {% csrf_token %}
-
     <div class="card-inner">
 
       {% if form.non_field_errors %}
@@ -152,7 +261,6 @@
         </div>
       {% endif %}
 
-      <!-- ========= TUTOR ========= -->
       <div class="section-head">
         <div class="section-title">
           <i class="bi bi-person-badge"></i>
@@ -177,51 +285,49 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label">Apellido materno</label>
+          <label class="form-label">Apellido materno <span class="req">*</span></label>
           {{ form.apellido_materno_tutor }}
-          <div class="help-text">Solo letras. Campo opcional.</div>
+          <div class="help-text">Solo letras. Campo obligatorio.</div>
           <div class="text-danger small mt-1">{{ form.apellido_materno_tutor.errors }}</div>
         </div>
 
         <div class="col-md-4">
-          <label class="form-label">Matrícula</label>
+          <label class="form-label">Matrícula <span class="req">*</span></label>
           {{ form.matricula }}
           <div class="help-text">Ejemplo: A123456</div>
           <div class="text-danger small mt-1">{{ form.matricula.errors }}</div>
         </div>
 
         <div class="col-md-4">
-          <label class="form-label">Programa educativo</label>
+          <label class="form-label">Programa educativo <span class="req">*</span></label>
           {{ form.programa_educativo }}
           <div class="help-text">Seleccione su programa; si no aparece, elija “Otro”.</div>
           <div class="text-danger small mt-1">{{ form.programa_educativo.errors }}</div>
         </div>
 
         <div class="col-md-4" id="box_prog_otro" style="display:none;">
-          <label class="form-label">Programa (Otro)</label>
+          <label class="form-label">Programa (Otro) <span class="req">*</span></label>
           {{ form.programa_educativo_otro }}
           <div class="help-text">Escriba el nombre completo del programa.</div>
           <div class="text-danger small mt-1">{{ form.programa_educativo_otro.errors }}</div>
         </div>
 
-
-
         <div class="col-md-6">
-          <label class="form-label">Correo electrónico</label>
+          <label class="form-label">Correo electrónico <span class="req">*</span></label>
           {{ form.correo }}
           <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional (@unach.mx).</div>
           <div class="text-danger small mt-1">{{ form.correo.errors }}</div>
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Celular</label>
+          <label class="form-label">Celular <span class="req">*</span></label>
           {{ form.celular }}
           <div class="help-text">Solo números. Exactamente 10 dígitos.</div>
           <div class="text-danger small mt-1">{{ form.celular.errors }}</div>
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Domicilio</label>
+          <label class="form-label">Domicilio <span class="req">*</span></label>
           {{ form.domicilio }}
           <div class="help-text">Calle, número, colonia y ciudad.</div>
           <div class="text-danger small mt-1">{{ form.domicilio.errors }}</div>
@@ -235,7 +341,7 @@
         </div>
 
         <div class="col-md-6" id="box_parent_otro" style="display:none;">
-          <label class="form-label">Parentesco (Otro)</label>
+          <label class="form-label">Parentesco (Otro) <span class="req">*</span></label>
           {{ form.parentesco_otro }}
           <div class="help-text">Especifique el parentesco.</div>
           <div class="text-danger small mt-1">{{ form.parentesco_otro.errors }}</div>
@@ -244,7 +350,6 @@
 
       <div class="divider"></div>
 
-      <!-- ========= MENOR ========= -->
       <div class="section-head">
         <div class="section-title">
           <i class="bi bi-emoji-smile"></i>
@@ -262,15 +367,15 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">CURP del menor</label>
+          <label class="form-label">CURP del menor <span class="req">*</span></label>
           {{ form.curp_menor }}
           <div class="help-text">18 caracteres. Letras mayúsculas y números.</div>
           <div class="text-danger small mt-1">{{ form.curp_menor.errors }}</div>
         </div>
       </div>
 
-      <div class="d-flex gap-2 mt-4">
-        <button type="submit" class="btn btn-primary fw-bold px-4">
+      <div class="d-flex gap-2 mt-4 flex-wrap">
+        <button type="submit" class="btn btn-primary px-4" id="btn-guardar">
           Guardar solicitud <i class="bi bi-check2-circle ms-1"></i>
         </button>
         <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
@@ -278,55 +383,313 @@
         </a>
       </div>
 
+      <div class="muted small mt-3">
+        <i class="bi bi-info-circle me-1"></i>
+        Al guardar, la solicitud queda registrada y el personal podrá validarla en el panel de admisiones.
+      </div>
+
     </div>
   </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 (function () {
-  // Mostrar/ocultar "Otro"
+
+  // ===== Toast =====
+  function showToast(title, msg){
+    const t = document.getElementById('toast-notification');
+    document.getElementById('toast-title').innerText = title || 'Atención';
+    document.getElementById('toast-msg').innerText = msg || 'Revisa los campos.';
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 2600);
+  }
+
+  // ===== Reglas =====
+  const onlyLetters = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const curpOk = /^[A-Za-z0-9]{18}$/;
+
+  function setValid(el){ el.classList.add("is-valid"); el.classList.remove("is-invalid"); }
+  function setInvalid(el){ el.classList.add("is-invalid"); el.classList.remove("is-valid"); }
+  function clearState(el){ el.classList.remove("is-valid","is-invalid"); }
+
+  function isEmpty(el){
+    if(!el) return true;
+    if(el.tagName === "SELECT") return !el.value;
+    return !String(el.value || "").trim();
+  }
+
+  function isInViewport(el){
+    const r = el.getBoundingClientRect();
+    return r.top >= 120 && r.bottom <= (window.innerHeight - 80);
+  }
+
+  function focusField(el){
+    setInvalid(el);
+    if(!isInViewport(el)){
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        try { el.focus({ preventScroll: true }); } catch(e) { el.focus(); }
+      }, 250);
+    } else {
+      try { el.focus({ preventScroll: true }); } catch(e) { el.focus(); }
+    }
+  }
+
+  // ===== Mostrar/ocultar "Otro" + required condicional =====
   const prog = document.getElementById("id_programa_educativo");
   const boxProg = document.getElementById("box_prog_otro");
+  const progOtro = document.getElementById("id_programa_educativo_otro");
+
   const par = document.getElementById("id_parentesco");
   const boxPar = document.getElementById("box_parent_otro");
+  const parOtro = document.getElementById("id_parentesco_otro");
 
   function toggleProg() {
     if (!prog || !boxProg) return;
-    boxProg.style.display = (prog.value === "OTRO") ? "block" : "none";
+    const show = (prog.value === "OTRO");
+    boxProg.style.display = show ? "block" : "none";
+    if(progOtro){
+      progOtro.required = show;
+      if(!show){ progOtro.value = ""; clearState(progOtro); }
+    }
   }
   function togglePar() {
     if (!par || !boxPar) return;
-    boxPar.style.display = (par.value === "OTRO") ? "block" : "none";
+    const show = (par.value === "OTRO");
+    boxPar.style.display = show ? "block" : "none";
+    if(parOtro){
+      parOtro.required = show;
+      if(!show){ parOtro.value = ""; clearState(parOtro); }
+    }
   }
-  if (prog) prog.addEventListener("change", toggleProg);
-  if (par) par.addEventListener("change", togglePar);
+  if (prog) prog.addEventListener("change", () => { toggleProg(); setValid(prog); });
+  if (par) par.addEventListener("change", () => { togglePar(); setValid(par); });
   toggleProg(); togglePar();
 
-  // Solo letras (nombres y apellidos): rojo/verde
-  const soloLetras = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]*$/;
+  // ===== Required general (except OTRO condicional ya se maneja arriba) =====
+  const ALL_REQUIRED_IDS = [
+    "id_nombres_tutor",
+    "id_apellido_paterno_tutor",
+    "id_apellido_materno_tutor",
+    "id_matricula",
+    "id_programa_educativo",
+    "id_correo",
+    "id_celular",
+    "id_domicilio",
+    "id_parentesco",
+    "id_fecha_nacimiento_menor",
+    "id_curp_menor"
+  ];
+  ALL_REQUIRED_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.required = true;
+  });
+
+  // ===== Live validations =====
   ["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
+    if(!el) return;
     el.addEventListener("input", () => {
-      if (!soloLetras.test(el.value)) {
-        el.classList.add("is-invalid");
-        el.classList.remove("is-valid");
-      } else if (el.value.trim().length > 1) {
-        el.classList.add("is-valid");
-        el.classList.remove("is-invalid");
-      } else {
-        el.classList.remove("is-valid","is-invalid");
-      }
+      const v = String(el.value || "").trim();
+      if(!v){ clearState(el); return; }
+      onlyLetters.test(v) ? setValid(el) : setInvalid(el);
     });
   });
 
-  // Celular: solo números
-  const cel = document.getElementById("id_celular");
-  if (cel) {
-    cel.addEventListener("input", () => {
-      cel.value = cel.value.replace(/\D/g, "");
+  const matricula = document.getElementById("id_matricula");
+  if(matricula){
+    matricula.addEventListener("input", () => {
+      const v = String(matricula.value || "").trim();
+      if(!v){ clearState(matricula); return; }
+      (v.length >= 2) ? setValid(matricula) : clearState(matricula);
     });
   }
+
+  const correo = document.getElementById("id_correo");
+  if(correo){
+    correo.addEventListener("input", () => {
+      const v = String(correo.value || "").trim();
+      if(!v){ clearState(correo); return; }
+      emailOk.test(v) ? setValid(correo) : setInvalid(correo);
+    });
+  }
+
+  const cel = document.getElementById("id_celular");
+  if(cel){
+    cel.addEventListener("input", () => {
+      cel.value = cel.value.replace(/\D/g, "");
+      const v = cel.value;
+      if(!v){ clearState(cel); return; }
+      (v.length === 10) ? setValid(cel) : setInvalid(cel);
+    });
+  }
+
+  const domicilio = document.getElementById("id_domicilio");
+  if(domicilio){
+    domicilio.addEventListener("input", () => {
+      const v = String(domicilio.value || "").trim();
+      if(!v){ clearState(domicilio); return; }
+      (v.length >= 4) ? setValid(domicilio) : clearState(domicilio);
+    });
+  }
+
+  if(progOtro){
+    progOtro.addEventListener("input", () => {
+      if(prog && prog.value === "OTRO"){
+        const v = String(progOtro.value || "").trim();
+        v ? setValid(progOtro) : setInvalid(progOtro);
+      }
+    });
+  }
+  if(parOtro){
+    parOtro.addEventListener("input", () => {
+      if(par && par.value === "OTRO"){
+        const v = String(parOtro.value || "").trim();
+        v ? setValid(parOtro) : setInvalid(parOtro);
+      }
+    });
+  }
+
+  const curp = document.getElementById("id_curp_menor");
+  if(curp){
+    curp.addEventListener("input", () => {
+      curp.value = curp.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const v = curp.value;
+      if(!v){ clearState(curp); return; }
+      curpOk.test(v) ? setValid(curp) : setInvalid(curp);
+    });
+  }
+
+  // ===== Edad (6 a 36 meses) =====
+  const fecha = document.getElementById("id_fecha_nacimiento_menor");
+
+  function monthsBetween(a, b){
+    let months = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+    if (b.getDate() < a.getDate()) months -= 1;
+    return months;
+  }
+
+  function validateEdadMenor(){
+    if(!fecha) return true;
+    const v = (fecha.value || "").trim();
+    if(!v){ setInvalid(fecha); return false; }
+
+    const [y,m,d] = v.split("-").map(n => parseInt(n,10));
+    if(!y || !m || !d){ setInvalid(fecha); return false; }
+
+    const nacimiento = new Date(y, m-1, d);
+    const hoy = new Date();
+    if(nacimiento > hoy){ setInvalid(fecha); return false; }
+
+    const meses = monthsBetween(nacimiento, hoy);
+    const ok = (meses >= 6 && meses <= 36);
+    ok ? setValid(fecha) : setInvalid(fecha);
+    return ok;
+  }
+
+  if(fecha){
+    fecha.addEventListener("change", () => {
+      const ok = validateEdadMenor();
+      if(!ok) showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
+    });
+    validateEdadMenor();
+  }
+
+  // ===== Validación EN ORDEN al GUARDAR =====
+  const ORDER = [
+    ["id_nombres_tutor", "Nombre(s)"],
+    ["id_apellido_paterno_tutor", "Apellido paterno"],
+    ["id_apellido_materno_tutor", "Apellido materno"],
+    ["id_matricula", "Matrícula"],
+    ["id_programa_educativo", "Programa educativo"],
+    ["id_programa_educativo_otro", "Programa (Otro)", () => prog?.value === "OTRO"],
+    ["id_correo", "Correo electrónico"],
+    ["id_celular", "Celular"],
+    ["id_domicilio", "Domicilio"],
+    ["id_parentesco", "Parentesco"],
+    ["id_parentesco_otro", "Parentesco (Otro)", () => par?.value === "OTRO"],
+    ["id_fecha_nacimiento_menor", "Fecha de nacimiento"],
+    ["id_curp_menor", "CURP del menor"],
+  ];
+
+  const form = document.getElementById("form-solicitud");
+  const btn = document.getElementById("btn-guardar");
+
+  if(form && btn){
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      toggleProg(); togglePar(); // por si cambió algo
+
+      for(const item of ORDER){
+        const [id, label, cond] = item;
+        if(typeof cond === "function" && !cond()) continue;
+
+        const el = document.getElementById(id);
+        if(!el) continue;
+
+        if(isEmpty(el)){
+          showToast("Falta información", `Ingresa: ${label}`);
+          focusField(el);
+          return;
+        }
+
+        if(["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].includes(id)){
+          const v = String(el.value || "").trim();
+          if(!onlyLetters.test(v)){
+            showToast("Dato inválido", `${label}: solo letras y espacios.`);
+            focusField(el);
+            return;
+          }
+        }
+
+        if(id === "id_correo"){
+          const v = String(el.value || "").trim();
+          if(!emailOk.test(v)){
+            showToast("Correo inválido", "Ingresa un correo válido.");
+            focusField(el);
+            return;
+          }
+        }
+
+        if(id === "id_celular"){
+          const v = String(el.value || "").replace(/\D/g,"");
+          if(v.length !== 10){
+            showToast("Celular inválido", "El celular debe tener 10 dígitos.");
+            focusField(el);
+            return;
+          }
+        }
+
+        if(id === "id_fecha_nacimiento_menor"){
+          if(!validateEdadMenor()){
+            showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
+            focusField(el);
+            return;
+          }
+        }
+
+        if(id === "id_curp_menor"){
+          const v = String(el.value || "").trim().toUpperCase();
+          if(!curpOk.test(v)){
+            showToast("CURP inválida", "La CURP debe tener 18 caracteres (letras/números).");
+            focusField(el);
+            return;
+          }
+        }
+      }
+
+      // ✅ Solo si todo está OK
+      btn.disabled = true;
+      btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>';
+      showToast("Enviando", "Guardando la solicitud, por favor espere...");
+      form.submit();
+    });
+  }
+
 })();
 </script>
 

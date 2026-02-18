@@ -9,78 +9,149 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    body{background:#f8f9fa;font-family:'Segoe UI',sans-serif}
-    .card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none}
-    .muted{color:#6c757d}
-    .badge-captura{background:#ffc107;color:#000;font-weight:700}
-    .badge-recibida{background:#198754;color:#fff;font-weight:700}
-    .table thead th{font-weight:700}
+    body{ background:#f3f5f8; font-family:'Segoe UI',sans-serif; }
 
-    /* ===== ACCIONES DEL PANEL (PRO) ===== */
+    /* ===== NAVBAR (con logo como tu otro panel) ===== */
+    .navbar-ti{
+      background:#1e3a8a;
+      padding:.75rem 0;
+      box-shadow:0 4px 10px rgba(0,0,0,.12);
+    }
+    .ti-brand-text{
+      font-size:1.1rem;
+      font-weight:800;
+      color:#fff;
+      letter-spacing:.5px;
+      line-height:1.15;
+    }
+    .ti-subtext{ color:rgba(255,255,255,.75); font-size:.85rem; }
+
+    .container-panel{ max-width:1200px; margin:0 auto; padding:22px 16px; margin-top:92px; }
+
+    /* ===== CARD/TABLA ===== */
+    .card-panel{
+      border-radius:16px;
+      box-shadow:0 10px 25px rgba(0,0,0,.08);
+      border:none;
+      background:#fff;
+    }
+    .muted{ color:#6c757d; }
+    .table-wrap{ overflow:auto; border-radius:14px; }
+    .table thead th{
+      background:#f8f9fa;
+      font-weight:800;
+      text-transform:uppercase;
+      font-size:.78rem;
+      color:#5b6470;
+      letter-spacing:.06em;
+      border-bottom:1px solid #e9edf2;
+      white-space:nowrap;
+    }
+    .table tbody td{ border-color:#eef2f6; vertical-align:middle; }
+
+    .badge-captura{ background:#ffc107; color:#000; font-weight:800; border-radius:999px; padding:.35rem .55rem; font-size:.75rem; }
+    .badge-recibida{ background:#198754; color:#fff; font-weight:800; border-radius:999px; padding:.35rem .55rem; font-size:.75rem; }
+
+    /* ===== HEADER DEL PANEL ===== */
+    .page-title{ font-weight:900; margin:0; }
+    .page-subtitle{ margin-top:6px; color:#6c757d; }
+
+    .btn-soft{ border-radius:10px; font-weight:700; padding:.55rem .9rem; }
+    .btn-outline-soft{ border:1px solid #dee2e6; background:#fff; }
+
+    /* ===== ACCIONES ===== */
     .actions{
       display:flex;
       gap:.5rem;
       align-items:center;
-      flex-wrap:wrap
+      flex-wrap:wrap;
     }
     .actions .btn{
-      border-radius:8px;
-      font-weight:500;
-      padding:.32rem .65rem
+      border-radius:10px;
+      font-weight:700;
+      padding:.45rem .8rem;
     }
-
-    /* Botones secundarios discretos */
     .btn-outline-secondary{
       color:#495057;
       border-color:#ced4da;
-      background-color:#fff
+      background:#fff;
     }
     .btn-outline-secondary:hover{
-      background-color:#f1f3f5;
+      background:#f1f3f5;
       border-color:#adb5bd;
-      color:#212529
+      color:#212529;
     }
-
-    /* Botón icon-only */
     .btn-icon{
-      width:38px;
-      height:38px;
+      width:42px;
+      height:42px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:0
+      padding:0;
+      border-radius:10px;
     }
-    .actions .text-muted{ font-size:.85rem }
+    .actions .text-muted{ font-size:.86rem; }
+    .link-note{ font-size:.82rem; color:#6c757d; margin-top:4px; }
+
+    /* Toast simple */
+    #toast-notification{
+      visibility:hidden; min-width:260px; max-width:92vw;
+      background:#111827; color:#fff; text-align:left;
+      border-radius:12px; padding:12px 14px;
+      position:fixed; z-index:9999;
+      left:50%; bottom:24px; transform:translateX(-50%);
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    #toast-notification.show{ visibility:visible; animation:fadein .25s, fadeout .25s 2.4s; }
+    @keyframes fadein{ from{ opacity:0; transform:translateX(-50%) translateY(10px);} to{ opacity:1; transform:translateX(-50%) translateY(0);} }
+    @keyframes fadeout{ from{ opacity:1;} to{ opacity:0;} }
   </style>
 </head>
 
 <body>
-<div class="container py-4">
 
-  <!-- ENCABEZADO -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="mb-0">Panel Admisiones (temporal)</h3>
-      <div class="muted">Listado de solicitudes y enlaces de captura.</div>
-    </div>
+<!-- Toast -->
+<div id="toast-notification">
+  <i class="bi bi-check-circle-fill" style="font-size:1.15rem;"></i>
+  <div>
+    <div id="toast-title" class="fw-bold">Listo</div>
+    <div id="toast-msg" style="font-size:.92rem; opacity:.9;">Acción realizada</div>
+  </div>
+</div>
 
-    <div class="d-flex gap-2">
-      <!-- ✅ BOTÓN REGRESAR -->
-      <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i> Regresar
+<!-- NAVBAR con logo/imagen (como tu otro panel) -->
+<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
+  <div class="container-fluid justify-content-center">
+    <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <!-- ✅ AJUSTA EL PATH SI TU LOGO ES OTRO -->
+        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3"
+             style="height:44px; width:auto; object-fit:contain;">
+        <div class="text-white">
+          <div class="ti-brand-text">PANEL DE SOLICITUDES DE ADMISIÓN</div>
+          <div class="ti-subtext">Listado de solicitudes y enlaces de captura</div>
+        </div>
       </a>
 
-      <!-- BOTÓN CREAR -->
-      <button class="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#modalCrear">
-        <i class="bi bi-plus-circle me-1"></i>
-        Crear solicitud y generar link
-      </button>
+      <div class="ms-auto d-flex gap-2">
+        <!-- ✅ BOTÓN REGRESAR (tu URL real) -->
+        <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-light btn-soft">
+          <i class="bi bi-arrow-left me-1"></i> Regresar
+        </a>
+
+        <!-- Crear -->
+        <button class="btn btn-light btn-soft" data-bs-toggle="modal" data-bs-target="#modalCrear">
+          <i class="bi bi-plus-circle me-1"></i> Crear solicitud
+        </button>
+      </div>
     </div>
   </div>
+</nav>
 
-  <!-- MENSAJES -->
+<div class="container-panel">
+
+  <!-- Mensajes (Django messages) -->
   {% if messages %}
     {% for message in messages %}
       <div class="alert alert-{{ message.tags|default:'success' }} mb-3">
@@ -89,113 +160,125 @@
     {% endfor %}
   {% endif %}
 
-  <!-- TABLA -->
+  <!-- Tabla -->
   <div class="card card-panel p-3">
-    <table class="table align-middle mb-0">
-      <thead>
-        <tr>
-          <th style="width:90px;">Folio</th>
-          <th>Nombre</th>
-          <th style="width:160px;">Matrícula</th>
-          <th style="width:170px;">Estado de Solicitud</th>
-          <th style="width:320px;">Link de Captura</th>
-        </tr>
-      </thead>
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width:90px;">Folio</th>
+            <th>Nombre</th>
+            <th style="width:160px;">Matrícula</th>
+            <th style="width:170px;">Estado de Solicitud</th>
+            <th style="width:360px;">Link de Captura</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        {% for s in solicitudes %}
-        <tr>
-          <td>{{ s.folio|default:"-" }}</td>
+        <tbody>
+          {% for s in solicitudes %}
+          <tr>
+            <td class="fw-bold">{{ s.folio|default:"-" }}</td>
 
-          <td>
-            {% if s.nombres_tutor or s.apellido_paterno_tutor %}
-              {{ s.nombres_tutor|default:"" }} {{ s.apellido_paterno_tutor|default:"" }} {{ s.apellido_materno_tutor|default:"" }}
-            {% else %}
-              <span class="muted">Sin nombre</span>
-            {% endif %}
-          </td>
+            <td>
+              {% if s.nombres_tutor or s.apellido_paterno_tutor %}
+                <div class="fw-semibold text-dark">
+                  {{ s.nombres_tutor|default:"" }} {{ s.apellido_paterno_tutor|default:"" }} {{ s.apellido_materno_tutor|default:"" }}
+                </div>
+              {% else %}
+                <span class="muted">Sin nombre</span>
+              {% endif %}
 
-          <td>
-            {% if s.matricula %}
-              {{ s.matricula }}
-            {% else %}
-              <span class="muted">-</span>
-            {% endif %}
-          </td>
+              {% if s.correo %}
+                <div class="muted small">{{ s.correo }}</div>
+              {% endif %}
+            </td>
 
-          <td>
-            {% if s.estado == "RECIBIDA" %}
-              <span class="badge badge-recibida">RECIBIDA</span>
-            {% else %}
-              <span class="badge badge-captura">CAPTURA</span>
-            {% endif %}
-          </td>
+            <td>
+              {% if s.matricula %}
+                <span class="fw-semibold">{{ s.matricula }}</span>
+              {% else %}
+                <span class="muted">-</span>
+              {% endif %}
+            </td>
 
-          <td>
-            {% with link=s.links.all|dictsortreversed:"creado_en"|first %}
-              <div class="actions">
+            <td>
+              {% if s.estado == "RECIBIDA" %}
+                <span class="badge badge-recibida">RECIBIDA</span>
+              {% else %}
+                <span class="badge badge-captura">CAPTURA</span>
+              {% endif %}
+            </td>
 
-                {% if link and not link.usado %}
+            <td>
+              {% with link=s.links.all|dictsortreversed:"creado_en"|first %}
+                <div class="actions">
 
-                  <!-- ACCIÓN PRINCIPAL -->
-                  <a class="btn btn-sm btn-primary"
-                     target="_blank"
-                     href="{% url 'captura_por_token' link.token %}">
-                    Abrir
-                  </a>
+                  {% if link and not link.usado %}
 
-                  <!-- SECUNDARIAS -->
-                  <button type="button"
-                          class="btn btn-sm btn-outline-secondary"
-                          onclick="copiarLink('{% url 'captura_por_token' link.token %}')">
-                    Copiar
-                  </button>
-
-                  {% if s.correo %}
-                    <a class="btn btn-sm btn-outline-secondary btn-icon"
-                       href="{% url 'enviar_link_por_correo' solicitud_id=s.id %}"
-                       title="Enviar correo">
-                      <i class="bi bi-envelope"></i>
+                    <!-- PRINCIPAL -->
+                    <a class="btn btn-primary"
+                       target="_blank"
+                       href="{% url 'captura_por_token' link.token %}">
+                      Abrir
                     </a>
+
+                    <!-- Copiar -->
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="copiarLink('{% url 'captura_por_token' link.token %}')">
+                      Copiar
+                    </button>
+
+                    <!-- Enviar correo -->
+                    {% if s.correo %}
+                      <a class="btn btn-outline-secondary btn-icon"
+                         href="{% url 'enviar_link_por_correo' solicitud_id=s.id %}"
+                         title="Enviar correo">
+                        <i class="bi bi-envelope"></i>
+                      </a>
+                    {% else %}
+                      <span class="text-muted small align-self-center">Sin correo</span>
+                    {% endif %}
+
+                    <!-- Editar -->
+                    <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
+                       class="btn btn-outline-secondary btn-icon"
+                       title="Editar datos">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+
                   {% else %}
-                    <span class="text-muted small align-self-center">Sin correo</span>
+
+                    <span class="text-muted small align-self-center">No activo</span>
+
+                    <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
+                       class="btn btn-outline-secondary btn-icon"
+                       title="Editar datos">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+
                   {% endif %}
 
-                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
-                     class="btn btn-sm btn-outline-secondary btn-icon"
-                     title="Editar datos">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>
+                </div>
 
-                {% else %}
-
-                  <span class="text-muted small align-self-center">No activo</span>
-
-                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
-                     class="btn btn-sm btn-outline-secondary btn-icon"
-                     title="Editar datos">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>
-
+                {% if link and not link.usado %}
+                  <div class="link-note">Enlace de un solo uso</div>
                 {% endif %}
-              </div>
+              {% endwith %}
+            </td>
+          </tr>
 
-              {% if link and not link.usado %}
-                <div class="muted small mt-1">Enlace de un solo uso</div>
-              {% endif %}
-            {% endwith %}
-          </td>
-        </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center muted py-4">
+              No hay solicitudes registradas.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
 
-        {% empty %}
-        <tr>
-          <td colspan="5" class="text-center muted py-4">
-            No hay solicitudes registradas.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div class="mt-3 muted small">
@@ -207,45 +290,47 @@
 <!-- MODAL CREAR SOLICITUD -->
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 18px 45px rgba(0,0,0,.18);">
 
       <form method="post" action="{% url 'crear_solicitud_y_link' %}">
         {% csrf_token %}
 
-        <div class="modal-header">
-          <h5 class="modal-title">Crear solicitud dirigida a</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-file-earmark-plus me-2"></i>Crear solicitud dirigida a
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body bg-light p-4">
           <div class="row g-3">
 
             <div class="col-md-4">
-              <label class="form-label">Nombre(s) <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold">Nombre(s) <span class="text-danger">*</span></label>
               <input type="text" name="nombres_tutor" class="form-control" required autocomplete="off">
               <div class="form-text">Solo letras y espacios.</div>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label">Apellido paterno <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold">Apellido paterno <span class="text-danger">*</span></label>
               <input type="text" name="apellido_paterno_tutor" class="form-control" required autocomplete="off">
               <div class="form-text">Solo letras.</div>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label">Apellido materno</label>
+              <label class="form-label fw-semibold">Apellido materno</label>
               <input type="text" name="apellido_materno_tutor" class="form-control" autocomplete="off">
               <div class="form-text">Opcional.</div>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">Matrícula</label>
+              <label class="form-label fw-semibold">Matrícula</label>
               <input type="text" name="matricula" class="form-control" autocomplete="off">
               <div class="form-text">Ej: A123456</div>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">Correo (opcional)</label>
+              <label class="form-label fw-semibold">Correo (opcional)</label>
               <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" autocomplete="off">
               <div class="form-text">Ej: Gmail / Hotmail / Outlook / @unach.mx</div>
             </div>
@@ -253,12 +338,10 @@
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-primary">
-            Crear solicitud
+        <div class="modal-footer bg-white">
+          <button type="button" class="btn btn-outline-secondary btn-soft" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-soft">
+            <i class="bi bi-link-45deg me-1"></i> Crear solicitud
           </button>
         </div>
 
@@ -271,12 +354,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-function copiarLink(path) {
-  const full = window.location.origin + path;
-  navigator.clipboard.writeText(full)
-    .then(() => alert("Link copiado correctamente ✅"))
-    .catch(() => alert("No se pudo copiar el link ❌"));
-}
+  function showToast(title, msg){
+    const t = document.getElementById('toast-notification');
+    document.getElementById('toast-title').innerText = title || 'Listo';
+    document.getElementById('toast-msg').innerText = msg || 'Acción realizada';
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 2700);
+  }
+
+  function copiarLink(path) {
+    const full = window.location.origin + path;
+    navigator.clipboard.writeText(full)
+      .then(() => showToast("Copiado", "Link copiado correctamente ✅"))
+      .catch(() => alert("No se pudo copiar el link ❌"));
+  }
 </script>
 
 </body>
