@@ -95,8 +95,8 @@
                                 <thead class="table-custom">
                                     <tr>
                                         <th>Nombre Completo</th>
-                                        <th>Tipo Persona</th>
-                                        <th>Identificadores</th>
+                                        <th>Tipo y Ocupación</th>
+                                        <th>Detalles Laborales</th>
                                         <th class="text-end">Acciones</th>
                                     </tr>
                                 </thead>
@@ -111,19 +111,53 @@
                                             {% if u.tipo_persona == 'ADMIN' %} <span class="badge bg-danger">ADMIN SISTEMA</span>
                                             {% elif u.tipo_persona == 'SUPERVISOR' %} <span class="badge bg-warning text-dark">SUPERVISOR</span>
                                             {% else %} <span class="badge bg-primary">PERSONAL</span> {% endif %}
+
+                                            <div class="small fw-bold mt-1" style="color: #6f42c1;">
+                                                {% for cargo in u.groups.all %}
+                                                    {% if "[MASTER]" in cargo.name %}<i class="bi bi-star-fill text-warning"></i> {% else %}<i class="bi bi-person-badge"></i> {% endif %}
+                                                    {{ cargo.name|cut:"[MASTER] " }}
+                                                {% empty %}
+                                                    <span class="text-muted fw-normal fst-italic">Sin ocupación</span>
+                                                {% endfor %}
+                                            </div>
                                         </td>
                                         <td>
-                                            <div class="small"><strong>CURP:</strong> {{ u.curp|default:"--" }}</div>
-                                            <div class="small text-muted"><strong>Nº Emp:</strong> {{ u.numero_empleado|default:"--" }}</div>
+                                            <div class="small text-muted mb-1"><strong>Nº Emp:</strong> {{ u.numero_empleado|default:"--" }}</div>
+                                            <div class="small">
+                                                <strong>Estatus:</strong>
+                                                {% if u.estatus_operativo %}
+                                                    <span class="badge bg-primary" style="font-size: 0.65rem;">ACTIVO</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">INACTIVO</span>
+                                                {% endif %}
+                                            </div>
                                         </td>
                                         <td class="text-end">
                                             {% if user.tipo_persona == 'ADMIN' %}
+
+                                                <button type="button" class="btn btn-sm btn-outline-primary border-0 me-1"
+                                                        title="Editar Información"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEditarUser"
+                                                        data-id="{{ u.id }}"
+                                                        data-nombre="{{ u.nombre }}"
+                                                        data-paterno="{{ u.apellido_paterno }}"
+                                                        data-materno="{{ u.apellido_materno|default:'' }}"
+                                                        data-curp="{{ u.curp }}"
+                                                        data-email="{{ u.email }}"
+                                                        data-tipo="{{ u.tipo_persona }}"
+                                                        data-numero="{{ u.numero_empleado }}"
+                                                        data-estatus="{{ u.estatus_operativo|yesno:'true,false' }}"
+                                                        onclick="cargarDatosEdicion(this)">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+
                                                 {% if u.id != user.id %}
                                                 <form onsubmit="submitAjax(event)" class="d-inline">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="action_type" value="delete_user">
                                                     <input type="hidden" name="user_id" value="{{ u.id }}">
-                                                    <button class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash-fill"></i></button>
+                                                    <button class="btn btn-sm btn-outline-danger border-0" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
                                                 </form>
                                                 {% endif %}
                                             {% else %}
@@ -160,7 +194,7 @@
                                         <label class="form-check-label fw-bold text-purple" style="color: #6f42c1;">¿Es Jefe/Control Total?</label>
                                     </div>
                                 </div>
-                                <div class="col-md-3"><button class="btn btn-success w-100">Crear</button></div>
+                                <div class="col-md-3"><button class="btn btn-primary w-100">Crear</button></div>
                             </form>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
@@ -210,7 +244,8 @@
 </div>
 
 <div class="modal fade" id="modalCrearUser" tabindex="-1">
-    <div class="modal-dialog modal-lg"> <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
             <form onsubmit="submitAjax(event)">
                 {% csrf_token %}
                 <input type="hidden" name="action_type" value="create_user">
@@ -222,60 +257,28 @@
 
                 <div class="modal-body p-4 bg-light">
                     <div class="row g-4">
-                        <div class="col-12">
-                            <h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">1. Identidad de la Persona</h6>
-                        </div>
+                        <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">1. Identidad de la Persona</h6></div>
+                        <div class="col-md-4"><label class="jira-label">Nombre(s) <span class="text-danger">*</span></label><input type="text" name="nombre" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Paterno <span class="text-danger">*</span></label><input type="text" name="apellido_paterno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Materno <span class="text-danger">*</span></label><input type="text" name="apellido_materno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
+                        <div class="col-md-6"><label class="jira-label">CURP <span class="text-danger">*</span></label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" pattern="[A-Za-z0-9]{18}" style="text-transform: uppercase;"></div>
 
-                        <div class="col-md-4">
-                            <label class="jira-label">Nombre(s) *</label>
-                            <input type="text" name="nombre" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras" style="text-transform: capitalize;">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="jira-label">Apellido Paterno *</label>
-                            <input type="text" name="apellido_paterno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="jira-label">Apellido Materno</label>
-                            <input type="text" name="apellido_materno" class="jira-input" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;">
-                        </div>
-
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">2. Estructura Interna UNACH</h6></div>
                         <div class="col-md-6">
-                            <label class="jira-label">CURP *</label>
-                            <input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" pattern="[A-Za-z0-9]{18}" title="Deben ser 18 caracteres sin símbolos" style="text-transform: uppercase;">
-                        </div>
-
-                        <div class="col-12 mt-4">
-                            <h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">2. Estructura Interna UNACH</h6>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="jira-label">Tipo de Persona *</label>
+                            <label class="jira-label">Tipo de Persona <span class="text-danger">*</span></label>
                             <select name="tipo_persona" class="jira-input" required>
                                 <option value="PERSONAL" selected>Personal de la estancia</option>
                                 <option value="SUPERVISOR">Supervisor</option>
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="jira-label">Número de Empleado *</label>
-                            <input type="text" name="numero_empleado" class="jira-input" required pattern="\d+" title="Solo ingrese números">
-                        </div>
+                        <div class="col-md-6"><label class="jira-label">Número de Empleado <span class="text-danger">*</span></label><input type="text" name="numero_empleado" class="jira-input" required pattern="\d+"></div>
 
-                        <div class="col-12 mt-4">
-                            <h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">3. Credenciales de Acceso</h6>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="jira-label">Correo Electrónico *</label>
-                            <input type="email" name="email" class="jira-input" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="jira-label">Contraseña Temporal *</label>
-                            <input type="password" name="password" class="jira-input" required>
-                        </div>
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">3. Credenciales de Acceso</h6></div>
+                        <div class="col-md-6"><label class="jira-label">Correo Electrónico <span class="text-danger">*</span></label><input type="email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Contraseña Temporal <span class="text-danger">*</span></label><input type="password" name="password" class="jira-input" required></div>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary fw-bold px-4">Registrar Personal</button>
@@ -285,9 +288,75 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalEditarUser" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <form onsubmit="submitAjax(event)">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="edit_user">
+                <input type="hidden" name="user_id" id="edit_user_id">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Editar Información del Empleado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-4">
+                        <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">1. Identidad de la Persona</h6></div>
+                        <div class="col-md-4"><label class="jira-label">Nombre(s) <span class="text-danger">*</span></label><input type="text" id="edit_nombre" name="nombre" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Paterno <span class="text-danger">*</span></label><input type="text" id="edit_paterno" name="apellido_paterno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Materno <span class="text-danger">*</span></label><input type="text" id="edit_materno" name="apellido_materno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
+                        <div class="col-md-6"><label class="jira-label">CURP <span class="text-danger">*</span></label><input type="text" id="edit_curp" name="curp" class="jira-input" required maxlength="18" minlength="18" pattern="[A-Za-z0-9]{18}" style="text-transform: uppercase;"></div>
+
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">2. Estructura Interna UNACH</h6></div>
+                        <div class="col-md-4">
+                            <label class="jira-label">Tipo de Persona <span class="text-danger">*</span></label>
+                            <select name="tipo_persona" id="edit_tipo" class="jira-input" required>
+                                <option value="PERSONAL">Personal de la estancia</option>
+                                <option value="SUPERVISOR">Supervisor</option>
+                                <option value="ADMIN">Administrador de Sistema</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4"><label class="jira-label">Número de Empleado <span class="text-danger">*</span></label><input type="text" id="edit_num" name="numero_empleado" class="jira-input" required pattern="\d+"></div>
+                        <div class="col-md-4">
+                            <label class="jira-label">Estatus Operativo <span class="text-danger">*</span></label>
+                            <select name="estatus_operativo" id="edit_estatus" class="jira-input" required>
+                                <option value="true">Activo (Trabajando)</option>
+                                <option value="false">Inactivo (Baja Temporal)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">3. Credenciales de Acceso</h6></div>
+                        <div class="col-md-6"><label class="jira-label">Correo Electrónico <span class="text-danger">*</span></label><input type="email" id="edit_email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Cambiar Contraseña (Opcional)</label><input type="password" name="password" class="jira-input" placeholder="Déjalo vacío para no cambiarla"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() { var savedTabID = localStorage.getItem('activeTabID'); if (savedTabID) { var btn = document.getElementById(savedTabID); if (btn) new bootstrap.Tab(btn).show(); } });
     function rememberTab(id) { localStorage.setItem('activeTabID', id); }
+
+    // FUNCIÓN MÁGICA PARA LLENAR EL MODAL DE EDICIÓN
+    function cargarDatosEdicion(boton) {
+        document.getElementById('edit_user_id').value = boton.getAttribute('data-id');
+        document.getElementById('edit_nombre').value = boton.getAttribute('data-nombre');
+        document.getElementById('edit_paterno').value = boton.getAttribute('data-paterno');
+        document.getElementById('edit_materno').value = boton.getAttribute('data-materno');
+        document.getElementById('edit_curp').value = boton.getAttribute('data-curp');
+        document.getElementById('edit_tipo').value = boton.getAttribute('data-tipo');
+        document.getElementById('edit_num').value = boton.getAttribute('data-numero');
+        document.getElementById('edit_email').value = boton.getAttribute('data-email');
+        document.getElementById('edit_estatus').value = boton.getAttribute('data-estatus');
+    }
 
     function submitAjax(event) {
         event.preventDefault();

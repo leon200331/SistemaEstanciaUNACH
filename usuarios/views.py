@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -9,10 +8,12 @@ from django.http import JsonResponse
 from .models import AccessLog
 
 # ✅ Solicitud (admisiones)
-from admisiones.models import Solicitud
+try:
+    from admisiones.models import Solicitud
+except ImportError:
+    pass
 
-
-# --- DEFINIMOS LOS GRUPOS DE PODER ---
+# --- DEFINIMOS LOS GRUPOS DE PODER (Compatibilidad con sistema anterior) ---
 ROLES_ADMINISTRATIVOS = [
     'admin', 'jefa_superior', 'directora', 'administrativo'
 ]
@@ -109,7 +110,9 @@ def panel_gobierno_ti(request):
         response_data = {'status': 'success', 'msg': 'Acción realizada'}
 
         try:
+            # ==========================================
             # 1. CREAR NUEVA PERSONA
+            # ==========================================
             if accion == 'create_user':
                 email = request.POST.get('email')
                 password = request.POST.get('password')
@@ -122,16 +125,16 @@ def panel_gobierno_ti(request):
 
                 # VALIDACIONES
                 if User.objects.filter(email=email).exists():
-                    if is_ajax:
-                        return JsonResponse({'status': 'error', 'msg': 'El CORREO electrónico ya está registrado en el sistema.'})
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': 'El CORREO electrónico ya está registrado en el sistema.'})
 
                 if curp and User.objects.filter(curp=curp).exists():
-                    if is_ajax:
-                        return JsonResponse({'status': 'error', 'msg': f'La CURP {curp} ya está asignada a otra persona.'})
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': f'La CURP {curp} ya está asignada a otra persona.'})
 
                 if num_empleado and User.objects.filter(numero_empleado=num_empleado).exists():
-                    if is_ajax:
-                        return JsonResponse({'status': 'error', 'msg': f'El Número de Empleado {num_empleado} ya existe.'})
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': f'El Número de Empleado {num_empleado} ya existe.'})
 
                 # CREACIÓN
                 u = User.objects.create_user(username=email, email=email, password=password)
@@ -141,6 +144,10 @@ def panel_gobierno_ti(request):
                 u.curp = curp
                 u.tipo_persona = tipo_persona
                 u.numero_empleado = num_empleado
+
+                # --- VALIDACIÓN DE ACCESO EN LOGIN (Requisito del Inge) ---
+                u.estatus_operativo = True
+                u.is_active = True
 
                 # PERMISOS BASE
                 if tipo_persona == 'ADMIN':
@@ -153,24 +160,76 @@ def panel_gobierno_ti(request):
                 u.save()
 
                 # AUDITORÍA
-                AccessLog.objects.create(
-                    usuario=request.user,
-                    accion=f"CREACIÓN PERSONA: Registró a {nombre} {apellido_paterno} [{tipo_persona}] con CURP {curp}"
-                )
-
+                AccessLog.objects.create(usuario=request.user,
+                                         accion=f"CREACIÓN PERSONA: Registró a {nombre} {apellido_paterno} [{tipo_persona}] con CURP {curp}")
                 response_data['msg'] = f'Persona {nombre} registrada exitosamente.'
 
-            # 2. ELIMINAR USUARIO
+            # ==========================================
+            # 2. EDITAR PERSONA
+            # ==========================================
+            elif accion == 'edit_user':
+                user_id = request.POST.get('user_id')
+                usr_edit = User.objects.get(id=user_id)
+
+                email = request.POST.get('email')
+                curp = request.POST.get('curp', '').upper()
+                num = request.POST.get('numero_empleado')
+
+                # Validar que no le robe los datos a OTRA persona
+                if User.objects.filter(email=email).exclude(id=user_id).exists():
+                    return JsonResponse({'status': 'error', 'msg': 'El correo ya está en uso por otra persona.'})
+                if curp and User.objects.filter(curp=curp).exclude(id=user_id).exists():
+                    return JsonResponse({'status': 'error', 'msg': 'La CURP ya está asignada a otra persona.'})
+                if num and User.objects.filter(numero_empleado=num).exclude(id=user_id).exists():
+                    return JsonResponse({'status': 'error', 'msg': 'Ese Número de Empleado ya existe en el sistema.'})
+
+                # Actualizar información
+                usr_edit.nombre = request.POST.get('nombre')
+                usr_edit.apellido_paterno = request.POST.get('apellido_paterno')
+                usr_edit.apellido_materno = request.POST.get('apellido_materno', '')
+                usr_edit.curp = curp
+                usr_edit.numero_empleado = num
+                usr_edit.email = email
+                usr_edit.username = email
+                usr_edit.tipo_persona = request.POST.get('tipo_persona')
+
+                # --- MAGIA DE BLOQUEO PARA EL LOGIN (Requisito del Inge) ---
+                estatus = (request.POST.get('estatus_operativo') == 'true')
+                usr_edit.estatus_operativo = estatus
+                usr_edit.is_active = estatus
+
+                # Asignar permisos según nuevo tipo
+                if usr_edit.tipo_persona == 'ADMIN':
+                    usr_edit.is_superuser = True
+                    usr_edit.is_staff = True
+                else:
+                    usr_edit.is_superuser = False
+                    usr_edit.is_staff = True
+
+                # Si escribió una contraseña nueva, cambiarla
+                nueva_pass = request.POST.get('password')
+                if nueva_pass:
+                    usr_edit.set_password(nueva_pass)
+
+                usr_edit.save()
+                AccessLog.objects.create(usuario=request.user,
+                                         accion=f"EDICIÓN PERSONA: Actualizó datos de {usr_edit.nombre}")
+                response_data['msg'] = 'Información actualizada correctamente.'
+
+            # ==========================================
+            # 3. ELIMINAR USUARIO
+            # ==========================================
             elif accion == 'delete_user':
                 user_id = request.POST.get('user_id')
                 if int(user_id) != request.user.id:
                     User.objects.filter(id=user_id).delete()
                     response_data['msg'] = 'Persona eliminada del sistema.'
                 else:
-                    if is_ajax:
-                        return JsonResponse({'status': 'error', 'msg': 'Seguridad: No puedes auto-eliminarte.'})
+                    if is_ajax: return JsonResponse({'status': 'error', 'msg': 'Seguridad: No puedes auto-eliminarte.'})
 
-            # 3. CREAR ROL SECUNDARIO
+            # ==========================================
+            # 4. CREAR ROL SECUNDARIO
+            # ==========================================
             elif accion == 'create_role':
                 nombre_rol = request.POST.get('nombre_rol')
                 es_master = request.POST.get('permiso_total')
@@ -179,12 +238,16 @@ def panel_gobierno_ti(request):
                     Group.objects.get_or_create(name=nombre_final)
                     response_data['msg'] = f'Rol secundario "{nombre_rol}" creado.'
 
-            # 4. ELIMINAR ROL SECUNDARIO
+            # ==========================================
+            # 5. ELIMINAR ROL SECUNDARIO
+            # ==========================================
             elif accion == 'delete_role':
                 Group.objects.filter(id=request.POST.get('rol_id')).delete()
                 response_data['msg'] = 'Rol eliminado.'
 
-            # 5. SEGURIDAD: APLICAR PROTOCOLOS
+            # ==========================================
+            # 6. SEGURIDAD: APLICAR PROTOCOLOS
+            # ==========================================
             elif accion == 'toggle_security':
                 request.session['sec_encrypt'] = True if request.POST.get('toggle_encrypt') else False
                 request.session['sec_manto'] = True if request.POST.get('toggle_manto') else False
@@ -192,14 +255,15 @@ def panel_gobierno_ti(request):
                 request.session['sec_inscrip'] = True if request.POST.get('toggle_inscrip') else False
                 response_data['msg'] = 'Protocolos de seguridad aplicados en el servidor.'
 
-            # 6. LIMPIAR HISTORIAL
+            # ==========================================
+            # 7. LIMPIAR HISTORIAL
+            # ==========================================
             elif accion == 'clear_history':
                 AccessLog.objects.exclude(accion__startswith="REL_CONF:").exclude(
                     accion__startswith="MASTER_CONF:").delete()
                 response_data['msg'] = 'Historial de auditoría depurado.'
 
-            if is_ajax:
-                return JsonResponse(response_data)
+            if is_ajax: return JsonResponse(response_data)
 
         except Exception as e:
             if is_ajax:
@@ -213,8 +277,7 @@ def panel_gobierno_ti(request):
     staff_list = User.objects.filter(is_staff=True).order_by('-date_joined')
 
     if request.session.get('sec_encrypt', False):
-        for s in staff_list:
-            s.email = enmascarar_datos(s.email)
+        for s in staff_list: s.email = enmascarar_datos(s.email)
 
     logs_gen = AccessLog.objects.all().order_by('-fecha_acceso')[:50]
 
@@ -222,7 +285,6 @@ def panel_gobierno_ti(request):
         'lista_staff': staff_list,
         'roles': Group.objects.all(),
         'logs': logs_gen,
-
         'encrypt_active': request.session.get('sec_encrypt', True),
         'manto_active': request.session.get('sec_manto', False),
         'firewall_active': request.session.get('sec_firewall', False),
@@ -234,7 +296,6 @@ def panel_gobierno_ti(request):
 
 @login_required
 def dashboard_medico(request):
-    # Si existe rol, valida. Si no existe, permite staff o acceso básico
     rol = getattr(request.user, 'rol', None)
     if rol is not None:
         if rol not in ROLES_MEDICOS and rol not in ROLES_ADMINISTRATIVOS:
@@ -243,32 +304,21 @@ def dashboard_medico(request):
     return render(request, 'dashboard/home_medico.html')
 
 
-@login_required
+# ==============================================================
+# VISTAS DE PADRES (PÚBLICAS, COMO LO PEDISTE SIN INICIAR SESIÓN)
+# ==============================================================
 def portal_padres_home(request):
-    # Si existe rol, valida tutor
-    rol = getattr(request.user, 'rol', None)
-    if rol is not None and rol != 'tutor':
-        return render(request, '403_prohibido.html')
-
-    # ✅ En lugar de token, usaremos una Solicitud (por ID)
     solicitud_activa = None
 
-    # Si tu modelo Solicitud tiene FK al usuario, usa esto (recomendado):
-    # solicitud_activa = Solicitud.objects.filter(tutor=request.user).order_by("-id").first()
-
-    # Temporal: toma la última global
-    solicitud_activa = Solicitud.objects.order_by("-id").first()
-
-    # Si no hay ninguna solicitud aún, intenta crear una (si se puede)
-    if not solicitud_activa:
-        kwargs = {}
-        if "estado" in [f.name for f in Solicitud._meta.fields]:
-            kwargs["estado"] = "CAPTURA"
-
-        try:
+    try:
+        solicitud_activa = Solicitud.objects.order_by("-id").first()
+        if not solicitud_activa:
+            kwargs = {}
+            if "estado" in [f.name for f in Solicitud._meta.fields]:
+                kwargs["estado"] = "CAPTURA"
             solicitud_activa = Solicitud.objects.create(**kwargs)
-        except Exception:
-            solicitud_activa = None
+    except Exception:
+        solicitud_activa = None
 
     solicitud_id = solicitud_activa.id if solicitud_activa else None
     folio = getattr(solicitud_activa, "folio", None) if solicitud_activa else None
@@ -283,22 +333,6 @@ def portal_padres_home(request):
     )
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
-@login_required
 def registro_inscripcion(request):
-    # Bloqueo por configuración TI (si existe)
-    if request.session.get('sec_inscrip', False):
-        return render(request, '403_prohibido.html', {
-            'mensaje': 'El periodo de inscripciones a la estancia está cerrado.'
-        })
-
-    # Si existe rol, valida tutor; si no existe, no bloquea
-    rol = getattr(request.user, 'rol', None)
-    if rol is not None and rol != 'tutor':
-        return render(request, '403_prohibido.html')
-
     return render(request, 'portal/registro_inscripcion.html')
-
 
