@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.core.validators import RegexValidator
 
 
@@ -96,7 +96,7 @@ class Usuario(AbstractUser):
         return f"{self.apellido_paterno} {self.apellido_materno} {self.nombre} - {self.get_tipo_persona_display()}"
 
 
-# --- MODELO: AUDITORÍA DE SEGURIDAD (Sin cambios, estaba perfecto) ---
+# --- MODELO: AUDITORÍA DE SEGURIDAD ---
 class AccessLog(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha_acceso = models.DateTimeField(auto_now_add=True)
@@ -105,3 +105,30 @@ class AccessLog(models.Model):
 
     def __str__(self):
         return f"Log: {self.usuario.nombre} - {self.fecha_acceso}"
+
+
+# =========================================================
+# 5. MODELO NUEVO: PERMISOS CRUZADOS (RELACIONAR DEPARTAMENTOS)
+# =========================================================
+class RelacionDepartamentos(models.Model):
+    """
+    Esta tabla sirve para decirle al sistema que un Puesto A (Ej: Psicóloga)
+    tiene permiso de entrar al módulo de un Puesto B (Ej: Nutrióloga).
+    """
+    rol_origen = models.ForeignKey(Group, related_name='permisos_otorgados', on_delete=models.CASCADE, verbose_name='Rol que entra (Origen)')
+    rol_destino = models.ForeignKey(Group, related_name='permisos_recibidos', on_delete=models.CASCADE, verbose_name='Módulo a visitar (Destino)')
+
+    # Los 4 permisos específicos de esta relación
+    puede_consultar = models.BooleanField(default=False, verbose_name='Solo Consultar')
+    puede_validar = models.BooleanField(default=False, verbose_name='Validar / Aprobar')
+    puede_observar = models.BooleanField(default=False, verbose_name='Hacer Observaciones')
+    puede_descargar = models.BooleanField(default=False, verbose_name='Descargar Copias')
+
+    class Meta:
+        # Candado de Arquitectura: Evita que se repita la misma relación dos veces
+        unique_together = ('rol_origen', 'rol_destino')
+        verbose_name = 'Relación de Departamento'
+        verbose_name_plural = 'Relaciones de Departamentos'
+
+    def __str__(self):
+        return f"{self.rol_origen.name} -> puede ver a -> {self.rol_destino.name}"

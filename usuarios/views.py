@@ -2,25 +2,17 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 
-from .models import AccessLog
+from .models import AccessLog, RelacionDepartamentos
 
 # ✅ Solicitud (admisiones)
 try:
     from admisiones.models import Solicitud
 except ImportError:
     pass
-
-# --- DEFINIMOS LOS GRUPOS DE PODER (Compatibilidad con sistema anterior) ---
-ROLES_ADMINISTRATIVOS = [
-    'admin', 'jefa_superior', 'directora', 'administrativo'
-]
-
-ROLES_MEDICOS = [
-    'medica', 'psicologa', 'nutriologa', 'trabajo_social'
-]
 
 
 # --- FUNCIÓN AUXILIAR PARA ENCRIPTAR DATOS VISUALMENTE ---
@@ -30,7 +22,7 @@ def enmascarar_datos(texto):
     return texto[:2] + "****" + texto[-2:]
 
 
-# --- VISTA SEMÁFORO (ROUTER DE SEGURIDAD) ---
+# --- VISTA SEMÁFORO (ROUTER DE SEGURIDAD LIMPIO) ---
 @login_required
 def root_redirect_view(request):
     user = request.user
@@ -40,39 +32,36 @@ def root_redirect_view(request):
         return render(request, '403_prohibido.html',
                       {'mensaje': 'El sistema está en Mantenimiento. Intente más tarde.'})
 
-    # ✅ Superusuario: va al panel TI
+    # ✅ Superusuario (TI): va al panel de Gobierno TI
     if user.is_superuser:
         return redirect('panel_gobierno_ti')
 
-    # ✅ Staff: va al panel administrativo
-    if user.is_staff:
+    # ✅ Personal Interno (Staff): va al panel administrativo
+    elif user.is_staff:
         return redirect('dashboard_admin')
 
-    # ✅ Si existe campo rol (tu sistema viejo), respétalo
-    rol = getattr(user, 'rol', None)
-    if rol == 'tutor':
+    # ✅ Beneficiarios / Alumnos (Padres de familia): van al portal público
+    else:
         return redirect('portal_padres_home')
-
-    if rol in ROLES_MEDICOS:
-        return redirect('dashboard_medico')
-
-    # Fallback seguro
-    return redirect('portal_padres_home')
 
 
 # --- VISTAS PROTEGIDAS ---
 @login_required
 def dashboard_admin(request):
-    # Si existe rol, valida. Si no existe, permite staff
-    rol = getattr(request.user, 'rol', None)
-    if rol is not None:
-        if rol not in ROLES_ADMINISTRATIVOS:
-            return render(request, '403_prohibido.html')
-    else:
-        if not request.user.is_staff:
-            return render(request, '403_prohibido.html')
+    # Solo el personal interno (is_staff) puede ver esto
+    if not request.user.is_staff:
+        return render(request, '403_prohibido.html', {'mensaje': 'Acceso denegado. Exclusivo para personal.'})
 
     return render(request, 'portal/panel_admin.html')
+
+
+@login_required
+def dashboard_medico(request):
+    # Solo el personal interno (is_staff) puede ver esto
+    if not request.user.is_staff:
+        return render(request, '403_prohibido.html', {'mensaje': 'Acceso denegado. Exclusivo para personal.'})
+
+    return render(request, 'dashboard/home_medico.html')
 
 
 # --- PANEL DE ADMINISTRACIÓN (ADMIN TI / GESTIÓN CENTRAL) ---
@@ -102,6 +91,19 @@ def panel_gobierno_ti(request):
     if not request.session.get('ha_registrado_login', False):
         AccessLog.objects.create(usuario=request.user, accion="Ingreso al Panel de Administración TI")
         request.session['ha_registrado_login'] = True
+
+    # ---------------------------------------------------------
+    # ⚙️ CREACIÓN DINÁMICA DE LOS 4 PERMISOS EN LA BASE DE DATOS
+    # ---------------------------------------------------------
+    ct_group = ContentType.objects.get_for_model(Group)
+    p_ver, _ = Permission.objects.get_or_create(codename='perm_consultar', name='Puede Consultar Todo',
+                                                content_type=ct_group)
+    p_val, _ = Permission.objects.get_or_create(codename='perm_validar', name='Puede Validar/Aprobar',
+                                                content_type=ct_group)
+    p_obs, _ = Permission.objects.get_or_create(codename='perm_observar', name='Puede Añadir Observaciones',
+                                                content_type=ct_group)
+    p_desc, _ = Permission.objects.get_or_create(codename='perm_descargar', name='Puede Descargar Copias',
+                                                 content_type=ct_group)
 
     # --- PROCESAMIENTO DE ACCIONES (POST / AJAX) ---
     if request.method == 'POST':
@@ -228,25 +230,125 @@ def panel_gobierno_ti(request):
                     if is_ajax: return JsonResponse({'status': 'error', 'msg': 'Seguridad: No puedes auto-eliminarte.'})
 
             # ==========================================
-            # 4. CREAR ROL SECUNDARIO
+            # 4. CREAR NUEVO PUESTO Y PERMISOS (Catálogo)
             # ==========================================
             elif accion == 'create_role':
-                nombre_rol = request.POST.get('nombre_rol')
-                es_master = request.POST.get('permiso_total')
+                nombre_rol = request.POST.get('nombre_rol', '').strip().title()
+                es_master = (request.POST.get('permiso_total') == 'on')
+
                 if nombre_rol:
                     nombre_final = f"[MASTER] {nombre_rol}" if es_master else nombre_rol
-                    Group.objects.get_or_create(name=nombre_final)
-                    response_data['msg'] = f'Rol secundario "{nombre_rol}" creado.'
+                    if Group.objects.filter(name=nombre_final).exists():
+                        if is_ajax: return JsonResponse(
+                            {'status': 'error', 'msg': f'El puesto "{nombre_final}" ya existe.'})
+
+                    grupo = Group.objects.create(name=nombre_final)
+
+                    # Le inyectamos los permisos de las casillas
+                    if request.POST.get('p_ver') == 'on': grupo.permissions.add(p_ver)
+                    if request.POST.get('p_val') == 'on': grupo.permissions.add(p_val)
+                    if request.POST.get('p_obs') == 'on': grupo.permissions.add(p_obs)
+                    if request.POST.get('p_desc') == 'on': grupo.permissions.add(p_desc)
+
+                    response_data['msg'] = f'Puesto "{nombre_rol}" guardado en el catálogo.'
 
             # ==========================================
-            # 5. ELIMINAR ROL SECUNDARIO
+            # 5. EDITAR PERMISOS DE UN PUESTO EXISTENTE
+            # ==========================================
+            elif accion == 'edit_role':
+                rol_id = request.POST.get('rol_id')
+                grupo = Group.objects.get(id=rol_id)
+
+                # Borrar los viejos y actualizar con los nuevos
+                grupo.permissions.clear()
+                if request.POST.get('p_ver') == 'on': grupo.permissions.add(p_ver)
+                if request.POST.get('p_val') == 'on': grupo.permissions.add(p_val)
+                if request.POST.get('p_obs') == 'on': grupo.permissions.add(p_obs)
+                if request.POST.get('p_desc') == 'on': grupo.permissions.add(p_desc)
+
+                response_data['msg'] = f'Permisos actualizados para el puesto: {grupo.name}'
+
+            # ==========================================
+            # 6. ASIGNAR PUESTO A UN EMPLEADO
+            # ==========================================
+            elif accion == 'assign_role':
+                usuario_id = request.POST.get('usuario_id')
+                rol_id = request.POST.get('rol_id')
+
+                if not usuario_id or not rol_id:
+                    if is_ajax: return JsonResponse({'status': 'error', 'msg': 'Selecciona empleado y puesto.'})
+
+                empleado = User.objects.get(id=usuario_id)
+                nuevo_grupo = Group.objects.get(id=rol_id)
+
+                # Validación de duplicados
+                if empleado.groups.exists():
+                    rol_actual = empleado.groups.first().name.replace('[MASTER] ', '')
+                    if is_ajax: return JsonResponse({'status': 'error',
+                                                     'msg': f'¡ALERTA! {empleado.nombre} ya es "{rol_actual}". No puede tener dos puestos a la vez.'})
+
+                empleado.groups.add(nuevo_grupo)
+                AccessLog.objects.create(usuario=request.user,
+                                         accion=f"ASIGNÓ CARGO: '{nuevo_grupo.name}' a {empleado.nombre}")
+                response_data['msg'] = f'Se vinculó a {empleado.nombre} como {nuevo_grupo.name}.'
+
+            # ==========================================
+            # 7. ELIMINAR ROL SECUNDARIO DEL CATÁLOGO
             # ==========================================
             elif accion == 'delete_role':
                 Group.objects.filter(id=request.POST.get('rol_id')).delete()
                 response_data['msg'] = 'Rol eliminado.'
 
             # ==========================================
-            # 6. SEGURIDAD: APLICAR PROTOCOLOS
+            # 8. RELACIONAR DEPARTAMENTOS (PERMISOS CRUZADOS)
+            # ==========================================
+            elif accion == 'cross_relation':
+                origen_id = request.POST.get('rol_origen')
+                destino_id = request.POST.get('rol_destino')
+
+                if not origen_id or not destino_id:
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': 'Selecciona ambos puestos para vincularlos.'})
+
+                if origen_id == destino_id:
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': 'No puedes vincular un puesto consigo mismo.'})
+
+                origen = Group.objects.get(id=origen_id)
+                destino = Group.objects.get(id=destino_id)
+
+                puede_ver = (request.POST.get('c_ver') == 'on')
+                puede_val = (request.POST.get('c_val') == 'on')
+                puede_obs = (request.POST.get('c_obs') == 'on')
+                puede_desc = (request.POST.get('c_desc') == 'on')
+
+                # Si la relación ya existe, la actualiza. Si no, la crea.
+                relacion, created = RelacionDepartamentos.objects.update_or_create(
+                    rol_origen=origen,
+                    rol_destino=destino,
+                    defaults={
+                        'puede_consultar': puede_ver,
+                        'puede_validar': puede_val,
+                        'puede_observar': puede_obs,
+                        'puede_descargar': puede_desc
+                    }
+                )
+
+                verbo = "Creó" if created else "Actualizó"
+                AccessLog.objects.create(usuario=request.user,
+                                         accion=f"{verbo} permiso cruzado: {origen.name} -> {destino.name}")
+                response_data['msg'] = f'Se configuró correctamente el permiso de {origen.name} sobre {destino.name}.'
+
+            # ==========================================
+            # 9. ELIMINAR RELACIÓN CRUZADA
+            # ==========================================
+            elif accion == 'delete_cross_relation':
+                rel_id = request.POST.get('rel_id')
+                RelacionDepartamentos.objects.filter(id=rel_id).delete()
+                response_data['msg'] = 'Vínculo entre departamentos eliminado.'
+
+            # ==========================================
+            # 10. SEGURIDAD: APLICAR PROTOCOLOS
             # ==========================================
             elif accion == 'toggle_security':
                 request.session['sec_encrypt'] = True if request.POST.get('toggle_encrypt') else False
@@ -256,7 +358,7 @@ def panel_gobierno_ti(request):
                 response_data['msg'] = 'Protocolos de seguridad aplicados en el servidor.'
 
             # ==========================================
-            # 7. LIMPIAR HISTORIAL
+            # 11. LIMPIAR HISTORIAL
             # ==========================================
             elif accion == 'clear_history':
                 AccessLog.objects.exclude(accion__startswith="REL_CONF:").exclude(
@@ -284,6 +386,7 @@ def panel_gobierno_ti(request):
     context = {
         'lista_staff': staff_list,
         'roles': Group.objects.all(),
+        'relaciones_cruzadas': RelacionDepartamentos.objects.all(),  # <-- SE ENVIAN AL HTML
         'logs': logs_gen,
         'encrypt_active': request.session.get('sec_encrypt', True),
         'manto_active': request.session.get('sec_manto', False),
@@ -292,16 +395,6 @@ def panel_gobierno_ti(request):
     }
 
     return render(request, 'portal/panel_ti.html', context)
-
-
-@login_required
-def dashboard_medico(request):
-    rol = getattr(request.user, 'rol', None)
-    if rol is not None:
-        if rol not in ROLES_MEDICOS and rol not in ROLES_ADMINISTRATIVOS:
-            return render(request, '403_prohibido.html')
-
-    return render(request, 'dashboard/home_medico.html')
 
 
 # ==============================================================
@@ -335,4 +428,3 @@ def portal_padres_home(request):
 
 def registro_inscripcion(request):
     return render(request, 'portal/registro_inscripcion.html')
-
