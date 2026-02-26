@@ -1,10 +1,12 @@
 from django.db import models, transaction
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+from django.conf import settings
 import uuid
 
 
 class Solicitud(models.Model):
+    # PDF (si después quieres generar oficio/carta)
     pdf = models.FileField(upload_to="pdf_solicitudes/", null=True, blank=True)
 
     # ✅ Folio consecutivo (1–1000)
@@ -28,6 +30,21 @@ class Solicitud(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # ✅ Dictamen / respuesta (Sprint 2)
+    comentario_respuesta = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Motivo de rechazo o comentario institucional de respuesta."
+    )
+    dictaminado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="solicitudes_dictaminadas"
+    )
+    dictaminado_en = models.DateTimeField(null=True, blank=True)
 
     # ---------------- Tutor ----------------
     nombres_tutor = models.CharField(max_length=80)
@@ -97,10 +114,14 @@ class Solicitud(models.Model):
 class LinkCaptura(models.Model):
     """
     ✅ Link único (token) para capturar solicitud.
-    - Se marca como usado cuando el tutor finaliza
+    - Se marca como usado cuando el tutor finaliza (estado pasa a RECIBIDA)
     - Se puede definir vigencia (por ejemplo 7 días)
     """
-    solicitud = models.ForeignKey("admisiones.Solicitud", on_delete=models.CASCADE, related_name="links")
+    solicitud = models.ForeignKey(
+        "admisiones.Solicitud",
+        on_delete=models.CASCADE,
+        related_name="links"
+    )
     token = models.CharField(max_length=64, unique=True, editable=False)
 
     creado_en = models.DateTimeField(auto_now_add=True)
