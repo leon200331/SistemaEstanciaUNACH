@@ -6,17 +6,24 @@ import uuid
 
 
 class Solicitud(models.Model):
-    # PDF (si después quieres generar oficio/carta)
+    # =========================
+    # ARCHIVO / CONTROL
+    # =========================
     pdf = models.FileField(upload_to="pdf_solicitudes/", null=True, blank=True)
 
-    # ✅ Folio consecutivo (1–1000)
     folio = models.PositiveIntegerField(
         unique=True,
         null=True,
         blank=True,
-        validators=[MinValueValidator(1), MaxValueValidator(1000)]
+        validators=[MinValueValidator(1), MaxValueValidator(1000)],
+        help_text="Folio consecutivo (1–1000). Se asigna automáticamente al guardar."
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # =========================
+    # ESTADO GENERAL (SPRINT 2)
+    # =========================
     class Estado(models.TextChoices):
         CAPTURA = "CAPTURA", "Captura"
         RECIBIDA = "RECIBIDA", "Recibida"
@@ -29,14 +36,12 @@ class Solicitud(models.Model):
         default=Estado.CAPTURA
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    # ✅ Dictamen / respuesta (Sprint 2)
     comentario_respuesta = models.TextField(
         null=True,
         blank=True,
         help_text="Motivo de rechazo o comentario institucional de respuesta."
     )
+
     dictaminado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -44,9 +49,68 @@ class Solicitud(models.Model):
         on_delete=models.SET_NULL,
         related_name="solicitudes_dictaminadas"
     )
+
     dictaminado_en = models.DateTimeField(null=True, blank=True)
 
-    # ---------------- Tutor (El solicitante principal) ----------------
+    # =========================
+    # EVALUACIÓN POR ÁREAS (SPRINT 3)
+    # =========================
+    class EstadoEvaluacion(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        APROBADO = "APROBADO", "Aprobado"
+        RECHAZADO = "RECHAZADO", "Rechazado"
+
+    estado_psicologia = models.CharField(
+        max_length=20,
+        choices=EstadoEvaluacion.choices,
+        default=EstadoEvaluacion.PENDIENTE
+    )
+    observaciones_psicologia = models.TextField(null=True, blank=True)
+
+    psicologia_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="solicitudes_psicologia"
+    )
+    psicologia_en = models.DateTimeField(null=True, blank=True)
+
+    estado_nutricion = models.CharField(
+        max_length=20,
+        choices=EstadoEvaluacion.choices,
+        default=EstadoEvaluacion.PENDIENTE
+    )
+    observaciones_nutricion = models.TextField(null=True, blank=True)
+
+    nutricion_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="solicitudes_nutricion"
+    )
+    nutricion_en = models.DateTimeField(null=True, blank=True)
+
+    estado_medico = models.CharField(
+        max_length=20,
+        choices=EstadoEvaluacion.choices,
+        default=EstadoEvaluacion.PENDIENTE
+    )
+    observaciones_medico = models.TextField(null=True, blank=True)
+
+    medico_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="solicitudes_medico"
+    )
+    medico_en = models.DateTimeField(null=True, blank=True)
+
+    # =========================
+    # DATOS DEL TUTOR
+    # =========================
     nombres_tutor = models.CharField(max_length=80)
     apellido_paterno_tutor = models.CharField(max_length=60)
     apellido_materno_tutor = models.CharField(max_length=60, blank=True)
@@ -71,7 +135,7 @@ class Solicitud(models.Model):
     correo = models.EmailField(blank=True)
     celular = models.CharField(max_length=10, blank=True)
 
-    # --- CAMBIO (Punto 6): Domicilio estructurado del tutor principal ---
+    # --- Domicilio estructurado del tutor principal ---
     estado_domicilio = models.CharField(max_length=100, blank=True)
     ciudad = models.CharField(max_length=100, blank=True)
     codigo_postal = models.CharField(max_length=10, blank=True)
@@ -93,8 +157,9 @@ class Solicitud(models.Model):
     )
     parentesco_otro = models.CharField(max_length=80, blank=True)
 
-    # ---------------- Menor ----------------
-    # --- CAMBIO (Punto 2): Nombre del menor estructurado ---
+    # =========================
+    # DATOS DEL MENOR
+    # =========================
     nombres_menor = models.CharField(max_length=80, blank=True)
     apellido_paterno_menor = models.CharField(max_length=60, blank=True)
     apellido_materno_menor = models.CharField(max_length=60, blank=True)
@@ -102,15 +167,35 @@ class Solicitud(models.Model):
     fecha_nacimiento_menor = models.DateField(null=True, blank=True)
     curp_menor = models.CharField(max_length=18, blank=True)
 
+    # =========================
+    # HELPERS
+    # =========================
     def nombre_tutor_completo(self):
         return f"{self.nombres_tutor} {self.apellido_paterno_tutor} {self.apellido_materno_tutor}".strip()
 
     def nombre_menor_completo(self):
         return f"{self.nombres_menor} {self.apellido_paterno_menor} {self.apellido_materno_menor}".strip()
 
+    def evaluaciones_completas(self) -> bool:
+        return all([
+            self.estado_psicologia != self.EstadoEvaluacion.PENDIENTE,
+            self.estado_nutricion != self.EstadoEvaluacion.PENDIENTE,
+            self.estado_medico != self.EstadoEvaluacion.PENDIENTE,
+        ])
+
+    def todas_aprobadas(self) -> bool:
+        return all([
+            self.estado_psicologia == self.EstadoEvaluacion.APROBADO,
+            self.estado_nutricion == self.EstadoEvaluacion.APROBADO,
+            self.estado_medico == self.EstadoEvaluacion.APROBADO,
+        ])
+
     def __str__(self):
         return f"Solicitud Folio {self.folio}" if self.folio else f"Solicitud #{self.id}"
 
+    # =========================
+    # FOLIO AUTOMÁTICO
+    # =========================
     def save(self, *args, **kwargs):
         if self.folio is None:
             with transaction.atomic():
@@ -124,13 +209,29 @@ class Solicitud(models.Model):
 
         super().save(*args, **kwargs)
 
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["estado"]),
+            models.Index(fields=["estado_psicologia"]),
+            models.Index(fields=["estado_nutricion"]),
+            models.Index(fields=["estado_medico"]),
+            models.Index(fields=["folio"]),
+        ]
+
 
 class LinkCaptura(models.Model):
+    """
+    Link único (token) para capturar solicitud.
+    - Se marca como usado cuando el tutor finaliza (estado pasa a RECIBIDA)
+    - Se puede definir vigencia (por ejemplo 7 días)
+    """
     solicitud = models.ForeignKey(
         "admisiones.Solicitud",
         on_delete=models.CASCADE,
         related_name="links"
     )
+
     token = models.CharField(max_length=64, unique=True, editable=False)
     creado_en = models.DateTimeField(auto_now_add=True)
     usado = models.BooleanField(default=False)
@@ -151,14 +252,19 @@ class LinkCaptura(models.Model):
     def __str__(self):
         return f"LinkCaptura({self.solicitud_id}) - usado={self.usado}"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["token"]),
+            models.Index(fields=["usado"]),
+        ]
+
 
 # =========================================================
 # SPRINT 2: MÓDULO DE INSCRIPCIÓN
 # =========================================================
-
 class SolicitudInscripcion(models.Model):
     solicitud_ingreso = models.OneToOneField(
-        'admisiones.Solicitud',
+        "admisiones.Solicitud",
         on_delete=models.CASCADE,
         related_name="inscripcion_oficial",
         verbose_name="Solicitud de Ingreso Base"
@@ -167,7 +273,8 @@ class SolicitudInscripcion(models.Model):
     usuario_tutor = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="expediente_inscripcion",
         verbose_name="Cuenta del Tutor"
     )
@@ -184,54 +291,32 @@ class SolicitudInscripcion(models.Model):
         default=EstadoInscripcion.NUEVA
     )
 
-    # =======================================================
-    # PASO 8: COMPLEMENTO DE INFORMACIÓN DEL BENEFICIARIO
-    # =======================================================
     avance_academico = models.CharField(max_length=50, null=True, blank=True, verbose_name="Avance Académico")
     estado_civil_tutor = models.CharField(max_length=50, null=True, blank=True, verbose_name="Estado Civil")
-
-    # Campo extra necesario para tu lógica de JS excluyente
     parentesco_tutor = models.CharField(max_length=50, null=True, blank=True, verbose_name="Parentesco Confirmado")
 
-    # =======================================================
-    # PASO 10: COMPLEMENTO DE INFORMACIÓN DEL MENOR
-    # =======================================================
     class SexoChoices(models.TextChoices):
         M = "M", "Masculino"
         F = "F", "Femenino"
 
-    # --- CAMBIO (Punto 4): Lugar de Nacimiento Estructurado ---
-    estado_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True,
-                                               verbose_name="Estado de Nacimiento")
-    municipio_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True,
-                                                  verbose_name="Municipio de Nacimiento")
+    estado_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True, verbose_name="Estado de Nacimiento")
+    municipio_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True, verbose_name="Municipio de Nacimiento")
 
-    # Edades
     edad_anios_menor = models.PositiveIntegerField(null=True, blank=True)
     edad_meses_menor = models.PositiveIntegerField(null=True, blank=True)
 
     sexo_menor = models.CharField(max_length=2, choices=SexoChoices.choices, null=True, blank=True, verbose_name="Sexo")
     tipo_sangre_menor = models.CharField(max_length=20, null=True, blank=True, verbose_name="Tipo de Sangre")
 
-    # =======================================================
-    # PASO 9: INFORMACIÓN GENERAL (SECCIÓN 3 Y 4 DEL PDF)
-    # =======================================================
-    # Datos del Padre / Madre (Sección 3)
     parentesco_segundo_padre = models.CharField(max_length=50, null=True, blank=True)
 
-    # --- CAMBIO (Punto 2): Nombre del otro tutor estructurado ---
     nombres_segundo_padre = models.CharField(max_length=80, null=True, blank=True, verbose_name="Nombre(s)")
-    apellido_paterno_segundo_padre = models.CharField(max_length=60, null=True, blank=True,
-                                                      verbose_name="Apellido Paterno")
-    apellido_materno_segundo_padre = models.CharField(max_length=60, null=True, blank=True,
-                                                      verbose_name="Apellido Materno")
+    apellido_paterno_segundo_padre = models.CharField(max_length=60, null=True, blank=True, verbose_name="Apellido Paterno")
+    apellido_materno_segundo_padre = models.CharField(max_length=60, null=True, blank=True, verbose_name="Apellido Materno")
 
-    estado_civil_segundo_padre = models.CharField(max_length=50, null=True, blank=True,
-                                                  verbose_name="Estado Civil Padre/Madre")
-    ocupacion_segundo_padre = models.CharField(max_length=100, null=True, blank=True,
-                                               verbose_name="Ocupación Padre/Madre")
+    estado_civil_segundo_padre = models.CharField(max_length=50, null=True, blank=True, verbose_name="Estado Civil Padre/Madre")
+    ocupacion_segundo_padre = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ocupación Padre/Madre")
 
-    # --- CAMBIO (Punto 6): Dirección estructurada del segundo tutor ---
     estado_domicilio_segundo_padre = models.CharField(max_length=100, null=True, blank=True)
     ciudad_segundo_padre = models.CharField(max_length=100, null=True, blank=True)
     codigo_postal_segundo_padre = models.CharField(max_length=10, null=True, blank=True)
@@ -242,33 +327,24 @@ class SolicitudInscripcion(models.Model):
     celular_segundo_padre = models.CharField(max_length=15, null=True, blank=True, verbose_name="Celular Padre/Madre")
     correo_segundo_padre = models.EmailField(null=True, blank=True, verbose_name="Correo Padre/Madre")
 
-    # =======================================================
-    # TELÉFONOS DE FAMILIARES AUTORIZADOS
-    # =======================================================
-    # --- CAMBIO (Punto 7): Estructura de nombres en Contacto 1 ---
     contacto_1_nombres = models.CharField(max_length=80, null=True, blank=True)
     contacto_1_apellido_paterno = models.CharField(max_length=60, null=True, blank=True)
     contacto_1_apellido_materno = models.CharField(max_length=60, null=True, blank=True)
     contacto_1_parentesco = models.CharField(max_length=50, null=True, blank=True)
     contacto_1_telefono = models.CharField(max_length=15, null=True, blank=True)
 
-    # --- CAMBIO (Punto 7): Estructura de nombres en Contacto 2 ---
     contacto_2_nombres = models.CharField(max_length=80, null=True, blank=True)
     contacto_2_apellido_paterno = models.CharField(max_length=60, null=True, blank=True)
     contacto_2_apellido_materno = models.CharField(max_length=60, null=True, blank=True)
     contacto_2_parentesco = models.CharField(max_length=50, null=True, blank=True)
     contacto_2_telefono = models.CharField(max_length=15, null=True, blank=True)
 
-    # --- CAMBIO (Punto 7): Estructura de nombres en Contacto 3 ---
     contacto_3_nombres = models.CharField(max_length=80, null=True, blank=True)
     contacto_3_apellido_paterno = models.CharField(max_length=60, null=True, blank=True)
     contacto_3_apellido_materno = models.CharField(max_length=60, null=True, blank=True)
     contacto_3_parentesco = models.CharField(max_length=50, null=True, blank=True)
     contacto_3_telefono = models.CharField(max_length=15, null=True, blank=True)
 
-    # =======================================================
-    # PASO 11: ACEPTACIÓN DE REGLAMENTOS
-    # =======================================================
     acepto_reglamentos = models.BooleanField(default=False)
     fecha_aceptacion = models.DateTimeField(null=True, blank=True)
 

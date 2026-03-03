@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
+from django.http import HttpResponseForbidden
 
 # --- SE AGREGÓ EmailMessage PARA PODER ENVIAR ARCHIVOS ADJUNTOS ---
 from django.core.mail import send_mail, EmailMessage
@@ -16,7 +17,13 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from .forms import CapturaSolicitudForm, CrearSolicitudPanelForm
+from .forms import (
+    CapturaSolicitudForm,
+    CrearSolicitudPanelForm,
+    DictamenPsicologiaForm,
+    DictamenNutricionForm,
+    DictamenMedicoForm,
+)
 
 # --- SE AGREGÓ generar_pdf_dictamen PARA LAS CARTAS DE APROBADO/RECHAZADO ---
 from .services import generar_pdf_fo301, generar_pdf_dictamen
@@ -303,22 +310,33 @@ def dictaminar_solicitud(request, pk):
             url_login = request.build_absolute_uri('/')
             nombre = s.nombre_tutor_completo() if hasattr(s, "nombre_tutor_completo") else "aspirante"
 
-            body = f"Estimado/a {nombre}:\n\n¡Su solicitud ha sido APROBADA!\n\nIngrese a nuestro portal:\n🔗 Link: {url_login}\n👤 Usuario: {usuario_final.email}\n🔑 Clave Temporal: {password_temporal}\n\nAtentamente,\nEstancia Infantil UNACH"
+            body = (
+                f"Estimado/a {nombre}:\n\n"
+                f"¡Su solicitud ha sido APROBADA!\n\n"
+                f"Ingrese a nuestro portal:\n"
+                f"🔗 Link: {url_login}\n"
+                f"👤 Usuario: {usuario_final.email}\n"
+                f"🔑 Clave Temporal: {password_temporal}\n\n"
+                f"Atentamente,\nEstancia Infantil UNACH"
+            )
 
-            email = EmailMessage("¡Solicitud Aprobada! - Inicia tu Inscripción UNACH", body,
-                                 getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@unach.mx"), [s.correo])
+            email = EmailMessage(
+                "¡Solicitud Aprobada! - Inicia tu Inscripción UNACH",
+                body,
+                getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@unach.mx"),
+                [s.correo],
+            )
             if ruta_pdf:
                 email.attach_file(ruta_pdf)
             email.send(fail_silently=False)
 
-        messages.success(request, f"Solicitud APROBADA. Se creó el expediente y se enviaron credenciales.")
+        messages.success(request, "Solicitud APROBADA. Se creó el expediente y se enviaron credenciales.")
         return redirect("panel_admisiones")
 
 
 # =========================================================
 # PORTAL DE PADRES (WIZARD DE INSCRIPCIÓN) - ACTUALIZADO
 # =========================================================
-
 @login_required
 def portal_inscripcion(request):
     inscripcion = SolicitudInscripcion.objects.filter(usuario_tutor__email=request.user.email).first()
@@ -343,17 +361,15 @@ def portal_inscripcion(request):
         s.apellido_paterno_menor = request.POST.get('apellido_paterno_menor')
         s.apellido_materno_menor = request.POST.get('apellido_materno_menor')
 
-        # Validar si mandaron fecha vacía para evitar crasheos de formato
         fecha_nac = request.POST.get('fecha_nacimiento_menor')
         s.fecha_nacimiento_menor = fecha_nac if fecha_nac else None
 
         s.curp_menor = request.POST.get('curp_menor')
-        s.save()  # Guardamos la solicitud base actualizada
+        s.save()
 
         inscripcion.estado_nacimiento_menor = request.POST.get('estado_nacimiento_menor')
         inscripcion.municipio_nacimiento_menor = request.POST.get('municipio_nacimiento_menor')
 
-        # Validación de enteros para la edad
         try:
             inscripcion.edad_anios_menor = int(request.POST.get('edad_anios_menor') or 0)
             inscripcion.edad_meses_menor = int(request.POST.get('edad_meses_menor') or 0)
@@ -372,7 +388,6 @@ def portal_inscripcion(request):
         inscripcion.estado_civil_segundo_padre = request.POST.get('estado_civil_segundo_padre')
         inscripcion.ocupacion_segundo_padre = request.POST.get('ocupacion_segundo_padre')
 
-        # Dirección del otro Padre/Madre
         inscripcion.estado_domicilio_segundo_padre = request.POST.get('estado_domicilio_segundo_padre')
         inscripcion.ciudad_segundo_padre = request.POST.get('ciudad_segundo_padre')
         inscripcion.codigo_postal_segundo_padre = request.POST.get('codigo_postal_segundo_padre')
@@ -384,21 +399,18 @@ def portal_inscripcion(request):
         inscripcion.correo_segundo_padre = request.POST.get('correo_segundo_padre')
 
         # 4. Familiares Autorizados (Estructurados)
-        # Familiar 1
         inscripcion.contacto_1_nombres = request.POST.get('contacto_1_nombres')
         inscripcion.contacto_1_apellido_paterno = request.POST.get('contacto_1_apellido_paterno')
         inscripcion.contacto_1_apellido_materno = request.POST.get('contacto_1_apellido_materno')
         inscripcion.contacto_1_parentesco = request.POST.get('contacto_1_parentesco')
         inscripcion.contacto_1_telefono = request.POST.get('contacto_1_telefono')
 
-        # Familiar 2
         inscripcion.contacto_2_nombres = request.POST.get('contacto_2_nombres')
         inscripcion.contacto_2_apellido_paterno = request.POST.get('contacto_2_apellido_paterno')
         inscripcion.contacto_2_apellido_materno = request.POST.get('contacto_2_apellido_materno')
         inscripcion.contacto_2_parentesco = request.POST.get('contacto_2_parentesco')
         inscripcion.contacto_2_telefono = request.POST.get('contacto_2_telefono')
 
-        # Familiar 3
         inscripcion.contacto_3_nombres = request.POST.get('contacto_3_nombres')
         inscripcion.contacto_3_apellido_paterno = request.POST.get('contacto_3_apellido_paterno')
         inscripcion.contacto_3_apellido_materno = request.POST.get('contacto_3_apellido_materno')
@@ -427,3 +439,115 @@ def portal_inscripcion(request):
         return redirect('portal_inscripcion')
 
     return render(request, 'admisiones/portal_inscripcion.html', {'inscripcion': inscripcion})
+
+
+# =========================================================
+# DICTÁMENES POR ÁREA (PSICOLOGÍA / NUTRICIÓN / MÉDICO)
+# =========================================================
+def actualizar_estado_final(sol: Solicitud):
+    # Si alguna área rechaza -> RECHAZADA final
+    if (
+        sol.estado_psicologia == Solicitud.EstadoEvaluacion.RECHAZADO
+        or sol.estado_nutricion == Solicitud.EstadoEvaluacion.RECHAZADO
+        or sol.estado_medico == Solicitud.EstadoEvaluacion.RECHAZADO
+    ):
+        sol.estado = Solicitud.Estado.RECHAZADA
+        sol.save(update_fields=["estado"])
+        return
+
+    # Si las 3 aprueban -> APROBADA final
+    if sol.todas_aprobadas():
+        sol.estado = Solicitud.Estado.APROBADA
+        sol.save(update_fields=["estado"])
+
+
+# ===================== PSICOLOGÍA =====================
+@login_required
+def psicologia_pendientes(request):
+    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
+    if (grupo != "psicologa") and (not request.user.is_superuser):
+        return HttpResponseForbidden("No tienes permisos para esta sección.")
+
+    qs = Solicitud.objects.filter(
+        estado=Solicitud.Estado.RECIBIDA,
+        estado_psicologia=Solicitud.EstadoEvaluacion.PENDIENTE
+    ).order_by("-created_at")
+
+    return render(request, "admisiones/psicologia_pendientes.html", {"solicitudes": qs})
+
+
+@login_required
+def psicologia_dictaminar(request, pk):
+    sol = get_object_or_404(Solicitud, pk=pk)
+
+    if request.method == "POST":
+        form = DictamenPsicologiaForm(request.POST, instance=sol)
+        if form.is_valid():
+            sol = form.save(commit=False)
+            sol.psicologia_por = request.user
+            sol.psicologia_en = timezone.now()
+            sol.save()
+            actualizar_estado_final(sol)
+            return redirect("psicologia_pendientes")
+    else:
+        form = DictamenPsicologiaForm(instance=sol)
+
+    return render(request, "admisiones/psicologia_dictaminar.html", {"sol": sol, "form": form})
+
+
+# ===================== NUTRICIÓN =====================
+@login_required
+def nutricion_pendientes(request):
+    qs = Solicitud.objects.filter(
+        estado=Solicitud.Estado.RECIBIDA,
+        estado_nutricion=Solicitud.EstadoEvaluacion.PENDIENTE
+    ).order_by("-created_at")
+    return render(request, "admisiones/nutricion_pendientes.html", {"solicitudes": qs})
+
+
+@login_required
+def nutricion_dictaminar(request, pk):
+    sol = get_object_or_404(Solicitud, pk=pk)
+
+    if request.method == "POST":
+        form = DictamenNutricionForm(request.POST, instance=sol)
+        if form.is_valid():
+            sol = form.save(commit=False)
+            sol.nutricion_por = request.user
+            sol.nutricion_en = timezone.now()
+            sol.save()
+            actualizar_estado_final(sol)
+            return redirect("nutricion_pendientes")
+    else:
+        form = DictamenNutricionForm(instance=sol)
+
+    return render(request, "admisiones/nutricion_dictaminar.html", {"sol": sol, "form": form})
+
+
+# ===================== MÉDICO =====================
+@login_required
+def medico_pendientes(request):
+    qs = Solicitud.objects.filter(
+        estado=Solicitud.Estado.RECIBIDA,
+        estado_medico=Solicitud.EstadoEvaluacion.PENDIENTE
+    ).order_by("-created_at")
+    return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
+
+
+@login_required
+def medico_dictaminar(request, pk):
+    sol = get_object_or_404(Solicitud, pk=pk)
+
+    if request.method == "POST":
+        form = DictamenMedicoForm(request.POST, instance=sol)
+        if form.is_valid():
+            sol = form.save(commit=False)
+            sol.medico_por = request.user
+            sol.medico_en = timezone.now()
+            sol.save()
+            actualizar_estado_final(sol)
+            return redirect("medico_pendientes")
+    else:
+        form = DictamenMedicoForm(instance=sol)
+
+    return render(request, "admisiones/medico_dictaminar.html", {"sol": sol, "form": form})

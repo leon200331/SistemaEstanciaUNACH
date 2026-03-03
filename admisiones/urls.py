@@ -15,11 +15,23 @@ urlpatterns = [
     # =========================================================
     # NUEVAS RUTAS: ELIMINAR SOLICITUDES DESDE EL PANEL
     # =========================================================
-    path('admisiones/solicitud/eliminar/<int:pk>/', views.eliminar_solicitud, name='eliminar_solicitud'),
-    path('admisiones/eliminar-todo/', views.eliminar_todas_solicitudes, name='eliminar_todas_solicitudes'),
+    path("admisiones/solicitud/eliminar/<int:pk>/", views.eliminar_solicitud, name="eliminar_solicitud"),
+    path("admisiones/eliminar-todo/", views.eliminar_todas_solicitudes, name="eliminar_todas_solicitudes"),
 
     # =========================================================
     # SPRINT 2: PORTAL DE INSCRIPCIÓN (PADRES)
     # =========================================================
     path("mi-inscripcion/", views.portal_inscripcion, name="portal_inscripcion"),
+
+    # =========================================================
+    # FILTROS / DICTÁMENES POR ÁREA (PSICOLOGÍA / NUTRICIÓN / MÉDICO)
+    # =========================================================
+    path("psicologia/", views.psicologia_pendientes, name="psicologia_pendientes"),
+    path("psicologia/<int:pk>/", views.psicologia_dictaminar, name="psicologia_dictaminar"),
+
+    path("nutricion/", views.nutricion_pendientes, name="nutricion_pendientes"),
+    path("nutricion/<int:pk>/", views.nutricion_dictaminar, name="nutricion_dictaminar"),
+
+    path("medico/", views.medico_pendientes, name="medico_pendientes"),
+    path("medico/<int:pk>/", views.medico_dictaminar, name="medico_dictaminar"),
 ]

@@ -24,6 +24,7 @@ def enmascarar_datos(texto):
 
 # --- VISTA SEMÁFORO (ROUTER DE SEGURIDAD LIMPIO) ---
 @login_required
+@login_required
 def root_redirect_view(request):
     user = request.user
 
@@ -36,13 +37,26 @@ def root_redirect_view(request):
     if user.is_superuser:
         return redirect('panel_gobierno_ti')
 
-    # ✅ Personal Interno (Staff): va al panel administrativo
-    elif user.is_staff:
+    # ✅ Personal Interno (Staff)
+    if user.is_staff:
+        # Tomamos el grupo/puesto principal (si usas uno)
+        grupo = user.groups.first().name.lower() if user.groups.exists() else ""
+
+        # 🔥 Rutas por puesto (ajusta nombres si tus grupos se llaman distinto)
+        if "psicologa" in grupo:
+            return redirect('psicologia_pendientes')
+
+        if "nutricion" in grupo:
+            return redirect('nutricion_pendientes')
+
+        if "medico" in grupo:
+            return redirect('medico_pendientes')
+
+        # Si no coincide con ninguno, cae al panel general (trabajadora social/admin)
         return redirect('dashboard_admin')
 
-    # ✅ Beneficiarios / Alumnos (Padres de familia): van al portal público
-    else:
-        return redirect('portal_padres_home')
+    # ✅ Beneficiarios / Padres
+    return redirect('portal_padres_home')
 
 
 # --- VISTAS PROTEGIDAS ---

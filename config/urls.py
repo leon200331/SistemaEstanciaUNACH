@@ -38,7 +38,9 @@ urlpatterns = [
     # --- MÓDULO ADMISIONES ---
     path("solicitud/", include("admisiones.urls")),
     path("solicitud/admisiones/", include("admisiones.urls")),
+    path("admisiones/", include("admisiones.urls")),
 
     # --- PANEL GOBIERNO TI ---
     path('gobierno-ti/', user_views.panel_gobierno_ti, name='panel_gobierno_ti'),
+
 ]

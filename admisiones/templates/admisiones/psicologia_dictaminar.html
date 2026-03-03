@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="mb-0">Dictamen Psicología</h3>
+      <small class="text-muted">Folio #{{ sol.folio }}</small>
+    </div>
+    <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary btn-sm">
+      Volver
+    </a>
+  </div>
+
+  <div class="row g-3">
+    <!-- Resumen -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted mb-2">Resumen</h6>
+
+          <div class="mb-2">
+            <div class="fw-semibold">Tutor</div>
+            <div>{{ sol.nombre_tutor_completo }}</div>
+          </div>
+
+          <div class="mb-2">
+            <div class="fw-semibold">Correo</div>
+            <div>{{ sol.correo|default:"—" }}</div>
+          </div>
+
+          <div class="mb-2">
+            <div class="fw-semibold">Matrícula</div>
+            <div>{{ sol.matricula|default:"—" }}</div>
+          </div>
+
+          <div class="mb-2">
+            <div class="fw-semibold">CURP del menor</div>
+            <div>{{ sol.curp_menor|default:"—" }}</div>
+          </div>
+
+          <hr>
+
+          <div>
+            <div class="fw-semibold">Estado actual Psicología</div>
+            {% if sol.estado_psicologia == "APROBADO" %}
+              <span class="badge bg-success">Aprobado</span>
+            {% elif sol.estado_psicologia == "RECHAZADO" %}
+              <span class="badge bg-danger">Rechazado</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% endif %}
+          </div>
+
+          {% if sol.psicologia_por %}
+          <div class="mt-2 text-muted small">
+            Dictaminado por: {{ sol.psicologia_por }}<br>
+            Fecha: {{ sol.psicologia_en|date:"d/m/Y H:i" }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Registrar dictamen</h6>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Estado</label>
+              {{ form.estado_psicologia }}
+              <div class="form-text">Selecciona Aprobado o Rechazado.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Observaciones</label>
+              {{ form.observaciones_psicologia }}
+              <div class="form-text">Especifica motivos o recomendaciones.</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-success">
+                Guardar dictamen
+              </button>
+              <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary">
+                Cancelar
+              </a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

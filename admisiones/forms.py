@@ -266,16 +266,56 @@ class CrearSolicitudPanelForm(forms.Form):
             return val
         return self._solo_letras(val, "Apellido materno")
 
-    class SolicitudBasicaForm(forms.ModelForm):
-        class Meta:
-            model = Solicitud
-            fields = ["nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor", "matricula", "correo"]
-            widgets = {
-                "nombres_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Nombre(s)"}),
-                "apellido_paterno_tutor": forms.TextInput(
-                    attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}),
-                "apellido_materno_tutor": forms.TextInput(
-                    attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}),
-                "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
-                "correo": forms.EmailInput(attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
+        class SolicitudBasicaForm(forms.ModelForm):
+            class Meta:
+                model = Solicitud
+                fields = ["nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor", "matricula", "correo"]
+                widgets = {
+                    "nombres_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Nombre(s)"}),
+                    "apellido_paterno_tutor": forms.TextInput(
+                        attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}
+                    ),
+                    "apellido_materno_tutor": forms.TextInput(
+                        attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}
+                    ),
+                    "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
+                    "correo": forms.EmailInput(
+                        attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
+                }
+
+        class DictamenPsicologiaForm(forms.ModelForm):
+            class Meta:
+                model = Solicitud
+                fields = ["estado_psicologia", "observaciones_psicologia"]
+
+        class DictamenNutricionForm(forms.ModelForm):
+            class Meta:
+                model = Solicitud
+                fields = ["estado_nutricion", "observaciones_nutricion"]
+
+        class DictamenMedicoForm(forms.ModelForm):
+            class Meta:
+                model = Solicitud
+                fields = ["estado_medico", "observaciones_medico"]
             }
+=======
+            }
+
+
+class DictamenPsicologiaForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ["estado_psicologia", "observaciones_psicologia"]
+
+
+class DictamenNutricionForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ["estado_nutricion", "observaciones_nutricion"]
+
+
+class DictamenMedicoForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ["estado_medico", "observaciones_medico"]
+>>>>>>> 5aa69b4 (filtro de psicologa)
