@@ -20,11 +20,19 @@ class CapturaSolicitudForm(forms.ModelForm):
             "unidad_academica",
             "correo",
             "celular",
-            "domicilio",
+
+            # --- NUEVOS CAMPOS DE DOMICILIO ---
+            "estado_domicilio",
+            "ciudad",
+            "codigo_postal",
+            "calle",
+            "numero_exterior",
+            "numero_interior",
+
             "parentesco",
             "parentesco_otro",
 
-            # Menor
+            # Menor (ELIMINADO EL NOMBRE. Solo pedimos fecha y CURP)
             "fecha_nacimiento_menor",
             "curp_menor",
         ]
@@ -51,9 +59,13 @@ class CapturaSolicitudForm(forms.ModelForm):
                 "placeholder": "10 dígitos"
             }),
 
-            "domicilio": forms.TextInput(attrs={
-                "placeholder": "Calle, número, colonia, ciudad"
-            }),
+            # --- WIDGETS DE NUEVOS CAMPOS DE DOMICILIO ---
+            "estado_domicilio": forms.TextInput(attrs={"placeholder": "Ej. Chiapas"}),
+            "ciudad": forms.TextInput(attrs={"placeholder": "Ej. Tuxtla Gutiérrez"}),
+            "codigo_postal": forms.TextInput(attrs={"placeholder": "Ej. 29000"}),
+            "calle": forms.TextInput(attrs={"placeholder": "Ej. Av. Central"}),
+            "numero_exterior": forms.TextInput(attrs={"placeholder": "Ej. 123"}),
+            "numero_interior": forms.TextInput(attrs={"placeholder": "Ej. A (Opcional)"}),
 
             "parentesco": forms.Select(),
             "parentesco_otro": forms.TextInput(attrs={
@@ -90,6 +102,11 @@ class CapturaSolicitudForm(forms.ModelForm):
         self.fields["apellido_paterno_tutor"].required = True
         self.fields["parentesco"].required = True
         self.fields["fecha_nacimiento_menor"].required = True
+
+        # Hacemos obligatorios los campos base de dirección
+        self.fields["estado_domicilio"].required = True
+        self.fields["ciudad"].required = True
+        self.fields["calle"].required = True
 
     # ======================================================
     # VALIDACIONES POR CAMPO
@@ -137,13 +154,11 @@ class CapturaSolicitudForm(forms.ModelForm):
             )
         return cel
 
-    def clean_domicilio(self):
-        dom = (self.cleaned_data.get("domicilio") or "").strip()
-        if dom and len(dom) < 8:
-            raise forms.ValidationError(
-                "El domicilio es demasiado corto."
-            )
-        return dom
+    def clean_codigo_postal(self):
+        cp = (self.cleaned_data.get("codigo_postal") or "").strip()
+        if cp and not re.fullmatch(r"\d{5}", cp):
+            raise forms.ValidationError("El código postal debe tener exactamente 5 dígitos.")
+        return cp
 
     def clean_curp_menor(self):
         curp = (self.cleaned_data.get("curp_menor") or "").strip().upper()
@@ -190,60 +205,42 @@ class CapturaSolicitudForm(forms.ModelForm):
                     "La edad del menor debe estar entre 6 meses y 3 años."
                 )
 
-        def clean_nombres_tutor(self):
-            nombre = (self.cleaned_data.get("nombres_tutor") or "").strip()
-
-            if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+", nombre):
-                raise forms.ValidationError(
-                    "El nombre solo debe contener letras."
-                )
-
-            if len(nombre) < 2:
-                raise forms.ValidationError(
-                    "Ingresa un nombre válido."
-                )
-
-            return nombre
-
-        def clean_apellido_paterno_tutor(self):
-            apellido = (self.cleaned_data.get("apellido_paterno_tutor") or "").strip()
-
-            if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+", apellido):
-                raise forms.ValidationError(
-                    "El apellido solo debe contener letras."
-                )
-
-            if len(apellido) < 2:
-                raise forms.ValidationError(
-                    "Ingresa un apellido válido."
-                )
-
-            return apellido
-
-        def clean_apellido_materno_tutor(self):
-            apellido = (self.cleaned_data.get("apellido_materno_tutor") or "").strip()
-
-            if apellido and not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+", apellido):
-                raise forms.ValidationError(
-                    "El apellido solo debe contener letras."
-                )
-
-            return apellido
-
         return cleaned_data
 
 
 class CrearSolicitudPanelForm(forms.Form):
+    # Definimos las opciones de la Unidad Académica
+    UNIDADES_CHOICES = [
+        ("", "Seleccione una opción..."),
+        ("Facultad de Ingeniería", "Facultad de Ingeniería"),
+        ("Facultad de Arquitectura", "Facultad de Arquitectura"),
+        ("Facultad de Contaduría y Administración", "Facultad de Contaduría y Administración"),
+        ("Facultad de Humanidades", "Facultad de Humanidades"),
+        ("Facultad de Medicina Humana", "Facultad de Medicina Humana"),
+        ("Facultad de Medicina Veterinaria y Zootecnia", "Facultad de Medicina Veterinaria y Zootecnia"),
+        ("Facultad de Ciencias Químicas", "Facultad de Ciencias Químicas"),
+        ("Facultad de Derecho", "Facultad de Derecho"),
+        ("Facultad de Lenguas", "Facultad de Lenguas"),
+        ("Otra", "Otra"),
+    ]
+
     nombres_tutor = forms.CharField(max_length=80, required=True)
     apellido_paterno_tutor = forms.CharField(max_length=60, required=True)
     apellido_materno_tutor = forms.CharField(max_length=60, required=False)
     matricula = forms.CharField(max_length=20, required=False)
+
+    # --- CAMBIADO A CHOICE FIELD ---
+    unidad_academica = forms.ChoiceField(choices=UNIDADES_CHOICES, required=True)
+
     correo = forms.EmailField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for f in self.fields.values():
             f.widget.attrs["class"] = "form-control"
+
+        # Al ChoiceField le ponemos la clase form-select para que Bootstrap lo dibuje bien
+        self.fields["unidad_academica"].widget.attrs["class"] = "form-select"
 
         self.fields["nombres_tutor"].widget.attrs["placeholder"] = "Ej. Juan Carlos"
         self.fields["apellido_paterno_tutor"].widget.attrs["placeholder"] = "Ej. Pérez"
@@ -282,5 +279,3 @@ class CrearSolicitudPanelForm(forms.Form):
                 "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
                 "correo": forms.EmailInput(attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
             }
-
-

@@ -273,77 +273,109 @@
         <div class="col-md-4">
           <label class="form-label">Nombre(s) <span class="req">*</span></label>
           {{ form.nombres_tutor }}
-          <div class="help-text">Solo letras y espacios. No se aceptan números ni caracteres especiales.</div>
+          <div class="help-text">Solo letras y espacios.</div>
           <div class="text-danger small mt-1">{{ form.nombres_tutor.errors }}</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Apellido paterno <span class="req">*</span></label>
           {{ form.apellido_paterno_tutor }}
-          <div class="help-text">Solo letras. Ejemplo: Pérez</div>
+          <div class="help-text">Solo letras.</div>
           <div class="text-danger small mt-1">{{ form.apellido_paterno_tutor.errors }}</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Apellido materno <span class="req">*</span></label>
           {{ form.apellido_materno_tutor }}
-          <div class="help-text">Solo letras. Campo obligatorio.</div>
+          <div class="help-text">Solo letras.</div>
           <div class="text-danger small mt-1">{{ form.apellido_materno_tutor.errors }}</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Matrícula <span class="req">*</span></label>
           {{ form.matricula }}
-          <div class="help-text">Ejemplo: A123456</div>
           <div class="text-danger small mt-1">{{ form.matricula.errors }}</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Programa educativo <span class="req">*</span></label>
           {{ form.programa_educativo }}
-          <div class="help-text">Seleccione su programa; si no aparece, elija “Otro”.</div>
           <div class="text-danger small mt-1">{{ form.programa_educativo.errors }}</div>
         </div>
 
         <div class="col-md-4" id="box_prog_otro" style="display:none;">
           <label class="form-label">Programa (Otro) <span class="req">*</span></label>
           {{ form.programa_educativo_otro }}
-          <div class="help-text">Escriba el nombre completo del programa.</div>
           <div class="text-danger small mt-1">{{ form.programa_educativo_otro.errors }}</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label">Correo electrónico <span class="req">*</span></label>
           {{ form.correo }}
-          <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional (@unach.mx).</div>
+          <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional.</div>
           <div class="text-danger small mt-1">{{ form.correo.errors }}</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label">Celular <span class="req">*</span></label>
           {{ form.celular }}
-          <div class="help-text">Solo números. Exactamente 10 dígitos.</div>
+          <div class="help-text">10 dígitos exactos.</div>
           <div class="text-danger small mt-1">{{ form.celular.errors }}</div>
         </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Domicilio <span class="req">*</span></label>
-          {{ form.domicilio }}
-          <div class="help-text">Calle, número, colonia y ciudad.</div>
-          <div class="text-danger small mt-1">{{ form.domicilio.errors }}</div>
+        <div class="col-md-12 mt-4 mb-2">
+            <h6 class="fw-bold border-bottom pb-2" style="color: var(--brand);"><i class="bi bi-geo-alt-fill me-1"></i> Dirección del Domicilio</h6>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Estado <span class="req">*</span></label>
+          {{ form.estado_domicilio }}
+          <div class="text-danger small mt-1">{{ form.estado_domicilio.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Ciudad / Municipio <span class="req">*</span></label>
+          {{ form.ciudad }}
+          <div class="text-danger small mt-1">{{ form.ciudad.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Código Postal <span class="req">*</span></label>
+          {{ form.codigo_postal }}
+          <div class="text-danger small mt-1">{{ form.codigo_postal.errors }}</div>
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Parentesco <span class="req">*</span></label>
+          <label class="form-label">Calle <span class="req">*</span></label>
+          {{ form.calle }}
+          <div class="text-danger small mt-1">{{ form.calle.errors }}</div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Número Exterior <span class="req">*</span></label>
+          {{ form.numero_exterior }}
+          <div class="text-danger small mt-1">{{ form.numero_exterior.errors }}</div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Num. Int. (Opcional)</label>
+          {{ form.numero_interior }}
+          <div class="text-danger small mt-1">{{ form.numero_interior.errors }}</div>
+        </div>
+
+        <div class="col-md-12 mt-4 mb-2">
+            <h6 class="fw-bold border-bottom pb-2" style="color: var(--brand);"><i class="bi bi-people-fill me-1"></i> Parentesco</h6>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Parentesco con el menor <span class="req">*</span></label>
           {{ form.parentesco }}
-          <div class="help-text">Seleccione el parentesco con el menor.</div>
           <div class="text-danger small mt-1">{{ form.parentesco.errors }}</div>
         </div>
 
         <div class="col-md-6" id="box_parent_otro" style="display:none;">
           <label class="form-label">Parentesco (Otro) <span class="req">*</span></label>
           {{ form.parentesco_otro }}
-          <div class="help-text">Especifique el parentesco.</div>
           <div class="text-danger small mt-1">{{ form.parentesco_otro.errors }}</div>
         </div>
       </div>
@@ -397,7 +429,6 @@
 <script>
 (function () {
 
-  // ===== Toast =====
   function showToast(title, msg){
     const t = document.getElementById('toast-notification');
     document.getElementById('toast-title').innerText = title || 'Atención';
@@ -406,7 +437,6 @@
     setTimeout(()=> t.classList.remove('show'), 2600);
   }
 
-  // ===== Reglas =====
   const onlyLetters = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const curpOk = /^[A-Za-z0-9]{18}$/;
@@ -438,7 +468,6 @@
     }
   }
 
-  // ===== Mostrar/ocultar "Otro" + required condicional =====
   const prog = document.getElementById("id_programa_educativo");
   const boxProg = document.getElementById("box_prog_otro");
   const progOtro = document.getElementById("id_programa_educativo_otro");
@@ -469,7 +498,6 @@
   if (par) par.addEventListener("change", () => { togglePar(); setValid(par); });
   toggleProg(); togglePar();
 
-  // ===== Required general (except OTRO condicional ya se maneja arriba) =====
   const ALL_REQUIRED_IDS = [
     "id_nombres_tutor",
     "id_apellido_paterno_tutor",
@@ -478,7 +506,11 @@
     "id_programa_educativo",
     "id_correo",
     "id_celular",
-    "id_domicilio",
+    "id_estado_domicilio",
+    "id_ciudad",
+    "id_codigo_postal",
+    "id_calle",
+    "id_numero_exterior",
     "id_parentesco",
     "id_fecha_nacimiento_menor",
     "id_curp_menor"
@@ -488,7 +520,6 @@
     if(el) el.required = true;
   });
 
-  // ===== Live validations =====
   ["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
@@ -527,12 +558,13 @@
     });
   }
 
-  const domicilio = document.getElementById("id_domicilio");
-  if(domicilio){
-    domicilio.addEventListener("input", () => {
-      const v = String(domicilio.value || "").trim();
-      if(!v){ clearState(domicilio); return; }
-      (v.length >= 4) ? setValid(domicilio) : clearState(domicilio);
+  const cp = document.getElementById("id_codigo_postal");
+  if(cp){
+    cp.addEventListener("input", () => {
+      cp.value = cp.value.replace(/\D/g, "");
+      const v = cp.value;
+      if(!v){ clearState(cp); return; }
+      (v.length === 5) ? setValid(cp) : setInvalid(cp);
     });
   }
 
@@ -563,7 +595,6 @@
     });
   }
 
-  // ===== Edad (6 a 36 meses) =====
   const fecha = document.getElementById("id_fecha_nacimiento_menor");
 
   function monthsBetween(a, b){
@@ -575,7 +606,13 @@
   function validateEdadMenor(){
     if(!fecha) return true;
     const v = (fecha.value || "").trim();
-    if(!v){ setInvalid(fecha); return false; }
+
+    // CAMBIO IMPORTANTE: Si está vacío, le quitamos la clase inválida y devolvemos false,
+    // para que no pinte rojo al cargar la página ni borre lo que el usuario está escribiendo.
+    if(!v){
+        clearState(fecha);
+        return false;
+    }
 
     const [y,m,d] = v.split("-").map(n => parseInt(n,10));
     if(!y || !m || !d){ setInvalid(fecha); return false; }
@@ -591,14 +628,20 @@
   }
 
   if(fecha){
-    fecha.addEventListener("change", () => {
-      const ok = validateEdadMenor();
-      if(!ok) showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
+    // Cambiamos 'change' por 'input' para que se evalúe cuando el papá pierda el foco o escriba
+    fecha.addEventListener("blur", () => {
+      const v = (fecha.value || "").trim();
+      if(v) {
+        const ok = validateEdadMenor();
+        if(!ok) showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
+      }
     });
-    validateEdadMenor();
+
+    fecha.addEventListener("input", () => {
+       validateEdadMenor();
+    });
   }
 
-  // ===== Validación EN ORDEN al GUARDAR =====
   const ORDER = [
     ["id_nombres_tutor", "Nombre(s)"],
     ["id_apellido_paterno_tutor", "Apellido paterno"],
@@ -608,7 +651,11 @@
     ["id_programa_educativo_otro", "Programa (Otro)", () => prog?.value === "OTRO"],
     ["id_correo", "Correo electrónico"],
     ["id_celular", "Celular"],
-    ["id_domicilio", "Domicilio"],
+    ["id_estado_domicilio", "Estado"],
+    ["id_ciudad", "Ciudad / Municipio"],
+    ["id_codigo_postal", "Código Postal"],
+    ["id_calle", "Calle"],
+    ["id_numero_exterior", "Número Exterior"],
     ["id_parentesco", "Parentesco"],
     ["id_parentesco_otro", "Parentesco (Otro)", () => par?.value === "OTRO"],
     ["id_fecha_nacimiento_menor", "Fecha de nacimiento"],
@@ -622,7 +669,7 @@
     form.addEventListener("submit", (e) => {
       e.preventDefault();
 
-      toggleProg(); togglePar(); // por si cambió algo
+      toggleProg(); togglePar();
 
       for(const item of ORDER){
         const [id, label, cond] = item;
@@ -664,6 +711,15 @@
           }
         }
 
+        if(id === "id_codigo_postal"){
+          const v = String(el.value || "").replace(/\D/g,"");
+          if(v.length !== 5){
+            showToast("Código Postal inválido", "El CP debe tener exactamente 5 dígitos.");
+            focusField(el);
+            return;
+          }
+        }
+
         if(id === "id_fecha_nacimiento_menor"){
           if(!validateEdadMenor()){
             showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
@@ -682,7 +738,6 @@
         }
       }
 
-      // ✅ Solo si todo está OK
       btn.disabled = true;
       btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>';
       showToast("Enviando", "Guardando la solicitud, por favor espere...");

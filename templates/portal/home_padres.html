@@ -15,6 +15,12 @@
     }
     .navbar-brand { font-weight: bold; color: white !important; }
 
+    /* Estilo para el logo */
+    .logo-img {
+        max-height: 40px; /* Ajusta la altura del logo según sea necesario */
+        margin-right: 10px;
+    }
+
     /* Tarjeta de Bienvenida */
     .welcome-card {
         background: linear-gradient(135deg, #1e3a8a 0%, #2980b9 100%);
@@ -49,12 +55,13 @@
 
 <nav class="navbar navbar-expand-lg navbar-unach mb-4">
     <div class="container">
-        <a class="navbar-brand" href="#">
-            <i class="bi bi-backpack2-fill me-2"></i> Estancia Infantil UNACH
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <img src="{% static 'img/logo.png' %}" alt="Logo UNACH" class="logo-img">
+            Estancia Infantil UNACH
         </a>
         <div class="d-flex">
             <span class="text-white me-3 align-self-center">
-                <i class="bi bi-person-circle"></i> {{ request.user.username }} (Tutor)
+                <i class="bi bi-person-circle"></i> {{ request.user.email }} (Tutor)
             </span>
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
@@ -68,10 +75,19 @@
 
 <div class="container">
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm mt-3" role="alert">
+                <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Aviso:</strong> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="welcome-card text-center text-md-start">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h1 class="fw-bold">¡Bienvenido(a), {{ request.user.first_name }}!</h1>
+                <h1 class="fw-bold">¡Bienvenido(a), {{ request.user.nombre|default:request.user.first_name }}!</h1>
                 <p class="lead mb-0">Ciclo Escolar 2026 - Panel de Gestión Familiar</p>
                 <p class="small opacity-75 mt-2">Estamos listos para recibir a tus pequeños.</p>
             </div>
@@ -83,69 +99,43 @@
 
     <div class="row g-4">
 
-        <!-- NUEVA INSCRIPCIÓN (POR LINK/TOKEN) -->
         <div class="col-md-6">
             <div class="card action-card p-4 text-center">
                 <div class="icon-box">
-                    <i class="bi bi-file-earmark-person-fill"></i>
+                    <i class="bi bi-folder-check"></i>
                 </div>
 
-                <h4 class="fw-bold text-primary">Nueva Inscripción</h4>
+                <h4 class="fw-bold text-primary">Mi Expediente de Inscripción</h4>
 
-                <p class="text-muted">
-                    Para iniciar tu registro, pega el <b>enlace</b> o <b>token</b> que te envió la Estancia Infantil.
+                <p class="text-muted mt-3 mb-4">
+                    Tu solicitud de ingreso ha sido aprobada. Haz clic en el botón para llenar los datos médicos del menor, información general y aceptar los reglamentos.
                 </p>
 
-                <form class="d-flex gap-2" onsubmit="return irCaptura(event)">
-                    <input id="tokenInput"
-                           class="form-control"
-                           placeholder="Pega tu link o token aquí"
-                           required>
-                    <button class="btn btn-primary fw-bold" type="submit">
-                        Abrir <i class="bi bi-arrow-right-short"></i>
-                    </button>
-                </form>
-
-                <div class="small text-muted mt-2">
-                    Ejemplo: <span class="font-monospace">.../captura/9f1c.../</span>
-                </div>
+                <a href="{% url 'portal_inscripcion' %}" class="btn btn-primary fw-bold btn-lg w-100">
+                    Continuar Inscripción <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+                </a>
 
             </div>
         </div>
 
-        <!-- ESTATUS -->
         <div class="col-md-6">
             <div class="card action-card p-4 text-center">
                 <div class="icon-box" style="color: #198754;">
-                    <i class="bi bi-check-circle-fill"></i>
+                    <i class="bi bi-clock-history"></i>
                 </div>
-                <h4 class="fw-bold text-success">Estatus de Solicitud</h4>
-                <p class="text-muted">
-                    Para consultar tu estatus debes ingresar con el <b>link/token</b> (es de un solo uso) que te envió la Estancia Infantil.
+                <h4 class="fw-bold text-success">Consulta de Estatus</h4>
+
+                <p class="text-muted mt-3 mb-4">
+                    Una vez que termines de llenar y envíes tu expediente de inscripción, el área de Trabajo Social lo revisará. Ingresa a tu portal para monitorear el progreso.
                 </p>
 
-                <button class="btn btn-outline-success w-100 py-2 fw-bold" disabled>
-                    Ingresa con tu link para ver estatus
-                </button>
+                <a href="{% url 'portal_inscripcion' %}" class="btn btn-outline-success fw-bold btn-lg w-100">
+                    Ver mi estatus actual
+                </a>
             </div>
         </div>
 
     </div>
 </div>
-
-<script>
-function irCaptura(e){
-  e.preventDefault();
-  const raw = document.getElementById("tokenInput").value.trim();
-
-  // Si pegan el link completo, sacamos el token
-  const m = raw.match(/captura\/([a-f0-9]{32,64})/i);
-  const token = m ? m[1] : raw;
-
-  // Ruta real de tu app admisiones:
-  window.location.href = `/solicitud/admisiones/captura/${token}/`;
-  return false;
-}
-</script>
 
 {% endblock %}

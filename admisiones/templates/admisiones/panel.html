@@ -84,8 +84,8 @@
           <i class="bi bi-arrow-left me-1"></i> Regresar
         </a>
 
-        <button class="btn btn-light btn-soft" data-bs-toggle="modal" data-bs-target="#modalCrear">
-          <i class="bi bi-plus-circle me-1"></i> Crear solicitud
+        <button class="btn btn-light btn-soft shadow-sm text-primary" data-bs-toggle="modal" data-bs-target="#modalCrear">
+          <i class="bi bi-plus-circle-fill me-1"></i> Crear solicitud
         </button>
       </div>
     </div>
@@ -96,11 +96,24 @@
 
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'success' }} mb-3">
-        {{ message }}
+      <div class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show shadow-sm mb-3">
+        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     {% endfor %}
   {% endif %}
+
+  <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+      <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold text-muted small text-uppercase"><i class="bi bi-funnel-fill me-1"></i>Clasificar por:</span>
+          <a href="?sort=apellidos" class="btn btn-sm {% if request.GET.sort == 'apellidos' %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-3">
+             Apellidos
+          </a>
+          <a href="?" class="btn btn-sm {% if not request.GET.sort %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-3">
+             Más recientes
+          </a>
+      </div>
+  </div>
 
   <div class="card card-panel p-3">
     <div class="table-wrap">
@@ -108,35 +121,30 @@
         <thead>
           <tr>
             <th style="width:90px;">Folio</th>
-            <th>Nombre</th>
+            <th>Nombre Completo</th>
             <th style="width:160px;">Matrícula</th>
-            <th style="width:190px;">Estado</th>
-            <th style="width:420px;">Acciones</th>
+            <th style="width:160px;">Estado</th>
+            <th style="width:450px;">Acciones</th>
           </tr>
         </thead>
 
         <tbody>
           {% for s in solicitudes %}
           <tr>
-            <td class="fw-bold">{{ s.folio|default:"-" }}</td>
+            <td class="fw-bold fs-6">{{ s.folio|default:"-" }}</td>
 
             <td>
-              <div class="fw-semibold text-dark">
-                {{ s.nombres_tutor|default:"" }} {{ s.apellido_paterno_tutor|default:"" }} {{ s.apellido_materno_tutor|default:"" }}
+              <div class="fw-bold text-dark fs-6">
+                {{ s.apellido_paterno_tutor|default:"" }} {{ s.apellido_materno_tutor|default:"" }} {{ s.nombres_tutor|default:"" }}
               </div>
               {% if s.correo %}
-                <div class="muted small">{{ s.correo }}</div>
-              {% endif %}
-              {% if s.dictaminado_por %}
-                <div class="muted small">
-                  Dictaminó: {{ s.dictaminado_por }}{% if s.dictaminado_en %} · {{ s.dictaminado_en|date:"d/m/Y H:i" }}{% endif %}
-                </div>
+                <div class="muted small"><i class="bi bi-envelope-fill me-1"></i>{{ s.correo }}</div>
               {% endif %}
             </td>
 
             <td>
               {% if s.matricula %}
-                <span class="fw-semibold">{{ s.matricula }}</span>
+                <span class="fw-semibold text-secondary">{{ s.matricula }}</span>
               {% else %}
                 <span class="muted">-</span>
               {% endif %}
@@ -162,148 +170,125 @@
 
                 {# ====== CAPTURA: link activo ====== #}
                 {% if s.estado == "CAPTURA" and link and not link.usado %}
-
-                  <a class="btn btn-primary" target="_blank" href="{% url 'captura_por_token' link.token %}">
-                    Abrir
-                  </a>
-
-                  <button type="button" class="btn btn-outline-secondary"
-                          onclick="copiarLink('{% url 'captura_por_token' link.token %}')">
-                    Copiar
-                  </button>
+                  <a class="btn btn-primary" target="_blank" href="{% url 'captura_por_token' link.token %}">Abrir</a>
+                  <button type="button" class="btn btn-outline-secondary" onclick="copiarLink('{% url 'captura_por_token' link.token %}')">Copiar</button>
 
                   {% if s.correo %}
-                    <a class="btn btn-outline-secondary btn-icon"
-                       href="{% url 'enviar_link_por_correo' solicitud_id=s.id %}" title="Enviar correo">
+                    <a class="btn btn-outline-secondary btn-icon" href="{% url 'enviar_link_por_correo' solicitud_id=s.id %}" title="Enviar correo">
                       <i class="bi bi-envelope"></i>
                     </a>
-                  {% else %}
-                    <span class="text-muted small">Sin correo</span>
                   {% endif %}
 
-                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
-                     class="btn btn-outline-secondary btn-icon" title="Editar datos">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>
+                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}" class="btn btn-outline-secondary btn-icon" title="Editar datos"><i class="bi bi-pencil-square"></i></a>
 
                 {# ====== RECIBIDA: revisar/dictaminar ====== #}
                 {% elif s.estado == "RECIBIDA" %}
-
-                  <a class="btn btn-primary" href="{% url 'revisar_solicitud' s.id %}">
-                    Revisar
-                  </a>
-
-                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}"
-                     class="btn btn-outline-secondary btn-icon" title="Editar datos">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>
+                  <a class="btn btn-success" href="{% url 'revisar_solicitud' s.id %}">Revisar</a>
+                  <a href="{% url 'editar_solicitud' solicitud_id=s.id %}" class="btn btn-outline-secondary btn-icon" title="Editar datos"><i class="bi bi-pencil-square"></i></a>
 
                 {# ====== APROBADA/RECHAZADA: ver detalle (solo lectura) ====== #}
                 {% elif s.estado == "APROBADA" or s.estado == "RECHAZADA" %}
-
-                  <a class="btn btn-outline-primary" href="{% url 'revisar_solicitud' s.id %}">
-                    Ver
-                  </a>
-
+                  <a class="btn btn-outline-primary" href="{% url 'revisar_solicitud' s.id %}">Ver Historial</a>
                   {% if s.pdf %}
-                    <a class="btn btn-outline-secondary btn-icon" href="{{ s.pdf.url }}" target="_blank" title="Ver PDF">
-                      <i class="bi bi-file-earmark-pdf"></i>
-                    </a>
+                    <a class="btn btn-outline-secondary btn-icon" href="{% url 'descargar_pdf_solicitud' s.id %}" target="_blank" title="Ver PDF"><i class="bi bi-file-earmark-pdf text-danger"></i></a>
                   {% endif %}
-
-                {# ====== fallback ====== #}
-                {% else %}
-
-                  <span class="text-muted small">Sin acciones</span>
-
                 {% endif %}
+
               </div>
 
-             {% if s.estado == "CAPTURA" and link and not link.usado %}
-  <div class="link-note">Enlace de un solo uso</div>
-
-{% elif s.estado == "CAPTURA" and not link %}
-  <div class="link-note">Link no activo</div>
-
-{% elif s.estado == "CAPTURA" and link and link.usado %}
-  <div class="link-note">Link no activo</div>
-{% endif %}
-
+              {% if s.estado == "CAPTURA" and link and not link.usado %}
+                <div class="link-note text-success"><i class="bi bi-circle-fill" style="font-size: 8px;"></i> Enlace activo</div>
+              {% elif s.estado == "CAPTURA" and link and link.usado %}
+                <div class="link-note text-danger"><i class="bi bi-circle-fill" style="font-size: 8px;"></i> Link ya utilizado</div>
+              {% endif %}
               {% endwith %}
             </td>
           </tr>
-
           {% empty %}
           <tr>
-            <td colspan="5" class="text-center muted py-4">
-              No hay solicitudes registradas.
+            <td colspan="5" class="text-center muted py-5">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              No hay solicitudes registradas en este momento.
             </td>
           </tr>
           {% endfor %}
         </tbody>
-
       </table>
     </div>
   </div>
-
-  <div class="mt-3 muted small">
-    Nota: Este panel es temporal para generar links sin usar el Admin.
-  </div>
-
 </div>
 
-<!-- MODAL CREAR SOLICITUD (tu modal original, igual) -->
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 18px 45px rgba(0,0,0,.18);">
 
-      <form method="post" action="{% url 'crear_solicitud_y_link' %}">
+      <form method="post" action="{% url 'crear_solicitud_y_link' %}" id="formCrearSolicitud" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="modal-header bg-primary text-white">
           <h5 class="modal-title fw-bold">
-            <i class="bi bi-file-earmark-plus me-2"></i>Crear solicitud dirigida a
+            <i class="bi bi-person-plus-fill me-2"></i>Nueva Solicitud de Ingreso
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
 
         <div class="modal-body bg-light p-4">
           <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">Nombre(s) <span class="text-danger">*</span></label>
-              <input type="text" name="nombres_tutor" class="form-control" required autocomplete="off">
-              <div class="form-text">Solo letras y espacios.</div>
-            </div>
 
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">Apellido paterno <span class="text-danger">*</span></label>
-              <input type="text" name="apellido_paterno_tutor" class="form-control" required autocomplete="off">
-              <div class="form-text">Solo letras.</div>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">Apellido materno</label>
-              <input type="text" name="apellido_materno_tutor" class="form-control" autocomplete="off">
-              <div class="form-text">Opcional.</div>
+            <div class="col-md-12">
+              <label class="form-label fw-bold">Nombre(s) <span class="text-danger">*</span></label>
+              <input type="text" name="nombres_tutor" class="form-control" placeholder="Ej. Lucia" required autocomplete="off" oninput="formatNameAndBlockNumbers(this)">
+              <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Matrícula</label>
-              <input type="text" name="matricula" class="form-control" autocomplete="off">
-              <div class="form-text">Ej: A123456</div>
+              <label class="form-label fw-bold">Apellido paterno <span class="text-danger">*</span></label>
+              <input type="text" name="apellido_paterno_tutor" class="form-control" placeholder="Ej. Perez" required autocomplete="off" oninput="formatNameAndBlockNumbers(this)">
+              <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Correo (opcional)</label>
-              <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" autocomplete="off">
-              <div class="form-text">Ej: Gmail / Hotmail / Outlook / @unach.mx</div>
+              <label class="form-label fw-bold">Apellido materno <span class="text-danger">*</span></label>
+              <input type="text" name="apellido_materno_tutor" class="form-control" placeholder="Ej. Sanchez" required autocomplete="off" oninput="formatNameAndBlockNumbers(this)">
+              <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Matrícula <span class="text-danger">*</span></label>
+              <input type="text" name="matricula" class="form-control" placeholder="Ej. A123456" required autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');">
+              <div class="invalid-feedback fw-bold">Complete este campo.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Unidad Académica <span class="text-danger">*</span></label>
+              <select name="unidad_academica" class="form-select" required>
+                  <option value="">Seleccione una opción...</option>
+                  <option value="Facultad de Ingeniería">Facultad de Ingeniería</option>
+                  <option value="Facultad de Arquitectura">Facultad de Arquitectura</option>
+                  <option value="Facultad de Contaduría y Administración">Facultad de Contaduría y Administración</option>
+                  <option value="Facultad de Humanidades">Facultad de Humanidades</option>
+                  <option value="Facultad de Medicina Humana">Facultad de Medicina Humana</option>
+                  <option value="Facultad de Medicina Veterinaria y Zootecnia">Facultad de Medicina Veterinaria y Zootecnia</option>
+                  <option value="Facultad de Ciencias Químicas">Facultad de Ciencias Químicas</option>
+                  <option value="Facultad de Derecho">Facultad de Derecho</option>
+                  <option value="Facultad de Lenguas">Facultad de Lenguas</option>
+                  <option value="Otra">Otra</option>
+              </select>
+              <div class="invalid-feedback fw-bold">Seleccione una unidad académica.</div>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label fw-bold">Correo <span class="text-danger">*</span></label>
+              <input type="email" name="correo" class="form-control" placeholder="lucia@gmail.com" required autocomplete="off" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$">
+              <div class="invalid-feedback fw-bold">Ingrese un correo válido (ej: nombre@dominio.com).</div>
+            </div>
+
           </div>
         </div>
 
         <div class="modal-footer bg-white">
-          <button type="button" class="btn btn-outline-secondary btn-soft" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-soft">
-            <i class="bi bi-link-45deg me-1"></i> Crear solicitud
+          <button type="button" class="btn btn-outline-secondary btn-soft px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-soft px-4 shadow">
+            <i class="bi bi-link-45deg me-1"></i> Generar Folio
           </button>
         </div>
       </form>
@@ -329,6 +314,33 @@
       .then(() => showToast("Copiado", "Link copiado correctamente ✅"))
       .catch(() => alert("No se pudo copiar el link ❌"));
   }
+
+  // 1. Mayúsculas automáticas y bloqueo de números
+  function formatNameAndBlockNumbers(input) {
+      let val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+      input.value = val.replace(/\b\w/g, function(char) {
+          return char.toUpperCase();
+      });
+  }
+
+  // 2. Control de validación del formulario al darle "Crear"
+  document.addEventListener("DOMContentLoaded", function() {
+      const form = document.getElementById('formCrearSolicitud');
+
+      if(form) {
+          form.addEventListener('submit', function(event) {
+              if (!form.checkValidity()) {
+                  event.preventDefault(); // Detiene el envío
+                  event.stopPropagation();
+                  form.classList.add('was-validated'); // Pone todo en rojo
+
+                  // Scrollea hacia el primer error
+                  const firstInvalid = form.querySelector(':invalid');
+                  if(firstInvalid) firstInvalid.focus();
+              }
+          });
+      }
+  });
 </script>
 
 </body>

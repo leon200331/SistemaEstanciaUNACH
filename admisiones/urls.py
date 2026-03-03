@@ -11,4 +11,15 @@ urlpatterns = [
     path("publica/nueva/", views.solicitud_publica_nueva, name="solicitud_publica_nueva"),
     path("admisiones/<int:pk>/revisar/", views.revisar_solicitud, name="revisar_solicitud"),
     path("admisiones/<int:pk>/dictaminar/", views.dictaminar_solicitud, name="dictaminar_solicitud"),
+
+    # =========================================================
+    # NUEVAS RUTAS: ELIMINAR SOLICITUDES DESDE EL PANEL
+    # =========================================================
+    path('admisiones/solicitud/eliminar/<int:pk>/', views.eliminar_solicitud, name='eliminar_solicitud'),
+    path('admisiones/eliminar-todo/', views.eliminar_todas_solicitudes, name='eliminar_todas_solicitudes'),
+
+    # =========================================================
+    # SPRINT 2: PORTAL DE INSCRIPCIÓN (PADRES)
+    # =========================================================
+    path("mi-inscripcion/", views.portal_inscripcion, name="portal_inscripcion"),
 ]
