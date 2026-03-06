@@ -19,7 +19,6 @@ class CapturaSolicitudForm(forms.ModelForm):
             "programa_educativo_otro",
 
             # ¡OJO AQUI! Se eliminó "unidad_academica" para que el papá no la sobreescriba y se borre.
-
             "correo",
             "celular",
 
@@ -34,7 +33,7 @@ class CapturaSolicitudForm(forms.ModelForm):
             "parentesco",
             "parentesco_otro",
 
-            # Menor
+            # Menor (solo fecha y CURP)
             "fecha_nacimiento_menor",
             "curp_menor",
         ]
@@ -57,7 +56,7 @@ class CapturaSolicitudForm(forms.ModelForm):
                 "placeholder": "10 dígitos"
             }),
 
-            # --- WIDGETS DE NUEVOS CAMPOS DE DOMICILIO ---
+            # --- WIDGETS DOMICILIO ---
             "estado_domicilio": forms.TextInput(attrs={"placeholder": "Ej. Chiapas"}),
             "ciudad": forms.TextInput(attrs={"placeholder": "Ej. Tuxtla Gutiérrez"}),
             "codigo_postal": forms.TextInput(attrs={"placeholder": "Ej. 29000"}),
@@ -79,13 +78,10 @@ class CapturaSolicitudForm(forms.ModelForm):
             }),
         }
 
-    # ======================================================
-    # BOOTSTRAP 5 (inputs y selects bien formateados)
-    # ======================================================
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for name, field in self.fields.items():
+        for _, field in self.fields.items():
             css = field.widget.attrs.get("class", "")
 
             if isinstance(field.widget, (Select, SelectMultiple)):
@@ -95,20 +91,15 @@ class CapturaSolicitudForm(forms.ModelForm):
 
             field.widget.attrs["class"] = f"{css} {base_class}".strip()
 
-        # Campos obligatorios explícitos
         self.fields["nombres_tutor"].required = True
         self.fields["apellido_paterno_tutor"].required = True
         self.fields["parentesco"].required = True
         self.fields["fecha_nacimiento_menor"].required = True
 
-        # Hacemos obligatorios los campos base de dirección
         self.fields["estado_domicilio"].required = True
         self.fields["ciudad"].required = True
         self.fields["calle"].required = True
 
-    # ======================================================
-    # VALIDACIONES POR CAMPO
-    # ======================================================
     def clean_nombres_tutor(self):
         v = (self.cleaned_data.get("nombres_tutor") or "").strip()
         if len(v) < 2:
@@ -124,32 +115,25 @@ class CapturaSolicitudForm(forms.ModelForm):
     def clean_correo(self):
         correo = (self.cleaned_data.get("correo") or "").strip().lower()
 
-        # Dominios permitidos
         dominios_permitidos = [
             "@gmail.com",
             "@hotmail.com",
             "@outlook.com",
-            "@unach.mx",  # si quieres permitir institucional
+            "@unach.mx",
         ]
 
-        if "@" not in correo:
-            raise forms.ValidationError(
-                "El correo debe contener el símbolo @."
-            )
+        if correo and ("@" not in correo):
+            raise forms.ValidationError("El correo debe contener el símbolo @.")
 
-        if not any(correo.endswith(d) for d in dominios_permitidos):
-            raise forms.ValidationError(
-                "El correo debe ser Gmail, Hotmail, Outlook o institucional UNACH."
-            )
+        if correo and (not any(correo.endswith(d) for d in dominios_permitidos)):
+            raise forms.ValidationError("El correo debe ser Gmail, Hotmail, Outlook o institucional UNACH.")
 
         return correo
 
     def clean_celular(self):
         cel = (self.cleaned_data.get("celular") or "").strip()
         if cel and not re.fullmatch(r"\d{10}", cel):
-            raise forms.ValidationError(
-                "El celular debe tener exactamente 10 dígitos."
-            )
+            raise forms.ValidationError("El celular debe tener exactamente 10 dígitos.")
         return cel
 
     def clean_codigo_postal(self):
@@ -161,36 +145,22 @@ class CapturaSolicitudForm(forms.ModelForm):
     def clean_curp_menor(self):
         curp = (self.cleaned_data.get("curp_menor") or "").strip().upper()
         if curp and not re.fullmatch(r"[A-Z0-9]{18}", curp):
-            raise forms.ValidationError(
-                "La CURP debe tener 18 caracteres (letras y números)."
-            )
+            raise forms.ValidationError("La CURP debe tener 18 caracteres (letras y números).")
         return curp
 
-    # ======================================================
-    # VALIDACIONES GENERALES (dependen de varios campos)
-    # ======================================================
     def clean(self):
         cleaned_data = super().clean()
 
-        # Programa educativo = OTRO
         programa = cleaned_data.get("programa_educativo")
         programa_otro = (cleaned_data.get("programa_educativo_otro") or "").strip()
         if programa == "OTRO" and not programa_otro:
-            self.add_error(
-                "programa_educativo_otro",
-                "Especifica el programa educativo."
-            )
+            self.add_error("programa_educativo_otro", "Especifica el programa educativo.")
 
-        # Parentesco = OTRO
         parentesco = cleaned_data.get("parentesco")
         parentesco_otro = (cleaned_data.get("parentesco_otro") or "").strip()
         if parentesco == "OTRO" and not parentesco_otro:
-            self.add_error(
-                "parentesco_otro",
-                "Especifica el parentesco."
-            )
+            self.add_error("parentesco_otro", "Especifica el parentesco.")
 
-        # Fecha nacimiento del menor (6 meses a 3 años)
         fecha = cleaned_data.get("fecha_nacimiento_menor")
         if fecha:
             hoy = date.today()
@@ -198,16 +168,12 @@ class CapturaSolicitudForm(forms.ModelForm):
             max_fecha = hoy - timedelta(days=30 * 6)
 
             if fecha < min_fecha or fecha > max_fecha:
-                self.add_error(
-                    "fecha_nacimiento_menor",
-                    "La edad del menor debe estar entre 6 meses y 3 años."
-                )
+                self.add_error("fecha_nacimiento_menor", "La edad del menor debe estar entre 6 meses y 3 años.")
 
         return cleaned_data
 
 
 class CrearSolicitudPanelForm(forms.Form):
-    # Definimos las opciones de la Unidad Académica
     UNIDADES_CHOICES = [
         ("", "Seleccione una opción..."),
         ("Facultad de Ingeniería", "Facultad de Ingeniería"),
@@ -227,17 +193,15 @@ class CrearSolicitudPanelForm(forms.Form):
     apellido_materno_tutor = forms.CharField(max_length=60, required=False)
     matricula = forms.CharField(max_length=20, required=False)
 
-    # --- CAMBIADO A CHOICE FIELD ---
     unidad_academica = forms.ChoiceField(choices=UNIDADES_CHOICES, required=True)
-
     correo = forms.EmailField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         for f in self.fields.values():
             f.widget.attrs["class"] = "form-control"
 
-        # Al ChoiceField le ponemos la clase form-select para que Bootstrap lo dibuje bien
         self.fields["unidad_academica"].widget.attrs["class"] = "form-select"
 
         self.fields["nombres_tutor"].widget.attrs["placeholder"] = "Ej. Juan Carlos"
@@ -248,6 +212,8 @@ class CrearSolicitudPanelForm(forms.Form):
 
     def _solo_letras(self, value, campo):
         value = (value or "").strip()
+        if not value:
+            return value
         if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+", value):
             raise forms.ValidationError(f"{campo}: solo letras y espacios (sin números ni caracteres especiales).")
         return value
@@ -259,10 +225,7 @@ class CrearSolicitudPanelForm(forms.Form):
         return self._solo_letras(self.cleaned_data.get("apellido_paterno_tutor"), "Apellido paterno")
 
     def clean_apellido_materno_tutor(self):
-        val = (self.cleaned_data.get("apellido_materno_tutor") or "").strip()
-        if not val:
-            return val
-        return self._solo_letras(val, "Apellido materno")
+        return self._solo_letras(self.cleaned_data.get("apellido_materno_tutor"), "Apellido materno")
 
 
 class SolicitudBasicaForm(forms.ModelForm):
@@ -279,7 +242,8 @@ class SolicitudBasicaForm(forms.ModelForm):
             ),
             "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
             "correo": forms.EmailInput(
-                attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
+                attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}
+            ),
         }
 
 
