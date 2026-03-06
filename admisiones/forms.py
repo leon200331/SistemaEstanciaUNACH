@@ -17,7 +17,9 @@ class CapturaSolicitudForm(forms.ModelForm):
             "matricula",
             "programa_educativo",
             "programa_educativo_otro",
-            "unidad_academica",
+
+            # ¡OJO AQUI! Se eliminó "unidad_academica" para que el papá no la sobreescriba y se borre.
+
             "correo",
             "celular",
 
@@ -32,7 +34,7 @@ class CapturaSolicitudForm(forms.ModelForm):
             "parentesco",
             "parentesco_otro",
 
-            # Menor (ELIMINADO EL NOMBRE. Solo pedimos fecha y CURP)
+            # Menor
             "fecha_nacimiento_menor",
             "curp_menor",
         ]
@@ -45,10 +47,6 @@ class CapturaSolicitudForm(forms.ModelForm):
             "programa_educativo": forms.Select(),
             "programa_educativo_otro": forms.TextInput(attrs={
                 "placeholder": "Especifica el programa educativo"
-            }),
-
-            "unidad_academica": forms.TextInput(attrs={
-                "placeholder": "Ej. Facultad de Ingeniería"
             }),
 
             "correo": forms.EmailInput(attrs={
@@ -266,40 +264,23 @@ class CrearSolicitudPanelForm(forms.Form):
             return val
         return self._solo_letras(val, "Apellido materno")
 
-        class SolicitudBasicaForm(forms.ModelForm):
-            class Meta:
-                model = Solicitud
-                fields = ["nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor", "matricula", "correo"]
-                widgets = {
-                    "nombres_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Nombre(s)"}),
-                    "apellido_paterno_tutor": forms.TextInput(
-                        attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}
-                    ),
-                    "apellido_materno_tutor": forms.TextInput(
-                        attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}
-                    ),
-                    "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
-                    "correo": forms.EmailInput(
-                        attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
-                }
 
-        class DictamenPsicologiaForm(forms.ModelForm):
-            class Meta:
-                model = Solicitud
-                fields = ["estado_psicologia", "observaciones_psicologia"]
-
-        class DictamenNutricionForm(forms.ModelForm):
-            class Meta:
-                model = Solicitud
-                fields = ["estado_nutricion", "observaciones_nutricion"]
-
-        class DictamenMedicoForm(forms.ModelForm):
-            class Meta:
-                model = Solicitud
-                fields = ["estado_medico", "observaciones_medico"]
-            }
-=======
-            }
+class SolicitudBasicaForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ["nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor", "matricula", "correo"]
+        widgets = {
+            "nombres_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Nombre(s)"}),
+            "apellido_paterno_tutor": forms.TextInput(
+                attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}
+            ),
+            "apellido_materno_tutor": forms.TextInput(
+                attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}
+            ),
+            "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
+            "correo": forms.EmailInput(
+                attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
+        }
 
 
 class DictamenPsicologiaForm(forms.ModelForm):
@@ -318,4 +299,3 @@ class DictamenMedicoForm(forms.ModelForm):
     class Meta:
         model = Solicitud
         fields = ["estado_medico", "observaciones_medico"]
->>>>>>> 5aa69b4 (filtro de psicologa)

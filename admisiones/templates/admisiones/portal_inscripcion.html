@@ -81,20 +81,28 @@
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
-                    <div class="col-md-8">
-                        <label class="label-custom">Nombre Completo <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
-                        <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.nombres_tutor }} {{ inscripcion.solicitud_ingreso.apellido_paterno_tutor }} {{ inscripcion.solicitud_ingreso.apellido_materno_tutor }}">
+                    <div class="col-md-4">
+                        <label class="label-custom">Nombre(s) <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.nombres_tutor }}">
                     </div>
+                    <div class="col-md-4">
+                        <label class="label-custom">Apellido Paterno <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.apellido_paterno_tutor }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="label-custom">Apellido Materno <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.apellido_materno_tutor }}">
+                    </div>
+
                     <div class="col-md-4">
                         <label class="label-custom">Matrícula <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
                         <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.matricula }}">
                     </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="label-custom">Programa Educativo <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
                         <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.programa_educativo|default:'' }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="label-custom">Unidad Académica <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
                         <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.unidad_academica|default:'' }}">
                     </div>
@@ -160,24 +168,22 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="label-custom">Fecha de Nacimiento <span class="text-danger">*</span></label>
-                        <input type="date" name="fecha_nacimiento_menor" class="form-control" value="{{ inscripcion.solicitud_ingreso.fecha_nacimiento_menor|date:'Y-m-d' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                        <label class="label-custom">Fecha de Nacimiento <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="date" id="fecha_nac_menor" name="fecha_nacimiento_menor" class="form-control bg-light text-muted" style="cursor: not-allowed;" value="{{ inscripcion.solicitud_ingreso.fecha_nacimiento_menor|date:'Y-m-d' }}" readonly required>
                     </div>
                     <div class="col-md-4">
-                        <label class="label-custom">CURP <span class="text-danger">*</span></label>
-                        <input type="text" name="curp_menor" class="form-control" style="text-transform: uppercase;" maxlength="18" value="{{ inscripcion.solicitud_ingreso.curp_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                        <label class="label-custom">CURP <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" name="curp_menor" class="form-control bg-light text-muted" style="cursor: not-allowed; text-transform: uppercase;" value="{{ inscripcion.solicitud_ingreso.curp_menor|default:'' }}" readonly required>
                     </div>
 
                     <div class="col-md-2">
                         <label class="label-custom">Edad (Años) <span class="text-danger">*</span></label>
-                        <input type="number" name="edad_anios_menor" class="form-control" min="0" max="3" value="{{ inscripcion.edad_anios_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="number" id="edad_anios_menor" name="edad_anios_menor" class="form-control border-primary" min="0" max="3" value="{{ inscripcion.edad_anios_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó.</div>
                     </div>
                     <div class="col-md-2">
                         <label class="label-custom">Meses <span class="text-danger">*</span></label>
-                        <input type="number" name="edad_meses_menor" class="form-control" min="0" max="11" value="{{ inscripcion.edad_meses_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="number" id="edad_meses_menor" name="edad_meses_menor" class="form-control border-primary" min="0" max="11" value="{{ inscripcion.edad_meses_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó.</div>
                     </div>
 
@@ -567,7 +573,6 @@
         if(confirm(`¿Estás seguro de eliminar al familiar ${numero}?`)) {
             document.getElementById(`familiar_${numero}_div`).classList.add('hidden-contact');
 
-            // Vaciar las nuevas cajas divididas
             document.getElementById(`contacto_${numero}_nombres`).value = '';
             document.getElementById(`contacto_${numero}_apellido_paterno`).value = '';
             document.getElementById(`contacto_${numero}_apellido_materno`).value = '';
@@ -580,9 +585,8 @@
     }
 
     // -------------------------------------------------------------------
-    // NUEVO: 5. LÓGICA DE ESTADOS Y MUNICIPIOS DE MÉXICO
+    // 5. LÓGICA DE ESTADOS Y MUNICIPIOS DE MÉXICO
     // -------------------------------------------------------------------
-    // Mini base de datos en JSON para el ejemplo (Puedes expandirla si lo deseas)
     const mexicoData = {
         "Chiapas": ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán", "Palenque", "Tonalá"],
         "Tabasco": ["Villahermosa", "Cárdenas", "Comalcalco", "Macuspana", "Tenosique"],
@@ -595,7 +599,6 @@
         const selectEstado = document.getElementById('estado_nacimiento_menor');
         const estadoGuardado = document.getElementById('estado_nacimiento_hidden').value;
 
-        // Agregar los estados al select
         for (let estado in mexicoData) {
             let option = document.createElement("option");
             option.text = estado;
@@ -604,7 +607,6 @@
             selectEstado.add(option);
         }
 
-        // Si ya había un estado guardado, cargar sus municipios
         if (estadoGuardado) {
             cargarMunicipios('estado_nacimiento_menor', 'municipio_nacimiento_menor', true);
         }
@@ -615,7 +617,6 @@
         const selectMunicipio = document.getElementById(idSelectMunicipio);
         const estadoSeleccionado = selectEstado.value;
 
-        // Limpiar el combo de municipios
         selectMunicipio.innerHTML = '<option value="">Selecciona el municipio...</option>';
 
         if (estadoSeleccionado && mexicoData[estadoSeleccionado]) {
@@ -626,7 +627,6 @@
                 let option = document.createElement("option");
                 option.text = municipio;
                 option.value = municipio;
-                // Seleccionar el municipio si viene de la base de datos
                 if (esCargaInicial && municipio === municipioGuardado) option.selected = true;
                 selectMunicipio.add(option);
             });
@@ -634,11 +634,48 @@
     }
 
     // -------------------------------------------------------------------
-    // 6. Arranque y Validaciones Generales
+    // NUEVO: 6. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
+    // -------------------------------------------------------------------
+    function calcularEdadMenor() {
+        const fechaInput = document.getElementById('fecha_nac_menor').value;
+        const inputAnios = document.getElementById('edad_anios_menor');
+        const inputMeses = document.getElementById('edad_meses_menor');
+
+        if (!fechaInput) return;
+
+        // Solo auto-calcular si las cajas están vacías (para no borrar cambios manuales del usuario)
+        if (inputAnios.value === '' && inputMeses.value === '') {
+            const partesFecha = fechaInput.split('-');
+            const nacimiento = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+            const hoy = new Date();
+
+            let anios = hoy.getFullYear() - nacimiento.getFullYear();
+            let meses = hoy.getMonth() - nacimiento.getMonth();
+
+            if (hoy.getDate() < nacimiento.getDate()) {
+                meses--;
+            }
+
+            if (meses < 0) {
+                anios--;
+                meses += 12;
+            }
+
+            // Validar que no salgan números negativos si ponen fecha futura por error
+            if(anios < 0) { anios = 0; meses = 0; }
+
+            inputAnios.value = anios;
+            inputMeses.value = meses;
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // 7. Arranque y Validaciones Generales
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
         sincronizarParentescos();
-        inicializarEstados(); // Inicializar combo de México
+        inicializarEstados();
+        calcularEdadMenor(); // <- Se llama el cálculo de edad aquí al cargar la página
 
         const selectSangre = document.getElementById('tipo_sangre_select');
         const inputOtro = document.getElementById('tipo_sangre_otro_input');

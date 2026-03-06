@@ -10,6 +10,9 @@ from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponseForbidden
 
+# --- IMPORT PARA EVITAR EL CRASH AL DUPLICAR EXPEDIENTES ---
+from django.db import IntegrityError
+
 # --- SE AGREGÓ EmailMessage PARA PODER ENVIAR ARCHIVOS ADJUNTOS ---
 from django.core.mail import send_mail, EmailMessage
 
@@ -25,8 +28,9 @@ from .forms import (
     DictamenMedicoForm,
 )
 
-# --- SE AGREGÓ generar_pdf_dictamen PARA LAS CARTAS DE APROBADO/RECHAZADO ---
-from .services import generar_pdf_fo301, generar_pdf_dictamen
+# --- SE AGREGARON LIBRERÍAS Y FUNCIONES PARA EL PDF DINÁMICO ---
+import os
+from .services import generar_pdf_fo301, generar_pdf_dictamen, generar_pdf_inscripcion_lleno
 from .models import Solicitud, LinkCaptura, SolicitudInscripcion
 
 from django.utils.crypto import get_random_string
@@ -212,12 +216,27 @@ def editar_solicitud(request, solicitud_id):
     return render(request, "admisiones/editar.html", {"solicitud": s})
 
 
+# --- NUEVA VERSIÓN DEL BOTÓN DE PDF ---
 @staff_member_required
 def descargar_pdf_solicitud(request, solicitud_id):
     solicitud = get_object_or_404(Solicitud, id=solicitud_id)
-    if not solicitud.pdf:
-        raise Http404("Esta solicitud no tiene PDF.")
-    return FileResponse(solicitud.pdf.open("rb"), as_attachment=True, filename=f"FO301_{solicitud.folio}.pdf")
+
+    # 1. Buscamos si el usuario ya tiene su expediente completo
+    inscripcion = SolicitudInscripcion.objects.filter(solicitud_ingreso=solicitud).first()
+
+    # 2. Si ya tiene expediente, generamos tu Word nuevo al vuelo
+    if inscripcion:
+        pdf_path = generar_pdf_inscripcion_lleno(inscripcion)
+        if pdf_path and os.path.exists(pdf_path):
+            return FileResponse(open(pdf_path, "rb"), as_attachment=True,
+                                filename=f"Hoja_Inscripcion_Folio_{solicitud.folio}.pdf")
+
+    # 3. Si apenas hizo la captura inicial (no ha entrado al portal), le damos el PDF básico
+    if solicitud.pdf:
+        return FileResponse(solicitud.pdf.open("rb"), as_attachment=True,
+                            filename=f"Solicitud_Basica_{solicitud.folio}.pdf")
+
+    raise Http404("El usuario aún no ha generado información para el PDF.")
 
 
 def solicitud_publica_nueva(request):
@@ -303,7 +322,15 @@ def dictaminar_solicitud(request, pk):
             usuario_existente.save()
             usuario_final = usuario_existente
 
-        SolicitudInscripcion.objects.get_or_create(solicitud_ingreso=s, defaults={'usuario_tutor': usuario_final})
+        # --- AQUÍ ESTÁ EL ESCUDO TRY/EXCEPT ---
+        try:
+            SolicitudInscripcion.objects.get_or_create(solicitud_ingreso=s, defaults={'usuario_tutor': usuario_final})
+        except IntegrityError:
+            messages.error(request, "¡Error! Este correo o usuario ya está en otro y ya tiene expediente.")
+            s.estado = Solicitud.Estado.RECIBIDA
+            s.save()
+            return redirect("revisar_solicitud", pk=pk)
+        # --------------------------------------
 
         if s.correo:
             ruta_pdf = generar_pdf_dictamen(s)
@@ -447,9 +474,9 @@ def portal_inscripcion(request):
 def actualizar_estado_final(sol: Solicitud):
     # Si alguna área rechaza -> RECHAZADA final
     if (
-        sol.estado_psicologia == Solicitud.EstadoEvaluacion.RECHAZADO
-        or sol.estado_nutricion == Solicitud.EstadoEvaluacion.RECHAZADO
-        or sol.estado_medico == Solicitud.EstadoEvaluacion.RECHAZADO
+            sol.estado_psicologia == Solicitud.EstadoEvaluacion.RECHAZADO
+            or sol.estado_nutricion == Solicitud.EstadoEvaluacion.RECHAZADO
+            or sol.estado_medico == Solicitud.EstadoEvaluacion.RECHAZADO
     ):
         sol.estado = Solicitud.Estado.RECHAZADA
         sol.save(update_fields=["estado"])
