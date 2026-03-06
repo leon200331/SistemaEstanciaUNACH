@@ -97,7 +97,9 @@ class Solicitud(models.Model):
         choices=EstadoEvaluacion.choices,
         default=EstadoEvaluacion.PENDIENTE
     )
+
     observaciones_medico = models.TextField(null=True, blank=True)
+
 
     medico_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -283,7 +285,9 @@ class SolicitudInscripcion(models.Model):
         NUEVA = "NUEVA", "Nueva"
         EN_PROCESO = "EN_PROCESO", "En Proceso (Capturando datos)"
         EN_REVISION = "EN_REVISION", "Enviada para Revisión"
+        EN_FILTROS = "EN_FILTROS", "En filtros"
         FINALIZADA = "FINALIZADA", "Inscripción Finalizada y Aprobada"
+        RECHAZADA = "RECHAZADA", "Rechazada"
 
     estado = models.CharField(
         max_length=20,
@@ -351,5 +355,88 @@ class SolicitudInscripcion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+def __str__(self):
+    return f"Historia clínica - Inscripción {self.inscripcion_id}"
+
+class HistoriaClinicaMedica(models.Model):
+    inscripcion = models.OneToOneField(
+        SolicitudInscripcion,
+        on_delete=models.CASCADE,
+        related_name="historia_clinica_medica"
+    )
+
+    # Ficha de identidad
+    nombre_paciente = models.CharField(max_length=200, blank=True)
+    edad = models.CharField(max_length=20, blank=True)
+    sexo = models.CharField(max_length=20, blank=True)
+    lugar_fecha_elaboracion = models.CharField(max_length=255, blank=True)
+    fecha_nacimiento = models.DateField(null=True, blank=True)
+    religion = models.CharField(max_length=100, blank=True)
+    quien_cuida_menor = models.CharField(max_length=150, blank=True)
+
+    # Antecedentes heredofamiliares
+    nombre_padre = models.CharField(max_length=200, blank=True)
+    edad_padre = models.CharField(max_length=20, blank=True)
+    tabaquismo_padre = models.BooleanField(default=False)
+    alcoholismo_padre = models.BooleanField(default=False)
+    drogas_padre = models.BooleanField(default=False)
+    enfermedades_actuales_padre = models.TextField(blank=True)
+    alergias_padre = models.TextField(blank=True)
+
+    nombre_madre = models.CharField(max_length=200, blank=True)
+    edad_madre = models.CharField(max_length=20, blank=True)
+    tabaquismo_madre = models.BooleanField(default=False)
+    alcoholismo_madre = models.BooleanField(default=False)
+    drogas_madre = models.BooleanField(default=False)
+    enfermedades_actuales_madre = models.TextField(blank=True)
+    enfermedades_infancia_madre = models.TextField(blank=True)
+    alergias_madre = models.TextField(blank=True)
+
+    # Antecedentes personales no patológicos
+    numero_gestas = models.CharField(max_length=10, blank=True)
+    complicaciones_embarazo = models.TextField(blank=True)
+    medicamentos_embarazo = models.TextField(blank=True)
+    exposicion_radiacion = models.TextField(blank=True)
+    sufrimiento_fetal = models.TextField(blank=True)
+    semanas_gestacion = models.CharField(max_length=50, blank=True)
+    tipo_parto = models.CharField(max_length=100, blank=True)
+    motivo_cesarea = models.TextField(blank=True)
+
+    # Patológicos
+    enfermedades_actuales = models.TextField(blank=True)
+    enfermedades_neonatales = models.TextField(blank=True)
+    enfermedades_exantematicas = models.TextField(blank=True)
+    internamientos_quirurgicos = models.TextField(blank=True)
+    alergia_medicamentos = models.TextField(blank=True)
+    alergia_alimentos = models.TextField(blank=True)
+    personas_enfermas_casa = models.TextField(blank=True)
+
+    # Padecimiento actual
+    vomitos = models.TextField(blank=True)
+    excreta_acuosa = models.TextField(blank=True)
+    fiebre = models.TextField(blank=True)
+    tos = models.TextField(blank=True)
+    rinorrea = models.TextField(blank=True)
+    erupciones = models.TextField(blank=True)
+    dificultad_respiratoria = models.TextField(blank=True)
+
+    # Exploración física básica
+    peso_actual = models.CharField(max_length=20, blank=True)
+    talla = models.CharField(max_length=20, blank=True)
+    temperatura = models.CharField(max_length=20, blank=True)
+    frecuencia_cardiaca = models.CharField(max_length=20, blank=True)
+    frecuencia_respiratoria = models.CharField(max_length=20, blank=True)
+    tension_arterial = models.CharField(max_length=20, blank=True)
+    estado_nutricional = models.CharField(max_length=100, blank=True)
+
+    # Dictamen
+    diagnostico = models.TextField(blank=True)
+    pronostico = models.TextField(blank=True)
+    elaborado_por = models.CharField(max_length=200, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
-        return f"Inscripción - Folio: {self.solicitud_ingreso.folio} ({self.estado})"
+        return f"Historia clínica - Solicitud {self.solicitud_id}"

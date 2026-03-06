@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponseForbidden
+from .forms import DictamenMedicoForm
 
 # --- IMPORT PARA EVITAR EL CRASH AL DUPLICAR EXPEDIENTES ---
 from django.db import IntegrityError
@@ -496,7 +497,7 @@ def psicologia_pendientes(request):
         return HttpResponseForbidden("No tienes permisos para esta sección.")
 
     qs = Solicitud.objects.filter(
-        estado=Solicitud.Estado.RECIBIDA,
+        estado=Solicitud.Estado.APROBADA,
         estado_psicologia=Solicitud.EstadoEvaluacion.PENDIENTE
     ).order_by("-created_at")
 
@@ -555,26 +556,73 @@ def nutricion_dictaminar(request, pk):
 @login_required
 def medico_pendientes(request):
     qs = Solicitud.objects.filter(
-        estado=Solicitud.Estado.RECIBIDA,
+        estado=Solicitud.Estado.APROBADA,
         estado_medico=Solicitud.EstadoEvaluacion.PENDIENTE
     ).order_by("-created_at")
     return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
 
+@login_required
+def medico_registro(request):
+    qs = Solicitud.objects.filter(
+        estado_medico__in=[
+            Solicitud.EstadoEvaluacion.APROBADO,
+            Solicitud.EstadoEvaluacion.RECHAZADO
+        ]
+    ).order_by("-medico_en")
 
+    return render(
+        request,
+        "admisiones/medico_registro.html",
+        {"solicitudes": qs}
+    )
 @login_required
 def medico_dictaminar(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
 
+    bloqueado = sol.estado_medico in [
+        Solicitud.EstadoEvaluacion.APROBADO,
+        Solicitud.EstadoEvaluacion.RECHAZADO,
+    ]
+
     if request.method == "POST":
-        form = DictamenMedicoForm(request.POST, instance=sol)
+        if bloqueado:
+            messages.warning(request, "Esta evaluación médica ya fue finalizada y no puede modificarse.")
+            return redirect("medico_dictaminar", pk=sol.pk)
+
+        form = DictamenMedicoForm(request.POST, request.FILES, instance=sol)
         if form.is_valid():
             sol = form.save(commit=False)
             sol.medico_por = request.user
             sol.medico_en = timezone.now()
             sol.save()
             actualizar_estado_final(sol)
+            messages.success(request, "Dictamen médico guardado correctamente.")
             return redirect("medico_pendientes")
     else:
         form = DictamenMedicoForm(instance=sol)
 
-    return render(request, "admisiones/medico_dictaminar.html", {"sol": sol, "form": form})
+    return render(request, "admisiones/medico_dictaminar.html", {
+        "sol": sol,
+        "form": form,
+        "bloqueado": bloqueado,
+    })
+
+@login_required
+def medico_registro(request):
+    aprobados = Solicitud.objects.filter(
+        estado_medico=Solicitud.EstadoEvaluacion.APROBADO
+    ).order_by("-medico_en", "-created_at")
+
+    rechazados = Solicitud.objects.filter(
+        estado_medico=Solicitud.EstadoEvaluacion.RECHAZADO
+    ).order_by("-medico_en", "-created_at")
+
+    return render(
+        request,
+        "admisiones/medico_registro.html",
+        {
+            "aprobados": aprobados,
+            "rechazados": rechazados,
+            "total_registros": aprobados.count() + rechazados.count(),
+        }
+    )

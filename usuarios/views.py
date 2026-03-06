@@ -24,38 +24,45 @@ def enmascarar_datos(texto):
 
 # --- VISTA SEMÁFORO (ROUTER DE SEGURIDAD LIMPIO) ---
 @login_required
-@login_required
 def root_redirect_view(request):
     user = request.user
 
-    # SEGURIDAD: MODO MANTENIMIENTO
     if request.session.get('sec_manto', False) and not user.is_superuser:
-        return render(request, '403_prohibido.html',
-                      {'mensaje': 'El sistema está en Mantenimiento. Intente más tarde.'})
+        return render(
+            request,
+            '403_prohibido.html',
+            {'mensaje': 'El sistema está en Mantenimiento. Intente más tarde.'}
+        )
 
-    # ✅ Superusuario (TI): va al panel de Gobierno TI
     if user.is_superuser:
         return redirect('panel_gobierno_ti')
 
-    # ✅ Personal Interno (Staff)
     if user.is_staff:
-        # Tomamos el grupo/puesto principal (si usas uno)
-        grupo = user.groups.first().name.lower() if user.groups.exists() else ""
+        grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
 
-        # 🔥 Rutas por puesto (ajusta nombres si tus grupos se llaman distinto)
-        if "psicologa" in grupo:
+        # Psicología
+        if "psicologa" in grupo or "psicólogo" in grupo or "psicologo" in grupo:
             return redirect('psicologia_pendientes')
 
-        if "nutricion" in grupo:
+        # Nutrición
+        if "nutricion" in grupo or "nutriólogo" in grupo or "nutriologo" in grupo:
             return redirect('nutricion_pendientes')
 
-        if "medico" in grupo:
+        # Médico
+        if (
+            "medico" in grupo
+            or "médico" in grupo
+            or "doctor" in grupo
+            or "doctora" in grupo
+        ):
             return redirect('medico_pendientes')
 
-        # Si no coincide con ninguno, cae al panel general (trabajadora social/admin)
+        # Trabajo social / panel general
+        if "trabajador social" in grupo or "trabajadora social" in grupo:
+            return redirect('dashboard_admin')
+
         return redirect('dashboard_admin')
 
-    # ✅ Beneficiarios / Padres
     return redirect('portal_padres_home')
 
 

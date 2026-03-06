@@ -4,6 +4,8 @@ import re
 from django.forms import Select, SelectMultiple
 
 from .models import Solicitud
+from .models import Solicitud, HistoriaClinicaMedica
+
 
 
 class CapturaSolicitudForm(forms.ModelForm):
@@ -263,3 +265,20 @@ class DictamenMedicoForm(forms.ModelForm):
     class Meta:
         model = Solicitud
         fields = ["estado_medico", "observaciones_medico"]
+        widgets = {
+            "estado_medico": forms.Select(attrs={
+                "class": "form-select"
+            }),
+            "observaciones_medico": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+                "placeholder": "Escribe observaciones médicas de la valoración presencial"
+            }),
+        }
+
+
+class HistoriaClinicaMedicaForm(forms.ModelForm):
+    class Meta:
+        model = HistoriaClinicaMedica
+        fields = "__all__"
+        exclude = ["solicitud", "created_at", "updated_at"]

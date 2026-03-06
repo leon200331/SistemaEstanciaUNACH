@@ -34,4 +34,5 @@ urlpatterns = [
 
     path("medico/", views.medico_pendientes, name="medico_pendientes"),
     path("medico/<int:pk>/", views.medico_dictaminar, name="medico_dictaminar"),
+    path("medico/registro/", views.medico_registro, name="medico_registro"),
 ]
