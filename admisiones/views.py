@@ -140,14 +140,18 @@ def crear_solicitud_y_link(request):
             },
         )
 
+    # --- LÓGICA NUEVA: Decidimos qué guardar en la base de datos ---
+    unidad_final = form.cleaned_data.get("unidad_academica", "")
+    if unidad_final == "Otra":
+        unidad_final = form.cleaned_data.get("unidad_academica_otra", "")
+
     solicitud = Solicitud.objects.create(
         estado="CAPTURA",
         nombres_tutor=form.cleaned_data["nombres_tutor"],
         apellido_paterno_tutor=form.cleaned_data["apellido_paterno_tutor"],
         apellido_materno_tutor=form.cleaned_data.get("apellido_materno_tutor", ""),
         matricula=form.cleaned_data.get("matricula", ""),
-        # --- SE GUARDA LA UNIDAD ACADÉMICA ---
-        unidad_academica=form.cleaned_data.get("unidad_academica", ""),
+        unidad_academica=unidad_final,  # Guardamos la real o la que escribieron
         correo=form.cleaned_data.get("correo", ""),
     )
 

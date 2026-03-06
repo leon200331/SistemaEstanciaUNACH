@@ -152,7 +152,7 @@
             <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-md-4">
-                        <label class="label-custom">Nombre(s) de Pila <span class="text-danger">*</span></label>
+                        <label class="label-custom">Nombre(s) <span class="text-danger">*</span></label>
                         <input type="text" name="nombres_menor" class="form-control" oninput="formatName(this)" value="{{ inscripcion.solicitud_ingreso.nombres_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
@@ -634,7 +634,7 @@
     }
 
     // -------------------------------------------------------------------
-    // NUEVO: 6. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
+    // 6. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
     // -------------------------------------------------------------------
     function calcularEdadMenor() {
         const fechaInput = document.getElementById('fecha_nac_menor').value;
@@ -675,7 +675,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         sincronizarParentescos();
         inicializarEstados();
-        calcularEdadMenor(); // <- Se llama el cálculo de edad aquí al cargar la página
+        calcularEdadMenor();
 
         const selectSangre = document.getElementById('tipo_sangre_select');
         const inputOtro = document.getElementById('tipo_sangre_otro_input');

@@ -260,7 +260,7 @@
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Unidad Académica <span class="text-danger">*</span></label>
-              <select name="unidad_academica" class="form-select" required>
+              <select name="unidad_academica" id="unidad_academica_select" class="form-select" onchange="mostrarOtraUnidad(this.value)" required>
                   <option value="">Seleccione una opción...</option>
                   <option value="Facultad de Ingeniería">Facultad de Ingeniería</option>
                   <option value="Facultad de Arquitectura">Facultad de Arquitectura</option>
@@ -274,6 +274,9 @@
                   <option value="Otra">Otra</option>
               </select>
               <div class="invalid-feedback fw-bold">Seleccione una unidad académica.</div>
+
+              <input type="text" name="unidad_academica_otra" id="input_unidad_otra" class="form-control mt-2 d-none" placeholder="Especifica la unidad académica">
+              <div class="invalid-feedback fw-bold">Por favor, escribe el nombre de la unidad.</div>
             </div>
 
             <div class="col-md-12">
@@ -321,6 +324,19 @@
       input.value = val.replace(/\b\w/g, function(char) {
           return char.toUpperCase();
       });
+  }
+
+  // LÓGICA NUEVA PARA MOSTRAR U OCULTAR "OTRA UNIDAD ACADÉMICA"
+  function mostrarOtraUnidad(valor) {
+      const inputOtra = document.getElementById('input_unidad_otra');
+      if (valor === 'Otra') {
+          inputOtra.classList.remove('d-none');
+          inputOtra.required = true;
+      } else {
+          inputOtra.classList.add('d-none');
+          inputOtra.required = false;
+          inputOtra.value = ''; // Limpiar el valor si eligen otra cosa
+      }
   }
 
   // 2. Control de validación del formulario al darle "Crear"
