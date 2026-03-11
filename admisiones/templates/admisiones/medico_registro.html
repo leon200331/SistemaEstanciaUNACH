@@ -118,7 +118,7 @@ color:#0f172a;
 <div class="container-fluid justify-content-center">
 <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
 
-<a class="navbar-brand d-flex align-items-center" href="#">
+<a class="navbar-brand d-flex align-items-center" href="{% url 'medico_pendientes' %}">
 <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
 <div class="text-white">
 <div class="ti-brand-text">REGISTRO MÉDICO</div>
@@ -207,6 +207,7 @@ Rechazados
 <th>Estado médico</th>
 <th>Médico</th>
 <th>Observaciones</th>
+<th>PDF</th>
 </tr>
 </thead>
 
@@ -234,11 +235,17 @@ APROBADO
 
 <td>{{ sol.observaciones_medico|default:"Sin observaciones" }}</td>
 
+<td>
+<a href="{% url 'medico_pdf' sol.pk %}" target="_blank" class="btn btn-sm btn-outline-danger">
+<i class="bi bi-file-earmark-pdf"></i> PDF
+</a>
+</td>
+
 </tr>
 {% empty %}
 
 <tr>
-<td colspan="6" class="text-center text-muted py-4">
+<td colspan="7" class="text-center text-muted py-4">
 No hay registros aprobados.
 </td>
 </tr>
@@ -268,6 +275,7 @@ No hay registros aprobados.
 <th>Estado médico</th>
 <th>Médico</th>
 <th>Observaciones</th>
+<th>PDF</th>
 </tr>
 </thead>
 
@@ -295,12 +303,18 @@ RECHAZADO
 
 <td>{{ sol.observaciones_medico|default:"Sin observaciones" }}</td>
 
+<td>
+<a href="{% url 'medico_pdf' sol.pk %}" target="_blank" class="btn btn-sm btn-outline-danger">
+<i class="bi bi-file-earmark-pdf"></i> PDF
+</a>
+</td>
+
 </tr>
 
 {% empty %}
 
 <tr>
-<td colspan="6" class="text-center text-muted py-4">
+<td colspan="7" class="text-center text-muted py-4">
 No hay registros rechazados.
 </td>
 </tr>

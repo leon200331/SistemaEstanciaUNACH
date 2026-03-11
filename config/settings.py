@@ -135,12 +135,12 @@ LOGOUT_REDIRECT_URL = '/login/'
 # 1. TIEMPO LÍMITE: 30 Minutos (en segundos)
 # 30 * 60 = 1800 segundos.
 # Si quieres ser más estricto, bájalo a 15 mins (900 seg).
-SESSION_COOKIE_AGE = 1800
+SESSION_COOKIE_AGE = 86400
 
 # 2. CANDADO DE NAVEGADOR
 # Si el usuario cierra la ventana o apaga la compu,
 # la sesión se muere instantáneamente (no queda guardada).
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # 3. RENOVACIÓN AUTOMÁTICA
 # Si el usuario sigue trabajando (dando clics), el contador

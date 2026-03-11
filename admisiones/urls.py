@@ -28,11 +28,16 @@ urlpatterns = [
     # =========================================================
     path("psicologia/", views.psicologia_pendientes, name="psicologia_pendientes"),
     path("psicologia/<int:pk>/", views.psicologia_dictaminar, name="psicologia_dictaminar"),
+    path("psicologia/registro/", views.psicologia_registro, name="psicologia_registro"),
+    path("psicologia/<int:pk>/pdf/", views.psicologia_pdf, name="psicologia_pdf"),
 
     path("nutricion/", views.nutricion_pendientes, name="nutricion_pendientes"),
     path("nutricion/<int:pk>/", views.nutricion_dictaminar, name="nutricion_dictaminar"),
+    path("nutricion/registro/", views.nutricion_registro, name="nutricion_registro"),
+    path("nutricion/<int:pk>/pdf/", views.nutricion_pdf, name="nutricion_pdf"),
 
     path("medico/", views.medico_pendientes, name="medico_pendientes"),
     path("medico/<int:pk>/", views.medico_dictaminar, name="medico_dictaminar"),
     path("medico/registro/", views.medico_registro, name="medico_registro"),
+    path("medico/<int:pk>/pdf/", views.medico_pdf, name="medico_pdf"),
 ]

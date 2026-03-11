@@ -45,7 +45,13 @@ def root_redirect_view(request):
             return redirect('psicologia_pendientes')
 
         # Nutrición
-        if "nutricion" in grupo or "nutriólogo" in grupo or "nutriologo" in grupo:
+        if (
+                "nutricion" in grupo
+                or "nutriólogo" in grupo
+                or "nutriologo" in grupo
+                or "nutriologa" in grupo
+                or "nutrióloga" in grupo
+        ):
             return redirect('nutricion_pendientes')
 
         # Médico

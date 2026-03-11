@@ -67,6 +67,128 @@ class Solicitud(models.Model):
     )
     observaciones_psicologia = models.TextField(null=True, blank=True)
 
+    # =========================
+    # VALORACIÓN PSICOLÓGICA
+    # =========================
+    fecha_aplicacion_psicologia = models.DateField(null=True, blank=True)
+    como_lo_llaman_en_casa = models.CharField(max_length=120, blank=True, default="")
+    edad_psicologia = models.PositiveIntegerField(null=True, blank=True)
+    lugar_nacimiento_menor_psicologia = models.CharField(max_length=150, blank=True, default="")
+
+    nombre_padre_psicologia = models.CharField(max_length=150, blank=True, default="")
+    edad_padre_psicologia = models.PositiveIntegerField(null=True, blank=True)
+    nacionalidad_padre_psicologia = models.CharField(max_length=80, blank=True, default="")
+    estado_civil_padre_psicologia = models.CharField(max_length=80, blank=True, default="")
+    religion_padre_psicologia = models.CharField(max_length=80, blank=True, default="")
+    ocupacion_padre_psicologia = models.CharField(max_length=120, blank=True, default="")
+    lugar_trabajo_padre_psicologia = models.CharField(max_length=150, blank=True, default="")
+    horario_trabajo_padre_psicologia = models.CharField(max_length=120, blank=True, default="")
+    escolaridad_padre_psicologia = models.CharField(max_length=120, blank=True, default="")
+    estudiante_padre_psicologia = models.BooleanField(default=False)
+    licenciatura_padre_psicologia = models.CharField(max_length=150, blank=True, default="")
+    semestre_padre_psicologia = models.CharField(max_length=20, blank=True, default="")
+
+    nombre_madre_psicologia = models.CharField(max_length=150, blank=True, default="")
+    edad_madre_psicologia = models.PositiveIntegerField(null=True, blank=True)
+    nacionalidad_madre_psicologia = models.CharField(max_length=80, blank=True, default="")
+    estado_civil_madre_psicologia = models.CharField(max_length=80, blank=True, default="")
+    religion_madre_psicologia = models.CharField(max_length=80, blank=True, default="")
+    ocupacion_madre_psicologia = models.CharField(max_length=120, blank=True, default="")
+    lugar_trabajo_madre_psicologia = models.CharField(max_length=150, blank=True, default="")
+    horario_trabajo_madre_psicologia = models.CharField(max_length=120, blank=True, default="")
+    escolaridad_madre_psicologia = models.CharField(max_length=120, blank=True, default="")
+    estudiante_madre_psicologia = models.BooleanField(default=False)
+    licenciatura_madre_psicologia = models.CharField(max_length=150, blank=True, default="")
+    semestre_madre_psicologia = models.CharField(max_length=20, blank=True, default="")
+
+    numero_gesta_psicologia = models.CharField(max_length=20, blank=True, default="")
+    embarazo_planeado_psicologia = models.CharField(max_length=20, blank=True, default="")
+    dificultad_embarazo_psicologia = models.TextField(blank=True, default="")
+    estado_animo_madre_embarazo_psicologia = models.TextField(blank=True, default="")
+    momento_supieron_sexo_bebe_psicologia = models.TextField(blank=True, default="")
+    quien_eligio_nombre_bebe_psicologia = models.TextField(blank=True, default="")
+    motivo_nombre_bebe_psicologia = models.TextField(blank=True, default="")
+
+    tipo_nacimiento_psicologia = models.CharField(max_length=50, blank=True, default="")
+    semanas_gestacion_psicologia = models.CharField(max_length=20, blank=True, default="")
+    dificultad_nacimiento_psicologia = models.TextField(blank=True, default="")
+    peso_al_nacer_psicologia = models.CharField(max_length=20, blank=True, default="")
+    talla_al_nacer_psicologia = models.CharField(max_length=20, blank=True, default="")
+    apego_inmediato_psicologia = models.CharField(max_length=100, blank=True, default="")
+    metodo_alimentacion_inicio_psicologia = models.CharField(max_length=20, blank=True, default="")
+
+    edad_destete_psicologia = models.CharField(max_length=30, blank=True, default="")
+    motivo_destete_psicologia = models.TextField(blank=True, default="")
+
+    edad_balbuceo_psicologia = models.CharField(max_length=30, blank=True, default="")
+    edad_primera_palabra_psicologia = models.CharField(max_length=30, blank=True, default="")
+    lenguaje_actual_psicologia = models.CharField(max_length=100, blank=True, default="")
+    dificultad_lenguaje_psicologia = models.TextField(blank=True, default="")
+
+    edad_se_sento_solo_psicologia = models.CharField(max_length=30, blank=True, default="")
+    gateo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    edad_gateo_psicologia = models.CharField(max_length=30, blank=True, default="")
+    edad_marcha_independiente_psicologia = models.CharField(max_length=30, blank=True, default="")
+    dominancia_manual_psicologia = models.CharField(max_length=100, blank=True, default="")
+
+    comportamiento_general_psicologia = models.TextField(blank=True, default="")
+    relacion_otros_ninos_psicologia = models.TextField(blank=True, default="")
+    apego_figura_familiar_psicologia = models.CharField(max_length=10, blank=True, default="")
+    apego_con_quien_psicologia = models.CharField(max_length=120, blank=True, default="")
+    se_viste_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    se_pone_prendas_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    cuales_prendas_se_pone_psicologia = models.CharField(max_length=200, blank=True, default="")
+    se_quita_prendas_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    cuales_prendas_se_quita_psicologia = models.CharField(max_length=200, blank=True, default="")
+    intenta_banarse_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    se_cepilla_dientes_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    come_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    toma_vaso_solo_psicologia = models.CharField(max_length=10, blank=True, default="")
+    iniciativa_para_jugar_psicologia = models.CharField(max_length=10, blank=True, default="")
+
+    realiza_siestas_psicologia = models.CharField(max_length=10, blank=True, default="")
+    cuantas_siestas_psicologia = models.CharField(max_length=20, blank=True, default="")
+    con_quien_duerme_psicologia = models.CharField(max_length=120, blank=True, default="")
+    hora_duerme_noche_psicologia = models.CharField(max_length=20, blank=True, default="")
+    hora_despierta_manana_psicologia = models.CharField(max_length=20, blank=True, default="")
+    necesita_algo_para_dormir_psicologia = models.CharField(max_length=10, blank=True, default="")
+    que_necesita_para_dormir_psicologia = models.CharField(max_length=200, blank=True, default="")
+    despierta_con_frecuencia_psicologia = models.CharField(max_length=10, blank=True, default="")
+
+    actividades_tarde_psicologia = models.TextField(blank=True, default="")
+    actividad_extra_tarde_psicologia = models.TextField(blank=True, default="")
+    juego_favorito_psicologia = models.CharField(max_length=150, blank=True, default="")
+    cancion_favorita_psicologia = models.CharField(max_length=150, blank=True, default="")
+    personaje_favorito_psicologia = models.CharField(max_length=150, blank=True, default="")
+    tiempo_pantallas_psicologia = models.CharField(max_length=100, blank=True, default="")
+    socializa_tardes_con_quien_psicologia = models.CharField(max_length=150, blank=True, default="")
+    lugar_para_jugar_psicologia = models.CharField(max_length=150, blank=True, default="")
+    comparte_juguetes_psicologia = models.CharField(max_length=100, blank=True, default="")
+    conducta_lider_juego_psicologia = models.CharField(max_length=100, blank=True, default="")
+    relacion_con_otros_ninos_detalle_psicologia = models.TextField(blank=True, default="")
+    se_adapta_nuevos_entornos_psicologia = models.CharField(max_length=100, blank=True, default="")
+    actividades_fin_semana_psicologia = models.TextField(blank=True, default="")
+
+    controla_orinar_psicologia = models.CharField(max_length=50, blank=True, default="")
+    controla_defecar_psicologia = models.CharField(max_length=50, blank=True, default="")
+    edad_comenzo_avisar_psicologia = models.CharField(max_length=30, blank=True, default="")
+    donde_realiza_necesidades_psicologia = models.CharField(max_length=100, blank=True, default="")
+    algo_significativo_control_esfinteres_psicologia = models.TextField(blank=True, default="")
+    duerme_con_panal_noche_psicologia = models.CharField(max_length=50, blank=True, default="")
+    reaccion_no_controla_esfinteres_psicologia = models.TextField(blank=True, default="")
+    que_hace_responsable_cuando_sucede_psicologia = models.TextField(blank=True, default="")
+
+    persona_aparte_padres_crianza_psicologia = models.TextField(blank=True, default="")
+    persona_aparte_padres_cuidado_psicologia = models.TextField(blank=True, default="")
+    periodos_cuidado_psicologia = models.TextField(blank=True, default="")
+    relacion_padre_madre_con_nino_psicologia = models.TextField(blank=True, default="")
+    tiempo_papa_dia_psicologia = models.CharField(max_length=100, blank=True, default="")
+    tiempo_mama_dia_psicologia = models.CharField(max_length=100, blank=True, default="")
+    metodo_mejorar_conducta_casa_psicologia = models.TextField(blank=True, default="")
+    dificultad_actual_hogar_entorno_psicologia = models.TextField(blank=True, default="")
+    beneficio_esperado_hijo_estancia_psicologia = models.TextField(blank=True, default="")
+    beneficio_personal_estancia_psicologia = models.TextField(blank=True, default="")
+
     psicologia_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -81,7 +203,130 @@ class Solicitud(models.Model):
         choices=EstadoEvaluacion.choices,
         default=EstadoEvaluacion.PENDIENTE
     )
+
     observaciones_nutricion = models.TextField(null=True, blank=True)
+
+    # =========================
+    # VALORACIÓN NUTRICIONAL PRESENCIAL
+    # =========================
+    edad_nutricion = models.CharField(max_length=50, blank=True, default="")
+    sexo_nutricion = models.CharField(max_length=20, blank=True, default="")
+    fecha_nacimiento_nutricion = models.CharField(max_length=50, blank=True, default="")
+
+    peso_nacer = models.CharField(max_length=50, blank=True, default="")
+    talla_nacer = models.CharField(max_length=50, blank=True, default="")
+    peso_actual = models.CharField(max_length=50, blank=True, default="")
+    talla_actual = models.CharField(max_length=50, blank=True, default="")
+
+    seno_materno = models.CharField(max_length=20, blank=True, default="")
+    tiempo_seno_materno = models.CharField(max_length=100, blank=True, default="")
+    motivo_no_seno = models.TextField(blank=True, default="")
+    acude_lactancia = models.CharField(max_length=20, blank=True, default="")
+
+    tipo_alimentacion_lactante = models.CharField(max_length=50, blank=True, default="")
+    formula_infantil = models.CharField(max_length=20, blank=True, default="")
+    cual_formula = models.CharField(max_length=150, blank=True, default="")
+    edad_inicio_formula = models.CharField(max_length=100, blank=True, default="")
+
+    formula_especial = models.CharField(max_length=20, blank=True, default="")
+    cual_formula_especial = models.CharField(max_length=150, blank=True, default="")
+    causa_formula_especial = models.TextField(blank=True, default="")
+
+    cantidad_leche_formula = models.CharField(max_length=100, blank=True, default="")
+    cada_cuantas_horas_leche = models.CharField(max_length=100, blank=True, default="")
+
+    presentacion_leche = models.CharField(max_length=50, blank=True, default="")
+    presentacion_leche_otra = models.CharField(max_length=150, blank=True, default="")
+
+    forma_proporcionar_formula = models.CharField(max_length=50, blank=True, default="")
+    forma_proporcionar_formula_otra = models.CharField(max_length=150, blank=True, default="")
+
+    complicaciones_alimentacion = models.CharField(max_length=20, blank=True, default="")
+    tipo_complicacion = models.CharField(max_length=50, blank=True, default="")
+    tipo_complicacion_otra = models.CharField(max_length=150, blank=True, default="")
+
+    agrega_alimento_formula = models.CharField(max_length=20, blank=True, default="")
+    cual_agrega_formula = models.CharField(max_length=150, blank=True, default="")
+
+    edad_cambio_leche = models.CharField(max_length=100, blank=True, default="")
+    edad_inicio_alimentacion_complementaria = models.CharField(max_length=100, blank=True, default="")
+
+    orden_verduras = models.CharField(max_length=150, blank=True, default="")
+    orden_frutas = models.CharField(max_length=150, blank=True, default="")
+    orden_carnes = models.CharField(max_length=150, blank=True, default="")
+    orden_jugo_frutas = models.CharField(max_length=150, blank=True, default="")
+    orden_yema_huevo = models.CharField(max_length=150, blank=True, default="")
+    orden_huevo_entero = models.CharField(max_length=150, blank=True, default="")
+    orden_arroz = models.CharField(max_length=150, blank=True, default="")
+    orden_galleta_pan = models.CharField(max_length=150, blank=True, default="")
+    orden_pastas = models.CharField(max_length=150, blank=True, default="")
+    orden_leguminosas = models.CharField(max_length=150, blank=True, default="")
+    orden_citricos = models.CharField(max_length=150, blank=True, default="")
+
+    alergia_alimentos = models.CharField(max_length=20, blank=True, default="")
+    cual_alergia = models.CharField(max_length=150, blank=True, default="")
+    reaccion_alergia = models.TextField(blank=True, default="")
+
+    restriccion_alimentaria_actual = models.CharField(max_length=20, blank=True, default="")
+    detalle_restriccion_alimentaria = models.TextField(blank=True, default="")
+
+    presentacion_alimentos = models.CharField(max_length=50, blank=True, default="")
+    orden_alimentos = models.CharField(max_length=50, blank=True, default="")
+    frecuencia_solidos = models.CharField(max_length=50, blank=True, default="")
+
+    alimentos_agrado_frutas = models.TextField(blank=True, default="")
+    alimentos_agrado_verduras = models.TextField(blank=True, default="")
+    alimentos_agrado_cereales = models.TextField(blank=True, default="")
+    alimentos_agrado_leguminosas = models.TextField(blank=True, default="")
+    alimentos_agrado_aoa = models.TextField(blank=True, default="")
+    alimentos_agrado_lacteos = models.TextField(blank=True, default="")
+
+    consume_agua = models.CharField(max_length=20, blank=True, default="")
+    cantidad_agua = models.CharField(max_length=100, blank=True, default="")
+
+    desayuna = models.CharField(max_length=20, blank=True, default="")
+    hora_desayuno = models.CharField(max_length=50, blank=True, default="")
+    come = models.CharField(max_length=20, blank=True, default="")
+    hora_comida = models.CharField(max_length=50, blank=True, default="")
+    cena = models.CharField(max_length=20, blank=True, default="")
+    hora_cena = models.CharField(max_length=50, blank=True, default="")
+    colacion = models.CharField(max_length=20, blank=True, default="")
+    hora_colacion = models.CharField(max_length=50, blank=True, default="")
+
+    acostumbra_comer_desayuno = models.TextField(blank=True, default="")
+    acostumbra_comer_comida = models.TextField(blank=True, default="")
+    acostumbra_comer_cena = models.TextField(blank=True, default="")
+    acostumbra_comer_colaciones = models.TextField(blank=True, default="")
+
+    misma_alimentacion_familia = models.CharField(max_length=20, blank=True, default="")
+    detalle_misma_alimentacion = models.TextField(blank=True, default="")
+
+    consume_golosinas = models.CharField(max_length=20, blank=True, default="")
+    frecuencia_golosinas = models.CharField(max_length=100, blank=True, default="")
+    cuales_golosinas = models.CharField(max_length=150, blank=True, default="")
+
+    consume_refrescos = models.CharField(max_length=20, blank=True, default="")
+    frecuencia_refrescos = models.CharField(max_length=100, blank=True, default="")
+    cuales_refrescos = models.CharField(max_length=150, blank=True, default="")
+
+    consume_jugos = models.CharField(max_length=20, blank=True, default="")
+    frecuencia_jugos = models.CharField(max_length=100, blank=True, default="")
+    cuales_jugos = models.CharField(max_length=150, blank=True, default="")
+
+    donde_consume_alimentos = models.CharField(max_length=50, blank=True, default="")
+    donde_consume_alimentos_otro = models.CharField(max_length=150, blank=True, default="")
+
+    compania_comida = models.CharField(max_length=50, blank=True, default="")
+    compania_comida_otro = models.CharField(max_length=150, blank=True, default="")
+
+    come_con = models.CharField(max_length=50, blank=True, default="")
+    consume_bebidas_en = models.CharField(max_length=50, blank=True, default="")
+    consume_bebidas_en_otro = models.CharField(max_length=150, blank=True, default="")
+
+    come_solo_o_ayuda = models.CharField(max_length=50, blank=True, default="")
+
+    observaciones_nutricion_clinica = models.TextField(blank=True, default="")
+    fecha_elaboracion_nutricion = models.CharField(max_length=50, blank=True, default="")
 
     nutricion_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -90,6 +335,7 @@ class Solicitud(models.Model):
         on_delete=models.SET_NULL,
         related_name="solicitudes_nutricion"
     )
+
     nutricion_en = models.DateTimeField(null=True, blank=True)
 
     estado_medico = models.CharField(
@@ -355,9 +601,8 @@ class SolicitudInscripcion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
-def __str__(self):
-    return f"Historia clínica - Inscripción {self.inscripcion_id}"
+    def __str__(self):
+        return f"Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
 
 class HistoriaClinicaMedica(models.Model):
     inscripcion = models.OneToOneField(
@@ -366,7 +611,6 @@ class HistoriaClinicaMedica(models.Model):
         related_name="historia_clinica_medica"
     )
 
-    # Ficha de identidad
     nombre_paciente = models.CharField(max_length=200, blank=True)
     edad = models.CharField(max_length=20, blank=True)
     sexo = models.CharField(max_length=20, blank=True)
@@ -375,7 +619,6 @@ class HistoriaClinicaMedica(models.Model):
     religion = models.CharField(max_length=100, blank=True)
     quien_cuida_menor = models.CharField(max_length=150, blank=True)
 
-    # Antecedentes heredofamiliares
     nombre_padre = models.CharField(max_length=200, blank=True)
     edad_padre = models.CharField(max_length=20, blank=True)
     tabaquismo_padre = models.BooleanField(default=False)
@@ -393,7 +636,6 @@ class HistoriaClinicaMedica(models.Model):
     enfermedades_infancia_madre = models.TextField(blank=True)
     alergias_madre = models.TextField(blank=True)
 
-    # Antecedentes personales no patológicos
     numero_gestas = models.CharField(max_length=10, blank=True)
     complicaciones_embarazo = models.TextField(blank=True)
     medicamentos_embarazo = models.TextField(blank=True)
@@ -403,7 +645,6 @@ class HistoriaClinicaMedica(models.Model):
     tipo_parto = models.CharField(max_length=100, blank=True)
     motivo_cesarea = models.TextField(blank=True)
 
-    # Patológicos
     enfermedades_actuales = models.TextField(blank=True)
     enfermedades_neonatales = models.TextField(blank=True)
     enfermedades_exantematicas = models.TextField(blank=True)
@@ -412,7 +653,6 @@ class HistoriaClinicaMedica(models.Model):
     alergia_alimentos = models.TextField(blank=True)
     personas_enfermas_casa = models.TextField(blank=True)
 
-    # Padecimiento actual
     vomitos = models.TextField(blank=True)
     excreta_acuosa = models.TextField(blank=True)
     fiebre = models.TextField(blank=True)
@@ -421,7 +661,6 @@ class HistoriaClinicaMedica(models.Model):
     erupciones = models.TextField(blank=True)
     dificultad_respiratoria = models.TextField(blank=True)
 
-    # Exploración física básica
     peso_actual = models.CharField(max_length=20, blank=True)
     talla = models.CharField(max_length=20, blank=True)
     temperatura = models.CharField(max_length=20, blank=True)
@@ -430,7 +669,6 @@ class HistoriaClinicaMedica(models.Model):
     tension_arterial = models.CharField(max_length=20, blank=True)
     estado_nutricional = models.CharField(max_length=100, blank=True)
 
-    # Dictamen
     diagnostico = models.TextField(blank=True)
     pronostico = models.TextField(blank=True)
     elaborado_por = models.CharField(max_length=200, blank=True)
@@ -439,4 +677,4 @@ class HistoriaClinicaMedica(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Historia clínica - Solicitud {self.solicitud_id}"
+        return f"Historia clínica - Inscripción {self.inscripcion_id}"

@@ -9,6 +9,9 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponseForbidden
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from django.http import HttpResponse
 from .forms import DictamenMedicoForm
 
 # --- IMPORT PARA EVITAR EL CRASH AL DUPLICAR EXPEDIENTES ---
@@ -503,6 +506,23 @@ def psicologia_pendientes(request):
 
     return render(request, "admisiones/psicologia_pendientes.html", {"solicitudes": qs})
 
+@login_required
+def psicologia_registro(request):
+    aprobados = Solicitud.objects.filter(
+        estado_psicologia=Solicitud.EstadoEvaluacion.APROBADO
+    ).order_by("-psicologia_en")
+
+    rechazados = Solicitud.objects.filter(
+        estado_psicologia=Solicitud.EstadoEvaluacion.RECHAZADO
+    ).order_by("-psicologia_en")
+
+    total_registros = aprobados.count() + rechazados.count()
+
+    return render(request, "admisiones/psicologia_registro.html", {
+        "aprobados": aprobados,
+        "rechazados": rechazados,
+        "total_registros": total_registros,
+    })
 
 @login_required
 def psicologia_dictaminar(request, pk):
@@ -522,22 +542,129 @@ def psicologia_dictaminar(request, pk):
 
     return render(request, "admisiones/psicologia_dictaminar.html", {"sol": sol, "form": form})
 
+import os
+from django.conf import settings
+
+@login_required
+def psicologia_pdf(request, pk):
+    grupos_usuario = [g.name.strip().lower() for g in request.user.groups.all()]
+
+    tiene_permiso = (
+        request.user.is_superuser
+        or any("psicologia" in g for g in grupos_usuario)
+        or any("psicólogo" in g for g in grupos_usuario)
+        or any("psicologo" in g for g in grupos_usuario)
+        or any("psicóloga" in g for g in grupos_usuario)
+        or any("psicologa" in g for g in grupos_usuario)
+    )
+
+    if not tiene_permiso:
+        return HttpResponse("No tienes permisos para esta sección.", status=403)
+
+    sol = get_object_or_404(Solicitud, pk=pk)
+
+    html = render_to_string("admisiones/psicologia_pdf.html", {
+        "sol": sol
+    })
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="Dictamen_Psicologia_{sol.folio}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse("Error al generar el PDF", status=500)
+
+    return response
+
 
 # ===================== NUTRICIÓN =====================
 @login_required
 def nutricion_pendientes(request):
+    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
+
+    if not (
+        "nutriologa" in grupo
+        or "nutrióloga" in grupo
+        or "nutriologo" in grupo
+        or "nutriólogo" in grupo
+        or "nutricion" in grupo
+        or "nutrición" in grupo
+        or request.user.is_superuser
+    ):
+        return HttpResponseForbidden("No tienes permisos para esta sección.")
+
     qs = Solicitud.objects.filter(
-        estado=Solicitud.Estado.RECIBIDA,
+        estado=Solicitud.Estado.APROBADA,
         estado_nutricion=Solicitud.EstadoEvaluacion.PENDIENTE
     ).order_by("-created_at")
+
     return render(request, "admisiones/nutricion_pendientes.html", {"solicitudes": qs})
 
 
 @login_required
+def nutricion_registro(request):
+    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
+
+    if not (
+        "nutriologa" in grupo
+        or "nutrióloga" in grupo
+        or "nutriologo" in grupo
+        or "nutriólogo" in grupo
+        or "nutricion" in grupo
+        or "nutrición" in grupo
+        or request.user.is_superuser
+    ):
+        return HttpResponseForbidden("No tienes permisos para esta sección.")
+
+    aprobados = Solicitud.objects.filter(
+        estado_nutricion=Solicitud.EstadoEvaluacion.APROBADO
+    ).order_by("-nutricion_en", "-created_at")
+
+    rechazados = Solicitud.objects.filter(
+        estado_nutricion=Solicitud.EstadoEvaluacion.RECHAZADO
+    ).order_by("-nutricion_en", "-created_at")
+
+    return render(
+        request,
+        "admisiones/nutricion_registro.html",
+        {
+            "aprobados": aprobados,
+            "rechazados": rechazados,
+            "total_registros": aprobados.count() + rechazados.count(),
+        }
+    )
+
+
+@login_required
 def nutricion_dictaminar(request, pk):
+    grupos_usuario = [g.name.strip().lower() for g in request.user.groups.all()]
+
+    tiene_permiso = (
+        request.user.is_superuser
+        or any("nutriologa" in g for g in grupos_usuario)
+        or any("nutrióloga" in g for g in grupos_usuario)
+        or any("nutriologo" in g for g in grupos_usuario)
+        or any("nutriólogo" in g for g in grupos_usuario)
+        or any("nutricion" in g for g in grupos_usuario)
+        or any("nutrición" in g for g in grupos_usuario)
+    )
+
+    if not tiene_permiso:
+        return HttpResponseForbidden("No tienes permisos para esta sección.")
+
     sol = get_object_or_404(Solicitud, pk=pk)
 
+    bloqueado = sol.estado_nutricion in [
+        Solicitud.EstadoEvaluacion.APROBADO,
+        Solicitud.EstadoEvaluacion.RECHAZADO,
+    ]
+
     if request.method == "POST":
+        if bloqueado:
+            messages.warning(request, "Esta evaluación de nutrición ya fue finalizada y no puede modificarse.")
+            return redirect("nutricion_dictaminar", pk=sol.pk)
+
         form = DictamenNutricionForm(request.POST, instance=sol)
         if form.is_valid():
             sol = form.save(commit=False)
@@ -545,11 +672,53 @@ def nutricion_dictaminar(request, pk):
             sol.nutricion_en = timezone.now()
             sol.save()
             actualizar_estado_final(sol)
+            messages.success(request, "Valoración de nutrición guardada correctamente.")
             return redirect("nutricion_pendientes")
     else:
         form = DictamenNutricionForm(instance=sol)
 
-    return render(request, "admisiones/nutricion_dictaminar.html", {"sol": sol, "form": form})
+    return render(request, "admisiones/nutricion_dictaminar.html", {
+        "sol": sol,
+        "form": form,
+        "bloqueado": bloqueado,
+    })
+
+@login_required
+def nutricion_pdf(request, pk):
+    grupos_usuario = [g.name.strip().lower() for g in request.user.groups.all()]
+
+    tiene_permiso = (
+        request.user.is_superuser
+        or any("nutriologa" in g for g in grupos_usuario)
+        or any("nutrióloga" in g for g in grupos_usuario)
+        or any("nutriologo" in g for g in grupos_usuario)
+        or any("nutriólogo" in g for g in grupos_usuario)
+        or any("nutricion" in g for g in grupos_usuario)
+        or any("nutrición" in g for g in grupos_usuario)
+    )
+
+    if not tiene_permiso:
+        return HttpResponse("No tienes permisos para esta sección.", status=403)
+
+    sol = get_object_or_404(Solicitud, pk=pk)
+
+    logo_path = os.path.join(settings.BASE_DIR, "static", "img", "logo.png")
+    logo_uri = f"file:///{logo_path.replace(os.sep, '/')}"
+
+    html = render_to_string("admisiones/nutricion_pdf.html", {
+        "sol": sol,
+        "logo_uri": logo_uri,
+    })
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="Dictamen_Nutricion_{sol.folio}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse("Error al generar el PDF", status=500)
+
+    return response
 
 
 # ===================== MÉDICO =====================
@@ -561,49 +730,58 @@ def medico_pendientes(request):
     ).order_by("-created_at")
     return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
 
-@login_required
-def medico_registro(request):
-    qs = Solicitud.objects.filter(
-        estado_medico__in=[
-            Solicitud.EstadoEvaluacion.APROBADO,
-            Solicitud.EstadoEvaluacion.RECHAZADO
-        ]
-    ).order_by("-medico_en")
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib import messages
+from django.utils import timezone
 
-    return render(
-        request,
-        "admisiones/medico_registro.html",
-        {"solicitudes": qs}
-    )
-@login_required
+from .models import Solicitud, SolicitudInscripcion, HistoriaClinicaMedica
+from .forms import DictamenMedicoForm, HistoriaClinicaMedicaForm
+
+
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib import messages
+from django.utils import timezone
+
+from .models import Solicitud, SolicitudInscripcion, HistoriaClinicaMedica
+from .forms import DictamenMedicoForm, HistoriaClinicaMedicaForm
+
+
 def medico_dictaminar(request, pk):
-    sol = get_object_or_404(Solicitud, pk=pk)
+    sol = get_object_or_404(Solicitud, id=pk)
+    inscripcion = get_object_or_404(SolicitudInscripcion, solicitud_ingreso=sol)
 
-    bloqueado = sol.estado_medico in [
-        Solicitud.EstadoEvaluacion.APROBADO,
-        Solicitud.EstadoEvaluacion.RECHAZADO,
-    ]
+    historia, created = HistoriaClinicaMedica.objects.get_or_create(
+        inscripcion=inscripcion
+    )
 
-    if request.method == "POST":
-        if bloqueado:
-            messages.warning(request, "Esta evaluación médica ya fue finalizada y no puede modificarse.")
-            return redirect("medico_dictaminar", pk=sol.pk)
+    bloqueado = sol.estado_medico != Solicitud.EstadoEvaluacion.PENDIENTE
 
+    if request.method == "POST" and not bloqueado:
         form = DictamenMedicoForm(request.POST, request.FILES, instance=sol)
-        if form.is_valid():
-            sol = form.save(commit=False)
-            sol.medico_por = request.user
-            sol.medico_en = timezone.now()
-            sol.save()
-            actualizar_estado_final(sol)
+        historia_form = HistoriaClinicaMedicaForm(request.POST, instance=historia)
+
+        if form.is_valid() and historia_form.is_valid():
+            solicitud_guardada = form.save(commit=False)
+            solicitud_guardada.medico_por = request.user
+            solicitud_guardada.medico_en = timezone.now()
+            solicitud_guardada.save()
+
+            historia_guardada = historia_form.save(commit=False)
+            historia_guardada.inscripcion = inscripcion
+            historia_guardada.save()
+
             messages.success(request, "Dictamen médico guardado correctamente.")
             return redirect("medico_pendientes")
+        else:
+            messages.error(request, "Corrige los errores del formulario.")
     else:
         form = DictamenMedicoForm(instance=sol)
+        historia_form = HistoriaClinicaMedicaForm(instance=historia)
 
-    return render(request, "admisiones/medico_dictaminar.html", {
+        return render(request, "admisiones/medico_dictaminar.html", {
         "sol": sol,
         "form": form,
+        "historia_form": historia_form,
         "bloqueado": bloqueado,
     })
 
@@ -626,3 +804,24 @@ def medico_registro(request):
             "total_registros": aprobados.count() + rechazados.count(),
         }
     )
+@login_required
+def medico_pdf(request, pk):
+    sol = get_object_or_404(Solicitud, pk=pk)
+
+    logo_path = os.path.join(settings.BASE_DIR, "static", "img", "logo.png")
+    logo_uri = f"file:///{logo_path.replace(os.sep, '/')}"
+
+    html = render_to_string("admisiones/medico_pdf.html", {
+        "sol": sol,
+        "logo_uri": logo_uri,
+    })
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="Dictamen_Medico_{sol.folio}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse("Error al generar el PDF", status=500)
+
+    return response
