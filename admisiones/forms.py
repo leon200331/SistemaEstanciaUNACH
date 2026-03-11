@@ -3,9 +3,8 @@ from datetime import date, timedelta
 import re
 from django.forms import Select, SelectMultiple
 
-from .models import Solicitud
+# Se unificaron las importaciones conflictivas aquí:
 from .models import Solicitud, HistoriaClinicaMedica
-
 
 
 class CapturaSolicitudForm(forms.ModelForm):
@@ -175,6 +174,9 @@ class CapturaSolicitudForm(forms.ModelForm):
         return cleaned_data
 
 
+# ======================================================
+# FORMULARIO MODIFICADO PARA SOPORTAR "OTRA" UNIDAD
+# ======================================================
 class CrearSolicitudPanelForm(forms.Form):
     UNIDADES_CHOICES = [
         ("", "Seleccione una opción..."),
@@ -196,6 +198,10 @@ class CrearSolicitudPanelForm(forms.Form):
     matricula = forms.CharField(max_length=20, required=False)
 
     unidad_academica = forms.ChoiceField(choices=UNIDADES_CHOICES, required=True)
+
+    # --- CAMPO NUEVO PARA "OTRA" (Marcadores de Git eliminados) ---
+    unidad_academica_otra = forms.CharField(max_length=100, required=False)
+
     correo = forms.EmailField(required=False)
 
     def __init__(self, *args, **kwargs):
@@ -206,11 +212,29 @@ class CrearSolicitudPanelForm(forms.Form):
 
         self.fields["unidad_academica"].widget.attrs["class"] = "form-select"
 
+        # Le ponemos un evento JavaScript al Select para detectar cuando cambie
+        self.fields["unidad_academica"].widget.attrs["onchange"] = "mostrarOtraUnidad(this.value)"
+
+        # Ocultamos la caja de "Otra" por defecto con la clase 'd-none' de Bootstrap
+        self.fields["unidad_academica_otra"].widget.attrs["class"] = "form-control d-none mt-2"
+        self.fields["unidad_academica_otra"].widget.attrs["placeholder"] = "Especifica la unidad académica"
+        self.fields["unidad_academica_otra"].widget.attrs["id"] = "input_unidad_otra"
+
         self.fields["nombres_tutor"].widget.attrs["placeholder"] = "Ej. Juan Carlos"
         self.fields["apellido_paterno_tutor"].widget.attrs["placeholder"] = "Ej. Pérez"
         self.fields["apellido_materno_tutor"].widget.attrs["placeholder"] = "Ej. López"
         self.fields["matricula"].widget.attrs["placeholder"] = "Ej. A123456"
         self.fields["correo"].widget.attrs["placeholder"] = "Ej. correo@unach.mx"
+
+    # --- NUEVA VALIDACIÓN: Si elige "Otra", debe escribir a fuerzas ---
+    def clean(self):
+        cleaned_data = super().clean()
+        unidad = cleaned_data.get("unidad_academica")
+        unidad_otra = cleaned_data.get("unidad_academica_otra")
+
+        if unidad == "Otra" and not unidad_otra:
+            self.add_error("unidad_academica_otra", "Por favor especifica la unidad académica.")
+        return cleaned_data
 
     def _solo_letras(self, value, campo):
         value = (value or "").strip()
@@ -1049,7 +1073,6 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Convertir booleanos del modelo a combo Sí/No al editar
         if self.instance and self.instance.pk:
             self.initial["tabaquismo_padre"] = "si" if self.instance.tabaquismo_padre else "no"
             self.initial["alcoholismo_padre"] = "si" if self.instance.alcoholismo_padre else "no"
