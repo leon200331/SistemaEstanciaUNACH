@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dictamen Psicología</title>
+<style>
+@page {
+    size: A4;
+    margin: 2cm;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #1f2937;
+}
+
+.header-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+.header-table td {
+    vertical-align: middle;
+}
+
+.logo {
+    width: 80px;
+    height: auto;
+}
+
+.title-main {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: #1e3a8a;
+}
+
+.title-sub {
+    text-align: center;
+    font-size: 12px;
+    color: #334155;
+    margin-top: 2px;
+}
+
+.folio-box {
+    text-align: right;
+    font-size: 11px;
+    font-weight: bold;
+    color: #0f172a;
+}
+
+.section {
+    margin-top: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+.section-title {
+    background: #dbeafe;
+    color: #1e3a8a;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 8px 10px;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table td:first-child {
+    width: 35%;
+    font-weight: bold;
+    color: #334155;
+}
+
+.obs-box {
+    border-top: 1px solid #cbd5e1;
+    padding: 10px;
+    min-height: 65px;
+}
+
+.label {
+    font-weight: bold;
+}
+
+.estado-aprobado {
+    color: #166534;
+    font-weight: bold;
+}
+
+.estado-rechazado {
+    color: #991b1b;
+    font-weight: bold;
+}
+
+.signatures {
+    width: 100%;
+    margin-top: 45px;
+    border-collapse: collapse;
+}
+
+.signatures td {
+    width: 50%;
+    text-align: center;
+    vertical-align: top;
+    padding-top: 35px;
+}
+
+.line {
+    border-top: 1px solid #000;
+    width: 80%;
+    margin: 0 auto 6px auto;
+}
+
+.small {
+    font-size: 10px;
+    color: #475569;
+}
+</style>
+</head>
+<body>
+
+<table class="header-table">
+    <tr>
+        <td style="width:15%;">
+            <img src="{{ logo_uri }}" class="logo" alt="Logo UNACH">
+        </td>
+        <td style="width:70%;">
+            <div class="title-main">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
+            <div class="title-sub">ESTANCIA INFANTIL UNACH</div>
+            <div class="title-sub">DICTAMEN DEL ÁREA DE PSICOLOGÍA</div>
+        </td>
+        <td style="width:15%;" class="folio-box">
+            Folio: #{{ sol.folio }}
+        </td>
+    </tr>
+</table>
+
+<div class="section">
+    <div class="section-title">Datos generales</div>
+    <table class="data-table">
+        <tr>
+            <td>Nombre del menor</td>
+            <td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td>
+        </tr>
+        <tr>
+            <td>Fecha de nacimiento</td>
+            <td>{{ sol.fecha_nacimiento_menor|default:"No registrada" }}</td>
+        </tr>
+        <tr>
+            <td>Tutor</td>
+            <td>{{ sol.nombre_tutor_completo }}</td>
+        </tr>
+        <tr>
+            <td>Correo</td>
+            <td>{{ sol.correo }}</td>
+        </tr>
+        <tr>
+            <td>Fecha de aplicación</td>
+            <td>{{ sol.fecha_aplicacion_psicologia|default:"No capturada" }}</td>
+        </tr>
+        <tr>
+            <td>Cómo lo llaman en casa</td>
+            <td>{{ sol.como_lo_llaman_en_casa|default:"No especificado" }}</td>
+        </tr>
+        <tr>
+            <td>Edad</td>
+            <td>{{ sol.edad_psicologia|default:"No especificada" }}</td>
+        </tr>
+        <tr>
+            <td>Lugar de nacimiento</td>
+            <td>{{ sol.lugar_nacimiento_menor_psicologia|default:"No especificado" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">Antecedentes familiares del padre</div>
+    <table class="data-table">
+        <tr><td>Nombre</td><td>{{ sol.nombre_padre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Edad</td><td>{{ sol.edad_padre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Nacionalidad</td><td>{{ sol.nacionalidad_padre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Estado civil</td><td>{{ sol.estado_civil_padre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Religión</td><td>{{ sol.religion_padre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Ocupación</td><td>{{ sol.ocupacion_padre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Lugar de trabajo</td><td>{{ sol.lugar_trabajo_padre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Horario de trabajo</td><td>{{ sol.horario_trabajo_padre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Escolaridad</td><td>{{ sol.escolaridad_padre_psicologia|default:"No especificada" }}</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">Antecedentes familiares de la madre</div>
+    <table class="data-table">
+        <tr><td>Nombre</td><td>{{ sol.nombre_madre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Edad</td><td>{{ sol.edad_madre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Nacionalidad</td><td>{{ sol.nacionalidad_madre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Estado civil</td><td>{{ sol.estado_civil_madre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Religión</td><td>{{ sol.religion_madre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Ocupación</td><td>{{ sol.ocupacion_madre_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Lugar de trabajo</td><td>{{ sol.lugar_trabajo_madre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Horario de trabajo</td><td>{{ sol.horario_trabajo_madre_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Escolaridad</td><td>{{ sol.escolaridad_madre_psicologia|default:"No especificada" }}</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">Desarrollo y comportamiento</div>
+    <table class="data-table">
+        <tr><td>Edad de balbuceo</td><td>{{ sol.edad_balbuceo_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Primera palabra</td><td>{{ sol.edad_primera_palabra_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Lenguaje actual</td><td>{{ sol.lenguaje_actual_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Dificultad del lenguaje</td><td>{{ sol.dificultad_lenguaje_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Comportamiento general</td><td>{{ sol.comportamiento_general_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Relación con otros niños</td><td>{{ sol.relacion_otros_ninos_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Apego familiar</td><td>{{ sol.apego_figura_familiar_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Con quién</td><td>{{ sol.apego_con_quien_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Iniciativa para jugar</td><td>{{ sol.iniciativa_para_jugar_psicologia|default:"No especificada" }}</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">Descanso y dinámica familiar</div>
+    <table class="data-table">
+        <tr><td>Realiza siestas</td><td>{{ sol.realiza_siestas_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Cuántas siestas</td><td>{{ sol.cuantas_siestas_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Con quién duerme</td><td>{{ sol.con_quien_duerme_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Necesita algo para dormir</td><td>{{ sol.necesita_algo_para_dormir_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Qué necesita</td><td>{{ sol.que_necesita_para_dormir_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Persona que interviene en crianza</td><td>{{ sol.persona_aparte_padres_crianza_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Persona que cuida al menor</td><td>{{ sol.persona_aparte_padres_cuidado_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Relación padre/madre con el niño</td><td>{{ sol.relacion_padre_madre_con_nino_psicologia|default:"No especificada" }}</td></tr>
+        <tr><td>Método para mejorar conducta</td><td>{{ sol.metodo_mejorar_conducta_casa_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Beneficio esperado para el hijo</td><td>{{ sol.beneficio_esperado_hijo_estancia_psicologia|default:"No especificado" }}</td></tr>
+        <tr><td>Beneficio personal esperado</td><td>{{ sol.beneficio_personal_estancia_psicologia|default:"No especificado" }}</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">Dictamen final</div>
+    <table class="data-table">
+        <tr>
+            <td>Estado del dictamen</td>
+            <td>
+                {% if sol.estado_psicologia == "APROBADO" %}
+                    <span class="estado-aprobado">APROBADO</span>
+                {% elif sol.estado_psicologia == "RECHAZADO" %}
+                    <span class="estado-rechazado">RECHAZADO</span>
+                {% else %}
+                    {{ sol.get_estado_psicologia_display }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Psicólogo(a)</td>
+            <td>{{ sol.psicologia_por|default:"No asignado" }}</td>
+        </tr>
+        <tr>
+            <td>Fecha de dictamen</td>
+            <td>{{ sol.psicologia_en|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+
+    <div class="obs-box">
+        <span class="label">Observaciones:</span><br>
+        {{ sol.observaciones_psicologia|default:"Sin observaciones" }}
+    </div>
+</div>
+
+<table class="signatures">
+    <tr>
+        <td>
+            <div class="line"></div>
+            <div class="small">Nombre y firma del beneficiario y/o responsable del menor</div>
+        </td>
+        <td>
+            <div class="line"></div>
+            <div class="small">Nombre y firma de la psicóloga</div>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

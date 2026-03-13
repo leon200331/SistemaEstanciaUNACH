@@ -1,103 +1,408 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container py-4">
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Filtro Psicología</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <div>
-      <h3 class="mb-0">Dictamen Psicología</h3>
-      <small class="text-muted">Folio #{{ sol.folio }}</small>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
+.navbar-ti{background:#2563eb;padding:.75rem 0;box-shadow:0 4px 10px rgba(0,0,0,.12);}
+.ti-brand-text{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:.5px;line-height:1.15;}
+.ti-subtext{color:rgba(255,255,255,.75);font-size:.85rem;}
+.container-panel{max-width:1200px;margin:0 auto;padding:22px 16px;margin-top:92px;}
+.card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
+.info-box{background:#fff;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.06);padding:14px 16px;margin-bottom:16px;}
+.btn-soft{border-radius:10px;font-weight:700;padding:.5rem .9rem;}
+.form-label{font-weight:700;color:#475569;font-size:.9rem;}
+textarea.form-control{min-height:90px;}
+.readonly-box{background:#eef2f7 !important;}
+.accordion-item{border:none;border-radius:14px !important;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-bottom:14px;}
+.accordion-button{font-weight:800;color:#1e3a8a;background:#fff;}
+.accordion-button:not(.collapsed){background:#eff6ff;color:#1e3a8a;box-shadow:none;}
+.accordion-body{background:#fff;}
+.sticky-actions{position:sticky;bottom:16px;z-index:10;}
+.hidden-by-rule{display:none !important;}
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
+  <div class="container-fluid justify-content-center">
+    <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'psicologia_pendientes' %}">
+        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
+        <div class="text-white">
+          <div class="ti-brand-text">FILTRO PSICOLOGÍA</div>
+          <div class="ti-subtext">Cuestionario familiar y entorno psicosocial del menor</div>
+        </div>
+      </a>
+
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{% url 'psicologia_pendientes' %}" class="btn btn-light btn-soft">
+          <i class="bi bi-arrow-left me-1"></i> Pendientes
+        </a>
+
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-light btn-soft">
+            <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+          </button>
+        </form>
+      </div>
     </div>
-    <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary btn-sm">
-      Volver
-    </a>
+  </div>
+</nav>
+
+<div class="container-panel">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="info-box">
+    <div class="row">
+      <div class="col-md-6">
+        <p class="mb-1"><strong>Folio:</strong> #{{ sol.folio }}</p>
+        <p class="mb-1"><strong>Tutor:</strong> {{ sol.nombre_tutor_completo }}</p>
+        <p class="mb-1"><strong>Correo:</strong> {{ sol.correo }}</p>
+      </div>
+      <div class="col-md-6">
+        <p class="mb-1"><strong>Menor:</strong> {{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</p>
+        <p class="mb-1"><strong>Fecha nacimiento:</strong> {{ sol.fecha_nacimiento_menor }}</p>
+        <p class="mb-1"><strong>Estado psicología:</strong> {{ sol.get_estado_psicologia_display }}</p>
+      </div>
+    </div>
   </div>
 
-  <div class="row g-3">
-    <!-- Resumen -->
-    <div class="col-lg-5">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h6 class="text-muted mb-2">Resumen</h6>
+  <form method="post">
+    {% csrf_token %}
 
-          <div class="mb-2">
-            <div class="fw-semibold">Tutor</div>
-            <div>{{ sol.nombre_tutor_completo }}</div>
+    <div class="accordion" id="accordionPsicologia">
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#sec1">
+            Ficha de identidad
+          </button>
+        </h2>
+        <div id="sec1" class="accordion-collapse collapse show" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label">Fecha de aplicación</label>
+                {{ form.fecha_aplicacion_psicologia }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Cómo lo llaman en casa</label>
+                {{ form.como_lo_llaman_en_casa }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Edad</label>
+                {{ form.edad_psicologia }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Lugar de nacimiento</label>
+                {{ form.lugar_nacimiento_menor_psicologia }}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Nombre del niño</label>
+                <input type="text" class="form-control readonly-box" value="{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}" readonly>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input type="text" class="form-control readonly-box" value="{{ sol.fecha_nacimiento_menor }}" readonly>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Folio</label>
+                <input type="text" class="form-control readonly-box" value="{{ sol.folio }}" readonly>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div class="mb-2">
-            <div class="fw-semibold">Correo</div>
-            <div>{{ sol.correo|default:"—" }}</div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec2">
+            Antecedentes familiares del padre
+          </button>
+        </h2>
+        <div id="sec2" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Nombre</label>{{ form.nombre_padre_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Edad</label>{{ form.edad_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Nacionalidad</label>{{ form.nacionalidad_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Estado civil</label>{{ form.estado_civil_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Religión</label>{{ form.religion_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Ocupación</label>{{ form.ocupacion_padre_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Lugar de trabajo</label>{{ form.lugar_trabajo_padre_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Horario de trabajo</label>{{ form.horario_trabajo_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Escolaridad</label>{{ form.escolaridad_padre_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Estudiante</label>{{ form.estudiante_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Licenciatura</label>{{ form.licenciatura_padre_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Semestre</label>{{ form.semestre_padre_psicologia }}</div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div class="mb-2">
-            <div class="fw-semibold">Matrícula</div>
-            <div>{{ sol.matricula|default:"—" }}</div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec3">
+            Antecedentes familiares de la madre
+          </button>
+        </h2>
+        <div id="sec3" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Nombre</label>{{ form.nombre_madre_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Edad</label>{{ form.edad_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Nacionalidad</label>{{ form.nacionalidad_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Estado civil</label>{{ form.estado_civil_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Religión</label>{{ form.religion_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Ocupación</label>{{ form.ocupacion_madre_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Lugar de trabajo</label>{{ form.lugar_trabajo_madre_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Horario de trabajo</label>{{ form.horario_trabajo_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Escolaridad</label>{{ form.escolaridad_madre_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Estudiante</label>{{ form.estudiante_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Licenciatura</label>{{ form.licenciatura_madre_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Semestre</label>{{ form.semestre_madre_psicologia }}</div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div class="mb-2">
-            <div class="fw-semibold">CURP del menor</div>
-            <div>{{ sol.curp_menor|default:"—" }}</div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec4">
+            Prenatales, perinatales y posnatales
+          </button>
+        </h2>
+        <div id="sec4" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-3"><label class="form-label">Número de gesta</label>{{ form.numero_gesta_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Embarazo planeado</label>{{ form.embarazo_planeado_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Dificultad embarazo</label>{{ form.dificultad_embarazo_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Estado de ánimo de la madre</label>{{ form.estado_animo_madre_embarazo_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Momento en que supieron el sexo del bebé</label>{{ form.momento_supieron_sexo_bebe_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Quién eligió el nombre</label>{{ form.quien_eligio_nombre_bebe_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Motivo del nombre</label>{{ form.motivo_nombre_bebe_psicologia }}</div>
+
+              <div class="col-md-3"><label class="form-label">Tipo de nacimiento</label>{{ form.tipo_nacimiento_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Semanas de gestación</label>{{ form.semanas_gestacion_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Peso al nacer</label>{{ form.peso_al_nacer_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Talla al nacer</label>{{ form.talla_al_nacer_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Dificultad nacimiento</label>{{ form.dificultad_nacimiento_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Apego inmediato</label>{{ form.apego_inmediato_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Método alimentación inicial</label>{{ form.metodo_alimentacion_inicio_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Edad del destete</label>{{ form.edad_destete_psicologia }}</div>
+              <div class="col-md-9"><label class="form-label">Motivo del destete</label>{{ form.motivo_destete_psicologia }}</div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <hr>
-
-          <div>
-            <div class="fw-semibold">Estado actual Psicología</div>
-            {% if sol.estado_psicologia == "APROBADO" %}
-              <span class="badge bg-success">Aprobado</span>
-            {% elif sol.estado_psicologia == "RECHAZADO" %}
-              <span class="badge bg-danger">Rechazado</span>
-            {% else %}
-              <span class="badge bg-warning text-dark">Pendiente</span>
-            {% endif %}
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec5">
+            Lenguaje y motricidad
+          </button>
+        </h2>
+        <div id="sec5" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-3"><label class="form-label">Edad de balbuceo</label>{{ form.edad_balbuceo_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Primera palabra</label>{{ form.edad_primera_palabra_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Lenguaje actual</label>{{ form.lenguaje_actual_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Dificultad del lenguaje</label>{{ form.dificultad_lenguaje_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Edad se sentó solo</label>{{ form.edad_se_sento_solo_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Gateó</label>{{ form.gateo_psicologia }}</div>
+              <div class="col-md-3" id="wrap_edad_gateo"><label class="form-label">Edad gateo</label>{{ form.edad_gateo_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Marcha independiente</label>{{ form.edad_marcha_independiente_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Dominancia manual</label>{{ form.dominancia_manual_psicologia }}</div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {% if sol.psicologia_por %}
-          <div class="mt-2 text-muted small">
-            Dictaminado por: {{ sol.psicologia_por }}<br>
-            Fecha: {{ sol.psicologia_en|date:"d/m/Y H:i" }}
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec6">
+            Comportamiento
+          </button>
+        </h2>
+        <div id="sec6" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Comportamiento general</label>{{ form.comportamiento_general_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Relación con otros niños</label>{{ form.relacion_otros_ninos_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Apego familiar</label>{{ form.apego_figura_familiar_psicologia }}</div>
+              <div class="col-md-3" id="wrap_apego_con_quien"><label class="form-label">Con quién</label>{{ form.apego_con_quien_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Se viste solo</label>{{ form.se_viste_solo_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Se pone prendas</label>{{ form.se_pone_prendas_solo_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Se quita prendas</label>{{ form.se_quita_prendas_solo_psicologia }}</div>
+              <div class="col-md-6" id="wrap_cuales_prendas_se_pone"><label class="form-label">Cuáles prendas se pone</label>{{ form.cuales_prendas_se_pone_psicologia }}</div>
+              <div class="col-md-6" id="wrap_cuales_prendas_se_quita"><label class="form-label">Cuáles prendas se quita</label>{{ form.cuales_prendas_se_quita_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Intenta bañarse solo</label>{{ form.intenta_banarse_solo_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Se cepilla dientes solo</label>{{ form.se_cepilla_dientes_solo_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Come solo</label>{{ form.come_solo_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Toma vaso solo</label>{{ form.toma_vaso_solo_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Iniciativa para jugar</label>{{ form.iniciativa_para_jugar_psicologia }}</div>
+            </div>
           </div>
-          {% endif %}
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec7">
+            Descanso, actividades y esfínteres
+          </button>
+        </h2>
+        <div id="sec7" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-2"><label class="form-label">Realiza siestas</label>{{ form.realiza_siestas_psicologia }}</div>
+              <div class="col-md-2" id="wrap_cuantas_siestas"><label class="form-label">Cuántas</label>{{ form.cuantas_siestas_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Con quién duerme</label>{{ form.con_quien_duerme_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Hora duerme</label>{{ form.hora_duerme_noche_psicologia }}</div>
+              <div class="col-md-2"><label class="form-label">Hora despierta</label>{{ form.hora_despierta_manana_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Necesita algo para dormir</label>{{ form.necesita_algo_para_dormir_psicologia }}</div>
+              <div class="col-md-5" id="wrap_que_necesita_para_dormir"><label class="form-label">Qué necesita</label>{{ form.que_necesita_para_dormir_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Despierta con frecuencia</label>{{ form.despierta_con_frecuencia_psicologia }}</div>
+
+              <div class="col-md-6"><label class="form-label">Actividades de la tarde</label>{{ form.actividades_tarde_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Actividad extra</label>{{ form.actividad_extra_tarde_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Juego favorito</label>{{ form.juego_favorito_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Canción favorita</label>{{ form.cancion_favorita_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Personaje favorito</label>{{ form.personaje_favorito_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Tiempo pantallas</label>{{ form.tiempo_pantallas_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Socializa con</label>{{ form.socializa_tardes_con_quien_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Lugar para jugar</label>{{ form.lugar_para_jugar_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Comparte juguetes</label>{{ form.comparte_juguetes_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Conducta líder</label>{{ form.conducta_lider_juego_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Relación con otros niños</label>{{ form.relacion_con_otros_ninos_detalle_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Se adapta a nuevos entornos</label>{{ form.se_adapta_nuevos_entornos_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Actividades fin de semana</label>{{ form.actividades_fin_semana_psicologia }}</div>
+
+              <div class="col-md-3"><label class="form-label">Controla orinar</label>{{ form.controla_orinar_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Controla defecar</label>{{ form.controla_defecar_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Edad comenzó a avisar</label>{{ form.edad_comenzo_avisar_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Dónde lo realiza</label>{{ form.donde_realiza_necesidades_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Algo significativo</label>{{ form.algo_significativo_control_esfinteres_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Duerme con pañal</label>{{ form.duerme_con_panal_noche_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Reacción al no controlar</label>{{ form.reaccion_no_controla_esfinteres_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Qué hace el responsable</label>{{ form.que_hace_responsable_cuando_sucede_psicologia }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec8">
+            Dinámica familiar y dictamen final
+          </button>
+        </h2>
+        <div id="sec8" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
+          <div class="accordion-body">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Persona aparte de padres que interviene en crianza</label>{{ form.persona_aparte_padres_crianza_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Persona aparte de padres que cuida al menor</label>{{ form.persona_aparte_padres_cuidado_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Periodos de cuidado</label>{{ form.periodos_cuidado_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Relación padre/madre con niño</label>{{ form.relacion_padre_madre_con_nino_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Tiempo papá al día</label>{{ form.tiempo_papa_dia_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Tiempo mamá al día</label>{{ form.tiempo_mama_dia_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Método para mejorar conducta</label>{{ form.metodo_mejorar_conducta_casa_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Dificultad actual hogar/entorno</label>{{ form.dificultad_actual_hogar_entorno_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Beneficio esperado para el hijo</label>{{ form.beneficio_esperado_hijo_estancia_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Beneficio personal esperado</label>{{ form.beneficio_personal_estancia_psicologia }}</div>
+
+              <div class="col-md-4"><label class="form-label">Estado psicología</label>{{ form.estado_psicologia }}</div>
+              <div class="col-md-8"><label class="form-label">Observaciones</label>{{ form.observaciones_psicologia }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="sticky-actions mt-3">
+      <div class="card card-panel p-3">
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary btn-soft">
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary btn-soft" {% if bloqueado %}disabled{% endif %}>
+            <i class="bi bi-save me-1"></i> Guardar dictamen
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Form -->
-    <div class="col-lg-7">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h6 class="text-muted mb-3">Registrar dictamen</h6>
-
-          <form method="post" novalidate>
-            {% csrf_token %}
-
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Estado</label>
-              {{ form.estado_psicologia }}
-              <div class="form-text">Selecciona Aprobado o Rechazado.</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Observaciones</label>
-              {{ form.observaciones_psicologia }}
-              <div class="form-text">Especifica motivos o recomendaciones.</div>
-            </div>
-
-            <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-success">
-                Guardar dictamen
-              </button>
-              <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary">
-                Cancelar
-              </a>
-            </div>
-
-          </form>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
+  </form>
 </div>
-{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  function toggleField(triggerId, targetWrapId, showValues = ["SI"]) {
+    const trigger = document.getElementById(triggerId);
+    const wrap = document.getElementById(targetWrapId);
+
+    if (!trigger || !wrap) return;
+
+    const input = wrap.querySelector("input, textarea, select");
+
+    function apply() {
+      const value = (trigger.value || "").trim().toUpperCase();
+      const shouldShow = showValues.includes(value);
+
+      if (shouldShow) {
+        wrap.classList.remove("hidden-by-rule");
+        if (input) input.disabled = false;
+      } else {
+        wrap.classList.add("hidden-by-rule");
+        if (input) {
+          input.disabled = true;
+          if (input.tagName === "SELECT") {
+            input.selectedIndex = 0;
+          } else if (input.type === "checkbox" || input.type === "radio") {
+            input.checked = false;
+          } else {
+            input.value = "";
+          }
+        }
+      }
+    }
+
+    trigger.addEventListener("change", apply);
+    apply();
+  }
+
+  toggleField("id_apego_figura_familiar_psicologia", "wrap_apego_con_quien", ["SI"]);
+  toggleField("id_se_pone_prendas_solo_psicologia", "wrap_cuales_prendas_se_pone", ["SI"]);
+  toggleField("id_se_quita_prendas_solo_psicologia", "wrap_cuales_prendas_se_quita", ["SI"]);
+  toggleField("id_necesita_algo_para_dormir_psicologia", "wrap_que_necesita_para_dormir", ["SI"]);
+  toggleField("id_gateo_psicologia", "wrap_edad_gateo", ["SI"]);
+  toggleField("id_realiza_siestas_psicologia", "wrap_cuantas_siestas", ["SI"]);
+});
+</script>
+
+</body>
+</html>
