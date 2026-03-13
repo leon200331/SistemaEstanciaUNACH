@@ -1,4 +1,4 @@
-    {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -52,6 +52,7 @@
     .b-recibida{ background:#198754; color:#fff; }
     .b-aprobada{ background:#0d6efd; color:#fff; }
     .b-rechazada{ background:#dc3545; color:#fff; }
+    .b-revision{ background:#6f42c1; color:#fff; }
 
     .btn-soft{ border-radius:12px; font-weight:800; padding:.55rem .95rem; }
     .btn-icon{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:12px; }
@@ -84,6 +85,16 @@
       position:sticky;
       top:92px;
     }
+
+    /* ESTILOS PARA LOS BOTONES DE DESCARGA DE PDF */
+    .doc-link-btn {
+        display: flex; align-items: center; justify-content: start; width: 100%;
+        background-color: #f8f9fa; border: 1px solid #dee2e6; color: #212529;
+        font-weight: 600; padding: 6px 12px; border-radius: 8px; text-decoration: none;
+        transition: all 0.2s; font-size: 0.85rem;
+    }
+    .doc-link-btn:hover { background-color: #e9ecef; border-color: #ced4da; }
+    .doc-link-btn i { font-size: 1.1rem; margin-right: 8px; }
   </style>
 </head>
 
@@ -114,18 +125,17 @@
 
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }} mb-3">
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-3 shadow-sm border-0" role="alert">
         {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     {% endfor %}
   {% endif %}
 
   <div class="row g-3">
 
-    <!-- ===== Columna izquierda: Datos ===== -->
     <div class="col-lg-8">
 
-      <!-- Header resumen -->
       <div class="card card-soft mb-3">
         <div class="card-header d-flex align-items-center justify-content-between">
           <div>
@@ -137,7 +147,9 @@
           </div>
 
           <div class="d-flex align-items-center gap-2">
-            {% if s.estado == "CAPTURA" %}
+            {% if inscripcion and inscripcion.estado == "EN_REVISION" %}
+              <span class="badge-pill b-revision"><i class="bi bi-eye me-1"></i>REVISIÓN DE EXPEDIENTE</span>
+            {% elif s.estado == "CAPTURA" %}
               <span class="badge-pill b-captura">CAPTURA</span>
             {% elif s.estado == "RECIBIDA" %}
               <span class="badge-pill b-recibida">RECIBIDA</span>
@@ -150,8 +162,8 @@
             {% endif %}
 
             {% if s.pdf %}
-              <a class="btn btn-outline-secondary btn-icon" href="{{ s.pdf.url }}" target="_blank" title="Ver PDF">
-                <i class="bi bi-file-earmark-pdf"></i>
+              <a class="btn btn-outline-secondary btn-icon border-2" href="{{ s.pdf.url }}" target="_blank" title="Descargar Hoja de Solicitud/Inscripción">
+                <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
               </a>
             {% endif %}
           </div>
@@ -164,8 +176,8 @@
               <div>
                 <div class="fw-bold">Recomendación</div>
                 <div class="small-muted">
-                  Revisa los datos capturados por el tutor. Si procede, dictamina en el panel derecho (Aprobar/Rechazar).
-                  Si rechazas, escribe el motivo para que se envíe en el correo.
+                  Revisa los datos capturados por el tutor. Si procede, dictamina en el panel derecho.
+                  Si rechazas o devuelves, escribe el motivo para que se envíe en el correo.
                 </div>
               </div>
             </div>
@@ -181,7 +193,6 @@
         </div>
       </div>
 
-      <!-- Datos del tutor -->
       <div class="card card-soft mb-3">
         <div class="card-header">
           <h6 class="section-title"><i class="bi bi-person-badge me-2"></i>Datos del tutor</h6>
@@ -222,12 +233,11 @@
             <dd>{{ s.celular|default:"-" }}</dd>
 
             <dt>Domicilio</dt>
-            <dd>{{ s.domicilio|default:"-" }}</dd>
+            <dd>{{ s.estado_domicilio }} {{ s.ciudad }}, {{ s.calle }} {{ s.numero_exterior }}</dd>
           </dl>
         </div>
       </div>
 
-      <!-- Datos del menor -->
       <div class="card card-soft mb-3">
         <div class="card-header">
           <h6 class="section-title"><i class="bi bi-person-heart me-2"></i>Datos del menor</h6>
@@ -245,13 +255,103 @@
 
     </div>
 
-    <!-- ===== Columna derecha: Acciones (Dictamen) ===== -->
     <div class="col-lg-4">
       <div class="sticky-actions">
 
+        {% if inscripcion %}
+        <div class="card card-soft mb-3 border-primary" style="border: 2px solid var(--brand) !important;">
+          <div class="card-header bg-primary text-white">
+            <h6 class="section-title text-white"><i class="bi bi-folder-check me-2"></i>Expediente de Inscripción</h6>
+          </div>
+          <div class="card-body">
+
+            <div class="mb-3 small bg-light p-2 rounded text-center border">
+                Estatus del tutor:<br>
+                <strong class="text-primary fs-6">{{ inscripcion.get_estado_display }}</strong>
+            </div>
+
+            <div class="bg-light p-3 rounded border mb-3">
+                <h6 class="fw-bold text-center mb-3 border-bottom pb-2" style="font-size: 0.9rem;">Documentos Subidos</h6>
+
+                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-hearts me-1"></i> Del Menor</p>
+                <div class="d-grid gap-1 mb-3">
+                    {% if inscripcion.doc_menor_certificado_medico %}<a href="{{ inscripcion.doc_menor_certificado_medico.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Certificado Médico</a>{% endif %}
+                    {% if inscripcion.doc_menor_cartilla_vacunacion %}<a href="{{ inscripcion.doc_menor_cartilla_vacunacion.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Cartilla de Vacunación</a>{% endif %}
+                    {% if inscripcion.doc_menor_grupo_sanguineo %}<a href="{{ inscripcion.doc_menor_grupo_sanguineo.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Grupo Sanguíneo</a>{% endif %}
+                    {% if inscripcion.doc_menor_acta_nacimiento %}<a href="{{ inscripcion.doc_menor_acta_nacimiento.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
+                    {% if inscripcion.doc_menor_fotos %}<a href="{{ inscripcion.doc_menor_fotos.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Menor</a>{% endif %}
+                    {% if inscripcion.doc_menor_laboratorio %}<a href="{{ inscripcion.doc_menor_laboratorio.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Est. Laboratorio</a>{% endif %}
+                </div>
+
+                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-badge-fill me-1"></i> Del Tutor</p>
+                <div class="d-grid gap-1 mb-3">
+                    {% if inscripcion.doc_tutor_acta_nacimiento %}<a href="{{ inscripcion.doc_tutor_acta_nacimiento.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
+                    {% if inscripcion.doc_tutor_ine %}<a href="{{ inscripcion.doc_tutor_ine.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
+                    {% if inscripcion.doc_tutor_fotos %}<a href="{{ inscripcion.doc_tutor_fotos.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Tutor</a>{% endif %}
+                    {% if inscripcion.doc_tutor_domicilio %}<a href="{{ inscripcion.doc_tutor_domicilio.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Comp. Domicilio</a>{% endif %}
+                    {% if inscripcion.doc_tutor_pago %}<a href="{{ inscripcion.doc_tutor_pago.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Recibo de Pago</a>{% endif %}
+                    {% if inscripcion.doc_tutor_historial %}<a href="{{ inscripcion.doc_tutor_historial.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Historial Académico</a>{% endif %}
+                    {% if inscripcion.doc_tutor_horario %}<a href="{{ inscripcion.doc_tutor_horario.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Horario de Clases</a>{% endif %}
+                </div>
+
+                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-check-fill me-1"></i> Del Autorizado</p>
+                <div class="d-grid gap-1 mb-3">
+                    {% if inscripcion.doc_autorizado_carta %}<a href="{{ inscripcion.doc_autorizado_carta.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Carta Autorización</a>{% endif %}
+                    {% if inscripcion.doc_autorizado_ine %}<a href="{{ inscripcion.doc_autorizado_ine.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
+                    {% if inscripcion.doc_autorizado_fotos %}<a href="{{ inscripcion.doc_autorizado_fotos.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos Autorizado</a>{% endif %}
+                </div>
+
+                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-file-earmark-check-fill me-1"></i> Oficial</p>
+                <div class="d-grid gap-1">
+                    {% if inscripcion.reglamento_firmado %}
+                    <a href="{{ inscripcion.reglamento_firmado.url }}" target="_blank" class="btn btn-primary btn-soft text-start fw-bold" style="font-size: 0.85rem;">
+                        <i class="bi bi-file-earmark-text-fill me-2 text-white"></i> Reglamento Firmado
+                    </a>
+                    {% else %}
+                    <div class="alert alert-warning py-2 small fw-bold text-center border-warning m-0"><i class="bi bi-hourglass-split me-1"></i> Esperando Reglamento</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if inscripcion.comentario_tutor %}
+            <div class="alert alert-info py-2 small shadow-sm border-info mb-3">
+              <span class="fw-bold text-dark"><i class="bi bi-chat-left-text-fill me-1 text-primary"></i> Mensaje del Tutor:</span><br>
+              <span class="fst-italic text-secondary">"{{ inscripcion.comentario_tutor }}"</span>
+            </div>
+            {% endif %}
+
+            {% if inscripcion.estado == 'EN_REVISION' %}
+            <div class="divider"></div>
+            <p class="small text-muted mb-2 lh-sm">Por favor, verifica que todos los documentos sean legibles y correctos antes de pasarlos a filtros.</p>
+
+            <form method="post" action="{% url 'revisar_solicitud' s.id %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label fw-bold text-dark small">Observaciones (Solo si devuelves):</label>
+                <textarea name="comentario_inscripcion" class="form-control" rows="2" placeholder="Ej: El Acta de Nacimiento está borrosa. Por favor corríjala."></textarea>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button class="btn btn-success btn-soft w-100 shadow-sm" type="submit" name="accion_inscripcion" value="APROBAR" onclick="return confirm('¿Confirmas que el expediente está correcto y pasará a filtros?');">
+                  <i class="bi bi-check-circle-fill me-1"></i> Validar y Pasar a Filtros
+                </button>
+
+                <button class="btn btn-outline-danger btn-soft w-100 border-2" type="submit" name="accion_inscripcion" value="DEVOLVER">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i> Devolver Documentos al Tutor
+                </button>
+              </div>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% elif s.estado == 'APROBADA' %}
+        <div class="alert alert-secondary shadow-sm small border mb-3">
+            <i class="bi bi-info-circle-fill me-1"></i> Este folio fue aprobado antes de la actualización, por lo que no tiene panel de seguimiento de PDF. (Para ver el nuevo panel, aprueba un folio nuevo).
+        </div>
+        {% endif %}
+
         <div class="card card-soft">
           <div class="card-header">
-            <h6 class="section-title"><i class="bi bi-clipboard-check me-2"></i>Dictamen (Trabajo Social)</h6>
+            <h6 class="section-title"><i class="bi bi-clipboard-check me-2"></i>Dictamen Inicial</h6>
           </div>
 
           <div class="card-body">
@@ -266,31 +366,29 @@
             {% endif %}
 
             {% if s.estado == "RECIBIDA" %}
-              <!-- Aprobar -->
               <form method="post" action="{% url 'dictaminar_solicitud' s.id %}" class="d-grid gap-2">
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="APROBAR">
-                <button class="btn btn-success btn-soft" type="submit">
-                  <i class="bi bi-check2-circle me-1"></i> Aprobar solicitud
+                <button class="btn btn-success btn-soft" type="submit" onclick="return confirm('¿Estás seguro de Aprobar? Se creará el usuario y se le enviará un correo con acceso.');">
+                  <i class="bi bi-check2-circle me-1"></i> Aprobar y Generar Acceso
                 </button>
               </form>
 
               <div class="divider"></div>
 
-              <!-- Rechazar (modal) -->
               <button class="btn btn-danger btn-soft w-100" type="button" data-bs-toggle="modal" data-bs-target="#modalRechazo">
                 <i class="bi bi-x-circle me-1"></i> Rechazar solicitud
               </button>
 
-              <div class="small-muted mt-2">
+              <div class="small-muted mt-2 text-center">
                 Al rechazar, el motivo se guardará y se enviará al correo del tutor.
               </div>
 
             {% else %}
-              <div class="callout">
-                <div class="fw-bold">Sin acciones de dictamen</div>
+              <div class="callout bg-light border-0">
+                <div class="fw-bold text-secondary">Acción Completada</div>
                 <div class="small-muted">
-                  Solo se puede dictaminar cuando la solicitud está en <b>RECIBIDA</b>.
+                  El dictamen inicial ya fue realizado o la solicitud está en otra etapa.
                 </div>
               </div>
             {% endif %}
@@ -299,7 +397,7 @@
 
             <div class="d-grid gap-2">
               <a class="btn btn-outline-secondary btn-soft" href="{% url 'panel_admisiones' %}">
-                <i class="bi bi-arrow-left me-1"></i> Volver
+                <i class="bi bi-arrow-left me-1"></i> Volver al panel principal
               </a>
 
               <a class="btn btn-outline-secondary btn-soft"
@@ -317,33 +415,32 @@
   </div>
 </div>
 
-<!-- ===== Modal rechazo ===== -->
 <div class="modal fade" id="modalRechazo" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form class="modal-content" method="post" action="{% url 'dictaminar_solicitud' s.id %}">
       {% csrf_token %}
       <input type="hidden" name="accion" value="RECHAZAR">
 
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold">Motivo de rechazo</h5>
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-circle-fill me-2"></i>Motivo de rechazo inicial</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
       <div class="modal-body">
-        <label class="form-label fw-semibold">Escribe el motivo (obligatorio)</label>
-        <textarea name="comentario" class="form-control" rows="5"
+        <label class="form-label fw-semibold text-muted">Escribe el motivo de rechazo de la solicitud (obligatorio)</label>
+        <textarea name="comentario" class="form-control bg-light" rows="5"
                   placeholder="Ej: Documentación incompleta / datos inconsistentes / fuera de convocatoria..."
                   required></textarea>
 
-        <div class="form-text">
-          Este texto se guardará como comentario de respuesta y se enviará por correo.
+        <div class="form-text mt-2 text-primary fw-bold">
+          <i class="bi bi-envelope-fill me-1"></i> Este mensaje le llegará al tutor por correo electrónico.
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary btn-soft" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-danger btn-soft">
-          <i class="bi bi-x-circle me-1"></i> Confirmar rechazo
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary btn-soft px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger btn-soft px-4 rounded-pill shadow-sm">
+          Confirmar Rechazo
         </button>
       </div>
     </form>

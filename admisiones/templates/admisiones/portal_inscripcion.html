@@ -35,6 +35,25 @@
 
     .fade-in { animation: fadeIn 0.3s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Estilos para el nuevo modal de confirmación animado */
+    .animated.pulse.infinite {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(0.95); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(0.95); }
+    }
+
+    /* Estilos para las cajas de documentos */
+    .doc-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 10px; padding: 15px; height: 100%; }
+    .doc-title { font-weight: bold; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 15px; }
+    .file-input-group { margin-bottom: 12px; }
+    .file-input-group label { font-size: 0.85rem; font-weight: bold; color: #495057; margin-bottom: 4px; display: block; }
+    .status-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
+    .status-ok { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+    .status-missing { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
 </style>
 {% endblock %}
 
@@ -72,7 +91,7 @@
         </div>
     </div>
 
-    <form method="POST" id="inscripcionForm" class="needs-validation" novalidate>
+    <form method="POST" id="inscripcionForm" class="needs-validation" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
         <div class="form-section-card">
@@ -123,7 +142,7 @@
                     </div>
                     <div class="col-md-4 mt-5">
                         <label class="label-custom">Estado Civil <span class="text-danger">*</span></label>
-                        <select name="estado_civil_tutor" class="form-select" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select id="estado_civil_tutor_select" name="estado_civil_tutor" class="form-select" onchange="manejarEstadoCivil()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
                             <option value="Soltero(a)" {% if inscripcion.estado_civil_tutor == 'Soltero(a)' %}selected{% endif %}>Soltero(a)</option>
                             <option value="Casado(a)" {% if inscripcion.estado_civil_tutor == 'Casado(a)' %}selected{% endif %}>Casado(a)</option>
@@ -236,20 +255,15 @@
             </div>
         </div>
 
-        <div class="form-section-card">
+        <div class="form-section-card" id="card_segundo_padre" style="display: none;">
             <div class="section-title">
-                <i class="bi bi-people fs-4 text-primary"></i> 3. Nombre del Padre/Madre y Familiares
+                <i class="bi bi-people fs-4 text-primary"></i> 3. Datos del Padre / Madre (El otro tutor)
             </div>
             <div class="card-body p-4">
-
-                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                    <h6 id="titulo_segundo_padre" class="fw-bold text-secondary mb-0">Datos del Padre / Madre (El otro tutor)</h6>
-                </div>
-
-                <div class="row g-3 mb-5">
+                <div class="row g-3">
                     <div class="col-md-3">
                         <label class="label-custom">Parentesco <span class="text-danger">*</span></label>
-                        <select id="parentesco_segundo_padre_select" name="parentesco_segundo_padre" class="form-select bg-light" style="pointer-events: none;" required>
+                        <select id="parentesco_segundo_padre_select" name="parentesco_segundo_padre" class="form-select bg-light sp-required" style="pointer-events: none;" required>
                             <option value="">Esperando selección...</option>
                             <option value="Madre" {% if inscripcion.parentesco_segundo_padre == 'Madre' %}selected{% endif %}>Madre</option>
                             <option value="Padre" {% if inscripcion.parentesco_segundo_padre == 'Padre' %}selected{% endif %}>Padre</option>
@@ -259,23 +273,23 @@
 
                     <div class="col-md-3">
                         <label class="label-custom">Nombre(s) <span class="text-danger">*</span></label>
-                        <input type="text" name="nombres_segundo_padre" class="form-control" oninput="formatName(this)" value="{{ inscripcion.nombres_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="nombres_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.nombres_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Apellido Paterno <span class="text-danger">*</span></label>
-                        <input type="text" name="apellido_paterno_segundo_padre" class="form-control" oninput="formatName(this)" value="{{ inscripcion.apellido_paterno_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="apellido_paterno_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.apellido_paterno_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Apellido Materno <span class="text-danger">*</span></label>
-                        <input type="text" name="apellido_materno_segundo_padre" class="form-control" oninput="formatName(this)" value="{{ inscripcion.apellido_materno_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="apellido_materno_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.apellido_materno_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
                     <div class="col-md-4 mt-3">
                         <label class="label-custom">Estado Civil <span class="text-danger">*</span></label>
-                        <select name="estado_civil_segundo_padre" class="form-select" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select name="estado_civil_segundo_padre" class="form-select sp-required" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
                             <option value="Soltero(a)" {% if inscripcion.estado_civil_segundo_padre == 'Soltero(a)' %}selected{% endif %}>Soltero(a)</option>
                             <option value="Casado(a)" {% if inscripcion.estado_civil_segundo_padre == 'Casado(a)' %}selected{% endif %}>Casado(a)</option>
@@ -285,18 +299,18 @@
                     </div>
                     <div class="col-md-4 mt-3">
                         <label class="label-custom">Ocupación <span class="text-danger">*</span></label>
-                        <input type="text" name="ocupacion_segundo_padre" class="form-control" oninput="formatName(this)" value="{{ inscripcion.ocupacion_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="ocupacion_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.ocupacion_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4 mt-3">
                         <label class="label-custom">Celular <span class="text-danger">*</span></label>
-                        <input type="text" name="celular_segundo_padre" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.celular_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="celular_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.celular_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
                     <div class="col-md-6 mt-3">
                         <label class="label-custom">Correo Electrónico <span class="text-danger">*</span></label>
-                        <input type="email" name="correo_segundo_padre" class="form-control" value="{{ inscripcion.correo_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="email" name="correo_segundo_padre" class="form-control sp-required" value="{{ inscripcion.correo_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Ingresa un correo válido.</div>
                     </div>
 
@@ -305,27 +319,27 @@
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Estado <span class="text-danger">*</span></label>
-                        <input type="text" name="estado_domicilio_segundo_padre" class="form-control" value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="estado_domicilio_segundo_padre" class="form-control sp-required" value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
-                        <input type="text" name="ciudad_segundo_padre" class="form-control" value="{{ inscripcion.ciudad_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="ciudad_segundo_padre" class="form-control sp-required" value="{{ inscripcion.ciudad_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Código Postal <span class="text-danger">*</span></label>
-                        <input type="text" name="codigo_postal_segundo_padre" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="5" value="{{ inscripcion.codigo_postal_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="codigo_postal_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="5" value="{{ inscripcion.codigo_postal_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="label-custom">Calle <span class="text-danger">*</span></label>
-                        <input type="text" name="calle_segundo_padre" class="form-control" value="{{ inscripcion.calle_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="calle_segundo_padre" class="form-control sp-required" value="{{ inscripcion.calle_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Número Ext. <span class="text-danger">*</span></label>
-                        <input type="text" name="numero_exterior_segundo_padre" class="form-control" value="{{ inscripcion.numero_exterior_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="numero_exterior_segundo_padre" class="form-control sp-required" value="{{ inscripcion.numero_exterior_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
@@ -333,9 +347,15 @@
                         <input type="text" name="numero_interior_segundo_padre" class="form-control" value="{{ inscripcion.numero_interior_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2 mt-5">
-                    <h6 class="fw-bold text-secondary mb-0">4. Familiares autorizados (Emergencias)</h6>
+        <div class="form-section-card">
+            <div class="section-title">
+                <i class="bi bi-person-lines-fill fs-4 text-primary"></i> <span id="num_sec_familiares">4</span>. Familiares Autorizados (Emergencias)
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-end mb-3">
                     {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' %}
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarFamiliar()">
                             <i class="bi bi-person-plus-fill"></i> Agregar otro familiar
@@ -366,14 +386,18 @@
                     </div>
                     <div class="col-md-6 mt-2">
                         <label class="label-custom">Parentesco 1 <span class="text-danger">*</span></label>
-                        <select name="contacto_1_parentesco" class="form-select form-select-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="hidden" name="contacto_1_parentesco" id="real_par_1" value="{{ inscripcion.contacto_1_parentesco|default:'' }}">
+                        <select id="sel_par_1" class="form-select form-select-sm" onchange="manejarPar(1)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
-                            <option value="Abuelo(a)" {% if inscripcion.contacto_1_parentesco == 'Abuelo(a)' %}selected{% endif %}>Abuelo(a)</option>
-                            <option value="Tío(a)" {% if inscripcion.contacto_1_parentesco == 'Tío(a)' %}selected{% endif %}>Tío(a)</option>
-                            <option value="Hermano(a) Mayor" {% if inscripcion.contacto_1_parentesco == 'Hermano(a) Mayor' %}selected{% endif %}>Hermano(a) Mayor</option>
-                            <option value="Otro" {% if inscripcion.contacto_1_parentesco == 'Otro' %}selected{% endif %}>Otro</option>
+                            <option value="Abuelo(a)">Abuelo(a)</option>
+                            <option value="Tío(a)">Tío(a)</option>
+                            <option value="Hermano(a) Mayor">Hermano(a) Mayor</option>
+                            <option value="Otro">Otro (Especificar)</option>
                         </select>
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
+                        <div id="div_otro_par_1" class="mt-2 fade-in" style="display: none;">
+                            <input type="text" id="inp_otro_par_1" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(1)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                        </div>
                     </div>
                 </div>
 
@@ -402,13 +426,17 @@
                         </div>
                         <div class="col-md-6 mt-2">
                             <label class="label-custom">Parentesco 2</label>
-                            <select id="contacto_2_parentesco" name="contacto_2_parentesco" class="form-select form-select-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="hidden" name="contacto_2_parentesco" id="real_par_2" value="{{ inscripcion.contacto_2_parentesco|default:'' }}">
+                            <select id="sel_par_2" class="form-select form-select-sm" onchange="manejarPar(2)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
                                 <option value="">Seleccione...</option>
-                                <option value="Abuelo(a)" {% if inscripcion.contacto_2_parentesco == 'Abuelo(a)' %}selected{% endif %}>Abuelo(a)</option>
-                                <option value="Tío(a)" {% if inscripcion.contacto_2_parentesco == 'Tío(a)' %}selected{% endif %}>Tío(a)</option>
-                                <option value="Hermano(a) Mayor" {% if inscripcion.contacto_2_parentesco == 'Hermano(a) Mayor' %}selected{% endif %}>Hermano(a) Mayor</option>
-                                <option value="Otro" {% if inscripcion.contacto_2_parentesco == 'Otro' %}selected{% endif %}>Otro</option>
+                                <option value="Abuelo(a)">Abuelo(a)</option>
+                                <option value="Tío(a)">Tío(a)</option>
+                                <option value="Hermano(a) Mayor">Hermano(a) Mayor</option>
+                                <option value="Otro">Otro (Especificar)</option>
                             </select>
+                            <div id="div_otro_par_2" class="mt-2 fade-in" style="display: none;">
+                                <input type="text" id="inp_otro_par_2" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(2)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -438,13 +466,17 @@
                         </div>
                         <div class="col-md-6 mt-2">
                             <label class="label-custom">Parentesco 3</label>
-                            <select id="contacto_3_parentesco" name="contacto_3_parentesco" class="form-select form-select-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="hidden" name="contacto_3_parentesco" id="real_par_3" value="{{ inscripcion.contacto_3_parentesco|default:'' }}">
+                            <select id="sel_par_3" class="form-select form-select-sm" onchange="manejarPar(3)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
                                 <option value="">Seleccione...</option>
-                                <option value="Abuelo(a)" {% if inscripcion.contacto_3_parentesco == 'Abuelo(a)' %}selected{% endif %}>Abuelo(a)</option>
-                                <option value="Tío(a)" {% if inscripcion.contacto_3_parentesco == 'Tío(a)' %}selected{% endif %}>Tío(a)</option>
-                                <option value="Hermano(a) Mayor" {% if inscripcion.contacto_3_parentesco == 'Hermano(a) Mayor' %}selected{% endif %}>Hermano(a) Mayor</option>
-                                <option value="Otro" {% if inscripcion.contacto_3_parentesco == 'Otro' %}selected{% endif %}>Otro</option>
+                                <option value="Abuelo(a)">Abuelo(a)</option>
+                                <option value="Tío(a)">Tío(a)</option>
+                                <option value="Hermano(a) Mayor">Hermano(a) Mayor</option>
+                                <option value="Otro">Otro (Especificar)</option>
                             </select>
+                            <div id="div_otro_par_3" class="mt-2 fade-in" style="display: none;">
+                                <input type="text" id="inp_otro_par_3" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(3)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -452,20 +484,154 @@
             </div>
         </div>
 
+        <div class="form-section-card border-warning" style="border: 2px solid #ffc107;">
+            <div class="section-title" style="background-color: #fff9e6;">
+                <i class="bi bi-cloud-arrow-up-fill fs-4 text-warning"></i> <span id="num_sec_expediente">5</span>. Expediente Digital (Documentos Obligatorios)
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning border-warning shadow-sm mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-octagon-fill fs-1 me-3"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1">¡Sube todos tus documentos!</h5>
+                            <p class="mb-0 small text-dark">Para poder continuar, debes subir <strong>TODOS</strong> los archivos en formato PDF o Imagen legible. Si te falta alguno, el sistema no te dejará enviar tu expediente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="doc-box shadow-sm">
+                            <div class="doc-title"><i class="bi bi-person-hearts me-2"></i>Del Menor</div>
+
+                            <div class="file-input-group">
+                                <label>1. Certificado Médico</label>
+                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_menor_certificado_medico %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>2. Cartilla de Vacunación</label>
+                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_menor_cartilla_vacunacion %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>3. Grupo Sanguíneo</label>
+                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_menor_grupo_sanguineo %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>4. Acta de Nacimiento</label>
+                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_menor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>5. 3 Fotos a color (Actualizadas)</label>
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>6. Estudios de Laboratorio</label>
+                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_menor_laboratorio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="doc-box shadow-sm">
+                            <div class="doc-title"><i class="bi bi-person-badge-fill me-2"></i>Del Beneficiario</div>
+
+                            <div class="file-input-group">
+                                <label>1. Acta de Nacimiento</label>
+                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>2. Copia de INE</label>
+                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>3. 3 Fotos a color (Actualizadas)</label>
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>4. Comprobante de Domicilio</label>
+                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_domicilio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>5. Recibo de Inscripción ($50)</label>
+                                <input type="file" name="doc_tutor_pago" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_pago %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>6. Historial Académico</label>
+                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_historial %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>7. Horario de Clases</label>
+                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_tutor_horario %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="doc-box shadow-sm">
+                            <div class="doc-title"><i class="bi bi-person-check-fill me-2"></i>Del Autorizado</div>
+
+                            <div class="file-input-group">
+                                <label>1. Carta de Autorización (Contestada)</label>
+                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_autorizado_carta %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>2. Copia de INE</label>
+                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_autorizado_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>3. 2 Fotos a color (Actualizadas)</label>
+                                <input type="file" name="doc_autorizado_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                {% if inscripcion.doc_autorizado_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         <div class="form-section-card border-primary" style="border: 2px solid #1e3a8a;">
             <div class="section-title bg-primary text-white">
-                <i class="bi bi-file-earmark-check fs-4"></i> 5. Reglamentos y Finalización
+                <i class="bi bi-file-earmark-check fs-4"></i> <span id="num_sec_reglamentos">6</span>. Reglamentos y Finalización
             </div>
             <div class="card-body p-4 text-center">
                 <i class="bi bi-file-pdf text-danger display-4 mb-3 d-block"></i>
                 <h5 class="fw-bold">Reglamento Interno de la Estancia Infantil UNACH</h5>
                 <p class="text-muted mb-4">Por favor, descarga y lee atentamente el reglamento oficial antes de enviar tu solicitud.</p>
 
-                <a href="{% static 'documentos/Reglamento_EIU.pdf' %}" class="btn btn-outline-danger mb-4 px-4 rounded-pill" target="_blank" download>
+                <a href="{% static 'img/Reglamento_EIU.pdf' %}" class="btn btn-outline-danger mb-4 px-4 rounded-pill" target="_blank" download>
                     <i class="bi bi-download me-2"></i>Descargar PDF del Reglamento
                 </a>
 
-                <div class="form-check text-start bg-light p-4 rounded-3 border">
+                <div class="form-check text-start bg-light p-4 rounded-3 border mb-4">
                     <input class="form-check-input fs-4 mt-1" type="checkbox" name="acepto_reglamentos" id="acepto_reglamentos" {% if inscripcion.acepto_reglamentos %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} style="cursor: pointer;" required>
                     <label class="form-check-label ms-3 mt-1" for="acepto_reglamentos" style="cursor: pointer;">
                         <strong>He leído y acepto</strong> los lineamientos, normas y reglamentos estipulados por la Estancia Infantil UNACH para el ingreso y permanencia del menor. <span class="text-danger">*</span>
@@ -473,12 +639,37 @@
                     <div class="invalid-feedback fw-bold">Debes aceptar el reglamento para continuar.</div>
                 </div>
 
+                <div class="text-start bg-light p-4 rounded-3 border mb-4 shadow-sm">
+                    <label class="form-label fw-bold text-dark fs-5 mb-2"><i class="bi bi-upload me-2 text-primary"></i>Sube el Reglamento Firmado <span class="text-danger">*</span></label>
+                    <p class="text-muted small mb-3">Imprime el documento, fírmalo, escanéalo y súbelo aquí obligatoriamente en formato PDF para poder enviar tu expediente.</p>
+
+                    <input type="file" name="reglamento_firmado" id="reglamento_firmado" class="form-control form-control-lg border-primary" accept="application/pdf"
+                           {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+                           {% if not inscripcion.reglamento_firmado %}required{% endif %}>
+                    <div class="invalid-feedback fw-bold">Debes subir el reglamento firmado en PDF para poder enviar tu expediente.</div>
+
+                    {% if inscripcion.reglamento_firmado %}
+                    <div class="mt-3 alert alert-success py-2 mb-0 d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                        <span>Documento cargado: <a href="{{ inscripcion.reglamento_firmado.url }}" target="_blank" class="fw-bold text-success text-decoration-underline ms-1">Ver archivo actual</a></span>
+                    </div>
+                    {% endif %}
+
+                    {% if inscripcion.observaciones %}
+                    <div class="mt-4 border-top pt-3">
+                        <label class="form-label fw-bold text-primary small"><i class="bi bi-reply-fill me-1"></i>Responder a Trabajo Social (Opcional):</label>
+                        <input type="text" name="comentario_tutor" class="form-control border-primary" placeholder="Ej: Ya firmé la hoja 2 como me indicaron y subí el nuevo archivo.">
+                        <div class="form-text">Si deseas aclarar algo sobre tu corrección, escríbelo aquí.</div>
+                    </div>
+                    {% endif %}
+                    </div>
+
                 {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' %}
                 <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-5 pt-4 border-top">
                     <button type="submit" name="guardar_avance" class="btn btn-secondary btn-lg px-5 rounded-pill" formnovalidate>
                         <i class="bi bi-save me-2"></i>Guardar Avance
                     </button>
-                    <button type="submit" id="btnEnviarRevision" name="enviar_revision" class="btn btn-success btn-lg px-5 rounded-pill fw-bold shadow">
+                    <button type="button" id="btnEnviarRevision" class="btn btn-success btn-lg px-5 rounded-pill fw-bold shadow">
                         <i class="bi bi-send-fill me-2"></i>Enviar Expediente Definitivo
                     </button>
                 </div>
@@ -486,9 +677,35 @@
             </div>
         </div>
 
+        <div class="modal fade" id="confirmarEnvioModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 25px; border: none; box-shadow: 0 15px 50px rgba(0,0,0,0.3);">
+                    <div class="modal-header border-0 pb-0 justify-content-center pt-5">
+                        <i class="bi bi-exclamation-triangle-fill text-warning display-1 animated pulse infinite"></i>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <h2 class="fw-bold text-dark mb-3">¿Estás seguro?</h2>
+                        <p class="text-muted fs-5 mb-0">
+                            Una vez enviado tu expediente definitivo a revisión por Trabajo Social,
+                            <strong class="text-danger">ya no podrás modificar tus datos</strong> ni volver a subir el reglamento.
+                        </p>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0 gap-2 flex-column flex-sm-row">
+                        <button type="button" class="btn btn-secondary btn-lg rounded-pill px-5 w-100 w-sm-auto order-2 order-sm-1" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-2"></i>No, Cancelar
+                        </button>
+                        <button type="button" class="btn btn-success btn-lg rounded-pill px-5 w-100 w-sm-auto fw-bold shadow order-1 order-sm-2" id="btnConfirmarFinalJS">
+                            <i class="bi bi-send-fill me-2"></i>Sí, Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // -------------------------------------------------------------------
     // 1. Convertir Primera Letra en Mayúscula y Bloquear Números
@@ -501,12 +718,48 @@
     }
 
     // -------------------------------------------------------------------
-    // 2. Lógica Excluyente de Parentescos (Madre / Padre)
+    // 2. Ocultar Segundo Padre y Cambiar Números de Sección
+    // -------------------------------------------------------------------
+    function manejarEstadoCivil() {
+        const estadoCivil = document.getElementById('estado_civil_tutor_select').value;
+        const cardPadre = document.getElementById('card_segundo_padre');
+        const numFamiliares = document.getElementById('num_sec_familiares');
+        const numReglamentos = document.getElementById('num_sec_reglamentos');
+        const numExpediente = document.getElementById('num_sec_expediente');
+        const camposRequeridos = cardPadre.querySelectorAll('.sp-required');
+
+        if (estadoCivil === 'Soltero(a)' || estadoCivil === '') {
+            cardPadre.style.display = 'none';
+            numFamiliares.innerText = '3';
+            numExpediente.innerText = '4';
+            numReglamentos.innerText = '5';
+
+            camposRequeridos.forEach(campo => {
+                campo.required = false;
+                campo.disabled = true;
+            });
+        } else {
+            cardPadre.style.display = 'block';
+            numFamiliares.innerText = '4';
+            numExpediente.innerText = '5';
+            numReglamentos.innerText = '6';
+
+            camposRequeridos.forEach(campo => {
+                campo.disabled = false;
+                campo.required = true;
+            });
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // 3. Lógica Excluyente de Parentescos (Madre / Padre)
     // -------------------------------------------------------------------
     function sincronizarParentescos() {
         const selectTutor = document.getElementById('parentesco_tutor_select');
         const selectSegundoPadre = document.getElementById('parentesco_segundo_padre_select');
         const tituloSegundoPadre = document.getElementById('titulo_segundo_padre');
+
+        if (!tituloSegundoPadre) return;
 
         if (selectTutor.value === 'Madre') {
             selectSegundoPadre.value = 'Padre';
@@ -527,7 +780,7 @@
     }
 
     // -------------------------------------------------------------------
-    // 3. Lógica Tipo de Sangre "Otro"
+    // 4. Lógica Tipo de Sangre "Otro"
     // -------------------------------------------------------------------
     function manejarTipoSangre() {
         const selectSangre = document.getElementById('tipo_sangre_select');
@@ -548,13 +801,57 @@
     }
 
     function actualizarSangreReal() {
-        const inputReal = document.getElementById('tipo_sangre_real');
-        const inputOtro = document.getElementById('tipo_sangre_otro_input');
-        inputReal.value = inputOtro.value;
+        document.getElementById('tipo_sangre_real').value = document.getElementById('tipo_sangre_otro_input').value;
     }
 
     // -------------------------------------------------------------------
-    // 4. Mostrar y Eliminar Familiares Dinámicamente
+    // 5. Lógica Parentesco "Otro" para Familiares
+    // -------------------------------------------------------------------
+    function manejarPar(num) {
+        const selectPar = document.getElementById(`sel_par_${num}`);
+        const inputReal = document.getElementById(`real_par_${num}`);
+        const divOtro = document.getElementById(`div_otro_par_${num}`);
+        const inputOtro = document.getElementById(`inp_otro_par_${num}`);
+
+        if (selectPar.value === 'Otro') {
+            divOtro.style.display = 'block';
+            inputReal.value = inputOtro.value;
+            inputOtro.required = true;
+        } else {
+            divOtro.style.display = 'none';
+            inputReal.value = selectPar.value;
+            inputOtro.required = false;
+            inputOtro.value = '';
+        }
+    }
+
+    function actualizarPar(num) {
+        document.getElementById(`real_par_${num}`).value = document.getElementById(`inp_otro_par_${num}`).value;
+    }
+
+    function inicializarParentescosFamiliares() {
+        for(let i=1; i<=3; i++) {
+            const elReal = document.getElementById(`real_par_${i}`);
+            if(!elReal) continue;
+
+            const valActual = elReal.value;
+            const selectPar = document.getElementById(`sel_par_${i}`);
+            const inputOtro = document.getElementById(`inp_otro_par_${i}`);
+
+            if (valActual) {
+                if (['Abuelo(a)','Tío(a)','Hermano(a) Mayor'].includes(valActual)) {
+                    selectPar.value = valActual;
+                } else {
+                    selectPar.value = 'Otro';
+                    inputOtro.value = valActual;
+                    manejarPar(i);
+                }
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // 6. Mostrar y Eliminar Familiares Dinámicamente
     // -------------------------------------------------------------------
     let familiaresMostrados = 1;
 
@@ -577,7 +874,9 @@
             document.getElementById(`contacto_${numero}_apellido_paterno`).value = '';
             document.getElementById(`contacto_${numero}_apellido_materno`).value = '';
             document.getElementById(`contacto_${numero}_telefono`).value = '';
-            document.getElementById(`contacto_${numero}_parentesco`).value = '';
+            document.getElementById(`sel_par_${numero}`).value = '';
+            document.getElementById(`real_par_${numero}`).value = '';
+            manejarPar(numero);
 
             familiaresMostrados = (numero === 3) ? 2 : 1;
             document.querySelector("button[onclick='agregarFamiliar()']").style.display = 'block';
@@ -585,7 +884,7 @@
     }
 
     // -------------------------------------------------------------------
-    // 5. LÓGICA DE ESTADOS Y MUNICIPIOS DE MÉXICO
+    // 7. LÓGICA DE ESTADOS Y MUNICIPIOS DE MÉXICO
     // -------------------------------------------------------------------
     const mexicoData = {
         "Chiapas": ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán", "Palenque", "Tonalá"],
@@ -634,7 +933,7 @@
     }
 
     // -------------------------------------------------------------------
-    // 6. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
+    // 8. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
     // -------------------------------------------------------------------
     function calcularEdadMenor() {
         const fechaInput = document.getElementById('fecha_nac_menor').value;
@@ -643,7 +942,6 @@
 
         if (!fechaInput) return;
 
-        // Solo auto-calcular si las cajas están vacías (para no borrar cambios manuales del usuario)
         if (inputAnios.value === '' && inputMeses.value === '') {
             const partesFecha = fechaInput.split('-');
             const nacimiento = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
@@ -661,7 +959,6 @@
                 meses += 12;
             }
 
-            // Validar que no salgan números negativos si ponen fecha futura por error
             if(anios < 0) { anios = 0; meses = 0; }
 
             inputAnios.value = anios;
@@ -670,12 +967,14 @@
     }
 
     // -------------------------------------------------------------------
-    // 7. Arranque y Validaciones Generales
+    // 9. Arranque y Validaciones Generales
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
+        manejarEstadoCivil();
         sincronizarParentescos();
         inicializarEstados();
         calcularEdadMenor();
+        inicializarParentescosFamiliares();
 
         const selectSangre = document.getElementById('tipo_sangre_select');
         const inputOtro = document.getElementById('tipo_sangre_otro_input');
@@ -690,19 +989,45 @@
         const form = document.getElementById('inscripcionForm');
         const btnEnviar = document.getElementById('btnEnviarRevision');
 
+        // Modal de confirmación
+        const confirmarModalEl = document.getElementById('confirmarEnvioModal');
+        let myModal;
+        if(confirmarModalEl) {
+            myModal = new bootstrap.Modal(confirmarModalEl, { keyboard: false });
+        }
+        const btnConfirmarFinalJS = document.getElementById('btnConfirmarFinalJS');
+
         if(btnEnviar) {
             btnEnviar.addEventListener('click', function(event) {
+                event.preventDefault(); // Detener envío automático
+
                 if (!form.checkValidity()) {
-                    event.preventDefault();
                     event.stopPropagation();
                     form.classList.add('was-validated');
                     const firstInvalid = form.querySelector(':invalid');
                     if(firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
-                    if(!confirm('¿Estás seguro de enviar tu expediente? Una vez enviado ya no podrás modificar los datos.')) {
-                        event.preventDefault();
-                    }
+                    // Si todo está bien, mostrar modal
+                    if(myModal) myModal.show();
                 }
+            });
+        }
+
+        // Si dicen que SÍ en el modal
+        if(btnConfirmarFinalJS){
+            btnConfirmarFinalJS.addEventListener('click', function(){
+                // Input oculto para simular el click del botón original
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'enviar_revision';
+                hiddenInput.value = '1';
+                form.appendChild(hiddenInput);
+
+                // Loader
+                btnConfirmarFinalJS.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+                btnConfirmarFinalJS.disabled = true;
+
+                form.submit();
             });
         }
 

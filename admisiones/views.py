@@ -29,7 +29,6 @@ from .forms import (
     DictamenMedicoForm,
 )
 
-# --- SE AGREGARON LIBRERÍAS Y FUNCIONES PARA EL PDF DINÁMICO ---
 import os
 from .services import generar_pdf_fo301, generar_pdf_dictamen, generar_pdf_inscripcion_lleno
 from .models import Solicitud, LinkCaptura, SolicitudInscripcion
@@ -51,27 +50,23 @@ def captura_por_token(request, token):
         if form.is_valid():
             form.save()
 
-            # Marcar link como usado
             link.usado = True
             link.usado_en = timezone.now()
             link.save(update_fields=["usado", "usado_en"])
 
-            # Cambiar estado
             solicitud.estado = "RECIBIDA"
             solicitud.save(update_fields=["estado"])
 
-            # PDF
             from django.core.files import File
-
             try:
                 pdf_path = generar_pdf_fo301(solicitud)
-
-                with open(pdf_path, "rb") as f:
-                    solicitud.pdf.save(
-                        f"FO301_{solicitud.folio}.pdf",
-                        File(f),
-                        save=True
-                    )
+                if pdf_path and os.path.exists(pdf_path):
+                    with open(pdf_path, "rb") as f:
+                        solicitud.pdf.save(
+                            f"FO301_{solicitud.folio}.pdf",
+                            File(f),
+                            save=True
+                        )
             except Exception as e:
                 print("Error al generar PDF:", e)
 
@@ -140,7 +135,6 @@ def crear_solicitud_y_link(request):
             },
         )
 
-    # --- LÓGICA NUEVA: Decidimos qué guardar en la base de datos ---
     unidad_final = form.cleaned_data.get("unidad_academica", "")
     if unidad_final == "Otra":
         unidad_final = form.cleaned_data.get("unidad_academica_otra", "")
@@ -151,7 +145,7 @@ def crear_solicitud_y_link(request):
         apellido_paterno_tutor=form.cleaned_data["apellido_paterno_tutor"],
         apellido_materno_tutor=form.cleaned_data.get("apellido_materno_tutor", ""),
         matricula=form.cleaned_data.get("matricula", ""),
-        unidad_academica=unidad_final,  # Guardamos la real o la que escribieron
+        unidad_academica=unidad_final,
         correo=form.cleaned_data.get("correo", ""),
     )
 
@@ -221,27 +215,37 @@ def editar_solicitud(request, solicitud_id):
     return render(request, "admisiones/editar.html", {"solicitud": s})
 
 
-# --- NUEVA VERSIÓN DEL BOTÓN DE PDF ---
+# ===================== DESCARGAR PDF (CON SALVAVIDAS) =====================
 @staff_member_required
 def descargar_pdf_solicitud(request, solicitud_id):
     solicitud = get_object_or_404(Solicitud, id=solicitud_id)
 
-    # 1. Buscamos si el usuario ya tiene su expediente completo
     inscripcion = SolicitudInscripcion.objects.filter(solicitud_ingreso=solicitud).first()
 
-    # 2. Si ya tiene expediente, generamos tu Word nuevo al vuelo
+    # 1. Si ya tiene expediente, generamos la Hoja de Inscripción nueva
     if inscripcion:
         pdf_path = generar_pdf_inscripcion_lleno(inscripcion)
         if pdf_path and os.path.exists(pdf_path):
             return FileResponse(open(pdf_path, "rb"), as_attachment=True,
                                 filename=f"Hoja_Inscripcion_Folio_{solicitud.folio}.pdf")
 
-    # 3. Si apenas hizo la captura inicial (no ha entrado al portal), le damos el PDF básico
+    # 2. SALVAVIDAS: Si no tiene el PDF base generado, lo forzamos a crearse ahora mismo
+    if not solicitud.pdf:
+        try:
+            from django.core.files import File
+            pdf_path = generar_pdf_fo301(solicitud)
+            if pdf_path and os.path.exists(pdf_path):
+                with open(pdf_path, "rb") as f:
+                    solicitud.pdf.save(f"FO301_{solicitud.folio}.pdf", File(f), save=True)
+        except Exception as e:
+            print("Fallo de emergencia al generar PDF:", e)
+
+    # 3. Retornamos el PDF
     if solicitud.pdf:
         return FileResponse(solicitud.pdf.open("rb"), as_attachment=True,
                             filename=f"Solicitud_Basica_{solicitud.folio}.pdf")
 
-    raise Http404("El usuario aún no ha generado información para el PDF.")
+    raise Http404("El archivo PDF no pudo generarse. Verifica que las plantillas Word existan y estén cerradas.")
 
 
 def solicitud_publica_nueva(request):
@@ -253,16 +257,81 @@ def solicitud_publica_nueva(request):
 
 
 # =========================================================
-# VISTA DICTAMEN
+# VISTA DICTAMEN (CON LÓGICA DE PDF CORREGIDA Y CORREOS)
 # =========================================================
 
 @login_required
 def revisar_solicitud(request, pk):
     s = get_object_or_404(Solicitud, pk=pk)
+
+    # Buscamos la inscripción ligada al folio
+    inscripcion = SolicitudInscripcion.objects.filter(solicitud_ingreso=s).first()
+
     if s.estado == Solicitud.Estado.CAPTURA:
         messages.warning(request, "Esta solicitud aún está en CAPTURA (no ha sido enviada).")
         return redirect("panel_admisiones")
-    return render(request, "admisiones/revisar_solicitud.html", {"s": s})
+
+    # --- LÓGICA: REVISIÓN DEL REGLAMENTO PDF (TRABAJO SOCIAL) ---
+    if request.method == 'POST' and inscripcion:
+        accion_inscripcion = request.POST.get('accion_inscripcion')
+        comentario_inscripcion = request.POST.get('comentario_inscripcion', '').strip()
+
+        # Si el PDF está mal y Trabajo Social lo devuelve
+        if accion_inscripcion == 'DEVOLVER':
+            if not comentario_inscripcion:
+                messages.error(request, "Debes escribir el motivo de la devolución (ej. Falta firma en PDF).")
+            else:
+                inscripcion.estado = SolicitudInscripcion.EstadoInscripcion.EN_PROCESO
+                inscripcion.observaciones = comentario_inscripcion
+                inscripcion.comentario_tutor = ""  # Limpiamos la respuesta vieja del tutor
+                inscripcion.save()
+
+                # CORREO PERSONALIZADO CON LINK AL PANEL
+                if s.correo:
+                    url_portal = request.build_absolute_uri(reverse('portal_padres_home'))
+                    cuerpo_correo = f"""Estimado(a) {s.nombres_tutor}:\n\nTrabajo Social ha revisado su expediente y requiere una corrección en su documentación.\n\nMotivo de la devolución:\n"{comentario_inscripcion}"\n\nPor favor, ingrese a su Panel Familiar para subir el documento corregido y continuar con su trámite:\n🔗 {url_portal}\n\nAtentamente,\nEstancia Infantil UNACH"""
+                    try:
+                        send_mail(
+                            "ACCIÓN REQUERIDA: Corrección de Expediente UNACH",
+                            cuerpo_correo,
+                            getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@unach.mx"),
+                            [s.correo],
+                            fail_silently=True
+                        )
+                    except:
+                        pass
+                messages.success(request, "Expediente devuelto al tutor. Se envió un correo de notificación.")
+                return redirect('revisar_solicitud', pk=pk)
+
+        # Si el PDF está perfecto y firmado
+        elif accion_inscripcion == 'APROBAR':
+            inscripcion.estado = SolicitudInscripcion.EstadoInscripcion.EN_FILTROS
+            inscripcion.observaciones = ""
+            inscripcion.save()
+
+            # CORREO DE ÉXITO AL PAPÁ
+            if s.correo:
+                url_portal = request.build_absolute_uri(reverse('portal_padres_home'))
+                cuerpo_exito = f"""Estimado(a) {s.nombres_tutor}:\n\n¡Excelentes noticias! Su documentación ha sido validada correctamente por Trabajo Social.\nSu expediente ha pasado a la etapa de Filtros (Evaluación Médica, Nutricional y Psicológica).\n\nPuede monitorear su avance desde su Panel Familiar:\n🔗 {url_portal}\n\nAtentamente,\nEstancia Infantil UNACH"""
+                try:
+                    send_mail(
+                        "✅ Expediente Validado - Estancia Infantil UNACH",
+                        cuerpo_exito,
+                        getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@unach.mx"),
+                        [s.correo],
+                        fail_silently=True
+                    )
+                except:
+                    pass
+
+            messages.success(request, "Documentación validada correctamente. El expediente pasa a la etapa de Filtros.")
+            return redirect('revisar_solicitud', pk=pk)
+
+    # Le mandamos 'inscripcion' al HTML para que sepa qué mostrar
+    return render(request, "admisiones/revisar_solicitud.html", {
+        "s": s,
+        "inscripcion": inscripcion
+    })
 
 
 @login_required
@@ -327,7 +396,6 @@ def dictaminar_solicitud(request, pk):
             usuario_existente.save()
             usuario_final = usuario_existente
 
-        # --- AQUÍ ESTÁ EL ESCUDO TRY/EXCEPT ---
         try:
             SolicitudInscripcion.objects.get_or_create(solicitud_ingreso=s, defaults={'usuario_tutor': usuario_final})
         except IntegrityError:
@@ -335,7 +403,6 @@ def dictaminar_solicitud(request, pk):
             s.estado = Solicitud.Estado.RECIBIDA
             s.save()
             return redirect("revisar_solicitud", pk=pk)
-        # --------------------------------------
 
         if s.correo:
             ruta_pdf = generar_pdf_dictamen(s)
@@ -367,7 +434,7 @@ def dictaminar_solicitud(request, pk):
 
 
 # =========================================================
-# PORTAL DE PADRES (WIZARD DE INSCRIPCIÓN) - ACTUALIZADO
+# PORTAL DE PADRES (WIZARD DE INSCRIPCIÓN) - ACTUALIZADO CON CHECKLIST
 # =========================================================
 @login_required
 def portal_inscripcion(request):
@@ -377,17 +444,39 @@ def portal_inscripcion(request):
         messages.error(request, "Error interno: No tienes un proceso de inscripción activo.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    if request.method == 'POST':
-        if inscripcion.estado in ['EN_REVISION', 'FINALIZADA']:
-            messages.error(request, "Tu expediente ya fue enviado. No puedes modificarlo.")
-            return redirect('portal_inscripcion')
+    # --- LÓGICA DE BLOQUEO DE PANTALLA ---
+    # Si Trabajo Social ya lo pasó a Filtros, el papá ya NO puede ver el formulario.
+    if inscripcion.estado in [SolicitudInscripcion.EstadoInscripcion.EN_REVISION,
+                              SolicitudInscripcion.EstadoInscripcion.EN_FILTROS,
+                              SolicitudInscripcion.EstadoInscripcion.FINALIZADA]:
+        messages.info(request,
+                      "Usted ya ha completado este proceso o su expediente está en revisión. No puede realizar modificaciones.")
+        return redirect('/')  # Lo rebota a su panel principal (home_padres.html)
 
-        # 1. Beneficiario (Tutor)
+    if request.method == 'POST':
+        # --- GUARDAR TODOS LOS ARCHIVOS DEL EXPEDIENTE ---
+        lista_archivos = [
+            'doc_menor_certificado_medico', 'doc_menor_cartilla_vacunacion', 'doc_menor_grupo_sanguineo',
+            'doc_menor_acta_nacimiento', 'doc_menor_fotos', 'doc_menor_laboratorio',
+            'doc_tutor_acta_nacimiento', 'doc_tutor_ine', 'doc_tutor_fotos', 'doc_tutor_domicilio',
+            'doc_tutor_pago', 'doc_tutor_historial', 'doc_tutor_horario',
+            'doc_autorizado_carta', 'doc_autorizado_ine', 'doc_autorizado_fotos',
+            'reglamento_firmado'
+        ]
+
+        for campo in lista_archivos:
+            if campo in request.FILES:
+                setattr(inscripcion, campo, request.FILES[campo])
+
+        # --- GUARDAR TEXTOS ---
+        comentario = request.POST.get('comentario_tutor', '').strip()
+        if comentario:
+            inscripcion.comentario_tutor = comentario
+
         inscripcion.avance_academico = request.POST.get('avance_academico')
         inscripcion.estado_civil_tutor = request.POST.get('estado_civil_tutor')
         inscripcion.parentesco_tutor = request.POST.get('parentesco_tutor')
 
-        # 2. Menor (Nombres se guardan en Solicitud original, Edades y Detalles en Inscripción)
         s = inscripcion.solicitud_ingreso
         s.nombres_menor = request.POST.get('nombres_menor')
         s.apellido_paterno_menor = request.POST.get('apellido_paterno_menor')
@@ -411,7 +500,6 @@ def portal_inscripcion(request):
         inscripcion.sexo_menor = request.POST.get('sexo_menor')
         inscripcion.tipo_sangre_menor = request.POST.get('tipo_sangre_menor')
 
-        # 3. El otro Padre/Madre (Estructurado)
         inscripcion.parentesco_segundo_padre = request.POST.get('parentesco_segundo_padre')
         inscripcion.nombres_segundo_padre = request.POST.get('nombres_segundo_padre')
         inscripcion.apellido_paterno_segundo_padre = request.POST.get('apellido_paterno_segundo_padre')
@@ -430,7 +518,6 @@ def portal_inscripcion(request):
         inscripcion.celular_segundo_padre = request.POST.get('celular_segundo_padre')
         inscripcion.correo_segundo_padre = request.POST.get('correo_segundo_padre')
 
-        # 4. Familiares Autorizados (Estructurados)
         inscripcion.contacto_1_nombres = request.POST.get('contacto_1_nombres')
         inscripcion.contacto_1_apellido_paterno = request.POST.get('contacto_1_apellido_paterno')
         inscripcion.contacto_1_apellido_materno = request.POST.get('contacto_1_apellido_materno')
@@ -449,20 +536,51 @@ def portal_inscripcion(request):
         inscripcion.contacto_3_parentesco = request.POST.get('contacto_3_parentesco')
         inscripcion.contacto_3_telefono = request.POST.get('contacto_3_telefono')
 
-        # Reglamentos
         if request.POST.get('acepto_reglamentos') == 'on':
             inscripcion.acepto_reglamentos = True
             inscripcion.fecha_aceptacion = timezone.now()
         else:
             inscripcion.acepto_reglamentos = False
 
+        # --- LÓGICA BLINDADA DE ENVÍO Y VALIDACIÓN DE ARCHIVOS ---
         if 'enviar_revision' in request.POST:
             if not inscripcion.acepto_reglamentos:
                 messages.error(request, "DEBES aceptar el reglamento para poder enviar tu inscripción.")
                 return redirect('portal_inscripcion')
 
+            # --- VALIDACIÓN ESTRICTA: El sistema revisa si falta alguno de los 17 archivos ---
+            faltantes = []
+            if not inscripcion.doc_menor_certificado_medico: faltantes.append("Certificado Médico (Menor)")
+            if not inscripcion.doc_menor_cartilla_vacunacion: faltantes.append("Cartilla de Vacunación")
+            if not inscripcion.doc_menor_grupo_sanguineo: faltantes.append("Grupo Sanguíneo")
+            if not inscripcion.doc_menor_acta_nacimiento: faltantes.append("Acta de Nacimiento (Menor)")
+            if not inscripcion.doc_menor_fotos: faltantes.append("Fotos del Menor")
+            if not inscripcion.doc_menor_laboratorio: faltantes.append("Estudios de Laboratorio")
+
+            if not inscripcion.doc_tutor_acta_nacimiento: faltantes.append("Acta de Nacimiento (Tutor)")
+            if not inscripcion.doc_tutor_ine: faltantes.append("INE (Tutor)")
+            if not inscripcion.doc_tutor_fotos: faltantes.append("Fotos del Tutor")
+            if not inscripcion.doc_tutor_domicilio: faltantes.append("Comprobante de Domicilio")
+            if not inscripcion.doc_tutor_pago: faltantes.append("Comprobante de Pago")
+            if not inscripcion.doc_tutor_historial: faltantes.append("Historial Académico")
+            if not inscripcion.doc_tutor_horario: faltantes.append("Horario de Clases")
+
+            if not inscripcion.doc_autorizado_carta: faltantes.append("Carta de Autorización")
+            if not inscripcion.doc_autorizado_ine: faltantes.append("INE Autorizado")
+            if not inscripcion.doc_autorizado_fotos: faltantes.append("Fotos Autorizado")
+
+            if not inscripcion.reglamento_firmado: faltantes.append("Reglamento Firmado")
+
+            if faltantes:
+                # Si falta algo, no lo deja enviar
+                lista_errores = ", ".join(faltantes)
+                messages.error(request,
+                               f"¡ERROR! No puedes enviar el expediente. Faltan estos documentos: {lista_errores}")
+                return redirect('portal_inscripcion')
+
             inscripcion.estado = SolicitudInscripcion.EstadoInscripcion.EN_REVISION
-            messages.success(request, "¡Expediente enviado con éxito! Trabajo Social lo revisará pronto.")
+            inscripcion.observaciones = None
+            messages.success(request, "¡Expediente reenviado con éxito! Trabajo Social ya lo tiene en su bandeja.")
         else:
             inscripcion.estado = SolicitudInscripcion.EstadoInscripcion.EN_PROCESO
             messages.success(request, "Avance guardado correctamente. Puedes continuar luego.")
@@ -477,7 +595,6 @@ def portal_inscripcion(request):
 # DICTÁMENES POR ÁREA (PSICOLOGÍA / NUTRICIÓN / MÉDICO)
 # =========================================================
 def actualizar_estado_final(sol: Solicitud):
-    # Si alguna área rechaza -> RECHAZADA final
     if (
             sol.estado_psicologia == Solicitud.EstadoEvaluacion.RECHAZADO
             or sol.estado_nutricion == Solicitud.EstadoEvaluacion.RECHAZADO
@@ -487,7 +604,6 @@ def actualizar_estado_final(sol: Solicitud):
         sol.save(update_fields=["estado"])
         return
 
-    # Si las 3 aprueban -> APROBADA final
     if sol.todas_aprobadas():
         sol.estado = Solicitud.Estado.APROBADA
         sol.save(update_fields=["estado"])
@@ -565,20 +681,7 @@ def medico_pendientes(request):
     ).order_by("-created_at")
     return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
 
-@login_required
-def medico_registro(request):
-    qs = Solicitud.objects.filter(
-        estado_medico__in=[
-            Solicitud.EstadoEvaluacion.APROBADO,
-            Solicitud.EstadoEvaluacion.RECHAZADO
-        ]
-    ).order_by("-medico_en")
 
-    return render(
-        request,
-        "admisiones/medico_registro.html",
-        {"solicitudes": qs}
-    )
 @login_required
 def medico_dictaminar(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
@@ -611,6 +714,7 @@ def medico_dictaminar(request, pk):
         "bloqueado": bloqueado,
     })
 
+
 @login_required
 def medico_registro(request):
     aprobados = Solicitud.objects.filter(
@@ -630,3 +734,55 @@ def medico_registro(request):
             "total_registros": aprobados.count() + rechazados.count(),
         }
     )
+
+
+# =========================================================
+# VISTA: VEREDICTO FINAL DE LA DIRECTORA (ÉPICA 2 - FIN)
+# =========================================================
+@login_required
+def veredicto_final_directora(request, inscripcion_id):
+    if request.method == 'POST':
+        # Verificamos que solo staff (directiva) pueda hacer esto
+        if not request.user.is_staff:
+            return HttpResponseForbidden("No tienes permisos para dictaminar.")
+
+        inscripcion = get_object_or_404(SolicitudInscripcion, id=inscripcion_id)
+        accion = request.POST.get('accion')
+        s = inscripcion.solicitud_ingreso
+
+        if accion == 'ACEPTAR':
+            # Cambiamos el estado oficial a FINALIZADA (Aceptado en la Estancia)
+            inscripcion.estado = SolicitudInscripcion.EstadoInscripcion.FINALIZADA
+            inscripcion.save()
+
+            # Generamos el correo de Bienvenida Oficial
+            if s.correo:
+                asunto = "¡Felicidades! Admisión Aprobada - Estancia Infantil UNACH"
+                cuerpo = f"""Estimado(a) {s.nombres_tutor}:\n\nNos complace informarle que después de revisar sus evaluaciones médicas, nutricionales y psicológicas, su hijo(a) {s.nombres_menor} ha sido ACEPTADO(A) OFICIALMENTE en la Estancia Infantil UNACH.\n\nEn breve se le informará sobre su sala asignada y la fecha de la junta de inicio de semestre.\n\nAtentamente,\nDirección General"""
+
+                try:
+                    email = EmailMessage(asunto, cuerpo, getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@unach.mx"),
+                                         [s.correo])
+                    email.send(fail_silently=True)
+                except Exception as e:
+                    print("Error al enviar correo de aceptación:", e)
+
+            messages.success(request, f"¡Éxito! El aspirante {s.nombres_menor} ha sido ACEPTADO oficialmente.")
+
+        elif accion == 'RECHAZAR':
+            # Cambiamos el estado oficial a RECHAZADA
+            inscripcion.estado = SolicitudInscripcion.EstadoInscripcion.RECHAZADA
+            inscripcion.save()
+
+            if s.correo:
+                asunto = "Resultado de Admisión - Estancia Infantil UNACH"
+                cuerpo = f"""Estimado(a) {s.nombres_tutor}:\n\nLe informamos que el proceso de revisión ha concluido. Lamentablemente, por motivos de cupo o dictámenes de los especialistas, no nos es posible aceptar su solicitud de ingreso en este ciclo escolar.\n\nAgradecemos su interés en la Estancia Infantil UNACH.\n\nAtentamente,\nDirección General"""
+                try:
+                    send_mail(asunto, cuerpo, getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@unach.mx"), [s.correo],
+                              fail_silently=True)
+                except:
+                    pass
+
+            messages.error(request, f"La solicitud de {s.nombres_menor} ha sido RECHAZADA. Se envió correo al tutor.")
+
+    return redirect('dashboard_directiva')

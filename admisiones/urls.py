@@ -35,4 +35,9 @@ urlpatterns = [
     path("medico/", views.medico_pendientes, name="medico_pendientes"),
     path("medico/<int:pk>/", views.medico_dictaminar, name="medico_dictaminar"),
     path("medico/registro/", views.medico_registro, name="medico_registro"),
+
+    # =========================================================
+    # VISTA FINAL DE DIRECTORA (ÉPICA 2)
+    # =========================================================
+    path('veredicto-final/<int:inscripcion_id>/', views.veredicto_final_directora, name='veredicto_final_directora'),
 ]

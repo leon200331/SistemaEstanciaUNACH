@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
@@ -10,7 +10,7 @@ from .models import AccessLog, RelacionDepartamentos
 
 # ✅ Solicitud (admisiones)
 try:
-    from admisiones.models import Solicitud
+    from admisiones.models import Solicitud, SolicitudInscripcion
 except ImportError:
     pass
 
@@ -27,6 +27,7 @@ def enmascarar_datos(texto):
 def root_redirect_view(request):
     user = request.user
 
+    # 1. VERIFICACIÓN DE MANTENIMIENTO
     if request.session.get('sec_manto', False) and not user.is_superuser:
         return render(
             request,
@@ -34,39 +35,101 @@ def root_redirect_view(request):
             {'mensaje': 'El sistema está en Mantenimiento. Intente más tarde.'}
         )
 
+    # 2. SI ES EL SUPERADMINISTRADOR (TI)
     if user.is_superuser:
         return redirect('panel_gobierno_ti')
 
+    # 3. SI ES UN PAPÁ (BENEFICIARIO)
+    if getattr(user, 'tipo_persona', '') == 'BENEFICIARIO':
+        return redirect('portal_padres_home')
+
+    # 4. SI ES STAFF (PERSONAL DE LA ESTANCIA)
     if user.is_staff:
         grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
+        tipo_persona = getattr(user, 'tipo_persona', '').upper()
 
-        # Psicología
+        # A) ¿Es Directiva? (Filtramos por nombre de grupo o tipo_persona)
+        if "directiva" in grupo or tipo_persona == 'DIRECTIVO' or "directora" in grupo or "coordinadora" in grupo:
+            return redirect('dashboard_directiva')
+
+        # B) Filtros Médicos y Especialistas
         if "psicologa" in grupo or "psicólogo" in grupo or "psicologo" in grupo:
             return redirect('psicologia_pendientes')
 
-        # Nutrición
         if "nutricion" in grupo or "nutriólogo" in grupo or "nutriologo" in grupo:
             return redirect('nutricion_pendientes')
 
-        # Médico
-        if (
-            "medico" in grupo
-            or "médico" in grupo
-            or "doctor" in grupo
-            or "doctora" in grupo
-        ):
+        if "medico" in grupo or "médico" in grupo or "doctor" in grupo or "doctora" in grupo:
             return redirect('medico_pendientes')
 
-        # Trabajo social / panel general
+        # C) Trabajo social
         if "trabajador social" in grupo or "trabajadora social" in grupo:
-            return redirect('dashboard_admin')
+            return redirect('dashboard_admin')  # Panel de admisiones
 
-        return redirect('dashboard_admin')
+        # ===============================================================
+        # D) BLOQUEO ESTRICTO: Es staff pero no tiene un puesto asignado
+        # ===============================================================
+        logout(request)
+        messages.error(request, "Acceso Denegado: Su usuario no tiene un puesto asignado en el sistema. Contacte a TI.")
+        return redirect('login')
 
-    return redirect('portal_padres_home')
+    # Si por alguna extraña razón no cae en ningún lado
+    logout(request)
+    messages.error(request, "Error de rol de usuario.")
+    return redirect('login')
 
 
 # --- VISTAS PROTEGIDAS ---
+
+# NUEVA VISTA PARA LA DIRECTORA CON DATOS 100% REALES
+@login_required
+def dashboard_directiva(request):
+    if not request.user.is_staff:
+        return render(request, '403_prohibido.html', {'mensaje': 'Acceso denegado. Exclusivo para personal directivo.'})
+
+    # Variables base
+    dictamenes_pendientes = []
+    kpi_alumnos = 0
+    kpi_por_autorizar = 0
+
+    try:
+        # Aquí consultamos los datos REALES de la Épica 2
+        dictamenes_pendientes = SolicitudInscripcion.objects.filter(
+            estado='EN_FILTROS',
+            solicitud_ingreso__estado_medico='APROBADO',
+            solicitud_ingreso__estado_nutricion='APROBADO',
+            solicitud_ingreso__estado_psicologia='APROBADO'
+        ).order_by('-updated_at')
+
+        kpi_alumnos = SolicitudInscripcion.objects.filter(estado='FINALIZADA').count()
+        kpi_por_autorizar = dictamenes_pendientes.count()
+    except Exception:
+        pass
+
+    # Diccionario de contexto con TODO dinámico
+    context = {
+        # Lo que ya funciona (Épica 2)
+        'dictamenes_pendientes': dictamenes_pendientes,
+        'kpi_alumnos': kpi_alumnos,
+        'kpi_por_autorizar': kpi_por_autorizar,
+
+        # Lo que haremos en la Épica 3 (Por ahora listas vacías y contadores en 0)
+        'kpi_incidencias': 0,
+        'kpi_mensajes': 0,
+        'kpi_salas': 0,
+        'docs_medico': [],
+        'docs_nutricion': [],
+        'docs_psicologia': [],
+        'mensajes_inscritos': [],
+        'mensajes_nuevos': [],
+        'incidencias_recientes': [],
+        'proximos_eventos': [],
+        'notificaciones': [],
+    }
+
+    return render(request, 'portal/home_directiva.html', context)
+
+
 @login_required
 def dashboard_admin(request):
     # Solo el personal interno (is_staff) puede ver esto

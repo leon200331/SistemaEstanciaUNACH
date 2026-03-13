@@ -100,7 +100,6 @@ class Solicitud(models.Model):
 
     observaciones_medico = models.TextField(null=True, blank=True)
 
-
     medico_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -313,11 +312,9 @@ class SolicitudInscripcion(models.Model):
     tipo_sangre_menor = models.CharField(max_length=20, null=True, blank=True, verbose_name="Tipo de Sangre")
 
     parentesco_segundo_padre = models.CharField(max_length=50, null=True, blank=True)
-
     nombres_segundo_padre = models.CharField(max_length=80, null=True, blank=True, verbose_name="Nombre(s)")
     apellido_paterno_segundo_padre = models.CharField(max_length=60, null=True, blank=True, verbose_name="Apellido Paterno")
     apellido_materno_segundo_padre = models.CharField(max_length=60, null=True, blank=True, verbose_name="Apellido Materno")
-
     estado_civil_segundo_padre = models.CharField(max_length=50, null=True, blank=True, verbose_name="Estado Civil Padre/Madre")
     ocupacion_segundo_padre = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ocupación Padre/Madre")
 
@@ -352,18 +349,52 @@ class SolicitudInscripcion(models.Model):
     acepto_reglamentos = models.BooleanField(default=False)
     fecha_aceptacion = models.DateTimeField(null=True, blank=True)
 
+    # =========================================================
+    # EXPEDIENTE DIGITAL (DOCUMENTOS OBLIGATORIOS SPRINT 2)
+    # =========================================================
+    # --- 1. DEL MENOR ---
+    doc_menor_certificado_medico = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Certificado Médico")
+    doc_menor_cartilla_vacunacion = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Cartilla de Vacunación")
+    doc_menor_grupo_sanguineo = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Grupo Sanguíneo")
+    doc_menor_acta_nacimiento = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Acta de Nacimiento")
+    doc_menor_fotos = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="3 Fotos Infantiles")
+    doc_menor_laboratorio = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Estudios de Laboratorio")
+
+    # --- 2. DEL BENEFICIARIO (TUTOR) ---
+    doc_tutor_acta_nacimiento = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Acta de Nacimiento Tutor")
+    doc_tutor_ine = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Copia de INE Tutor")
+    doc_tutor_fotos = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="3 Fotos Infantiles Tutor")
+    doc_tutor_domicilio = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Comprobante de Domicilio")
+    doc_tutor_pago = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Comprobante de Pago Inscripción")
+    doc_tutor_historial = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Historial Académico")
+    doc_tutor_horario = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Horario de Clases")
+
+    # --- 3. DEL AUTORIZADO ---
+    doc_autorizado_carta = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True, verbose_name="Carta de Autorización")
+    doc_autorizado_ine = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True, verbose_name="Copia de INE Autorizado")
+    doc_autorizado_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True, verbose_name="2 Fotos Infantiles Autorizado")
+
+    # --- REGLAMENTO ---
+    reglamento_firmado = models.FileField(upload_to="reglamentos_firmados/", null=True, blank=True, verbose_name="Reglamento Firmado (PDF)")
+
+    # --- CONTROL DE TRABAJO SOCIAL ---
+    observaciones = models.TextField(null=True, blank=True, verbose_name="Observaciones (Correcciones)")
+    comentario_tutor = models.TextField(null=True, blank=True, verbose_name="Comentario del Tutor al reenviar")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Expediente de Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
 
-def __str__(self):
-    return f"Historia clínica - Inscripción {self.inscripcion_id}"
 
 class HistoriaClinicaMedica(models.Model):
     inscripcion = models.OneToOneField(
         SolicitudInscripcion,
         on_delete=models.CASCADE,
-        related_name="historia_clinica_medica"
+        related_name="historia_clinica_medica",
+        null=True,
+        blank=True
     )
 
     # Ficha de identidad
@@ -439,4 +470,4 @@ class HistoriaClinicaMedica(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Historia clínica - Solicitud {self.solicitud_id}"
+        return f"Historia clínica - Solicitud {self.inscripcion_id}"

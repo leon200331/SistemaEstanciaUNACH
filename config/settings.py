@@ -121,6 +121,11 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# --- NUEVO: CONFIGURACIÓN PARA ARCHIVOS SUBIDOS POR USUARIOS (PDFs) ---
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+# ----------------------------------------------------------------------
+
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 # Redirecciones de Login

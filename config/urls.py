@@ -8,6 +8,10 @@ from django.contrib.auth import views as auth_views
 # --- IMPORTANTE: ESTA LÍNEA ES LA CLAVE ---
 from usuarios import views as user_views
 
+# --- NUEVAS IMPORTACIONES PARA VER PDFs ---
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     # 1. ADMIN DE DJANGO
     path('admin/', admin.site.urls),
@@ -22,6 +26,9 @@ urlpatterns = [
     path('panel-administrativo/', user_views.dashboard_admin, name='dashboard_admin'),
     path('area-medica/', user_views.dashboard_medico, name='dashboard_medico'),
     path('portal-padres/', user_views.portal_padres_home, name='portal_padres_home'),
+
+    # --- NUEVA RUTA PARA LA DIRECTORA ---
+    path('panel-directiva/', user_views.dashboard_directiva, name='dashboard_directiva'),
 
     # 5. INSCRIPCIÓN
     path('inscripcion-nueva/', user_views.registro_inscripcion, name='registro_inscripcion'),
@@ -44,3 +51,7 @@ urlpatterns = [
     path('gobierno-ti/', user_views.panel_gobierno_ti, name='panel_gobierno_ti'),
 
 ]
+
+# --- NUEVO: PERMISO PARA MOSTRAR LOS ARCHIVOS SUBIDOS EN MODO DESARROLLO ---
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
