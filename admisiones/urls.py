@@ -39,13 +39,10 @@ urlpatterns = [
     path("medico/", views.medico_pendientes, name="medico_pendientes"),
     path("medico/<int:pk>/", views.medico_dictaminar, name="medico_dictaminar"),
     path("medico/registro/", views.medico_registro, name="medico_registro"),
-<<<<<<< HEAD
+    path("medico/<int:pk>/pdf/", views.medico_pdf, name="medico_pdf"),
 
     # =========================================================
     # VISTA FINAL DE DIRECTORA (ÉPICA 2)
     # =========================================================
     path('veredicto-final/<int:inscripcion_id>/', views.veredicto_final_directora, name='veredicto_final_directora'),
-=======
-    path("medico/<int:pk>/pdf/", views.medico_pdf, name="medico_pdf"),
->>>>>>> 9cf9f3aa36532df235963898f5e43979494268d8
 ]

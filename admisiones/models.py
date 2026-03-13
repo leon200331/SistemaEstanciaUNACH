@@ -631,12 +631,7 @@ class SolicitudInscripcion(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-<<<<<<< HEAD
         return f"Expediente de Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
-
-=======
-        return f"Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
->>>>>>> 9cf9f3aa36532df235963898f5e43979494268d8
 
 class HistoriaClinicaMedica(models.Model):
     inscripcion = models.OneToOneField(
@@ -713,8 +708,4 @@ class HistoriaClinicaMedica(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-<<<<<<< HEAD
         return f"Historia clínica - Solicitud {self.inscripcion_id}"
-=======
-        return f"Historia clínica - Inscripción {self.inscripcion_id}"
->>>>>>> 9cf9f3aa36532df235963898f5e43979494268d8
