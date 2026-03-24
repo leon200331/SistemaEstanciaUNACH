@@ -16,8 +16,13 @@ urlpatterns = [
     # 1. ADMIN DE DJANGO
     path('admin/', admin.site.urls),
 
-    # 2. EL LOGIN
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    # =================================================================================
+    # 2. EL LOGIN (CANDADO ACTIVADO: Si ya está logueado, lo rebota y no lo deja verlo)
+    # =================================================================================
+    path('login/', auth_views.LoginView.as_view(
+        template_name='registration/login.html',
+        redirect_authenticated_user=True  # <--- ESTA ES LA MAGIA QUE FALTABA
+    ), name='login'),
 
     # 3. EL SEMÁFORO (Raíz)
     path('', user_views.root_redirect_view, name='root'),

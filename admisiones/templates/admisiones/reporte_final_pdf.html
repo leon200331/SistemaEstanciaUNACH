@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Final de Ingreso FO-301</title>
+
+    <style>
+        /* Configuración de Página Completa (xhtml2pdf requiere esto) */
+        @page {
+            size: letter;
+            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+
+            /* Encabezado fijo en todas las hojas si se estira */
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 1.5cm; width: 18.59cm; top: 1.5cm; height: 3.5cm;
+            }
+            /* Área de firma fija en la parte inferior si la hoja se estira */
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 1.5cm; width: 18.59cm; top: 22.5cm; height: 5.5cm;
+            }
+        }
+
+        /* Estilos Globales para verse Oficial */
+        body {
+            font-family: 'Times New Roman', Times, serif; /* Fuente formal */
+            font-size: 13pt;
+            color: #000;
+            line-height: 1.6;
+        }
+
+        /* Contenedor principal para que no se encima con el encabezado fijo */
+        .content-container { margin-top: 3.5cm; }
+
+        /* replicated header table style from image */
+        .header-table {
+            width: 100%;
+            border-bottom: 2pt solid #000;
+            padding-bottom: 5pt;
+            border-collapse: collapse;
+        }
+        .header-table td { vertical-align: middle; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-justify { text-align: justify; }
+        .fw-bold { font-weight: bold; }
+        .text-uppercase { text-uppercase: uppercase; }
+
+        /* Estilos de información oficial */
+        .u-chaps { font-size: 14pt; margin: 0; }
+        .estancia { font-size: 12pt; margin: 0; color: #444; }
+        .fo-code { font-size: 11pt; font-weight: bold; }
+
+        .title { margin-top: 30pt; margin-bottom: 40pt; }
+
+        /* Simulación de las líneas de firma punteadas exactas de la imagen */
+        .signatures-table {
+            width: 100%;
+            margin-top: 50pt;
+            border-collapse: collapse;
+        }
+        .signature-cell {
+            width: 48%;
+            text-align: center;
+            vertical-align: top;
+        }
+        .signature-line {
+            border-top: 1pt solid #000;
+            margin-top: 30pt;
+            margin-bottom: 4pt;
+        }
+        .firma-digital {
+            font-family: 'Courier New', Courier, monospace;
+            color: #000080; /* Azul marino */
+            font-size: 11pt;
+            height: 35pt;
+            display: block;
+        }
+        .label-firma {
+            display: inline-block;
+            border: 1.5pt dotted #000; /* Borde punteado como la imagen */
+            padding: 2pt 8pt;
+            font-size: 12pt;
+        }
+
+        /* Sección que permite crecer si hay mucho texto */
+        .motivos-textarea {
+            width: 100%;
+            margin-top: 5pt;
+            margin-bottom: 20pt;
+            font-size: 13pt;
+            font-style: italic;
+            border-bottom: 1pt solid #000;
+            padding-bottom: 3pt;
+            word-wrap: break-word; /* Obliga a romper palabras si son muy largas */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header_content">
+        <table class="header-table">
+            <tr>
+                <td width="20%">
+                    <img src="{% static 'img/logo_unach.png' %}" height="70" alt="UNACH">
+                </td>
+
+                <td width="60%" class="text-center">
+                    <p class="fw-bold u-chaps">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</p>
+                    <p class="estancia">ESTANCIA INFANTIL UNACH</p>
+                </td>
+
+                <td width="20%" class="text-right">
+                    <img src="{% static 'img/logo_eiu.png' %}" height="50" alt="EIU">
+                    <div class="fo-code mt-1">FO-301-02-18</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-container">
+
+        <h3 class="text-center fw-bold title">REPORTE FINAL DE INGRESO</h3>
+
+        <div class="text-right mb-4">
+            <strong>Fecha:</strong> <u class="ms-2 fw-bold"> &nbsp; {{ inscripcion.directora_en|date:"d" }} de {{ inscripcion.directora_en|date:"F" }} de {{ inscripcion.directora_en|date:"Y" }} &nbsp; </u>
+        </div>
+
+        <p class="text-justify" style="margin-bottom: 25pt;">
+            Derivado de la información proporcionada por las diversas áreas que participan en el proceso de inscripción al servicio que proporciona la Estancia Infantil UNACH, se determina que el menor
+            <strong class="text-uppercase" style="border-bottom: 1.5pt solid #000;">
+                &nbsp; {{ inscripcion.solicitud_ingreso.nombres_menor }} {{ inscripcion.solicitud_ingreso.apellido_paterno_menor }} {{ inscripcion.solicitud_ingreso.apellido_materno_menor }} &nbsp;
+            </strong>
+        </p>
+
+        <div style="margin-left: 20pt; margin-bottom: 20pt;">
+            {% if inscripcion.reporte_final_aprobado %}
+                <p>
+                    <strong style="font-size:1.4em;">( X )</strong>
+                    <span class="ms-2">Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.</span>
+                </p>
+                <p>
+                    <span style="font-size:1.4em;">( &nbsp;&nbsp; )</span>
+                    <span class="ms-2 text-muted">No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza la inscripción del mismo por los siguientes motivos:</span>
+                </p>
+            {% else %}
+                <p class="text-muted">
+                    <span style="font-size:1.4em;">( &nbsp;&nbsp; )</span>
+                    <span class="ms-2">Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.</span>
+                </p>
+                <p>
+                    <strong style="font-size:1.4em;">( X )</strong>
+                    <span class="ms-2">No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza la inscripción del mismo por los siguientes motivos:</span>
+                </p>
+            {% endif %}
+        </div>
+
+        <div style="margin-left: 50pt;">
+            {% if inscripcion.reporte_final_motivos %}
+                <div class="motivos-textarea text-justify">
+                    {{ inscripcion.reporte_final_motivos|linebreaksbr }}
+                </div>
+            {% else %}
+                <p>__________________________________________________________________________________________</p>
+                <p>__________________________________________________________________________________________</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div id="footer_content">
+        <table class="signatures-table">
+            <tr>
+                <td class="signature-cell">
+                    <div class="signature-line"></div>
+                    <span class="firma-digital fw-bold text-uppercase">
+                        Firmado digitalmente por:<br>
+                        {{ inscripcion.reporte_final_por.nombre }} {{ inscripcion.reporte_final_por.apellido_paterno }} {{ inscripcion.reporte_final_por.apellido_materno|default:"" }}
+                    </span>
+                    <div class="label-firma fw-bold">Nombre y Firma de la Trabajadora Social</div>
+                </td>
+
+                <td width="4%"></td>
+
+                <td class="signature-cell">
+                    <div class="signature-line"></div>
+                    <span class="firma-digital fw-bold text-uppercase">
+                        Firmado digitalmente por:<br>
+                        {{ inscripcion.directora_por.nombre }} {{ inscripcion.directora_por.apellido_paterno }} {{ inscripcion.directora_por.apellido_materno|default:"" }}
+                    </span>
+                    <div class="label-firma fw-bold">Nombre y Firma de la Directora</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

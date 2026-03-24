@@ -5,174 +5,316 @@
 
 {% block extra_css %}
 <style>
-    /* El body background puede chocar con el base, pero aquí lo forzamos para esta vista */
-    body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+    :root {
+      --brand: #1e3a8a;
+      --brand2: #2563eb;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --card: #ffffff;
+      --bg: #f6f8fc;
+    }
+
+    body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: var(--ink); }
 
     /* Barra de Navegación UNACH */
     .navbar-unach {
-        background-color: #1e3a8a; /* Azul Institucional */
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        background-color: var(--brand);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        padding: 0.75rem 0;
     }
-    .navbar-brand { font-weight: bold; color: white !important; }
+    .navbar-brand { font-weight: 800; color: white !important; letter-spacing: 0.5px; }
+    .logo-img { max-height: 42px; margin-right: 12px; object-fit: contain; }
 
-    /* Estilo para el logo */
-    .logo-img {
-        max-height: 40px; /* Ajusta la altura del logo según sea necesario */
-        margin-right: 10px;
+    .btn-nav {
+      border-radius: 10px;
+      font-weight: 800;
+      padding: 0.5rem 0.9rem;
     }
 
-    /* Tarjeta de Bienvenida */
-    .welcome-card {
-        background: linear-gradient(135deg, #1e3a8a 0%, #2980b9 100%);
+    /* Tarjeta de Bienvenida (Hero) */
+    .hero-card {
+        background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
         color: white;
-        border-radius: 15px;
-        padding: 40px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 20px rgba(30, 58, 138, 0.2);
+        border-radius: 20px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        margin-top: 20px;
+        box-shadow: 0 18px 40px rgba(30, 58, 138, 0.18);
+        position: relative;
+        overflow: hidden;
     }
+    .hero-card:after {
+        content: "";
+        position: absolute;
+        right: -80px;
+        top: -100px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        filter: blur(2px);
+    }
+    .hero-card h1 { font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .hero-card .lead { font-size: 1.1rem; opacity: 0.95; font-weight: 500; }
+    .hero-icon { font-size: 6rem; opacity: 0.2; transform: rotate(-10deg); position: absolute; right: 40px; top: 20px; }
 
     /* Tarjetas de Acciones */
     .action-card {
-        background: white;
-        border-radius: 15px;
+        background: var(--card);
+        border-radius: 20px;
         border: none;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        padding: 35px;
+        transition: all 0.3s ease;
         height: 100%;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
     }
     .action-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
     }
-    .icon-box {
-        font-size: 3rem;
-        color: #d63384; /* Color secundario */
-        margin-bottom: 15px;
+
+    .icon-box-primary {
+        width: 80px; height: 80px;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--brand2);
+        border-radius: 22px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
     }
+    .icon-box-success {
+        width: 80px; height: 80px;
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border-radius: 22px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+
+    .card-title-custom { font-weight: 900; color: var(--ink); margin-bottom: 15px; font-size: 1.35rem; }
+    .card-text-custom { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; flex-grow: 1; }
+
+    .btn-action {
+        border-radius: 12px;
+        font-weight: 800;
+        padding: 0.8rem 1.5rem;
+        width: 100%;
+        transition: all 0.2s;
+    }
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--brand2), var(--brand));
+        border: none; color: white;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    }
+    .btn-primary-custom:hover { background: linear-gradient(135deg, #1d4ed8, #1e3a8a); color: white; transform: scale(1.02); }
+
+    .status-pill {
+        border-radius: 999px;
+        padding: 0.8rem 1.5rem;
+        font-weight: 800;
+        width: 100%;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .alert-custom { border-radius: 16px; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+
+    /* Alerta de devolución especial para el home */
+    .alert-devuelta-home {
+        background-color: #fffafa;
+        border: 2px solid #ffcdd2;
+        border-left: 8px solid #dc3545;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    .alert-devuelta-home i { font-size: 2.5rem; line-height: 1; margin-top: 5px; }
+    .alert-devuelta-home h4 { font-weight: 900; margin-bottom: 10px; }
+    .alert-devuelta-home p { margin-bottom: 15px; font-size: 1.05rem; }
+    .btn-corregir { border-radius: 12px; font-weight: 800; padding: 0.6rem 1.5rem; }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<nav class="navbar navbar-expand-lg navbar-unach mb-4">
+{% with mi_inscripcion=inscripcion|default:request.user.expediente_inscripcion %}
+
+<nav class="navbar navbar-expand-lg navbar-unach fixed-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="#">
             <img src="{% static 'img/logo.png' %}" alt="Logo UNACH" class="logo-img">
             Estancia Infantil UNACH
         </a>
-        <div class="d-flex">
-            <span class="text-white me-3 align-self-center">
-                <i class="bi bi-person-circle"></i> {{ request.user.email }} (Tutor)
+        <div class="ms-auto d-flex gap-3 align-items-center">
+            <span class="text-white fw-semibold small d-none d-md-inline">
+                <i class="bi bi-person-circle me-1"></i> {{ request.user.email }} (Tutor)
             </span>
-            <form action="{% url 'logout' %}" method="post">
+            <form action="{% url 'logout' %}" method="post" class="m-0">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Salir
+                <button type="submit" class="btn btn-outline-light btn-nav">
+                    <i class="bi bi-box-arrow-right me-1"></i> Salir
                 </button>
             </form>
         </div>
     </div>
 </nav>
 
-<div class="container">
+<div class="container" style="padding-top: 90px; max-width: 1100px;">
 
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm mt-3" role="alert">
-                <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Aviso:</strong> {{ message }}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show alert-custom mt-2 mb-0" role="alert">
+                <strong><i class="bi bi-info-circle-fill me-2"></i>Aviso:</strong> {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     {% endif %}
 
-    <div class="welcome-card text-center text-md-start">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="fw-bold">¡Bienvenido(a), {{ request.user.nombre|default:request.user.first_name }}!</h1>
-                <p class="lead mb-0">Ciclo Escolar 2026 - Panel de Gestión Familiar</p>
-                <p class="small opacity-75 mt-2">Estamos listos para recibir a tus pequeños.</p>
-            </div>
-            <div class="col-md-4 text-center">
-                <i class="bi bi-house-heart-fill display-1 opacity-50"></i>
+    <div class="hero-card">
+        <i class="bi bi-house-heart-fill hero-icon d-none d-md-block"></i>
+        <div class="position-relative" style="z-index: 2;">
+            <h1>¡Bienvenido(a), {{ request.user.nombre|default:request.user.first_name }}!</h1>
+            <p class="lead">Ciclo Escolar 2026 - Panel de Gestión Familiar</p>
+            <div class="d-inline-flex align-items-center gap-2 mt-2 px-3 py-1 rounded-pill" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);">
+                <i class="bi bi-stars"></i> <span class="small fw-bold">Estamos listos para recibir a tus pequeños.</span>
             </div>
         </div>
     </div>
 
-    {% if request.user.expediente_inscripcion.observaciones and request.user.expediente_inscripcion.estado == 'EN_PROCESO' %}
-    <div class="alert alert-danger d-flex align-items-center shadow-sm mb-4 border-danger rounded-4" role="alert" style="border-width: 2px;">
-        <i class="bi bi-exclamation-triangle-fill display-5 me-4 text-danger"></i>
-        <div>
-            <h4 class="fw-bold mb-1 text-danger">¡Acción Requerida! Expediente Devuelto</h4>
-            <p class="mb-1 fw-semibold text-dark">Trabajo Social revisó tu documento y solicitó la siguiente corrección:</p>
-            <p class="mb-2 fst-italic bg-white p-2 border rounded">"{{ request.user.expediente_inscripcion.observaciones }}"</p>
-            <hr class="border-danger opacity-25">
-            <p class="mb-0 fw-bold">👉 Entra a "Mi Expediente de Inscripción", corrige tu información o documentos y vuelve a enviarlo para no detener tu trámite.</p>
+    {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+        <div class="card-header bg-success text-white py-3">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-check-circle-fill me-2"></i> ¡Inscripción Aprobada por Dirección!</h5>
+        </div>
+        <div class="card-body p-4" style="background-color: #f0fdf4;">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h4 class="fw-black text-dark mb-3">Último Paso: Confirmar tu Pago</h4>
+                    <p class="text-muted fs-5">Felicidades, tu menor ha sido aceptado oficialmente. Para finalizar tu proceso, por favor sube tu comprobante de pago de inscripción.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'descargar_reporte_final_padre' mi_inscripcion.id %}" class="btn btn-outline-success fw-bold rounded-pill">
+                            <i class="bi bi-download me-1"></i> Descargar Reporte Final
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="bg-white p-4 rounded-4 shadow-sm border">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <label class="form-label fw-bold text-brand small mb-2 text-uppercase">Subir Comprobante (PDF o Imagen)</label>
+                            <input type="file" name="comprobante_pago" class="form-control mb-3" required>
+                            <button type="submit" name="subir_pago" class="btn btn-success w-100 fw-bold py-2 shadow-sm rounded-3">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Enviar a Validación
+                            </button>
+                        </form>
+                        {% if mi_inscripcion.doc_tutor_pago %}
+                        <div class="text-center mt-3 text-success small fw-bold">
+                            <i class="bi bi-file-earmark-check"></i> Ya enviaste un archivo.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
 
-    {% if request.user.expediente_inscripcion.estado == 'EN_FILTROS' %}
-    <div class="alert alert-success d-flex align-items-center shadow-sm mb-4 border-success rounded-4" role="alert" style="border-width: 2px;">
-        <i class="bi bi-check-circle-fill display-5 me-4 text-success"></i>
+    {% if mi_inscripcion.estado == 'DEVUELTA' %}
+    <div class="alert-devuelta-home">
+        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+        <div class="w-100">
+            <h4 class="text-danger">¡Acción Requerida! Expediente Devuelto</h4>
+            <p class="text-dark">
+                Trabajo Social ha revisado tus documentos y encontró detalles que deben corregirse.
+                El trámite está <strong>pausado</strong> hasta que lo resuelvas.
+            </p>
+            <a href="{% url 'portal_inscripcion' %}" class="btn btn-danger btn-corregir shadow-sm">
+                <i class="bi bi-pencil-square me-2"></i> Ir a mi Expediente para Corregirlo
+            </a>
+        </div>
+    </div>
+    {% elif mi_inscripcion.estado == 'FILTROS' %}
+    <div class="alert alert-success d-flex align-items-center alert-custom mb-4" style="border-left: 6px solid #198754; background-color: #f6fcf9;">
+        <i class="bi bi-check-circle-fill fs-1 me-3 text-success"></i>
         <div>
             <h4 class="fw-bold mb-1 text-success">¡Documentación Aprobada!</h4>
-            <p class="mb-0 fw-semibold text-dark">Tu expediente digital ha sido validado correctamente. Has avanzado a la fase de Evaluaciones (Filtros).</p>
+            <p class="mb-0 text-dark">Tu expediente ha sido validado correctamente. Has avanzado a la fase de Evaluaciones (Filtros Médicos y Psicológicos).</p>
         </div>
     </div>
     {% endif %}
-    <div class="row g-4">
 
+    <div class="row g-4 mb-5">
         <div class="col-md-6">
-            <div class="card action-card p-4 text-center">
-                <div class="icon-box">
-                    <i class="bi bi-folder-check"></i>
+            <div class="action-card">
+                <div class="w-100 text-center">
+                    <div class="icon-box-primary mx-auto">
+                        <i class="bi bi-folder-check"></i>
+                    </div>
+                    <h3 class="card-title-custom">Mi Expediente de Inscripción</h3>
+                    <p class="card-text-custom">
+                        Tu solicitud de ingreso fue aprobada. Haz clic aquí para llenar los datos médicos de tu menor, actualizar tu información familiar y firmar los reglamentos.
+                    </p>
                 </div>
 
-                <h4 class="fw-bold text-primary">Mi Expediente de Inscripción</h4>
-
-                <p class="text-muted mt-3 mb-4">
-                    Tu solicitud de ingreso ha sido aprobada. Haz clic en el botón para llenar los datos médicos del menor, información general y aceptar los reglamentos.
-                </p>
-
-                {% if request.user.expediente_inscripcion.estado == 'EN_FILTROS' or request.user.expediente_inscripcion.estado == 'FINALIZADA' %}
-                    <button class="btn btn-secondary fw-bold btn-lg w-100" disabled style="opacity: 0.7;">
-                        <i class="bi bi-lock-fill me-2"></i> Expediente Cerrado
-                    </button>
-                    <div class="mt-3 text-success fw-bold small">
-                        <i class="bi bi-check-circle-fill me-1"></i> Usted ya ha realizado este proceso.
-                    </div>
-                {% elif request.user.expediente_inscripcion.estado == 'EN_REVISION' %}
-                    <button class="btn btn-warning text-dark fw-bold btn-lg w-100" disabled style="opacity: 0.8;">
-                        <i class="bi bi-hourglass-split me-2"></i> En Revisión
-                    </button>
-                    <div class="mt-3 text-warning-emphasis fw-bold small">
-                        Trabajo Social está revisando tus documentos.
-                    </div>
-                {% else %}
-                    <a href="{% url 'portal_inscripcion' %}" class="btn btn-primary fw-bold btn-lg w-100">
-                        Continuar Inscripción <i class="bi bi-arrow-right-circle-fill ms-2"></i>
-                    </a>
-                {% endif %}
+                <div class="w-100 mt-2">
+                    {% if not mi_inscripcion or mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}
+                        <a href="{% url 'portal_inscripcion' %}" class="btn btn-action btn-primary-custom">
+                            Continuar Inscripción <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
+                        </a>
+                    {% elif mi_inscripcion.estado == 'EN_REVISION' %}
+                        <div class="status-pill bg-warning text-dark shadow-sm">
+                            <i class="bi bi-hourglass-split"></i> En Revisión
+                        </div>
+                        <div class="text-center mt-3 text-warning-emphasis fw-bold small">
+                            Trabajo Social está verificando tus documentos.
+                        </div>
+                    {% else %}
+                        <div class="status-pill bg-secondary text-white shadow-sm opacity-75">
+                            <i class="bi bi-lock-fill"></i> Expediente Cerrado
+                        </div>
+                        <div class="text-center mt-3 text-success fw-bold small">
+                            <i class="bi bi-check-circle-fill me-1"></i> Trámite documental finalizado.
+                        </div>
+                    {% endif %}
                 </div>
+            </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card action-card p-4 text-center">
-                <div class="icon-box" style="color: #198754;">
-                    <i class="bi bi-clock-history"></i>
+            <div class="action-card">
+                <div class="w-100 text-center">
+                    <div class="icon-box-success mx-auto">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h3 class="card-title-custom">Consulta de Estatus</h3>
+                    <p class="card-text-custom">
+                        Una vez que envíes tu expediente definitivo, el área de Trabajo Social lo revisará. Ingresa a tu portal regularmente para monitorear el progreso de tu trámite.
+                    </p>
                 </div>
-                <h4 class="fw-bold text-success">Consulta de Estatus</h4>
 
-                <p class="text-muted mt-3 mb-4">
-                    Una vez que termines de llenar y envíes tu expediente de inscripción, el área de Trabajo Social lo revisará. Ingresa a tu portal para monitorear el progreso.
-                </p>
-
-                <button class="btn btn-outline-success fw-bold btn-lg w-100" disabled>
-                    Estatus: {{ request.user.expediente_inscripcion.get_estado_display }}
-                </button>
+                <div class="w-100 mt-2">
+                    <div class="status-pill border border-success text-success bg-white fw-bold">
+                        <i class="bi bi-info-circle-fill me-1"></i> Estatus:
+                        {% if not mi_inscripcion %}
+                            Sin Iniciar
+                        {% else %}
+                            {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
 </div>
 
+{% endwith %}
 {% endblock %}

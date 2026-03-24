@@ -49,7 +49,7 @@
     /* Estilos para las cajas de documentos */
     .doc-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 10px; padding: 15px; height: 100%; }
     .doc-title { font-weight: bold; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 15px; }
-    .file-input-group { margin-bottom: 12px; }
+    .file-input-group { margin-bottom: 12px; transition: all 0.3s ease; }
     .file-input-group label { font-size: 0.85rem; font-weight: bold; color: #495057; margin-bottom: 4px; display: block; }
     .status-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .status-ok { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
@@ -79,6 +79,35 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
+    {% endif %}
+
+    {% if inscripcion.estado == 'DEVUELTA' %}
+    <input type="hidden" id="raw_observaciones" value="{{ inscripcion.observaciones }}">
+    <div class="alert shadow-sm mb-4 border-0" style="border-left: 6px solid #dc3545; border-radius: 12px; background-color: #fffafa;">
+        <div class="d-flex align-items-start">
+            <i class="bi bi-exclamation-triangle-fill text-danger fs-1 me-3 mt-1"></i>
+            <div class="w-100">
+                <h4 class="fw-bold text-danger mb-1">Expediente Devuelto</h4>
+                <p class="mb-2 text-dark">Trabajo Social ha revisado tus documentos y te solicita hacer la siguiente corrección:</p>
+                <div class="bg-white p-3 rounded border border-danger mb-3 shadow-sm text-dark fs-6" id="clean_obs_container">
+                    Cargando observaciones...
+                </div>
+                <div class="small text-muted border-top pt-2 border-danger opacity-75">
+                    <i class="bi bi-check2-circle text-success me-1"></i> <strong>Instrucciones:</strong> Busca más abajo las cajas marcadas en <strong class="text-danger">ROJO</strong>, selecciona el archivo correcto y vuelve a enviar tu expediente.
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or inscripcion.estado == 'RECHAZADA' %}
+    <div class="alert alert-success shadow-sm mb-4 border-0" style="background-color: #eaf8f0; border-left: 5px solid #198754 !important; border-radius: 12px;">
+        <h4 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i> ¡Tu dictamen está listo!</h4>
+        <p class="text-dark mb-3">La Dirección de la Estancia Infantil UNACH ha emitido el Veredicto Final de tu solicitud y se ha enviado una copia a tu correo electrónico.</p>
+        <a href="{% url 'descargar_reporte_final_padre' inscripcion.id %}" class="btn btn-success fw-bold shadow-sm rounded-pill px-4">
+            <i class="bi bi-file-earmark-pdf-fill me-2"></i> Descargar Reporte Final Oficial (FO-301)
+        </a>
+    </div>
     {% endif %}
 
     <div class="header-banner d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -356,7 +385,7 @@
             </div>
             <div class="card-body p-4">
                 <div class="d-flex justify-content-end mb-3">
-                    {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' %}
+                    {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' or inscripcion.estado == 'DEVUELTA' %}
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarFamiliar()">
                             <i class="bi bi-person-plus-fill"></i> Agregar otro familiar
                         </button>
@@ -402,7 +431,7 @@
                 </div>
 
                 <div id="familiar_2_div" class="bg-light p-3 rounded mb-3 border position-relative fade-in hidden-contact">
-                    {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' %}
+                    {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' or inscripcion.estado == 'DEVUELTA' %}
                     <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 mt-2 me-2" onclick="eliminarFamiliar(2)" title="Eliminar familiar">
                         <i class="bi bi-trash-fill"></i>
                     </button>
@@ -442,7 +471,7 @@
                 </div>
 
                 <div id="familiar_3_div" class="bg-light p-3 rounded mb-3 border position-relative fade-in hidden-contact">
-                    {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' %}
+                    {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' or inscripcion.estado == 'DEVUELTA' %}
                     <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 mt-2 me-2" onclick="eliminarFamiliar(3)" title="Eliminar familiar">
                         <i class="bi bi-trash-fill"></i>
                     </button>
@@ -493,8 +522,8 @@
                     <div class="d-flex align-items-center">
                         <i class="bi bi-exclamation-octagon-fill fs-1 me-3"></i>
                         <div>
-                            <h5 class="fw-bold mb-1">¡Sube todos tus documentos!</h5>
-                            <p class="mb-0 small text-dark">Para poder continuar, debes subir <strong>TODOS</strong> los archivos en formato PDF o Imagen legible. Si te falta alguno, el sistema no te dejará enviar tu expediente.</p>
+                            <h5 class="fw-bold mb-1">¡Sube todos tus documentos con el nombre correcto!</h5>
+                            <p class="mb-0 small text-dark">Para poder continuar, debes subir <strong>TODOS</strong> los archivos y nombrarlos correctamente (ej. "curp", "acta_nacimiento"). Si te falta alguno, el sistema no te dejará enviar tu expediente.</p>
                         </div>
                     </div>
                 </div>
@@ -506,37 +535,37 @@
 
                             <div class="file-input-group">
                                 <label>1. Certificado Médico</label>
-                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_certificado_medico %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>2. Cartilla de Vacunación</label>
-                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_cartilla_vacunacion %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>3. Grupo Sanguíneo</label>
-                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_grupo_sanguineo %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>4. Acta de Nacimiento</label>
-                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>5. 3 Fotos a color (Actualizadas)</label>
-                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>6. Estudios de Laboratorio</label>
-                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_laboratorio %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_laboratorio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
                         </div>
@@ -548,43 +577,37 @@
 
                             <div class="file-input-group">
                                 <label>1. Acta de Nacimiento</label>
-                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>2. Copia de INE</label>
-                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>3. 3 Fotos a color (Actualizadas)</label>
-                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>4. Comprobante de Domicilio</label>
-                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_domicilio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>5. Recibo de Inscripción ($50)</label>
-                                <input type="file" name="doc_tutor_pago" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
-                                {% if inscripcion.doc_tutor_pago %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
-                            </div>
-
-                            <div class="file-input-group">
-                                <label>6. Historial Académico</label>
-                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <label>5. Historial Académico</label>
+                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_historial %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>7. Horario de Clases</label>
-                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <label>6. Horario de Clases</label>
+                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_horario %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
                         </div>
@@ -596,19 +619,19 @@
 
                             <div class="file-input-group">
                                 <label>1. Carta de Autorización (Contestada)</label>
-                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_autorizado_carta %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>2. Copia de INE</label>
-                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_autorizado_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>3. 2 Fotos a color (Actualizadas)</label>
-                                <input type="file" name="doc_autorizado_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="file" name="doc_autorizado_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_autorizado_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
                             </div>
                         </div>
@@ -627,7 +650,7 @@
                 <h5 class="fw-bold">Reglamento Interno de la Estancia Infantil UNACH</h5>
                 <p class="text-muted mb-4">Por favor, descarga y lee atentamente el reglamento oficial antes de enviar tu solicitud.</p>
 
-                <a href="{% static 'img/Reglamento_EIU.pdf' %}" class="btn btn-outline-danger mb-4 px-4 rounded-pill" target="_blank" download>
+                <a href="{% static 'documentos/Reglamento_EIU.pdf' %}" class="btn btn-outline-danger mb-4 px-4 rounded-pill" target="_blank" download>
                     <i class="bi bi-download me-2"></i>Descargar PDF del Reglamento
                 </a>
 
@@ -639,13 +662,12 @@
                     <div class="invalid-feedback fw-bold">Debes aceptar el reglamento para continuar.</div>
                 </div>
 
-                <div class="text-start bg-light p-4 rounded-3 border mb-4 shadow-sm">
+                <div class="text-start bg-light p-4 rounded-3 border mb-4 shadow-sm" id="box_reglamento_firmado">
                     <label class="form-label fw-bold text-dark fs-5 mb-2"><i class="bi bi-upload me-2 text-primary"></i>Sube el Reglamento Firmado <span class="text-danger">*</span></label>
                     <p class="text-muted small mb-3">Imprime el documento, fírmalo, escanéalo y súbelo aquí obligatoriamente en formato PDF para poder enviar tu expediente.</p>
 
                     <input type="file" name="reglamento_firmado" id="reglamento_firmado" class="form-control form-control-lg border-primary" accept="application/pdf"
-                           {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-                           {% if not inscripcion.reglamento_firmado %}required{% endif %}>
+                           {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.reglamento_firmado %}true{% else %}false{% endif %}">
                     <div class="invalid-feedback fw-bold">Debes subir el reglamento firmado en PDF para poder enviar tu expediente.</div>
 
                     {% if inscripcion.reglamento_firmado %}
@@ -662,9 +684,9 @@
                         <div class="form-text">Si deseas aclarar algo sobre tu corrección, escríbelo aquí.</div>
                     </div>
                     {% endif %}
-                    </div>
+                </div>
 
-                {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' %}
+                {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' or inscripcion.estado == 'DEVUELTA' %}
                 <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-5 pt-4 border-top">
                     <button type="submit" name="guardar_avance" class="btn btn-secondary btn-lg px-5 rounded-pill" formnovalidate>
                         <i class="bi bi-save me-2"></i>Guardar Avance
@@ -702,11 +724,95 @@
             </div>
         </div>
 
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 15px 50px rgba(0,0,0,0.2);">
+                    <div class="modal-header border-0 pb-0 justify-content-center pt-4">
+                        <i class="bi bi-x-octagon-fill text-danger display-1 animated pulse infinite"></i>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <h3 class="fw-bold text-dark mb-3" id="errorModalTitle">Error</h3>
+                        <p class="text-muted fs-6 mb-3" id="errorModalMessage"></p>
+                        <ul id="errorModalList" class="text-start text-danger fw-bold bg-light p-3 rounded border border-danger text-wrap text-break" style="display: none; list-style-type: none; font-size: 0.9rem;"></ul>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+                        <button type="button" class="btn btn-danger btn-lg rounded-pill px-5 shadow" data-bs-dismiss="modal">
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // -------------------------------------------------------------------
+    // LÓGICA DE PALOMITAS ROJAS (ARCHIVOS DEVUELTOS)
+    // -------------------------------------------------------------------
+    const rawObsInput = document.getElementById('raw_observaciones');
+    if (rawObsInput) {
+        let rawObs = rawObsInput.value;
+        let cleanMsg = rawObs;
+
+        if (rawObs.includes('|')) {
+            const parts = rawObs.split('|');
+            const badDocs = parts[0].split(',');
+            cleanMsg = parts[1] || "Por favor, corrige los documentos marcados en rojo.";
+
+            // Pinta las cajas de rojo
+            badDocs.forEach(docName => {
+                if (docName) {
+                    const fileInput = document.querySelector(`input[name="${docName}"]`);
+                    if (fileInput) {
+                        fileInput.classList.add('is-invalid');
+                        const box = fileInput.closest('.file-input-group') || fileInput.closest('#box_reglamento_firmado');
+
+                        if(box) {
+                            box.classList.add('border', 'border-danger', 'p-2', 'rounded', 'bg-white', 'shadow-sm');
+
+                            const badge = box.querySelector('.status-badge');
+                            if (badge) {
+                                badge.className = 'status-badge mt-1 d-inline-block bg-danger text-white border border-danger px-2 py-1';
+                                badge.innerHTML = '<i class="bi bi-x-circle-fill"></i> Documento Rechazado';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const container = document.getElementById('clean_obs_container');
+        if(container) container.innerHTML = `<strong><i class="bi bi-chat-left-text text-danger me-2"></i>"${cleanMsg}"</strong>`;
+    }
+
+    // -------------------------------------------------------------------
+    // FUNCIÓN PARA MOSTRAR MODAL DE ERRORES PERSONALIZADO
+    // -------------------------------------------------------------------
+    function mostrarErrorModal(titulo, mensaje, lista = []) {
+        document.getElementById('errorModalTitle').innerText = titulo;
+        document.getElementById('errorModalMessage').innerHTML = mensaje;
+
+        const listaEl = document.getElementById('errorModalList');
+        if (lista && lista.length > 0) {
+            listaEl.innerHTML = '';
+            lista.forEach(item => {
+                let li = document.createElement('li');
+                li.innerHTML = `<i class="bi bi-file-earmark-x me-2"></i>${item}`;
+                li.classList.add('mb-1');
+                listaEl.appendChild(li);
+            });
+            listaEl.style.display = 'block';
+        } else {
+            listaEl.style.display = 'none';
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+        modal.show();
+    }
+
     // -------------------------------------------------------------------
     // 1. Convertir Primera Letra en Mayúscula y Bloquear Números
     // -------------------------------------------------------------------
@@ -967,8 +1073,28 @@
     }
 
     // -------------------------------------------------------------------
-    // 9. Arranque y Validaciones Generales
+    // 9. Arranque y Validaciones Generales (INCLUYE REVISIÓN DE ARCHIVOS)
     // -------------------------------------------------------------------
+
+    const reglasArchivos = {
+        'doc_menor_certificado_medico': { palabras: ['certificado', 'medico'], msj: 'certificado_medico' },
+        'doc_menor_cartilla_vacunacion': { palabras: ['cartilla', 'vacun'], msj: 'cartilla_vacunacion' },
+        'doc_menor_grupo_sanguineo': { palabras: ['grupo', 'sangre', 'sanguineo'], msj: 'grupo_sanguineo' },
+        'doc_menor_acta_nacimiento': { palabras: ['acta', 'nacimiento'], msj: 'acta_nacimiento' },
+        'doc_menor_fotos': { palabras: ['foto'], msj: 'fotos' },
+        'doc_menor_laboratorio': { palabras: ['laboratorio', 'estudio', 'analisis'], msj: 'estudios_laboratorio' },
+        'doc_tutor_acta_nacimiento': { palabras: ['acta', 'nacimiento'], msj: 'acta_nacimiento' },
+        'doc_tutor_ine': { palabras: ['ine', 'identificacion', 'ife', 'credencial'], msj: 'ine' },
+        'doc_tutor_fotos': { palabras: ['foto'], msj: 'fotos' },
+        'doc_tutor_domicilio': { palabras: ['domicilio', 'comprobante', 'luz', 'agua', 'telmex'], msj: 'comprobante_domicilio' },
+        'doc_tutor_historial': { palabras: ['historial', 'academico', 'kardex', 'calificaciones'], msj: 'historial_academico' },
+        'doc_tutor_horario': { palabras: ['horario', 'clase', 'carga'], msj: 'horario_clases' },
+        'doc_autorizado_carta': { palabras: ['carta', 'autorizacion'], msj: 'carta_autorizacion' },
+        'doc_autorizado_ine': { palabras: ['ine', 'identificacion', 'ife', 'credencial'], msj: 'ine' },
+        'doc_autorizado_fotos': { palabras: ['foto'], msj: 'fotos' },
+        'reglamento_firmado': { palabras: ['reglamento', 'firmado'], msj: 'reglamento_firmado' }
+    };
+
     document.addEventListener("DOMContentLoaded", function() {
         manejarEstadoCivil();
         sincronizarParentescos();
@@ -986,10 +1112,34 @@
             manejarTipoSangre();
         }
 
+        // Validación en tiempo real del nombre de los archivos al subirlos usando el MODAL BONITO
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name.toLowerCase();
+                    const regla = reglasArchivos[this.name];
+
+                    if (regla) {
+                        const esValido = regla.palabras.some(palabra => fileName.includes(palabra));
+                        if (!esValido) {
+                            mostrarErrorModal(
+                                "Nombre de archivo incorrecto",
+                                `El sistema requiere que el archivo contenga la palabra <strong>"${regla.msj}"</strong> en su nombre.<br><br>Por favor, renombra tu archivo en tu computadora e inténtalo de nuevo.`
+                            );
+                            this.value = '';
+                            this.classList.add('is-invalid');
+                        } else {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                        }
+                    }
+                }
+            });
+        });
+
         const form = document.getElementById('inscripcionForm');
         const btnEnviar = document.getElementById('btnEnviarRevision');
 
-        // Modal de confirmación
         const confirmarModalEl = document.getElementById('confirmarEnvioModal');
         let myModal;
         if(confirmarModalEl) {
@@ -999,31 +1149,63 @@
 
         if(btnEnviar) {
             btnEnviar.addEventListener('click', function(event) {
-                event.preventDefault(); // Detener envío automático
+                event.preventDefault();
 
                 if (!form.checkValidity()) {
                     event.stopPropagation();
                     form.classList.add('was-validated');
                     const firstInvalid = form.querySelector(':invalid');
                     if(firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    // Si todo está bien, mostrar modal
-                    if(myModal) myModal.show();
+                    return;
                 }
+
+                let todosSubidos = true;
+                let docsFaltantes = [];
+                const fileInputs = document.querySelectorAll('input[type="file"]');
+
+                fileInputs.forEach(input => {
+                    if (input.disabled) return;
+
+                    const estaEnBaseDeDatos = input.getAttribute('data-uploaded') === 'true';
+                    const tieneArchivoSeleccionadoAhora = input.files.length > 0;
+
+                    if (!estaEnBaseDeDatos && !tieneArchivoSeleccionadoAhora) {
+                        todosSubidos = false;
+
+                        let labelElement = input.closest('.file-input-group');
+                        if (!labelElement) labelElement = input.closest('.text-start');
+
+                        let nombreBonito = labelElement ? labelElement.querySelector('label').innerText : input.name;
+                        nombreBonito = nombreBonito.replace(/^\d+\.\s*/, '').replace(/\*/g, '').trim();
+
+                        docsFaltantes.push(nombreBonito);
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!todosSubidos) {
+                    mostrarErrorModal(
+                        "Faltan Documentos Obligatorios",
+                        "Para poder enviar tu expediente definitivo, debes subir los siguientes documentos:<br><span class='text-muted small mt-2 d-block'>(Recuerda que puedes usar el botón 'Guardar Avance' para subir los archivos faltantes más tarde).</span>",
+                        docsFaltantes
+                    );
+                    return;
+                }
+
+                if(myModal) myModal.show();
             });
         }
 
-        // Si dicen que SÍ en el modal
         if(btnConfirmarFinalJS){
             btnConfirmarFinalJS.addEventListener('click', function(){
-                // Input oculto para simular el click del botón original
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = 'enviar_revision';
                 hiddenInput.value = '1';
                 form.appendChild(hiddenInput);
 
-                // Loader
                 btnConfirmarFinalJS.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
                 btnConfirmarFinalJS.disabled = true;
 
@@ -1040,6 +1222,76 @@
             familiaresMostrados = 3;
             document.querySelector("button[onclick='agregarFamiliar()']").style.display = 'none';
         }
+    });
+
+    // -------------------------------------------------------------------
+    // 10. AUTO-GUARDADO (LOCALSTORAGE) BLINDADO POR USUARIO
+    // -------------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+        // LA MAGIA ESTÁ AQUÍ: Le agregamos el ID del usuario a la llave de guardado
+        // Así jamás se mezclarán los datos de dos solicitudes distintas en la misma PC.
+        const pageId = window.location.pathname + "_user_{{ request.user.id }}";
+        const forms = document.querySelectorAll("form");
+
+        forms.forEach(form => {
+            const elements = form.querySelectorAll("input, select, textarea");
+
+            // 1. AL CARGAR LA PÁGINA: Recuperar datos guardados
+            elements.forEach(el => {
+                // Ignoramos archivos y tokens
+                if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
+
+                const key = el.name || el.id;
+                if (!key) return;
+
+                const savedValue = localStorage.getItem(`autosave_${pageId}_${key}`);
+                if (savedValue !== null) {
+                    if (el.type === "checkbox" || el.type === "radio") {
+                        el.checked = (savedValue === "true");
+                    } else {
+                        el.value = savedValue;
+                    }
+                    // Disparamos los eventos para que la página reaccione (abrir cajitas ocultas)
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            // 2. MIENTRAS ESCRIBE O SELECCIONA: Guardar en tiempo real
+            function guardarDato(e) {
+                const el = e.target;
+                if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
+
+                const key = el.name || el.id;
+                if (!key) return;
+
+                let valueToSave = el.value;
+                if (el.type === "checkbox" || el.type === "radio") {
+                    valueToSave = el.checked ? "true" : "false";
+                }
+
+                localStorage.setItem(`autosave_${pageId}_${key}`, valueToSave);
+            }
+
+            form.addEventListener("input", guardarDato);
+            form.addEventListener("change", guardarDato);
+
+            // 3. AL ENVIAR CON ÉXITO: Limpiar la memoria SOLO de este usuario
+            function limpiarMemoria() {
+                elements.forEach(el => {
+                    const key = el.name || el.id;
+                    if (!key) return;
+                    localStorage.removeItem(`autosave_${pageId}_${key}`);
+                });
+            }
+
+            form.addEventListener("submit", limpiarMemoria);
+
+            const btnConfirmarFinalJS = document.getElementById('btnConfirmarFinalJS');
+            if(btnConfirmarFinalJS){
+                btnConfirmarFinalJS.addEventListener('click', limpiarMemoria);
+            }
+        });
     });
 </script>
 {% endblock %}

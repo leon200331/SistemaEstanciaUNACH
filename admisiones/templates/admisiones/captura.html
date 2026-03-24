@@ -291,8 +291,8 @@
           <div class="text-danger small mt-1">{{ form.apellido_materno_tutor.errors }}</div>
         </div>
 
-        <div class="col-md-4">
-          <label class="form-label">Matrícula <span class="req">*</span></label>
+        <div class="col-md-4" id="box_matricula">
+          <label class="form-label">Matrícula</label>
           {{ form.matricula }}
           <div class="text-danger small mt-1">{{ form.matricula.errors }}</div>
         </div>
@@ -468,6 +468,30 @@
     }
   }
 
+  // Lógica para Formateo a Tipo Título (Primera letra mayúscula)
+  function toTitleCase(str) {
+      return str.replace(/\w\S*/g, function(txt){
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
+  }
+
+  // Lógica de Matrícula (Ocultarla si viene vacía desde el panel)
+  const matriculaInput = document.getElementById("id_matricula");
+  const boxMatricula = document.getElementById("box_matricula");
+
+  if (matriculaInput && boxMatricula) {
+      const valMatricula = matriculaInput.value.trim();
+      if (!valMatricula) {
+          // Si no hay matrícula, ocultamos toda la caja
+          boxMatricula.style.display = "none";
+          matriculaInput.required = false; // Le quitamos el requerido para que no bloquee el formulario
+      } else {
+          // Si sí hay, la dejamos visible, pero sigue readonly (por tu forms.py)
+          boxMatricula.style.display = "block";
+      }
+  }
+
+
   const prog = document.getElementById("id_programa_educativo");
   const boxProg = document.getElementById("box_prog_otro");
   const progOtro = document.getElementById("id_programa_educativo_otro");
@@ -502,7 +526,6 @@
     "id_nombres_tutor",
     "id_apellido_paterno_tutor",
     "id_apellido_materno_tutor",
-    "id_matricula",
     "id_programa_educativo",
     "id_correo",
     "id_celular",
@@ -520,24 +543,24 @@
     if(el) el.required = true;
   });
 
+  // Evento de validación y formateo de Nombres
   ["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
+
+    // Al perder el foco (blur), formatea el texto a "Tipo Título"
+    el.addEventListener("blur", () => {
+        el.value = toTitleCase(el.value);
+    });
+
     el.addEventListener("input", () => {
+      // Limpia caracteres no permitidos mientras escribe
+      el.value = el.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '');
       const v = String(el.value || "").trim();
       if(!v){ clearState(el); return; }
       onlyLetters.test(v) ? setValid(el) : setInvalid(el);
     });
   });
-
-  const matricula = document.getElementById("id_matricula");
-  if(matricula){
-    matricula.addEventListener("input", () => {
-      const v = String(matricula.value || "").trim();
-      if(!v){ clearState(matricula); return; }
-      (v.length >= 2) ? setValid(matricula) : clearState(matricula);
-    });
-  }
 
   const correo = document.getElementById("id_correo");
   if(correo){
@@ -607,8 +630,6 @@
     if(!fecha) return true;
     const v = (fecha.value || "").trim();
 
-    // CAMBIO IMPORTANTE: Si está vacío, le quitamos la clase inválida y devolvemos false,
-    // para que no pinte rojo al cargar la página ni borre lo que el usuario está escribiendo.
     if(!v){
         clearState(fecha);
         return false;
@@ -628,7 +649,6 @@
   }
 
   if(fecha){
-    // Cambiamos 'change' por 'input' para que se evalúe cuando el papá pierda el foco o escriba
     fecha.addEventListener("blur", () => {
       const v = (fecha.value || "").trim();
       if(v) {
@@ -646,7 +666,6 @@
     ["id_nombres_tutor", "Nombre(s)"],
     ["id_apellido_paterno_tutor", "Apellido paterno"],
     ["id_apellido_materno_tutor", "Apellido materno"],
-    ["id_matricula", "Matrícula"],
     ["id_programa_educativo", "Programa educativo"],
     ["id_programa_educativo_otro", "Programa (Otro)", () => prog?.value === "OTRO"],
     ["id_correo", "Correo electrónico"],

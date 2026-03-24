@@ -58,7 +58,7 @@ class Solicitud(models.Model):
     class EstadoEvaluacion(models.TextChoices):
         PENDIENTE = "PENDIENTE", "Pendiente"
         APROBADO = "APROBADO", "Aprobado"
-        RECHAZADO = "RECHAZADO", "Rechazado"
+        RECHAZADO = "RECHAZADO", "Rechazada"
 
     estado_psicologia = models.CharField(
         max_length=20,
@@ -101,7 +101,7 @@ class Solicitud(models.Model):
     licenciatura_madre_psicologia = models.CharField(max_length=150, blank=True, default="")
     semestre_madre_psicologia = models.CharField(max_length=20, blank=True, default="")
 
-    numero_gesta_psicologia = models.CharField(max_length=20, blank=True, default="")
+    numero_gesta_psicologia = models.CharField(max_length=50, blank=True, default="")
     embarazo_planeado_psicologia = models.CharField(max_length=20, blank=True, default="")
     dificultad_embarazo_psicologia = models.TextField(blank=True, default="")
     estado_animo_madre_embarazo_psicologia = models.TextField(blank=True, default="")
@@ -110,7 +110,7 @@ class Solicitud(models.Model):
     motivo_nombre_bebe_psicologia = models.TextField(blank=True, default="")
 
     tipo_nacimiento_psicologia = models.CharField(max_length=50, blank=True, default="")
-    semanas_gestacion_psicologia = models.CharField(max_length=20, blank=True, default="")
+    semanas_gestacion_psicologia = models.CharField(max_length=100, blank=True, default="")
     dificultad_nacimiento_psicologia = models.TextField(blank=True, default="")
     peso_al_nacer_psicologia = models.CharField(max_length=20, blank=True, default="")
     talla_al_nacer_psicologia = models.CharField(max_length=20, blank=True, default="")
@@ -529,13 +529,16 @@ class SolicitudInscripcion(models.Model):
     class EstadoInscripcion(models.TextChoices):
         NUEVA = "NUEVA", "Nueva"
         EN_PROCESO = "EN_PROCESO", "En Proceso (Capturando datos)"
+        DEVUELTA = "DEVUELTA", "Devuelta"
         EN_REVISION = "EN_REVISION", "Enviada para Revisión"
-        EN_FILTROS = "EN_FILTROS", "En filtros"
+        FILTROS = "FILTROS", "En filtros (Físicos)"
+        ESPERANDO_DIRECTORA = "ESPERANDO_DIRECTORA", "Esperando Veredicto de Dirección"
+        ACEPTADO_ESPERANDO_PAGO = "ACEPTADO_ESPERANDO_PAGO", "Aceptado - Esperando Pago"
         FINALIZADA = "FINALIZADA", "Inscripción Finalizada y Aprobada"
         RECHAZADA = "RECHAZADA", "Rechazada"
 
     estado = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=EstadoInscripcion.choices,
         default=EstadoInscripcion.NUEVA
     )
@@ -548,8 +551,10 @@ class SolicitudInscripcion(models.Model):
         M = "M", "Masculino"
         F = "F", "Femenino"
 
-    estado_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True, verbose_name="Estado de Nacimiento")
-    municipio_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True, verbose_name="Municipio de Nacimiento")
+    estado_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True,
+                                               verbose_name="Estado de Nacimiento")
+    municipio_nacimiento_menor = models.CharField(max_length=100, null=True, blank=True,
+                                                  verbose_name="Municipio de Nacimiento")
 
     edad_anios_menor = models.PositiveIntegerField(null=True, blank=True)
     edad_meses_menor = models.PositiveIntegerField(null=True, blank=True)
@@ -559,10 +564,14 @@ class SolicitudInscripcion(models.Model):
 
     parentesco_segundo_padre = models.CharField(max_length=50, null=True, blank=True)
     nombres_segundo_padre = models.CharField(max_length=80, null=True, blank=True, verbose_name="Nombre(s)")
-    apellido_paterno_segundo_padre = models.CharField(max_length=60, null=True, blank=True, verbose_name="Apellido Paterno")
-    apellido_materno_segundo_padre = models.CharField(max_length=60, null=True, blank=True, verbose_name="Apellido Materno")
-    estado_civil_segundo_padre = models.CharField(max_length=50, null=True, blank=True, verbose_name="Estado Civil Padre/Madre")
-    ocupacion_segundo_padre = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ocupación Padre/Madre")
+    apellido_paterno_segundo_padre = models.CharField(max_length=60, null=True, blank=True,
+                                                      verbose_name="Apellido Paterno")
+    apellido_materno_segundo_padre = models.CharField(max_length=60, null=True, blank=True,
+                                                      verbose_name="Apellido Materno")
+    estado_civil_segundo_padre = models.CharField(max_length=50, null=True, blank=True,
+                                                  verbose_name="Estado Civil Padre/Madre")
+    ocupacion_segundo_padre = models.CharField(max_length=100, null=True, blank=True,
+                                               verbose_name="Ocupación Padre/Madre")
 
     estado_domicilio_segundo_padre = models.CharField(max_length=100, null=True, blank=True)
     ciudad_segundo_padre = models.CharField(max_length=100, null=True, blank=True)
@@ -599,39 +608,69 @@ class SolicitudInscripcion(models.Model):
     # EXPEDIENTE DIGITAL (DOCUMENTOS OBLIGATORIOS SPRINT 2)
     # =========================================================
     # --- 1. DEL MENOR ---
-    doc_menor_certificado_medico = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Certificado Médico")
-    doc_menor_cartilla_vacunacion = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Cartilla de Vacunación")
-    doc_menor_grupo_sanguineo = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Grupo Sanguíneo")
-    doc_menor_acta_nacimiento = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Acta de Nacimiento")
-    doc_menor_fotos = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="3 Fotos Infantiles")
-    doc_menor_laboratorio = models.FileField(upload_to="expedientes/menor/", null=True, blank=True, verbose_name="Estudios de Laboratorio")
+    doc_menor_certificado_medico = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
+                                                    verbose_name="Certificado Médico")
+    doc_menor_cartilla_vacunacion = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
+                                                     verbose_name="Cartilla de Vacunación")
+    doc_menor_grupo_sanguineo = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
+                                                 verbose_name="Grupo Sanguíneo")
+    doc_menor_acta_nacimiento = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
+                                                 verbose_name="Acta de Nacimiento")
+    doc_menor_fotos = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
+                                       verbose_name="3 Fotos Infantiles")
+    doc_menor_laboratorio = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
+                                             verbose_name="Estudios de Laboratorio")
 
     # --- 2. DEL BENEFICIARIO (TUTOR) ---
-    doc_tutor_acta_nacimiento = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Acta de Nacimiento Tutor")
-    doc_tutor_ine = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Copia de INE Tutor")
-    doc_tutor_fotos = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="3 Fotos Infantiles Tutor")
-    doc_tutor_domicilio = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Comprobante de Domicilio")
-    doc_tutor_pago = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Comprobante de Pago Inscripción")
-    doc_tutor_historial = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Historial Académico")
-    doc_tutor_horario = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True, verbose_name="Horario de Clases")
+    doc_tutor_acta_nacimiento = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                                 verbose_name="Acta de Nacimiento Tutor")
+    doc_tutor_ine = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                     verbose_name="Copia de INE Tutor")
+    doc_tutor_fotos = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                       verbose_name="3 Fotos Infantiles Tutor")
+    doc_tutor_domicilio = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                           verbose_name="Comprobante de Domicilio")
+    doc_tutor_pago = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                      verbose_name="Comprobante de Pago Inscripción")
+    doc_tutor_historial = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                           verbose_name="Historial Académico")
+    doc_tutor_horario = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                         verbose_name="Horario de Clases")
 
     # --- 3. DEL AUTORIZADO ---
-    doc_autorizado_carta = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True, verbose_name="Carta de Autorización")
-    doc_autorizado_ine = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True, verbose_name="Copia de INE Autorizado")
-    doc_autorizado_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True, verbose_name="2 Fotos Infantiles Autorizado")
+    doc_autorizado_carta = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
+                                            verbose_name="Carta de Autorización")
+    doc_autorizado_ine = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
+                                          verbose_name="Copia de INE Autorizado")
+    doc_autorizado_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
+                                            verbose_name="2 Fotos Infantiles Autorizado")
 
     # --- REGLAMENTO ---
-    reglamento_firmado = models.FileField(upload_to="reglamentos_firmados/", null=True, blank=True, verbose_name="Reglamento Firmado (PDF)")
+    reglamento_firmado = models.FileField(upload_to="reglamentos_firmados/", null=True, blank=True,
+                                          verbose_name="Reglamento Firmado (PDF)")
 
     # --- CONTROL DE TRABAJO SOCIAL ---
     observaciones = models.TextField(null=True, blank=True, verbose_name="Observaciones (Correcciones)")
     comentario_tutor = models.TextField(null=True, blank=True, verbose_name="Comentario del Tutor al reenviar")
+
+    # === CAMPOS NUEVOS PARA EL REPORTE FINAL DE INGRESO (TS) ===
+    reporte_final_aprobado = models.BooleanField(null=True, blank=True, verbose_name="¿Se autoriza inscripción?")
+    reporte_final_motivos = models.TextField(blank=True, null=True, verbose_name="Motivos de rechazo")
+    reporte_final_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                          related_name='reportes_ts')
+    reporte_final_en = models.DateTimeField(null=True, blank=True)
+
+    # === FIRMA DE LA DIRECTORA ===
+    directora_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                      related_name='firmas_directora')
+    directora_en = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Expediente de Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
+
 
 class HistoriaClinicaMedica(models.Model):
     inscripcion = models.OneToOneField(

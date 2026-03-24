@@ -5,70 +5,29 @@
 
 {% block extra_css %}
 <style>
+    /* ... Tus estilos se mantienen iguales ... */
     body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-
-    /* Barra de Navegación UNACH */
     .navbar-unach { background-color: #1e3a8a; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .navbar-brand { font-weight: bold; color: white !important; }
     .logo-img { max-height: 40px; margin-right: 10px; }
-
-    /* Tarjeta de Bienvenida Dinámica */
-    .welcome-banner {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white; border-radius: 15px; padding: 30px; margin-bottom: 25px;
-        box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15); display: flex; align-items: center; justify-content: space-between;
-    }
-
-    /* Estilos de Tarjetas del Dashboard */
-    .dash-card { 
-        background: white; border-radius: 15px; border: none; 
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; 
-    }
-    .dash-card-header { 
-        background: #f8fafc; padding: 15px 20px; border-bottom: 1px solid #e2e8f0; 
-        font-weight: bold; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; justify-content: space-between;
-    }
+    .welcome-banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border-radius: 15px; padding: 30px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15); display: flex; align-items: center; justify-content: space-between; }
+    .dash-card { background: white; border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; }
+    .dash-card-header { background: #f8fafc; padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-weight: bold; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; justify-content: space-between; }
     .dash-card-body { padding: 20px; }
-
-    /* KPIs o Mini Tarjetas Rápidas */
-    .kpi-box {
-        padding: 20px; border-radius: 12px; color: white; display: flex;
-        align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
-    }
+    .kpi-box { padding: 20px; border-radius: 12px; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; }
     .kpi-box:hover { transform: translateY(-3px); }
     .kpi-box h3 { margin: 0; font-size: 2rem; font-weight: 900; }
     .kpi-box p { margin: 0; font-size: 0.85rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
     .kpi-box i { font-size: 2.5rem; opacity: 0.4; }
-
-    /* Pestañas (Tabs) principales */
     .nav-tabs { border-bottom: 2px solid #e2e8f0; }
     .nav-tabs .nav-link { color: #64748b; font-weight: 600; border: none; border-bottom: 3px solid transparent; padding: 10px 20px; border-radius: 0; }
     .nav-tabs .nav-link:hover { color: #1e3a8a; }
     .nav-tabs .nav-link.active { color: #1e3a8a; background: transparent; border-bottom: 3px solid #1e3a8a; }
-
-    /* Pestañas estilo Pastilla (Para los Correos) */
-    .nav-pills .nav-link { color: #495057; font-weight: 600; border-radius: 8px; margin-right: 10px; }
-    .nav-pills .nav-link.active { background-color: #1e3a8a; color: white; }
-
-    /* Incidencias */
-    .incidencia-item { border-left: 5px solid; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .incidencia-alto { border-color: #dc3545; background: #fff5f5; }
-    .incidencia-leve { border-color: #ffc107; background: #fffbea; }
-
-    /* Feed de Notificaciones */
+    .btn-action { border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; font-weight: bold; }
     .notif-feed { padding-left: 20px; border-left: 2px solid #e2e8f0; list-style: none; margin-left: 10px; padding-bottom: 0; }
     .notif-item { position: relative; padding-bottom: 15px; }
     .notif-item::before { content: ''; position: absolute; left: -26px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; border: 2px solid white; box-shadow: 0 0 0 2px #3b82f6; }
     .notif-time { font-size: 0.75rem; color: #64748b; font-weight: bold; }
-
-    /* Mensajes (Correos) */
-    .msg-item { border-bottom: 1px solid #e9ecef; padding: 15px 0; transition: background-color 0.2s; cursor: pointer; }
-    .msg-item:hover { background-color: #f8fafc; }
-    .msg-item:last-child { border-bottom: none; }
-    .msg-unread { font-weight: bold; background-color: #f0f7ff; border-left: 4px solid #3b82f6; padding-left: 15px; }
-
-    /* Botones de acción en tablas */
-    .btn-action { border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; font-weight: bold; }
 </style>
 {% endblock %}
 
@@ -94,12 +53,11 @@
 </nav>
 
 <div class="container-fluid px-4 mb-5">
-
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm mb-4" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
     {% endif %}
@@ -110,7 +68,7 @@
                 Panel Ejecutivo · {{ request.user.puesto|default:"Dirección General" }}
             </p>
             <h2 class="fw-bold mb-0">¡Bienvenida(o), {{ request.user.nombre|default:"Licenciada" }}!</h2>
-            <p class="mt-2 mb-0 fw-light">Este es el resumen operativo de la Estancia. Los datos mostrados reflejan el estado actual de la base de datos.</p>
+            <p class="mt-2 mb-0 fw-light">Expedientes listos para Veredicto Final de Ingreso.</p>
         </div>
         <div class="d-none d-md-block pe-4">
             <i class="bi bi-buildings-fill display-1 opacity-25"></i>
@@ -118,287 +76,82 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="kpi-box" style="background: linear-gradient(135deg, #198754, #146c43);">
-                <div>
-                    <p>Alumnos Activos</p>
-                    <h3>{{ kpi_alumnos|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-people-fill"></i>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-box" style="background: linear-gradient(135deg, #fd7e14, #d35400);">
-                <div>
-                    <p>Por Autorizar</p>
-                    <h3>{{ kpi_por_autorizar|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-file-earmark-check-fill"></i>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-box" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
-                <div>
-                    <p>Incidencias Hoy</p>
-                    <h3>{{ kpi_incidencias|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-shield-exclamation"></i>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-box" style="background: linear-gradient(135deg, #0dcaf0, #b08d00);">
-                <div>
-                    <p>Salas Config.</p>
-                    <h3>{{ kpi_salas|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-door-open-fill"></i>
-            </div>
-        </div>
+        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #198754, #146c43);"><div><p>Alumnos Activos</p><h3>{{ kpi_alumnos|default:"0" }}</h3></div><i class="bi bi-people-fill"></i></div></div>
+        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #fd7e14, #d35400);"><div><p>Por Autorizar</p><h3>{{ dictamenes_pendientes|length }}</h3></div><i class="bi bi-file-earmark-check-fill"></i></div></div>
+        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #dc3545, #b02a37);"><div><p>Incidencias Hoy</p><h3>0</h3></div><i class="bi bi-shield-exclamation"></i></div></div>
+        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0);"><div><p>Salas Config.</p><h3>{{ kpi_salas|default:"6" }}</h3></div><i class="bi bi-door-open-fill"></i></div></div>
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-8">
-
+        <div class="col-lg-12">
             <div class="dash-card">
                 <div class="dash-card-header bg-white border-bottom-0 pb-0">
-                    <span><i class="bi bi-inboxes-fill text-primary me-2"></i> Bandeja de Autorizaciones por Área</span>
+                    <span><i class="bi bi-award-fill text-warning me-2"></i> Bandeja de Veredicto Final (Directora)</span>
                 </div>
                 <div class="dash-card-body pt-2">
-
-                    <ul class="nav nav-tabs mb-4" id="bandejaTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-medico" type="button">
-                                <i class="bi bi-heart-pulse-fill text-danger me-1"></i> Área Médica <span class="badge bg-danger ms-1">{{ docs_medico|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-nutricion" type="button">
-                                <i class="bi bi-apple text-success me-1"></i> Nutrición <span class="badge bg-secondary ms-1">{{ docs_nutricion|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-psicologia" type="button">
-                                <i class="bi bi-person-hearts text-info me-1"></i> Psicología <span class="badge bg-info ms-1">{{ docs_psicologia|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dictamen" type="button">
-                                <i class="bi bi-award-fill text-warning me-1"></i> Dictamen Final <span class="badge bg-primary ms-1">{{ kpi_por_autorizar|default:"0" }}</span>
-                            </button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="bandejaTabsContent">
-
-                        <div class="tab-pane fade show active" id="tab-medico">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <tbody>
-                                        {% for doc in docs_medico %}
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="4" class="text-center py-5 text-muted">
-                                                <i class="bi bi-check2-circle display-4 text-success mb-3 d-block opacity-50"></i>
-                                                <h6 class="fw-bold">Todo al día en Medicina</h6>
-                                                <p class="mb-0 small">No hay documentos pendientes de autorización médica.</p>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="alert alert-primary border-0 bg-light shadow-sm d-flex align-items-center mb-4">
+                        <i class="bi bi-info-circle-fill fs-3 text-primary me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Instrucciones de Firma Digital</h6>
+                            <p class="mb-0 small text-dark">Al hacer clic en <strong>Aceptar</strong>, el sistema estampará automáticamente su nombre como firma digital en el formato <strong>FO-301-02-18</strong> y enviará el reporte final al correo institucional del beneficiario.</p>
                         </div>
-
-                        <div class="tab-pane fade" id="tab-nutricion">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <tbody>
-                                        {% for doc in docs_nutricion %}
-                                        {% empty %}
-                                        <tr>
-                                            <td class="text-center py-5 text-muted">
-                                                <i class="bi bi-check2-circle display-4 text-success mb-3 d-block opacity-50"></i>
-                                                <h6 class="fw-bold">Todo al día en Nutrición</h6>
-                                                <p class="mb-0 small">No hay reportes de nutrición pendientes.</p>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="tab-psicologia">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <tbody>
-                                        {% for doc in docs_psicologia %}
-                                        {% empty %}
-                                        <tr>
-                                            <td class="text-center py-5 text-muted">
-                                                <i class="bi bi-check2-circle display-4 text-success mb-3 d-block opacity-50"></i>
-                                                <h6 class="fw-bold">Todo al día en Psicología</h6>
-                                                <p class="mb-0 small">No hay evaluaciones psicológicas pendientes de firma.</p>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="tab-dictamen">
-                            <div class="alert alert-primary border-primary bg-light border-2 shadow-sm d-flex align-items-center mb-3">
-                                <i class="bi bi-info-circle-fill display-6 text-primary me-3"></i>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Veredicto Final de Ingreso</h6>
-                                    <p class="mb-0 small text-dark">Los siguientes aspirantes ya superaron los 3 filtros médicos y psicológicos. Seleccione <strong>Aprobar</strong> para finalizar su proceso de admisión.</p>
-                                </div>
-                            </div>
-
-                            <table class="table table-hover align-middle">
-                                <tbody>
-                                    {% for ins in dictamenes_pendientes %}
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg-success mb-1">3 Filtros Completos</span><br>
-                                            <strong>Folio #{{ ins.solicitud_ingreso.folio }} - {{ ins.solicitud_ingreso.nombres_menor }} {{ ins.solicitud_ingreso.apellido_paterno_menor }}</strong>
-                                            <p class="mb-0 small text-muted">Tutor: {{ ins.solicitud_ingreso.nombre_tutor_completo }}</p>
-                                        </td>
-                                        <td class="text-end" style="min-width: 250px;">
-                                            <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-inline">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="accion" value="ACEPTAR">
-                                                <button type="submit" class="btn btn-success btn-action me-1 shadow-sm" onclick="return confirm('¿Confirmas ACEPTAR definitivamente a este alumno? Se enviará un correo oficial al tutor.');">
-                                                    <i class="bi bi-hand-thumbs-up-fill me-1"></i> Aceptar
-                                                </button>
-                                            </form>
-
-                                            <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-inline">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="accion" value="RECHAZAR">
-                                                <button type="submit" class="btn btn-outline-danger btn-action" onclick="return confirm('¿Estás segura de RECHAZAR esta inscripción? Esta acción no se puede deshacer.');">
-                                                    <i class="bi bi-x-circle me-1"></i> Rechazar
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="2" class="text-center py-5 text-muted">
-                                            <i class="bi bi-check-circle display-4 text-success mb-3 d-block opacity-50"></i>
-                                            <h6 class="fw-bold">No hay alumnos pendientes</h6>
-                                            <p class="mb-0 small">Nadie está en espera de Veredicto Final en este momento.</p>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-
                     </div>
-                </div>
-            </div>
 
-            <div class="dash-card">
-                <div class="dash-card-header bg-white border-bottom pb-3">
-                    <span><i class="bi bi-envelope-paper-fill text-info me-2"></i> Mensajes de Tutores (Buzón)</span>
-                </div>
-                <div class="dash-card-body bg-light">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Aspirante y Folio</th>
+                                    <th>Tutor / Programa</th>
+                                    <th>Estado Filtros</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ins in dictamenes_pendientes %}
+                                <tr>
+                                    <td>
+                                        <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
+                                        <span class="text-uppercase">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted d-block">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
+                                        <span class="badge bg-secondary">{{ ins.solicitud_ingreso.programa_educativo }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success"><i class="bi bi-check-all"></i> Méd, Nut, Psic OK</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion" value="ACEPTAR">
+                                            <button type="submit" class="btn btn-success btn-sm fw-bold shadow-sm" onclick="return confirm('¿Confirmas que deseas ACEPTAR a este alumno? Se generará y enviará el Reporte Final FO-301.');">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Aceptar y Firmar
+                                            </button>
+                                        </form>
 
-                    <ul class="nav nav-pills mb-4" id="buzonTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active shadow-sm" data-bs-toggle="pill" data-bs-target="#msg-inscritos" type="button">
-                                <i class="bi bi-mortarboard-fill me-1"></i> Alumnos Inscritos <span class="badge bg-light text-dark ms-1">{{ mensajes_inscritos|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link shadow-sm" data-bs-toggle="pill" data-bs-target="#msg-nuevos" type="button">
-                                <i class="bi bi-person-plus-fill me-1"></i> Nuevos Ingresos <span class="badge bg-light text-dark ms-1">{{ mensajes_nuevos|length }}</span>
-                            </button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content bg-white p-3 rounded shadow-sm border" id="buzonTabsContent">
-
-                        <div class="tab-pane fade show active" id="msg-inscritos">
-                            {% for msg in mensajes_inscritos %}
+                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion" value="RECHAZAR">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás segura de RECHAZAR esta inscripción?');">
+                                                <i class="bi bi-x-circle me-1"></i> Rechazar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
                                 {% empty %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="bi bi-inbox text-secondary display-6 mb-2 d-block opacity-50"></i>
-                                    <p class="small mb-0">No hay mensajes de tutores inscritos.</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="tab-pane fade" id="msg-nuevos">
-                            {% for msg in mensajes_nuevos %}
-                                {% empty %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="bi bi-inbox text-secondary display-6 mb-2 d-block opacity-50"></i>
-                                    <p class="small mb-0">No hay mensajes de aspirantes.</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-check2-circle display-4 text-success mb-3 d-block opacity-50"></i>
+                                        <h6 class="fw-bold">No hay expedientes pendientes de firma directiva</h6>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-        </div>
-
-        <div class="col-lg-4">
-
-            <div class="dash-card">
-                <div class="dash-card-header bg-white">
-                    <i class="bi bi-shield-exclamation text-danger"></i> Monitor de Incidencias
-                </div>
-                <div class="dash-card-body pt-3">
-                    {% for incidencia in incidencias_recientes %}
-                        {% empty %}
-                        <div class="text-center py-4 text-muted border border-dashed rounded bg-light">
-                            <i class="bi bi-emoji-smile text-success display-6 mb-2 d-block opacity-50"></i>
-                            <h6 class="fw-bold mb-0">Sin Incidencias</h6>
-                            <p class="small mb-0">Todo opera con normalidad.</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="dash-card border-primary" style="border: 2px solid #1e3a8a;">
-                <div class="dash-card-header bg-primary text-white">
-                    <i class="bi bi-calendar-range"></i> Próximos Eventos
-                </div>
-                <div class="dash-card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for evento in proximos_eventos %}
-                            {% empty %}
-                            <div class="text-center py-4 text-muted bg-light">
-                                <i class="bi bi-calendar-x text-secondary display-6 mb-2 d-block opacity-50"></i>
-                                <p class="small mb-0">No hay eventos configurados<br>para este semestre.</p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="dash-card">
-                <div class="dash-card-header bg-white">
-                    <i class="bi bi-bell-fill text-warning"></i> Notificaciones Recientes
-                </div>
-                <div class="dash-card-body pt-4">
-                    <ul class="notif-feed m-0">
-                        {% for notif in notificaciones %}
-                            {% empty %}
-                            <li class="notif-item text-muted" style="border-color: transparent;">
-                                <div class="notif-time text-center">Bandeja Vacía</div>
-                                <div class="small mt-1 text-center">No hay notificaciones recientes en el sistema.</div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>

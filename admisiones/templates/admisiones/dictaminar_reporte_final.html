@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5 pt-5 mb-5" style="max-width: 900px;">
+    
+    <div class="mb-3">
+        <a href="{% url 'reporte_final_pendientes' %}" class="text-decoration-none text-muted fw-bold">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0" style="border-radius: 2px;">
+        <div class="card-body p-5 bg-white text-dark" style="font-family: 'Arial', sans-serif;">
+            
+            <div class="row mb-5 align-items-center border-bottom pb-4">
+                <div class="col-3 text-center">
+                    <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" style="max-height: 70px;">
+                </div>
+                <div class="col-6 text-center">
+                    <h5 class="fw-bold mb-0">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</h5>
+                    <h6 class="text-muted mb-0">ESTANCIA INFANTIL UNACH</h6>
+                </div>
+                <div class="col-3 text-end">
+                    <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" style="max-height: 60px;">
+                    <div class="fw-bold mt-1" style="font-size: 0.8rem;">FO-301-02-18</div>
+                </div>
+            </div>
+
+            <h4 class="text-center fw-bold mb-5 text-uppercase">REPORTE FINAL DE INGRESO</h4>
+
+            <p class="mb-4 text-justify" style="line-height: 1.8;">
+                Derivado de la información proporcionada por las diversas áreas que participan en el proceso de inscripción al servicio que proporciona la Estancia Infantil UNACH, se determina que el menor <strong class="text-decoration-underline ms-1 text-uppercase">{{ inscripcion.solicitud_ingreso.nombres_menor }} {{ inscripcion.solicitud_ingreso.apellido_paterno_menor }} {{ inscripcion.solicitud_ingreso.apellido_materno_menor }}</strong>
+            </p>
+
+            <form method="POST" id="formReporte">
+                {% csrf_token %}
+
+                <div class="form-check mb-4 p-3 rounded" id="box_aprobar" style="transition: 0.3s; border: 1px solid transparent;">
+                    <input class="form-check-input fs-4" type="radio" name="decision" id="decision_aprobar" value="APROBAR" required onchange="toggleMotivos()">
+                    <label class="form-check-label ms-2 mt-1 fs-5" for="decision_aprobar" style="cursor: pointer;">
+                        ( &nbsp;&nbsp; ) Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.
+                    </label>
+                </div>
+
+                <div class="form-check mb-2 p-3 rounded" id="box_rechazar" style="transition: 0.3s; border: 1px solid transparent;">
+                    <input class="form-check-input fs-4" type="radio" name="decision" id="decision_rechazar" value="RECHAZAR" required onchange="toggleMotivos()">
+                    <label class="form-check-label ms-2 mt-1 fs-5" for="decision_rechazar" style="cursor: pointer;">
+                        ( &nbsp;&nbsp; ) No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza la inscripción del mismo por los siguientes motivos:
+                    </label>
+                </div>
+
+                <div class="ms-5 ps-3 mb-5" id="div_motivos" style="display: none;">
+                    <textarea class="form-control bg-light border-secondary" name="motivos" id="input_motivos" rows="3" placeholder="Escriba los motivos de rechazo aquí..."></textarea>
+                </div>
+
+                <div class="row mt-5 pt-5 text-center">
+                    <div class="col-6">
+                        <div class="border-bottom border-dark mx-auto" style="width: 80%;">
+                            <span class="d-block mb-1 text-primary fw-bold text-uppercase" style="font-family: 'Courier New', Courier, monospace;">
+                                {{ request.user.nombre }} {{ request.user.apellido_paterno }} {{ request.user.apellido_materno|default:"" }}
+                            </span>
+                        </div>
+                        <div class="mt-2 fw-bold">Nombre y Firma de la Trabajadora Social</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border-bottom border-dark mx-auto" style="width: 80%;">
+                            <span class="d-block mb-1 text-muted fst-italic" style="height: 24px;">
+                                (Pendiente de firma de Directora)
+                            </span>
+                        </div>
+                        <div class="mt-2 fw-bold">Nombre y Firma de la Directora</div>
+                    </div>
+                </div>
+
+                <div class="d-grid mt-5 pt-4">
+                    <button type="submit" class="btn btn-primary btn-lg shadow fw-bold rounded-pill" onclick="return confirm('¿Estás segura de guardar el Reporte Final de Ingreso? El expediente pasará a la Directora.');">
+                        <i class="bi bi-save-fill me-2"></i> Guardar y Enviar a Dirección
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleMotivos() {
+        const rechazar = document.getElementById('decision_rechazar').checked;
+        const divMotivos = document.getElementById('div_motivos');
+        const inputMotivos = document.getElementById('input_motivos');
+        const boxAprobar = document.getElementById('box_aprobar');
+        const boxRechazar = document.getElementById('box_rechazar');
+
+        if (rechazar) {
+            divMotivos.style.display = 'block';
+            inputMotivos.required = true;
+            boxRechazar.style.backgroundColor = '#fff5f5';
+            boxRechazar.style.borderColor = '#dc3545';
+            boxAprobar.style.backgroundColor = 'transparent';
+            boxAprobar.style.borderColor = 'transparent';
+        } else {
+            divMotivos.style.display = 'none';
+            inputMotivos.required = false;
+            inputMotivos.value = '';
+            boxAprobar.style.backgroundColor = '#f0fdf4';
+            boxAprobar.style.borderColor = '#198754';
+            boxRechazar.style.backgroundColor = 'transparent';
+            boxRechazar.style.borderColor = 'transparent';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 11px; /* Letra pequeña para que quepa todo perfecto */
+            color: #000;
+        }
+
+        /* --- ENCABEZADO Y LOGOS --- */
+        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .header-table td { vertical-align: middle; border: none; padding: 0; }
+        .logo-left { width: 15%; text-align: left; }
+        .header-text { width: 70%; text-align: center; }
+        .logo-right { width: 15%; text-align: right; }
+        .logo-img { max-height: 55px; width: auto; }
+        .institucion { font-size: 14px; font-weight: bold; margin: 0; text-transform: uppercase; }
+        .dependencia { font-size: 12px; margin: 0; text-transform: uppercase; }
+
+        /* --- TÍTULOS --- */
+        .title-center { text-align: center; font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; }
+        .folio-right { text-align: right; font-size: 11px; margin-bottom: 15px; }
+        .section-title { font-size: 12px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+
+        /* --- TABLITAS (CUADRÍCULAS) --- */
+        .grid-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .grid-table th, .grid-table td {
+            border: 1px solid #000; /* Líneas de la tabla */
+            padding: 4px 6px;
+            vertical-align: top;
+            text-align: left;
+        }
+        .grid-table th {
+            font-weight: bold;
+            background-color: #f8f9fa; /* Un gris muy clarito para los títulos de las celdas */
+            font-size: 10px;
+        }
+        .grid-table td {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td class="logo-left">
+                <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" class="logo-img">
+            </td>
+            <td class="header-text">
+                <p class="institucion">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</p>
+                <p class="dependencia">ESTANCIA INFANTIL UNACH</p>
+            </td>
+            <td class="logo-right">
+                <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" class="logo-img">
+            </td>
+        </tr>
+    </table>
+
+    <div class="title-center">SOLICITUD DE INSCRIPCIÓN</div>
+    <div class="folio-right">FO-301-02-01</div>
+
+    <table class="grid-table">
+        <tr>
+            <td width="50%"><b>Folio:</b> {{ s.folio }}</td>
+            <td width="50%"><b>Fecha:</b> {{ fecha_hoy|date:"d/m/Y" }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">1. Datos del Beneficiario</div>
+    <table class="grid-table">
+        <tr>
+            <th>Nombre(s)</th>
+            <th>Primer Apellido</th>
+            <th>Segundo Apellido</th>
+        </tr>
+        <tr>
+            <td>{{ s.nombres_tutor|default:"-" }}</td>
+            <td>{{ s.apellido_paterno_tutor|default:"-" }}</td>
+            <td>{{ s.apellido_materno_tutor|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr>
+            <th>Matrícula</th>
+            <th>Programa Educativo</th>
+            <th>Unidad Académica</th>
+            <th>Avance Académico</th>
+        </tr>
+        <tr>
+            <td>{{ s.matricula|default:"-" }}</td>
+            <td>{{ s.programa_educativo|default:"-" }}</td>
+            <td>{{ s.unidad_academica|default:"-" }}</td>
+            <td>{{ inscripcion.avance_academico|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr>
+            <th>Correo Electrónico</th>
+            <th>Celular</th>
+            <th>Estado Civil</th>
+            <th>Parentesco con el menor</th>
+        </tr>
+        <tr>
+            <td>{{ s.correo|default:"-" }}</td>
+            <td>{{ s.celular|default:"-" }}</td>
+            <td>{{ inscripcion.estado_civil_tutor|default:"-" }}</td>
+            <td>{{ inscripcion.parentesco_tutor|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr><th>Domicilio</th></tr>
+        <tr><td>{{ domicilio_tutor }}</td></tr>
+    </table>
+
+    <div class="section-title">2. Datos del Menor</div>
+    <table class="grid-table">
+        <tr>
+            <th>Nombre(s)</th>
+            <th>Primer Apellido</th>
+            <th>Segundo Apellido</th>
+        </tr>
+        <tr>
+            <td>{{ s.nombres_menor|default:"-" }}</td>
+            <td>{{ s.apellido_paterno_menor|default:"-" }}</td>
+            <td>{{ s.apellido_materno_menor|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr>
+            <th>Edad</th>
+            <th>Lugar de Nacimiento</th>
+            <th>Fecha de Nacimiento</th>
+        </tr>
+        <tr>
+            <td>{{ inscripcion.edad_anios_menor|default:"0" }} años y {{ inscripcion.edad_meses_menor|default:"0" }} meses</td>
+            <td>{{ inscripcion.municipio_nacimiento_menor|default:"-" }}, {{ inscripcion.estado_nacimiento_menor|default:"-" }}</td>
+            <td>{{ s.fecha_nacimiento_menor|date:"d/m/Y"|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr>
+            <th>Sexo</th>
+            <th>Tipo de Sangre</th>
+            <th>CURP</th>
+        </tr>
+        <tr>
+            <td>{{ inscripcion.sexo_menor|default:"-" }}</td>
+            <td>{{ inscripcion.tipo_sangre_menor|default:"-" }}</td>
+            <td>{{ s.curp_menor|default:"-" }}</td>
+        </tr>
+    </table>
+
+    {% if inscripcion.nombres_segundo_padre %}
+    <div class="section-title">3. Datos del Padre/Madre</div>
+    <table class="grid-table">
+        <tr>
+            <th>Nombre(s)</th>
+            <th>Primer Apellido</th>
+            <th>Segundo Apellido</th>
+        </tr>
+        <tr>
+            <td>{{ inscripcion.nombres_segundo_padre|default:"-" }}</td>
+            <td>{{ inscripcion.apellido_paterno_segundo_padre|default:"-" }}</td>
+            <td>{{ inscripcion.apellido_materno_segundo_padre|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr>
+            <th>Estado Civil</th>
+            <th>Ocupación</th>
+            <th>Celular</th>
+            <th>Correo Electrónico</th>
+        </tr>
+        <tr>
+            <td>{{ inscripcion.estado_civil_segundo_padre|default:"-" }}</td>
+            <td>{{ inscripcion.ocupacion_segundo_padre|default:"-" }}</td>
+            <td>{{ inscripcion.celular_segundo_padre|default:"-" }}</td>
+            <td>{{ inscripcion.correo_segundo_padre|default:"-" }}</td>
+        </tr>
+    </table>
+    <table class="grid-table">
+        <tr><th>Domicilio</th></tr>
+        <tr><td>{{ domicilio_segundo }}</td></tr>
+    </table>
+    {% endif %}
+    <div class="section-title">4. Contactos de Emergencia (Familiares)</div>
+    <table class="grid-table">
+        <tr>
+            <th>Nombre(s)</th>
+            <th>Primer Apellido</th>
+            <th>Segundo Apellido</th>
+            <th>Teléfono</th>
+            <th>Parentesco</th>
+        </tr>
+        <tr>
+            <td>{{ inscripcion.contacto_1_nombres|default:"-" }}</td>
+            <td>{{ inscripcion.contacto_1_apellido_paterno|default:"-" }}</td>
+            <td>{{ inscripcion.contacto_1_apellido_materno|default:"-" }}</td>
+            <td>{{ inscripcion.contacto_1_telefono|default:"-" }}</td>
+            <td>{{ inscripcion.contacto_1_parentesco|default:"-" }}</td>
+        </tr>
+        {% if inscripcion.contacto_2_nombres %}
+        <tr>
+            <td>{{ inscripcion.contacto_2_nombres }}</td>
+            <td>{{ inscripcion.contacto_2_apellido_paterno }}</td>
+            <td>{{ inscripcion.contacto_2_apellido_materno }}</td>
+            <td>{{ inscripcion.contacto_2_telefono }}</td>
+            <td>{{ inscripcion.contacto_2_parentesco }}</td>
+        </tr>
+        {% endif %}
+        {% if inscripcion.contacto_3_nombres %}
+        <tr>
+            <td>{{ inscripcion.contacto_3_nombres }}</td>
+            <td>{{ inscripcion.contacto_3_apellido_paterno }}</td>
+            <td>{{ inscripcion.contacto_3_apellido_materno }}</td>
+            <td>{{ inscripcion.contacto_3_telefono }}</td>
+            <td>{{ inscripcion.contacto_3_parentesco }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+</body>
+</html>

@@ -63,7 +63,7 @@
 <body>
 
 <div id="toast-notification">
-  <i class="bi bi-check-circle-fill" style="font-size:1.15rem;"></i>
+  <i class="bi bi-info-circle-fill" style="font-size:1.15rem; color:#0dcaf0;"></i>
   <div>
     <div id="toast-title" class="fw-bold">Listo</div>
     <div id="toast-msg" style="font-size:.92rem; opacity:.9;">Acción realizada</div>
@@ -184,22 +184,39 @@
 
                   <a href="{% url 'editar_solicitud' solicitud_id=s.id %}" class="btn btn-outline-secondary btn-icon btn-sm" title="Editar datos"><i class="bi bi-pencil-square"></i></a>
 
+                  <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="showToast('Documento Pendiente', 'El PDF estará disponible cuando el tutor finalice la solicitud.')" title="PDF no disponible aún">
+                      <i class="bi bi-file-earmark-pdf-fill text-secondary fs-5"></i>
+                  </button>
+
                 {# ====== RECIBIDA: revisar/dictaminar ====== #}
                 {% elif s.estado == "RECIBIDA" %}
                   <a class="btn btn-success btn-sm shadow-sm px-3" href="{% url 'revisar_solicitud' s.id %}"><i class="bi bi-clipboard-check me-1"></i>Revisar</a>
 
                   <a href="{% url 'editar_solicitud' solicitud_id=s.id %}" class="btn btn-outline-secondary btn-icon btn-sm" title="Editar datos"><i class="bi bi-pencil-square"></i></a>
 
-                {# ====== APROBADA/RECHAZADA: ver detalle y PDF siempre ====== #}
+                  <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="showToast('Documento Pendiente', 'El PDF se habilitará cuando se dictamine la solicitud.')" title="PDF no disponible aún">
+                      <i class="bi bi-file-earmark-pdf-fill text-secondary fs-5"></i>
+                  </button>
+
+                {# ====== APROBADA/RECHAZADA: ver historial y descargar PDF ====== #}
                 {% elif s.estado == "APROBADA" or s.estado == "RECHAZADA" %}
                   <a class="btn btn-outline-primary btn-sm fw-bold px-3 border-2" href="{% url 'revisar_solicitud' s.id %}">
                       <i class="bi bi-journal-text me-1"></i> Ver Historial
                   </a>
 
-                  <a class="btn btn-outline-secondary btn-icon btn-sm border-2" href="{% url 'descargar_pdf_solicitud' s.id %}" target="_blank" title="Descargar FO301 (PDF)">
-                      <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
-                  </a>
+                  {% if s.estado == "APROBADA" %}
+                      {% if s.inscripcion_oficial %}
+                          <a class="btn btn-outline-secondary btn-icon btn-sm border-2 border-danger shadow-sm" href="{% url 'descargar_pdf_solicitud' s.id %}" target="_blank" title="Descargar FO301 Lleno (PDF)">
+                              <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
+                          </a>
+                      {% else %}
+                          <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="showToast('Documento Pendiente', 'Falta que el beneficiario llene su solicitud final y suba sus documentos.')" title="Esperando al beneficiario">
+                              <i class="bi bi-file-earmark-pdf-fill text-secondary fs-5"></i>
+                          </button>
+                      {% endif %}
                   {% endif %}
+
+                {% endif %}
 
               </div>
 

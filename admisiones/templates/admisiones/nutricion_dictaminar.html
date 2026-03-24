@@ -6,6 +6,9 @@
 <title>Valoración Nutricional</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <style>
 body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .navbar-ti{background:#a855f7;padding:.75rem 0;box-shadow:0 4px 10px rgba(0,0,0,.12);}
@@ -15,8 +18,54 @@ body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
 .section-title{font-weight:800;margin-bottom:12px;color:#6b21a8;font-size:1.05rem;}
 .btn-soft{border-radius:10px;font-weight:700;padding:.55rem 1rem;}
-.sub-card{background:#faf7ff;border:1px solid #eadcff;border-radius:14px;padding:16px;margin-bottom:18px;}
-label{font-weight:600;margin-bottom:6px;}
+
+/* --- CAMBIO: Fondo morado pastel suave y bordes morados claros --- */
+.sub-card{background:#faf5ff;border:1px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:18px;}
+
+/* ========================================================
+   TRUCO DE DISEÑO: PREGUNTAS Y CAJAS JUNTAS ABAJO
+   ======================================================== */
+.sub-card .row > div[class*="col-"] {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Empuja todo (texto y caja) hacia abajo */
+}
+
+/* --- CAMBIO: Letras de preguntas sin negritas (font-weight: normal) --- */
+.sub-card .row > div[class*="col-"] > label,
+label {
+    margin-bottom: 6px !important; /* Mantiene la pregunta pegadita a su caja */
+    font-weight: normal;
+    color: #334155;
+}
+
+.sub-card .row > div[class*="col-"] > input,
+.sub-card .row > div[class*="col-"] > select,
+.sub-card .row > div[class*="col-"] > textarea {
+    flex: 0 0 auto;
+}
+
+/* Estilos de Select2 para que combine con Bootstrap */
+.select2-container .select2-selection--multiple {
+    min-height: 38px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #a855f7;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-top: 5px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+    margin-right: 5px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #ffdddd;
+}
 </style>
 </head>
 <body>
@@ -81,28 +130,32 @@ label{font-weight:600;margin-bottom:6px;}
         <div class="col-md-3 mb-3">{{ form.tipo_alimentacion_lactante.label_tag }}{{ form.tipo_alimentacion_lactante }}</div>
     </div>
 
-    <div class="mb-3" id="box_motivo_no_seno">{{ form.motivo_no_seno.label_tag }}{{ form.motivo_no_seno }}</div>
-
     <div class="row">
-        <div class="col-md-3 mb-3">{{ form.formula_infantil.label_tag }}{{ form.formula_infantil }}</div>
-        <div class="col-md-3 mb-3">{{ form.cual_formula.label_tag }}{{ form.cual_formula }}</div>
-        <div class="col-md-3 mb-3">{{ form.edad_inicio_formula.label_tag }}{{ form.edad_inicio_formula }}</div>
-        <div class="col-md-3 mb-3">{{ form.formula_especial.label_tag }}{{ form.formula_especial }}</div>
+        <div class="col-md-12 mb-3" id="box_motivo_no_seno" style="display: none;">{{ form.motivo_no_seno.label_tag }}{{ form.motivo_no_seno }}</div>
     </div>
 
     <div class="row">
-        <div class="col-md-4 mb-3">{{ form.cual_formula_especial.label_tag }}{{ form.cual_formula_especial }}</div>
-        <div class="col-md-4 mb-3">{{ form.cantidad_leche_formula.label_tag }}{{ form.cantidad_leche_formula }}</div>
-        <div class="col-md-4 mb-3">{{ form.cada_cuantas_horas_leche.label_tag }}{{ form.cada_cuantas_horas_leche }}</div>
+        <div class="col-md-4 mb-3">{{ form.formula_infantil.label_tag }}{{ form.formula_infantil }}</div>
+        <div class="col-md-4 mb-3" id="box_cual_formula" style="display: none;">{{ form.cual_formula.label_tag }}{{ form.cual_formula }}</div>
+        <div class="col-md-4 mb-3" id="box_edad_inicio_formula" style="display: none;">{{ form.edad_inicio_formula.label_tag }}{{ form.edad_inicio_formula }}</div>
     </div>
 
-    <div class="mb-3" id="box_causa_formula_especial">{{ form.causa_formula_especial.label_tag }}{{ form.causa_formula_especial }}</div>
+    <div class="row">
+        <div class="col-md-6 mb-3">{{ form.cantidad_leche_formula.label_tag }}{{ form.cantidad_leche_formula }}</div>
+        <div class="col-md-6 mb-3">{{ form.cada_cuantas_horas_leche.label_tag }}{{ form.cada_cuantas_horas_leche }}</div>
+    </div>
 
     <div class="row">
-        <div class="col-md-4 mb-3">{{ form.presentacion_leche.label_tag }}{{ form.presentacion_leche }}</div>
-        <div class="col-md-4 mb-3" id="box_presentacion_leche_otra">{{ form.presentacion_leche_otra.label_tag }}{{ form.presentacion_leche_otra }}</div>
-        <div class="col-md-4 mb-3">{{ form.forma_proporcionar_formula.label_tag }}{{ form.forma_proporcionar_formula }}</div>
-        <div class="col-md-4 mb-3" id="box_forma_proporcionar_formula_otra">{{ form.forma_proporcionar_formula_otra.label_tag }}{{ form.forma_proporcionar_formula_otra }}</div>
+        <div class="col-md-4 mb-3">{{ form.formula_especial.label_tag }}{{ form.formula_especial }}</div>
+        <div class="col-md-4 mb-3" id="box_cual_formula_especial" style="display: none;">{{ form.cual_formula_especial.label_tag }}{{ form.cual_formula_especial }}</div>
+        <div class="col-md-4 mb-3" id="box_causa_formula_especial" style="display: none;">{{ form.causa_formula_especial.label_tag }}{{ form.causa_formula_especial }}</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-3">{{ form.presentacion_leche.label_tag }}{{ form.presentacion_leche }}</div>
+        <div class="col-md-3 mb-3" id="box_presentacion_leche_otra" style="display: none;">{{ form.presentacion_leche_otra.label_tag }}{{ form.presentacion_leche_otra }}</div>
+        <div class="col-md-3 mb-3">{{ form.forma_proporcionar_formula.label_tag }}{{ form.forma_proporcionar_formula }}</div>
+        <div class="col-md-3 mb-3" id="box_forma_proporcionar_formula_otra" style="display: none;">{{ form.forma_proporcionar_formula_otra.label_tag }}{{ form.forma_proporcionar_formula_otra }}</div>
     </div>
 </div>
 
@@ -110,15 +163,15 @@ label{font-weight:600;margin-bottom:6px;}
     <div class="section-title">3. Complicaciones y alimentación complementaria</div>
     <div class="row">
         <div class="col-md-4 mb-3">{{ form.complicaciones_alimentacion.label_tag }}{{ form.complicaciones_alimentacion }}</div>
-        <div class="col-md-4 mb-3" id="box_tipo_complicacion">{{ form.tipo_complicacion.label_tag }}{{ form.tipo_complicacion }}</div>
-        <div class="col-md-4 mb-3" id="box_tipo_complicacion_otra">{{ form.tipo_complicacion_otra.label_tag }}{{ form.tipo_complicacion_otra }}</div>
+        <div class="col-md-4 mb-3" id="box_tipo_complicacion" style="display: none;">{{ form.tipo_complicacion.label_tag }}{{ form.tipo_complicacion }}</div>
+        <div class="col-md-4 mb-3" id="box_tipo_complicacion_otra" style="display: none;">{{ form.tipo_complicacion_otra.label_tag }}{{ form.tipo_complicacion_otra }}</div>
         <div class="col-md-4 mb-3">{{ form.agrega_alimento_formula.label_tag }}{{ form.agrega_alimento_formula }}</div>
-        <div class="col-md-4 mb-3" id="box_cual_agrega_formula">{{ form.cual_agrega_formula.label_tag }}{{ form.cual_agrega_formula }}</div>
+        <div class="col-md-4 mb-3" id="box_cual_agrega_formula" style="display: none;">{{ form.cual_agrega_formula.label_tag }}{{ form.cual_agrega_formula }}</div>
         <div class="col-md-4 mb-3">{{ form.edad_cambio_leche.label_tag }}{{ form.edad_cambio_leche }}</div>
         <div class="col-md-4 mb-3">{{ form.edad_inicio_alimentacion_complementaria.label_tag }}{{ form.edad_inicio_alimentacion_complementaria }}</div>
     </div>
 
-    <div class="section-title">Orden de introducción de alimentos</div>
+    <div class="section-title mt-3">Orden de introducción de alimentos</div>
     <div class="row">
         <div class="col-md-4 mb-3">{{ form.orden_verduras.label_tag }}{{ form.orden_verduras }}</div>
         <div class="col-md-4 mb-3">{{ form.orden_frutas.label_tag }}{{ form.orden_frutas }}</div>
@@ -138,11 +191,13 @@ label{font-weight:600;margin-bottom:6px;}
     <div class="section-title">4. Alergias y restricciones</div>
     <div class="row">
         <div class="col-md-3 mb-3">{{ form.alergia_alimentos.label_tag }}{{ form.alergia_alimentos }}</div>
-        <div class="col-md-3 mb-3" id="box_cual_alergia">{{ form.cual_alergia.label_tag }}{{ form.cual_alergia }}</div>
+        <div class="col-md-3 mb-3" id="box_cual_alergia" style="display: none;">{{ form.cual_alergia.label_tag }}{{ form.cual_alergia }}</div>
         <div class="col-md-3 mb-3">{{ form.restriccion_alimentaria_actual.label_tag }}{{ form.restriccion_alimentaria_actual }}</div>
     </div>
-    <div class="mb-3" id="box_reaccion_alergia">{{ form.reaccion_alergia.label_tag }}{{ form.reaccion_alergia }}</div>
-    <div class="mb-3" id="box_detalle_restriccion">{{ form.detalle_restriccion_alimentaria.label_tag }}{{ form.detalle_restriccion_alimentaria }}</div>
+    <div class="row">
+        <div class="col-md-6 mb-3" id="box_reaccion_alergia" style="display: none;">{{ form.reaccion_alergia.label_tag }}{{ form.reaccion_alergia }}</div>
+        <div class="col-md-6 mb-3" id="box_detalle_restriccion" style="display: none;">{{ form.detalle_restriccion_alimentaria.label_tag }}{{ form.detalle_restriccion_alimentaria }}</div>
+    </div>
 </div>
 
 <div class="sub-card">
@@ -168,44 +223,53 @@ label{font-weight:600;margin-bottom:6px;}
 
 <div class="sub-card">
     <div class="section-title">7. Agua y tiempos de comida</div>
+
     <div class="row">
-        <div class="col-md-3 mb-3">{{ form.consume_agua.label_tag }}{{ form.consume_agua }}</div>
-        <div class="col-md-3 mb-3" id="box_cantidad_agua">{{ form.cantidad_agua.label_tag }}{{ form.cantidad_agua }}</div>
+        <div class="col-md-6 mb-3">{{ form.consume_agua.label_tag }}{{ form.consume_agua }}</div>
+        <div class="col-md-6 mb-3" id="box_cantidad_agua" style="display: none;">{{ form.cantidad_agua.label_tag }}{{ form.cantidad_agua }}</div>
+    </div>
+
+    <div class="row">
         <div class="col-md-3 mb-3">{{ form.desayuna.label_tag }}{{ form.desayuna }}</div>
         <div class="col-md-3 mb-3">{{ form.hora_desayuno.label_tag }}{{ form.hora_desayuno }}</div>
-
         <div class="col-md-3 mb-3">{{ form.come.label_tag }}{{ form.come }}</div>
         <div class="col-md-3 mb-3">{{ form.hora_comida.label_tag }}{{ form.hora_comida }}</div>
+    </div>
+
+    <div class="row">
         <div class="col-md-3 mb-3">{{ form.cena.label_tag }}{{ form.cena }}</div>
         <div class="col-md-3 mb-3">{{ form.hora_cena.label_tag }}{{ form.hora_cena }}</div>
-
         <div class="col-md-3 mb-3">{{ form.colacion.label_tag }}{{ form.colacion }}</div>
         <div class="col-md-3 mb-3">{{ form.hora_colacion.label_tag }}{{ form.hora_colacion }}</div>
     </div>
 
-    <div class="mb-3">{{ form.acostumbra_comer_desayuno.label_tag }}{{ form.acostumbra_comer_desayuno }}</div>
-    <div class="mb-3">{{ form.acostumbra_comer_comida.label_tag }}{{ form.acostumbra_comer_comida }}</div>
-    <div class="mb-3">{{ form.acostumbra_comer_cena.label_tag }}{{ form.acostumbra_comer_cena }}</div>
-    <div class="mb-3">{{ form.acostumbra_comer_colaciones.label_tag }}{{ form.acostumbra_comer_colaciones }}</div>
+    <div class="row mt-3">
+        <div class="col-md-6 mb-3">{{ form.acostumbra_comer_desayuno.label_tag }}{{ form.acostumbra_comer_desayuno }}</div>
+        <div class="col-md-6 mb-3">{{ form.acostumbra_comer_comida.label_tag }}{{ form.acostumbra_comer_comida }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">{{ form.acostumbra_comer_cena.label_tag }}{{ form.acostumbra_comer_cena }}</div>
+        <div class="col-md-6 mb-3">{{ form.acostumbra_comer_colaciones.label_tag }}{{ form.acostumbra_comer_colaciones }}</div>
+    </div>
 </div>
 
 <div class="sub-card">
     <div class="section-title">8. Hábitos familiares y consumo</div>
     <div class="row">
         <div class="col-md-4 mb-3">{{ form.misma_alimentacion_familia.label_tag }}{{ form.misma_alimentacion_familia }}</div>
-        <div class="col-md-8 mb-3" id="box_detalle_misma_alimentacion">{{ form.detalle_misma_alimentacion.label_tag }}{{ form.detalle_misma_alimentacion }}</div>
+        <div class="col-md-8 mb-3" id="box_detalle_misma_alimentacion" style="display: none;">{{ form.detalle_misma_alimentacion.label_tag }}{{ form.detalle_misma_alimentacion }}</div>
 
         <div class="col-md-4 mb-3">{{ form.consume_golosinas.label_tag }}{{ form.consume_golosinas }}</div>
-        <div class="col-md-4 mb-3" id="box_frecuencia_golosinas">{{ form.frecuencia_golosinas.label_tag }}{{ form.frecuencia_golosinas }}</div>
-        <div class="col-md-4 mb-3" id="box_cuales_golosinas">{{ form.cuales_golosinas.label_tag }}{{ form.cuales_golosinas }}</div>
+        <div class="col-md-4 mb-3" id="box_frecuencia_golosinas" style="display: none;">{{ form.frecuencia_golosinas.label_tag }}{{ form.frecuencia_golosinas }}</div>
+        <div class="col-md-4 mb-3" id="box_cuales_golosinas" style="display: none;">{{ form.cuales_golosinas.label_tag }}{{ form.cuales_golosinas }}</div>
 
         <div class="col-md-4 mb-3">{{ form.consume_refrescos.label_tag }}{{ form.consume_refrescos }}</div>
-        <div class="col-md-4 mb-3" id="box_frecuencia_refrescos">{{ form.frecuencia_refrescos.label_tag }}{{ form.frecuencia_refrescos }}</div>
-        <div class="col-md-4 mb-3" id="box_cuales_refrescos">{{ form.cuales_refrescos.label_tag }}{{ form.cuales_refrescos }}</div>
+        <div class="col-md-4 mb-3" id="box_frecuencia_refrescos" style="display: none;">{{ form.frecuencia_refrescos.label_tag }}{{ form.frecuencia_refrescos }}</div>
+        <div class="col-md-4 mb-3" id="box_cuales_refrescos" style="display: none;">{{ form.cuales_refrescos.label_tag }}{{ form.cuales_refrescos }}</div>
 
         <div class="col-md-4 mb-3">{{ form.consume_jugos.label_tag }}{{ form.consume_jugos }}</div>
-        <div class="col-md-4 mb-3" id="box_frecuencia_jugos">{{ form.frecuencia_jugos.label_tag }}{{ form.frecuencia_jugos }}</div>
-        <div class="col-md-4 mb-3" id="box_cuales_jugos">{{ form.cuales_jugos.label_tag }}{{ form.cuales_jugos }}</div>
+        <div class="col-md-4 mb-3" id="box_frecuencia_jugos" style="display: none;">{{ form.frecuencia_jugos.label_tag }}{{ form.frecuencia_jugos }}</div>
+        <div class="col-md-4 mb-3" id="box_cuales_jugos" style="display: none;">{{ form.cuales_jugos.label_tag }}{{ form.cuales_jugos }}</div>
     </div>
 </div>
 
@@ -213,24 +277,24 @@ label{font-weight:600;margin-bottom:6px;}
     <div class="section-title">9. Contexto al comer</div>
     <div class="row">
         <div class="col-md-4 mb-3">{{ form.donde_consume_alimentos.label_tag }}{{ form.donde_consume_alimentos }}</div>
-        <div class="col-md-4 mb-3" id="box_donde_otro">{{ form.donde_consume_alimentos_otro.label_tag }}{{ form.donde_consume_alimentos_otro }}</div>
+        <div class="col-md-4 mb-3" id="box_donde_otro" style="display: none;">{{ form.donde_consume_alimentos_otro.label_tag }}{{ form.donde_consume_alimentos_otro }}</div>
         <div class="col-md-4 mb-3">{{ form.compania_comida.label_tag }}{{ form.compania_comida }}</div>
-        <div class="col-md-4 mb-3" id="box_compania_otro">{{ form.compania_comida_otro.label_tag }}{{ form.compania_comida_otro }}</div>
+        <div class="col-md-4 mb-3" id="box_compania_otro" style="display: none;">{{ form.compania_comida_otro.label_tag }}{{ form.compania_comida_otro }}</div>
         <div class="col-md-4 mb-3">{{ form.come_con.label_tag }}{{ form.come_con }}</div>
         <div class="col-md-4 mb-3">{{ form.consume_bebidas_en.label_tag }}{{ form.consume_bebidas_en }}</div>
-        <div class="col-md-4 mb-3" id="box_bebidas_otro">{{ form.consume_bebidas_en_otro.label_tag }}{{ form.consume_bebidas_en_otro }}</div>
+        <div class="col-md-4 mb-3" id="box_bebidas_otro" style="display: none;">{{ form.consume_bebidas_en_otro.label_tag }}{{ form.consume_bebidas_en_otro }}</div>
         <div class="col-md-4 mb-3">{{ form.come_solo_o_ayuda.label_tag }}{{ form.come_solo_o_ayuda }}</div>
     </div>
 </div>
 
 <div class="sub-card">
     <div class="section-title">10. Cierre y dictamen</div>
-    <div class="mb-3">{{ form.observaciones_nutricion_clinica.label_tag }}{{ form.observaciones_nutricion_clinica }}</div>
     <div class="row">
+        <div class="col-md-12 mb-3">{{ form.observaciones_nutricion_clinica.label_tag }}{{ form.observaciones_nutricion_clinica }}</div>
         <div class="col-md-4 mb-3">{{ form.fecha_elaboracion_nutricion.label_tag }}{{ form.fecha_elaboracion_nutricion }}</div>
         <div class="col-md-4 mb-3">{{ form.estado_nutricion.label_tag }}{{ form.estado_nutricion }}</div>
+        <div class="col-md-12 mb-3">{{ form.observaciones_nutricion.label_tag }}{{ form.observaciones_nutricion }}</div>
     </div>
-    <div class="mb-3">{{ form.observaciones_nutricion.label_tag }}{{ form.observaciones_nutricion }}</div>
 </div>
 
 <div class="d-flex gap-2 mt-4">
@@ -244,24 +308,33 @@ label{font-weight:600;margin-bottom:6px;}
 </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
 function toggleBox(selectId, expectedValue, boxId) {
     const select = document.getElementById(selectId);
     const box = document.getElementById(boxId);
     if (!select || !box) return;
-    box.style.display = select.value === expectedValue ? "block" : "none";
+    box.style.display = select.value === expectedValue ? "flex" : "none";
 }
 
 function toggleBoxForYes(selectId, boxId) {
     const select = document.getElementById(selectId);
     const box = document.getElementById(boxId);
     if (!select || !box) return;
-    box.style.display = select.value === "SI" ? "block" : "none";
+    box.style.display = (select.value === "SI" || select.value === "Si") ? "flex" : "none";
 }
 
 function initToggles() {
     toggleBox("id_seno_materno", "NO", "box_motivo_no_seno");
-    toggleBox("id_formula_especial", "SI", "box_causa_formula_especial");
+
+    toggleBoxForYes("id_formula_infantil", "box_cual_formula");
+    toggleBoxForYes("id_formula_infantil", "box_edad_inicio_formula");
+
+    toggleBoxForYes("id_formula_especial", "box_cual_formula_especial");
+    toggleBoxForYes("id_formula_especial", "box_causa_formula_especial");
+
     toggleBox("id_presentacion_leche", "OTRA", "box_presentacion_leche_otra");
     toggleBox("id_forma_proporcionar_formula", "OTRO", "box_forma_proporcionar_formula_otra");
 
@@ -289,8 +362,18 @@ function initToggles() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    // INICIALIZACIÓN DE SELECT2 PARA LOS ALIMENTOS DEL AGRADO
+    $('.select2-multiple').select2({
+        tags: true,
+        tokenSeparators: [',', ' '],
+        placeholder: "Escriba o seleccione opciones...",
+        allowClear: true,
+        width: '100%'
+    });
+
     const ids = [
         "id_seno_materno",
+        "id_formula_infantil",
         "id_formula_especial",
         "id_presentacion_leche",
         "id_forma_proporcionar_formula",

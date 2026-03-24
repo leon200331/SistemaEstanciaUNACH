@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 2cm 2.5cm; /* Márgenes para el diseño */
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 13px; /* Un poco más pequeña para que quepa todo */
+            color: #000;
+            line-height: 1.6;
+        }
+
+        /* --- ESTILOS DEL ENCABEZADO CON LOGOS --- */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .header-table td {
+            vertical-align: middle;
+            border: none;
+            padding: 0;
+        }
+        .logo-left {
+            width: 15%; /* Espacio para logo UNACH */
+            text-align: left;
+        }
+        .header-text {
+            width: 70%; /* Espacio para el texto central */
+            text-align: center;
+        }
+        .logo-right {
+            width: 15%; /* Espacio para logo EIU */
+            text-align: right;
+        }
+        .logo-img {
+            max-height: 60px; /* Tamaño máximo de los logos */
+            width: auto;
+        }
+        .institucion {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .dependencia {
+            font-size: 13px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        /* --- ESTILOS DEL CUERPO --- */
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+        }
+        .data-row {
+            margin-bottom: 25px;
+        }
+        .content {
+            margin-top: 15px;
+            text-align: justify;
+        }
+        .footer {
+            margin-top: 60px;
+            text-align: left;
+        }
+        .bold { font-weight: bold; }
+        p { margin-top: 0; margin-bottom: 15px; } /* Espaciado entre párrafos */
+    </style>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td class="logo-left">
+                <img src="static/img/logo_unach.png" alt="UNACH" class="logo-img">
+            </td>
+            <td class="header-text">
+                <p class="institucion">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</p>
+                <p class="dependencia">ESTANCIA INFANTIL UNACH</p>
+            </td>
+            <td class="logo-right">
+                <img src="static/img/logo_eiu.png" alt="EIU" class="logo-img">
+            </td>
+        </tr>
+    </table>
+
+    <div class="title">
+        DICTAMEN {% if dictamen == 'APROBADA' %}APROBATORIO{% else %}RECHAZATORIO{% endif %} DE INGRESO
+    </div>
+
+    <div class="content">
+        <div class="data-row">
+            <span class="bold">Fecha:</span> {{ fecha_hoy|date:"d/m/Y" }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="bold">Folio de Solicitud:</span> {{ solicitud.folio }}
+        </div>
+
+        <p><span class="bold">Estimado(a):</span> {{ nombre_tutor }}</p>
+
+        <p>Nos es grato informarle que, tras la revisión de su solicitud por parte del área de Trabajo Social, su trámite de ingreso a la Estancia Infantil UNACH ha sido <span class="bold">{{ dictamen }}</span>.</p>
+
+        {% if dictamen == 'APROBADA' %}
+            <p>El siguiente paso es conformar el Expediente de Inscripción de su menor. Para ello, deberá ingresar al Portal de Padres de la Estancia Infantil utilizando las credenciales de acceso que han sido enviadas a su correo electrónico.</p>
+            <p>Le recordamos que cuenta con un plazo máximo de 7 días naturales para completar este proceso y aceptar los reglamentos vigentes.</p>
+            <p>¡Bienvenidos a la familia EIU!</p>
+        {% else %}
+            <p><span class="bold">Motivo de la resolución:</span><br>
+            <em>{{ comentarios }}</em></p>
+            <p>Agradecemos su interés en formar parte de la Estancia Infantil UNACH. Le invitamos a estar pendiente de futuras convocatorias.</p>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p><span class="bold">Atentamente,</span><br>Dirección y Trabajo Social<br>Estancia Infantil UNACH</p>
+    </div>
+</body>
+</html>

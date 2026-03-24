@@ -160,12 +160,6 @@
             {% else %}
               <span class="badge-pill b-captura">{{ s.estado }}</span>
             {% endif %}
-
-            {% if s.pdf %}
-              <a class="btn btn-outline-secondary btn-icon border-2" href="{{ s.pdf.url }}" target="_blank" title="Descargar Hoja de Solicitud/Inscripción">
-                <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
-              </a>
-            {% endif %}
           </div>
         </div>
 
@@ -323,11 +317,17 @@
             <div class="divider"></div>
             <p class="small text-muted mb-2 lh-sm">Por favor, verifica que todos los documentos sean legibles y correctos antes de pasarlos a filtros.</p>
 
-            <form method="post" action="{% url 'revisar_solicitud' s.id %}">
+            <form method="post" action="{% url 'revisar_solicitud' s.id %}" id="formRevisionInscripcion">
               {% csrf_token %}
+              <input type="hidden" name="docs_erroneos" id="docs_erroneos" value="">
+
+              <div class="alert alert-warning small py-2 my-3 border-warning shadow-sm">
+                  <i class="bi bi-info-circle-fill me-1"></i> <strong>¿Falta o está mal un documento?</strong> Ponle una palomita roja a los documentos incorrectos en la lista de arriba y escribe el motivo abajo.
+              </div>
+
               <div class="mb-3">
-                <label class="form-label fw-bold text-dark small">Observaciones (Solo si devuelves):</label>
-                <textarea name="comentario_inscripcion" class="form-control" rows="2" placeholder="Ej: El Acta de Nacimiento está borrosa. Por favor corríjala."></textarea>
+                <label class="form-label fw-bold text-dark small">Observaciones (Obligatorio si devuelves):</label>
+                <textarea name="comentario_inscripcion" class="form-control border-danger" rows="2" placeholder="Ej: El Acta de Nacimiento está borrosa. Por favor corríjala."></textarea>
               </div>
 
               <div class="d-grid gap-2">
@@ -340,6 +340,63 @@
                 </button>
               </div>
             </form>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.getElementById('formRevisionInscripcion');
+                    // Buscamos los botones de documentos y el botón del reglamento
+                    const docLinks = document.querySelectorAll('.doc-link-btn, a.btn-primary.btn-soft');
+
+                    docLinks.forEach(link => {
+                        const url = link.getAttribute('href');
+                        if(!url) return;
+
+                        let docName = "";
+                        if(url.includes('certificado')) docName = 'doc_menor_certificado_medico';
+                        else if(url.includes('cartilla')) docName = 'doc_menor_cartilla_vacunacion';
+                        else if(url.includes('sanguineo')) docName = 'doc_menor_grupo_sanguineo';
+                        else if(url.includes('menor_acta')) docName = 'doc_menor_acta_nacimiento';
+                        else if(url.includes('menor_foto')) docName = 'doc_menor_fotos';
+                        else if(url.includes('laboratorio')) docName = 'doc_menor_laboratorio';
+                        else if(url.includes('tutor_acta')) docName = 'doc_tutor_acta_nacimiento';
+                        else if(url.includes('tutor_ine')) docName = 'doc_tutor_ine';
+                        else if(url.includes('tutor_foto')) docName = 'doc_tutor_fotos';
+                        else if(url.includes('domicilio')) docName = 'doc_tutor_domicilio';
+                        else if(url.includes('historial')) docName = 'doc_tutor_historial';
+                        else if(url.includes('horario')) docName = 'doc_tutor_horario';
+                        else if(url.includes('autorizado_carta')) docName = 'doc_autorizado_carta';
+                        else if(url.includes('autorizado_ine')) docName = 'doc_autorizado_ine';
+                        else if(url.includes('autorizado_foto')) docName = 'doc_autorizado_fotos';
+                        else if(url.includes('reglamento')) docName = 'reglamento_firmado';
+
+                        if(docName) {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'd-flex align-items-center mb-1';
+
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.className = 'form-check-input me-2 border-danger check-error-doc';
+                            checkbox.value = docName;
+                            checkbox.title = "Marcar como incorrecto/rechazado";
+                            checkbox.style.cursor = "pointer";
+                            checkbox.style.transform = "scale(1.2)";
+
+                            link.parentNode.insertBefore(wrapper, link);
+                            wrapper.appendChild(checkbox);
+                            wrapper.appendChild(link);
+                            link.classList.remove('mb-1');
+                        }
+                    });
+
+                    if(form) {
+                        form.addEventListener('submit', function() {
+                            const checks = document.querySelectorAll('.check-error-doc:checked');
+                            const valores = Array.from(checks).map(cb => cb.value);
+                            document.getElementById('docs_erroneos').value = valores.join(',');
+                        });
+                    }
+                });
+            </script>
             {% endif %}
           </div>
         </div>

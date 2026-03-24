@@ -23,6 +23,10 @@ urlpatterns = [
     # =========================================================
     path("mi-inscripcion/", views.portal_inscripcion, name="portal_inscripcion"),
 
+    # --- NUEVA RUTA PARA QUE EL PADRE DESCARGUE EL REPORTE FINAL ---
+    path("mi-inscripcion/descargar-reporte/<int:inscripcion_id>/", views.descargar_reporte_final_padre,
+         name="descargar_reporte_final_padre"),
+
     # =========================================================
     # FILTROS / DICTÁMENES POR ÁREA (PSICOLOGÍA / NUTRICIÓN / MÉDICO)
     # =========================================================
@@ -42,7 +46,19 @@ urlpatterns = [
     path("medico/<int:pk>/pdf/", views.medico_pdf, name="medico_pdf"),
 
     # =========================================================
+    # REPORTE FINAL DE INGRESO (TRABAJO SOCIAL)
+    # =========================================================
+    path("reporte-final-ingreso/", views.reporte_final_pendientes, name="reporte_final_pendientes"),
+    path("reporte-final-ingreso/<int:pk>/", views.dictaminar_reporte_final, name="dictaminar_reporte_final"),
+
+    # =========================================================
     # VISTA FINAL DE DIRECTORA (ÉPICA 2)
     # =========================================================
     path('veredicto-final/<int:inscripcion_id>/', views.veredicto_final_directora, name='veredicto_final_directora'),
+
+    # =========================================================
+    # VALIDACIÓN DE PAGOS (TRABAJO SOCIAL)
+    # =========================================================
+    path('pagos/pendientes/', views.validacion_pagos_pendientes, name='validacion_pagos_pendientes'),
+    path('pagos/validar/<int:pk>/', views.registrar_pago_valido, name='registrar_pago_valido'),
 ]

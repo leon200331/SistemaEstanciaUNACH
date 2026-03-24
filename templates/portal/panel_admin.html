@@ -99,7 +99,6 @@
 
 {% block content %}
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="container d-flex justify-content-between align-items-center">
     <div class="brand">
@@ -124,7 +123,6 @@
 
 <div class="container py-4">
 
-  <!-- HERO -->
   <div class="hero">
     <i class="bi bi-building icon"></i>
     <h1 class="mb-1">Gestion de Trabajo Social</h1>
@@ -132,10 +130,8 @@
     <div class="muted mt-2">Accede a los módulos del personal autorizado.</div>
   </div>
 
-  <!-- MODULES -->
   <div class="row g-4 grid">
 
-    <!-- Admisiones -->
     <div class="col-md-4">
       <div class="module-card">
         <div class="module-icon" style="background:#e9f2ff; color:#0d6efd;">
@@ -149,7 +145,32 @@
       </div>
     </div>
 
-    <!-- Documentación -->
+    <div class="col-md-4">
+      <div class="module-card" style="border: 2px solid #ffc107;">
+        <div class="module-icon" style="background:#fff9e6; color:#ffc107;">
+          <i class="bi bi-file-earmark-check-fill"></i>
+        </div>
+        <h4>Reportes Finales</h4>
+        <p>Genera el Reporte Final (FO-301-02-18) de los menores que aprobaron los filtros.</p>
+        <a class="btn btn-warning btn-wide shadow-sm fw-bold text-dark" href="{% url 'reporte_final_pendientes' %}">
+          Ir a Reportes Pendientes <i class="bi bi-arrow-right-short"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="module-card" style="border: 2px solid #198754;">
+        <div class="module-icon" style="background:#eaf8f0; color:#198754;">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <h4>Validación de Pagos</h4>
+        <p>Revisa y aprueba los comprobantes de pago para finalizar la inscripción.</p>
+        <a class="btn btn-success btn-wide shadow-sm fw-bold text-white" href="{% url 'validacion_pagos_pendientes' %}">
+          Ir a Pagos Pendientes <i class="bi bi-arrow-right-short"></i>
+        </a>
+      </div>
+    </div>
+
     <div class="col-md-4">
       <div class="module-card">
         <div class="module-icon" style="background:#eaf8f0; color:#198754;">
@@ -163,7 +184,6 @@
       </div>
     </div>
 
-    <!-- Usuarios/Roles -->
     <div class="col-md-4">
       <div class="module-card">
         <div class="module-icon" style="background:#fff0f6; color:#d63384;">
@@ -172,7 +192,6 @@
         <h4>Usuarios</h4>
         <p>(Próximamente) Alta de personal y asignación de permisos.</p>
 
-        <!-- Si quieres que este botón lleve al panel TI (sin hablar de roles) -->
         <a class="btn btn-outline-secondary btn-wide" href="{% url 'panel_gobierno_ti' %}">
           Ir a Panel TI
         </a>

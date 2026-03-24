@@ -28,7 +28,7 @@
       font-size:.92rem;
       text-transform:uppercase;
       font-weight:800;
-      color:#64748b;
+      color:#166534;
       letter-spacing:.05em;
       margin-bottom:14px;
     }
@@ -41,8 +41,8 @@
     }
 
     .section-block{
-      background:#f8fafc;
-      border:1px solid #e2e8f0;
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
       border-radius:16px;
       padding:18px;
       margin-bottom:18px;
@@ -71,6 +71,29 @@
 
     .btn-soft{ border-radius:10px; font-weight:700; padding:.55rem 1rem; }
 
+    /* ========================================================
+       TRUCO DE DISEÑO: ALINEACIÓN SIMÉTRICA Y SIN NEGRITAS
+       ======================================================== */
+    .section-block .row > div[class*="col-"] {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .section-block .row > div[class*="col-"] > label,
+    label.form-label {
+        margin-bottom: 6px !important;
+        font-weight: normal;
+        color: #2c3e50;
+    }
+
+    .section-block .row > div[class*="col-"] > input,
+    .section-block .row > div[class*="col-"] > select,
+    .section-block .row > div[class*="col-"] > textarea,
+    .section-block .row > div[class*="col-"] > .pdf-box {
+        flex: 0 0 auto;
+    }
+
     textarea.form-control{ resize:none; min-height:90px; }
     .form-control, .form-select{
       border-radius:12px;
@@ -84,7 +107,7 @@
     }
 
     .pdf-box{
-      background:#f8fafc;
+      background:#ffffff;
       border:1px dashed #94a3b8;
       border-radius:12px;
       padding:14px;
@@ -92,7 +115,7 @@
 
     .hr-soft{
       border:0;
-      border-top:1px solid #e2e8f0;
+      border-top:1px solid #bbf7d0;
       margin:1.2rem 0;
     }
   </style>
@@ -138,7 +161,7 @@
   {% endif %}
 
   <div class="card card-panel p-4 mb-4">
-    <div class="section-title">Información de la solicitud</div>
+    <div class="section-title" style="color: #64748b;">Información de la solicitud</div>
 
     <div class="row g-3">
       <div class="col-md-3">
@@ -172,7 +195,7 @@
       <div class="col-md-6">
         <div class="info-box">
           <div class="info-label">Tutor</div>
-          <div class="info-value">{{ sol.nombre_tutor_completo }}</div>
+          <div class="info-value">{{ sol.nombres_tutor }} {{ sol.apellido_paterno_tutor }} {{ sol.apellido_materno_tutor }}</div>
         </div>
       </div>
 
@@ -186,7 +209,7 @@
       <div class="col-md-6">
         <div class="info-box">
           <div class="info-label">Menor</div>
-          <div class="info-value">{{ sol.nombre_menor_completo|default:"No capturado" }}</div>
+          <div class="info-value">{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</div>
         </div>
       </div>
 
@@ -207,15 +230,160 @@
   </div>
 
   <div class="card card-panel p-4">
-    <div class="section-title">Formulario de dictamen médico</div>
+    <div class="section-title" style="color: #0f766e; font-size: 1.1rem; margin-bottom: 20px;">Formulario de dictamen médico</div>
 
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
       <div class="section-block">
+        <div class="section-title">Ficha de identidad</div>
         <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label fw-bold">Historia clínica (PDF, máximo 5 MB)</label>
+          <div class="col-md-4 mb-3">{{ historia_form.nombres_paciente.label_tag }}{{ historia_form.nombres_paciente }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_paciente.label_tag }}{{ historia_form.apellido_paterno_paciente }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_paciente.label_tag }}{{ historia_form.apellido_materno_paciente }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-3 mb-3">{{ historia_form.edad.label_tag }}{{ historia_form.edad }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.sexo.label_tag }}{{ historia_form.sexo }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.fecha_nacimiento.label_tag }}{{ historia_form.fecha_nacimiento }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.religion.label_tag }}{{ historia_form.religion }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.lugar_fecha_elaboracion.label_tag }}{{ historia_form.lugar_fecha_elaboracion }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.quien_cuida_menor.label_tag }}{{ historia_form.quien_cuida_menor }}</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Antecedentes heredo familiares</div>
+
+        <div class="subsection-title">Padre</div>
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">{{ historia_form.nombres_padre.label_tag }}{{ historia_form.nombres_padre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_padre.label_tag }}{{ historia_form.apellido_paterno_padre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_padre.label_tag }}{{ historia_form.apellido_materno_padre }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-3 mb-3">{{ historia_form.edad_padre.label_tag }}{{ historia_form.edad_padre }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.tabaquismo_padre.label_tag }}{{ historia_form.tabaquismo_padre }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.alcoholismo_padre.label_tag }}{{ historia_form.alcoholismo_padre }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.drogas_padre.label_tag }}{{ historia_form.drogas_padre }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.enfermedades_actuales_padre.label_tag }}{{ historia_form.enfermedades_actuales_padre }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.alergias_padre.label_tag }}{{ historia_form.alergias_padre }}</div>
+        </div>
+
+        <div class="hr-soft"></div>
+
+        <div class="subsection-title">Madre</div>
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">{{ historia_form.nombres_madre.label_tag }}{{ historia_form.nombres_madre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_madre.label_tag }}{{ historia_form.apellido_paterno_madre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_madre.label_tag }}{{ historia_form.apellido_materno_madre }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-3 mb-3">{{ historia_form.edad_madre.label_tag }}{{ historia_form.edad_madre }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.tabaquismo_madre.label_tag }}{{ historia_form.tabaquismo_madre }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.alcoholismo_madre.label_tag }}{{ historia_form.alcoholismo_madre }}</div>
+          <div class="col-md-3 mb-3">{{ historia_form.drogas_madre.label_tag }}{{ historia_form.drogas_madre }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">{{ historia_form.enfermedades_actuales_madre.label_tag }}{{ historia_form.enfermedades_actuales_madre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.enfermedades_infancia_madre.label_tag }}{{ historia_form.enfermedades_infancia_madre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.alergias_madre.label_tag }}{{ historia_form.alergias_madre }}</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Antecedentes personales no patológicos</div>
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">{{ historia_form.numero_gestas.label_tag }}{{ historia_form.numero_gestas }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.semanas_gestacion.label_tag }}{{ historia_form.semanas_gestacion }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.tipo_parto.label_tag }}{{ historia_form.tipo_parto }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.complicaciones_embarazo.label_tag }}{{ historia_form.complicaciones_embarazo }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.medicamentos_embarazo.label_tag }}{{ historia_form.medicamentos_embarazo }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.exposicion_radiacion.label_tag }}{{ historia_form.exposicion_radiacion }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.sufrimiento_fetal.label_tag }}{{ historia_form.sufrimiento_fetal }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">{{ historia_form.motivo_cesarea.label_tag }}{{ historia_form.motivo_cesarea }}</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Antecedentes personales patológicos</div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.enfermedades_actuales.label_tag }}{{ historia_form.enfermedades_actuales }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.enfermedades_neonatales.label_tag }}{{ historia_form.enfermedades_neonatales }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.enfermedades_exantematicas.label_tag }}{{ historia_form.enfermedades_exantematicas }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.internamientos_quirurgicos.label_tag }}{{ historia_form.internamientos_quirurgicos }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.alergia_medicamentos.label_tag }}{{ historia_form.alergia_medicamentos }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.alergia_alimentos.label_tag }}{{ historia_form.alergia_alimentos }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">{{ historia_form.personas_enfermas_casa.label_tag }}{{ historia_form.personas_enfermas_casa }}</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Padecimiento actual</div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.vomitos.label_tag }}{{ historia_form.vomitos }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.excreta_acuosa.label_tag }}{{ historia_form.excreta_acuosa }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">{{ historia_form.fiebre.label_tag }}{{ historia_form.fiebre }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.tos.label_tag }}{{ historia_form.tos }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.rinorrea.label_tag }}{{ historia_form.rinorrea }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.erupciones.label_tag }}{{ historia_form.erupciones }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.dificultad_respiratoria.label_tag }}{{ historia_form.dificultad_respiratoria }}</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Exploración física</div>
+        <div class="row g-3">
+          <div class="col-md-2 mb-3">{{ historia_form.peso_actual.label_tag }}{{ historia_form.peso_actual }}</div>
+          <div class="col-md-2 mb-3">{{ historia_form.talla.label_tag }}{{ historia_form.talla }}</div>
+          <div class="col-md-2 mb-3">{{ historia_form.temperatura.label_tag }}{{ historia_form.temperatura }}</div>
+          <div class="col-md-2 mb-3">{{ historia_form.frecuencia_cardiaca.label_tag }}{{ historia_form.frecuencia_cardiaca }}</div>
+          <div class="col-md-2 mb-3">{{ historia_form.frecuencia_respiratoria.label_tag }}{{ historia_form.frecuencia_respiratoria }}</div>
+          <div class="col-md-2 mb-3">{{ historia_form.tension_arterial.label_tag }}{{ historia_form.tension_arterial }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">{{ historia_form.estado_nutricional.label_tag }}{{ historia_form.estado_nutricional }}</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Dictamen clínico</div>
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">{{ historia_form.diagnostico.label_tag }}{{ historia_form.diagnostico }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">{{ historia_form.pronostico.label_tag }}{{ historia_form.pronostico }}</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">{{ historia_form.elaborado_por.label_tag }}{{ historia_form.elaborado_por }}</div>
+        </div>
+      </div>
+
+      <div class="section-block" style="background-color: #f1f5f9; border-color: #cbd5e1;">
+        <div class="section-title" style="color: #334155;">Resolución y Archivos</div>
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Historia clínica (PDF, máximo 5 MB)</label>
             <div class="pdf-box">
               {{ form.pdf }}
               {% if form.pdf.errors %}
@@ -232,146 +400,21 @@
             </div>
           </div>
 
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Dictamen médico</label>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Dictamen médico final</label>
             {{ form.estado_medico }}
             {% if form.estado_medico.errors %}
               <div class="text-danger small mt-1">{{ form.estado_medico.errors }}</div>
             {% endif %}
           </div>
 
-          <div class="col-md-12">
-            <label class="form-label fw-bold">Observaciones médicas</label>
+          <div class="col-md-12 mb-3">
+            <label class="form-label">Observaciones médicas</label>
             {{ form.observaciones_medico }}
             {% if form.observaciones_medico.errors %}
               <div class="text-danger small mt-1">{{ form.observaciones_medico.errors }}</div>
             {% endif %}
           </div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Ficha de identidad</div>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label fw-bold">Nombre del paciente</label>
-            {{ historia_form.nombre_paciente }}
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Edad</label>
-            {{ historia_form.edad }}
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Sexo</label>
-            {{ historia_form.sexo }}
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-bold">Lugar y fecha de elaboración</label>
-            {{ historia_form.lugar_fecha_elaboracion }}
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Fecha de nacimiento</label>
-            {{ historia_form.fecha_nacimiento }}
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Religión</label>
-            {{ historia_form.religion }}
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-bold">Quién cuida al menor</label>
-            {{ historia_form.quien_cuida_menor }}
-          </div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Antecedentes heredo familiares</div>
-
-        <div class="subsection-title">Padre</div>
-        <div class="row g-3">
-          <div class="col-md-4">{{ historia_form.nombre_padre.label_tag }}{{ historia_form.nombre_padre }}</div>
-          <div class="col-md-2">{{ historia_form.edad_padre.label_tag }}{{ historia_form.edad_padre }}</div>
-          <div class="col-md-2">{{ historia_form.tabaquismo_padre.label_tag }}{{ historia_form.tabaquismo_padre }}</div>
-          <div class="col-md-2">{{ historia_form.alcoholismo_padre.label_tag }}{{ historia_form.alcoholismo_padre }}</div>
-          <div class="col-md-2">{{ historia_form.drogas_padre.label_tag }}{{ historia_form.drogas_padre }}</div>
-          <div class="col-md-6">{{ historia_form.enfermedades_actuales_padre.label_tag }}{{ historia_form.enfermedades_actuales_padre }}</div>
-          <div class="col-md-6">{{ historia_form.alergias_padre.label_tag }}{{ historia_form.alergias_padre }}</div>
-        </div>
-
-        <div class="hr-soft"></div>
-
-        <div class="subsection-title">Madre</div>
-        <div class="row g-3">
-          <div class="col-md-4">{{ historia_form.nombre_madre.label_tag }}{{ historia_form.nombre_madre }}</div>
-          <div class="col-md-2">{{ historia_form.edad_madre.label_tag }}{{ historia_form.edad_madre }}</div>
-          <div class="col-md-2">{{ historia_form.tabaquismo_madre.label_tag }}{{ historia_form.tabaquismo_madre }}</div>
-          <div class="col-md-2">{{ historia_form.alcoholismo_madre.label_tag }}{{ historia_form.alcoholismo_madre }}</div>
-          <div class="col-md-2">{{ historia_form.drogas_madre.label_tag }}{{ historia_form.drogas_madre }}</div>
-          <div class="col-md-4">{{ historia_form.enfermedades_actuales_madre.label_tag }}{{ historia_form.enfermedades_actuales_madre }}</div>
-          <div class="col-md-4">{{ historia_form.enfermedades_infancia_madre.label_tag }}{{ historia_form.enfermedades_infancia_madre }}</div>
-          <div class="col-md-4">{{ historia_form.alergias_madre.label_tag }}{{ historia_form.alergias_madre }}</div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Antecedentes personales no patológicos</div>
-        <div class="row g-3">
-          <div class="col-md-2">{{ historia_form.numero_gestas.label_tag }}{{ historia_form.numero_gestas }}</div>
-          <div class="col-md-5">{{ historia_form.complicaciones_embarazo.label_tag }}{{ historia_form.complicaciones_embarazo }}</div>
-          <div class="col-md-5">{{ historia_form.medicamentos_embarazo.label_tag }}{{ historia_form.medicamentos_embarazo }}</div>
-          <div class="col-md-6">{{ historia_form.exposicion_radiacion.label_tag }}{{ historia_form.exposicion_radiacion }}</div>
-          <div class="col-md-6">{{ historia_form.sufrimiento_fetal.label_tag }}{{ historia_form.sufrimiento_fetal }}</div>
-          <div class="col-md-3">{{ historia_form.semanas_gestacion.label_tag }}{{ historia_form.semanas_gestacion }}</div>
-          <div class="col-md-3">{{ historia_form.tipo_parto.label_tag }}{{ historia_form.tipo_parto }}</div>
-          <div class="col-md-6">{{ historia_form.motivo_cesarea.label_tag }}{{ historia_form.motivo_cesarea }}</div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Antecedentes personales patológicos</div>
-        <div class="row g-3">
-          <div class="col-md-6">{{ historia_form.enfermedades_actuales.label_tag }}{{ historia_form.enfermedades_actuales }}</div>
-          <div class="col-md-6">{{ historia_form.enfermedades_neonatales.label_tag }}{{ historia_form.enfermedades_neonatales }}</div>
-          <div class="col-md-6">{{ historia_form.enfermedades_exantematicas.label_tag }}{{ historia_form.enfermedades_exantematicas }}</div>
-          <div class="col-md-6">{{ historia_form.internamientos_quirurgicos.label_tag }}{{ historia_form.internamientos_quirurgicos }}</div>
-          <div class="col-md-6">{{ historia_form.alergia_medicamentos.label_tag }}{{ historia_form.alergia_medicamentos }}</div>
-          <div class="col-md-6">{{ historia_form.alergia_alimentos.label_tag }}{{ historia_form.alergia_alimentos }}</div>
-          <div class="col-md-12">{{ historia_form.personas_enfermas_casa.label_tag }}{{ historia_form.personas_enfermas_casa }}</div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Padecimiento actual</div>
-        <div class="row g-3">
-          <div class="col-md-6">{{ historia_form.vomitos.label_tag }}{{ historia_form.vomitos }}</div>
-          <div class="col-md-6">{{ historia_form.excreta_acuosa.label_tag }}{{ historia_form.excreta_acuosa }}</div>
-          <div class="col-md-4">{{ historia_form.fiebre.label_tag }}{{ historia_form.fiebre }}</div>
-          <div class="col-md-4">{{ historia_form.tos.label_tag }}{{ historia_form.tos }}</div>
-          <div class="col-md-4">{{ historia_form.rinorrea.label_tag }}{{ historia_form.rinorrea }}</div>
-          <div class="col-md-6">{{ historia_form.erupciones.label_tag }}{{ historia_form.erupciones }}</div>
-          <div class="col-md-6">{{ historia_form.dificultad_respiratoria.label_tag }}{{ historia_form.dificultad_respiratoria }}</div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Exploración física</div>
-        <div class="row g-3">
-          <div class="col-md-2">{{ historia_form.peso_actual.label_tag }}{{ historia_form.peso_actual }}</div>
-          <div class="col-md-2">{{ historia_form.talla.label_tag }}{{ historia_form.talla }}</div>
-          <div class="col-md-2">{{ historia_form.temperatura.label_tag }}{{ historia_form.temperatura }}</div>
-          <div class="col-md-2">{{ historia_form.frecuencia_cardiaca.label_tag }}{{ historia_form.frecuencia_cardiaca }}</div>
-          <div class="col-md-2">{{ historia_form.frecuencia_respiratoria.label_tag }}{{ historia_form.frecuencia_respiratoria }}</div>
-          <div class="col-md-2">{{ historia_form.tension_arterial.label_tag }}{{ historia_form.tension_arterial }}</div>
-          <div class="col-md-12">{{ historia_form.estado_nutricional.label_tag }}{{ historia_form.estado_nutricional }}</div>
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-title">Dictamen clínico</div>
-        <div class="row g-3">
-          <div class="col-md-12">{{ historia_form.diagnostico.label_tag }}{{ historia_form.diagnostico }}</div>
-          <div class="col-md-12">{{ historia_form.pronostico.label_tag }}{{ historia_form.pronostico }}</div>
-          <div class="col-md-6">{{ historia_form.elaborado_por.label_tag }}{{ historia_form.elaborado_por }}</div>
         </div>
       </div>
 
