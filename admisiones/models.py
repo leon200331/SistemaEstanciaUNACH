@@ -748,3 +748,173 @@ class HistoriaClinicaMedica(models.Model):
 
     def __str__(self):
         return f"Historia clínica - Solicitud {self.inscripcion_id}"
+
+
+# =========================================================
+# ÉPICA 3: CONFIGURACIÓN DE SEMESTRE Y SALAS
+# =========================================================
+
+class Semestre(models.Model):
+    class SedeChoices(models.TextChoices):
+        TUXTLA = "TUXTLA", "Tuxtla"
+        TAPACHULA = "TAPACHULA", "Tapachula"
+
+    class EstadoSemestre(models.TextChoices):
+        CONFIGURACION = "CONFIGURACION", "En Configuración"
+        ACTIVO = "ACTIVO", "Activo"
+        CERRADO = "CERRADO", "Cerrado"
+
+    nombre = models.CharField(max_length=100, help_text="Ej. Enero - Junio 2026")
+    sede = models.CharField(max_length=20, choices=SedeChoices.choices, default=SedeChoices.TUXTLA)
+
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+
+    estado = models.CharField(max_length=20, choices=EstadoSemestre.choices, default=EstadoSemestre.CONFIGURACION)
+
+    # Especialistas asignados al semestre entero
+    medico_asignado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name="semestres_medico")
+    nutriologa_asignada = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                            related_name="semestres_nutricion")
+    psicologa_asignada = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                           related_name="semestres_psicologia")
+
+    # Fecha programada para disparar los correos de la Encuesta B
+    fecha_encuesta_satisfaccion = models.DateField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre} ({self.sede})"
+
+
+class DiaFestivo(models.Model):
+    semestre = models.ForeignKey(Semestre, on_delete=models.CASCADE, related_name="dias_festivos")
+    fecha = models.DateField()
+    motivo = models.CharField(max_length=200, help_text="Ej. Día del Trabajo, Consejo Técnico, etc.")
+
+    def __str__(self):
+        return f"{self.fecha} - {self.motivo}"
+
+
+class Sala(models.Model):
+    # Catálogo maestro de salas físicas (Ej. Lactantes A, Maternal B1)
+    nombre = models.CharField(max_length=50, unique=True)
+    capacidad_maxima = models.PositiveIntegerField(default=10)
+
+    def __str__(self):
+        return self.nombre
+
+
+class SalaSemestre(models.Model):
+    """
+    Configuración específica de una sala durante un semestre en particular.
+    Aquí se guardan los horarios de la sala.
+    """
+    semestre = models.ForeignKey(Semestre, on_delete=models.CASCADE, related_name="salas_activas")
+    sala = models.ForeignKey(Sala, on_delete=models.CASCADE)
+
+    # Horarios generales de la sala
+    inicio_recepcion = models.TimeField(null=True, blank=True)
+    termino_recepcion = models.TimeField(null=True, blank=True)
+    horario_desayuno = models.TimeField(null=True, blank=True)
+    horario_actividades_pedagogicas = models.TimeField(null=True, blank=True)
+    horario_recreo = models.TimeField(null=True, blank=True)
+    horario_colacion = models.TimeField(null=True, blank=True)
+    horario_siesta = models.TimeField(null=True, blank=True)
+    horario_comida = models.TimeField(null=True, blank=True)
+    horario_salida = models.TimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.sala.nombre} - {self.semestre.nombre}"
+
+
+class AsignacionMaestra(models.Model):
+    """
+    Relaciona a las maestras con las salas. Permite tener Titulares y Suplentes.
+    """
+
+    class RolMaestra(models.TextChoices):
+        TITULAR = "TITULAR", "Maestra Titular"
+        TITULAR_2 = "TITULAR_2", "Segunda Titular"
+        SUPLENTE = "SUPLENTE", "Maestra Suplente / Apoyo"
+
+    sala_semestre = models.ForeignKey(SalaSemestre, on_delete=models.CASCADE, related_name="maestras_asignadas")
+    maestra = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mis_salas")
+    rol = models.CharField(max_length=20, choices=RolMaestra.choices, default=RolMaestra.TITULAR)
+
+    # Horarios exclusivos de descanso de esta maestra
+    horario_desayuno_maestra = models.TimeField(null=True, blank=True)
+    horario_tiempo_fuera = models.TimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.maestra.get_full_name()} ({self.get_rol_display()}) en {self.sala_semestre.sala.nombre}"
+
+
+# =========================================================
+# ENCUESTA DE SATISFACCIÓN B
+# =========================================================
+
+class EncuestaSatisfaccion(models.Model):
+    """
+    Guarda las respuestas exactas del formato FO-301-02-15 b.
+    Se llena mediante un link web enviado al tutor.
+    """
+    semestre = models.ForeignKey(Semestre, on_delete=models.CASCADE, related_name="encuestas")
+    tutor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mis_encuestas")
+    inscripcion = models.ForeignKey(SolicitudInscripcion, on_delete=models.CASCADE, null=True, blank=True)
+
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    # Preguntas de SI / NO (Booleanas)
+    q1_info_completa = models.BooleanField(verbose_name="¿Recibió información completa de la permanencia diaria?",
+                                           default=True)
+    q2_seguro = models.BooleanField(
+        verbose_name="¿Considera que su hija y/o hijo se encuentra seguro durante su permanencia en la Estancia Infantil?",
+        default=True)
+    q3_orientacion_nutricion = models.BooleanField(
+        verbose_name="¿Considera que la orientación sobre la alimentación adecuada de hija y/o hijo fue de utilidad?",
+        default=True)
+    q4_orientacion_medica = models.BooleanField(
+        verbose_name="¿Considera que la orientación médica de hija y/o hijo fue de utilidad?", default=True)
+    q5_orientacion_pedagogica = models.BooleanField(
+        verbose_name="¿Considera que la orientación pedagógica de hija y/o hijo fue de utilidad?", default=True)
+    q6_orientacion_psicologica = models.BooleanField(
+        verbose_name="¿Considera que la orientación psicológica recibida fue de utilidad?", default=True)
+    q7_apoyo_estudios = models.BooleanField(
+        verbose_name="¿Considera que el servicio prestado durante este semestre fue de apoyo para continuar sus estudios?",
+        default=True)
+
+    comentarios = models.TextField(blank=True, null=True, verbose_name="Comentarios y sugerencias:")
+
+    # Campo automático para poder ordenar del peor al mejor
+    puntaje_total = models.PositiveIntegerField(default=0, help_text="Calculado automáticamente (0 a 7)")
+
+    def save(self, *args, **kwargs):
+        # El sistema analiza automáticamente la encuesta antes de guardarla
+        puntaje = 0
+        if self.q1_info_completa: puntaje += 1
+        if self.q2_seguro: puntaje += 1
+        if self.q3_orientacion_nutricion: puntaje += 1
+        if self.q4_orientacion_medica: puntaje += 1
+        if self.q5_orientacion_pedagogica: puntaje += 1
+        if self.q6_orientacion_psicologica: puntaje += 1
+        if self.q7_apoyo_estudios: puntaje += 1
+
+        self.puntaje_total = puntaje
+        super().save(*args, **kwargs)
+
+    def nivel_satisfaccion(self):
+        """Etiqueta visual para el panel de la administradora"""
+        if self.puntaje_total == 7:
+            return "Excelente"
+        elif self.puntaje_total >= 5:
+            return "Bueno"
+        elif self.puntaje_total >= 3:
+            return "Regular"
+        else:
+            return "Malo (Alerta)"
+
+    def __str__(self):
+        return f"Encuesta de {self.tutor} - {self.semestre.nombre} (Puntaje: {self.puntaje_total})"

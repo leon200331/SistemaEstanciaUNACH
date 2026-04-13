@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dictamen Médico</title>
+<style>
+    @page {
+        size: letter;
+        margin: 1.5cm 2cm;
+    }
+
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 9px;
+        color: #000;
+    }
+
+    /* --- ENCABEZADO OFICIAL --- */
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 12px;
+    }
+    .header-table td {
+        vertical-align: middle;
+        border: none;
+    }
+    .logo-img {
+        max-height: 50px;
+        width: auto;
+    }
+    .title-main {
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+    .title-sub {
+        text-align: center;
+        font-size: 10px;
+        font-weight: bold;
+        color: #333;
+        margin-top: 2px;
+    }
+    .folio-box {
+        text-align: right;
+        font-size: 11px;
+        font-weight: bold;
+        color: #dc3545;
+    }
+
+    /* --- TABLAS TIPO FORMATO OFICIAL --- */
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+    .form-table th {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        font-weight: bold;
+        text-align: left;
+        padding: 4px 6px;
+        border: 1px solid #475569;
+        font-size: 10px;
+        text-transform: uppercase;
+    }
+    .form-table td {
+        padding: 4px 6px;
+        border: 1px solid #475569;
+        vertical-align: middle;
+    }
+    .col-label {
+        width: 30%;
+        font-weight: bold;
+        background-color: #f8fafc;
+        color: #334155;
+    }
+    .section-divider {
+        background-color: #f1f5f9;
+        font-weight: bold;
+        text-align: center;
+        font-size: 9px;
+        color: #0f766e;
+    }
+
+    /* --- CAJA DE OBSERVACIONES --- */
+    .obs-box {
+        border: 1px solid #475569;
+        padding: 6px;
+        min-height: 40px;
+        margin-bottom: 10px;
+        background-color: #ffffff;
+    }
+
+    .estado-aprobado { color: #166534; font-weight: bold; }
+    .estado-rechazado { color: #991b1b; font-weight: bold; }
+
+    /* --- FIRMAS --- */
+    .signatures {
+        width: 100%;
+        margin-top: 30px;
+        border-collapse: collapse;
+    }
+    .signatures td {
+        width: 50%;
+        text-align: center;
+        vertical-align: bottom;
+        padding-top: 25px;
+        border: none;
+    }
+    .line {
+        border-top: 1px solid #000;
+        width: 70%;
+        margin: 0 auto 5px auto;
+    }
+    .small {
+        font-size: 9px;
+        color: #333;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+{% with hist=sol.inscripcion_oficial.historia_clinica_medica %}
+
+<table class="header-table">
+    <tr>
+        <td style="width: 20%; text-align: left;">
+            <img src="static/img/logo_unach.png" alt="UNACH" class="logo-img">
+        </td>
+        <td style="width: 60%;">
+            <div class="title-main">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
+            <div class="title-sub">ESTANCIA INFANTIL UNACH</div>
+            <div class="title-sub">HISTORIA CLÍNICA Y DICTAMEN MÉDICO</div>
+        </td>
+        <td style="width: 20%; text-align: right;">
+            <div class="folio-box">Folio: #{{ sol.folio }}</div>
+            <img src="static/img/logo_eiu.png" alt="EIU" class="logo-img" style="margin-top: 5px;">
+        </td>
+    </tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">I. Ficha de Identidad del Menor</th></tr>
+    <tr>
+        <td class="col-label">Nombre del Menor</td>
+        <td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Fecha de Nac. / Edad / Sexo</td>
+        <td>{{ sol.fecha_nacimiento_menor|date:"d/m/Y"|default:"--" }} &nbsp;|&nbsp; {{ hist.edad|default:"--" }} &nbsp;|&nbsp; {{ hist.sexo|default:"--" }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Tutor Responsable / Correo</td>
+        <td>{{ sol.nombre_tutor_completo }} ({{ sol.correo|default:"Sin correo" }})</td>
+    </tr>
+    <tr>
+        <td class="col-label">Lugar y Fecha de Elaboración</td>
+        <td>{{ hist.lugar_fecha_elaboracion|default:"--" }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Religión / Quién lo cuida</td>
+        <td>{{ hist.religion|default:"--" }} &nbsp;|&nbsp; {{ hist.quien_cuida_menor|default:"--" }}</td>
+    </tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">II. Antecedentes Heredo Familiares</th></tr>
+
+    <tr><td colspan="2" class="section-divider">DATOS DEL PADRE</td></tr>
+    <tr><td class="col-label">Nombre / Edad</td><td>{{ hist.nombre_padre|default:"--" }} ({{ hist.edad_padre|default:"--" }} años)</td></tr>
+    <tr>
+        <td class="col-label">Tóxicos</td>
+        <td>
+            Tabaquismo: {% if hist.tabaquismo_padre %}Sí{% else %}No{% endif %} |
+            Alcoholismo: {% if hist.alcoholismo_padre %}Sí{% else %}No{% endif %} |
+            Drogas: {% if hist.drogas_padre %}Sí{% else %}No{% endif %}
+        </td>
+    </tr>
+    <tr><td class="col-label">Enfermedades / Alergias</td><td>{{ hist.enfermedades_actuales_padre|default:"Ninguna" }} / {{ hist.alergias_padre|default:"Ninguna" }}</td></tr>
+
+    <tr><td colspan="2" class="section-divider">DATOS DE LA MADRE</td></tr>
+    <tr><td class="col-label">Nombre / Edad</td><td>{{ hist.nombre_madre|default:"--" }} ({{ hist.edad_madre|default:"--" }} años)</td></tr>
+    <tr>
+        <td class="col-label">Tóxicos</td>
+        <td>
+            Tabaquismo: {% if hist.tabaquismo_madre %}Sí{% else %}No{% endif %} |
+            Alcoholismo: {% if hist.alcoholismo_madre %}Sí{% else %}No{% endif %} |
+            Drogas: {% if hist.drogas_madre %}Sí{% else %}No{% endif %}
+        </td>
+    </tr>
+    <tr><td class="col-label">Enfermedades / Alergias</td><td>{{ hist.enfermedades_actuales_madre|default:"Ninguna" }} / {{ hist.alergias_madre|default:"Ninguna" }}</td></tr>
+    <tr><td class="col-label">Enf. de la infancia</td><td>{{ hist.enfermedades_infancia_madre|default:"Ninguna" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">III. Antecedentes Personales No Patológicos (Perinatales)</th></tr>
+    <tr><td class="col-label">Embarazo (Gestas / Semanas)</td><td>Gestas: {{ hist.numero_gestas|default:"--" }} &nbsp;|&nbsp; Semanas: {{ hist.semanas_gestacion|default:"--" }} &nbsp;|&nbsp; Parto: {{ hist.tipo_parto|default:"--" }}</td></tr>
+    <tr><td class="col-label">Complicaciones / Medicamentos</td><td>{{ hist.complicaciones_embarazo|default:"Ninguna" }} / {{ hist.medicamentos_embarazo|default:"Ninguno" }}</td></tr>
+    <tr><td class="col-label">Radiación / Sufrimiento Fetal</td><td>Radiación: {{ hist.exposicion_radiacion|default:"No" }} / Sufrimiento Fetal: {{ hist.sufrimiento_fetal|default:"No" }}</td></tr>
+    <tr><td class="col-label">Motivo de cesárea</td><td>{{ hist.motivo_cesarea|default:"N/A" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">IV. Antecedentes Personales Patológicos</th></tr>
+    <tr><td class="col-label">Enfermedades Actuales</td><td>{{ hist.enfermedades_actuales|default:"Ninguna" }}</td></tr>
+    <tr><td class="col-label">Enf. Neonatales / Exantemáticas</td><td>Neonatales: {{ hist.enfermedades_neonatales|default:"Ninguna" }} | Exantemáticas: {{ hist.enfermedades_exantematicas|default:"Ninguna" }}</td></tr>
+    <tr><td class="col-label">Quirúrgicos / Hospitalizaciones</td><td>{{ hist.internamientos_quirurgicos|default:"Ninguno" }}</td></tr>
+    <tr><td class="col-label">Alergias</td><td>Medicamentos: {{ hist.alergia_medicamentos|default:"Ninguna" }} | Alimentos: {{ hist.alergia_alimentos|default:"Ninguna" }}</td></tr>
+    <tr><td class="col-label">Personas enfermas en casa</td><td>{{ hist.personas_enfermas_casa|default:"Ninguna" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">V. Padecimiento Actual y Exploración Física</th></tr>
+    <tr>
+        <td class="col-label">Síntomas Actuales</td>
+        <td>
+            Vómitos: {{ hist.vomitos|default:"No" }} |
+            Excreta acuosa: {{ hist.excreta_acuosa|default:"No" }} |
+            Fiebre: {{ hist.fiebre|default:"No" }} |
+            Tos: {{ hist.tos|default:"No" }} <br>
+            Rinorrea: {{ hist.rinorrea|default:"No" }} |
+            Erupciones: {{ hist.erupciones|default:"No" }} |
+            Dif. Respiratoria: {{ hist.dificultad_respiratoria|default:"No" }}
+        </td>
+    </tr>
+    <tr>
+        <td class="col-label">Signos Vitales</td>
+        <td>
+            Peso: {{ hist.peso_actual|default:"--" }} |
+            Talla: {{ hist.talla|default:"--" }} |
+            Temp: {{ hist.temperatura|default:"--" }} |
+            FC: {{ hist.frecuencia_cardiaca|default:"--" }} |
+            FR: {{ hist.frecuencia_respiratoria|default:"--" }} |
+            TA: {{ hist.tension_arterial|default:"--" }}
+        </td>
+    </tr>
+    <tr><td class="col-label">Estado Nutricional</td><td>{{ hist.estado_nutricional|default:"--" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">VI. Resolución y Dictamen Clínico</th></tr>
+    <tr><td class="col-label">Diagnóstico Médico</td><td>{{ hist.diagnostico|default:"--" }}</td></tr>
+    <tr><td class="col-label">Pronóstico</td><td>{{ hist.pronostico|default:"--" }}</td></tr>
+    <tr>
+        <td class="col-label">Resolución Final</td>
+        <td>
+            {% if sol.estado_medico == "APROBADO" %}
+                <span class="estado-aprobado">APROBADO</span>
+            {% elif sol.estado_medico == "RECHAZADO" %}
+                <span class="estado-rechazado">RECHAZADO</span>
+            {% else %}
+                {{ sol.get_estado_medico_display }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr><td class="col-label">Médico Responsable</td><td>{{ hist.elaborado_por|default:"--" }}</td></tr>
+    <tr><td class="col-label">Fecha de Evaluación</td><td>{{ sol.medico_en|date:"d de F de Y, H:i" }} hrs.</td></tr>
+</table>
+
+<div class="obs-box">
+    <strong>Observaciones Adicionales:</strong><br>
+    {{ sol.observaciones_medico|default:"Sin observaciones adicionales registradas en el sistema." }}
+</div>
+
+<table class="signatures">
+    <tr>
+        <td>
+            <div class="line"></div>
+            <div class="small">Firma del padre, madre o tutor legal</div>
+        </td>
+        <td>
+            <div class="line"></div>
+            <div class="small">Dr(a). {{ hist.elaborado_por|default:"Médico Responsable" }}</div>
+            <div class="small">Firma y Sello</div>
+        </td>
+    </tr>
+</table>
+
+{% endwith %}
+
+</body>
+</html>

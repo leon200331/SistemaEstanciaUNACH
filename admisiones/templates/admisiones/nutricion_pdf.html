@@ -1,290 +1,238 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>Dictamen Nutrición</title>
 <style>
-@page {
-    size: A4;
-    margin: 2cm;
-}
+    @page {
+        size: letter;
+        margin: 1.5cm 2cm;
+    }
 
-body {
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 11px;
-    color: #1f2937;
-}
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 9px; /* Letra un poco más pequeña para que quepa todo el super cuestionario */
+        color: #000;
+    }
 
-.header-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 12px;
-}
+    /* --- ENCABEZADO OFICIAL --- */
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+    .header-table td {
+        vertical-align: middle;
+        border: none;
+    }
+    .logo-img {
+        max-height: 50px;
+        width: auto;
+    }
+    .title-main {
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+    .title-sub {
+        text-align: center;
+        font-size: 10px;
+        font-weight: bold;
+        color: #333;
+        margin-top: 2px;
+    }
+    .folio-box {
+        text-align: right;
+        font-size: 11px;
+        font-weight: bold;
+        color: #dc3545;
+    }
 
-.header-table td {
-    vertical-align: middle;
-}
+    /* --- TABLAS TIPO FORMATO OFICIAL --- */
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+    .form-table th {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        font-weight: bold;
+        text-align: left;
+        padding: 4px 6px;
+        border: 1px solid #475569;
+        font-size: 10px;
+        text-transform: uppercase;
+    }
+    .form-table td {
+        padding: 4px 6px;
+        border: 1px solid #475569;
+        vertical-align: middle;
+    }
+    .col-label {
+        width: 35%;
+        font-weight: bold;
+        background-color: #f8fafc;
+        color: #334155;
+    }
 
-.logo {
-    width: 80px;
-    height: auto;
-}
+    /* --- CAJA DE OBSERVACIONES --- */
+    .obs-box {
+        border: 1px solid #475569;
+        padding: 6px;
+        min-height: 40px;
+        margin-bottom: 10px;
+        background-color: #ffffff;
+    }
 
-.title-main {
-    text-align: center;
-    font-size: 15px;
-    font-weight: bold;
-    color: #7e22ce;
-}
+    .estado-aprobado { color: #166534; font-weight: bold; }
+    .estado-rechazado { color: #991b1b; font-weight: bold; }
 
-.title-sub {
-    text-align: center;
-    font-size: 12px;
-    color: #334155;
-    margin-top: 2px;
-}
-
-.folio-box {
-    text-align: right;
-    font-size: 11px;
-    font-weight: bold;
-    color: #0f172a;
-}
-
-.section {
-    margin-top: 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-}
-
-.section-title {
-    background: #f3e8ff;
-    color: #7e22ce;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 8px 10px;
-    border-bottom: 1px solid #cbd5e1;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.data-table td {
-    padding: 7px 10px;
-    border-bottom: 1px solid #e5e7eb;
-    vertical-align: top;
-}
-
-.data-table tr:last-child td {
-    border-bottom: none;
-}
-
-.data-table td:first-child {
-    width: 35%;
-    font-weight: bold;
-    color: #334155;
-}
-
-.obs-box {
-    border-top: 1px solid #cbd5e1;
-    padding: 10px;
-    min-height: 65px;
-}
-
-.label {
-    font-weight: bold;
-}
-
-.estado-aprobado {
-    color: #166534;
-    font-weight: bold;
-}
-
-.estado-rechazado {
-    color: #991b1b;
-    font-weight: bold;
-}
-
-.signatures {
-    width: 100%;
-    margin-top: 45px;
-    border-collapse: collapse;
-}
-
-.signatures td {
-    width: 50%;
-    text-align: center;
-    vertical-align: top;
-    padding-top: 35px;
-}
-
-.line {
-    border-top: 1px solid #000;
-    width: 80%;
-    margin: 0 auto 6px auto;
-}
-
-.small {
-    font-size: 10px;
-    color: #475569;
-}
+    /* --- FIRMAS --- */
+    .signatures {
+        width: 100%;
+        margin-top: 30px;
+        border-collapse: collapse;
+    }
+    .signatures td {
+        width: 50%;
+        text-align: center;
+        vertical-align: bottom;
+        padding-top: 25px;
+        border: none;
+    }
+    .line {
+        border-top: 1px solid #000;
+        width: 70%;
+        margin: 0 auto 5px auto;
+    }
+    .small {
+        font-size: 9px;
+        color: #333;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
 
 <table class="header-table">
     <tr>
-        <td style="width:15%;">
-            <img src="{{ logo_uri }}" class="logo" alt="Logo UNACH">
+        <td style="width: 20%; text-align: left;">
+            <img src="static/img/logo_unach.png" alt="UNACH" class="logo-img">
         </td>
-        <td style="width:70%;">
+        <td style="width: 60%;">
             <div class="title-main">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
             <div class="title-sub">ESTANCIA INFANTIL UNACH</div>
-            <div class="title-sub">DICTAMEN DEL ÁREA DE NUTRICIÓN</div>
+            <div class="title-sub">VALORACIÓN Y DICTAMEN NUTRICIONAL</div>
         </td>
-        <td style="width:15%;" class="folio-box">
-            Folio: #{{ sol.folio }}
+        <td style="width: 20%; text-align: right;">
+            <div class="folio-box">Folio: #{{ sol.folio }}</div>
+            <img src="static/img/logo_eiu.png" alt="EIU" class="logo-img" style="margin-top: 5px;">
         </td>
     </tr>
 </table>
 
-<div class="section">
-    <div class="section-title">Datos generales</div>
-    <table class="data-table">
-        <tr>
-            <td>Nombre del menor</td>
-            <td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td>
-        </tr>
-        <tr>
-            <td>Fecha de nacimiento</td>
-            <td>{{ sol.fecha_nacimiento_menor|default:"No registrada" }}</td>
-        </tr>
-        <tr>
-            <td>Tutor</td>
-            <td>{{ sol.nombre_tutor_completo }}</td>
-        </tr>
-        <tr>
-            <td>Correo</td>
-            <td>{{ sol.correo }}</td>
-        </tr>
-        <tr>
-            <td>Edad</td>
-            <td>{{ sol.edad_nutricion|default:"No especificada" }}</td>
-        </tr>
-        <tr>
-            <td>Sexo</td>
-            <td>{{ sol.sexo_nutricion|default:"No especificado" }}</td>
-        </tr>
-        <tr>
-            <td>Peso al nacer</td>
-            <td>{{ sol.peso_nacer|default:"No especificado" }}</td>
-        </tr>
-        <tr>
-            <td>Talla al nacer</td>
-            <td>{{ sol.talla_nacer|default:"No especificada" }}</td>
-        </tr>
-        <tr>
-            <td>Peso actual</td>
-            <td>{{ sol.peso_actual|default:"No especificado" }}</td>
-        </tr>
-        <tr>
-            <td>Talla actual</td>
-            <td>{{ sol.talla_actual|default:"No especificada" }}</td>
-        </tr>
-    </table>
+<table class="form-table">
+    <tr><th colspan="2">I. Datos Generales del Menor</th></tr>
+    <tr>
+        <td class="col-label">Nombre completo</td>
+        <td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Tutor responsable / Correo</td>
+        <td>{{ sol.nombre_tutor_completo }} ({{ sol.correo }})</td>
+    </tr>
+    <tr>
+        <td class="col-label">Fecha nac. / Edad / Sexo</td>
+        <td>{{ sol.fecha_nacimiento_menor|default:"--" }} / {{ sol.edad_nutricion|default:"--" }} / {{ sol.sexo_nutricion|default:"--" }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Peso y Talla al nacer</td>
+        <td>{{ sol.peso_nacer|default:"--" }} kg / {{ sol.talla_nacer|default:"--" }} cm</td>
+    </tr>
+    <tr>
+        <td class="col-label">Peso y Talla actuales</td>
+        <td>{{ sol.peso_actual|default:"--" }} kg / {{ sol.talla_actual|default:"--" }} cm</td>
+    </tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">II. Lactancia, Fórmula y Complicaciones</th></tr>
+    <tr><td class="col-label">Seno materno</td><td>{{ sol.seno_materno|default:"--" }} (Tiempo: {{ sol.tiempo_seno_materno|default:"--" }}) - Motivo suspensión: {{ sol.motivo_no_seno|default:"--" }}</td></tr>
+    <tr><td class="col-label">Alimentación actual</td><td>{{ sol.tipo_alimentacion_lactante|default:"--" }}</td></tr>
+    <tr><td class="col-label">Fórmula infantil</td><td>{{ sol.formula_infantil|default:"--" }} ({{ sol.cual_formula|default:"N/A" }}) - Especial: {{ sol.formula_especial|default:"No" }} ({{ sol.cual_formula_especial|default:"N/A" }})</td></tr>
+    <tr><td class="col-label">Frecuencia y cantidad</td><td>{{ sol.cantidad_leche_formula|default:"--" }} cada {{ sol.cada_cuantas_horas_leche|default:"--" }} hrs. vía {{ sol.forma_proporcionar_formula|default:"--" }}</td></tr>
+    <tr><td class="col-label">Complicaciones / Alergias</td><td>{{ sol.complicaciones_alimentacion|default:"No" }} ({{ sol.tipo_complicacion|default:"N/A" }}) | Alergias: {{ sol.alergia_alimentos|default:"No" }} ({{ sol.cual_alergia|default:"N/A" }})</td></tr>
+    <tr><td class="col-label">Restricciones alimentarias</td><td>{{ sol.restriccion_alimentaria_actual|default:"No" }} - {{ sol.detalle_restriccion_alimentaria|default:"N/A" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">III. Orden de Introducción de Alimentos y Agrado</th></tr>
+    <tr><td class="col-label">Mes de introducción</td>
+        <td>
+            Verduras: {{ sol.orden_verduras|default:"--" }} | Frutas: {{ sol.orden_frutas|default:"--" }} | Carnes: {{ sol.orden_carnes|default:"--" }} <br>
+            Cereales/Leguminosas: {{ sol.orden_arroz|default:"--" }} (Arroz), {{ sol.orden_leguminosas|default:"--" }} (Leguminosas) <br>
+            Huevo: {{ sol.orden_yema_huevo|default:"--" }} (Yema), {{ sol.orden_huevo_entero|default:"--" }} (Entero)
+        </td>
+    </tr>
+    <tr><td class="col-label">Frutas de agrado</td><td>{{ sol.alimentos_agrado_frutas|default:"Ninguna" }}</td></tr>
+    <tr><td class="col-label">Verduras de agrado</td><td>{{ sol.alimentos_agrado_verduras|default:"Ninguna" }}</td></tr>
+    <tr><td class="col-label">Carnes / Leguminosas agrado</td><td>{{ sol.alimentos_agrado_aoa|default:"Ninguna" }} / {{ sol.alimentos_agrado_leguminosas|default:"Ninguna" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">IV. Contexto Familiar y Hábitos</th></tr>
+    <tr><td class="col-label">Consume agua</td><td>{{ sol.consume_agua|default:"No" }} ({{ sol.cantidad_agua|default:"--" }})</td></tr>
+    <tr><td class="col-label">Tiempos de comida</td><td>Desayuno: {{ sol.desayuna|default:"--" }} ({{ sol.hora_desayuno|default:"--" }}) | Comida: {{ sol.come|default:"--" }} ({{ sol.hora_comida|default:"--" }}) | Cena: {{ sol.cena|default:"--" }} ({{ sol.hora_cena|default:"--" }})</td></tr>
+    <tr><td class="col-label">Dieta familiar y Contexto</td><td>Misma dieta: {{ sol.misma_alimentacion_familia|default:"--" }} | Come con: {{ sol.come_con|default:"--" }} en {{ sol.donde_consume_alimentos|default:"--" }}</td></tr>
+    <tr><td class="col-label">Consumo de Azúcares</td><td>Golosinas: {{ sol.consume_golosinas|default:"--" }} | Refrescos: {{ sol.consume_refrescos|default:"--" }} | Jugos: {{ sol.consume_jugos|default:"--" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">V. Resolución del Dictamen Clínico</th></tr>
+    <tr>
+        <td class="col-label">Estado del dictamen</td>
+        <td>
+            {% if sol.estado_nutricion == "APROBADO" %}
+                <span class="estado-aprobado">APROBADO</span>
+            {% elif sol.estado_nutricion == "RECHAZADO" %}
+                <span class="estado-rechazado">RECHAZADO</span>
+            {% else %}
+                {{ sol.get_estado_nutricion_display }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td class="col-label">Nutriólogo(a) responsable</td>
+        <td>{{ sol.nutricion_por|default:"No asignado" }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Fecha de elaboración</td>
+        <td>{{ sol.fecha_elaboracion_nutricion|default:"--" }}</td>
+    </tr>
+</table>
+
+<div class="obs-box">
+    <strong>Observaciones clínicas (Uso interno Nutrición):</strong><br>
+    {{ sol.observaciones_nutricion_clinica|default:"Ninguna observación clínica registrada." }}
 </div>
 
-<div class="section">
-    <div class="section-title">Lactancia y alimentación</div>
-    <table class="data-table">
-        <tr><td>Seno materno</td><td>{{ sol.seno_materno|default:"No especificado" }}</td></tr>
-        <tr><td>Tiempo de seno materno</td><td>{{ sol.tiempo_seno_materno|default:"No especificado" }}</td></tr>
-        <tr><td>Motivo de no seno materno</td><td>{{ sol.motivo_no_seno|default:"No especificado" }}</td></tr>
-        <tr><td>Acude para lactancia</td><td>{{ sol.acude_lactancia|default:"No especificado" }}</td></tr>
-        <tr><td>Tipo de alimentación</td><td>{{ sol.tipo_alimentacion_lactante|default:"No especificado" }}</td></tr>
-        <tr><td>Fórmula infantil</td><td>{{ sol.formula_infantil|default:"No especificada" }}</td></tr>
-        <tr><td>Cuál fórmula</td><td>{{ sol.cual_formula|default:"No especificada" }}</td></tr>
-        <tr><td>Edad inicio fórmula</td><td>{{ sol.edad_inicio_formula|default:"No especificada" }}</td></tr>
-        <tr><td>Fórmula especial</td><td>{{ sol.formula_especial|default:"No especificada" }}</td></tr>
-        <tr><td>Cuál fórmula especial</td><td>{{ sol.cual_formula_especial|default:"No especificada" }}</td></tr>
-        <tr><td>Causa fórmula especial</td><td>{{ sol.causa_formula_especial|default:"No especificada" }}</td></tr>
-    </table>
-</div>
-
-<div class="section">
-    <div class="section-title">Hábitos alimentarios</div>
-    <table class="data-table">
-        <tr><td>Cantidad leche/fórmula</td><td>{{ sol.cantidad_leche_formula|default:"No especificada" }}</td></tr>
-        <tr><td>Cada cuántas horas</td><td>{{ sol.cada_cuantas_horas_leche|default:"No especificado" }}</td></tr>
-        <tr><td>Presentación leche</td><td>{{ sol.presentacion_leche|default:"No especificada" }}</td></tr>
-        <tr><td>Forma de proporcionar fórmula</td><td>{{ sol.forma_proporcionar_formula|default:"No especificada" }}</td></tr>
-        <tr><td>Complicaciones de alimentación</td><td>{{ sol.complicaciones_alimentacion|default:"No especificadas" }}</td></tr>
-        <tr><td>Tipo de complicación</td><td>{{ sol.tipo_complicacion|default:"No especificado" }}</td></tr>
-        <tr><td>Agrega alimento a fórmula</td><td>{{ sol.agrega_alimento_formula|default:"No especificado" }}</td></tr>
-        <tr><td>Cuál agrega</td><td>{{ sol.cual_agrega_formula|default:"No especificado" }}</td></tr>
-        <tr><td>Edad inicio alimentación complementaria</td><td>{{ sol.edad_inicio_alimentacion_complementaria|default:"No especificada" }}</td></tr>
-        <tr><td>Frecuencia de sólidos</td><td>{{ sol.frecuencia_solidos|default:"No especificada" }}</td></tr>
-    </table>
-</div>
-
-<div class="section">
-    <div class="section-title">Consumo y observaciones</div>
-    <table class="data-table">
-        <tr><td>Consume agua</td><td>{{ sol.consume_agua|default:"No especificado" }}</td></tr>
-        <tr><td>Cantidad de agua</td><td>{{ sol.cantidad_agua|default:"No especificada" }}</td></tr>
-        <tr><td>Desayuna</td><td>{{ sol.desayuna|default:"No especificado" }}</td></tr>
-        <tr><td>Come</td><td>{{ sol.come|default:"No especificado" }}</td></tr>
-        <tr><td>Cena</td><td>{{ sol.cena|default:"No especificado" }}</td></tr>
-        <tr><td>Colación</td><td>{{ sol.colacion|default:"No especificada" }}</td></tr>
-        <tr><td>Misma alimentación de la familia</td><td>{{ sol.misma_alimentacion_familia|default:"No especificado" }}</td></tr>
-        <tr><td>Consume golosinas</td><td>{{ sol.consume_golosinas|default:"No especificado" }}</td></tr>
-        <tr><td>Consume refrescos</td><td>{{ sol.consume_refrescos|default:"No especificado" }}</td></tr>
-        <tr><td>Consume jugos</td><td>{{ sol.consume_jugos|default:"No especificado" }}</td></tr>
-    </table>
-</div>
-
-<div class="section">
-    <div class="section-title">Dictamen final</div>
-    <table class="data-table">
-        <tr>
-            <td>Estado del dictamen</td>
-            <td>
-                {% if sol.estado_nutricion == "APROBADO" %}
-                    <span class="estado-aprobado">APROBADO</span>
-                {% elif sol.estado_nutricion == "RECHAZADO" %}
-                    <span class="estado-rechazado">RECHAZADO</span>
-                {% else %}
-                    {{ sol.get_estado_nutricion_display }}
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td>Nutriólogo(a)</td>
-            <td>{{ sol.nutricion_por|default:"No asignado" }}</td>
-        </tr>
-        <tr>
-            <td>Fecha de dictamen</td>
-            <td>{{ sol.nutricion_en|date:"d/m/Y H:i" }}</td>
-        </tr>
-    </table>
-
-    <div class="obs-box">
-        <span class="label">Observaciones:</span><br>
-        {{ sol.observaciones_nutricion|default:"Sin observaciones" }}
-    </div>
+<div class="obs-box">
+    <strong>Observaciones y recomendaciones generales para el tutor:</strong><br>
+    {{ sol.observaciones_nutricion|default:"Sin recomendaciones adicionales registradas." }}
 </div>
 
 <table class="signatures">
     <tr>
         <td>
             <div class="line"></div>
-            <div class="small">Nombre y firma del beneficiario y/o responsable del menor</div>
+            <div class="small">Firma del padre, madre o tutor legal</div>
         </td>
         <td>
             <div class="line"></div>
-            <div class="small">Nombre y firma del nutriólogo(a)</div>
+            <div class="small">Firma del Especialista en Nutrición</div>
         </td>
     </tr>
 </table>

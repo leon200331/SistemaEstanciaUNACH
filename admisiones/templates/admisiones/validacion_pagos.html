@@ -7,25 +7,30 @@
 <style>
   body { background:#f6f7fb; font-family:'Segoe UI',sans-serif; }
 
-  /* Topbar Idéntico al Panel de Solicitudes */
-  .topbar {
+  /* Envoltura azul que ocupa toda la pantalla de lado a lado */
+  .topbar-wrapper {
     background: #1e3a8a; /* Azul institucional */
-    color: #fff;
-    padding: 12px 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.15);
+    width: 100%;
+  }
+
+  /* Contenedor interno que se alinea con la tabla de abajo */
+  .topbar-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,.15);
+    padding: 12px 12px;
+    color: #fff;
   }
 
   .topbar-left {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.2rem;
   }
 
   .topbar-logo {
-    height: 45px; /* Ajusta el tamaño según necesites */
+    height: 45px;
     width: auto;
   }
 
@@ -33,10 +38,11 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    text-align: left;
   }
 
   .topbar-title h1 {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     margin: 0;
     letter-spacing: 0.5px;
@@ -108,19 +114,23 @@
 
 {% block content %}
 
-<div class="topbar">
-  <div class="topbar-left">
-    <img src="{% static 'img/logo.png' %}" alt="Logo EIU y UNACH" class="topbar-logo">
-    <div class="topbar-title">
-      <h1>PANEL DE VALIDACIÓN DE PAGOS</h1>
-      <p>Revisión de comprobantes de inscripción final</p>
-    </div>
-  </div>
+<div class="topbar-wrapper">
+  <div class="container topbar-content">
 
-  <div class="topbar-right">
-    <a href="{% url 'root' %}" class="btn btn-outline-light btn-topbar">
-      <i class="bi bi-arrow-left"></i> Regresar
-    </a>
+    <div class="topbar-left">
+      <img src="{% static 'img/logo.png' %}" alt="Logo EIU y UNACH" class="topbar-logo">
+      <div class="topbar-title">
+        <h1>PANEL DE VALIDACIÓN DE PAGOS</h1>
+        <p>Revisión de comprobantes de inscripción final</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <a href="{% url 'root' %}" class="btn btn-outline-light btn-topbar">
+        <i class="bi bi-arrow-left"></i> Regresar
+      </a>
+    </div>
+
   </div>
 </div>
 

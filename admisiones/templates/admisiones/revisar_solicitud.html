@@ -8,6 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
     :root{
       --brand:#1e3a8a;
@@ -95,6 +97,16 @@
     }
     .doc-link-btn:hover { background-color: #e9ecef; border-color: #ced4da; }
     .doc-link-btn i { font-size: 1.1rem; margin-right: 8px; }
+
+    /* PERSONALIZACIÓN EXTRA DE SWEETALERT SI ES NECESARIA */
+    .swal2-styled.swal2-confirm {
+      border-radius: 12px !important;
+      font-weight: 800 !important;
+    }
+    .swal2-styled.swal2-cancel {
+      border-radius: 12px !important;
+      font-weight: 800 !important;
+    }
   </style>
 </head>
 
@@ -321,6 +333,8 @@
               {% csrf_token %}
               <input type="hidden" name="docs_erroneos" id="docs_erroneos" value="">
 
+              <input type="hidden" name="accion_inscripcion" id="input_accion_inscripcion" value="">
+
               <div class="alert alert-warning small py-2 my-3 border-warning shadow-sm">
                   <i class="bi bi-info-circle-fill me-1"></i> <strong>¿Falta o está mal un documento?</strong> Ponle una palomita roja a los documentos incorrectos en la lista de arriba y escribe el motivo abajo.
               </div>
@@ -331,17 +345,54 @@
               </div>
 
               <div class="d-grid gap-2">
-                <button class="btn btn-success btn-soft w-100 shadow-sm" type="submit" name="accion_inscripcion" value="APROBAR" onclick="return confirm('¿Confirmas que el expediente está correcto y pasará a filtros?');">
+                <button class="btn btn-success btn-soft w-100 shadow-sm" type="button" onclick="confirmarPaseFiltros()">
                   <i class="bi bi-check-circle-fill me-1"></i> Validar y Pasar a Filtros
                 </button>
 
-                <button class="btn btn-outline-danger btn-soft w-100 border-2" type="submit" name="accion_inscripcion" value="DEVOLVER">
+                <button class="btn btn-outline-danger btn-soft w-100 border-2" type="button" onclick="confirmarDevolucion()">
                   <i class="bi bi-arrow-counterclockwise me-1"></i> Devolver Documentos al Tutor
                 </button>
               </div>
             </form>
 
             <script>
+                // Funciones de SweetAlert para Inscripción
+                function confirmarPaseFiltros() {
+                    Swal.fire({
+                        title: '¿Pasar a filtros?',
+                        text: "Verifica que el expediente esté completo. Pasará a las áreas correspondientes.",
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonColor: '#198754',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, enviar',
+                        cancelButtonText: 'Revisar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('input_accion_inscripcion').value = 'APROBAR';
+                            document.getElementById('formRevisionInscripcion').submit();
+                        }
+                    });
+                }
+
+                function confirmarDevolucion() {
+                     Swal.fire({
+                        title: '¿Devolver documentos?',
+                        text: "Asegúrate de marcar los documentos erróneos y dejar una observación clara para el tutor.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, devolver',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('input_accion_inscripcion').value = 'DEVOLVER';
+                            document.getElementById('formRevisionInscripcion').submit();
+                        }
+                    });
+                }
+
                 document.addEventListener('DOMContentLoaded', function() {
                     const form = document.getElementById('formRevisionInscripcion');
                     // Buscamos los botones de documentos y el botón del reglamento
@@ -423,10 +474,11 @@
             {% endif %}
 
             {% if s.estado == "RECIBIDA" %}
-              <form method="post" action="{% url 'dictaminar_solicitud' s.id %}" class="d-grid gap-2">
+
+              <form method="post" action="{% url 'dictaminar_solicitud' s.id %}" id="formAprobarSolicitud" class="d-grid gap-2">
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="APROBAR">
-                <button class="btn btn-success btn-soft" type="submit" onclick="return confirm('¿Estás seguro de Aprobar? Se creará el usuario y se le enviará un correo con acceso.');">
+                <button class="btn btn-success btn-soft" type="button" onclick="confirmarAprobacion()">
                   <i class="bi bi-check2-circle me-1"></i> Aprobar y Generar Acceso
                 </button>
               </form>
@@ -505,6 +557,28 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function confirmarAprobacion() {
+    Swal.fire({
+      title: '¿Aprobar solicitud?',
+      text: "Se aprobará este folio y el tutor quedará habilitado para continuar con su proceso de inscripción.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#1e3a8a', // Azul Institucional
+      cancelButtonColor: '#dc3545',  // Rojo para cancelar
+      confirmButtonText: 'Sí, Aprobar',
+      cancelButtonText: 'Cancelar',
+      background: '#ffffff',
+      color: '#0f172a'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Si el usuario hace clic en "Sí", enviamos el formulario
+        document.getElementById('formAprobarSolicitud').submit();
+      }
+    });
+  }
+</script>
 
 </body>
 </html>

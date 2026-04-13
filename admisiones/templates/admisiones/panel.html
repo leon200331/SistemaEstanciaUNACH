@@ -109,11 +109,21 @@
   <div class="d-flex justify-content-between align-items-center mb-3 px-2">
       <div class="d-flex align-items-center gap-2">
           <span class="fw-bold text-muted small text-uppercase"><i class="bi bi-funnel-fill me-1"></i>Clasificar por:</span>
+
           <a href="?sort=apellidos" class="btn btn-sm {% if request.GET.sort == 'apellidos' %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-3">
              Apellidos
           </a>
+
           <a href="?" class="btn btn-sm {% if not request.GET.sort %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-3">
              Más recientes
+          </a>
+
+          <a href="?sort=folio_asc" class="btn btn-sm {% if request.GET.sort == 'folio_asc' %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-3" title="Folio: del más antiguo al más nuevo">
+             <i class="bi bi-sort-numeric-down"></i> Folio (1-9)
+          </a>
+
+          <a href="?sort=folio_desc" class="btn btn-sm {% if request.GET.sort == 'folio_desc' %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-3" title="Folio: del más nuevo al más antiguo">
+             <i class="bi bi-sort-numeric-down-alt"></i> Folio (9-1)
           </a>
       </div>
   </div>
@@ -305,9 +315,9 @@
             </div>
 
             <div class="col-md-12">
-              <label class="form-label fw-bold">Correo <span class="text-danger">*</span></label>
-              <input type="email" name="correo" class="form-control" placeholder="lucia@gmail.com" required autocomplete="off" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$">
-              <div class="invalid-feedback fw-bold">Ingrese un correo válido (ej: nombre@dominio.com).</div>
+              <label class="form-label fw-bold">Correo Institucional <span class="text-danger">*</span></label>
+              <input type="email" name="correo" class="form-control" placeholder="ejemplo@unach.mx" required autocomplete="off" pattern=".*@unach\.mx$">
+              <div class="invalid-feedback fw-bold">Ingrese un correo institucional válido.</div>
             </div>
 
           </div>

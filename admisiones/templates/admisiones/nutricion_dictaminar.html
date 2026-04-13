@@ -23,25 +23,26 @@ body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .sub-card{background:#faf5ff;border:1px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:18px;}
 
 /* ========================================================
-   TRUCO DE DISEÑO: PREGUNTAS Y CAJAS JUNTAS ABAJO
+   TRUCO DE DISEÑO: PREGUNTAS Y CAJAS JUNTAS ABAJO (CORREGIDO)
    ======================================================== */
 .sub-card .row > div[class*="col-"] {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Empuja todo (texto y caja) hacia abajo */
 }
 
-/* --- CAMBIO: Letras de preguntas sin negritas (font-weight: normal) --- */
+/* --- CAMBIO: Letras de preguntas sin negritas --- */
 .sub-card .row > div[class*="col-"] > label,
 label {
-    margin-bottom: 6px !important; /* Mantiene la pregunta pegadita a su caja */
+    margin-bottom: 6px !important;
     font-weight: normal;
     color: #334155;
 }
 
 .sub-card .row > div[class*="col-"] > input,
 .sub-card .row > div[class*="col-"] > select,
-.sub-card .row > div[class*="col-"] > textarea {
+.sub-card .row > div[class*="col-"] > textarea,
+.sub-card .row > div[class*="col-"] > .select2-container {
+    margin-top: auto; /* Esto empuja la caja hacia abajo de forma segura */
     flex: 0 0 auto;
 }
 
@@ -56,15 +57,24 @@ label {
     border: none;
     color: white;
     border-radius: 4px;
-    padding: 2px 6px;
+    /* --- CORRECCIÓN CSS PARA EVITAR QUE LA "X" SE AMONTONE --- */
+    padding: 2px 8px 2px 24px;
     margin-top: 5px;
+    position: relative;
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
     color: white;
-    margin-right: 5px;
+    /* --- SEPARAMOS LA "X" DE LA LETRA --- */
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 0;
+    font-weight: bold;
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
     color: #ffdddd;
+    background: transparent;
 }
 </style>
 </head>
@@ -291,7 +301,12 @@ label {
     <div class="section-title">10. Cierre y dictamen</div>
     <div class="row">
         <div class="col-md-12 mb-3">{{ form.observaciones_nutricion_clinica.label_tag }}{{ form.observaciones_nutricion_clinica }}</div>
-        <div class="col-md-4 mb-3">{{ form.fecha_elaboracion_nutricion.label_tag }}{{ form.fecha_elaboracion_nutricion }}</div>
+
+        <div class="col-md-4 mb-3">
+            <label for="fecha_automatica" class="form-label">Fecha de elaboración:</label>
+            <input type="date" name="fecha_elaboracion_nutricion" id="fecha_automatica" class="form-control" required readonly>
+        </div>
+
         <div class="col-md-4 mb-3">{{ form.estado_nutricion.label_tag }}{{ form.estado_nutricion }}</div>
         <div class="col-md-12 mb-3">{{ form.observaciones_nutricion.label_tag }}{{ form.observaciones_nutricion }}</div>
     </div>
@@ -400,6 +415,16 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     initToggles();
+
+    // --- NUEVO: Script para llenar la fecha de elaboración automáticamente ---
+    const fechaInput = document.getElementById('fecha_automatica');
+    if (fechaInput) {
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        fechaInput.value = `${año}-${mes}-${dia}`;
+    }
 });
 </script>
 

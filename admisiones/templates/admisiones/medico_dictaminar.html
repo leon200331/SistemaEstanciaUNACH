@@ -71,13 +71,9 @@
 
     .btn-soft{ border-radius:10px; font-weight:700; padding:.55rem 1rem; }
 
-    /* ========================================================
-       TRUCO DE DISEÑO: ALINEACIÓN SIMÉTRICA Y SIN NEGRITAS
-       ======================================================== */
     .section-block .row > div[class*="col-"] {
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
     }
 
     .section-block .row > div[class*="col-"] > label,
@@ -91,6 +87,7 @@
     .section-block .row > div[class*="col-"] > select,
     .section-block .row > div[class*="col-"] > textarea,
     .section-block .row > div[class*="col-"] > .pdf-box {
+        margin-top: auto;
         flex: 0 0 auto;
     }
 
@@ -117,6 +114,14 @@
       border:0;
       border-top:1px solid #bbf7d0;
       margin:1.2rem 0;
+    }
+
+    /* Estilo para los campos bloqueados (Solo para los datos inmutables del menor) */
+    .campo-bloqueado {
+        background-color: #e9ecef !important;
+        pointer-events: none;
+        color: #495057;
+        font-weight: bold;
     }
   </style>
 </head>
@@ -170,56 +175,48 @@
           <div class="info-value">#{{ sol.folio|default:"-" }}</div>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">Estado general</div>
           <div class="info-value">{{ sol.get_estado_display }}</div>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">Estado médico</div>
           <div class="info-value">{{ sol.get_estado_medico_display }}</div>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">Fecha de registro</div>
           <div class="info-value">{{ sol.created_at|date:"d/m/Y" }}</div>
         </div>
       </div>
-
       <div class="col-md-6">
         <div class="info-box">
           <div class="info-label">Tutor</div>
           <div class="info-value">{{ sol.nombres_tutor }} {{ sol.apellido_paterno_tutor }} {{ sol.apellido_materno_tutor }}</div>
         </div>
       </div>
-
       <div class="col-md-6">
         <div class="info-box">
           <div class="info-label">Correo</div>
           <div class="info-value">{{ sol.correo|default:"No capturado" }}</div>
         </div>
       </div>
-
       <div class="col-md-6">
         <div class="info-box">
           <div class="info-label">Menor</div>
-          <div class="info-value">{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</div>
+          <div class="info-value" id="menor_nombre_completo">{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</div>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">Fecha de nacimiento</div>
-          <div class="info-value">{{ sol.fecha_nacimiento_menor|default:"No capturada" }}</div>
+          <div class="info-value" id="menor_fecha_nac">{{ sol.fecha_nacimiento_menor|default:"" }}</div>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">CURP menor</div>
@@ -236,21 +233,23 @@
       {% csrf_token %}
 
       <div class="section-block">
-        <div class="section-title">Ficha de identidad</div>
+        <div class="section-title">Datos del Menor</div>
         <div class="row g-3">
           <div class="col-md-4 mb-3">{{ historia_form.nombres_paciente.label_tag }}{{ historia_form.nombres_paciente }}</div>
           <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_paciente.label_tag }}{{ historia_form.apellido_paterno_paciente }}</div>
           <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_paciente.label_tag }}{{ historia_form.apellido_materno_paciente }}</div>
         </div>
         <div class="row g-3">
-          <div class="col-md-3 mb-3">{{ historia_form.edad.label_tag }}{{ historia_form.edad }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.sexo.label_tag }}{{ historia_form.sexo }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.fecha_nacimiento.label_tag }}{{ historia_form.fecha_nacimiento }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.religion.label_tag }}{{ historia_form.religion }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.fecha_nacimiento.label_tag }}{{ historia_form.fecha_nacimiento }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.edad.label_tag }}{{ historia_form.edad }}</div>
+          <div class="col-md-4 mb-3">{{ historia_form.sexo.label_tag }}{{ historia_form.sexo }}</div>
         </div>
+
+        <div class="hr-soft"></div>
+        <div class="subsection-title">Contexto y Entorno</div>
         <div class="row g-3">
-          <div class="col-md-6 mb-3">{{ historia_form.lugar_fecha_elaboracion.label_tag }}{{ historia_form.lugar_fecha_elaboracion }}</div>
           <div class="col-md-6 mb-3">{{ historia_form.quien_cuida_menor.label_tag }}{{ historia_form.quien_cuida_menor }}</div>
+          <div class="col-md-6 mb-3">{{ historia_form.lugar_fecha_elaboracion.label_tag }}{{ historia_form.lugar_fecha_elaboracion }}</div>
         </div>
       </div>
 
@@ -451,5 +450,155 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Convertidor de Input a Select + "Otro"
+  function crearComboConOtro(inputId, opciones, placeholder, valorDesdeBD) {
+      const inputOriginal = document.getElementById(inputId);
+      if (!inputOriginal) return;
+
+      inputOriginal.style.display = 'none';
+
+      let valorActual = inputOriginal.value.trim() || valorDesdeBD.trim();
+
+      const select = document.createElement('select');
+      select.className = 'form-select mb-2';
+      select.innerHTML = `<option value="">${placeholder}</option>`;
+      opciones.forEach(opt => {
+          select.innerHTML += `<option value="${opt}">${opt}</option>`;
+      });
+      select.innerHTML += `<option value="OTRO">Otro (Especificar)</option>`;
+
+      const inputOtro = document.createElement('input');
+      inputOtro.type = 'text';
+      inputOtro.className = 'form-control';
+      inputOtro.placeholder = 'Escriba aquí...';
+      inputOtro.style.display = 'none';
+
+      inputOriginal.parentNode.insertBefore(select, inputOriginal.nextSibling);
+      inputOriginal.parentNode.insertBefore(inputOtro, select.nextSibling);
+
+      if (valorActual) {
+          inputOriginal.value = valorActual;
+          const optExacta = Array.from(select.options).find(o => o.value.toLowerCase() === valorActual.toLowerCase());
+          if (optExacta) {
+              optExacta.selected = true;
+          } else {
+              select.value = "OTRO";
+              inputOtro.style.display = 'block';
+              inputOtro.value = valorActual;
+          }
+      }
+
+      select.addEventListener('change', function() {
+          if (this.value === "OTRO") {
+              inputOtro.style.display = 'block';
+              inputOriginal.value = inputOtro.value;
+          } else {
+              inputOtro.style.display = 'none';
+              inputOriginal.value = this.value;
+          }
+      });
+
+      inputOtro.addEventListener('input', function() {
+          inputOriginal.value = this.value;
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+      // 1. EXTRAER DATOS DEL MENOR
+      const nombreMenor = "{{ sol.nombres_menor|default:'' }}";
+      const paternoMenor = "{{ sol.apellido_paterno_menor|default:'' }}";
+      const maternoMenor = "{{ sol.apellido_materno_menor|default:'' }}";
+      const fechaNacMenor = document.getElementById("menor_fecha_nac").innerText.trim();
+
+      // EXTRAER EDAD (Priorizando la Inscripción, luego Nutrición, luego Psicología)
+      let edadAnios = "{{ sol.inscripcion_oficial.edad_anios_menor|default_if_none:'' }}";
+      let edadMeses = "{{ sol.inscripcion_oficial.edad_meses_menor|default_if_none:'' }}";
+      let edadNutricion = "{{ sol.edad_nutricion|default:'' }}";
+      let edadPsicologia = "{{ sol.edad_psicologia|default_if_none:'' }}";
+
+      let edadBD = "";
+      if (edadAnios !== "" && edadMeses !== "") {
+          edadBD = edadAnios + " años, " + edadMeses + " meses";
+      } else if (edadNutricion !== "") {
+          edadBD = edadNutricion;
+      } else if (edadPsicologia !== "") {
+          edadBD = edadPsicologia + " años";
+      }
+
+      // EXTRAER SEXO
+      const sexoBD = "{{ sol.inscripcion_oficial.sexo_menor|default:sol.sexo_nutricion|default:'' }}";
+
+      const inputNombre = document.getElementById("id_nombres_paciente");
+      const inputPaterno = document.getElementById("id_apellido_paterno_paciente");
+      const inputMaterno = document.getElementById("id_apellido_materno_paciente");
+      const inputFecha = document.getElementById("id_fecha_nacimiento");
+      const inputEdad = document.getElementById("id_edad");
+      const inputSexo = document.getElementById("id_sexo");
+
+      // Llenamos las columnas
+      if(inputNombre && !inputNombre.value) inputNombre.value = nombreMenor;
+      if(inputPaterno && !inputPaterno.value) inputPaterno.value = paternoMenor;
+      if(inputMaterno && !inputMaterno.value) inputMaterno.value = maternoMenor;
+
+      if(inputFecha && !inputFecha.value && fechaNacMenor) {
+          inputFecha.value = "{{ sol.fecha_nacimiento_menor|date:'Y-m-d' }}";
+      }
+
+      if(inputEdad && !inputEdad.value && edadBD !== "") {
+          inputEdad.value = edadBD;
+      }
+
+      if(inputSexo && (!inputSexo.value || inputSexo.value === "") && sexoBD) {
+          if (sexoBD === 'M') {
+              inputSexo.value = 'Masculino';
+          } else if (sexoBD === 'F') {
+              inputSexo.value = 'Femenino';
+          } else {
+              inputSexo.value = sexoBD;
+          }
+      }
+
+      // 2. BLOQUEAR LOS DATOS BÁSICOS
+      const camposBloquear = [
+          "id_nombres_paciente", "id_apellido_paterno_paciente",
+          "id_apellido_materno_paciente", "id_fecha_nacimiento"
+      ];
+
+      camposBloquear.forEach(id => {
+          let el = document.getElementById(id);
+          if(el && el.value) {
+              el.setAttribute("readonly", true);
+              el.classList.add("campo-bloqueado");
+          }
+      });
+
+      if(inputEdad && inputEdad.value) {
+          inputEdad.setAttribute("readonly", true);
+          inputEdad.classList.add("campo-bloqueado");
+      }
+      if(inputSexo && inputSexo.value && inputSexo.value !== "") {
+          inputSexo.classList.add("campo-bloqueado");
+      }
+
+      // 3. AUTOLLENAR LUGAR Y FECHA DE ELABORACIÓN
+      let lugarFechaInput = document.getElementById("id_lugar_fecha_elaboracion");
+      if(lugarFechaInput && !lugarFechaInput.value) {
+          const hoy = new Date();
+          const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+          lugarFechaInput.value = "Tuxtla Gutiérrez, Chiapas a " + hoy.toLocaleDateString('es-MX', opciones);
+      }
+
+      // 4. COMBOS DESPLEGABLES EDITABLES
+      crearComboConOtro(
+          "id_quien_cuida_menor",
+          ['Mamá', 'Papá', 'Ambos (Mamá y Papá)', 'Abuelos', 'Tíos'],
+          "Seleccione quién cuida al menor...",
+          ""
+      );
+  });
+</script>
+
 </body>
 </html>

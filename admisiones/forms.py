@@ -59,7 +59,7 @@ class CapturaSolicitudForm(forms.ModelForm):
             }),
 
             "correo": forms.EmailInput(attrs={
-                "placeholder": "correo@ejemplo.com"
+                "placeholder": "correo@unach.mx"
             }),
 
             "celular": forms.TextInput(attrs={
@@ -126,21 +126,15 @@ class CapturaSolicitudForm(forms.ModelForm):
         v = (self.cleaned_data.get("apellido_materno_tutor") or "").strip()
         return v.title() if v else v  # FUERZA MAYUSCULA INICIAL
 
+    # --- CAMBIO APLICADO: Solo acepta @unach.mx ---
     def clean_correo(self):
         correo = (self.cleaned_data.get("correo") or "").strip().lower()
-
-        dominios_permitidos = [
-            "@gmail.com",
-            "@hotmail.com",
-            "@outlook.com",
-            "@unach.mx",
-        ]
 
         if correo and ("@" not in correo):
             raise forms.ValidationError("El correo debe contener el símbolo @.")
 
-        if correo and (not any(correo.endswith(d) for d in dominios_permitidos)):
-            raise forms.ValidationError("El correo debe ser Gmail, Hotmail, Outlook o institucional UNACH.")
+        if correo and not correo.endswith("@unach.mx"):
+            raise forms.ValidationError("Por políticas de CTI, solo se permiten correos institucionales con terminación @unach.mx.")
 
         return correo
 
@@ -238,6 +232,13 @@ class CrearSolicitudPanelForm(forms.Form):
         self.fields["apellido_materno_tutor"].widget.attrs["placeholder"] = "Ej. López"
         self.fields["matricula"].widget.attrs["placeholder"] = "Ej. A123456"
         self.fields["correo"].widget.attrs["placeholder"] = "Ej. correo@unach.mx"
+
+    # --- CAMBIO APLICADO: Solo acepta @unach.mx en el Panel de Trabajo Social ---
+    def clean_correo(self):
+        correo = (self.cleaned_data.get("correo") or "").strip().lower()
+        if correo and not correo.endswith("@unach.mx"):
+            raise forms.ValidationError("Por políticas de CTI, solo se permiten correos institucionales con terminación @unach.mx")
+        return correo
 
     # --- NUEVA VALIDACIÓN: Si elige "Otra", debe escribir a fuerzas ---
     def clean(self):

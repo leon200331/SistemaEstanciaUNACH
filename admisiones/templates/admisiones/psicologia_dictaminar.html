@@ -41,6 +41,29 @@ textarea.form-control{min-height:90px;}
 
 /* Estilo para resaltar el error */
 .is-invalid-custom { border: 2px solid #dc3545 !important; background-color: #fff8f8 !important; }
+
+/* ========================================================
+   ALINEACIÓN SIMÉTRICA SEGURA (Evita que Chrome se congele)
+   ======================================================== */
+.accordion-body .row > div[class*="col-"] {
+    display: flex;
+    flex-direction: column;
+}
+
+.accordion-body .row > div[class*="col-"] > label.form-label {
+    margin-bottom: 6px !important;
+}
+
+.accordion-body .row > div[class*="col-"] > input:not([type="checkbox"]):not([type="radio"]),
+.accordion-body .row > div[class*="col-"] > select,
+.accordion-body .row > div[class*="col-"] > textarea,
+.accordion-body .row > div[class*="col-"] > .d-flex,
+.accordion-body .row > div[class*="col-"] > .time-combo,
+.accordion-body .row > div[class*="col-"] > .input-group,
+.accordion-body .row > div[class*="col-"] > .d-none {
+    margin-top: auto; /* Empuja el elemento a la parte inferior de forma segura */
+    flex: 0 0 auto;
+}
 </style>
 </head>
 <body>

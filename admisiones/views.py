@@ -17,7 +17,6 @@ from django.core.mail import send_mail, EmailMessage
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.utils.crypto import get_random_string
 
 import os
 from io import BytesIO
@@ -67,12 +66,19 @@ def captura_por_token(request, token):
 # ===================== GESTIÓN DE PANEL (TRABAJO SOCIAL) =====================
 @login_required
 def panel_admisiones(request):
-    orden = '-created_at'
+    orden = '-created_at'  # Por defecto: más recientes
     sort_param = request.GET.get('sort')
+
     if sort_param == 'apellidos':
         orden = 'apellido_paterno_tutor'
+    elif sort_param == 'folio_asc':
+        orden = 'id'  # De menor a mayor (Ej: 1, 2, 3...)
+    elif sort_param == 'folio_desc':
+        orden = '-id'  # De mayor a menor (Ej: 99, 98, 97...)
+
     solicitudes = Solicitud.objects.order_by(orden)
     form_crear = CrearSolicitudPanelForm()
+
     return render(request, "admisiones/panel.html", {"solicitudes": solicitudes, "form_crear": form_crear})
 
 
@@ -233,7 +239,6 @@ def dictaminar_solicitud(request, pk):
         s.save()
 
         correo_tutor = s.correo.lower().strip()
-        password_temporal = get_random_string(8)
 
         user, created = User.objects.get_or_create(
             email=correo_tutor,
@@ -245,30 +250,42 @@ def dictaminar_solicitud(request, pk):
                 'is_active': True
             }
         )
-        user.set_password(password_temporal)
-        user.save()
+
+        # =====================================================================
+        # TODO PARA ENTREGA FINAL:
+        # 1. Borrar el bloque de "PRUEBAS LOCALES".
+        # 2. Quitar el '#' de las líneas de "SSO UNACH".
+        # =====================================================================
+
+        # --- CÓDIGO DE DESARROLLO (PRUEBAS LOCALES) ---
+        if created:
+            user.set_password('Unach2026')
+            user.save()
+
+        # --- CÓDIGO DE PRODUCCIÓN (SSO UNACH) ---
+        # if created:
+        #     user.set_unusable_password()
+        #     user.save()
 
         SolicitudInscripcion.objects.get_or_create(solicitud_ingreso=s, defaults={'usuario_tutor': user})
 
         if s.correo:
-            # --- SE AGREGA REQUEST=REQUEST PARA LOS LOGOS ---
             ruta_pdf = generar_pdf_dictamen(s)
-            url_login = request.build_absolute_uri('/')
+            url_login = request.build_absolute_uri('/login/')
             asunto = "¡Felicidades! Solicitud Aprobada - UNACH"
             cuerpo = (
                 f"Hola {s.nombres_tutor}:\n\n"
                 f"Tu solicitud ha sido APROBADA.\n\n"
-                f"Ingresa aquí para continuar: {url_login}\n"
-                f"Usuario: {correo_tutor}\n"
-                f"Contraseña Temporal: {password_temporal}\n\n"
-                f"Atentamente, UNACH."
+                f"Para continuar con tu proceso de inscripción, por favor ingresa al sistema usando tu correo institucional (@unach.mx) y tu contraseña de siempre.\n\n"
+                f"Enlace de acceso: {url_login}\n\n"
+                f"Atentamente, Estancia Infantil UNACH."
             )
             email = EmailMessage(asunto, cuerpo, settings.DEFAULT_FROM_EMAIL, [s.correo])
             if ruta_pdf and os.path.exists(ruta_pdf):
                 email.attach_file(ruta_pdf)
             email.send(fail_silently=True)
 
-        messages.success(request, f"¡Éxito! Claves enviadas a {s.correo}")
+        messages.success(request, f"¡Éxito! Notificación de aprobación enviada a {s.correo}")
         return redirect("panel_admisiones")
 
 
@@ -330,8 +347,10 @@ def portal_inscripcion(request):
 # Psicología
 @login_required
 def psicologia_pendientes(request):
-    qs = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_psicologia="PENDIENTE").order_by(
-        "-created_at")
+    # 1. Obtenemos los IDs de las solicitudes en FILTROS
+    folios_listos = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    # 2. Filtramos
+    qs = Solicitud.objects.filter(id__in=folios_listos, estado_psicologia="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/psicologia_pendientes.html", {"solicitudes": qs})
 
 
@@ -354,8 +373,10 @@ def psicologia_dictaminar(request, pk):
 # Nutrición
 @login_required
 def nutricion_pendientes(request):
-    qs = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_nutricion="PENDIENTE").order_by(
-        "-created_at")
+    # 1. Obtenemos los IDs de las solicitudes en FILTROS
+    folios_listos = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    # 2. Filtramos
+    qs = Solicitud.objects.filter(id__in=folios_listos, estado_nutricion="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/nutricion_pendientes.html", {"solicitudes": qs})
 
 
@@ -378,7 +399,10 @@ def nutricion_dictaminar(request, pk):
 # Médico
 @login_required
 def medico_pendientes(request):
-    qs = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_medico="PENDIENTE").order_by("-created_at")
+    # 1. Obtenemos los IDs de las solicitudes en FILTROS
+    folios_listos = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    # 2. Filtramos
+    qs = Solicitud.objects.filter(id__in=folios_listos, estado_medico="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
 
 

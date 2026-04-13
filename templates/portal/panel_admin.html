@@ -38,61 +38,124 @@
     font-size:.9rem;
   }
 
-  /* Hero */
+  /* Hero Banner Elegante */
   .hero{
-    border-radius:22px;
-    padding:34px;
-    background:linear-gradient(135deg, #0f2f84 0%, #2c7bbf 100%);
+    border-radius:24px;
+    padding:40px;
+    background:linear-gradient(135deg, #153c9e 0%, #2061b4 100%);
     color:#fff;
-    box-shadow:0 14px 28px rgba(15,47,132,.22);
+    box-shadow:0 15px 35px rgba(21, 60, 158, 0.2);
     position:relative;
     overflow:hidden;
+    margin-bottom: 35px;
   }
-  .hero h1{ font-weight:900; margin-bottom:.35rem; }
-  .hero .sub{ opacity:.9; }
-  .hero .muted{ opacity:.8; font-size:.95rem; }
+  .hero h1{ font-weight:900; margin-bottom:.5rem; letter-spacing: -0.5px; }
+  .hero .sub{ opacity:.9; font-size: 1.05rem; }
+  .hero .muted{ opacity:.75; font-size:.95rem; margin-top: 10px; }
   .hero .icon{
     position:absolute;
-    right:28px;
-    top:22px;
-    font-size:4.2rem;
-    opacity:.25;
+    right:40px;
+    top:50%;
+    transform: translateY(-50%);
+    font-size:7rem;
+    opacity:0.15;
   }
 
-  /* Cards */
-  .grid{ margin-top:22px; }
-  .module-card{
-    border:none;
-    border-radius:18px;
-    background:#fff;
-    box-shadow:0 10px 28px rgba(0,0,0,.06);
-    padding:22px;
-    height:100%;
+  /* =========================================
+     DISEÑO DINÁMICO Y ELEGANTE (LISTA)
+     ========================================= */
+  .list-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem; /* Más espacio para que "respiren" */
+      max-width: 950px;
+      margin: 0 auto;
   }
-  .module-icon{
-    width:72px;height:72px;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:2rem;
-    margin:0 auto 14px auto;
+
+  .module-row-card {
+      background: #ffffff;
+      border-radius: 20px; /* Bordes más suaves */
+      padding: 22px 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.03);
+      border: 1px solid rgba(0,0,0,.04);
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+      /* Animación premium */
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border-left: 6px solid transparent;
   }
-  .module-card h4{
-    font-weight:800;
-    margin-bottom:.35rem;
-    text-align:center;
+
+  /* Efecto al pasar el mouse (Hover) */
+  .module-row-card:hover {
+      transform: translateY(-5px); /* Se levanta */
+      box-shadow: 0 15px 35px rgba(0,0,0,.08); /* Sombra más amplia */
+      border-left-width: 10px; /* El borde de color se hace más grueso */
   }
-  .module-card p{
-    color:#6c757d;
-    text-align:center;
-    margin-bottom:16px;
+
+  .module-icon-row {
+      width: 70px;
+      height: 70px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
   }
-  .btn-wide{
-    width:100%;
-    border-radius:12px;
-    padding:.65rem 1rem;
-    font-weight:700;
+
+  /* El icono gira o crece un poquito al hacer hover en la tarjeta */
+  .module-row-card:hover .module-icon-row {
+      transform: scale(1.1);
+  }
+
+  .module-content-row {
+      flex-grow: 1;
+  }
+
+  .module-content-row h4 {
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+      font-size: 1.25rem;
+      color: #1e293b;
+  }
+
+  .module-content-row p {
+      color: #64748b;
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+  }
+
+  .btn-row {
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+  }
+
+  /* El botón crece un poco al pasar el mouse */
+  .btn-row:hover {
+      transform: scale(1.03);
+  }
+
+  /* Colores de Borde Izquierdo y Botones */
+  .card-blue { border-left-color: #0d6efd; }
+  .card-yellow { border-left-color: #ffc107; }
+  .card-green { border-left-color: #198754; }
+
+  /* Responsivo para celulares */
+  @media (max-width: 768px) {
+      .module-row-card {
+          flex-direction: column;
+          text-align: center;
+          gap: 1.2rem;
+          padding: 25px 20px;
+      }
+      .btn-row { width: 100%; }
+      .hero .icon { display: none; }
   }
 </style>
 {% endblock %}
@@ -125,80 +188,60 @@
 
   <div class="hero">
     <i class="bi bi-building icon"></i>
-    <h1 class="mb-1">Gestion de Trabajo Social</h1>
+    <h1 class="mb-1">Gestión de Trabajo Social</h1>
     <div class="sub">Gestión interna • Admisiones • Documentación • Reportes</div>
-    <div class="muted mt-2">Accede a los módulos del personal autorizado.</div>
+    <div class="muted">Accede a los módulos del personal autorizado.</div>
   </div>
 
-  <div class="row g-4 grid">
+  <div class="list-grid">
 
-    <div class="col-md-4">
-      <div class="module-card">
-        <div class="module-icon" style="background:#e9f2ff; color:#0d6efd;">
-          <i class="bi bi-file-earmark-text"></i>
-        </div>
+    <div class="module-row-card card-blue">
+      <div class="module-icon-row" style="background:#eff6ff; color:#3b82f6;">
+        <i class="bi bi-file-earmark-text"></i>
+      </div>
+      <div class="module-content-row">
         <h4>Solicitudes de ingreso</h4>
         <p>Genera enlaces de captura, revisa estados y descarga PDFs FO-301-02-01.</p>
-        <a class="btn btn-primary btn-wide" href="{% url 'panel_admisiones' %}">
+      </div>
+      <div>
+        <a class="btn btn-primary btn-row shadow-sm" href="{% url 'panel_admisiones' %}">
           Ir a Panel Admisiones <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>
 
-    <div class="col-md-4">
-      <div class="module-card" style="border: 2px solid #ffc107;">
-        <div class="module-icon" style="background:#fff9e6; color:#ffc107;">
-          <i class="bi bi-file-earmark-check-fill"></i>
-        </div>
+    <div class="module-row-card card-yellow">
+      <div class="module-icon-row" style="background:#fefce8; color:#eab308;">
+        <i class="bi bi-file-earmark-check-fill"></i>
+      </div>
+      <div class="module-content-row">
         <h4>Reportes Finales</h4>
         <p>Genera el Reporte Final (FO-301-02-18) de los menores que aprobaron los filtros.</p>
-        <a class="btn btn-warning btn-wide shadow-sm fw-bold text-dark" href="{% url 'reporte_final_pendientes' %}">
-          Ir a Reportes Pendientes <i class="bi bi-arrow-right-short"></i>
+      </div>
+      <div>
+        <a class="btn btn-warning btn-row shadow-sm fw-bold text-dark" href="{% url 'reporte_final_pendientes' %}">
+          Ir a Reportes <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>
 
-    <div class="col-md-4">
-      <div class="module-card" style="border: 2px solid #198754;">
-        <div class="module-icon" style="background:#eaf8f0; color:#198754;">
-          <i class="bi bi-cash-coin"></i>
-        </div>
+    <div class="module-row-card card-green">
+      <div class="module-icon-row" style="background:#f0fdf4; color:#22c55e;">
+        <i class="bi bi-cash-coin"></i>
+      </div>
+      <div class="module-content-row">
         <h4>Validación de Pagos</h4>
         <p>Revisa y aprueba los comprobantes de pago para finalizar la inscripción.</p>
-        <a class="btn btn-success btn-wide shadow-sm fw-bold text-white" href="{% url 'validacion_pagos_pendientes' %}">
-          Ir a Pagos Pendientes <i class="bi bi-arrow-right-short"></i>
-        </a>
       </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="module-card">
-        <div class="module-icon" style="background:#eaf8f0; color:#198754;">
-          <i class="bi bi-check2-square"></i>
-        </div>
-        <h4>Validación de documentación</h4>
-        <p>(Próximamente) Aprobación por dirección y área médica con observaciones.</p>
-        <button class="btn btn-outline-success btn-wide" disabled>
-          Próximamente
-        </button>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="module-card">
-        <div class="module-icon" style="background:#fff0f6; color:#d63384;">
-          <i class="bi bi-people"></i>
-        </div>
-        <h4>Usuarios</h4>
-        <p>(Próximamente) Alta de personal y asignación de permisos.</p>
-
-        <a class="btn btn-outline-secondary btn-wide" href="{% url 'panel_gobierno_ti' %}">
-          Ir a Panel TI
+      <div>
+        <a class="btn btn-success btn-row shadow-sm fw-bold text-white" href="{% url 'validacion_pagos_pendientes' %}">
+          Ir a Pagos <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>
 
   </div>
+
 </div>
 
 {% endblock %}
