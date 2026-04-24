@@ -220,18 +220,46 @@ def panel_gobierno_ti(request):
                 response_data[
                     'msg'] = 'Has cedido la Administración. Tus permisos se han revocado, tu sesión seguirá abierta hasta que salgas manualmente.'
 
+
             elif accion == 'start_cycle':
-                nombre = request.POST.get('nombre_ciclo')
+
+                nombre = request.POST.get('nombre_semestre')
+
                 inicio = request.POST.get('fecha_inicio')
+
                 fin = request.POST.get('fecha_fin')
+
                 Semestre.objects.filter(estado__in=['ACTIVO', 'CONFIGURACION']).update(estado='CERRADO')
-                nuevo = Semestre.objects.create(nombre=nombre, estado='ACTIVO', fecha_inicio=inicio, fecha_fin=fin)
-                AccessLog.objects.create(usuario=request.user, accion=f"Inició ciclo: {nuevo.nombre}")
-                response_data['msg'] = f'¡Ciclo {nuevo.nombre} iniciado!'
+
+                nuevo = Semestre.objects.create(
+
+                    nombre=nombre,
+
+                    estado='ACTIVO',
+
+                    fecha_inicio=inicio,
+
+                    fecha_fin=fin
+
+                )
+
+                AccessLog.objects.create(
+
+                    usuario=request.user,
+
+                    accion=f"Inició semestre: {nuevo.nombre}"
+
+                )
+
+                response_data['msg'] = f'¡Semestre {nuevo.nombre} iniciado!'
+
+
 
             elif accion == 'end_cycle':
+
                 Semestre.objects.filter(estado__in=['ACTIVO', 'CONFIGURACION']).update(estado='CERRADO')
-                response_data['msg'] = 'Ciclo cerrado.'
+
+                response_data['msg'] = 'Semestre cerrado.'
 
             elif accion == 'toggle_security':
                 request.session['sec_encrypt'] = True if request.POST.get('toggle_encrypt') else False

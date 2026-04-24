@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import FileResponse, Http404, HttpResponse, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django.contrib import messages
 # --- CAMBIO PUNTO 10: Quitamos el decorador que revelaba el admin y usamos user_passes_test ---
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
-from django.utils.text import slugify
 from django.template.loader import render_to_string
 from django.contrib.staticfiles import finders
 from xhtml2pdf import pisa
@@ -332,80 +331,16 @@ def psicologia_pendientes(request):
 @login_required
 def psicologia_dictaminar(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
-
     if request.method == "POST":
         form = DictamenPsicologiaForm(request.POST, instance=sol)
-
         if form.is_valid():
-            estado = request.POST.get("estado_psicologia")
-
-            if estado not in ["APROBADO", "RECHAZADO"]:
-                form.add_error(
-                    "estado_psicologia",
-                    "Debes seleccionar APROBADO o RECHAZADO para finalizar el dictamen."
-                )
-            else:
-                sol = form.save(commit=False)
-                sol.psicologia_por = request.user
-                sol.psicologia_en = timezone.now()
-                sol.save()
-                return redirect("psicologia_pendientes")
-    else:
-        form = DictamenPsicologiaForm(instance=sol)
-
-    return render(request, "admisiones/psicologia_dictaminar.html", {
-        "sol": sol,
-        "form": form
-    })
-
-
-@login_required
-@require_POST
-def psicologia_autoguardar(request, pk):
-    sol = get_object_or_404(Solicitud, pk=pk)
-
-    data = request.POST.copy()
-
-    campos_excluidos = [
-        "estado_psicologia",
-        "observaciones_psicologia",
-    ]
-
-    for campo in campos_excluidos:
-        if campo in data:
-            del data[campo]
-
-    # Mantener el estado real sin finalizar
-    data["estado_psicologia"] = sol.estado_psicologia or "PENDIENTE"
-    data["observaciones_psicologia"] = sol.observaciones_psicologia or ""
-
-    form = DictamenPsicologiaForm(data, instance=sol)
-
-    # Permitir PENDIENTE en autoguardado
-    if "estado_psicologia" in form.fields:
-        form.fields["estado_psicologia"].choices = [
-            ("PENDIENTE", "Pendiente"),
-            ("APROBADO", "Aprobado"),
-            ("RECHAZADO", "Rechazado"),
-        ]
-        form.fields["estado_psicologia"].required = False
-
-    if form.is_valid():
-        sol_edit = form.save(commit=False)
-        sol_edit.estado_psicologia = sol.estado_psicologia or "PENDIENTE"
-        sol_edit.observaciones_psicologia = sol.observaciones_psicologia
-        sol_edit.psicologia_por = request.user
-        sol_edit.save()
-
-        return JsonResponse({
-            "ok": True,
-            "mensaje": "Guardado automático realizado"
-        })
-
-    return JsonResponse({
-        "ok": False,
-        "errores": form.errors
-    }, status=400)
+            sol = form.save(commit=False)
+            sol.psicologia_por = request.user
+            sol.psicologia_en = timezone.now()
+            sol.save()
+            return redirect("psicologia_pendientes")
+    return render(request, "admisiones/psicologia_dictaminar.html",
+                  {"sol": sol, "form": DictamenPsicologiaForm(instance=sol)})
 
 
 @login_required
@@ -415,105 +350,26 @@ def psicologia_registro(request):
     return render(request, "admisiones/psicologia_registro.html", {"aprobados": aprobados, "rechazados": rechazados})
 
 
-# Nutrición
 @login_required
 def nutricion_pendientes(request):
-    folios_listos = SolicitudInscripcion.objects.filter(
-        estado='FILTROS'
-    ).values_list('solicitud_ingreso_id', flat=True)
-
-    qs = Solicitud.objects.filter(
-        id__in=folios_listos,
-        estado_nutricion="PENDIENTE"
-    ).order_by("-created_at")
-
+    folios = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    qs = Solicitud.objects.filter(id__in=folios, estado_nutricion="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/nutricion_pendientes.html", {"solicitudes": qs})
 
 
 @login_required
 def nutricion_dictaminar(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
-
     if request.method == "POST":
         form = DictamenNutricionForm(request.POST, instance=sol)
-
         if form.is_valid():
             sol = form.save(commit=False)
-
-            if sol.estado_nutricion not in ["APROBADO", "RECHAZADO"]:
-                form.add_error("estado_nutricion", "Debes seleccionar APROBADO o RECHAZADO para finalizar el dictamen.")
-            else:
-                sol.nutricion_por = request.user
-                sol.nutricion_en = timezone.now()
-                sol.save()
-                return redirect("nutricion_pendientes")
-    else:
-        form = DictamenNutricionForm(instance=sol)
-
-    return render(request, "admisiones/nutricion_dictaminar.html", {
-        "sol": sol,
-        "form": form
-    })
-
-
-@login_required
-@require_POST
-def nutricion_autoguardar(request, pk):
-    sol = get_object_or_404(Solicitud, pk=pk)
-
-    data = request.POST.copy()
-
-    # Quitamos campos finales del POST para que no interfieran en el autoguardado
-    campos_excluidos = [
-        "estado_nutricion",
-        "observaciones_nutricion",
-        "fecha_elaboracion_nutricion",
-    ]
-
-    for campo in campos_excluidos:
-        if campo in data:
-            del data[campo]
-
-    # Reponemos valores actuales del registro
-    data["estado_nutricion"] = sol.estado_nutricion or "PENDIENTE"
-    data["observaciones_nutricion"] = sol.observaciones_nutricion or ""
-
-    if sol.fecha_elaboracion_nutricion:
-        data["fecha_elaboracion_nutricion"] = sol.fecha_elaboracion_nutricion.strftime("%Y-%m-%d")
-    else:
-        data["fecha_elaboracion_nutricion"] = ""
-
-    form = DictamenNutricionForm(data, instance=sol)
-
-    # 🔥 MUY IMPORTANTE: para autoguardado sí permitimos PENDIENTE
-    if "estado_nutricion" in form.fields:
-        form.fields["estado_nutricion"].choices = [
-            ("PENDIENTE", "Pendiente"),
-            ("APROBADO", "Aprobado"),
-            ("RECHAZADO", "Rechazado"),
-        ]
-        form.fields["estado_nutricion"].required = False
-
-    if form.is_valid():
-        sol_edit = form.save(commit=False)
-
-        # 🔒 Conservamos el estado real actual si aún no se ha finalizado
-        sol_edit.estado_nutricion = sol.estado_nutricion or "PENDIENTE"
-        sol_edit.observaciones_nutricion = sol.observaciones_nutricion
-        sol_edit.fecha_elaboracion_nutricion = sol.fecha_elaboracion_nutricion
-
-        sol_edit.nutricion_por = request.user
-        sol_edit.save()
-
-        return JsonResponse({
-            "ok": True,
-            "mensaje": "Guardado automático realizado"
-        })
-
-    return JsonResponse({
-        "ok": False,
-        "errores": form.errors
-    }, status=400)
+            sol.nutricion_por = request.user
+            sol.nutricion_en = timezone.now()
+            sol.save()
+            return redirect("nutricion_pendientes")
+    return render(request, "admisiones/nutricion_dictaminar.html",
+                  {"sol": sol, "form": DictamenNutricionForm(instance=sol)})
 
 
 @login_required
@@ -525,15 +381,8 @@ def nutricion_registro(request):
 
 @login_required
 def medico_pendientes(request):
-    folios_listos = SolicitudInscripcion.objects.filter(
-        estado='FILTROS'
-    ).values_list('solicitud_ingreso_id', flat=True)
-
-    qs = Solicitud.objects.filter(
-        id__in=folios_listos,
-        estado_medico="PENDIENTE"
-    ).order_by("-created_at")
-
+    folios = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    qs = Solicitud.objects.filter(id__in=folios, estado_medico="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
 
 
@@ -542,202 +391,19 @@ def medico_dictaminar(request, pk):
     sol = get_object_or_404(Solicitud, id=pk)
     insc = get_object_or_404(SolicitudInscripcion, solicitud_ingreso=sol)
     historia, _ = HistoriaClinicaMedica.objects.get_or_create(inscripcion=insc)
-
-    bloqueado = sol.estado_medico in ["APROBADO", "RECHAZADO"]
-
     if request.method == "POST":
         form = DictamenMedicoForm(request.POST, request.FILES, instance=sol)
         h_form = HistoriaClinicaMedicaForm(request.POST, instance=historia)
-
         if form.is_valid() and h_form.is_valid():
             sol = form.save(commit=False)
             sol.medico_por = request.user
             sol.medico_en = timezone.now()
             sol.save()
-            historia = h_form.save(commit=False)
-            historia.inscripcion = insc
-            historia.save()
-
-            messages.success(request, "Dictamen médico guardado correctamente.")
+            h_form.save()
             return redirect("medico_pendientes")
-    else:
-        form = DictamenMedicoForm(instance=sol)
-        h_form = HistoriaClinicaMedicaForm(instance=historia)
-
-    return render(request, "admisiones/medico_dictaminar.html", {
-        "sol": sol,
-        "form": form,
-        "historia_form": h_form,
-        "bloqueado": bloqueado,
-    })
-
-@login_required
-@require_POST
-def medico_autoguardar(request, pk):
-    sol = get_object_or_404(Solicitud, id=pk)
-    insc = get_object_or_404(SolicitudInscripcion, solicitud_ingreso=sol)
-    historia, _ = HistoriaClinicaMedica.objects.get_or_create(inscripcion=insc)
-
-    def txt(nombre):
-        valor = request.POST.get(nombre, "")
-        valor = valor.strip()
-        return valor if valor != "" else ""
-
-    def bool_si_no(nombre):
-        valor = request.POST.get(nombre, "").strip().upper()
-        if valor == "SI":
-            return True
-        if valor == "NO":
-            return False
-        return None
-
-    try:
-        # Datos del menor
-        historia.nombres_paciente = txt("nombres_paciente")
-        historia.apellido_paterno_paciente = txt("apellido_paterno_paciente")
-        historia.apellido_materno_paciente = txt("apellido_materno_paciente")
-        historia.nombre_paciente = " ".join(
-            x for x in [
-                historia.nombres_paciente,
-                historia.apellido_paterno_paciente,
-                historia.apellido_materno_paciente
-            ] if x
-        )
-
-        fecha_nacimiento = txt("fecha_nacimiento")
-        if fecha_nacimiento:
-            historia.fecha_nacimiento = fecha_nacimiento
-
-        historia.edad = txt("edad")
-        historia.sexo = txt("sexo")
-        historia.quien_cuida_menor = txt("quien_cuida_menor")
-        historia.lugar_fecha_elaboracion = txt("lugar_fecha_elaboracion")
-
-        # Padre
-        historia.nombres_padre = txt("nombres_padre")
-        historia.apellido_paterno_padre = txt("apellido_paterno_padre")
-        historia.apellido_materno_padre = txt("apellido_materno_padre")
-        historia.nombre_padre = " ".join(
-            x for x in [
-                historia.nombres_padre,
-                historia.apellido_paterno_padre,
-                historia.apellido_materno_padre
-            ] if x
-        )
-
-        historia.edad_padre = txt("edad_padre")
-        historia.tabaquismo_padre = bool_si_no("tabaquismo_padre")
-        historia.alcoholismo_padre = bool_si_no("alcoholismo_padre")
-        historia.drogas_padre = bool_si_no("drogas_padre")
-        historia.enfermedades_actuales_padre = txt("enfermedades_actuales_padre")
-        historia.alergias_padre = txt("alergias_padre")
-
-        # Madre
-        historia.nombres_madre = txt("nombres_madre")
-        historia.apellido_paterno_madre = txt("apellido_paterno_madre")
-        historia.apellido_materno_madre = txt("apellido_materno_madre")
-        historia.nombre_madre = " ".join(
-            x for x in [
-                historia.nombres_madre,
-                historia.apellido_paterno_madre,
-                historia.apellido_materno_madre
-            ] if x
-        )
-
-        historia.edad_madre = txt("edad_madre")
-        historia.tabaquismo_madre = bool_si_no("tabaquismo_madre")
-        historia.alcoholismo_madre = bool_si_no("alcoholismo_madre")
-        historia.drogas_madre = bool_si_no("drogas_madre")
-        historia.enfermedades_actuales_madre = txt("enfermedades_actuales_madre")
-        historia.enfermedades_infancia_madre = txt("enfermedades_infancia_madre")
-        historia.alergias_madre = txt("alergias_madre")
-
-        # Antecedentes no patológicos
-        historia.numero_gestas = txt("numero_gestas")
-        historia.semanas_gestacion = txt("semanas_gestacion")
-        historia.tipo_parto = txt("tipo_parto")
-        historia.complicaciones_embarazo = txt("complicaciones_embarazo")
-        historia.medicamentos_embarazo = txt("medicamentos_embarazo")
-        historia.exposicion_radiacion = txt("exposicion_radiacion")
-        historia.sufrimiento_fetal = txt("sufrimiento_fetal")
-        historia.motivo_cesarea = txt("motivo_cesarea")
-
-        # Antecedentes patológicos
-        historia.enfermedades_actuales = txt("enfermedades_actuales")
-        historia.enfermedades_neonatales = txt("enfermedades_neonatales")
-        historia.enfermedades_exantematicas = txt("enfermedades_exantematicas")
-        historia.internamientos_quirurgicos = txt("internamientos_quirurgicos")
-        historia.alergia_medicamentos = txt("alergia_medicamentos")
-        historia.alergia_alimentos = txt("alergia_alimentos")
-        historia.personas_enfermas_casa = txt("personas_enfermas_casa")
-
-        # Padecimiento actual
-        historia.vomitos = txt("vomitos")
-        historia.excreta_acuosa = txt("excreta_acuosa")
-        historia.fiebre = txt("fiebre")
-        historia.tos = txt("tos")
-        historia.rinorrea = txt("rinorrea")
-        historia.erupciones = txt("erupciones")
-        historia.dificultad_respiratoria = txt("dificultad_respiratoria")
-
-        # Exploración física
-        historia.peso_actual = txt("peso_actual")
-        historia.talla = txt("talla")
-        historia.temperatura = txt("temperatura")
-        historia.frecuencia_cardiaca = txt("frecuencia_cardiaca")
-        historia.frecuencia_respiratoria = txt("frecuencia_respiratoria")
-        historia.tension_arterial = txt("tension_arterial")
-        historia.estado_nutricional = txt("estado_nutricional")
-
-        # Dictamen clínico
-        historia.diagnostico = txt("diagnostico")
-        historia.pronostico = txt("pronostico")
-        historia.elaborado_por = txt("elaborado_por")
-
-        historia.inscripcion = insc
-        historia.save()
-
-        # Solicitud
-        estado_medico = request.POST.get("estado_medico", "").strip()
-        observaciones_medico = request.POST.get("observaciones_medico", "").strip()
-
-        if estado_medico:
-            sol.estado_medico = estado_medico
-
-        sol.observaciones_medico = observaciones_medico
-        sol.medico_por = request.user
-        sol.medico_en = timezone.now()
-        sol.save()
-
-        return JsonResponse({
-            "ok": True,
-            "message": "Cambios guardados automáticamente.",
-            "hora": timezone.localtime().strftime("%H:%M:%S")
-        })
-
-    except Exception as e:
-        print("=========== ERROR AUTOGUARDADO MÉDICO ===========")
-        print("ERROR:", str(e))
-        print("POST:", request.POST)
-        print("=================================================")
-
-        return JsonResponse({
-            "ok": False,
-            "message": f"Error al autoguardar: {str(e)}"
-        }, status=400)
-
-# ===================== REPORTE FINAL DE INGRESO (TRABAJO SOCIAL) =====================
-
-@login_required
-def reporte_final_pendientes(request):
-    inscripciones = SolicitudInscripcion.objects.filter(
-        estado='FILTROS',
-        solicitud_ingreso__estado_medico='APROBADO',
-        solicitud_ingreso__estado_nutricion='APROBADO',
-        solicitud_ingreso__estado_psicologia='APROBADO',
-        reporte_final_aprobado__isnull=True
-    ).order_by('created_at')
-    return render(request, 'admisiones/reporte_final_pendientes.html', {'inscripciones': inscripciones})
+    return render(request, "admisiones/medico_dictaminar.html", {"sol": sol, "form": DictamenMedicoForm(instance=sol),
+                                                                 "historia_form": HistoriaClinicaMedicaForm(
+                                                                     instance=historia)})
 
 
 @login_required
@@ -766,12 +432,9 @@ def psicologia_pdf(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
     html = render_to_string("admisiones/psicologia_pdf.html", {"sol": sol}, request=request)
     response = HttpResponse(content_type="application/pdf")
-    matricula = sol.matricula or sol.folio or "S_M"
+    matricula = sol.matricula or "S_M"
     response['Content-Disposition'] = f'attachment; filename="Dictamen_Psicologia_{matricula}.pdf"'
-
-    pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
-    if pisa_status.err:
-        return HttpResponse("Error al generar el PDF de psicología", status=500)
+    pisa.CreatePDF(html, dest=response, link_callback=link_callback)
     return response
 
 
@@ -780,39 +443,20 @@ def nutricion_pdf(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
     html = render_to_string("admisiones/nutricion_pdf.html", {"sol": sol}, request=request)
     response = HttpResponse(content_type="application/pdf")
-    matricula = sol.matricula or sol.folio or "S_M"
+    matricula = sol.matricula or "S_M"
     response['Content-Disposition'] = f'attachment; filename="Dictamen_Nutricion_{matricula}.pdf"'
-
-    pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
-    if pisa_status.err:
-        return HttpResponse("Error al generar el PDF de nutrición", status=500)
+    pisa.CreatePDF(html, dest=response, link_callback=link_callback)
     return response
 
 
 @login_required
 def medico_pdf(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
-    # Validación básica de permisos
-    if not (
-        request.user.is_superuser
-        or request.user.is_staff
-        or request.user.groups.filter(name__in=["medica", "admin", "directora", "jefa_superior", "administrativo"]).exists()
-    ):
-        raise Http404("No autorizado")
-
-    # Generar PDF en memoria
     html = render_to_string("admisiones/medico_pdf.html", {"sol": sol}, request=request)
-    resultado = io.BytesIO()
-    pdf = pisa.CreatePDF(io.StringIO(html), dest=resultado)
-
-    if pdf.err:
-        return HttpResponse("Error al generar el PDF", status=500)
-
-    nombre_menor = f"{sol.nombres_menor or ''} {sol.apellido_paterno_menor or ''} {sol.apellido_materno_menor or ''}".strip()
-    nombre_archivo = f"Dictamen_Medico_{sol.folio}_{slugify(nombre_menor) or 'solicitud'}.pdf"
-
-    response = HttpResponse(resultado.getvalue(), content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
+    response = HttpResponse(content_type="application/pdf")
+    matricula = sol.matricula or "S_M"
+    response['Content-Disposition'] = f'attachment; filename="Dictamen_Medico_{matricula}.pdf"'
+    pisa.CreatePDF(html, dest=response, link_callback=link_callback)
     return response
 
 
@@ -876,6 +520,14 @@ def dictaminar_reporte_final(request, pk):
         insc.save()
         return redirect('reporte_final_pendientes')
     return render(request, 'admisiones/dictaminar_reporte_final.html', {'inscripcion': insc})
+
+
+@login_required
+def reporte_final_pendientes(request):
+    insc = SolicitudInscripcion.objects.filter(estado='FILTROS', solicitud_ingreso__estado_medico='APROBADO',
+                                               reporte_final_aprobado__isnull=True)
+    return render(request, 'admisiones/reporte_final_pendientes.html', {'inscripciones': insc})
+
 
 # ===================== DASHBOARD DIRECTIVA (NUEVO) =====================
 @login_required

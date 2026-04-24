@@ -249,18 +249,39 @@
 
                     <div class="col-md-6">
                         <label class="label-custom">Estado de Nacimiento <span class="text-danger">*</span></label>
-                        <select id="estado_nacimiento_menor" name="estado_nacimiento_menor" class="form-select" onchange="cargarMunicipios('estado_nacimiento_menor', 'municipio_nacimiento_menor')" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                            <option value="">Selecciona el estado...</option>
-                            </select>
-                        <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
+                        <input
+                            type="text"
+                            id="estado_nacimiento_menor"
+                            name="estado_nacimiento_menor"
+                            class="form-control"
+                            list="lista_estados_mexico"
+                            autocomplete="off"
+                            placeholder="Escribe o selecciona el estado..."
+                            value="{{ inscripcion.estado_nacimiento_menor|default:'' }}"
+                            {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+                            required
+                        >
+                        <datalist id="lista_estados_mexico"></datalist>
+                        <div class="invalid-feedback fw-bold">Selecciona un estado válido.</div>
                         <input type="hidden" id="estado_nacimiento_hidden" value="{{ inscripcion.estado_nacimiento_menor|default:'' }}">
                     </div>
+
                     <div class="col-md-6">
                         <label class="label-custom">Municipio / Ciudad <span class="text-danger">*</span></label>
-                        <select id="municipio_nacimiento_menor" name="municipio_nacimiento_menor" class="form-select" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                            <option value="">Primero selecciona un estado...</option>
-                        </select>
-                        <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
+                        <input
+                            type="text"
+                            id="municipio_nacimiento_menor"
+                            name="municipio_nacimiento_menor"
+                            class="form-control"
+                            list="lista_municipios_mexico"
+                            autocomplete="off"
+                            placeholder="Primero selecciona un estado..."
+                            value="{{ inscripcion.municipio_nacimiento_menor|default:'' }}"
+                            {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+                            required
+                        >
+                        <datalist id="lista_municipios_mexico"></datalist>
+                        <div class="invalid-feedback fw-bold">Selecciona un municipio válido.</div>
                         <input type="hidden" id="municipio_nacimiento_hidden" value="{{ inscripcion.municipio_nacimiento_menor|default:'' }}">
                     </div>
 
@@ -274,32 +295,27 @@
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
                     </div>
 
-<div class="col-md-4">
-    <label class="label-custom">Tipo de Sangre <span class="text-danger">*</span></label>
-
-    <input type="hidden" name="tipo_sangre_menor" id="tipo_sangre_real" value="{{ inscripcion.tipo_sangre_menor|default:'' }}">
-
-    <select id="tipo_sangre_select" class="form-select" onchange="document.getElementById('tipo_sangre_real').value = this.value"
-        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-
-        <option value="">Seleccione...</option>
-
-        <option value="O+" {% if inscripcion.tipo_sangre_menor == 'O+' %}selected{% endif %}>O+</option>
-        <option value="O-" {% if inscripcion.tipo_sangre_menor == 'O-' %}selected{% endif %}>O-</option>
-
-        <option value="A+" {% if inscripcion.tipo_sangre_menor == 'A+' %}selected{% endif %}>A+</option>
-        <option value="A-" {% if inscripcion.tipo_sangre_menor == 'A-' %}selected{% endif %}>A-</option>
-
-        <option value="B+" {% if inscripcion.tipo_sangre_menor == 'B+' %}selected{% endif %}>B+</option>
-        <option value="B-" {% if inscripcion.tipo_sangre_menor == 'B-' %}selected{% endif %}>B-</option>
-
-        <option value="AB+" {% if inscripcion.tipo_sangre_menor == 'AB+' %}selected{% endif %}>AB+</option>
-        <option value="AB-" {% if inscripcion.tipo_sangre_menor == 'AB-' %}selected{% endif %}>AB-</option>
-
-    </select>
-
-    <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
-</div>
+                    <div class="col-md-4">
+                        <label class="label-custom">Tipo de Sangre <span class="text-danger">*</span></label>
+                        <input type="hidden" name="tipo_sangre_menor" id="tipo_sangre_real" value="{{ inscripcion.tipo_sangre_menor|default:'' }}">
+                        <select id="tipo_sangre_select" class="form-select" onchange="manejarTipoSangre()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                            <option value="">Seleccione...</option>
+                            <option value="O+" {% if inscripcion.tipo_sangre_menor == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if inscripcion.tipo_sangre_menor == 'O-' %}selected{% endif %}>O-</option>
+                            <option value="A+" {% if inscripcion.tipo_sangre_menor == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if inscripcion.tipo_sangre_menor == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if inscripcion.tipo_sangre_menor == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if inscripcion.tipo_sangre_menor == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="Otro" {% if inscripcion.tipo_sangre_menor and inscripcion.tipo_sangre_menor not in 'O+,O-,A+,A-,B+,B-' %}selected{% endif %}>Otro (Especificar)</option>
+                        </select>
+                        <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
+                        <div id="div_sangre_otro" class="mt-2 fade-in" style="display: none;">
+                            <input type="text" id="tipo_sangre_otro_input" class="form-control border-primary" placeholder="Escribe el tipo de sangre..." oninput="actualizarSangreReal()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="form-section-card" id="card_segundo_padre" style="display: none;">
             <div class="section-title">
@@ -326,7 +342,7 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="label-custom">Parentesco <span class="text-danger">*</span></label>
-                        <select id="parentesco_segundo_padre_select" name="parentesco_segundo_padre" class="form-select bg-light sp-required"  required>
+                        <select id="parentesco_segundo_padre_select" name="parentesco_segundo_padre" class="form-select bg-light sp-required" style="pointer-events: none;" required>
                             <option value="">Esperando selección...</option>
                             <option value="Madre" {% if inscripcion.parentesco_segundo_padre == 'Madre' %}selected{% endif %}>Madre</option>
                             <option value="Padre" {% if inscripcion.parentesco_segundo_padre == 'Padre' %}selected{% endif %}>Padre</option>
@@ -380,15 +396,40 @@
                         <h6 class="fw-bold text-muted border-bottom pb-1" style="font-size: 0.9rem;">Dirección de la Pareja</h6>
                     </div>
                     <div class="col-md-4">
-                        <label class="label-custom">Estado <span class="text-danger">*</span></label>
-                        <input type="text" name="estado_domicilio_segundo_padre" class="form-control sp-required" value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
-                        <input type="text" name="ciudad_segundo_padre" class="form-control sp-required" value="{{ inscripcion.ciudad_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
-                    </div>
+    <label class="label-custom">Estado <span class="text-danger">*</span></label>
+    <input
+        type="text"
+        id="estado_domicilio_segundo_padre"
+        name="estado_domicilio_segundo_padre"
+        class="form-control sp-required"
+        list="lista_estados_pareja"
+        autocomplete="off"
+        placeholder="Escribe o selecciona el estado..."
+        value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}"
+        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+        required
+    >
+    <datalist id="lista_estados_pareja"></datalist>
+    <div class="invalid-feedback fw-bold">Selecciona un estado válido.</div>
+</div>
+
+<div class="col-md-4">
+    <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
+    <input
+        type="text"
+        id="ciudad_segundo_padre"
+        name="ciudad_segundo_padre"
+        class="form-control sp-required"
+        list="lista_municipios_pareja"
+        autocomplete="off"
+        placeholder="Primero selecciona un estado..."
+        value="{{ inscripcion.ciudad_segundo_padre|default:'' }}"
+        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+        required
+    >
+    <datalist id="lista_municipios_pareja"></datalist>
+    <div class="invalid-feedback fw-bold">Selecciona un municipio válido.</div>
+</div>
                     <div class="col-md-4">
                         <label class="label-custom">Código Postal <span class="text-danger">*</span></label>
                         <input type="text" name="codigo_postal_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="5" value="{{ inscripcion.codigo_postal_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
@@ -411,6 +452,168 @@
                 </div>
             </div>
         </div>
+<!-- ==========================================================
+     SCRIPT PARA BUSCADOR DE ESTADO Y MUNICIPIO DEL MENOR
+     PÉGALO ANTES DE </script> SI TU ARCHIVO COMPLETO YA TIENE UN SCRIPT.
+     Si este fragmento lo pegas tal cual, este bloque ya va incluido.
+========================================================== -->
+<script>
+const ESTADOS_MX_COMPLETOS = [
+    { nombre: "Aguascalientes", municipios: ["Aguascalientes", "Asientos", "Calvillo", "Cosío", "Jesús María", "Pabellón de Arteaga", "Rincón de Romos", "San José de Gracia", "Tepezalá", "El Llano", "San Francisco de los Romo"] },
+    { nombre: "Baja California", municipios: ["Ensenada", "Mexicali", "Tecate", "Tijuana", "Playas de Rosarito", "San Quintín", "San Felipe"] },
+    { nombre: "Baja California Sur", municipios: ["Comondú", "Mulegé", "La Paz", "Los Cabos", "Loreto"] },
+    { nombre: "Campeche", municipios: ["Calkiní", "Campeche", "Carmen", "Champotón", "Hecelchakán", "Hopelchén", "Palizada", "Tenabo", "Escárcega", "Calakmul", "Candelaria", "Seybaplaya", "Dzitbalché"] },
+    { nombre: "Chiapas", municipios: ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán de Domínguez", "Palenque", "Tonalá", "Chiapa de Corzo", "Ocosingo", "Villaflores", "Cintalapa", "Reforma", "Arriaga", "Las Margaritas", "Pichucalco", "Berriozábal"] },
+    { nombre: "Chihuahua", municipios: ["Chihuahua", "Juárez", "Cuauhtémoc", "Delicias", "Hidalgo del Parral", "Nuevo Casas Grandes", "Camargo", "Jiménez", "Meoqui", "Guachochi"] },
+    { nombre: "Ciudad de México", municipios: ["Álvaro Obregón", "Azcapotzalco", "Benito Juárez", "Coyoacán", "Cuajimalpa de Morelos", "Cuauhtémoc", "Gustavo A. Madero", "Iztacalco", "Iztapalapa", "La Magdalena Contreras", "Miguel Hidalgo", "Milpa Alta", "Tláhuac", "Tlalpan", "Venustiano Carranza", "Xochimilco"] },
+    { nombre: "Coahuila", municipios: ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña", "San Pedro", "Sabinas", "Frontera", "Ramos Arizpe", "Matamoros"] },
+    { nombre: "Colima", municipios: ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez", "Armería", "Comala", "Coquimatlán", "Cuauhtémoc", "Ixtlahuacán", "Minatitlán"] },
+    { nombre: "Durango", municipios: ["Durango", "Gómez Palacio", "Lerdo", "Santiago Papasquiaro", "Guadalupe Victoria", "Canatlán", "Pueblo Nuevo", "El Oro", "Mapimí", "Vicente Guerrero"] },
+    { nombre: "Estado de México", municipios: ["Toluca", "Ecatepec de Morelos", "Naucalpan de Juárez", "Nezahualcóyotl", "Tlalnepantla de Baz", "Chimalhuacán", "Atizapán de Zaragoza", "Cuautitlán Izcalli", "Ixtapaluca", "Tecámac", "Metepec", "Lerma", "Zinacantepec", "Valle de Chalco Solidaridad", "Huixquilucan"] },
+    { nombre: "Guanajuato", municipios: ["Guanajuato", "León", "Irapuato", "Celaya", "Salamanca", "Silao de la Victoria", "San Miguel de Allende", "Dolores Hidalgo Cuna de la Independencia Nacional", "Valle de Santiago", "Acámbaro"] },
+    { nombre: "Guerrero", municipios: ["Chilpancingo de los Bravo", "Acapulco de Juárez", "Iguala de la Independencia", "Taxco de Alarcón", "Zihuatanejo de Azueta", "Chilapa de Álvarez", "Tlapa de Comonfort", "Coyuca de Benítez", "Ometepec", "Atoyac de Álvarez"] },
+    { nombre: "Hidalgo", municipios: ["Pachuca de Soto", "Tulancingo de Bravo", "Tula de Allende", "Huejutla de Reyes", "Mineral de la Reforma", "Tepeji del Río de Ocampo", "Ixmiquilpan", "Actopan", "Apan", "Zimapán"] },
+    { nombre: "Jalisco", municipios: ["Guadalajara", "Zapopan", "San Pedro Tlaquepaque", "Tonalá", "Tlajomulco de Zúñiga", "Puerto Vallarta", "El Salto", "Lagos de Moreno", "Tepatitlán de Morelos", "Ocotlán"] },
+    { nombre: "Michoacán", municipios: ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán", "Zitácuaro", "La Piedad", "Pátzcuaro", "Sahuayo", "Hidalgo"] },
+    { nombre: "Morelos", municipios: ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco", "Yautepec", "Emiliano Zapata", "Ayala", "Xochitepec", "Jojutla", "Puente de Ixtla"] },
+    { nombre: "Nayarit", municipios: ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla", "Compostela", "Xalisco", "Ixtlán del Río", "Acaponeta", "Tecuala", "Tuxpan", "Rosamorada"] },
+    { nombre: "Nuevo León", municipios: ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "General Escobedo", "Santa Catarina", "San Pedro Garza García", "Juárez", "García", "Cadereyta Jiménez"] },
+    { nombre: "Oaxaca", municipios: ["Oaxaca de Juárez", "Salina Cruz", "Juchitán de Zaragoza", "San Juan Bautista Tuxtepec", "Huajuapan de León", "Santa Cruz Xoxocotlán", "Santa Lucía del Camino", "Santo Domingo Tehuantepec", "Pinotepa Nacional", "Miahuatlán de Porfirio Díaz"] },
+    { nombre: "Puebla", municipios: ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco", "San Pedro Cholula", "Amozoc", "Huauchinango", "Teziutlán", "Izúcar de Matamoros", "Cuautlancingo"] },
+    { nombre: "Querétaro", municipios: ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués", "Pedro Escobedo", "Tequisquiapan", "Cadereyta de Montes", "Colón", "Ezequiel Montes", "Amealco de Bonfil"] },
+    { nombre: "Quintana Roo", municipios: ["Othón P. Blanco", "Benito Juárez", "Solidaridad", "Cozumel", "Tulum", "Felipe Carrillo Puerto", "José María Morelos", "Lázaro Cárdenas", "Isla Mujeres", "Puerto Morelos", "Bacalar"] },
+    { nombre: "San Luis Potosí", municipios: ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala", "Rioverde", "Tamazunchale", "Ébano", "Xilitla", "Cárdenas", "Cerritos"] },
+    { nombre: "Sinaloa", municipios: ["Culiacán", "Mazatlán", "Ahome", "Guasave", "Navolato", "El Fuerte", "Salvador Alvarado", "Sinaloa", "Escuinapa", "Rosario"] },
+    { nombre: "Sonora", municipios: ["Hermosillo", "Cajeme", "Nogales", "San Luis Río Colorado", "Navojoa", "Guaymas", "Agua Prieta", "Caborca", "Empalme", "Huatabampo"] },
+    { nombre: "Tabasco", municipios: ["Centro", "Cárdenas", "Comalcalco", "Macuspana", "Huimanguillo", "Cunduacán", "Nacajuca", "Paraíso", "Tenosique", "Balancán"] },
+    { nombre: "Tamaulipas", municipios: ["Ciudad Victoria", "Tampico", "Reynosa", "Matamoros", "Nuevo Laredo", "Altamira", "Madero", "El Mante", "Río Bravo", "Valle Hermoso"] },
+    { nombre: "Tlaxcala", municipios: ["Tlaxcala", "Apizaco", "Huamantla", "Chiautempan", "Calpulalpan", "San Pablo del Monte", "Zacatelco", "Contla de Juan Cuamatzi", "Tlaxco", "Yauhquemehcan"] },
+    { nombre: "Veracruz", municipios: ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica de Hidalgo", "Boca del Río", "Orizaba", "Minatitlán", "Tuxpan", "Papantla"] },
+    { nombre: "Yucatán", municipios: ["Mérida", "Valladolid", "Tizimín", "Progreso", "Kanasín", "Umán", "Tekax", "Motul", "Hunucmá", "Izamal"] },
+    { nombre: "Zacatecas", municipios: ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez", "Río Grande", "Sombrerete", "Calera", "Ojocaliente", "Loreto", "Nochistlán de Mejía"] }
+];
+
+function normalizarMX(texto) {
+    return String(texto || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function buscarEstadoMX(nombre) {
+    const limpio = normalizarMX(nombre);
+    return ESTADOS_MX_COMPLETOS.find(e => normalizarMX(e.nombre) === limpio);
+}
+
+function inicializarEstadosMunicipiosMenor() {
+    const inputEstado = document.getElementById("estado_nacimiento_menor");
+    const inputMunicipio = document.getElementById("municipio_nacimiento_menor");
+    const listaEstados = document.getElementById("lista_estados_mexico");
+    const listaMunicipios = document.getElementById("lista_municipios_mexico");
+    if (!inputEstado || !inputMunicipio || !listaEstados || !listaMunicipios) return;
+
+    listaEstados.innerHTML = "";
+    ESTADOS_MX_COMPLETOS.sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach(estado => {
+        const option = document.createElement("option");
+        option.value = estado.nombre;
+        listaEstados.appendChild(option);
+    });
+
+    inputEstado.addEventListener("input", cargarMunicipiosMenor);
+    inputEstado.addEventListener("change", cargarMunicipiosMenor);
+
+    if (inputEstado.value.trim()) cargarMunicipiosMenor(true);
+}
+
+function cargarMunicipiosMenor(esCargaInicial = false) {
+    const inputEstado = document.getElementById("estado_nacimiento_menor");
+    const inputMunicipio = document.getElementById("municipio_nacimiento_menor");
+    const listaMunicipios = document.getElementById("lista_municipios_mexico");
+    if (!inputEstado || !inputMunicipio || !listaMunicipios) return;
+
+    const estado = buscarEstadoMX(inputEstado.value);
+    const municipioGuardado = document.getElementById("municipio_nacimiento_hidden")?.value || "";
+    listaMunicipios.innerHTML = "";
+
+    if (!estado) {
+        if (!esCargaInicial) inputMunicipio.value = "";
+        inputMunicipio.placeholder = "Primero selecciona un estado válido...";
+        return;
+    }
+
+    if (!esCargaInicial) inputMunicipio.value = "";
+
+    estado.municipios.sort((a, b) => a.localeCompare(b, "es")).forEach(municipio => {
+        const option = document.createElement("option");
+        option.value = municipio;
+        listaMunicipios.appendChild(option);
+    });
+
+    inputMunicipio.placeholder = "Escribe o selecciona el municipio...";
+    if (esCargaInicial && municipioGuardado) inputMunicipio.value = municipioGuardado;
+}
+
+document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosMenor);
+    function inicializarEstadosMunicipiosPareja() {
+    const inputEstado = document.getElementById("estado_domicilio_segundo_padre");
+    const inputMunicipio = document.getElementById("ciudad_segundo_padre");
+    const listaEstados = document.getElementById("lista_estados_pareja");
+    const listaMunicipios = document.getElementById("lista_municipios_pareja");
+
+    if (!inputEstado || !inputMunicipio || !listaEstados || !listaMunicipios) return;
+
+    listaEstados.innerHTML = "";
+
+    ESTADOS_MX_COMPLETOS
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+        .forEach(estado => {
+            const option = document.createElement("option");
+            option.value = estado.nombre;
+            listaEstados.appendChild(option);
+        });
+
+    inputEstado.addEventListener("input", cargarMunicipiosPareja);
+    inputEstado.addEventListener("change", cargarMunicipiosPareja);
+
+    if (inputEstado.value.trim()) {
+        cargarMunicipiosPareja(true);
+    }
+}
+
+function cargarMunicipiosPareja(esCargaInicial = false) {
+    const inputEstado = document.getElementById("estado_domicilio_segundo_padre");
+    const inputMunicipio = document.getElementById("ciudad_segundo_padre");
+    const listaMunicipios = document.getElementById("lista_municipios_pareja");
+
+    if (!inputEstado || !inputMunicipio || !listaMunicipios) return;
+
+    const estado = buscarEstadoMX(inputEstado.value);
+    const municipioGuardado = inputMunicipio.value || "";
+
+    listaMunicipios.innerHTML = "";
+
+    if (!estado) {
+        if (!esCargaInicial) inputMunicipio.value = "";
+        inputMunicipio.placeholder = "Primero selecciona un estado válido...";
+        return;
+    }
+
+    if (!esCargaInicial) inputMunicipio.value = "";
+
+    estado.municipios
+        .sort((a, b) => a.localeCompare(b, "es"))
+        .forEach(municipio => {
+            const option = document.createElement("option");
+            option.value = municipio;
+            listaMunicipios.appendChild(option);
+        });
+
+    inputMunicipio.placeholder = "Escribe o selecciona el municipio...";
+
+    if (esCargaInicial && municipioGuardado) {
+        inputMunicipio.value = municipioGuardado;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja);
+</script>
 
         <div class="form-section-card">
             <div class="section-title">
@@ -425,22 +628,41 @@
                     {% endif %}
                 </div>
 
-                <div class="row g-2 bg-light p-3 rounded mb-3 border">
-                    <div class="col-md-4">
-                        <label class="label-custom">Nombre(s) Familiar 1 <span class="text-danger">*</span></label>
-                        <input type="text" name="contacto_1_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_nombres|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="label-custom">Ap. Paterno 1 <span class="text-danger">*</span></label>
-                        <input type="text" name="contacto_1_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_paterno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="label-custom">Ap. Materno 1 <span class="text-danger">*</span></label>
-                        <input type="text" name="contacto_1_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_materno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
-                    </div>
+                <div class="col-md-4">
+    <label class="label-custom">Estado <span class="text-danger">*</span></label>
+    <input
+        type="text"
+        id="estado_domicilio_segundo_padre"
+        name="estado_domicilio_segundo_padre"
+        class="form-control sp-required"
+        list="lista_estados_pareja"
+        autocomplete="off"
+        placeholder="Escribe o selecciona el estado..."
+        value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}"
+        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+        required
+    >
+    <datalist id="lista_estados_pareja"></datalist>
+    <div class="invalid-feedback fw-bold">Selecciona un estado válido.</div>
+</div>
+
+<div class="col-md-4">
+    <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
+    <input
+        type="text"
+        id="ciudad_segundo_padre"
+        name="ciudad_segundo_padre"
+        class="form-control sp-required"
+        list="lista_municipios_pareja"
+        autocomplete="off"
+        placeholder="Primero selecciona un estado..."
+        value="{{ inscripcion.ciudad_segundo_padre|default:'' }}"
+        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
+        required
+    >
+    <datalist id="lista_municipios_pareja"></datalist>
+    <div class="invalid-feedback fw-bold">Selecciona un municipio válido.</div>
+</div>
                     <div class="col-md-6 mt-2">
                         <label class="label-custom">Teléfono 1 <span class="text-danger">*</span></label>
                         <input type="text" name="contacto_1_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_1_telefono|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
@@ -591,18 +813,12 @@
                             </div>
 
                             <div class="file-input-group">
-                                <label>
-                                    5. 3 Fotos del menor a color (Actualizadas)
-                                    <button type="button"
-                                            class="btn btn-link btn-sm p-0 ms-1 align-baseline text-primary text-decoration-none"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalInfoFotosMenor"
-                                            style="vertical-align: baseline;">
-                                        <i class="bi bi-info-circle-fill"></i>
-                                    </button>
+                                <label class="d-flex align-items-center">
+                                    5. Fotografía del Menor
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Tamaño infantil. Fondo claro. Peso máximo: 2MB."></i>
                                 </label>
-                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
-                                <small class="text-muted d-block mt-1">Sube 3 fotos recientes, a color, rostro visible y fondo claro.</small>
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -631,18 +847,12 @@
                             </div>
 
                             <div class="file-input-group">
-                                <label>
-                                    3. 3 Fotos del beneficiario a color (Actualizadas)
-                                    <button type="button"
-                                            class="btn btn-link btn-sm p-0 ms-1 align-baseline text-primary text-decoration-none"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalInfoFotosBeneficiario"
-                                            style="vertical-align: baseline;">
-                                        <i class="bi bi-info-circle-fill"></i>
-                                    </button>
+                                <label class="d-flex align-items-center">
+                                    3. Fotografía del Tutor
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Tamaño credencial. Nítida y reciente. Peso máximo: 2MB."></i>
                                 </label>
-                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
-                                <small class="text-muted d-block mt-1">Sube 3 fotos recientes, a color, rostro visible y fondo claro.</small>
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -693,18 +903,12 @@
                             </div>
 
                             <div class="file-input-group">
-                                <label>
+                                <label class="d-flex align-items-center">
                                     3. Fotografía Familiar 1
-                                    <button type="button"
-                                            class="btn btn-link btn-sm p-0 ms-1 align-baseline text-primary text-decoration-none"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalInfoFotosAutorizado"
-                                            style="vertical-align: baseline;">
-                                        <i class="bi bi-info-circle-fill"></i>
-                                    </button>
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Foto individual."></i>
                                 </label>
-                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
-                                <small class="text-muted d-block mt-1">Sube 2 fotos recientes, a color, rostro visible y fondo claro.</small>
+                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_contacto_1_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -714,7 +918,7 @@
                                     <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
                                        title="Obligatorio si registró un segundo familiar arriba."></i>
                                 </label>
-                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_contacto_2_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -724,7 +928,7 @@
                                     <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
                                        title="Obligatorio si registró un tercer familiar arriba."></i>
                                 </label>
-                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_contacto_3_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
                         </div>
@@ -833,78 +1037,6 @@
                             Entendido
                         </button>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalInfoFotosMenor" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Especificaciones de las fotos del menor</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body pt-2">
-                        <ul class="mb-0 ps-3">
-                            <li>3 fotos a color y recientes.</li>
-                            <li>Tamaño infantil o credencial.</li>
-                            <li>Rostro de frente y claramente visible.</li>
-                            <li>Fondo blanco o claro.</li>
-                            <li>Sin filtros ni ediciones.</li>
-                            <li>Formato JPG, JPEG o PNG.</li>
-                            <li>Peso máximo sugerido: 2 MB por archivo.</li>
-                            <li>Buena iluminación y nitidez.</li>
-                        </ul>
-                    </div>
-                    <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Entendido</button></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalInfoFotosBeneficiario" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Especificaciones de las fotos del beneficiario</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body pt-2">
-                        <ul class="mb-0 ps-3">
-                            <li>3 fotos a color y recientes.</li>
-                            <li>Tamaño infantil o credencial.</li>
-                            <li>Rostro de frente y claramente visible.</li>
-                            <li>Fondo blanco o claro.</li>
-                            <li>Sin filtros ni ediciones.</li>
-                            <li>Formato JPG, JPEG o PNG.</li>
-                            <li>Peso máximo sugerido: 2 MB por archivo.</li>
-                            <li>Buena iluminación y nitidez.</li>
-                        </ul>
-                    </div>
-                    <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Entendido</button></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalInfoFotosAutorizado" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Especificaciones de las fotos del autorizado</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body pt-2">
-                        <ul class="mb-0 ps-3">
-                            <li>2 fotos a color y recientes.</li>
-                            <li>Tamaño infantil o credencial.</li>
-                            <li>Rostro de frente y claramente visible.</li>
-                            <li>Fondo blanco o claro.</li>
-                            <li>Sin filtros ni ediciones.</li>
-                            <li>Formato JPG, JPEG o PNG.</li>
-                            <li>Peso máximo sugerido: 2 MB por archivo.</li>
-                            <li>Buena iluminación y nitidez.</li>
-                        </ul>
-                    </div>
-                    <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Entendido</button></div>
                 </div>
             </div>
         </div>
@@ -1182,50 +1314,79 @@
     // 7. LÓGICA DE ESTADOS Y MUNICIPIOS DE MÉXICO
     // -------------------------------------------------------------------
     const mexicoData = {
-        "Chiapas": ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán", "Palenque", "Tonalá"],
-        "Tabasco": ["Villahermosa", "Cárdenas", "Comalcalco", "Macuspana", "Tenosique"],
-        "Oaxaca": ["Oaxaca de Juárez", "Salina Cruz", "Juchitán", "Tuxtepec", "Huajuapan"],
-        "Veracruz": ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica"],
-        "CDMX": ["Álvaro Obregón", "Coyoacán", "Cuauhtémoc", "Gustavo A. Madero", "Tlalpan"]
-    };
+    "Aguascalientes": ["Aguascalientes"],
+    "Baja California": ["Mexicali", "Tijuana", "Ensenada", "Tecate", "Playas de Rosarito"],
+    "Baja California Sur": ["La Paz", "Los Cabos", "Comondú", "Loreto", "Mulegé"],
+    "Campeche": ["Campeche", "Carmen", "Champotón", "Escárcega", "Calkiní"],
+    "Chiapas": ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán", "Palenque", "Tonalá"],
+    "Chihuahua": ["Chihuahua", "Ciudad Juárez", "Cuauhtémoc", "Delicias", "Parral"],
+    "Ciudad de México": ["Álvaro Obregón", "Coyoacán", "Cuauhtémoc", "Gustavo A. Madero", "Iztapalapa", "Tlalpan"],
+    "Coahuila": ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña"],
+    "Colima": ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez"],
+    "Durango": ["Durango", "Gómez Palacio", "Lerdo"],
+    "Estado de México": ["Toluca", "Ecatepec", "Naucalpan", "Nezahualcóyotl", "Tlalnepantla"],
+    "Guanajuato": ["Guanajuato", "León", "Irapuato", "Celaya", "Salamanca"],
+    "Guerrero": ["Chilpancingo", "Acapulco", "Iguala", "Taxco", "Zihuatanejo"],
+    "Hidalgo": ["Pachuca", "Tulancingo", "Tula de Allende", "Huejutla"],
+    "Jalisco": ["Guadalajara", "Zapopan", "Tlaquepaque", "Tonalá", "Puerto Vallarta"],
+    "Michoacán": ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán"],
+    "Morelos": ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco"],
+    "Nayarit": ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla"],
+    "Nuevo León": ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "San Pedro Garza García"],
+    "Oaxaca": ["Oaxaca de Juárez", "Salina Cruz", "Juchitán", "Tuxtepec", "Huajuapan"],
+    "Puebla": ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco"],
+    "Querétaro": ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués"],
+    "Quintana Roo": ["Chetumal", "Cancún", "Playa del Carmen", "Cozumel", "Tulum"],
+    "San Luis Potosí": ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala"],
+    "Sinaloa": ["Culiacán", "Mazatlán", "Los Mochis", "Guasave"],
+    "Sonora": ["Hermosillo", "Ciudad Obregón", "Nogales", "San Luis Río Colorado"],
+    "Tabasco": ["Villahermosa", "Cárdenas", "Comalcalco", "Macuspana", "Tenosique"],
+    "Tamaulipas": ["Ciudad Victoria", "Tampico", "Reynosa", "Matamoros", "Nuevo Laredo"],
+    "Tlaxcala": ["Tlaxcala", "Apizaco", "Huamantla", "Chiautempan"],
+    "Veracruz": ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica"],
+    "Yucatán": ["Mérida", "Valladolid", "Tizimín", "Progreso"],
+    "Zacatecas": ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez"]
+};
 
     function inicializarEstados() {
-        const selectEstado = document.getElementById('estado_nacimiento_menor');
-        const estadoGuardado = document.getElementById('estado_nacimiento_hidden').value;
+    const listaEstados = document.getElementById('lista_estados_mexico');
+    const estados = Object.keys(mexicoData).sort((a, b) => a.localeCompare(b, 'es'));
 
-        for (let estado in mexicoData) {
+    listaEstados.innerHTML = '';
+
+    estados.forEach(function(estado) {
+        let option = document.createElement("option");
+        option.value = estado;
+        listaEstados.appendChild(option);
+    });
+
+    const estadoGuardado = document.getElementById('estado_nacimiento_menor').value;
+
+    if (estadoGuardado) {
+        cargarMunicipios('estado_nacimiento_menor', 'municipio_nacimiento_menor', true);
+    }
+}
+
+    function cargarMunicipios(idInputEstado, idSelectMunicipio, esCargaInicial = false) {
+    const inputEstado = document.getElementById(idInputEstado);
+    const selectMunicipio = document.getElementById(idSelectMunicipio);
+    const estadoSeleccionado = inputEstado.value.trim();
+
+    selectMunicipio.innerHTML = '<option value="">Selecciona el municipio...</option>';
+
+    if (estadoSeleccionado && mexicoData[estadoSeleccionado]) {
+        const municipioGuardado = document.getElementById('municipio_nacimiento_hidden').value;
+        const municipios = mexicoData[estadoSeleccionado];
+
+        municipios.forEach(function(municipio) {
             let option = document.createElement("option");
-            option.text = estado;
-            option.value = estado;
-            if (estado === estadoGuardado) option.selected = true;
-            selectEstado.add(option);
-        }
-
-        if (estadoGuardado) {
-            cargarMunicipios('estado_nacimiento_menor', 'municipio_nacimiento_menor', true);
-        }
+            option.text = municipio;
+            option.value = municipio;
+            if (esCargaInicial && municipio === municipioGuardado) option.selected = true;
+            selectMunicipio.add(option);
+        });
     }
-
-    function cargarMunicipios(idSelectEstado, idSelectMunicipio, esCargaInicial = false) {
-        const selectEstado = document.getElementById(idSelectEstado);
-        const selectMunicipio = document.getElementById(idSelectMunicipio);
-        const estadoSeleccionado = selectEstado.value;
-
-        selectMunicipio.innerHTML = '<option value="">Selecciona el municipio...</option>';
-
-        if (estadoSeleccionado && mexicoData[estadoSeleccionado]) {
-            const municipioGuardado = document.getElementById('municipio_nacimiento_hidden').value;
-            const municipios = mexicoData[estadoSeleccionado];
-
-            municipios.forEach(function(municipio) {
-                let option = document.createElement("option");
-                option.text = municipio;
-                option.value = municipio;
-                if (esCargaInicial && municipio === municipioGuardado) option.selected = true;
-                selectMunicipio.add(option);
-            });
-        }
-    }
+}
 
     // -------------------------------------------------------------------
     // 8. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
@@ -1330,7 +1491,7 @@
                         "Para poder enviar tu expediente definitivo, debes cargar los siguientes documentos:",
                         docsFaltantes
                     );
-                  //  return; //
+                    return;
                 }
 
                 if(myModal) myModal.show();
@@ -1382,16 +1543,11 @@
         const pageId = window.location.pathname + "_user_{{ request.user.id }}";
         const forms = document.querySelectorAll("form");
 
-        forms.forEach(formEl => {
-            const elements = formEl.querySelectorAll("input, select, textarea");
+        forms.forEach(form => {
+            const elements = form.querySelectorAll("input, select, textarea");
 
             elements.forEach(el => {
-                if (
-                    el.type === "file" ||
-                    el.type === "hidden" ||
-                    el.type === "password" ||
-                    el.name === "csrfmiddlewaretoken"
-                ) return;
+                if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
 
                 const key = el.name || el.id;
                 if (!key) return;
@@ -1408,36 +1564,38 @@
                 }
             });
 
-            const guardarDato = (e) => {
+            function guardarDato(e) {
                 const el = e.target;
-                if (
-                    el.type === "file" ||
-                    el.type === "hidden" ||
-                    el.type === "password" ||
-                    el.name === "csrfmiddlewaretoken"
-                ) return;
+                if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
 
                 const key = el.name || el.id;
                 if (!key) return;
 
-                const value = (el.type === "checkbox" || el.type === "radio") ? (el.checked ? "true" : "false") : el.value;
-                localStorage.setItem(`autosave_${pageId}_${key}`, value);
-            };
+                let valueToSave = el.value;
+                if (el.type === "checkbox" || el.type === "radio") {
+                    valueToSave = el.checked ? "true" : "false";
+                }
 
-            formEl.addEventListener("input", guardarDato);
-            formEl.addEventListener("change", guardarDato);
+                localStorage.setItem(`autosave_${pageId}_${key}`, valueToSave);
+            }
 
-            const limpiarMemoria = () => {
+            form.addEventListener("input", guardarDato);
+            form.addEventListener("change", guardarDato);
+
+            function limpiarMemoria() {
                 elements.forEach(el => {
                     const key = el.name || el.id;
                     if (!key) return;
                     localStorage.removeItem(`autosave_${pageId}_${key}`);
                 });
-            };
+            }
 
-            formEl.addEventListener("submit", limpiarMemoria);
+            form.addEventListener("submit", limpiarMemoria);
+
             const btnConfirmarFinalJS = document.getElementById('btnConfirmarFinalJS');
-            if (btnConfirmarFinalJS) btnConfirmarFinalJS.addEventListener('click', limpiarMemoria);
+            if(btnConfirmarFinalJS){
+                btnConfirmarFinalJS.addEventListener('click', limpiarMemoria);
+            }
         });
     });
 

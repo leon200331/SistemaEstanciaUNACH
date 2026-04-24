@@ -6,6 +6,7 @@
 <title>Valoración Nutricional</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <style>
@@ -17,13 +18,19 @@ body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
 .section-title{font-weight:800;margin-bottom:12px;color:#6b21a8;font-size:1.05rem;}
 .btn-soft{border-radius:10px;font-weight:700;padding:.55rem 1rem;}
+
+/* --- CAMBIO: Fondo morado pastel suave y bordes morados claros --- */
 .sub-card{background:#faf5ff;border:1px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:18px;}
 
+/* ========================================================
+   TRUCO DE DISEÑO: PREGUNTAS Y CAJAS JUNTAS ABAJO (CORREGIDO)
+   ======================================================== */
 .sub-card .row > div[class*="col-"] {
     display: flex;
     flex-direction: column;
 }
 
+/* --- CAMBIO: Letras de preguntas sin negritas --- */
 .sub-card .row > div[class*="col-"] > label,
 label {
     margin-bottom: 6px !important;
@@ -35,10 +42,11 @@ label {
 .sub-card .row > div[class*="col-"] > select,
 .sub-card .row > div[class*="col-"] > textarea,
 .sub-card .row > div[class*="col-"] > .select2-container {
-    margin-top: auto;
+    margin-top: auto; /* Esto empuja la caja hacia abajo de forma segura */
     flex: 0 0 auto;
 }
 
+/* Estilos de Select2 para que combine con Bootstrap */
 .select2-container .select2-selection--multiple {
     min-height: 38px;
     border: 1px solid #dee2e6;
@@ -49,12 +57,14 @@ label {
     border: none;
     color: white;
     border-radius: 4px;
+    /* --- CORRECCIÓN CSS PARA EVITAR QUE LA "X" SE AMONTONE --- */
     padding: 2px 8px 2px 24px;
     margin-top: 5px;
     position: relative;
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
     color: white;
+    /* --- SEPARAMOS LA "X" DE LA LETRA --- */
     position: absolute;
     left: 6px;
     top: 50%;
@@ -65,52 +75,6 @@ label {
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
     color: #ffdddd;
     background: transparent;
-}
-
-/* Estado de autoguardado */
-.autosave-indicator {
-    min-height: 24px;
-}
-
-/* Modal bonito nutrición */
-.modal-nutri{
-    border: none;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 18px 45px rgba(88, 28, 135, .22);
-}
-.modal-nutri-header{
-    background: linear-gradient(135deg, #9333ea, #7e22ce);
-    border-bottom: none;
-    padding: 1rem 1.25rem;
-}
-.modal-icon-circle{
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,.18);
-    color: #fff;
-    font-size: 1.1rem;
-}
-.btn-nutri-confirm{
-    background: #16a34a;
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    border-radius: 10px;
-    padding: .55rem 1rem;
-}
-.btn-nutri-confirm:hover{
-    background: #15803d;
-    color: #fff;
-}
-#resumenEstadoDictamen{
-    background: #faf5ff;
-    border-color: #e9d5ff !important;
-    color: #4c1d95;
 }
 </style>
 </head>
@@ -151,7 +115,7 @@ label {
     </div>
 </div>
 
-<form method="post" id="form-nutricion" data-autosave-url="{% url 'nutricion_autoguardar' sol.pk %}">
+<form method="post">
 {% csrf_token %}
 
 <div class="sub-card">
@@ -340,86 +304,27 @@ label {
 
         <div class="col-md-4 mb-3">
             <label for="fecha_automatica" class="form-label">Fecha de elaboración:</label>
-            <input
-                type="date"
-                name="fecha_elaboracion_nutricion"
-                id="fecha_automatica"
-                class="form-control"
-                required
-                readonly
-                data-no-autosave="1"
-            >
+            <input type="date" name="fecha_elaboracion_nutricion" id="fecha_automatica" class="form-control" required readonly>
         </div>
 
-        <div class="col-md-4 mb-3">
-            {{ form.estado_nutricion.label_tag }}
-            {{ form.estado_nutricion }}
-        </div>
-
-        <div class="col-md-12 mb-3">
-            {{ form.observaciones_nutricion.label_tag }}
-            {{ form.observaciones_nutricion }}
-        </div>
+        <div class="col-md-4 mb-3">{{ form.estado_nutricion.label_tag }}{{ form.estado_nutricion }}</div>
+        <div class="col-md-12 mb-3">{{ form.observaciones_nutricion.label_tag }}{{ form.observaciones_nutricion }}</div>
     </div>
 </div>
 
-<div class="autosave-indicator mt-3 mb-2">
-    <small id="autosave-status" class="text-muted">Sin cambios recientes.</small>
-</div>
-
 <div class="d-flex gap-2 mt-4">
-    <button type="button" class="btn btn-success btn-soft" id="btnGuardarValoracion">
-        <i class="bi bi-save me-1"></i> Finalizar dictamen
+    <button type="submit" class="btn btn-success btn-soft">
+        <i class="bi bi-save me-1"></i> Guardar valoración
     </button>
     <a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-secondary btn-soft">Cancelar</a>
 </div>
 
 </form>
-
-<!-- Modal de confirmación bonito -->
-<div class="modal fade" id="modalConfirmarDictamen" tabindex="-1" aria-labelledby="modalConfirmarDictamenLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content modal-nutri">
-      <div class="modal-header modal-nutri-header">
-        <div class="d-flex align-items-center gap-2">
-          <div class="modal-icon-circle">
-            <i class="bi bi-clipboard2-check"></i>
-          </div>
-          <div>
-            <h5 class="modal-title mb-0 text-white" id="modalConfirmarDictamenLabel">Confirmar dictamen</h5>
-            <small class="text-white-50">Área de valoración nutricional</small>
-          </div>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body py-4">
-        <p class="mb-2 fw-semibold text-dark" id="textoConfirmacionDictamen">
-          ¿Deseas guardar esta valoración?
-        </p>
-        <div class="alert alert-light border rounded-3 mb-0" id="resumenEstadoDictamen">
-          Se guardarán los cambios realizados en el formulario.
-        </div>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-outline-secondary btn-soft" data-bs-dismiss="modal">
-          Cancelar
-        </button>
-        <button type="button" class="btn btn-nutri-confirm btn-soft" id="btnConfirmarEnvioFinal">
-          <i class="bi bi-check2-circle me-1"></i> Sí, guardar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 function toggleBox(selectId, expectedValue, boxId) {
@@ -472,6 +377,7 @@ function initToggles() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    // INICIALIZACIÓN DE SELECT2 PARA LOS ALIMENTOS DEL AGRADO
     $('.select2-multiple').select2({
         tags: true,
         tokenSeparators: [',', ' '],
@@ -510,182 +416,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     initToggles();
 
+    // --- NUEVO: Script para llenar la fecha de elaboración automáticamente ---
     const fechaInput = document.getElementById('fecha_automatica');
-    if (fechaInput && !fechaInput.value) {
+    if (fechaInput) {
         const hoy = new Date();
         const año = hoy.getFullYear();
         const mes = String(hoy.getMonth() + 1).padStart(2, '0');
         const dia = String(hoy.getDate()).padStart(2, '0');
         fechaInput.value = `${año}-${mes}-${dia}`;
     }
-
-    const form = document.getElementById("form-nutricion");
-    const status = document.getElementById("autosave-status");
-    const autosaveUrl = form ? form.dataset.autosaveUrl : null;
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-
-    let autosaveTimer = null;
-    let isSaving = false;
-    let lastPayload = "";
-
-    function setStatus(text, cls = "text-muted") {
-        if (!status) return;
-        status.className = cls;
-        status.textContent = text;
-    }
-
-    function collectFormData() {
-        const formData = new FormData();
-
-        if (csrfToken) {
-            formData.append("csrfmiddlewaretoken", csrfToken);
-        }
-
-        const elements = form.querySelectorAll("input, textarea, select");
-
-        elements.forEach(el => {
-            if (!el.name) return;
-            if (el.dataset.noAutosave === "1") return;
-            if (el.disabled) return;
-            if (el.type === "file") return;
-
-            if (el.tagName === "SELECT" && el.multiple) {
-                const selected = Array.from(el.selectedOptions).map(opt => opt.value);
-                selected.forEach(value => formData.append(el.name, value));
-            } else if ((el.type === "checkbox" || el.type === "radio")) {
-                if (el.checked) {
-                    formData.append(el.name, el.value);
-                }
-            } else {
-                formData.append(el.name, el.value);
-            }
-        });
-
-        return formData;
-    }
-
-    function serializeFormData(formData) {
-        const pairs = [];
-        for (const [key, value] of formData.entries()) {
-            pairs.push(`${key}=${value}`);
-        }
-        return pairs.join("&");
-    }
-
-    function autosave() {
-        if (!autosaveUrl || isSaving) return;
-
-        const formData = collectFormData();
-        const currentPayload = serializeFormData(formData);
-
-        if (currentPayload === lastPayload) {
-            return;
-        }
-
-        isSaving = true;
-        setStatus("Guardando cambios...", "text-warning");
-
-        fetch(autosaveUrl, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.ok) {
-                lastPayload = currentPayload;
-                setStatus("Cambios guardados automáticamente.", "text-success");
-            } else {
-                setStatus("No se pudo guardar.", "text-danger");
-                console.error("Respuesta del servidor:", data);
-            }
-        })
-        .catch(error => {
-            setStatus("Error al autoguardar.", "text-danger");
-            console.error("Error de autoguardado:", error);
-        })
-        .finally(() => {
-            isSaving = false;
-        });
-    }
-
-    function scheduleAutosave() {
-        setStatus("Cambios sin guardar...", "text-secondary");
-        clearTimeout(autosaveTimer);
-        autosaveTimer = setTimeout(autosave, 1000);
-    }
-
-    if (form) {
-        form.querySelectorAll("input, textarea, select").forEach(el => {
-            if (el.dataset.noAutosave === "1") return;
-            if (el.disabled) return;
-
-            const eventType = (
-                el.tagName === "SELECT" ||
-                el.type === "date" ||
-                el.type === "time" ||
-                el.type === "number"
-            ) ? "change" : "input";
-
-            el.addEventListener(eventType, scheduleAutosave);
-        });
-
-        form.addEventListener("submit", function() {
-            setStatus("Guardando manualmente...", "text-primary");
-        });
-    }
-
-    $('.select2-multiple').on('change', function () {
-        scheduleAutosave();
-    });
-
-    if (form) {
-        lastPayload = serializeFormData(collectFormData());
-    }
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const formNutricion = document.getElementById("form-nutricion");
-    const btnGuardar = document.getElementById("btnGuardarValoracion");
-    const btnConfirmar = document.getElementById("btnConfirmarEnvioFinal");
-    const textoConfirmacion = document.getElementById("textoConfirmacionDictamen");
-    const resumenEstado = document.getElementById("resumenEstadoDictamen");
-    const estadoNutricion = document.getElementById("id_estado_nutricion");
-
-    if (!formNutricion || !btnGuardar || !btnConfirmar) return;
-
-    const modalElement = document.getElementById("modalConfirmarDictamen");
-    const modalConfirmacion = new bootstrap.Modal(modalElement);
-
-    btnGuardar.addEventListener("click", function() {
-        let valor = estadoNutricion ? estadoNutricion.value : "";
-        let texto = "¿Deseas guardar esta valoración?";
-        let resumen = "Se guardarán los cambios realizados en el formulario.";
-
-        if (valor === "APROBADO") {
-            texto = "¿Estás seguro de APROBAR este dictamen?";
-            resumen = "La valoración quedará registrada como APROBADA.";
-        } else if (valor === "RECHAZADO") {
-            texto = "¿Estás seguro de RECHAZAR este dictamen?";
-            resumen = "La valoración quedará registrada como RECHAZADA.";
-        } else {
-            texto = "¿Deseas guardar esta valoración?";
-            resumen = "Se guardarán los cambios capturados en el formulario.";
-        }
-
-        textoConfirmacion.textContent = texto;
-        resumenEstado.textContent = resumen;
-        modalConfirmacion.show();
-    });
-
-    btnConfirmar.addEventListener("click", function() {
-        modalConfirmacion.hide();
-        formNutricion.submit();
-    });
 });
 </script>
 

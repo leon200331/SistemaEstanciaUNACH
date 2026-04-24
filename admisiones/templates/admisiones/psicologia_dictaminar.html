@@ -18,27 +18,42 @@ body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
 .info-box{background:#fff;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.06);padding:14px 16px;margin-bottom:16px;}
 .btn-soft{border-radius:10px;font-weight:700;padding:.5rem .9rem;}
+
+/* --- CAMBIO: Letras sin negritas resaltadas --- */
 .form-label{font-weight:500;color:#334155;font-size:.9rem;}
+
 textarea.form-control{min-height:90px;}
 .readonly-box{background:#eef2f7 !important;}
 .accordion-item{border:none;border-radius:14px !important;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-bottom:14px;}
+
+/* --- CAMBIO: Fondos Azules Pastel para no cansar la vista --- */
 .accordion-button{font-weight:800;color:#1e3a8a;background:#eff6ff;}
 .accordion-button:not(.collapsed){background:#dbeafe;color:#1e3a8a;box-shadow:none;}
-.accordion-body{background:#eff6ff; border-top: 1px solid #bfdbfe;}
+.accordion-body{background:#eff6ff; border-top: 1px solid #bfdbfe;} /* Fondo azul pastel suave */
+
 .sticky-actions{position:sticky;bottom:16px;z-index:10;}
 .hidden-by-rule{display:none !important;}
+
+/* Estilos de tiempo */
 .time-combo { display: flex; align-items: center; gap: 4px; }
 .sel-time { width: 65px; padding: 0.375rem 0.5rem; }
 .sel-ampm { width: 75px; padding: 0.375rem 0.5rem; }
+
+/* Estilo para resaltar el error */
 .is-invalid-custom { border: 2px solid #dc3545 !important; background-color: #fff8f8 !important; }
 
+/* ========================================================
+   ALINEACIÓN SIMÉTRICA SEGURA (Evita que Chrome se congele)
+   ======================================================== */
 .accordion-body .row > div[class*="col-"] {
     display: flex;
     flex-direction: column;
 }
+
 .accordion-body .row > div[class*="col-"] > label.form-label {
     margin-bottom: 6px !important;
 }
+
 .accordion-body .row > div[class*="col-"] > input:not([type="checkbox"]):not([type="radio"]),
 .accordion-body .row > div[class*="col-"] > select,
 .accordion-body .row > div[class*="col-"] > textarea,
@@ -46,7 +61,7 @@ textarea.form-control{min-height:90px;}
 .accordion-body .row > div[class*="col-"] > .time-combo,
 .accordion-body .row > div[class*="col-"] > .input-group,
 .accordion-body .row > div[class*="col-"] > .d-none {
-    margin-top: auto;
+    margin-top: auto; /* Empuja el elemento a la parte inferior de forma segura */
     flex: 0 0 auto;
 }
 </style>
@@ -126,16 +141,6 @@ textarea.form-control{min-height:90px;}
 
   <form method="post" id="formDictamen">
     {% csrf_token %}
-
-      <div class="card card-panel p-3 mb-3" id="checkOtroProgenitorWrap" style="display:none;">
-  <div class="form-check m-0">
-    <input class="form-check-input" type="checkbox" id="checkOtroProgenitor">
-    <label class="form-check-label fw-semibold" for="checkOtroProgenitor">
-      Agregar información del otro progenitor
-    </label>
-    <div class="small text-muted mt-1" id="textoCheckOtroProgenitor"></div>
-  </div>
-</div>
 
     <div class="accordion" id="accordionPsicologia">
 
@@ -673,15 +678,12 @@ textarea.form-control{min-height:90px;}
 
     <div class="sticky-actions mt-3">
       <div class="card card-panel p-3">
-        <div class="d-flex justify-content-end gap-2 align-items-center">
-          <small id="autosaveStatus" class="text-muted me-auto fw-semibold"></small>
-
+        <div class="d-flex justify-content-end gap-2">
           <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary btn-soft">
             Cancelar
           </a>
-
-          <button type="button" id="btnFinalizar" class="btn btn-primary btn-soft" {% if bloqueado %}disabled{% endif %}>
-            <i class="bi bi-check2-circle me-1"></i> Finalizar dictamen
+          <button type="submit" class="btn btn-primary btn-soft" {% if bloqueado %}disabled{% endif %}>
+            <i class="bi bi-save me-1"></i> Guardar dictamen
           </button>
         </div>
       </div>
@@ -690,27 +692,19 @@ textarea.form-control{min-height:90px;}
   </form>
 </div>
 
-
-
-<div class="modal fade" id="modalConfirmar" tabindex="-1">
+<div class="modal fade" id="modalAlertaSoltero" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:16px;">
-      <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-exclamation-circle text-primary me-2"></i>
-          Confirmar acción
-        </h5>
+    <div class="modal-content" style="border-radius:16px; border:none; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i>Atención</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body text-center">
-        <p class="mb-0">¿Deseas finalizar el dictamen?</p>
+      <div class="modal-body pt-2 pb-4">
+        <p id="textoAlertaSoltero" class="mb-0 text-secondary" style="font-size:1rem;"></p>
       </div>
-      <div class="modal-footer border-0">
-        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          Cancelar
-        </button>
-        <button class="btn btn-primary" id="btnConfirmarGuardar">
-          Sí, finalizar
-        </button>
+      <div class="modal-footer border-0 bg-light rounded-bottom" style="border-radius:0 0 16px 16px;">
+        <button type="button" class="btn btn-outline-secondary fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary fw-bold rounded-pill px-4" id="btnAceptarSoltero">Sí, abrir sección</button>
       </div>
     </div>
   </div>
@@ -860,6 +854,7 @@ document.addEventListener("DOMContentLoaded", function () {
           hiddenNombreCompleto.value = `${inNombres.value} ${inPaterno.value} ${inMaterno.value}`.trim();
       }));
 
+      // --- RECUPERAR DATOS VISUALES EN CASO DE ERROR/RECARGA ---
       if (hiddenReligion && hiddenReligion.value) {
           let exists = Array.from(selReligion.options).some(opt => opt.value === hiddenReligion.value);
           if (exists) {
@@ -923,52 +918,45 @@ document.addEventListener("DOMContentLoaded", function () {
   setupManualCombos("padre");
   setupManualCombos("madre");
 
-const esSoltero = (dataTutor.estadoCivil || "").toLowerCase().includes('solter');
-const secPadre = document.getElementById('sec2');
-const secMadre = document.getElementById('sec3');
+  const esSoltero = dataTutor.estadoCivil.toLowerCase().includes('solter');
+  const secPadre = document.getElementById('sec2');
+  const secMadre = document.getElementById('sec3');
 
-const checkWrap = document.getElementById('checkOtroProgenitorWrap');
-const checkOtroProgenitor = document.getElementById('checkOtroProgenitor');
-const textoCheckOtroProgenitor = document.getElementById('textoCheckOtroProgenitor');
+  const modalAlerta = new bootstrap.Modal(document.getElementById('modalAlertaSoltero'));
+  const txtAlerta = document.getElementById('textoAlertaSoltero');
+  const btnAceptarSoltero = document.getElementById('btnAceptarSoltero');
+  let seccionPendiente = null;
 
-let seccionRestringida = null;
-let botonRestringido = null;
+  if (esSoltero) {
+      if (parentescoTutor === 'MADRE' || parentescoTutor === 'TUTORA') {
+          secPadre.addEventListener('show.bs.collapse', function (e) {
+              if (!secPadre.dataset.alerted) {
+                  e.preventDefault();
+                  seccionPendiente = secPadre;
+                  txtAlerta.innerText = "Atención: La tutora principal está registrada como Soltera.\n\n¿Deseas abrir y agregar información en la sección del padre de todas formas?";
+                  modalAlerta.show();
+              }
+          });
+      } else if (parentescoTutor === 'PADRE' || parentescoTutor === 'TUTOR') {
+          secMadre.addEventListener('show.bs.collapse', function (e) {
+              if (!secMadre.dataset.alerted) {
+                  e.preventDefault();
+                  seccionPendiente = secMadre;
+                  txtAlerta.innerText = "Atención: El tutor principal está registrado como Soltero.\n\n¿Deseas abrir y agregar información en la sección de la madre de todas formas?";
+                  modalAlerta.show();
+              }
+          });
+      }
+  }
 
-if (esSoltero) {
-    checkWrap.style.display = 'block';
-
-    if (parentescoTutor === 'MADRE' || parentescoTutor === 'TUTORA') {
-        seccionRestringida = secPadre;
-        botonRestringido = document.querySelector('[data-bs-target="#sec2"]');
-        textoCheckOtroProgenitor.textContent = 'La tutora principal está registrada como Soltera. Marca este check solo si deseas capturar información del padre.';
-    } else if (parentescoTutor === 'PADRE' || parentescoTutor === 'TUTOR') {
-        seccionRestringida = secMadre;
-        botonRestringido = document.querySelector('[data-bs-target="#sec3"]');
-        textoCheckOtroProgenitor.textContent = 'El tutor principal está registrado como Soltero. Marca este check solo si deseas capturar información de la madre.';
-    }
-
-    if (seccionRestringida && botonRestringido) {
-        botonRestringido.disabled = true;
-        botonRestringido.classList.add('opacity-50');
-    }
-
-    checkOtroProgenitor.addEventListener('change', function () {
-        if (!seccionRestringida || !botonRestringido) return;
-
-        if (this.checked) {
-            botonRestringido.disabled = false;
-            botonRestringido.classList.remove('opacity-50');
-        } else {
-            botonRestringido.disabled = true;
-            botonRestringido.classList.add('opacity-50');
-
-            if (seccionRestringida.classList.contains('show')) {
-                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(seccionRestringida, { toggle: false });
-                bsCollapse.hide();
-            }
-        }
-    });
-}
+  btnAceptarSoltero.addEventListener('click', function() {
+      if (seccionPendiente) {
+          seccionPendiente.dataset.alerted = 'true';
+          modalAlerta.hide();
+          let bsCollapse = new bootstrap.Collapse(seccionPendiente, { toggle: false });
+          bsCollapse.show();
+      }
+  });
 
   document.querySelectorAll('select option').forEach(opt => {
       let text = opt.textContent.trim();
@@ -1048,16 +1036,23 @@ if (esSoltero) {
   setupNumericInput('peso_txt', 'id_peso_al_nacer_psicologia');
   setupNumericInput('talla_txt', 'id_talla_al_nacer_psicologia');
 
+
+  // =====================================================================
+  // EL ROBOT QUE ENGAÑA A DJANGO Y EVITA ERRORES (ACTUALIZADO)
+  // =====================================================================
   const edadMenorAnios = parseInt("{{ sol.inscripcion_oficial.edad_anios_menor|default:'0' }}", 10);
 
   if (edadMenorAnios < 2) {
+      // 1. Ocultar todos los acordiones después de "Comportamiento"
       document.querySelectorAll('.hide-if-under-2').forEach(el => {
           el.classList.add('d-none');
       });
   }
 
+  // REDIRECCIÓN AUTOMÁTICA AL APARTADO CON ERROR (Mejorado para buscar en listas de errores Django)
   const firstError = document.querySelector('.errorlist, .is-invalid, .alert-danger li strong');
   if (firstError) {
+      // Intentamos encontrar en qué acordeón está el error
       const errorInField = document.querySelector('#accordionPsicologia .errorlist') || document.querySelector('#accordionPsicologia .is-invalid');
 
       if (errorInField) {
@@ -1069,6 +1064,7 @@ if (esSoltero) {
                   bsCollapse.show();
               }
 
+              // Resaltar el campo fallido con rojo
               const inputWithError = accordionItem.querySelector('input, select, textarea');
               if (inputWithError) inputWithError.classList.add('is-invalid-custom');
 
@@ -1077,9 +1073,40 @@ if (esSoltero) {
               }, 300);
           }
       } else {
+          // Si el error está a nivel de formulario, sube al encabezado
           document.getElementById('error-summary-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
   }
+
+  // 2. Antes de guardar, rellenamos las preguntas ocultas para que Django no rechace
+  document.getElementById('formDictamen').addEventListener('submit', function() {
+      if (edadMenorAnios < 2) {
+          document.querySelectorAll('.hide-if-under-2').forEach(wrap => {
+
+              wrap.querySelectorAll('select').forEach(sel => {
+                  if (!sel.value && sel.options.length > 0) {
+                      let noOpt = Array.from(sel.options).find(opt => opt.text.trim().toLowerCase() === 'no');
+                      if (noOpt) {
+                          sel.value = noOpt.value;
+                      } else {
+                          sel.selectedIndex = 1;
+                      }
+                      sel.dispatchEvent(new Event('change'));
+                  }
+              });
+
+              wrap.querySelectorAll('input[type="text"], textarea, input[type="hidden"]').forEach(inp => {
+                  if (!inp.value && inp.name && inp.name !== "csrfmiddlewaretoken") {
+                      inp.value = "N/A por edad";
+                      inp.dispatchEvent(new Event('input'));
+                  }
+              });
+          });
+      }
+
+      updateTimeComboDescanso('duerme');
+      updateTimeComboDescanso('despierta');
+  });
 
   function updateTimeComboDescanso(prefix) {
       const hEl = document.getElementById(`h_${prefix}`);
@@ -1115,132 +1142,6 @@ if (esSoltero) {
           const el = document.getElementById(`${part}_${prefix}`);
           if (el) el.addEventListener('change', () => updateTimeComboDescanso(prefix));
       });
-  });
-
-  // =========================
-  // AUTOGUARDADO PSICOLOGÍA
-  // =========================
-  const formDictamen = document.getElementById("formDictamen");
-  const autosaveStatus = document.getElementById("autosaveStatus");
-  let autosaveTimer = null;
-  let enviandoFinal = false;
-
-  function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-          const cookies = document.cookie.split(";");
-          for (let i = 0; i < cookies.length; i++) {
-              const cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
-  }
-
-  function autoguardarPsicologia() {
-      if (enviandoFinal) return;
-
-      const formData = new FormData(formDictamen);
-      formData.delete("estado_psicologia");
-      formData.delete("observaciones_psicologia");
-
-      autosaveStatus.textContent = "Guardando...";
-      autosaveStatus.classList.remove("text-danger", "text-success");
-      autosaveStatus.classList.add("text-muted");
-
-      fetch("{% url 'psicologia_autoguardar' sol.pk %}", {
-          method: "POST",
-          headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-          },
-          body: formData
-      })
-      .then(async response => {
-          const data = await response.json();
-          if (!response.ok) throw data;
-          return data;
-      })
-      .then(data => {
-          autosaveStatus.textContent = "Guardado automáticamente";
-          autosaveStatus.classList.remove("text-muted", "text-danger");
-          autosaveStatus.classList.add("text-success");
-      })
-      .catch(error => {
-          autosaveStatus.textContent = "Error al autoguardar";
-          autosaveStatus.classList.remove("text-muted", "text-success");
-          autosaveStatus.classList.add("text-danger");
-          console.log("Error autoguardado psicología:", error);
-      });
-  }
-
-  formDictamen.querySelectorAll("input, select, textarea").forEach(el => {
-      if (el.id === "id_estado_psicologia" || el.id === "id_observaciones_psicologia") {
-          return;
-      }
-
-      el.addEventListener("input", function () {
-          clearTimeout(autosaveTimer);
-          autosaveTimer = setTimeout(autoguardarPsicologia, 1200);
-      });
-
-      el.addEventListener("change", function () {
-          clearTimeout(autosaveTimer);
-          autosaveTimer = setTimeout(autoguardarPsicologia, 800);
-      });
-  });
-
-  document.getElementById('formDictamen').addEventListener('submit', function() {
-      if (edadMenorAnios < 2) {
-          document.querySelectorAll('.hide-if-under-2').forEach(wrap => {
-              wrap.querySelectorAll('select').forEach(sel => {
-                  if (!sel.value && sel.options.length > 0) {
-                      let noOpt = Array.from(sel.options).find(opt => opt.text.trim().toLowerCase() === 'no');
-                      if (noOpt) {
-                          sel.value = noOpt.value;
-                      } else {
-                          sel.selectedIndex = 1;
-                      }
-                      sel.dispatchEvent(new Event('change'));
-                  }
-              });
-
-              wrap.querySelectorAll('input[type="text"], textarea, input[type="hidden"]').forEach(inp => {
-                  if (!inp.value && inp.name && inp.name !== "csrfmiddlewaretoken") {
-                      inp.value = "N/A por edad";
-                      inp.dispatchEvent(new Event('input'));
-                  }
-              });
-          });
-      }
-
-      updateTimeComboDescanso('duerme');
-      updateTimeComboDescanso('despierta');
-  });
-
-  // =========================
-  // ALERTA FINALIZAR DICTAMEN
-  // =========================
-  const btnFinalizar = document.getElementById("btnFinalizar");
-  const modalConfirmar = new bootstrap.Modal(document.getElementById("modalConfirmar"));
-  const btnConfirmarGuardar = document.getElementById("btnConfirmarGuardar");
-
-  btnFinalizar.addEventListener("click", function () {
-      const estado = document.getElementById("id_estado_psicologia").value;
-
-      if (!estado || estado === "") {
-          alert("Debes seleccionar APROBADO o RECHAZADO antes de finalizar.");
-          return;
-      }
-
-      modalConfirmar.show();
-  });
-
-  btnConfirmarGuardar.addEventListener("click", function () {
-      enviandoFinal = true;
-      formDictamen.submit();
   });
 
 });

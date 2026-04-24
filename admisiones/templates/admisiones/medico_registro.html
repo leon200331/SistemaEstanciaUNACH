@@ -236,10 +236,11 @@ APROBADO
 <td>{{ sol.observaciones_medico|default:"Sin observaciones" }}</td>
 
 <td>
-<a href="{% url 'medico_pdf' sol.pk %}" class="btn btn-sm btn-outline-danger">
-<i class="bi bi-download me-1"></i> Descargar PDF
+<a href="{% url 'medico_pdf' sol.pk %}" target="_blank" class="btn btn-sm btn-outline-danger">
+<i class="bi bi-file-earmark-pdf"></i> PDF
 </a>
 </td>
+
 </tr>
 {% empty %}
 

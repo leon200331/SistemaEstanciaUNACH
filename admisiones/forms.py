@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import re
 from django.forms import Select, SelectMultiple
 
+# Se unificaron las importaciones conflictivas aquí:
 from .models import Solicitud, HistoriaClinicaMedica
 
 
@@ -49,11 +50,8 @@ class CapturaSolicitudForm(forms.ModelForm):
             "apellido_materno_tutor": forms.TextInput(attrs={"placeholder": "Ej. López"}),
 
             # --- SE AGREGÓ READONLY A LA MATRÍCULA ---
-            "matricula": forms.TextInput(attrs={
-                "placeholder": "Ej. A123456",
-                "readonly": "readonly",
-                "style": "background-color: #e9ecef; cursor: not-allowed;"
-            }),
+            "matricula": forms.TextInput(attrs={"placeholder": "Ej. A123456", "readonly": "readonly",
+                                                "style": "background-color: #e9ecef; cursor: not-allowed;"}),
 
             "programa_educativo": forms.Select(),
             "programa_educativo_otro": forms.TextInput(attrs={
@@ -108,7 +106,6 @@ class CapturaSolicitudForm(forms.ModelForm):
         self.fields["parentesco"].required = True
         self.fields["fecha_nacimiento_menor"].required = True
 
-        # Campos base de dirección obligatorios
         self.fields["estado_domicilio"].required = True
         self.fields["ciudad"].required = True
         self.fields["calle"].required = True
@@ -117,17 +114,17 @@ class CapturaSolicitudForm(forms.ModelForm):
         v = (self.cleaned_data.get("nombres_tutor") or "").strip()
         if len(v) < 2:
             raise forms.ValidationError("Ingresa un nombre válido.")
-        return v.title()
+        return v.title()  # FUERZA MAYUSCULA INICIAL
 
     def clean_apellido_paterno_tutor(self):
         v = (self.cleaned_data.get("apellido_paterno_tutor") or "").strip()
         if len(v) < 2:
             raise forms.ValidationError("Ingresa un apellido paterno válido.")
-        return v.title()
+        return v.title()  # FUERZA MAYUSCULA INICIAL
 
     def clean_apellido_materno_tutor(self):
         v = (self.cleaned_data.get("apellido_materno_tutor") or "").strip()
-        return v.title() if v else v
+        return v.title() if v else v  # FUERZA MAYUSCULA INICIAL
 
     # --- CAMBIO APLICADO: Solo acepta @unach.mx ---
     def clean_correo(self):
@@ -172,7 +169,6 @@ class CapturaSolicitudForm(forms.ModelForm):
         if parentesco == "OTRO" and not parentesco_otro:
             self.add_error("parentesco_otro", "Especifica el parentesco.")
 
-        # Edad del menor (6 meses a 3 años)
         fecha = cleaned_data.get("fecha_nacimiento_menor")
         if fecha:
             hoy = date.today()
@@ -210,7 +206,7 @@ class CrearSolicitudPanelForm(forms.Form):
 
     unidad_academica = forms.ChoiceField(choices=UNIDADES_CHOICES, required=True)
 
-    # Campo para capturar una unidad académica personalizada
+    # --- CAMPO NUEVO PARA "OTRA" (Marcadores de Git eliminados) ---
     unidad_academica_otra = forms.CharField(max_length=100, required=False)
 
     correo = forms.EmailField(required=False)
@@ -241,9 +237,10 @@ class CrearSolicitudPanelForm(forms.Form):
     def clean_correo(self):
         correo = (self.cleaned_data.get("correo") or "").strip().lower()
         if correo and not correo.endswith("@unach.mx"):
-            raise forms.ValidationError(
-                "Por políticas de CTI, solo se permiten correos institucionales con terminación @unach.mx")
+            raise forms.ValidationError("Por políticas de CTI, solo se permiten correos institucionales con terminación @unach.mx")
         return correo
+
+    # --- NUEVA VALIDACIÓN: Si elige "Otra", debe escribir a fuerzas ---
     def clean(self):
         cleaned_data = super().clean()
         unidad = cleaned_data.get("unidad_academica")
@@ -259,7 +256,7 @@ class CrearSolicitudPanelForm(forms.Form):
             return value
         if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+", value):
             raise forms.ValidationError(f"{campo}: solo letras y espacios (sin números ni caracteres especiales).")
-        return value.title()
+        return value.title()  # MAYUSCULA DESDE LA CREACIÓN
 
     def clean_nombres_tutor(self):
         return self._solo_letras(self.cleaned_data.get("nombres_tutor"), "Nombre(s)")
@@ -277,10 +274,16 @@ class SolicitudBasicaForm(forms.ModelForm):
         fields = ["nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor", "matricula", "correo"]
         widgets = {
             "nombres_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Nombre(s)"}),
-            "apellido_paterno_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}),
-            "apellido_materno_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}),
+            "apellido_paterno_tutor": forms.TextInput(
+                attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}
+            ),
+            "apellido_materno_tutor": forms.TextInput(
+                attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}
+            ),
             "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
-            "correo": forms.EmailInput(attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}),
+            "correo": forms.EmailInput(
+                attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}
+            ),
         }
 
 
@@ -542,13 +545,6 @@ class DictamenPsicologiaForm(forms.ModelForm):
             else:
                 field.widget.attrs["class"] = "form-control"
 
-        if "estado_psicologia" in self.fields:
-            self.fields["estado_psicologia"].choices = [
-                ("", "Seleccione una opción"),
-                ("APROBADO", "Aprobado"),
-                ("RECHAZADO", "Rechazado"),
-            ]
-
 
 SEXO_CHOICES_NUTRI = [
     ("", "Seleccione"),
@@ -652,6 +648,7 @@ COME_SOLO_CHOICES = [
     ("CON_AYUDA", "Con ayuda"),
 ]
 
+# --- LISTAS PREDEFINIDAS PARA LOS ALIMENTOS DEL AGRADO ---
 FRUTAS_CHOICES = [(x, x) for x in
                   ["Manzana", "Pera", "Plátano", "Melón", "Sandía", "Papaya", "Mango", "Naranja", "Fresa", "Uva",
                    "Guayaba", "Piña"]]
@@ -668,36 +665,24 @@ LACTEOS_CHOICES = [(x, x) for x in
 
 
 class DictamenNutricionForm(forms.ModelForm):
-    alimentos_agrado_frutas = DynamicMultipleChoiceField(
-        choices=FRUTAS_CHOICES,
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select select2-multiple'})
-    )
-    alimentos_agrado_verduras = DynamicMultipleChoiceField(
-        choices=VERDURAS_CHOICES,
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select select2-multiple'})
-    )
-    alimentos_agrado_cereales = DynamicMultipleChoiceField(
-        choices=CEREALES_CHOICES,
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select select2-multiple'})
-    )
-    alimentos_agrado_leguminosas = DynamicMultipleChoiceField(
-        choices=LEGUMINOSAS_CHOICES,
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select select2-multiple'})
-    )
-    alimentos_agrado_aoa = DynamicMultipleChoiceField(
-        choices=AOA_CHOICES,
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select select2-multiple'})
-    )
-    alimentos_agrado_lacteos = DynamicMultipleChoiceField(
-        choices=LACTEOS_CHOICES,
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select select2-multiple'})
-    )
+    # --- CAMPOS DINÁMICOS PARA SELECT2 ---
+    alimentos_agrado_frutas = DynamicMultipleChoiceField(choices=FRUTAS_CHOICES, required=False,
+                                                         widget=forms.SelectMultiple(
+                                                             attrs={'class': 'form-select select2-multiple'}))
+    alimentos_agrado_verduras = DynamicMultipleChoiceField(choices=VERDURAS_CHOICES, required=False,
+                                                           widget=forms.SelectMultiple(
+                                                               attrs={'class': 'form-select select2-multiple'}))
+    alimentos_agrado_cereales = DynamicMultipleChoiceField(choices=CEREALES_CHOICES, required=False,
+                                                           widget=forms.SelectMultiple(
+                                                               attrs={'class': 'form-select select2-multiple'}))
+    alimentos_agrado_leguminosas = DynamicMultipleChoiceField(choices=LEGUMINOSAS_CHOICES, required=False,
+                                                              widget=forms.SelectMultiple(
+                                                                  attrs={'class': 'form-select select2-multiple'}))
+    alimentos_agrado_aoa = DynamicMultipleChoiceField(choices=AOA_CHOICES, required=False, widget=forms.SelectMultiple(
+        attrs={'class': 'form-select select2-multiple'}))
+    alimentos_agrado_lacteos = DynamicMultipleChoiceField(choices=LACTEOS_CHOICES, required=False,
+                                                          widget=forms.SelectMultiple(
+                                                              attrs={'class': 'form-select select2-multiple'}))
 
     class Meta:
         model = Solicitud
@@ -966,6 +951,7 @@ class DictamenNutricionForm(forms.ModelForm):
             "observaciones_nutricion": "Observaciones finales del dictamen",
         }
 
+    # --- FUNCIONES PARA GUARDAR LOS ALIMENTOS COMO LISTA SEPARADA POR COMAS ---
     def clean_alimentos_agrado_frutas(self):
         val = self.cleaned_data.get("alimentos_agrado_frutas")
         return ", ".join(val) if val else ""
@@ -990,17 +976,23 @@ class DictamenNutricionForm(forms.ModelForm):
         val = self.cleaned_data.get("alimentos_agrado_lacteos")
         return ", ".join(val) if val else ""
 
+    # ==============================================================
+    # --- AQUÍ EMPIEZA LA MAGIA DEL AUTOCOMPLETADO PARA NUTRICIÓN ---
+    # ==============================================================
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # 1. AUTOCOMPLETAR LOS DATOS SI EXISTE LA SOLICITUD
         if self.instance and self.instance.pk:
             insc = None
             if hasattr(self.instance, 'inscripcion_oficial'):
                 insc = self.instance.inscripcion_oficial
 
+            # --- Fecha de Nacimiento ---
             if not self.initial.get("fecha_nacimiento_nutricion") and self.instance.fecha_nacimiento_menor:
                 self.initial["fecha_nacimiento_nutricion"] = self.instance.fecha_nacimiento_menor.strftime("%d/%m/%Y")
 
+            # --- Edad y Sexo (Del expediente del tutor) ---
             if insc:
                 if not self.initial.get("edad_nutricion"):
                     anios = insc.edad_anios_menor or 0
@@ -1013,12 +1005,14 @@ class DictamenNutricionForm(forms.ModelForm):
                     elif insc.sexo_menor == "F":
                         self.initial["sexo_nutricion"] = "FEMENINO"
 
+            # --- Peso y Talla al Nacer (Extraídos de Psicología) ---
             if not self.initial.get("peso_nacer") and self.instance.peso_al_nacer_psicologia:
                 self.initial["peso_nacer"] = f"{self.instance.peso_al_nacer_psicologia} kg"
 
             if not self.initial.get("talla_nacer") and self.instance.talla_al_nacer_psicologia:
                 self.initial["talla_nacer"] = f"{self.instance.talla_al_nacer_psicologia} cm"
 
+            # --- PREPARAR LAS ETIQUETAS EXISTENTES PARA QUE SELECT2 LAS LEA ---
             multi_fields = [
                 "alimentos_agrado_frutas", "alimentos_agrado_verduras",
                 "alimentos_agrado_cereales", "alimentos_agrado_leguminosas",
@@ -1027,8 +1021,10 @@ class DictamenNutricionForm(forms.ModelForm):
             for f in multi_fields:
                 val = getattr(self.instance, f)
                 if val:
+                    # Convertimos la cadena "Manzana, Pera" en lista ["Manzana", "Pera"]
                     self.initial[f] = [x.strip() for x in val.split(',') if x.strip()]
 
+        # 2. LISTA DE CAMPOS QUE SE DEBEN BLOQUEAR
         campos_bloqueados = [
             "edad_nutricion",
             "sexo_nutricion",
@@ -1037,9 +1033,11 @@ class DictamenNutricionForm(forms.ModelForm):
             "talla_nacer"
         ]
 
+        # 3. ASIGNACIÓN DE ESTILOS Y BLOQUEO DE CASILLAS
         for name, field in self.fields.items():
             existing_class = field.widget.attrs.get("class", "")
 
+            # Asignar las clases CSS de Bootstrap normales respetando las múltiples
             if isinstance(field.widget, forms.SelectMultiple):
                 if "form-select" not in existing_class:
                     field.widget.attrs["class"] = f"form-select {existing_class}".strip()
@@ -1051,20 +1049,15 @@ class DictamenNutricionForm(forms.ModelForm):
             else:
                 field.widget.attrs["class"] = "form-control"
 
+            # Aplicar el bloqueo visual y funcional a los 5 campos seleccionados
             if name in campos_bloqueados:
                 field.widget.attrs["readonly"] = "readonly"
+                # Estilo gris para indicar que no se puede editar y bloquear clicks
                 field.widget.attrs["style"] = "background-color: #e9ecef; pointer-events: none;"
 
+                # Si el campo es un menú desplegable (Select como el de sexo), le quitamos el "tab"
                 if isinstance(field.widget, forms.Select):
                     field.widget.attrs["tabindex"] = "-1"
-
-        if "estado_nutricion" in self.fields:
-            self.fields["estado_nutricion"].choices = [
-                ("", "Seleccione una opción"),
-                ("APROBADO", "Aprobado"),
-                ("RECHAZADO", "Rechazado"),
-            ]
-
 
 
 TIPO_PARTO_CHOICES = [
@@ -1100,14 +1093,17 @@ class DictamenMedicoForm(forms.ModelForm):
 
 
 class HistoriaClinicaMedicaForm(forms.ModelForm):
+    # --- AQUI SE SEPARARON LOS NOMBRES DEL PACIENTE ---
     nombres_paciente = forms.CharField(label="Nombre(s)", required=False)
     apellido_paterno_paciente = forms.CharField(label="Apellido paterno", required=False)
     apellido_materno_paciente = forms.CharField(label="Apellido materno", required=False)
 
+    # --- AQUI SE SEPARARON LOS NOMBRES DEL PADRE ---
     nombres_padre = forms.CharField(label="Nombre(s) del padre", required=False)
     apellido_paterno_padre = forms.CharField(label="Apellido paterno", required=False)
     apellido_materno_padre = forms.CharField(label="Apellido materno", required=False)
 
+    # --- AQUI SE SEPARARON LOS NOMBRES DE LA MADRE ---
     nombres_madre = forms.CharField(label="Nombre(s) de la madre", required=False)
     apellido_paterno_madre = forms.CharField(label="Apellido paterno", required=False)
     apellido_materno_madre = forms.CharField(label="Apellido materno", required=False)
@@ -1158,6 +1154,7 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
 
     class Meta:
         model = HistoriaClinicaMedica
+        # EXCLUIMOS los campos originales para que no estorben
         exclude = ["inscripcion", "created_at", "updated_at", "nombre_paciente", "nombre_padre", "nombre_madre"]
         widgets = {
             "fecha_nacimiento": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
@@ -1186,11 +1183,8 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
             "numero_gestas": forms.TextInput(attrs={"class": "form-control", "placeholder": "Número de gestas"}),
             "complicaciones_embarazo": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Complicaciones durante el embarazo"}),
-            "medicamentos_embarazo": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 2,
-                "placeholder": "Medicamentos o vitaminas durante el embarazo"
-            }),
+            "medicamentos_embarazo": forms.Textarea(attrs={"class": "form-control", "rows": 2,
+                                                           "placeholder": "Medicamentos o vitaminas durante el embarazo"}),
             "exposicion_radiacion": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Exposición a radiación"}),
             "sufrimiento_fetal": forms.Textarea(
@@ -1234,13 +1228,14 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.instance and self.instance.pk:
-            self.initial["tabaquismo_padre"] = "SI" if self.instance.tabaquismo_padre else "NO"
-            self.initial["alcoholismo_padre"] = "SI" if self.instance.alcoholismo_padre else "NO"
-            self.initial["drogas_padre"] = "SI" if self.instance.drogas_padre else "NO"
-            self.initial["tabaquismo_madre"] = "SI" if self.instance.tabaquismo_madre else "NO"
-            self.initial["alcoholismo_madre"] = "SI" if self.instance.alcoholismo_madre else "NO"
-            self.initial["drogas_madre"] = "SI" if self.instance.drogas_madre else "NO"
+            self.initial["tabaquismo_padre"] = "si" if self.instance.tabaquismo_padre else "no"
+            self.initial["alcoholismo_padre"] = "si" if self.instance.alcoholismo_padre else "no"
+            self.initial["drogas_padre"] = "si" if self.instance.drogas_padre else "no"
+            self.initial["tabaquismo_madre"] = "si" if self.instance.tabaquismo_madre else "no"
+            self.initial["alcoholismo_madre"] = "si" if self.instance.alcoholismo_madre else "no"
+            self.initial["drogas_madre"] = "si" if self.instance.drogas_madre else "no"
 
+            # INTENTAMOS SEPARAR EL NOMBRE DEL PACIENTE
             if self.instance.nombre_paciente:
                 parts = self.instance.nombre_paciente.split()
                 if len(parts) >= 3:
@@ -1253,6 +1248,7 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
                 else:
                     self.initial["nombres_paciente"] = self.instance.nombre_paciente
 
+            # INTENTAMOS SEPARAR EL NOMBRE DEL PADRE
             if self.instance.nombre_padre:
                 parts = self.instance.nombre_padre.split()
                 if len(parts) >= 3:
@@ -1265,6 +1261,7 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
                 else:
                     self.initial["nombres_padre"] = self.instance.nombre_padre
 
+            # INTENTAMOS SEPARAR EL NOMBRE DE LA MADRE
             if self.instance.nombre_madre:
                 parts = self.instance.nombre_madre.split()
                 if len(parts) >= 3:
@@ -1290,14 +1287,15 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        instance.tabaquismo_padre = self.cleaned_data.get("tabaquismo_padre") == "SI"
-        instance.alcoholismo_padre = self.cleaned_data.get("alcoholismo_padre") == "SI"
-        instance.drogas_padre = self.cleaned_data.get("drogas_padre") == "SI"
+        instance.tabaquismo_padre = self.cleaned_data.get("tabaquismo_padre") == "si"
+        instance.alcoholismo_padre = self.cleaned_data.get("alcoholismo_padre") == "si"
+        instance.drogas_padre = self.cleaned_data.get("drogas_padre") == "si"
 
-        instance.tabaquismo_madre = self.cleaned_data.get("tabaquismo_madre") == "SI"
-        instance.alcoholismo_madre = self.cleaned_data.get("alcoholismo_madre") == "SI"
-        instance.drogas_madre = self.cleaned_data.get("drogas_madre") == "SI"
+        instance.tabaquismo_madre = self.cleaned_data.get("tabaquismo_madre") == "si"
+        instance.alcoholismo_madre = self.cleaned_data.get("alcoholismo_madre") == "si"
+        instance.drogas_madre = self.cleaned_data.get("drogas_madre") == "si"
 
+        # AQUI VOLVEMOS A UNIR LOS 3 CAMPOS PARA QUE LA BASE DE DATOS NO EXPLOTE
         np = self.cleaned_data.get("nombres_paciente", "").strip()
         app = self.cleaned_data.get("apellido_paterno_paciente", "").strip()
         amp = self.cleaned_data.get("apellido_materno_paciente", "").strip()
