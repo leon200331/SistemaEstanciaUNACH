@@ -1314,3 +1314,33 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+# =========================================================
+# ÉPICA 3: CONFIGURACIÓN DE SEMESTRE Y SALAS
+# =========================================================
+from .models import Semestre, DiaFestivo, Sala, SalaSemestre, AsignacionMaestra
+
+class SemestreForm(forms.ModelForm):
+    class Meta:
+        model = Semestre
+        fields = [
+            'nombre',
+            'sede',
+            'fecha_inicio',
+            'fecha_fin',
+            'medico_asignado',
+            'nutriologa_asignada',
+            'psicologa_asignada',
+            'fecha_encuesta_satisfaccion'
+        ]
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Enero - Junio 2026'}),
+            'sede': forms.Select(attrs={'class': 'form-select'}),
+            'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'medico_asignado': forms.Select(attrs={'class': 'form-select'}),
+            'nutriologa_asignada': forms.Select(attrs={'class': 'form-select'}),
+            'psicologa_asignada': forms.Select(attrs={'class': 'form-select'}),
+            'fecha_encuesta_satisfaccion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }

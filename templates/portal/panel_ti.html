@@ -5,6 +5,14 @@
 
 {% block extra_css %}
 <style>
+    :root {
+      --brand: #1e3a8a;
+      --brand2: #2563eb;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --card: #ffffff;
+      --bg: #f6f8fc;
+    }
     body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
     .navbar-ti { background-color: #1e3a8a; padding: 0.8rem 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .ti-brand-text { font-size: 1.2rem; font-weight: 700; color: white; letter-spacing: 0.5px; }
@@ -19,12 +27,10 @@
 
     .table-custom th { background-color: #f8f9fa; text-transform: uppercase; font-size: 0.8rem; color: #666; }
 
-    /* ESTILOS MODAL JIRA */
     .jira-label { font-size: 0.85rem; font-weight: 600; color: #44546f; margin-bottom: 4px; display: block; }
     .jira-input { background: #f4f5f7; border: 2px solid #dfe1e6; border-radius: 4px; padding: 8px 12px; font-size: 0.9rem; color: #172b4d; width: 100%; transition: 0.2s; }
     .jira-input:focus { background: white; border-color: #0c66e4; outline: none; }
 
-    /* TOAST (Notificación Flotante) */
     #toast-notification {
         visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px;
         position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -43,10 +49,10 @@
         <div class="d-flex align-items-center" style="width: 100%; max-width: 1200px; padding: 0 20px;">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height: 45px; width: auto; object-fit: contain;">
-                <div class="text-white"><div class="ti-brand-text">PANEL DE ADMINISTRACIÓN DE USUARIOS</div></div>
+                <div class="text-white"><div class="ti-brand-text">PANEL DE ADMINISTRACIÓN DE SISTEMA</div></div>
             </a>
             <div class="ms-auto text-white d-none d-md-block">
-                <small class="me-2">Usuario: {{ user.username }} ({{ user.tipo_persona }})</small>
+                <small class="me-2">Usuario: {{ user.username }} (ADMIN)</small>
                 <form action="{% url 'logout' %}" method="post" class="d-inline">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-outline-light border-0" onclick="localStorage.removeItem('activeTabID')"><i class="bi bi-power fs-5"></i></button>
@@ -62,18 +68,17 @@
             <div class="sidebar-card">
                 <div class="p-3 bg-light border-bottom text-center"><h6 class="m-0 fw-bold text-primary">GESTIÓN CENTRAL</h6></div>
                 <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
-
                     <button class="nav-link active" id="tab-staff-btn" data-bs-toggle="pill" data-bs-target="#tab-staff" onclick="rememberTab(this.id)"><i class="bi bi-briefcase-fill me-2"></i> Personal Interno</button>
-                    <button class="nav-link" id="tab-alumnos-btn" data-bs-toggle="pill" data-bs-target="#tab-alumnos" onclick="rememberTab(this.id)"><i class="bi bi-mortarboard-fill me-2"></i> Alumnos Inscritos</button>
 
-                    {% if user.tipo_persona == 'ADMIN' or user.tipo_persona == 'SUPERVISOR' %}
-                    <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)"><i class="bi bi-diagram-3-fill me-2"></i> Asignación de Cargos y Permisos</button>
-                    <button class="nav-link" id="tab-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-logs" onclick="rememberTab(this.id)"><i class="bi bi-clock-history me-2"></i> Historial</button>
-                    {% endif %}
+                    <button class="nav-link" id="tab-ciclos-btn" data-bs-toggle="pill" data-bs-target="#tab-ciclos" onclick="rememberTab(this.id)"><i class="bi bi-calendar-plus me-2"></i> Gestión de Ciclos</button>
 
-                    {% if user.tipo_persona == 'ADMIN' %}
+                    <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)"><i class="bi bi-diagram-3-fill me-2"></i> Asignación de Roles</button>
+
+                    <button class="nav-link" id="tab-historial-btn" data-bs-toggle="pill" data-bs-target="#tab-historial" onclick="rememberTab(this.id)"><i class="bi bi-folder-fill me-2"></i> Historial de Ciclos</button>
+
+                    <button class="nav-link" id="tab-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-logs" onclick="rememberTab(this.id)"><i class="bi bi-terminal me-2"></i> Auditoría Técnica</button>
+
                     <button class="nav-link" id="tab-sec-btn" data-bs-toggle="pill" data-bs-target="#tab-sec" onclick="rememberTab(this.id)"><i class="bi bi-lock-fill me-2"></i> Seguridad</button>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -85,17 +90,14 @@
                     <div class="content-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="fw-bold m-0">Directorio de Empleados</h5>
-
-                            {% if user.tipo_persona == 'ADMIN' %}
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearUser"><i class="bi bi-person-plus-fill me-1"></i> Nueva Persona</button>
-                            {% endif %}
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-custom">
                                     <tr>
                                         <th>Nombre Completo</th>
-                                        <th>Tipo y Ocupación</th>
+                                        <th>Roles Oficiales</th>
                                         <th>Detalles Laborales</th>
                                         <th class="text-end">Acciones</th>
                                     </tr>
@@ -108,16 +110,11 @@
                                             <div class="small text-muted">{{ u.email }}</div>
                                         </td>
                                         <td>
-                                            {% if u.tipo_persona == 'ADMIN' %} <span class="badge bg-danger">ADMIN SISTEMA</span>
-                                            {% elif u.tipo_persona == 'SUPERVISOR' %} <span class="badge bg-warning text-dark">SUPERVISOR</span>
-                                            {% else %} <span class="badge bg-primary">PERSONAL</span> {% endif %}
-
                                             <div class="small fw-bold mt-1" style="color: #6f42c1;">
                                                 {% for cargo in u.groups.all %}
-                                                    {% if "[MASTER]" in cargo.name %}<i class="bi bi-star-fill text-warning"></i> {% else %}<i class="bi bi-person-badge"></i> {% endif %}
-                                                    {{ cargo.name|cut:"[MASTER] " }}
+                                                    <i class="bi bi-person-badge text-primary"></i> {{ cargo.name }}<br>
                                                 {% empty %}
-                                                    <span class="text-muted fw-normal fst-italic">Sin ocupación</span>
+                                                    <span class="text-muted fw-normal fst-italic">Sin rol asignado</span>
                                                 {% endfor %}
                                             </div>
                                         </td>
@@ -133,35 +130,21 @@
                                             </div>
                                         </td>
                                         <td class="text-end">
-                                            {% if user.tipo_persona == 'ADMIN' %}
-
-                                                <button type="button" class="btn btn-sm btn-outline-primary border-0 me-1"
-                                                        title="Editar Información"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalEditarUser"
-                                                        data-id="{{ u.id }}"
-                                                        data-nombre="{{ u.nombre }}"
-                                                        data-paterno="{{ u.apellido_paterno }}"
-                                                        data-materno="{{ u.apellido_materno|default:'' }}"
-                                                        data-curp="{{ u.curp }}"
-                                                        data-email="{{ u.email }}"
-                                                        data-tipo="{{ u.tipo_persona }}"
-                                                        data-numero="{{ u.numero_empleado }}"
-                                                        data-estatus="{{ u.estatus_operativo|yesno:'true,false' }}"
-                                                        onclick="cargarDatosEdicion(this)">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </button>
-
-                                                {% if u.id != user.id %}
-                                                <form onsubmit="submitAjax(event)" class="d-inline">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="action_type" value="delete_user">
-                                                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                                                    <button class="btn btn-sm btn-outline-danger border-0" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
-                                                </form>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="small text-muted fst-italic">Sin permisos</span>
+                                            <button type="button" class="btn btn-sm btn-outline-primary border-0 me-1"
+                                                    title="Editar Información" data-bs-toggle="modal" data-bs-target="#modalEditarUser"
+                                                    data-id="{{ u.id }}" data-nombre="{{ u.nombre }}" data-paterno="{{ u.apellido_paterno }}"
+                                                    data-materno="{{ u.apellido_materno|default:'' }}" data-curp="{{ u.curp }}"
+                                                    data-email="{{ u.email }}" data-tipo="{{ u.tipo_persona }}" data-numero="{{ u.numero_empleado }}"
+                                                    data-estatus="{{ u.estatus_operativo|yesno:'true,false' }}" onclick="cargarDatosEdicion(this)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            {% if u.id != user.id %}
+                                            <form onsubmit="submitAjax(event)" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action_type" value="delete_user">
+                                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                <button class="btn btn-sm btn-outline-danger border-0" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
+                                            </form>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -172,281 +155,261 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="tab-alumnos">
-                    <div class="content-card"><h5 class="fw-bold">Padres y Alumnos</h5><p class="text-muted">Gestión de usuarios externos.</p></div>
+                <div class="tab-pane fade" id="tab-ciclos">
+                    <div class="content-card mb-4 border-success border-top border-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="fw-bold m-0"><i class="bi bi-calendar-plus text-success me-2"></i>Gestión de Ciclos Escolares</h5>
+                                <p class="text-muted small m-0">Controla la apertura y cierre oficial del sistema.</p>
+                            </div>
+                            <form onsubmit="submitAjax(event)" class="m-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="end_cycle">
+                                <button type="submit" class="btn btn-outline-danger fw-bold btn-sm">
+                                    <i class="bi bi-stop-circle-fill me-1"></i> Terminar Ciclo Actual
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="alert alert-success bg-light border-success p-4 rounded">
+                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-play-circle-fill me-1"></i> Abrir Nuevo Ciclo Escolar</h6>
+                            <form onsubmit="submitAjax(event)" class="row g-3 align-items-end">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="start_cycle">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-secondary small mb-1">Nombre del Ciclo</label>
+                                    <input type="text" name="nombre_ciclo" class="form-control" placeholder="Ej: Enero - Junio 2026" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-secondary small mb-1">Fecha de Inicio</label>
+                                    <input type="date" name="fecha_inicio" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-secondary small mb-1">Fecha de Término</label>
+                                    <input type="date" name="fecha_fin" class="form-control" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-success w-100 fw-bold">Iniciar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="tab-pane fade" id="tab-roles">
-
-                    <div class="content-card mb-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-briefcase-fill text-primary me-2"></i>1. Catálogo de Roles y Permisos</h5>
-                        <p class="small text-muted">Crea los puestos que existirán en la estancia y define qué pueden hacer en el sistema.</p>
-
-                        <form onsubmit="submitAjax(event)" class="p-3 bg-light rounded border mb-4">
-                            {% csrf_token %}
-                            <input type="hidden" name="action_type" value="create_role">
-
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="fw-bold small">Nombre del Nuevo Puesto</label>
-                                    <input type="text" name="nombre_rol" class="form-control" placeholder="Ej: Nutrióloga, Psicóloga" required style="text-transform: capitalize;">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="fw-bold small d-block mb-1">Jerarquía</label>
-                                    <div class="form-check form-switch p-2 bg-white rounded border">
-                                        <input class="form-check-input ms-0 me-2" type="checkbox" name="permiso_total">
-                                        <label class="form-check-label fw-bold text-danger">Es Jefa / Control Total</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button class="btn btn-primary w-100 fw-bold">Guardar Puesto</button>
-                                </div>
+                    <div class="content-card mb-4 border-primary border-top border-4">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; font-size: 1.5rem;">
+                              <i class="bi bi-person-badge"></i>
                             </div>
-
-                            <div class="row mt-3 pt-3 border-top">
-                                <div class="col-12 mb-2"><small class="text-primary fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> Permisos Operativos para este puesto:</small></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="p_ver"><label class="small fw-bold">1. Consultar (Ver Todo)</label></div></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="p_val"><label class="small fw-bold text-success">2. Aprobar / Validar</label></div></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="p_obs"><label class="small fw-bold text-purple" style="color:#6f42c1;">3. Añadir Observaciones</label></div></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="p_desc"><label class="small fw-bold text-info">4. Descargar Copias</label></div></div>
+                            <div>
+                              <h4 class="fw-bold text-primary mb-0">Asignación de Roles Oficiales</h4>
+                              <p class="text-muted small mb-0">Vincula al personal con los roles operativos del sistema.</p>
                             </div>
-                        </form>
-
-                        <h6 class="fw-bold text-muted mb-3">Roles Disponibles en el Catálogo:</h6>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for rol in roles %}
-                                <span class="badge bg-white text-dark border p-2 d-flex align-items-center">
-                                    {% if "[MASTER]" in rol.name %} <i class="bi bi-star-fill text-warning me-1"></i> {% endif %}
-                                    {{ rol.name|cut:"[MASTER] " }}
-
-                                    <button type="button" class="btn btn-sm p-0 text-primary ms-3 me-2" title="Editar Permisos"
-                                        data-bs-toggle="modal" data-bs-target="#modalEditarRol"
-                                        data-id="{{ rol.id }}"
-                                        data-nombre="{{ rol.name|cut:'[MASTER] ' }}"
-                                        data-perms="{% for p in rol.permissions.all %}{{ p.codename }},{% endfor %}"
-                                        onclick="cargarDatosRol(this)">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <form onsubmit="submitAjax(event)" class="m-0 d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action_type" value="delete_role">
-                                        <input type="hidden" name="rol_id" value="{{ rol.id }}">
-                                        <button class="btn btn-sm p-0 text-muted hover-danger" title="Eliminar Rol"><i class="bi bi-x-circle-fill"></i></button>
-                                    </form>
-                                </span>
-                            {% endfor %}
                         </div>
-                    </div>
 
-                    <div class="content-card border-primary border-top border-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-person-check-fill text-primary me-2"></i>2. Asignar Puesto al Personal</h5>
-                        <p class="small text-muted">Relaciona a un empleado con un puesto del catálogo que creaste arriba.</p>
-
-                        <form onsubmit="submitAjax(event)" class="row g-3 align-items-end">
+                        <form onsubmit="submitAjax(event)" class="row g-3 align-items-end bg-light p-3 rounded border border-light mb-4">
                             {% csrf_token %}
-                            <input type="hidden" name="action_type" value="assign_role">
-                            <div class="col-md-5">
-                                <label class="fw-bold small">Empleado</label>
-                                <select name="usuario_id" class="form-select" required>
-                                    <option value="" disabled selected>-- Elegir Persona --</option>
-                                    {% for u in lista_staff %}
-                                        {% if u.tipo_persona != 'ADMIN' %}
-                                        <option value="{{ u.id }}">{{ u.nombre }} {{ u.apellido_paterno }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
+                            <input type="hidden" name="action_type" value="assign_fixed_role">
+                            <div class="col-md-4">
+                              <label class="form-label fw-bold text-secondary small">1. Seleccionar Empleado</label>
+                              <select name="usuario_id" class="form-select" required>
+                                <option value="">-- Elegir Persona --</option>
+                                {% for u in lista_staff %}
+                                  <option value="{{ u.id }}">{{ u.nombre }} {{ u.apellido_paterno }} ({{ u.email }})</option>
+                                {% endfor %}
+                              </select>
                             </div>
-                            <div class="col-md-5">
-                                <label class="fw-bold small">Puesto Operativo (Rol)</label>
-                                <select name="rol_id" class="form-select" required>
-                                    <option value="" disabled selected>-- Elegir Puesto --</option>
-                                    {% for rol in roles %}
-                                        <option value="{{ rol.id }}">{{ rol.name|cut:"[MASTER] " }} {% if "[MASTER]" in rol.name %}(Jefa){% endif %}</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="col-md-3">
+                              <label class="form-label fw-bold text-secondary small">2. Asignar Rol</label>
+                              <select name="rol_fijo" class="form-select" required>
+                                <option value="">-- Elegir Rol --</option>
+                                <option value="Administrador del Sistema">Administrador del Sistema</option>
+                                <option value="Directora">Directora</option>
+                                <option value="Trabajadora Social">Trabajadora Social</option>
+                                <option value="Coordinadora de Sala">Coordinadora de Sala</option>
+                                <option value="Médico">Médico</option>
+                                <option value="Psicóloga">Psicóloga</option>
+                                <option value="Nutrióloga">Nutrióloga</option>
+                                <option value="Asistentes de Salas (Maestras)">Asistentes de Salas (Maestras)</option>
+                              </select>
+                            </div>
+                            <div class="col-md-3">
+                              <label class="form-label fw-bold text-secondary small">3. Ciclo Aplicable</label>
+                              <select name="semestre_id" class="form-select" required>
+                                <option value="">-- Seleccionar Ciclo --</option>
+                                {% for c in ciclos_historial %}
+                                  <option value="{{ c.id }}">{{ c.nombre }}</option>
+                                {% endfor %}
+                              </select>
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-primary w-100 fw-bold">Vincular</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="content-card border-primary border-top border-4 mt-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-diagram-2-fill text-primary me-2"></i>3. Relacionar Departamentos (Permisos Cruzados)</h5>
-                        <p class="small text-muted">Define qué puesto puede ver o editar la información de otro puesto (Ej: Psicóloga -> Nutrióloga).</p>
-
-                        <form onsubmit="submitAjax(event)" class="p-3 bg-light rounded border">
-                            {% csrf_token %}
-                            <input type="hidden" name="action_type" value="cross_relation">
-
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="fw-bold small">Quién entra (Rol Origen)</label>
-                                    <select name="rol_origen" class="form-select" required>
-                                        <option value="" disabled selected>-- Ej: Psicóloga --</option>
-                                        {% for rol in roles %}
-                                            {% if "[MASTER]" not in rol.name %}
-                                            <option value="{{ rol.id }}">{{ rol.name }}</option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="fw-bold small">A qué módulo (Rol Destino)</label>
-                                    <select name="rol_destino" class="form-select" required>
-                                        <option value="" disabled selected>-- Ej: Nutrióloga --</option>
-                                        {% for rol in roles %}
-                                            {% if "[MASTER]" not in rol.name %}
-                                            <option value="{{ rol.id }}">{{ rol.name }}</option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary w-100 fw-bold">Vincular Departamentos</button>
-                                </div>
-                            </div>
-
-                            <div class="row mt-3 pt-3 border-top">
-                                <div class="col-12 mb-2"><small class="text-primary fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> ¿Qué podrá hacer el Origen en el módulo de Destino?</small></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="c_ver"><label class="small fw-bold">1. Solo Consultar</label></div></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="c_val"><label class="small fw-bold text-success">2. Validar</label></div></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="c_obs"><label class="small fw-bold text-purple" style="color:#6f42c1;">3. Observar</label></div></div>
-                                <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="c_desc"><label class="small fw-bold text-info">4. Descargar</label></div></div>
+                              <button type="submit" class="btn btn-primary w-100 fw-bold">Vincular</button>
                             </div>
                         </form>
 
-                        <h6 class="fw-bold text-muted mt-4 mb-3">Relaciones Actuales en el Sistema:</h6>
+                        <hr class="my-4">
+                        <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-list-check me-1"></i> Personal con rol activo</h6>
                         <div class="table-responsive">
-                            <table class="table table-sm table-bordered bg-white small">
-                                <thead class="bg-light">
+                            <table class="table table-hover align-middle" style="font-size: 0.9rem;">
+                              <thead class="table-light">
+                                <tr>
+                                  <th>Empleado</th>
+                                  <th>Correo Institucional</th>
+                                  <th>Rol Asignado</th>
+                                  <th class="text-center">Acciones</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for u in lista_staff %}
+                                  {% if u.groups.all %}
+                                  <tr>
+                                    <td><strong>{{ u.nombre }} {{ u.apellido_paterno }}</strong></td>
+                                    <td>{{ u.email }}</td>
+                                    <td>
+                                      {% for grupo in u.groups.all %}
+                                        <span class="badge bg-primary px-3 py-2 rounded-pill">{{ grupo.name }}</span>
+                                      {% endfor %}
+                                    </td>
+                                    <td class="text-center">
+                                      <form onsubmit="submitAjax(event)" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="remove_fixed_role">
+                                        <input type="hidden" name="usuario_id" value="{{ u.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Quitar Rol</button>
+                                      </form>
+                                    </td>
+                                  </tr>
+                                  {% endif %}
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-historial">
+                    <div class="content-card">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-folder-fill text-warning me-2"></i>Historial de Expedientes (PDF)</h5>
+                        <p class="small text-muted mb-4">Aquí puedes consultar y descargar la documentación formal generada automáticamente en cada ciclo escolar.</p>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle small border">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Rol Origen (Entra a...)</th>
-                                        <th>Rol Destino (Módulo)</th>
-                                        <th>Permisos Concedidos</th>
-                                        <th class="text-center">Eliminar</th>
+                                        <th>Nombre del Ciclo</th>
+                                        <th>Inicio</th>
+                                        <th>Término</th>
+                                        <th>Estatus</th>
+                                        <th class="text-center">Expediente Oficial</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for rel in relaciones_cruzadas %}
+                                    {% for ciclo in ciclos_historial %}
                                     <tr>
-                                        <td class="fw-bold text-primary">{{ rel.rol_origen.name|cut:"[MASTER] " }}</td>
-                                        <td class="fw-bold text-secondary">{{ rel.rol_destino.name|cut:"[MASTER] " }}</td>
+                                        <td class="fw-bold">{{ ciclo.nombre }}</td>
+                                        <td>{{ ciclo.fecha_inicio|date:"d/m/Y"|default:"--" }}</td>
+                                        <td>{{ ciclo.fecha_fin|date:"d/m/Y"|default:"--" }}</td>
                                         <td>
-                                            {% if rel.puede_consultar %}<span class="badge bg-secondary">Consultar</span>{% endif %}
-                                            {% if rel.puede_validar %}<span class="badge bg-success">Validar</span>{% endif %}
-                                            {% if rel.puede_observar %}<span class="badge" style="background-color:#6f42c1;">Observar</span>{% endif %}
-                                            {% if rel.puede_descargar %}<span class="badge bg-info">Descargar</span>{% endif %}
+                                            {% if ciclo.estado == 'ACTIVO' %}
+                                                <span class="badge bg-success">ACTIVO</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">CERRADO</span>
+                                            {% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <form onsubmit="submitAjax(event)" class="m-0">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="action_type" value="delete_cross_relation">
-                                                <input type="hidden" name="rel_id" value="{{ rel.id }}">
-                                                <button class="btn btn-sm text-danger p-0" title="Eliminar Relación"><i class="bi bi-trash-fill"></i></button>
-                                            </form>
+                                            <a href="{% url 'descargar_reporte_ciclo_pdf' ciclo.id %}" class="btn btn-sm btn-outline-danger shadow-sm fw-bold rounded-pill px-3">
+                                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+                                            </a>
                                         </td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="4" class="text-center text-muted fst-italic">No hay permisos cruzados configurados.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted fst-italic py-4">No hay ciclos registrados en la base de datos.</td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="tab-pane fade" id="tab-logs">
                     <div class="content-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold m-0">Historial de Accesos</h5>
+                            <div>
+                                <h5 class="fw-bold m-0"><i class="bi bi-terminal text-dark me-2"></i>Auditoría Técnica del Sistema</h5>
+                                <p class="text-muted small m-0">Registro en tiempo real de los accesos y configuraciones.</p>
+                            </div>
                             <form onsubmit="submitAjax(event)">
                                 {% csrf_token %}
                                 <input type="hidden" name="action_type" value="clear_history">
-                                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash-fill me-1"></i> Limpiar Historial</button>
+                                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash-fill me-1"></i> Depurar Log</button>
                             </form>
                         </div>
-                        <table class="table table-sm table-striped small">
-                            <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr></thead>
-                            <tbody>{% for log in logs %} <tr><td>{{ log.fecha_acceso|date:"d/m/Y H:i" }}</td><td>{{ log.usuario.username }}</td><td>{{ log.accion }}</td></tr> {% endfor %}</tbody>
-                        </table>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm table-striped small">
+                                <thead style="position: sticky; top: 0; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                    <tr><th>Fecha</th><th>Usuario</th><th>Acción Registrada</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in logs %}
+                                        <tr><td>{{ log.fecha_acceso|date:"d/m/Y H:i" }}</td><td>{{ log.usuario.username }}</td><td>{{ log.accion }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div class="tab-pane fade" id="tab-sec">
                     <div class="content-card border-danger border-top border-4">
                         <h5 class="text-danger fw-bold mb-4"><i class="bi bi-shield-shaded me-2"></i>Protocolos de Seguridad del Servidor</h5>
-                        <p class="text-muted small mb-4">Administra el comportamiento del sistema. Estos interruptores tienen efecto inmediato en toda la plataforma.</p>
 
                         <form onsubmit="submitAjax(event)" class="bg-light p-4 rounded border">
                             {% csrf_token %}
                             <input type="hidden" name="action_type" value="toggle_security">
-
                             <div class="row g-4">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="p-3 bg-white border rounded shadow-sm h-100">
                                         <div class="form-check form-switch d-flex align-items-start p-0">
                                             <div class="flex-grow-1 pe-3">
-                                                <label class="form-check-label fw-bold text-dark mb-1">1. Modo Mantenimiento (Error 403)</label>
+                                                <label class="form-check-label fw-bold text-dark mb-1">1. Enmascaramiento de Datos</label>
                                                 <p class="small text-muted m-0" style="font-size: 0.8rem; text-align: justify;">
-                                                    <strong>¿Para qué sirve?</strong> Cierra el sistema por completo. Si un empleado o padre de familia intenta entrar, el sistema los rebotará a una pantalla de "Error 403 - En Mantenimiento". Útil si hay fallas técnicas.
-                                                </p>
-                                            </div>
-                                            <input class="form-check-input fs-4 m-0 mt-1" type="checkbox" name="toggle_manto" {% if manto_active %}checked{% endif %}>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="p-3 bg-white border rounded shadow-sm h-100">
-                                        <div class="form-check form-switch d-flex align-items-start p-0">
-                                            <div class="flex-grow-1 pe-3">
-                                                <label class="form-check-label fw-bold text-dark mb-1">2. Firewall Interno (Bloqueo TI)</label>
-                                                <p class="small text-muted m-0" style="font-size: 0.8rem; text-align: justify;">
-                                                    <strong>¿Para qué sirve?</strong> Expulsa a Directivos y Supervisores de este panel de configuración. Garantiza que absolutamente nadie, excepto el Administrador del Sistema, pueda hacer cambios aquí.
-                                                </p>
-                                            </div>
-                                            <input class="form-check-input fs-4 m-0 mt-1" type="checkbox" name="toggle_firewall" {% if firewall_active %}checked{% endif %}>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="p-3 bg-white border rounded shadow-sm h-100">
-                                        <div class="form-check form-switch d-flex align-items-start p-0">
-                                            <div class="flex-grow-1 pe-3">
-                                                <label class="form-check-label fw-bold text-dark mb-1">3. Enmascaramiento de Datos</label>
-                                                <p class="small text-muted m-0" style="font-size: 0.8rem; text-align: justify;">
-                                                    <strong>¿Para qué sirve?</strong> Protege la privacidad ocultando partes de textos sensibles en las tablas con asteriscos (Ej: le****@gmail.com). Evita robo de datos si alguien mira tu pantalla.
+                                                    Protege la privacidad ocultando partes de correos y textos sensibles en las tablas con asteriscos.
                                                 </p>
                                             </div>
                                             <input class="form-check-input fs-4 m-0 mt-1" type="checkbox" name="toggle_encrypt" {% if encrypt_active %}checked{% endif %}>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="col-md-6">
-                                    <div class="p-3 bg-white border rounded shadow-sm h-100">
-                                        <div class="form-check form-switch d-flex align-items-start p-0">
-                                            <div class="flex-grow-1 pe-3">
-                                                <label class="form-check-label fw-bold text-success mb-1">4. Recepción de Solicitudes</label>
-                                                <p class="small text-muted m-0" style="font-size: 0.8rem; text-align: justify;">
-                                                    <strong>¿Para qué sirve?</strong> Control manual del portal de padres. Déjalo encendido para recibir solicitudes; apágalo a tu gusto únicamente cuando la estancia esté llena y no haya cupo.
-                                                </p>
-                                            </div>
-                                            <input class="form-check-input fs-4 m-0 mt-1" type="checkbox" name="toggle_inscrip" {% if inscrip_active %}checked{% endif %} style="background-color: #198754; border-color: #198754;">
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-
                             <div class="text-end mt-4 pt-3 border-top">
-                                <button type="submit" class="btn btn-danger fw-bold px-5"><i class="bi bi-exclamation-triangle-fill me-2"></i>Aplicar Protocolos en Servidor</button>
+                                <button type="submit" class="btn btn-danger fw-bold px-5">Aplicar Protocolo de Seguridad</button>
                             </div>
                         </form>
+
+                        <div class="mt-5 p-4 border border-danger rounded bg-light">
+                          <h6 class="text-danger fw-bold"><i class="bi bi-exclamation-octagon-fill me-2"></i> Zona de Peligro: Transferencia de Administración</h6>
+                          <p class="small text-muted">Usa esta opción únicamente si vas a dejar el cargo y necesitas nombrar a un sucesor. Tu sesión actual no se cerrará bruscamente, pero perderás tus privilegios administrativos al instante.</p>
+
+                          <form id="formTransferenciaMando" onsubmit="event.preventDefault(); abrirModalTransferencia();" class="row g-2 align-items-end mt-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="action_type" value="abandon_admin">
+                            <div class="col-md-8">
+                              <label class="form-label small fw-bold text-dark mb-1">Elegir Sucesor Administrativo</label>
+                              <select name="sucesor_id" id="selectSucesor" class="form-select form-select-sm" required>
+                                <option value="">-- Seleccionar empleado --</option>
+                                {% for s in lista_staff %}
+                                    {% if s.id != user.id %}
+                                        <option value="{{ s.id }}">{{ s.nombre }} {{ s.apellido_paterno }} ({{ s.email }})</option>
+                                    {% endif %}
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold">Ceder Administración</button>
+                            </div>
+                          </form>
+                        </div>
                     </div>
                 </div>
 
@@ -455,40 +418,49 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalAdvertenciaPeligro" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-radius: 12px;">
+      <div class="modal-header bg-danger text-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Advertencia Irreversible</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <div class="mb-3">
+            <i class="bi bi-shield-x text-danger" style="font-size: 3.5rem;"></i>
+        </div>
+        <h4 class="fw-bold text-dark mb-3">¿Estás completamente seguro?</h4>
+        <p class="text-muted mb-0" style="font-size: 0.95rem;">
+            Estás a punto de ceder la <strong>Administración del Sistema</strong> a otra persona. Dejarás de tener permisos para realizar cambios críticos en el sistema en este exacto momento, aunque tu sesión siga abierta.
+        </p>
+      </div>
+      <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline-secondary fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger fw-bold px-4" onclick="ejecutarTransferenciaMando()">Sí, Ceder Mando</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="modalCrearUser" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
             <form onsubmit="submitAjax(event)">
                 {% csrf_token %}
                 <input type="hidden" name="action_type" value="create_user">
-
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus me-2"></i>Registrar Nuevo Personal</h5>
+                    <h5 class="modal-title fw-bold">Registrar Nuevo Personal</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body p-4 bg-light">
                     <div class="row g-4">
-                        <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">1. Identidad de la Persona</h6></div>
-                        <div class="col-md-4"><label class="jira-label">Nombre(s) <span class="text-danger">*</span></label><input type="text" name="nombre" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
-                        <div class="col-md-4"><label class="jira-label">Apellido Paterno <span class="text-danger">*</span></label><input type="text" name="apellido_paterno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
-                        <div class="col-md-4"><label class="jira-label">Apellido Materno <span class="text-danger">*</span></label><input type="text" name="apellido_materno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
-                        <div class="col-md-6"><label class="jira-label">CURP <span class="text-danger">*</span></label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" pattern="[A-Za-z0-9]{18}" style="text-transform: uppercase;"></div>
-
-                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">2. Estructura Interna UNACH</h6></div>
-                        <div class="col-md-6">
-                            <label class="jira-label">Tipo de Persona <span class="text-danger">*</span></label>
-                            <select name="tipo_persona" class="jira-input" required>
-                                <option value="PERSONAL" selected>Personal de la estancia</option>
-                                <option value="SUPERVISOR">Supervisor</option>
-                                <option value="ADMIN">Administrador de Sistema</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6"><label class="jira-label">Número de Empleado <span class="text-danger">*</span></label><input type="text" name="numero_empleado" class="jira-input" required pattern="\d+"></div>
-
-                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">3. Credenciales de Acceso</h6></div>
-                        <div class="col-md-6"><label class="jira-label">Correo Electrónico <span class="text-danger">*</span></label><input type="email" name="email" class="jira-input" required></div>
-                        <div class="col-md-6"><label class="jira-label">Contraseña Temporal <span class="text-danger">*</span></label><input type="password" name="password" class="jira-input" required></div>
+                        <div class="col-md-4"><label class="jira-label">Nombre(s) *</label><input type="text" name="nombre" class="jira-input" required style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Paterno *</label><input type="text" name="apellido_paterno" class="jira-input" required style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Materno</label><input type="text" name="apellido_materno" class="jira-input" style="text-transform: capitalize;"></div>
+                        <div class="col-md-6"><label class="jira-label">CURP *</label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" style="text-transform: uppercase;"></div>
+                        <div class="col-md-6"><label class="jira-label">Número de Empleado</label><input type="text" name="numero_empleado" class="jira-input" pattern="\d+"></div>
+                        <div class="col-md-6"><label class="jira-label">Correo Institucional *</label><input type="email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Contraseña *</label><input type="password" name="password" class="jira-input" required></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -509,39 +481,38 @@
                 <input type="hidden" name="user_id" id="edit_user_id">
 
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Editar Información del Empleado</h5>
+                    <h5 class="modal-title fw-bold">Editar Información del Empleado</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body p-4 bg-light">
                     <div class="row g-4">
-                        <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">1. Identidad de la Persona</h6></div>
-                        <div class="col-md-4"><label class="jira-label">Nombre(s) <span class="text-danger">*</span></label><input type="text" id="edit_nombre" name="nombre" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
-                        <div class="col-md-4"><label class="jira-label">Apellido Paterno <span class="text-danger">*</span></label><input type="text" id="edit_paterno" name="apellido_paterno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
-                        <div class="col-md-4"><label class="jira-label">Apellido Materno <span class="text-danger">*</span></label><input type="text" id="edit_materno" name="apellido_materno" class="jira-input" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" style="text-transform: capitalize;"></div>
-                        <div class="col-md-6"><label class="jira-label">CURP <span class="text-danger">*</span></label><input type="text" id="edit_curp" name="curp" class="jira-input" required maxlength="18" minlength="18" pattern="[A-Za-z0-9]{18}" style="text-transform: uppercase;"></div>
+                        <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">1. Identidad</h6></div>
+                        <div class="col-md-4"><label class="jira-label">Nombre(s) *</label><input type="text" id="edit_nombre" name="nombre" class="jira-input" required style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Paterno *</label><input type="text" id="edit_paterno" name="apellido_paterno" class="jira-input" required style="text-transform: capitalize;"></div>
+                        <div class="col-md-4"><label class="jira-label">Apellido Materno</label><input type="text" id="edit_materno" name="apellido_materno" class="jira-input" style="text-transform: capitalize;"></div>
+                        <div class="col-md-6"><label class="jira-label">CURP *</label><input type="text" id="edit_curp" name="curp" class="jira-input" required maxlength="18" minlength="18" style="text-transform: uppercase;"></div>
 
-                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">2. Estructura Interna UNACH</h6></div>
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">2. Estructura</h6></div>
                         <div class="col-md-4">
-                            <label class="jira-label">Tipo de Persona <span class="text-danger">*</span></label>
+                            <label class="jira-label">Tipo *</label>
                             <select name="tipo_persona" id="edit_tipo" class="jira-input" required>
                                 <option value="PERSONAL">Personal de la estancia</option>
                                 <option value="SUPERVISOR">Supervisor</option>
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
-                        <div class="col-md-4"><label class="jira-label">Número de Empleado <span class="text-danger">*</span></label><input type="text" id="edit_num" name="numero_empleado" class="jira-input" required pattern="\d+"></div>
+                        <div class="col-md-4"><label class="jira-label">Nº Empleado *</label><input type="text" id="edit_num" name="numero_empleado" class="jira-input" required></div>
                         <div class="col-md-4">
-                            <label class="jira-label">Estatus Operativo <span class="text-danger">*</span></label>
+                            <label class="jira-label">Estatus *</label>
                             <select name="estatus_operativo" id="edit_estatus" class="jira-input" required>
-                                <option value="true">Activo (Trabajando)</option>
-                                <option value="false">Inactivo (Baja Temporal)</option>
+                                <option value="true">Activo</option>
+                                <option value="false">Inactivo</option>
                             </select>
                         </div>
-
-                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small mb-0 border-bottom pb-2">3. Credenciales de Acceso</h6></div>
-                        <div class="col-md-6"><label class="jira-label">Correo Electrónico <span class="text-danger">*</span></label><input type="email" id="edit_email" name="email" class="jira-input" required></div>
-                        <div class="col-md-6"><label class="jira-label">Cambiar Contraseña (Opcional)</label><input type="password" name="password" class="jira-input" placeholder="Déjalo vacío para no cambiarla"></div>
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">3. Credenciales</h6></div>
+                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" id="edit_email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Cambiar Contraseña (Opcional)</label><input type="password" name="password" class="jira-input"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -553,38 +524,14 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalEditarRol" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
-            <form onsubmit="submitAjax(event)">
-                {% csrf_token %}
-                <input type="hidden" name="action_type" value="edit_role">
-                <input type="hidden" name="rol_id" id="edit_rol_id">
-
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-lock me-2"></i>Editar Permisos de Puesto</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 bg-light">
-                    <h6 class="fw-bold mb-3">Puesto: <span id="nombre_rol_display" class="text-primary"></span></h6>
-                    <p class="small text-muted mb-4">Activa o desactiva lo que las personas con este puesto pueden hacer en el sistema.</p>
-
-                    <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="p_ver" id="ep_ver"><label class="fw-bold">1. Consultar (Ver Todo)</label></div>
-                    <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="p_val" id="ep_val"><label class="fw-bold text-success">2. Aprobar / Validar</label></div>
-                    <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="p_obs" id="ep_obs"><label class="fw-bold text-purple" style="color:#6f42c1;">3. Añadir Observaciones</label></div>
-                    <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="p_desc" id="ep_desc"><label class="fw-bold text-info">4. Descargar Copias</label></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary fw-bold px-4">Guardar Permisos</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function() { var savedTabID = localStorage.getItem('activeTabID'); if (savedTabID) { var btn = document.getElementById(savedTabID); if (btn) new bootstrap.Tab(btn).show(); } });
+    document.addEventListener("DOMContentLoaded", function() {
+        var savedTabID = localStorage.getItem('activeTabID');
+        if (savedTabID) {
+            var btn = document.getElementById(savedTabID);
+            if (btn) new bootstrap.Tab(btn).show();
+        }
+    });
     function rememberTab(id) { localStorage.setItem('activeTabID', id); }
 
     function cargarDatosEdicion(boton) {
@@ -599,15 +546,24 @@
         document.getElementById('edit_estatus').value = boton.getAttribute('data-estatus');
     }
 
-    function cargarDatosRol(btn) {
-        document.getElementById('edit_rol_id').value = btn.getAttribute('data-id');
-        document.getElementById('nombre_rol_display').innerText = btn.getAttribute('data-nombre');
+    var modalAdvertencia;
+    function abrirModalTransferencia() {
+        var select = document.getElementById('selectSucesor');
+        if (select.value === "") { select.reportValidity(); return; }
+        modalAdvertencia = new bootstrap.Modal(document.getElementById('modalAdvertenciaPeligro'));
+        modalAdvertencia.show();
+    }
 
-        let perms = btn.getAttribute('data-perms');
-        document.getElementById('ep_ver').checked = perms.includes('perm_consultar');
-        document.getElementById('ep_val').checked = perms.includes('perm_validar');
-        document.getElementById('ep_obs').checked = perms.includes('perm_observar');
-        document.getElementById('ep_desc').checked = perms.includes('perm_descargar');
+    function ejecutarTransferenciaMando() {
+        modalAdvertencia.hide();
+        var form = document.getElementById('formTransferenciaMando');
+        var formData = new FormData(form);
+        fetch(window.location.href, { method: 'POST', body: formData, headers: {'X-Requested-With': 'XMLHttpRequest'} })
+        .then(r => r.json())
+        .then(d => {
+            if(d.status === 'success') { showToast(d.msg); setTimeout(() => window.location.reload(), 2000); }
+            else { alert("Error: \n" + d.msg); }
+        }).catch(err => alert("Ocurrió un error en el servidor."));
     }
 
     function submitAjax(event) {
@@ -615,16 +571,16 @@
         fetch(window.location.href, { method: 'POST', body: new FormData(event.target), headers: {'X-Requested-With': 'XMLHttpRequest'} })
         .then(r => r.json())
         .then(d => {
-            if(d.status === 'success') {
-                showToast(d.msg);
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                alert("Error de validación: \n" + d.msg);
-            }
-        })
-        .catch(err => alert("Ocurrió un error en el servidor."));
+            if(d.status === 'success') { showToast(d.msg); setTimeout(() => window.location.reload(), 1000); }
+            else { alert("Error de validación: \n" + d.msg); }
+        }).catch(err => alert("Ocurrió un error en el servidor."));
     }
 
-    function showToast(msg) { var x = document.getElementById("toast-notification"); x.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + msg; x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000); }
+    function showToast(msg) {
+        var x = document.getElementById("toast-notification");
+        x.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + msg;
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    }
 </script>
 {% endblock %}

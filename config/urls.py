@@ -55,6 +55,9 @@ urlpatterns = [
     # --- PANEL GOBIERNO TI ---
     path('gobierno-ti/', user_views.panel_gobierno_ti, name='panel_gobierno_ti'),
 
+    # NUEVA RUTA: DESCARGA DE EXPEDIENTE DE CICLO EN PDF
+    path('gobierno-ti/ciclo/<int:ciclo_id>/pdf/', user_views.descargar_reporte_ciclo_pdf, name='descargar_reporte_ciclo_pdf'),
+
 ]
 
 # --- NUEVO: PERMISO PARA MOSTRAR LOS ARCHIVOS SUBIDOS EN MODO DESARROLLO ---

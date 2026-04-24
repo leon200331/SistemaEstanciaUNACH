@@ -562,7 +562,16 @@ class SolicitudInscripcion(models.Model):
     sexo_menor = models.CharField(max_length=2, choices=SexoChoices.choices, null=True, blank=True, verbose_name="Sexo")
     tipo_sangre_menor = models.CharField(max_length=20, null=True, blank=True, verbose_name="Tipo de Sangre")
 
+    # --- DATOS DE PAREJA / SEGUNDO TUTOR (PUNTO 5) ---
     parentesco_segundo_padre = models.CharField(max_length=50, null=True, blank=True)
+
+    vinculo_segundo_padre = models.CharField(
+        max_length=20,
+        choices=[('BIOLOGICO', 'Padre/Madre de sangre'), ('POLITICO', 'Madrastra/Padrastro')],
+        null=True, blank=True,
+        verbose_name="Vínculo de la pareja con el menor"
+    )
+
     nombres_segundo_padre = models.CharField(max_length=80, null=True, blank=True, verbose_name="Nombre(s)")
     apellido_paterno_segundo_padre = models.CharField(max_length=60, null=True, blank=True,
                                                       verbose_name="Apellido Paterno")
@@ -605,8 +614,9 @@ class SolicitudInscripcion(models.Model):
     fecha_aceptacion = models.DateTimeField(null=True, blank=True)
 
     # =========================================================
-    # EXPEDIENTE DIGITAL (DOCUMENTOS OBLIGATORIOS SPRINT 2)
+    # EXPEDIENTE DIGITAL (DOCUMENTOS OBLIGATORIOS)
     # =========================================================
+
     # --- 1. DEL MENOR ---
     doc_menor_certificado_medico = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
                                                     verbose_name="Certificado Médico")
@@ -621,13 +631,18 @@ class SolicitudInscripcion(models.Model):
     doc_menor_laboratorio = models.FileField(upload_to="expedientes/menor/", null=True, blank=True,
                                              verbose_name="Estudios de Laboratorio")
 
-    # --- 2. DEL BENEFICIARIO (TUTOR) ---
+    # --- 2. DEL BENEFICIARIO (TUTOR) Y PAREJA ---
     doc_tutor_acta_nacimiento = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
                                                  verbose_name="Acta de Nacimiento Tutor")
     doc_tutor_ine = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
                                      verbose_name="Copia de INE Tutor")
     doc_tutor_fotos = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
                                        verbose_name="3 Fotos Infantiles Tutor")
+
+    # NUEVO CAMPO: FOTO DE LA PAREJA (PUNTO 9)
+    doc_segundo_padre_fotos = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
+                                               verbose_name="Foto de la Pareja / Segundo Tutor")
+
     doc_tutor_domicilio = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
                                            verbose_name="Comprobante de Domicilio")
     doc_tutor_pago = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
@@ -637,13 +652,19 @@ class SolicitudInscripcion(models.Model):
     doc_tutor_horario = models.FileField(upload_to="expedientes/tutor/", null=True, blank=True,
                                          verbose_name="Horario de Clases")
 
-    # --- 3. DEL AUTORIZADO ---
+    # --- 3. DE LOS AUTORIZADOS (PUNTO 9) ---
     doc_autorizado_carta = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
                                             verbose_name="Carta de Autorización")
     doc_autorizado_ine = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
                                           verbose_name="Copia de INE Autorizado")
-    doc_autorizado_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
-                                            verbose_name="2 Fotos Infantiles Autorizado")
+
+    # NUEVOS CAMPOS: FOTOS INDIVIDUALES PARA LOS 3 CONTACTOS DE EMERGENCIA (PUNTO 9)
+    doc_contacto_1_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
+                                            verbose_name="Foto Familiar Autorizado 1")
+    doc_contacto_2_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
+                                            verbose_name="Foto Familiar Autorizado 2")
+    doc_contacto_3_fotos = models.FileField(upload_to="expedientes/autorizado/", null=True, blank=True,
+                                            verbose_name="Foto Familiar Autorizado 3")
 
     # --- REGLAMENTO ---
     reglamento_firmado = models.FileField(upload_to="reglamentos_firmados/", null=True, blank=True,
@@ -772,7 +793,6 @@ class Semestre(models.Model):
 
     estado = models.CharField(max_length=20, choices=EstadoSemestre.choices, default=EstadoSemestre.CONFIGURACION)
 
-    # Especialistas asignados al semestre entero
     medico_asignado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name="semestres_medico")
     nutriologa_asignada = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
@@ -780,7 +800,6 @@ class Semestre(models.Model):
     psicologa_asignada = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
                                            related_name="semestres_psicologia")
 
-    # Fecha programada para disparar los correos de la Encuesta B
     fecha_encuesta_satisfaccion = models.DateField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -799,7 +818,6 @@ class DiaFestivo(models.Model):
 
 
 class Sala(models.Model):
-    # Catálogo maestro de salas físicas (Ej. Lactantes A, Maternal B1)
     nombre = models.CharField(max_length=50, unique=True)
     capacidad_maxima = models.PositiveIntegerField(default=10)
 
@@ -808,14 +826,9 @@ class Sala(models.Model):
 
 
 class SalaSemestre(models.Model):
-    """
-    Configuración específica de una sala durante un semestre en particular.
-    Aquí se guardan los horarios de la sala.
-    """
     semestre = models.ForeignKey(Semestre, on_delete=models.CASCADE, related_name="salas_activas")
     sala = models.ForeignKey(Sala, on_delete=models.CASCADE)
 
-    # Horarios generales de la sala
     inicio_recepcion = models.TimeField(null=True, blank=True)
     termino_recepcion = models.TimeField(null=True, blank=True)
     horario_desayuno = models.TimeField(null=True, blank=True)
@@ -831,10 +844,6 @@ class SalaSemestre(models.Model):
 
 
 class AsignacionMaestra(models.Model):
-    """
-    Relaciona a las maestras con las salas. Permite tener Titulares y Suplentes.
-    """
-
     class RolMaestra(models.TextChoices):
         TITULAR = "TITULAR", "Maestra Titular"
         TITULAR_2 = "TITULAR_2", "Segunda Titular"
@@ -844,7 +853,6 @@ class AsignacionMaestra(models.Model):
     maestra = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mis_salas")
     rol = models.CharField(max_length=20, choices=RolMaestra.choices, default=RolMaestra.TITULAR)
 
-    # Horarios exclusivos de descanso de esta maestra
     horario_desayuno_maestra = models.TimeField(null=True, blank=True)
     horario_tiempo_fuera = models.TimeField(null=True, blank=True)
 
@@ -857,17 +865,12 @@ class AsignacionMaestra(models.Model):
 # =========================================================
 
 class EncuestaSatisfaccion(models.Model):
-    """
-    Guarda las respuestas exactas del formato FO-301-02-15 b.
-    Se llena mediante un link web enviado al tutor.
-    """
     semestre = models.ForeignKey(Semestre, on_delete=models.CASCADE, related_name="encuestas")
     tutor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mis_encuestas")
     inscripcion = models.ForeignKey(SolicitudInscripcion, on_delete=models.CASCADE, null=True, blank=True)
 
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
-    # Preguntas de SI / NO (Booleanas)
     q1_info_completa = models.BooleanField(verbose_name="¿Recibió información completa de la permanencia diaria?",
                                            default=True)
     q2_seguro = models.BooleanField(
@@ -888,11 +891,9 @@ class EncuestaSatisfaccion(models.Model):
 
     comentarios = models.TextField(blank=True, null=True, verbose_name="Comentarios y sugerencias:")
 
-    # Campo automático para poder ordenar del peor al mejor
     puntaje_total = models.PositiveIntegerField(default=0, help_text="Calculado automáticamente (0 a 7)")
 
     def save(self, *args, **kwargs):
-        # El sistema analiza automáticamente la encuesta antes de guardarla
         puntaje = 0
         if self.q1_info_completa: puntaje += 1
         if self.q2_seguro: puntaje += 1
@@ -906,7 +907,6 @@ class EncuestaSatisfaccion(models.Model):
         super().save(*args, **kwargs)
 
     def nivel_satisfaccion(self):
-        """Etiqueta visual para el panel de la administradora"""
         if self.puntaje_total == 7:
             return "Excelente"
         elif self.puntaje_total >= 5:
@@ -918,3 +918,35 @@ class EncuestaSatisfaccion(models.Model):
 
     def __str__(self):
         return f"Encuesta de {self.tutor} - {self.semestre.nombre} (Puntaje: {self.puntaje_total})"
+
+
+# --- SISTEMA DE COMUNICACIÓN Y SEGURIDAD PARA DIRECCIÓN ---
+
+class MensajeDirectora(models.Model):
+    remitente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    asunto = models.CharField(max_length=200)
+    contenido = models.TextField()
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    leido = models.BooleanField(default=False)
+
+    # Esta es la lógica para separar apartados:
+    es_alumno_inscrito = models.BooleanField(default=False, help_text="Si es Falso, es de un aspirante en registro")
+
+    def __str__(self):
+        return f"{self.asunto} - {self.remitente.email}"
+
+
+class Incidencia(models.Model):
+    NIVEL_CHOICES = [
+        ('ALTO', 'Alto Riesgo (Urgente)'),
+        ('BAJO', 'Bajo Riesgo (Seguimiento)'),
+    ]
+    alumno = models.ForeignKey(SolicitudInscripcion, on_delete=models.CASCADE, related_name="incidencias")
+    descripcion = models.TextField()
+    nivel = models.CharField(max_length=10, choices=NIVEL_CHOICES, default='BAJO')
+    fecha_reporte = models.DateTimeField(auto_now_add=True)
+    resuelta = models.BooleanField(default=False)
+    registrada_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"Incidencia {self.nivel}: {self.alumno.solicitud_ingreso.nombres_menor}"

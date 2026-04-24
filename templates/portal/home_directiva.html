@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Panel Directivo - Estancia Infantil UNACH{% endblock %}
+{% block title %}Centro de Mando - Estancia Infantil UNACH{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ... Tus estilos se mantienen iguales ... */
+    /* ... Estilos originales ... */
     body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
     .navbar-unach { background-color: #1e3a8a; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .navbar-brand { font-weight: bold; color: white !important; }
@@ -19,15 +19,15 @@
     .kpi-box h3 { margin: 0; font-size: 2rem; font-weight: 900; }
     .kpi-box p { margin: 0; font-size: 0.85rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
     .kpi-box i { font-size: 2.5rem; opacity: 0.4; }
-    .nav-tabs { border-bottom: 2px solid #e2e8f0; }
-    .nav-tabs .nav-link { color: #64748b; font-weight: 600; border: none; border-bottom: 3px solid transparent; padding: 10px 20px; border-radius: 0; }
-    .nav-tabs .nav-link:hover { color: #1e3a8a; }
-    .nav-tabs .nav-link.active { color: #1e3a8a; background: transparent; border-bottom: 3px solid #1e3a8a; }
-    .btn-action { border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; font-weight: bold; }
-    .notif-feed { padding-left: 20px; border-left: 2px solid #e2e8f0; list-style: none; margin-left: 10px; padding-bottom: 0; }
-    .notif-item { position: relative; padding-bottom: 15px; }
-    .notif-item::before { content: ''; position: absolute; left: -26px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; border: 2px solid white; box-shadow: 0 0 0 2px #3b82f6; }
-    .notif-time { font-size: 0.75rem; color: #64748b; font-weight: bold; }
+
+    /* ... Estilos nuevos para el Centro de Mando ... */
+    .header-section { background: #f8fafc; padding: 15px; font-weight: bold; border-bottom: 1px solid #eee; }
+    .msg-item { border-left: 4px solid #3b82f6; background: #f0f7ff; margin-bottom: 8px; padding: 10px; border-radius: 0 8px 8px 0; }
+    .msg-alumno { border-left-color: #10b981; background: #f0fff4; }
+    .incidencia-alta { background: #fff5f5; border: 1px solid #feb2b2; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+    .incidencia-baja { background: #fffaf0; border: 1px solid #fbd38d; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+    .badge-alto { background: #e53e3e; color: white; }
+    .badge-bajo { background: #dd6b20; color: white; }
 </style>
 {% endblock %}
 
@@ -65,46 +65,47 @@
     <div class="welcome-banner">
         <div>
             <p class="text-uppercase mb-1 fw-bold text-white-50" style="letter-spacing: 2px; font-size: 0.85rem;">
-                Panel Ejecutivo · {{ request.user.puesto|default:"Dirección General" }}
+                Centro de Mando Directivo · {{ request.user.puesto|default:"Dirección General" }}
             </p>
             <h2 class="fw-bold mb-0">¡Bienvenida(o), {{ request.user.nombre|default:"Licenciada" }}!</h2>
-            <p class="mt-2 mb-0 fw-light">Expedientes listos para Veredicto Final de Ingreso.</p>
+            <p class="mt-2 mb-0 fw-light">Supervisión general de expedientes, incidencias y comunicación de la Estancia Infantil.</p>
         </div>
         <div class="d-none d-md-block pe-4">
-            <i class="bi bi-buildings-fill display-1 opacity-25"></i>
+            <i class="bi bi-shield-lock-fill display-1 opacity-25"></i>
         </div>
     </div>
 
     <div class="row g-3 mb-4">
         <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #198754, #146c43);"><div><p>Alumnos Activos</p><h3>{{ kpi_alumnos|default:"0" }}</h3></div><i class="bi bi-people-fill"></i></div></div>
-        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #fd7e14, #d35400);"><div><p>Por Autorizar</p><h3>{{ dictamenes_pendientes|length }}</h3></div><i class="bi bi-file-earmark-check-fill"></i></div></div>
-        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #dc3545, #b02a37);"><div><p>Incidencias Hoy</p><h3>0</h3></div><i class="bi bi-shield-exclamation"></i></div></div>
+        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #fd7e14, #d35400);"><div><p>Pendientes Veredicto</p><h3>{{ kpi_pendientes|default:"0" }}</h3></div><i class="bi bi-file-earmark-check-fill"></i></div></div>
+        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #dc3545, #b02a37);"><div><p>Riesgos Críticos</p><h3>{{ kpi_riesgo|default:"0" }}</h3></div><i class="bi bi-shield-exclamation"></i></div></div>
         <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0);"><div><p>Salas Config.</p><h3>{{ kpi_salas|default:"6" }}</h3></div><i class="bi bi-door-open-fill"></i></div></div>
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-12">
+
+        <div class="col-lg-7">
+
             <div class="dash-card">
                 <div class="dash-card-header bg-white border-bottom-0 pb-0">
-                    <span><i class="bi bi-award-fill text-warning me-2"></i> Bandeja de Veredicto Final (Directora)</span>
+                    <span><i class="bi bi-award-fill text-warning me-2"></i> Bandeja de Veredicto Final (Firma)</span>
                 </div>
                 <div class="dash-card-body pt-2">
-                    <div class="alert alert-primary border-0 bg-light shadow-sm d-flex align-items-center mb-4">
+                    <div class="alert alert-primary border-0 bg-light shadow-sm d-flex align-items-center mb-3">
                         <i class="bi bi-info-circle-fill fs-3 text-primary me-3"></i>
                         <div>
                             <h6 class="fw-bold mb-1">Instrucciones de Firma Digital</h6>
-                            <p class="mb-0 small text-dark">Al hacer clic en <strong>Aceptar</strong>, el sistema estampará automáticamente su nombre como firma digital en el formato <strong>FO-301-02-18</strong> y enviará el reporte final al correo institucional del beneficiario.</p>
+                            <p class="mb-0 small text-dark">Al hacer clic en <strong>Aceptar</strong>, el sistema estampará su nombre en el formato FO-301 y notificará al beneficiario.</p>
                         </div>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle border">
+                        <table class="table table-hover align-middle border mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Aspirante y Folio</th>
-                                    <th>Tutor / Programa</th>
                                     <th>Estado Filtros</th>
-                                    <th class="text-center">Acciones</th>
+                                    <th class="text-center">Veredicto</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -112,38 +113,34 @@
                                 <tr>
                                     <td>
                                         <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
-                                        <span class="text-uppercase">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
+                                        <span class="text-uppercase d-block fw-bold">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
+                                        <small class="text-muted">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
                                     </td>
                                     <td>
-                                        <small class="text-muted d-block">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
-                                        <span class="badge bg-secondary">{{ ins.solicitud_ingreso.programa_educativo }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-success"><i class="bi bi-check-all"></i> Méd, Nut, Psic OK</span>
+                                        <span class="badge bg-success mb-1"><i class="bi bi-check-all"></i> Áreas OK</span>
                                     </td>
                                     <td class="text-center">
-                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-inline">
+                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-flex justify-content-center gap-1">
                                             {% csrf_token %}
-                                            <input type="hidden" name="accion" value="ACEPTAR">
-                                            <button type="submit" class="btn btn-success btn-sm fw-bold shadow-sm" onclick="return confirm('¿Confirmas que deseas ACEPTAR a este alumno? Se generará y enviará el Reporte Final FO-301.');">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Aceptar y Firmar
+                                            <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success btn-sm shadow-sm" title="Aceptar y Firmar" onclick="return confirm('¿Aceptar a este alumno y generar Reporte Final FO-301?');">
+                                                <i class="bi bi-check-circle-fill"></i>
                                             </button>
-                                        </form>
 
-                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-inline">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="accion" value="RECHAZAR">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás segura de RECHAZAR esta inscripción?');">
-                                                <i class="bi bi-x-circle me-1"></i> Rechazar
+                                            <button type="submit" name="accion" value="PENDIENTE" class="btn btn-warning btn-sm text-dark shadow-sm" title="Dejar en Pausa/Pendiente" onclick="return confirm('¿Dejar este expediente en PENDIENTE para revisión posterior?');">
+                                                <i class="bi bi-hourglass-split"></i>
+                                            </button>
+
+                                            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger btn-sm shadow-sm" title="Rechazar Inscripción" onclick="return confirm('¿Estás segura de RECHAZAR definitivamente esta inscripción?');">
+                                                <i class="bi bi-x-circle"></i>
                                             </button>
                                         </form>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-5 text-muted">
-                                        <i class="bi bi-check2-circle display-4 text-success mb-3 d-block opacity-50"></i>
-                                        <h6 class="fw-bold">No hay expedientes pendientes de firma directiva</h6>
+                                    <td colspan="3" class="text-center py-4 text-muted">
+                                        <i class="bi bi-check2-circle display-4 text-success mb-2 d-block opacity-50"></i>
+                                        <h6 class="fw-bold m-0">Bandeja limpia. No hay expedientes pendientes de firma.</h6>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -152,9 +149,137 @@
                     </div>
                 </div>
             </div>
+
+            <div class="dash-card">
+                <div class="header-section text-primary bg-white pb-2 pt-3 px-4">
+                    <i class="bi bi-search me-2"></i> Supervisión Global: Expedientes en Áreas
+                </div>
+                <div class="dash-card-body pt-0">
+                    <p class="small text-muted mb-3">Aquí puedes monitorear en qué área están atorados los expedientes antes de que lleguen a tu bandeja.</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Folio y Aspirante</th>
+                                    <th>Médico</th>
+                                    <th>Psicología</th>
+                                    <th>Nutrición</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                {% for exp in expedientes_en_filtros %}
+                                <tr>
+                                    <td><strong>#{{ exp.solicitud_ingreso.folio }}</strong> - {{ exp.solicitud_ingreso.nombres_menor }}</td>
+                                    <td>
+                                        {% if exp.solicitud_ingreso.estado_medico == 'APROBADO' %}<span class="badge bg-success">OK</span>
+                                        {% elif exp.solicitud_ingreso.estado_medico == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
+                                        {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if exp.solicitud_ingreso.estado_psicologia == 'APROBADO' %}<span class="badge bg-success">OK</span>
+                                        {% elif exp.solicitud_ingreso.estado_psicologia == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
+                                        {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if exp.solicitud_ingreso.estado_nutricion == 'APROBADO' %}<span class="badge bg-success">OK</span>
+                                        {% elif exp.solicitud_ingreso.estado_nutricion == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
+                                        {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-3 text-muted fst-italic">No hay expedientes atascados en filtros en este momento.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-5">
+
+            <div class="dash-card border border-danger border-opacity-25">
+                <div class="header-section text-danger bg-white pb-2 pt-3 px-4">
+                    <i class="bi bi-shield-exclamation me-2"></i> Reporte de Incidencias Activas
+                </div>
+                <div class="dash-card-body pt-0">
+
+                    <h6 class="fw-bold small text-danger border-bottom pb-1"><i class="bi bi-fire"></i> ALTO RIESGO (CRÍTICAS)</h6>
+                    {% for inc in incidencias_alto %}
+                    <div class="incidencia-alta d-flex justify-content-between align-items-center shadow-sm">
+                        <div>
+                            <strong class="d-block text-danger">{{ inc.alumno.solicitud_ingreso.nombres_menor }}</strong>
+                            <small class="text-dark">{{ inc.descripcion }}</small>
+                            <div class="mt-1"><small class="text-muted"><i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}</small></div>
+                        </div>
+                        <span class="badge badge-alto px-2 py-1"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                    </div>
+                    {% empty %}
+                    <p class="small text-muted py-1 fst-italic">Sin incidencias de alto riesgo.</p>
+                    {% endfor %}
+
+                    <h6 class="fw-bold small text-warning border-bottom pb-1 mt-4"><i class="bi bi-exclamation-circle"></i> BAJO RIESGO (SEGUIMIENTO)</h6>
+                    {% for inc in incidencias_bajo %}
+                    <div class="incidencia-baja shadow-sm">
+                        <strong class="text-dark">{{ inc.alumno.solicitud_ingreso.nombres_menor }}</strong>
+                        <br><small class="text-dark">{{ inc.descripcion }}</small>
+                        <div class="mt-1"><small class="text-muted"><i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}</small></div>
+                    </div>
+                    {% empty %}
+                    <p class="small text-muted py-1 fst-italic">Sin incidencias menores.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="dash-card">
+                <div class="header-section text-dark bg-white pb-2 pt-3 px-4">
+                    <i class="bi bi-envelope-paper-fill text-primary me-2"></i> Bandeja de Entrada (Correos)
+                </div>
+                <div class="dash-card-body pt-0">
+
+                    <h6 class="fw-bold text-muted small border-bottom pb-1 mt-2">
+                        <i class="bi bi-person-lines-fill me-1"></i> DE ASPIRANTES (NUEVO INGRESO)
+                    </h6>
+                    {% for msg in mensajes_aspirantes %}
+                    <div class="msg-item shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-primary small">{{ msg.remitente.email }}</span>
+                            <span class="badge bg-light text-muted border">{{ msg.fecha_envio|date:"d/m" }}</span>
+                        </div>
+                        <p class="mb-1 small fw-bold text-dark">{{ msg.asunto }}</p>
+                        <p class="mb-0 small text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ msg.contenido }}
+                        </p>
+                    </div>
+                    {% empty %}
+                    <p class="text-center py-3 small text-muted fst-italic bg-light rounded">No hay correos de aspirantes.</p>
+                    {% endfor %}
+
+                    <h6 class="fw-bold text-success small border-bottom pb-1 mt-4">
+                        <i class="bi bi-person-check-fill me-1"></i> DE ALUMNOS INSCRITOS
+                    </h6>
+                    {% for msg in mensajes_alumnos %}
+                    <div class="msg-item msg-alumno shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-success small">{{ msg.remitente.email }}</span>
+                            <span class="badge bg-light text-muted border">{{ msg.fecha_envio|date:"d/m" }}</span>
+                        </div>
+                        <p class="mb-1 small fw-bold text-dark">{{ msg.asunto }}</p>
+                        <p class="mb-0 small text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ msg.contenido }}
+                        </p>
+                    </div>
+                    {% empty %}
+                    <p class="text-center py-3 small text-muted fst-italic bg-light rounded">No hay correos de alumnos inscritos.</p>
+                    {% endfor %}
+
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-{% endblock %}
+{% endblock %}+

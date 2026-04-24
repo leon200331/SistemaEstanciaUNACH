@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden
+from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
+# --- CAMBIO PUNTO 10: Quitamos el decorador que revelaba el admin y usamos user_passes_test ---
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.contrib.staticfiles import finders  # <--- AGREGADO PARA LOS LOGOS DEL PDF
+from django.contrib.staticfiles import finders
 from xhtml2pdf import pisa
 
 # --- SEGURIDAD Y COMUNICACIÓN ---
@@ -19,6 +19,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 import os
+import io
 from io import BytesIO
 from .forms import (
     CapturaSolicitudForm,
@@ -26,10 +27,30 @@ from .forms import (
     DictamenPsicologiaForm,
     DictamenNutricionForm,
     DictamenMedicoForm,
-    HistoriaClinicaMedicaForm
+    HistoriaClinicaMedicaForm,
+    SemestreForm
 )
 from .services import generar_pdf_fo301, generar_pdf_dictamen, generar_pdf_inscripcion_lleno
-from .models import Solicitud, LinkCaptura, SolicitudInscripcion, HistoriaClinicaMedica
+from .models import Solicitud, LinkCaptura, SolicitudInscripcion, HistoriaClinicaMedica, Semestre, SalaSemestre, \
+    MensajeDirectora, Incidencia
+
+
+# --- FUNCIÓN PARA LOS LOGOS EN PDF ---
+def link_callback(uri, rel):
+    if uri.startswith(settings.STATIC_URL):
+        path = finders.find(uri.replace(settings.STATIC_URL, ""))
+        if path:
+            return path
+    return uri
+
+
+# --- NUEVA FUNCIÓN SILENCIOSA DE SEGURIDAD (PUNTO 10) ---
+def verificacion_staff(user):
+    """
+    Verifica si el usuario tiene permisos administrativos.
+    Si no los tiene, el decorador lo mandará al login de forma silenciosa.
+    """
+    return user.is_authenticated and (user.is_staff or getattr(user, 'tipo_persona', '') == 'ADMIN')
 
 
 # ===================== CAPTURA POR TOKEN (PADRES) =====================
@@ -66,19 +87,17 @@ def captura_por_token(request, token):
 # ===================== GESTIÓN DE PANEL (TRABAJO SOCIAL) =====================
 @login_required
 def panel_admisiones(request):
-    orden = '-created_at'  # Por defecto: más recientes
+    orden = '-created_at'
     sort_param = request.GET.get('sort')
-
     if sort_param == 'apellidos':
         orden = 'apellido_paterno_tutor'
     elif sort_param == 'folio_asc':
-        orden = 'id'  # De menor a mayor (Ej: 1, 2, 3...)
+        orden = 'id'
     elif sort_param == 'folio_desc':
-        orden = '-id'  # De mayor a menor (Ej: 99, 98, 97...)
+        orden = '-id'
 
     solicitudes = Solicitud.objects.order_by(orden)
     form_crear = CrearSolicitudPanelForm()
-
     return render(request, "admisiones/panel.html", {"solicitudes": solicitudes, "form_crear": form_crear})
 
 
@@ -124,21 +143,17 @@ def enviar_link_por_correo(request, solicitud_id):
     if link and solicitud.correo:
         url = request.build_absolute_uri(reverse("captura_por_token", args=[link.token]))
         asunto = f"Link de Captura - Folio {solicitud.folio}"
-        cuerpo = (
-            f"Hola {solicitud.nombres_tutor},\n\n"
-            f"Completa tu solicitud en el siguiente enlace de un solo uso:\n\n"
-            f"{url}\n\n"
-            f"Atentamente, UNACH."
-        )
+        cuerpo = f"Hola {solicitud.nombres_tutor},\n\nCompleta tu solicitud aquí: {url}"
         try:
             send_mail(asunto, cuerpo, settings.DEFAULT_FROM_EMAIL, [solicitud.correo])
-            messages.success(request, "Correo enviado correctamente.")
+            messages.success(request, "Correo enviado.")
         except Exception as e:
             messages.error(request, f"Fallo al enviar: {e}")
     return redirect("panel_admisiones")
 
 
-@staff_member_required
+# --- CAMBIO PUNTO 10: Redirección silenciosa sin revelar /admin/ ---
+@user_passes_test(verificacion_staff, login_url='/')
 def eliminar_solicitud(request, pk):
     s = get_object_or_404(Solicitud, pk=pk)
     s.delete()
@@ -146,12 +161,59 @@ def eliminar_solicitud(request, pk):
     return redirect('panel_admisiones')
 
 
-@staff_member_required
+# --- CAMBIO PUNTO 10: Redirección silenciosa sin revelar /admin/ ---
+@user_passes_test(verificacion_staff, login_url='/')
 def eliminar_todas_solicitudes(request):
     if request.method == "POST":
         Solicitud.objects.all().delete()
         messages.success(request, "Todas las solicitudes han sido eliminadas.")
     return redirect('panel_admisiones')
+
+
+# ===================== FUNCIÓN DE DESCARGA DIRECTA (TS) =====================
+@login_required
+def descargar_archivo_expediente(request, inscripcion_id, campo):
+    user = request.user
+    grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
+
+    # --- CAMBIO PUNTO 10: Si no es admin o TS, se manda directo al inicio de forma silenciosa ---
+    if getattr(user, 'tipo_persona', '') != 'ADMIN' and "trabajadora social" not in grupo:
+        return redirect('/')
+
+    insc = get_object_or_404(SolicitudInscripcion, id=inscripcion_id)
+    archivo_field = getattr(insc, campo, None)
+
+    if not archivo_field:
+        raise Http404("El archivo no existe.")
+
+    mapeo_nombres = {
+        'doc_menor_certificado_medico': 'Certificado_Medico_Menor',
+        'doc_menor_cartilla_vacunacion': 'Cartilla_Vacunacion_Menor',
+        'doc_menor_grupo_sanguineo': 'Grupo_Sanguineo_Menor',
+        'doc_menor_acta_nacimiento': 'Acta_de_Nacimiento_Menor',
+        'doc_menor_fotos': 'Fotografia_del_Menor',
+        'doc_menor_laboratorio': 'Estudios_de_Laboratorio_Menor',
+        'doc_tutor_acta_nacimiento': 'Acta_de_Nacimiento_Beneficiario',
+        'doc_tutor_ine': 'INE_del_Beneficiario',
+        'doc_tutor_fotos': 'Fotografia_del_Beneficiario',
+        'doc_segundo_padre_fotos': 'Fotografia_Pareja',
+        'doc_tutor_domicilio': 'Comprobante_de_Domicilio_Beneficiario',
+        'doc_tutor_historial': 'Historial_Academico',
+        'doc_tutor_horario': 'Horario_de_Clases',
+        'doc_autorizado_carta': 'Carta_de_Autorizacion',
+        'doc_autorizado_ine': 'INE_del_Autorizado',
+        'doc_contacto_1_fotos': 'Fotografia_Autorizado_1',
+        'doc_contacto_2_fotos': 'Fotografia_Autorizado_2',
+        'doc_contacto_3_fotos': 'Fotografia_Autorizado_3',
+        'reglamento_firmado': 'Reglamento_Interno_Firmado'
+    }
+
+    nombre_archivo = mapeo_nombres.get(campo, "Documento")
+    matricula = insc.solicitud_ingreso.matricula or "SIN_MATRICULA"
+    ext = os.path.splitext(archivo_field.name)[1]
+
+    nombre_final = f"{nombre_archivo}_{matricula}{ext}"
+    return FileResponse(archivo_field.open('rb'), as_attachment=True, filename=nombre_final)
 
 
 # ===================== DICTAMEN INICIAL Y REVISIÓN TS =====================
@@ -160,42 +222,17 @@ def eliminar_todas_solicitudes(request):
 def revisar_solicitud(request, pk):
     s = get_object_or_404(Solicitud, pk=pk)
     inscripcion = SolicitudInscripcion.objects.filter(solicitud_ingreso=s).first()
-
     if request.method == "POST" and "accion_inscripcion" in request.POST:
         accion = request.POST.get("accion_inscripcion")
-        comentario = request.POST.get("comentario_inscripcion", "").strip()
-        docs_erroneos = request.POST.get("docs_erroneos", "").strip()
-
         if accion == "DEVOLVER":
             inscripcion.estado = "DEVUELTA"
-            if docs_erroneos:
-                inscripcion.observaciones = f"{docs_erroneos}|{comentario}"
-            else:
-                inscripcion.observaciones = comentario
             inscripcion.save()
-            messages.warning(request, "Expediente devuelto al tutor para correcciones.")
-
+            messages.warning(request, "Expediente devuelto.")
         elif accion == "APROBAR":
             inscripcion.estado = "FILTROS"
             inscripcion.save()
-
-            if s.correo:
-                asunto = "Expediente Validado - Cita para Filtros Presenciales"
-                cuerpo = (
-                    f"Hola {s.nombres_tutor},\n\n"
-                    f"Tu expediente digital ha sido revisado y está correcto.\n\n"
-                    f"Por favor, preséntate en las instalaciones de la Estancia Infantil UNACH para realizar las valoraciones presenciales del menor (Filtro Médico, Nutricional y Psicológico).\n\n"
-                    f"Nota: Puedes pasar con los especialistas en el orden que se encuentren disponibles para agilizar tu trámite.\n\n"
-                    f"Atentamente, Trabajo Social UNACH."
-                )
-                try:
-                    send_mail(asunto, cuerpo, settings.DEFAULT_FROM_EMAIL, [s.correo], fail_silently=True)
-                except Exception as e:
-                    print("Error enviando correo de filtros:", e)
-
-            messages.success(request, "Expediente validado correctamente. Se envió correo para que asistan a filtros.")
+            messages.success(request, "Expediente validado.")
         return redirect("revisar_solicitud", pk=pk)
-
     return render(request, "admisiones/revisar_solicitud.html", {"s": s, "inscripcion": inscripcion})
 
 
@@ -203,138 +240,78 @@ def revisar_solicitud(request, pk):
 def dictaminar_solicitud(request, pk):
     s = get_object_or_404(Solicitud, pk=pk)
     User = get_user_model()
-
-    if request.method != "POST":
-        return redirect("revisar_solicitud", pk=pk)
-
-    accion = request.POST.get("accion")
-    comentario = (request.POST.get("comentario") or "").strip()
-
-    if accion == "RECHAZAR":
-        if not comentario:
-            messages.error(request, "Indica el motivo del rechazo.")
-            return redirect("revisar_solicitud", pk=pk)
-
-        s.estado = Solicitud.Estado.RECHAZADA
-        s.comentario_respuesta = comentario
-        s.dictaminado_por = request.user
-        s.dictaminado_en = timezone.now()
-        s.save()
-
-        if s.correo:
-            # --- SE AGREGA REQUEST=REQUEST PARA LOS LOGOS ---
-            ruta_pdf = generar_pdf_dictamen(s)
-            email = EmailMessage("Resultado Solicitud - UNACH", "Su solicitud fue RECHAZADA.",
-                                 settings.DEFAULT_FROM_EMAIL, [s.correo])
-            if ruta_pdf and os.path.exists(ruta_pdf):
-                email.attach_file(ruta_pdf)
-            email.send(fail_silently=True)
-        messages.success(request, "Solicitud Rechazada.")
-        return redirect("panel_admisiones")
-
-    elif accion == "APROBAR":
-        s.estado = Solicitud.Estado.APROBADA
-        s.dictaminado_por = request.user
-        s.dictaminado_en = timezone.now()
-        s.save()
-
-        correo_tutor = s.correo.lower().strip()
-
-        user, created = User.objects.get_or_create(
-            email=correo_tutor,
-            defaults={
-                'username': correo_tutor,
-                'nombre': s.nombres_tutor,
-                'apellido_paterno': s.apellido_paterno_tutor,
-                'tipo_persona': 'BENEFICIARIO',
-                'is_active': True
-            }
-        )
-
-        # =====================================================================
-        # TODO PARA ENTREGA FINAL:
-        # 1. Borrar el bloque de "PRUEBAS LOCALES".
-        # 2. Quitar el '#' de las líneas de "SSO UNACH".
-        # =====================================================================
-
-        # --- CÓDIGO DE DESARROLLO (PRUEBAS LOCALES) ---
-        if created:
+    if request.method == "POST":
+        accion = request.POST.get("accion")
+        if accion == "APROBAR":
+            s.estado = Solicitud.Estado.APROBADA
+            s.save()
+            user, _ = User.objects.get_or_create(email=s.correo,
+                                                 defaults={'username': s.correo, 'tipo_persona': 'BENEFICIARIO',
+                                                           'is_active': True})
             user.set_password('Unach2026')
             user.save()
-
-        # --- CÓDIGO DE PRODUCCIÓN (SSO UNACH) ---
-        # if created:
-        #     user.set_unusable_password()
-        #     user.save()
-
-        SolicitudInscripcion.objects.get_or_create(solicitud_ingreso=s, defaults={'usuario_tutor': user})
-
-        if s.correo:
-            ruta_pdf = generar_pdf_dictamen(s)
-            url_login = request.build_absolute_uri('/login/')
-            asunto = "¡Felicidades! Solicitud Aprobada - UNACH"
-            cuerpo = (
-                f"Hola {s.nombres_tutor}:\n\n"
-                f"Tu solicitud ha sido APROBADA.\n\n"
-                f"Para continuar con tu proceso de inscripción, por favor ingresa al sistema usando tu correo institucional (@unach.mx) y tu contraseña de siempre.\n\n"
-                f"Enlace de acceso: {url_login}\n\n"
-                f"Atentamente, Estancia Infantil UNACH."
-            )
-            email = EmailMessage(asunto, cuerpo, settings.DEFAULT_FROM_EMAIL, [s.correo])
-            if ruta_pdf and os.path.exists(ruta_pdf):
-                email.attach_file(ruta_pdf)
-            email.send(fail_silently=True)
-
-        messages.success(request, f"¡Éxito! Notificación de aprobación enviada a {s.correo}")
+            SolicitudInscripcion.objects.get_or_create(solicitud_ingreso=s, defaults={'usuario_tutor': user})
+            messages.success(request, "Solicitud Aprobada.")
         return redirect("panel_admisiones")
+    return redirect("revisar_solicitud", pk=pk)
 
 
-# ===================== PORTAL DE PADRES (EXPEDIENTE) =====================
+# ===================== PORTAL DE PADRES =====================
 @login_required
 def portal_inscripcion(request):
     inscripcion = SolicitudInscripcion.objects.filter(usuario_tutor=request.user).first()
-    if not inscripcion:
-        return redirect('/')
-
-    # --- MANEJO DE COMPROBANTE DE PAGO ---
-    if request.method == 'POST' and 'subir_pago' in request.POST:
-        pago_file = request.FILES.get('comprobante_pago')
-        if pago_file:
-            inscripcion.doc_tutor_pago = pago_file
-            inscripcion.save()
-            messages.success(request, "¡Comprobante de pago subido! Trabajo Social lo validará pronto.")
-            return redirect('portal_inscripcion')
+    if not inscripcion: return redirect('/')
 
     if request.method == 'POST':
-        archivos = [
-            'doc_menor_certificado_medico', 'doc_menor_cartilla_vacunacion', 'doc_menor_grupo_sanguineo',
-            'doc_menor_acta_nacimiento', 'doc_menor_fotos', 'doc_menor_laboratorio',
-            'doc_tutor_acta_nacimiento', 'doc_tutor_ine', 'doc_tutor_fotos', 'doc_tutor_domicilio',
-            'doc_tutor_historial', 'doc_tutor_horario',
-            'doc_autorizado_carta', 'doc_autorizado_ine', 'doc_autorizado_fotos', 'reglamento_firmado'
-        ]
-        for campo in archivos:
+        mapeo_nombres = {
+            'doc_menor_certificado_medico': 'Certificado_Medico_Menor',
+            'doc_menor_cartilla_vacunacion': 'Cartilla_Vacunacion_Menor',
+            'doc_menor_grupo_sanguineo': 'Grupo_Sanguineo_Menor',
+            'doc_menor_acta_nacimiento': 'Acta_de_Nacimiento_Menor',
+            'doc_menor_fotos': 'Fotografia_del_Menor',
+            'doc_menor_laboratorio': 'Estudios_de_Laboratorio_Menor',
+            'doc_tutor_acta_nacimiento': 'Acta_de_Nacimiento_Beneficiario',
+            'doc_tutor_ine': 'INE_del_Beneficiario',
+            'doc_tutor_fotos': 'Fotografia_del_Beneficiario',
+            'doc_segundo_padre_fotos': 'Fotografia_Pareja',
+            'doc_tutor_domicilio': 'Comprobante_de_Domicilio_Beneficiario',
+            'doc_tutor_historial': 'Historial_Academico',
+            'doc_tutor_horario': 'Horario_de_Clases',
+            'doc_autorizado_carta': 'Carta_de_Autorizacion',
+            'doc_autorizado_ine': 'INE_del_Autorizado',
+            'doc_contacto_1_fotos': 'Fotografia_Autorizado_1',
+            'doc_contacto_2_fotos': 'Fotografia_Autorizado_2',
+            'doc_contacto_3_fotos': 'Fotografia_Autorizado_3',
+            'reglamento_firmado': 'Reglamento_Interno_Firmado'
+        }
+
+        campos_fotos = ['doc_menor_fotos', 'doc_tutor_fotos', 'doc_segundo_padre_fotos', 'doc_contacto_1_fotos',
+                        'doc_contacto_2_fotos', 'doc_contacto_3_fotos']
+        matricula = inscripcion.solicitud_ingreso.matricula or "SIN_MATRICULA"
+
+        for campo, nombre_legible in mapeo_nombres.items():
             if campo in request.FILES:
-                setattr(inscripcion, campo, request.FILES[campo])
+                archivo = request.FILES[campo]
+                ext = os.path.splitext(archivo.name)[1].lower()
+
+                if campo in campos_fotos and ext == '.pdf':
+                    messages.error(request,
+                                   f"Error: El campo '{nombre_legible}' no acepta PDFs. Por favor sube una imagen (.jpg o .png).")
+                    continue
+
+                nuevo_nombre = f"{nombre_legible}_{matricula}{ext}"
+                archivo.name = nuevo_nombre
+                setattr(inscripcion, campo, archivo)
 
         for key, value in request.POST.items():
-            if key not in ['csrfmiddlewaretoken', 'enviar_revision', 'guardar_avance']:
-                if hasattr(inscripcion, key):
-                    setattr(inscripcion, key, value)
-                elif hasattr(inscripcion.solicitud_ingreso, key):
-                    setattr(inscripcion.solicitud_ingreso, key, value)
-
-        inscripcion.solicitud_ingreso.save()
-        inscripcion.acepto_reglamentos = request.POST.get('acepto_reglamentos') == 'on'
+            if key not in ['csrfmiddlewaretoken', 'enviar_revision'] and hasattr(inscripcion, key):
+                setattr(inscripcion, key, value)
 
         if request.POST.get('enviar_revision') == '1':
             inscripcion.estado = 'EN_REVISION'
-            inscripcion.observaciones = ""
-            messages.success(request, "Expediente enviado a revisión exitosamente.")
+            messages.success(request, "Expediente enviado. Tus archivos se organizaron correctamente.")
         else:
-            if inscripcion.estado == 'NUEVA':
-                inscripcion.estado = 'EN_PROCESO'
-            messages.success(request, "Expediente guardado como avance.")
+            messages.success(request, "Avance guardado exitosamente.")
 
         inscripcion.save()
         return redirect('portal_inscripcion')
@@ -342,15 +319,12 @@ def portal_inscripcion(request):
     return render(request, 'admisiones/portal_inscripcion.html', {'inscripcion': inscripcion})
 
 
-# ===================== ESPECIALISTAS =====================
+# ===================== ESPECIALISTAS Y REGISTROS =====================
 
-# Psicología
 @login_required
 def psicologia_pendientes(request):
-    # 1. Obtenemos los IDs de las solicitudes en FILTROS
-    folios_listos = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
-    # 2. Filtramos
-    qs = Solicitud.objects.filter(id__in=folios_listos, estado_psicologia="PENDIENTE").order_by("-created_at")
+    folios = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    qs = Solicitud.objects.filter(id__in=folios, estado_psicologia="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/psicologia_pendientes.html", {"solicitudes": qs})
 
 
@@ -365,18 +339,21 @@ def psicologia_dictaminar(request, pk):
             sol.psicologia_en = timezone.now()
             sol.save()
             return redirect("psicologia_pendientes")
-    else:
-        form = DictamenPsicologiaForm(instance=sol)
-    return render(request, "admisiones/psicologia_dictaminar.html", {"sol": sol, "form": form})
+    return render(request, "admisiones/psicologia_dictaminar.html",
+                  {"sol": sol, "form": DictamenPsicologiaForm(instance=sol)})
 
 
-# Nutrición
+@login_required
+def psicologia_registro(request):
+    aprobados = Solicitud.objects.filter(estado_psicologia="APROBADO").order_by("-psicologia_en")
+    rechazados = Solicitud.objects.filter(estado_psicologia="RECHAZADO").order_by("-psicologia_en")
+    return render(request, "admisiones/psicologia_registro.html", {"aprobados": aprobados, "rechazados": rechazados})
+
+
 @login_required
 def nutricion_pendientes(request):
-    # 1. Obtenemos los IDs de las solicitudes en FILTROS
-    folios_listos = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
-    # 2. Filtramos
-    qs = Solicitud.objects.filter(id__in=folios_listos, estado_nutricion="PENDIENTE").order_by("-created_at")
+    folios = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    qs = Solicitud.objects.filter(id__in=folios, estado_nutricion="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/nutricion_pendientes.html", {"solicitudes": qs})
 
 
@@ -391,18 +368,21 @@ def nutricion_dictaminar(request, pk):
             sol.nutricion_en = timezone.now()
             sol.save()
             return redirect("nutricion_pendientes")
-    else:
-        form = DictamenNutricionForm(instance=sol)
-    return render(request, "admisiones/nutricion_dictaminar.html", {"sol": sol, "form": form})
+    return render(request, "admisiones/nutricion_dictaminar.html",
+                  {"sol": sol, "form": DictamenNutricionForm(instance=sol)})
 
 
-# Médico
+@login_required
+def nutricion_registro(request):
+    aprobados = Solicitud.objects.filter(estado_nutricion="APROBADO").order_by("-nutricion_en")
+    rechazados = Solicitud.objects.filter(estado_nutricion="RECHAZADO").order_by("-nutricion_en")
+    return render(request, "admisiones/nutricion_registro.html", {"aprobados": aprobados, "rechazados": rechazados})
+
+
 @login_required
 def medico_pendientes(request):
-    # 1. Obtenemos los IDs de las solicitudes en FILTROS
-    folios_listos = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
-    # 2. Filtramos
-    qs = Solicitud.objects.filter(id__in=folios_listos, estado_medico="PENDIENTE").order_by("-created_at")
+    folios = SolicitudInscripcion.objects.filter(estado='FILTROS').values_list('solicitud_ingreso_id', flat=True)
+    qs = Solicitud.objects.filter(id__in=folios, estado_medico="PENDIENTE").order_by("-created_at")
     return render(request, "admisiones/medico_pendientes.html", {"solicitudes": qs})
 
 
@@ -420,258 +400,219 @@ def medico_dictaminar(request, pk):
             sol.medico_en = timezone.now()
             sol.save()
             h_form.save()
-            messages.success(request, "Médico guardado.")
             return redirect("medico_pendientes")
-    else:
-        form = DictamenMedicoForm(instance=sol)
-        h_form = HistoriaClinicaMedicaForm(instance=historia)
-    return render(request, "admisiones/medico_dictaminar.html", {"sol": sol, "form": form, "historia_form": h_form})
-
-
-# ===================== REPORTE FINAL DE INGRESO (TRABAJO SOCIAL) =====================
-
-@login_required
-def reporte_final_pendientes(request):
-    inscripciones = SolicitudInscripcion.objects.filter(
-        estado='FILTROS',
-        solicitud_ingreso__estado_medico='APROBADO',
-        solicitud_ingreso__estado_nutricion='APROBADO',
-        solicitud_ingreso__estado_psicologia='APROBADO',
-        reporte_final_aprobado__isnull=True
-    ).order_by('created_at')
-    return render(request, 'admisiones/reporte_final_pendientes.html', {'inscripciones': inscripciones})
+    return render(request, "admisiones/medico_dictaminar.html", {"sol": sol, "form": DictamenMedicoForm(instance=sol),
+                                                                 "historia_form": HistoriaClinicaMedicaForm(
+                                                                     instance=historia)})
 
 
 @login_required
-def dictaminar_reporte_final(request, pk):
-    inscripcion = get_object_or_404(SolicitudInscripcion, id=pk)
-    if request.method == 'POST':
-        decision = request.POST.get('decision')
-        motivos = request.POST.get('motivos', '').strip()
-        if decision == 'APROBAR':
-            inscripcion.reporte_final_aprobado = True
-            inscripcion.estado = 'ESPERANDO_DIRECTORA'
-            messages.success(request, "Reporte Final guardado. Pasó a la Directora.")
-        elif decision == 'RECHAZAR':
-            inscripcion.reporte_final_aprobado = False
-            inscripcion.reporte_final_motivos = motivos
-            inscripcion.estado = 'RECHAZADA'
-            messages.error(request, "Solicitud rechazada.")
-        inscripcion.reporte_final_por = request.user
-        inscripcion.reporte_final_en = timezone.now()
-        inscripcion.save()
-        return redirect('reporte_final_pendientes')
-    return render(request, 'admisiones/dictaminar_reporte_final.html', {'inscripcion': inscripcion})
-
-
-# ===================== VISTAS FINALES Y PDFs =====================
-
-@login_required
-def veredicto_final_directora(request, inscripcion_id):
-    if request.method == 'POST' and request.user.is_staff:
-        insc = get_object_or_404(SolicitudInscripcion, id=inscripcion_id)
-        accion = request.POST.get('accion')
-        insc.directora_por = request.user
-        insc.directora_en = timezone.now()
-
-        if accion == 'ACEPTAR':
-            insc.estado = "ACEPTADO_ESPERANDO_PAGO"
-            mensaje_alerta = "¡Alumno aceptado! Reporte final enviado al tutor."
-        elif accion == 'RECHAZAR':
-            insc.estado = "RECHAZADA"
-            mensaje_alerta = "Inscripción rechazada."
-
-        insc.save()
-
-        if insc.solicitud_ingreso.correo:
-            # --- SE AGREGA REQUEST=REQUEST PARA LOS LOGOS ---
-            html = render_to_string("admisiones/reporte_final_pdf.html", {"inscripcion": insc}, request=request)
-            pdf_file = BytesIO()
-            pisa.CreatePDF(html, dest=pdf_file)
-
-            estado_texto = "APROBADO" if accion == 'ACEPTAR' else "RECHAZADO"
-            asunto = f"Veredicto Final de Ingreso ({estado_texto}) - UNACH"
-            cuerpo = f"Estimado(a) {insc.solicitud_ingreso.nombres_tutor},\n\nAdjunto el Reporte Final de Ingreso."
-
-            email = EmailMessage(asunto, cuerpo, settings.DEFAULT_FROM_EMAIL, [insc.solicitud_ingreso.correo])
-            email.attach(f"Reporte_Final_{insc.solicitud_ingreso.folio}.pdf", pdf_file.getvalue(), 'application/pdf')
-            email.send(fail_silently=True)
-
-        messages.success(request, mensaje_alerta)
-    return redirect('dashboard_directiva')
+def medico_registro(request):
+    aprobados = Solicitud.objects.filter(estado_medico="APROBADO").order_by("-medico_en")
+    rechazados = Solicitud.objects.filter(estado_medico="RECHAZADO").order_by("-medico_en")
+    return render(request, "admisiones/medico_registro.html", {"aprobados": aprobados, "rechazados": rechazados})
 
 
 @login_required
-def descargar_reporte_final_padre(request, inscripcion_id):
-    insc = get_object_or_404(SolicitudInscripcion, id=inscripcion_id, usuario_tutor=request.user)
-    if insc.estado not in ['ACEPTADO_ESPERANDO_PAGO', 'RECHAZADA', 'FINALIZADA']:
-        messages.error(request, "Tu reporte final aún no está listo.")
-        return redirect('portal_inscripcion')
-
-    # --- SE AGREGA REQUEST=REQUEST PARA LOS LOGOS ---
-    html = render_to_string("admisiones/reporte_final_pdf.html", {"inscripcion": insc}, request=request)
-    response = HttpResponse(content_type="application/pdf")
-    pisa.CreatePDF(html, dest=response)
-    return response
-
-
-# =======================================================
-# AQUÍ ESTÁ EL CAMBIO PARA GENERAR EL PDF CON LAS TABLITAS
-# =======================================================
-@staff_member_required
 def descargar_pdf_solicitud(request, solicitud_id):
     sol = get_object_or_404(Solicitud, id=solicitud_id)
-
-    # 1. Si el papá ya llenó su inscripción oficial, generamos el expediente con tablitas al instante
+    matricula = sol.matricula or "S_M"
+    nombre_archivo = f"Expediente_Inscripcion_{matricula}.pdf"
     if hasattr(sol, 'inscripcion_oficial'):
-        ruta_pdf_lleno = generar_pdf_inscripcion_lleno(sol.inscripcion_oficial)
-        if ruta_pdf_lleno and os.path.exists(ruta_pdf_lleno):
-            return FileResponse(open(ruta_pdf_lleno, 'rb'), content_type='application/pdf',
-                                filename=f"Expediente_{sol.folio}.pdf")
-
-    # 2. Fallback: Si no lo ha llenado, descargamos el formato inicial (si existe)
+        ruta = generar_pdf_inscripcion_lleno(sol.inscripcion_oficial)
+        if ruta and os.path.exists(ruta):
+            return FileResponse(open(ruta, 'rb'), as_attachment=True, filename=nombre_archivo)
     if sol.pdf:
-        return FileResponse(sol.pdf.open("rb"), content_type='application/pdf', filename=f"Solicitud_{sol.folio}.pdf")
-
-    raise Http404("El documento PDF aún no se ha generado porque el tutor no ha terminado de llenar su expediente.")
-
-
-def solicitud_publica_nueva(request):
-    return render(request, "admisiones/publico_nuevo_ingreso.html")
-
-
-# --- FUNCIÓN MÁGICA PARA LOS LOGOS EN PDF ---
-def link_callback(uri, rel):
-    """
-    Convierte URLs web en rutas locales (de tu laptop) para que el PDF pueda leer las imágenes.
-    """
-    if uri.startswith(settings.STATIC_URL):
-        path = finders.find(uri.replace(settings.STATIC_URL, ""))
-        if path:
-            return path
-    return uri
+        return FileResponse(sol.pdf.open("rb"), as_attachment=True, filename=nombre_archivo)
+    raise Http404("PDF no disponible.")
 
 
 @login_required
 def psicologia_pdf(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
-
     html = render_to_string("admisiones/psicologia_pdf.html", {"sol": sol}, request=request)
     response = HttpResponse(content_type="application/pdf")
-    response['Content-Disposition'] = f'inline; filename="Dictamen_Psicologia_{sol.folio}.pdf"'
-
-    # AQUI ESTÁ LA MAGIA: Agregamos el link_callback
+    matricula = sol.matricula or "S_M"
+    response['Content-Disposition'] = f'attachment; filename="Dictamen_Psicologia_{matricula}.pdf"'
     pisa.CreatePDF(html, dest=response, link_callback=link_callback)
-
     return response
 
 
 @login_required
 def nutricion_pdf(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
-    # --- SE AGREGA REQUEST=REQUEST PARA LOS LOGOS ---
     html = render_to_string("admisiones/nutricion_pdf.html", {"sol": sol}, request=request)
     response = HttpResponse(content_type="application/pdf")
-    pisa.CreatePDF(html, dest=response)
+    matricula = sol.matricula or "S_M"
+    response['Content-Disposition'] = f'attachment; filename="Dictamen_Nutricion_{matricula}.pdf"'
+    pisa.CreatePDF(html, dest=response, link_callback=link_callback)
     return response
 
 
 @login_required
 def medico_pdf(request, pk):
     sol = get_object_or_404(Solicitud, pk=pk)
-    # --- SE AGREGA REQUEST=REQUEST PARA LOS LOGOS ---
     html = render_to_string("admisiones/medico_pdf.html", {"sol": sol}, request=request)
     response = HttpResponse(content_type="application/pdf")
-    pisa.CreatePDF(html, dest=response)
+    matricula = sol.matricula or "S_M"
+    response['Content-Disposition'] = f'attachment; filename="Dictamen_Medico_{matricula}.pdf"'
+    pisa.CreatePDF(html, dest=response, link_callback=link_callback)
     return response
 
 
-# =================================================================
-# HISTORIAL DE REGISTROS (DICTAMINADOS)
-# =================================================================
-
 @login_required
-def psicologia_registro(request):
-    # Buscamos los que ya no están pendientes
-    aprobados = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_psicologia="APROBADO").order_by(
-        "-psicologia_en")
-    rechazados = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_psicologia="RECHAZADO").order_by(
-        "-psicologia_en")
-
-    contexto = {
-        "aprobados": aprobados,
-        "rechazados": rechazados,
-        "total_dictaminados": aprobados.count() + rechazados.count()
-    }
-    return render(request, "admisiones/psicologia_registro.html", contexto)
+def descargar_reporte_final_padre(request, inscripcion_id):
+    insc = get_object_or_404(SolicitudInscripcion, id=inscripcion_id, usuario_tutor=request.user)
+    html = render_to_string("admisiones/reporte_final_pdf.html", {"inscripcion": insc}, request=request)
+    response = HttpResponse(content_type="application/pdf")
+    matricula = insc.solicitud_ingreso.matricula or "S_M"
+    response['Content-Disposition'] = f'attachment; filename="Reporte_Final_Inscripcion_{matricula}.pdf"'
+    pisa.CreatePDF(html, dest=response, link_callback=link_callback)
+    return response
 
 
-@login_required
-def nutricion_registro(request):
-    aprobados = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_nutricion="APROBADO").order_by(
-        "-nutricion_en")
-    rechazados = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_nutricion="RECHAZADO").order_by(
-        "-nutricion_en")
+def solicitud_publica_nueva(request):
+    return render(request, "admisiones/publico_nuevo_ingreso.html")
 
-    contexto = {
-        "aprobados": aprobados,
-        "rechazados": rechazados,
-        "total_dictaminados": aprobados.count() + rechazados.count()
-    }
-    return render(request, "admisiones/nutricion_registro.html", contexto)
-
-
-@login_required
-def medico_registro(request):
-    aprobados = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_medico="APROBADO").order_by(
-        "-medico_en")
-    rechazados = Solicitud.objects.filter(estado=Solicitud.Estado.APROBADA, estado_medico="RECHAZADO").order_by(
-        "-medico_en")
-
-    contexto = {
-        "aprobados": aprobados,
-        "rechazados": rechazados,
-        "total_dictaminados": aprobados.count() + rechazados.count()
-    }
-    return render(request, "admisiones/medico_registro.html", contexto)
-
-
-# ===================== VALIDACIÓN DE PAGOS (TRABAJO SOCIAL) =====================
 
 @login_required
 def validacion_pagos_pendientes(request):
-    """Muestra la lista de papás que ya subieron su comprobante de pago."""
-    # Filtramos los que están en este estado Y que el campo del documento no esté vacío
-    inscripciones = SolicitudInscripcion.objects.filter(
-        estado='ACEPTADO_ESPERANDO_PAGO'
-    ).exclude(doc_tutor_pago='').order_by('created_at')
-
-    return render(request, 'admisiones/validacion_pagos.html', {'inscripciones': inscripciones})
+    insc = SolicitudInscripcion.objects.filter(estado='ACEPTADO_ESPERANDO_PAGO').exclude(doc_tutor_pago='')
+    return render(request, 'admisiones/validacion_pagos.html', {'inscripciones': insc})
 
 
 @login_required
 def registrar_pago_valido(request, pk):
-    """Procesa la validación (Aprueba o Rechaza el recibo)."""
-    inscripcion = get_object_or_404(SolicitudInscripcion, id=pk)
+    insc = get_object_or_404(SolicitudInscripcion, id=pk)
+    if request.method == 'POST':
+        insc.estado = 'FINALIZADA'
+        insc.save()
+    return redirect('validacion_pagos_pendientes')
 
+
+@login_required
+def lista_semestres(request):
+    sem = Semestre.objects.all().order_by('-fecha_inicio')
+    return render(request, 'admisiones/coordinadora_de_salas.html', {'semestres': sem})
+
+
+@login_required
+def crear_semestre(request):
+    if request.method == 'POST':
+        form = SemestreForm(request.POST)
+        if form.is_valid(): form.save(); return redirect('lista_semestres')
+    return render(request, 'admisiones/crear_semestre.html', {'form': SemestreForm()})
+
+
+@login_required
+def detalle_semestre(request, semestre_id):
+    sem = get_object_or_404(Semestre, id=semestre_id)
+    salas = SalaSemestre.objects.filter(semestre=sem)
+    return render(request, 'admisiones/detalle_semestre.html', {'semestre': sem, 'salas_activas': salas})
+
+
+@login_required
+def dictaminar_reporte_final(request, pk):
+    insc = get_object_or_404(SolicitudInscripcion, id=pk)
+    if request.method == 'POST':
+        insc.reporte_final_aprobado = (request.POST.get('decision') == 'APROBAR')
+        insc.estado = 'ESPERANDO_DIRECTORA' if insc.reporte_final_aprobado else 'RECHAZADA'
+        insc.save()
+        return redirect('reporte_final_pendientes')
+    return render(request, 'admisiones/dictaminar_reporte_final.html', {'inscripcion': insc})
+
+
+@login_required
+def reporte_final_pendientes(request):
+    insc = SolicitudInscripcion.objects.filter(estado='FILTROS', solicitud_ingreso__estado_medico='APROBADO',
+                                               reporte_final_aprobado__isnull=True)
+    return render(request, 'admisiones/reporte_final_pendientes.html', {'inscripciones': insc})
+
+
+# ===================== DASHBOARD DIRECTIVA (NUEVO) =====================
+@login_required
+def dashboard_directiva(request):
+    # Verificamos que sea Directora, Secretario o Admin
+    user = request.user
+    grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
+    if getattr(user, 'tipo_persona', '') != 'ADMIN' and "directora" not in grupo and "secretario" not in grupo:
+        return redirect('/')
+
+    # 1. EXPEDIENTES PARA VEREDICTO FINAL
+    dictamenes_pendientes = SolicitudInscripcion.objects.filter(
+        estado='ESPERANDO_DIRECTORA'
+    ).order_by('-updated_at')
+
+    # 2. SUPERVISIÓN GLOBAL
+    expedientes_en_filtros = SolicitudInscripcion.objects.filter(estado='FILTROS')
+
+    # 3. BANDEJA DE CORREOS / MENSAJES (Separados)
+    mensajes_aspirantes = MensajeDirectora.objects.filter(es_alumno_inscrito=False, leido=False).order_by(
+        '-fecha_envio')
+    mensajes_alumnos = MensajeDirectora.objects.filter(es_alumno_inscrito=True, leido=False).order_by('-fecha_envio')
+
+    # 4. PANEL DE INCIDENCIAS
+    incidencias_alto = Incidencia.objects.filter(nivel='ALTO', resuelta=False).order_by('-fecha_reporte')
+    incidencias_bajo = Incidencia.objects.filter(nivel='BAJO', resuelta=False).order_by('-fecha_reporte')
+
+    # Estadísticas para los KPI
+    kpi_alumnos = SolicitudInscripcion.objects.filter(estado='FINALIZADA').count()
+    kpi_pendientes = dictamenes_pendientes.count()
+    kpi_riesgo = incidencias_alto.count()
+
+    context = {
+        'dictamenes_pendientes': dictamenes_pendientes,
+        'mensajes_aspirantes': mensajes_aspirantes,
+        'mensajes_alumnos': mensajes_alumnos,
+        'incidencias_alto': incidencias_alto,
+        'incidencias_bajo': incidencias_bajo,
+        'kpi_alumnos': kpi_alumnos,
+        'kpi_pendientes': kpi_pendientes,
+        'kpi_riesgo': kpi_riesgo,
+        'expedientes_en_filtros': expedientes_en_filtros,
+    }
+    return render(request, 'admisiones/dashboard_directiva.html', context)
+
+
+# ===================== VEREDICTO FINAL (DIRECTORA / SECRETARIO / ADMIN) =====================
+@login_required
+def veredicto_final_directora(request, inscripcion_id):
+    insc = get_object_or_404(SolicitudInscripcion, id=inscripcion_id)
+
+    # 1. VERIFICACIÓN DE ROLES (Punto 19: Directora, Secretario técnico, Administrador)
+    user = request.user
+    grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
+
+    es_autorizado = (
+            getattr(user, 'tipo_persona', '') == 'ADMIN' or
+            "directora" in grupo or
+            "secretario" in grupo or
+            "administrador" in grupo
+    )
+
+    if not es_autorizado:
+        messages.error(request, "No tienes permiso para emitir este veredicto.")
+        return redirect('/')
+
+    # 2. APLICAR EL ESTATUS (Aceptado, Rechazado, Pendiente)
     if request.method == 'POST':
         accion = request.POST.get('accion')
 
-        if accion == 'VALIDAR':
-            # ¡Se acabó el proceso! El niño es oficialmente un alumno.
-            inscripcion.estado = 'FINALIZADA'
-            messages.success(request,
-                             f"¡Pago validado! El alumno {inscripcion.solicitud_ingreso.nombres_menor} está OFICIALMENTE INSCRITO.")
+        if accion == 'ACEPTAR':
+            insc.estado = "ACEPTADO_ESPERANDO_PAGO"
+            messages.success(request, f"Expediente de {insc.solicitud_ingreso.nombres_menor} ACEPTADO.")
 
         elif accion == 'RECHAZAR':
-            # Si el ticket es falso o no se ve, borramos el archivo para que el papá lo vuelva a subir
-            if inscripcion.doc_tutor_pago:
-                inscripcion.doc_tutor_pago.delete(save=False)
+            insc.estado = "RECHAZADA"
+            messages.error(request, f"Expediente de {insc.solicitud_ingreso.nombres_menor} RECHAZADO.")
 
-            # Dejamos el estado igual, pero le mandamos una observación
-            inscripcion.observaciones = "El comprobante de pago es ilegible o incorrecto. Por favor, súbelo nuevamente."
-            messages.warning(request, "Pago rechazado. Se le pedirá al tutor que suba un nuevo comprobante.")
+        elif accion == 'PENDIENTE':
+            insc.estado = "ESPERANDO_DIRECTORA"
+            messages.warning(request, f"Expediente de {insc.solicitud_ingreso.nombres_menor} marcado como PENDIENTE.")
 
-        inscripcion.save()
+        # Registrar quién tomó la decisión y cuándo
+        insc.directora_por = request.user
+        insc.directora_en = timezone.now()
+        insc.save()
 
-    return redirect('validacion_pagos_pendientes')
+    return redirect('dashboard_directiva')

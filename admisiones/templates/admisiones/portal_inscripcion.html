@@ -53,7 +53,11 @@
     .file-input-group label { font-size: 0.85rem; font-weight: bold; color: #495057; margin-bottom: 4px; display: block; }
     .status-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .status-ok { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
-    .status-missing { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+    .status-missing { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; display: none; }
+
+    /* Estilo para el icono de información */
+    .info-icon { cursor: help; color: #0d6efd; margin-left: 5px; font-size: 1.1rem; }
 </style>
 {% endblock %}
 
@@ -144,7 +148,7 @@
 
                     <div class="col-md-4">
                         <label class="label-custom">Matrícula <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
-                        <input type="text" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.matricula }}">
+                        <input type="text" id="matricula_frontend" name="matricula" class="form-control bg-light text-muted" style="cursor: not-allowed;" readonly value="{{ inscripcion.solicitud_ingreso.matricula }}">
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Programa Educativo <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
@@ -175,10 +179,18 @@
                             <option value="">Seleccione...</option>
                             <option value="Soltero(a)" {% if inscripcion.estado_civil_tutor == 'Soltero(a)' %}selected{% endif %}>Soltero(a)</option>
                             <option value="Casado(a)" {% if inscripcion.estado_civil_tutor == 'Casado(a)' %}selected{% endif %}>Casado(a)</option>
-                            <option value="Unión Libre" {% if inscripcion.estado_civil_tutor == 'Unión Libre' %}selected{% endif %}>Unión Libre</option>
                         </select>
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
                     </div>
+
+                    <div class="col-md-4 mt-5 fade-in" id="div_pregunta_pareja" style="display: none;">
+                        <label class="label-custom text-primary">¿Desea registrar datos de una pareja/cónyuge? <span class="text-danger">*</span></label>
+                        <select id="tiene_pareja_select" name="tiene_pareja" class="form-select border-primary" onchange="manejarEstadoCivil()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <option value="NO">No, soy padre/madre soltero(a)</option>
+                            <option value="SI" {% if inscripcion.nombres_segundo_padre %}selected{% endif %}>Sí, deseo registrar a mi pareja</option>
+                        </select>
+                    </div>
+
                     <div class="col-md-4 mt-5">
                         <label class="label-custom">Tu parentesco con el menor <span class="text-danger">*</span></label>
                         <select id="parentesco_tutor_select" name="parentesco_tutor" class="form-select" onchange="sincronizarParentescos()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
@@ -221,7 +233,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">CURP <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
-                        <input type="text" name="curp_menor" class="form-control bg-light text-muted" style="cursor: not-allowed; text-transform: uppercase;" value="{{ inscripcion.solicitud_ingreso.curp_menor|default:'' }}" readonly required>
+                        <input type="text" id="curp_frontend" name="curp_menor" class="form-control bg-light text-muted" style="cursor: not-allowed; text-transform: uppercase;" value="{{ inscripcion.solicitud_ingreso.curp_menor|default:'' }}" readonly required>
                     </div>
 
                     <div class="col-md-2">
@@ -286,9 +298,26 @@
 
         <div class="form-section-card" id="card_segundo_padre" style="display: none;">
             <div class="section-title">
-                <i class="bi bi-people fs-4 text-primary"></i> 3. Datos del Padre / Madre (El otro tutor)
+                <i class="bi bi-people fs-4 text-primary"></i> 3. Datos de la Pareja / Cónyuge
             </div>
             <div class="card-body p-4">
+
+                <div class="row mb-4 pb-3 border-bottom">
+                    <div class="col-md-12">
+                        <label class="label-custom d-block">¿Esta persona es el padre/madre biológico(a) del menor? <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-wrap gap-4 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input sp-required" type="radio" name="vinculo_segundo_padre" id="vinculo_bio" value="BIOLOGICO" {% if inscripcion.vinculo_segundo_padre == 'BIOLOGICO' %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <label class="form-check-label fw-bold text-success" for="vinculo_bio">Sí (Padre/Madre de sangre)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input sp-required" type="radio" name="vinculo_segundo_padre" id="vinculo_pol" value="POLITICO" {% if inscripcion.vinculo_segundo_padre == 'POLITICO' %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <label class="form-check-label fw-bold text-primary" for="vinculo_pol">No (Madrastra/Padrastro)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="label-custom">Parentesco <span class="text-danger">*</span></label>
@@ -322,7 +351,6 @@
                             <option value="">Seleccione...</option>
                             <option value="Soltero(a)" {% if inscripcion.estado_civil_segundo_padre == 'Soltero(a)' %}selected{% endif %}>Soltero(a)</option>
                             <option value="Casado(a)" {% if inscripcion.estado_civil_segundo_padre == 'Casado(a)' %}selected{% endif %}>Casado(a)</option>
-                            <option value="Unión Libre" {% if inscripcion.estado_civil_segundo_padre == 'Unión Libre' %}selected{% endif %}>Unión Libre</option>
                         </select>
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
                     </div>
@@ -344,7 +372,7 @@
                     </div>
 
                     <div class="col-md-12 mt-4">
-                        <h6 class="fw-bold text-muted border-bottom pb-1" style="font-size: 0.9rem;">Dirección del Padre/Madre</h6>
+                        <h6 class="fw-bold text-muted border-bottom pb-1" style="font-size: 0.9rem;">Dirección de la Pareja</h6>
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Estado <span class="text-danger">*</span></label>
@@ -522,8 +550,8 @@
                     <div class="d-flex align-items-center">
                         <i class="bi bi-exclamation-octagon-fill fs-1 me-3"></i>
                         <div>
-                            <h5 class="fw-bold mb-1">¡Sube todos tus documentos con el nombre correcto!</h5>
-                            <p class="mb-0 small text-dark">Para poder continuar, debes subir <strong>TODOS</strong> los archivos y nombrarlos correctamente (ej. "curp", "acta_nacimiento"). Si te falta alguno, el sistema no te dejará enviar tu expediente.</p>
+                            <h5 class="fw-bold mb-1">Carga tus documentos</h5>
+                            <p class="mb-0 small text-dark">Sube tus archivos. Al seleccionarlos, verás cómo el sistema ajusta su nombre automáticamente.</p>
                         </div>
                     </div>
                 </div>
@@ -535,38 +563,42 @@
 
                             <div class="file-input-group">
                                 <label>1. Certificado Médico</label>
-                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_certificado_medico %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_menor_certificado_medico %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>2. Cartilla de Vacunación</label>
-                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_cartilla_vacunacion %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_menor_cartilla_vacunacion %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>3. Grupo Sanguíneo</label>
-                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_grupo_sanguineo %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_menor_grupo_sanguineo %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>4. Acta de Nacimiento</label>
-                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_menor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>5. 3 Fotos a color (Actualizadas)</label>
-                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <label class="d-flex align-items-center">
+                                    5. Fotografía del Menor
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Tamaño infantil. Fondo claro. Peso máximo: 2MB."></i>
+                                </label>
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>6. Estudios de Laboratorio</label>
-                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_laboratorio %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_laboratorio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_laboratorio %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_menor_laboratorio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
                         </div>
                     </div>
@@ -577,62 +609,100 @@
 
                             <div class="file-input-group">
                                 <label>1. Acta de Nacimiento</label>
-                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_tutor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>2. Copia de INE</label>
-                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_tutor_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>3. 3 Fotos a color (Actualizadas)</label>
-                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <label class="d-flex align-items-center">
+                                    3. Fotografía del Tutor
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Tamaño credencial. Nítida y reciente. Peso máximo: 2MB."></i>
+                                </label>
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
-                            <div class="file-input-group">
+                            <div class="file-input-group border border-primary p-2 rounded bg-white shadow-sm mt-3" id="group_foto_pareja" style="display: none;">
+                                <label class="d-flex align-items-center text-primary">
+                                    <i class="bi bi-camera-fill me-1"></i> Fotografía de la Pareja
+                                    <i class="bi bi-info-circle-fill info-icon text-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Es obligatoria si registró los datos de su pareja arriba."></i>
+                                </label>
+                                <input type="file" name="doc_segundo_padre_fotos" class="form-control form-control-sm border-primary" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_segundo_padre_fotos %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_segundo_padre_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group mt-3">
                                 <label>4. Comprobante de Domicilio</label>
-                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_domicilio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_tutor_domicilio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>5. Historial Académico</label>
-                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_historial %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_tutor_historial %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>6. Horario de Clases</label>
-                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_horario %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_tutor_horario %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-4">
                         <div class="doc-box shadow-sm">
-                            <div class="doc-title"><i class="bi bi-person-check-fill me-2"></i>Del Autorizado</div>
+                            <div class="doc-title"><i class="bi bi-person-check-fill me-2"></i>De los Autorizados</div>
 
                             <div class="file-input-group">
                                 <label>1. Carta de Autorización (Contestada)</label>
-                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_autorizado_carta %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_autorizado_carta %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>2. Copia de INE</label>
-                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_autorizado_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <label>2. Copia de INE (de todos)</label>
+                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_autorizado_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>3. 2 Fotos a color (Actualizadas)</label>
-                                <input type="file" name="doc_autorizado_fotos" class="form-control form-control-sm" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_autorizado_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1 d-inline-block">Falta</span>{% endif %}
+                                <label class="d-flex align-items-center">
+                                    3. Fotografía Familiar 1
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Condiciones: Solo JPG o PNG. Foto individual."></i>
+                                </label>
+                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_contacto_1_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group" id="group_foto_aut2" style="display: none;">
+                                <label class="d-flex align-items-center">
+                                    4. Fotografía Familiar 2
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Obligatorio si registró un segundo familiar arriba."></i>
+                                </label>
+                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_contacto_2_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                            </div>
+
+                            <div class="file-input-group" id="group_foto_aut3" style="display: none;">
+                                <label class="d-flex align-items-center">
+                                    5. Fotografía Familiar 3
+                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="Obligatorio si registró un tercer familiar arriba."></i>
+                                </label>
+                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
+                                {% if inscripcion.doc_contacto_3_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
                         </div>
                     </div>
@@ -749,6 +819,19 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Variable global para bloquear inputs si el estado es solo de lectura
+    const isReadOnly = ("{{ inscripcion.estado }}" === "EN_REVISION" || "{{ inscripcion.estado }}" === "FINALIZADA");
+
+    // -------------------------------------------------------------------
+    // INICIALIZAR TODOS LOS TOOLTIPS DE LA PÁGINA
+    // -------------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+
     // -------------------------------------------------------------------
     // LÓGICA DE PALOMITAS ROJAS (ARCHIVOS DEVUELTOS)
     // -------------------------------------------------------------------
@@ -762,7 +845,6 @@
             const badDocs = parts[0].split(',');
             cleanMsg = parts[1] || "Por favor, corrige los documentos marcados en rojo.";
 
-            // Pinta las cajas de rojo
             badDocs.forEach(docName => {
                 if (docName) {
                     const fileInput = document.querySelector(`input[name="${docName}"]`);
@@ -824,35 +906,53 @@
     }
 
     // -------------------------------------------------------------------
-    // 2. Ocultar Segundo Padre y Cambiar Números de Sección
+    // 2. LÓGICA DE ESTADO CIVIL Y PAREJA (MOSTRAR FOTO DINÁMICAMENTE)
     // -------------------------------------------------------------------
     function manejarEstadoCivil() {
         const estadoCivil = document.getElementById('estado_civil_tutor_select').value;
+        const preguntaParejaDiv = document.getElementById('div_pregunta_pareja');
+        const tieneParejaSelect = document.getElementById('tiene_pareja_select');
         const cardPadre = document.getElementById('card_segundo_padre');
+        const camposRequeridos = cardPadre.querySelectorAll('.sp-required');
+
         const numFamiliares = document.getElementById('num_sec_familiares');
         const numReglamentos = document.getElementById('num_sec_reglamentos');
         const numExpediente = document.getElementById('num_sec_expediente');
-        const camposRequeridos = cardPadre.querySelectorAll('.sp-required');
 
-        if (estadoCivil === 'Soltero(a)' || estadoCivil === '') {
-            cardPadre.style.display = 'none';
-            numFamiliares.innerText = '3';
-            numExpediente.innerText = '4';
-            numReglamentos.innerText = '5';
+        const groupFotoPareja = document.getElementById('group_foto_pareja');
+        const inputFotoPareja = document.querySelector('input[name="doc_segundo_padre_fotos"]');
 
-            camposRequeridos.forEach(campo => {
-                campo.required = false;
-                campo.disabled = true;
-            });
+        if (estadoCivil === 'Soltero(a)') {
+            preguntaParejaDiv.style.display = 'block';
         } else {
+            preguntaParejaDiv.style.display = 'none';
+        }
+
+        if (estadoCivil === 'Casado(a)' || (estadoCivil === 'Soltero(a)' && tieneParejaSelect.value === 'SI')) {
             cardPadre.style.display = 'block';
             numFamiliares.innerText = '4';
             numExpediente.innerText = '5';
             numReglamentos.innerText = '6';
 
+            if(groupFotoPareja) groupFotoPareja.style.display = 'block';
+            if(inputFotoPareja && !isReadOnly) inputFotoPareja.disabled = false;
+
             camposRequeridos.forEach(campo => {
                 campo.disabled = false;
                 campo.required = true;
+            });
+        } else {
+            cardPadre.style.display = 'none';
+            numFamiliares.innerText = '3';
+            numExpediente.innerText = '4';
+            numReglamentos.innerText = '5';
+
+            if(groupFotoPareja) groupFotoPareja.style.display = 'none';
+            if(inputFotoPareja) inputFotoPareja.disabled = true;
+
+            camposRequeridos.forEach(campo => {
+                campo.required = false;
+                campo.disabled = true;
             });
         }
     }
@@ -863,26 +963,14 @@
     function sincronizarParentescos() {
         const selectTutor = document.getElementById('parentesco_tutor_select');
         const selectSegundoPadre = document.getElementById('parentesco_segundo_padre_select');
-        const tituloSegundoPadre = document.getElementById('titulo_segundo_padre');
-
-        if (!tituloSegundoPadre) return;
 
         if (selectTutor.value === 'Madre') {
             selectSegundoPadre.value = 'Padre';
-            tituloSegundoPadre.innerText = "Datos del Padre";
         } else if (selectTutor.value === 'Padre') {
             selectSegundoPadre.value = 'Madre';
-            tituloSegundoPadre.innerText = "Datos de la Madre";
         } else {
             selectSegundoPadre.value = '';
-            tituloSegundoPadre.innerText = "Datos del Padre / Madre (El otro tutor)";
-            selectSegundoPadre.style.pointerEvents = "auto";
-            selectSegundoPadre.classList.remove('bg-light');
-            return;
         }
-
-        selectSegundoPadre.style.pointerEvents = "none";
-        selectSegundoPadre.classList.add('bg-light');
     }
 
     // -------------------------------------------------------------------
@@ -922,11 +1010,9 @@
         if (selectPar.value === 'Otro') {
             divOtro.style.display = 'block';
             inputReal.value = inputOtro.value;
-            inputOtro.required = true;
         } else {
             divOtro.style.display = 'none';
             inputReal.value = selectPar.value;
-            inputOtro.required = false;
             inputOtro.value = '';
         }
     }
@@ -957,16 +1043,20 @@
     }
 
     // -------------------------------------------------------------------
-    // 6. Mostrar y Eliminar Familiares Dinámicamente
+    // 6. Mostrar y Eliminar Familiares Dinámicamente (CON FOTOS)
     // -------------------------------------------------------------------
     let familiaresMostrados = 1;
 
     function agregarFamiliar() {
         if (familiaresMostrados === 1) {
             document.getElementById('familiar_2_div').classList.remove('hidden-contact');
+            document.getElementById('group_foto_aut2').style.display = 'block';
+            if(!isReadOnly) document.querySelector('input[name="doc_contacto_2_fotos"]').disabled = false;
             familiaresMostrados = 2;
         } else if (familiaresMostrados === 2) {
             document.getElementById('familiar_3_div').classList.remove('hidden-contact');
+            document.getElementById('group_foto_aut3').style.display = 'block';
+            if(!isReadOnly) document.querySelector('input[name="doc_contacto_3_fotos"]').disabled = false;
             familiaresMostrados = 3;
             document.querySelector("button[onclick='agregarFamiliar()']").style.display = 'none';
         }
@@ -975,6 +1065,10 @@
     function eliminarFamiliar(numero) {
         if(confirm(`¿Estás seguro de eliminar al familiar ${numero}?`)) {
             document.getElementById(`familiar_${numero}_div`).classList.add('hidden-contact');
+
+            // Ocultar y deshabilitar foto
+            document.getElementById(`group_foto_aut${numero}`).style.display = 'none';
+            document.querySelector(`input[name="doc_contacto_${numero}_fotos"]`).disabled = true;
 
             document.getElementById(`contacto_${numero}_nombres`).value = '';
             document.getElementById(`contacto_${numero}_apellido_paterno`).value = '';
@@ -1073,69 +1167,14 @@
     }
 
     // -------------------------------------------------------------------
-    // 9. Arranque y Validaciones Generales (INCLUYE REVISIÓN DE ARCHIVOS)
+    // 9. Arranque y Validaciones Generales
     // -------------------------------------------------------------------
-
-    const reglasArchivos = {
-        'doc_menor_certificado_medico': { palabras: ['certificado', 'medico'], msj: 'certificado_medico' },
-        'doc_menor_cartilla_vacunacion': { palabras: ['cartilla', 'vacun'], msj: 'cartilla_vacunacion' },
-        'doc_menor_grupo_sanguineo': { palabras: ['grupo', 'sangre', 'sanguineo'], msj: 'grupo_sanguineo' },
-        'doc_menor_acta_nacimiento': { palabras: ['acta', 'nacimiento'], msj: 'acta_nacimiento' },
-        'doc_menor_fotos': { palabras: ['foto'], msj: 'fotos' },
-        'doc_menor_laboratorio': { palabras: ['laboratorio', 'estudio', 'analisis'], msj: 'estudios_laboratorio' },
-        'doc_tutor_acta_nacimiento': { palabras: ['acta', 'nacimiento'], msj: 'acta_nacimiento' },
-        'doc_tutor_ine': { palabras: ['ine', 'identificacion', 'ife', 'credencial'], msj: 'ine' },
-        'doc_tutor_fotos': { palabras: ['foto'], msj: 'fotos' },
-        'doc_tutor_domicilio': { palabras: ['domicilio', 'comprobante', 'luz', 'agua', 'telmex'], msj: 'comprobante_domicilio' },
-        'doc_tutor_historial': { palabras: ['historial', 'academico', 'kardex', 'calificaciones'], msj: 'historial_academico' },
-        'doc_tutor_horario': { palabras: ['horario', 'clase', 'carga'], msj: 'horario_clases' },
-        'doc_autorizado_carta': { palabras: ['carta', 'autorizacion'], msj: 'carta_autorizacion' },
-        'doc_autorizado_ine': { palabras: ['ine', 'identificacion', 'ife', 'credencial'], msj: 'ine' },
-        'doc_autorizado_fotos': { palabras: ['foto'], msj: 'fotos' },
-        'reglamento_firmado': { palabras: ['reglamento', 'firmado'], msj: 'reglamento_firmado' }
-    };
-
     document.addEventListener("DOMContentLoaded", function() {
         manejarEstadoCivil();
         sincronizarParentescos();
         inicializarEstados();
         calcularEdadMenor();
         inicializarParentescosFamiliares();
-
-        const selectSangre = document.getElementById('tipo_sangre_select');
-        const inputOtro = document.getElementById('tipo_sangre_otro_input');
-        const valActual = "{{ inscripcion.tipo_sangre_menor|default:'' }}";
-
-        if (valActual && !['O+','O-','A+','A-','B+','B-'].includes(valActual)) {
-            selectSangre.value = 'Otro';
-            inputOtro.value = valActual;
-            manejarTipoSangre();
-        }
-
-        // Validación en tiempo real del nombre de los archivos al subirlos usando el MODAL BONITO
-        document.querySelectorAll('input[type="file"]').forEach(input => {
-            input.addEventListener('change', function(e) {
-                if (this.files.length > 0) {
-                    const fileName = this.files[0].name.toLowerCase();
-                    const regla = reglasArchivos[this.name];
-
-                    if (regla) {
-                        const esValido = regla.palabras.some(palabra => fileName.includes(palabra));
-                        if (!esValido) {
-                            mostrarErrorModal(
-                                "Nombre de archivo incorrecto",
-                                `El sistema requiere que el archivo contenga la palabra <strong>"${regla.msj}"</strong> en su nombre.<br><br>Por favor, renombra tu archivo en tu computadora e inténtalo de nuevo.`
-                            );
-                            this.value = '';
-                            this.classList.add('is-invalid');
-                        } else {
-                            this.classList.remove('is-invalid');
-                            this.classList.add('is-valid');
-                        }
-                    }
-                }
-            });
-        });
 
         const form = document.getElementById('inscripcionForm');
         const btnEnviar = document.getElementById('btnEnviarRevision');
@@ -1172,23 +1211,28 @@
                     if (!estaEnBaseDeDatos && !tieneArchivoSeleccionadoAhora) {
                         todosSubidos = false;
 
-                        let labelElement = input.closest('.file-input-group');
-                        if (!labelElement) labelElement = input.closest('.text-start');
-
+                        let labelElement = input.closest('.file-input-group') || input.closest('.text-start');
                         let nombreBonito = labelElement ? labelElement.querySelector('label').innerText : input.name;
-                        nombreBonito = nombreBonito.replace(/^\d+\.\s*/, '').replace(/\*/g, '').trim();
+                        nombreBonito = nombreBonito.split('\n')[0].replace(/^\d+\.\s*/, '').replace(/\*/g, '').trim();
 
                         docsFaltantes.push(nombreBonito);
                         input.classList.add('is-invalid');
+
+                        let badgeFalta = input.parentNode.querySelector('.status-missing');
+                        if(badgeFalta) badgeFalta.style.display = 'inline-block';
+
                     } else {
                         input.classList.remove('is-invalid');
+
+                        let badgeFalta = input.parentNode.querySelector('.status-missing');
+                        if(badgeFalta) badgeFalta.style.display = 'none';
                     }
                 });
 
                 if (!todosSubidos) {
                     mostrarErrorModal(
                         "Faltan Documentos Obligatorios",
-                        "Para poder enviar tu expediente definitivo, debes subir los siguientes documentos:<br><span class='text-muted small mt-2 d-block'>(Recuerda que puedes usar el botón 'Guardar Avance' para subir los archivos faltantes más tarde).</span>",
+                        "Para poder enviar tu expediente definitivo, debes cargar los siguientes documentos:",
                         docsFaltantes
                     );
                     return;
@@ -1213,32 +1257,40 @@
             });
         }
 
+        // Inicializar vistas de familiares extra si ya existen en base de datos
         if ("{{ inscripcion.contacto_2_nombres|default:'' }}" !== "") {
             document.getElementById('familiar_2_div').classList.remove('hidden-contact');
+            document.getElementById('group_foto_aut2').style.display = 'block';
+            if(!isReadOnly) document.querySelector('input[name="doc_contacto_2_fotos"]').disabled = false;
             familiaresMostrados = 2;
+        } else {
+            document.getElementById('group_foto_aut2').style.display = 'none';
+            document.querySelector('input[name="doc_contacto_2_fotos"]').disabled = true;
         }
+
         if ("{{ inscripcion.contacto_3_nombres|default:'' }}" !== "") {
             document.getElementById('familiar_3_div').classList.remove('hidden-contact');
+            document.getElementById('group_foto_aut3').style.display = 'block';
+            if(!isReadOnly) document.querySelector('input[name="doc_contacto_3_fotos"]').disabled = false;
             familiaresMostrados = 3;
             document.querySelector("button[onclick='agregarFamiliar()']").style.display = 'none';
+        } else {
+            document.getElementById('group_foto_aut3').style.display = 'none';
+            document.querySelector('input[name="doc_contacto_3_fotos"]').disabled = true;
         }
     });
 
     // -------------------------------------------------------------------
-    // 10. AUTO-GUARDADO (LOCALSTORAGE) BLINDADO POR USUARIO
+    // 10. AUTO-GUARDADO (LOCALSTORAGE)
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
-        // LA MAGIA ESTÁ AQUÍ: Le agregamos el ID del usuario a la llave de guardado
-        // Así jamás se mezclarán los datos de dos solicitudes distintas en la misma PC.
         const pageId = window.location.pathname + "_user_{{ request.user.id }}";
         const forms = document.querySelectorAll("form");
 
         forms.forEach(form => {
             const elements = form.querySelectorAll("input, select, textarea");
 
-            // 1. AL CARGAR LA PÁGINA: Recuperar datos guardados
             elements.forEach(el => {
-                // Ignoramos archivos y tokens
                 if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
 
                 const key = el.name || el.id;
@@ -1251,13 +1303,11 @@
                     } else {
                         el.value = savedValue;
                     }
-                    // Disparamos los eventos para que la página reaccione (abrir cajitas ocultas)
                     el.dispatchEvent(new Event('change', { bubbles: true }));
                     el.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
 
-            // 2. MIENTRAS ESCRIBE O SELECCIONA: Guardar en tiempo real
             function guardarDato(e) {
                 const el = e.target;
                 if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
@@ -1276,7 +1326,6 @@
             form.addEventListener("input", guardarDato);
             form.addEventListener("change", guardarDato);
 
-            // 3. AL ENVIAR CON ÉXITO: Limpiar la memoria SOLO de este usuario
             function limpiarMemoria() {
                 elements.forEach(el => {
                     const key = el.name || el.id;
@@ -1291,6 +1340,69 @@
             if(btnConfirmarFinalJS){
                 btnConfirmarFinalJS.addEventListener('click', limpiarMemoria);
             }
+        });
+    });
+
+    // -------------------------------------------------------------------
+    // 11. RENOMBRADO VISUAL INMEDIATO AL SELECCIONAR ARCHIVO (MAGIA FRONTEND)
+    // -------------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+        const mapeoNombres = {
+            'doc_menor_certificado_medico': 'Certificado_Medico_Menor',
+            'doc_menor_cartilla_vacunacion': 'Cartilla_Vacunacion_Menor',
+            'doc_menor_grupo_sanguineo': 'Grupo_Sanguineo_Menor',
+            'doc_menor_acta_nacimiento': 'Acta_de_Nacimiento_Menor',
+            'doc_menor_fotos': 'Fotografia_del_Menor',
+            'doc_menor_laboratorio': 'Estudios_de_Laboratorio_Menor',
+            'doc_tutor_acta_nacimiento': 'Acta_de_Nacimiento_Beneficiario',
+            'doc_tutor_ine': 'INE_del_Beneficiario',
+            'doc_tutor_fotos': 'Fotografia_del_Beneficiario',
+            'doc_segundo_padre_fotos': 'Fotografia_Pareja',
+            'doc_tutor_domicilio': 'Comprobante_de_Domicilio_Beneficiario',
+            'doc_tutor_historial': 'Historial_Academico',
+            'doc_tutor_horario': 'Horario_de_Clases',
+            'doc_autorizado_carta': 'Carta_de_Autorizacion',
+            'doc_autorizado_ine': 'INE_del_Autorizado',
+            'doc_contacto_1_fotos': 'Fotografia_Autorizado_1',
+            'doc_contacto_2_fotos': 'Fotografia_Autorizado_2',
+            'doc_contacto_3_fotos': 'Fotografia_Autorizado_3',
+            'reglamento_firmado': 'Reglamento_Interno_Firmado'
+        };
+
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function(e) {
+                if (this.files && this.files.length > 0) {
+
+                    this.classList.remove('is-invalid');
+                    let badgeFalta = this.parentNode.querySelector('.status-missing');
+                    if(badgeFalta) badgeFalta.style.display = 'none';
+
+                    const originalFile = this.files[0];
+                    const fieldName = this.name;
+                    const baseName = mapeoNombres[fieldName];
+
+                    if (!baseName) return;
+
+                    let matricula = document.getElementById('matricula_frontend').value.trim();
+                    if (!matricula) matricula = "SIN_MATRICULA";
+
+                    const fileNameParts = originalFile.name.split('.');
+                    const ext = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+                    const nuevoNombre = `${baseName}_${matricula}${ext}`;
+
+                    try {
+                        const newFile = new File([originalFile], nuevoNombre, { type: originalFile.type });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(newFile);
+                        this.files = dataTransfer.files;
+                    } catch (err) {
+                        console.error("Error al renombrar:", err);
+                    }
+                }
+            });
         });
     });
 </script>

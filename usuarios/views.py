@@ -1,211 +1,117 @@
+import io
+import os
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.http import JsonResponse
+from django.contrib.auth.models import Group
+from django.http import JsonResponse, HttpResponse
+from django.utils import timezone
+from django.template.loader import get_template
 
-from .models import AccessLog, RelacionDepartamentos
+# --- IMPORTACIÓN MAESTRA PARA ENCONTRAR LOS LOGOS ---
+from django.contrib.staticfiles import finders
 
-# ✅ Solicitud (admisiones)
 try:
-    from admisiones.models import Solicitud, SolicitudInscripcion
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
+
+from .models import AccessLog, AsignacionRolCiclo
+
+try:
+    from admisiones.models import Solicitud, SolicitudInscripcion, Semestre
 except ImportError:
     pass
 
 
-# --- FUNCIÓN AUXILIAR PARA ENCRIPTAR DATOS VISUALMENTE ---
 def enmascarar_datos(texto):
     if not texto or len(texto) < 4:
         return "****"
     return texto[:2] + "****" + texto[-2:]
 
 
-# --- VISTA SEMÁFORO (ROUTER DE SEGURIDAD LIMPIO) ---
 @login_required
 def root_redirect_view(request):
     user = request.user
 
-    # 1. VERIFICACIÓN DE MANTENIMIENTO
-    if request.session.get('sec_manto', False) and not user.is_superuser:
-        return render(
-            request,
-            '403_prohibido.html',
-            {'mensaje': 'El sistema está en Mantenimiento. Intente más tarde.'}
-        )
-
-    # 2. SI ES EL SUPERADMINISTRADOR (TI)
-    if user.is_superuser:
+    if user.is_superuser or getattr(user, 'tipo_persona', '') == 'ADMIN':
         return redirect('panel_gobierno_ti')
 
-    # 3. SI ES UN PAPÁ (BENEFICIARIO)
+    if request.session.get('sec_manto', False):
+        logout(request)
+        messages.error(request, 'El sistema está en Mantenimiento. Intente más tarde.')
+        return redirect('login')
+
     if getattr(user, 'tipo_persona', '') == 'BENEFICIARIO':
         return redirect('portal_padres_home')
 
-    # 4. SI ES STAFF (PERSONAL DE LA ESTANCIA)
     if user.is_staff:
         grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
-        tipo_persona = getattr(user, 'tipo_persona', '').upper()
+        if "directora" in grupo: return redirect('dashboard_directiva')
+        if "trabajadora social" in grupo: return redirect('dashboard_admin')
+        if "coordinadora de sala" in grupo: return redirect('lista_semestres')
+        if "psicóloga" in grupo or "psicologa" in grupo: return redirect('psicologia_pendientes')
+        if "nutrióloga" in grupo or "nutriologa" in grupo: return redirect('nutricion_pendientes')
+        if "médico" in grupo or "medico" in grupo: return redirect('medico_pendientes')
+        if "asistentes" in grupo or "maestras" in grupo: return redirect('lista_semestres')
 
-        # A) ¿Es Directiva? (Filtramos por nombre de grupo o tipo_persona)
-        if "directiva" in grupo or tipo_persona == 'DIRECTIVO' or "directora" in grupo or "coordinadora" in grupo:
-            return redirect('dashboard_directiva')
-
-        # B) Filtros Médicos y Especialistas
-        if "psicologa" in grupo or "psicólogo" in grupo or "psicologo" in grupo:
-            return redirect('psicologia_pendientes')
-
-        # Nutrición
-        if (
-                "nutricion" in grupo
-                or "nutriólogo" in grupo
-                or "nutriologo" in grupo
-                or "nutriologa" in grupo
-                or "nutrióloga" in grupo
-        ):
-            return redirect('nutricion_pendientes')
-
-        if "medico" in grupo or "médico" in grupo or "doctor" in grupo or "doctora" in grupo:
-            return redirect('medico_pendientes')
-
-        # C) Trabajo social
-        if "trabajador social" in grupo or "trabajadora social" in grupo:
-            return redirect('dashboard_admin')  # Panel de admisiones
-
-        # ===============================================================
-        # D) BLOQUEO ESTRICTO: Es staff pero no tiene un puesto asignado
-        # ===============================================================
         logout(request)
-        messages.error(request, "Acceso Denegado: Su usuario no tiene un puesto asignado en el sistema. Contacte a TI.")
+        messages.error(request,
+                       "Acceso Denegado: Su usuario no tiene un rol oficial asignado. Contacte al Administrador.")
         return redirect('login')
 
-    # Si por alguna extraña razón no cae en ningún lado
     logout(request)
     messages.error(request, "Error de rol de usuario.")
     return redirect('login')
 
 
-# --- VISTAS PROTEGIDAS ---
-
-# NUEVA VISTA PARA LA DIRECTORA CON DATOS 100% REALES
 @login_required
 def dashboard_directiva(request):
-    if not request.user.is_staff:
-        return render(request, '403_prohibido.html', {'mensaje': 'Acceso denegado. Exclusivo para personal directivo.'})
-
-    # Variables base
-    dictamenes_pendientes = []
-    kpi_alumnos = 0
-    kpi_por_autorizar = 0
-
-    try:
-        # Aquí consultamos los datos REALES de la Épica 2
-        dictamenes_pendientes = SolicitudInscripcion.objects.filter(
-            estado='EN_FILTROS',
-            solicitud_ingreso__estado_medico='APROBADO',
-            solicitud_ingreso__estado_nutricion='APROBADO',
-            solicitud_ingreso__estado_psicologia='APROBADO'
-        ).order_by('-updated_at')
-
-        kpi_alumnos = SolicitudInscripcion.objects.filter(estado='FINALIZADA').count()
-        kpi_por_autorizar = dictamenes_pendientes.count()
-    except Exception:
-        pass
-
-    # Diccionario de contexto con TODO dinámico
-    context = {
-        # Lo que ya funciona (Épica 2)
-        'dictamenes_pendientes': dictamenes_pendientes,
-        'kpi_alumnos': kpi_alumnos,
-        'kpi_por_autorizar': kpi_por_autorizar,
-
-        # Lo que haremos en la Épica 3 (Por ahora listas vacías y contadores en 0)
-        'kpi_incidencias': 0,
-        'kpi_mensajes': 0,
-        'kpi_salas': 0,
-        'docs_medico': [],
-        'docs_nutricion': [],
-        'docs_psicologia': [],
-        'mensajes_inscritos': [],
-        'mensajes_nuevos': [],
-        'incidencias_recientes': [],
-        'proximos_eventos': [],
-        'notificaciones': [],
-    }
-
-    return render(request, 'portal/home_directiva.html', context)
+    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
+    if not request.user.is_staff or "directora" not in grupo:
+        logout(request)
+        messages.error(request, 'Acceso denegado. Área exclusiva de Dirección.')
+        return redirect('login')
+    return render(request, 'portal/home_directiva.html', {})
 
 
 @login_required
 def dashboard_admin(request):
-    # Solo el personal interno (is_staff) puede ver esto
-    if not request.user.is_staff:
-        return render(request, '403_prohibido.html', {'mensaje': 'Acceso denegado. Exclusivo para personal.'})
-
+    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
+    if not request.user.is_staff or "trabajadora social" not in grupo:
+        logout(request)
+        messages.error(request, 'Acceso denegado. Área exclusiva de Trabajo Social.')
+        return redirect('login')
     return render(request, 'portal/panel_admin.html')
 
 
 @login_required
 def dashboard_medico(request):
-    # Solo el personal interno (is_staff) puede ver esto
-    if not request.user.is_staff:
-        return render(request, '403_prohibido.html', {'mensaje': 'Acceso denegado. Exclusivo para personal.'})
-
+    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
+    if not request.user.is_staff or ("médico" not in grupo and "medico" not in grupo):
+        logout(request)
+        messages.error(request, 'Acceso denegado. Área exclusiva del personal Médico.')
+        return redirect('login')
     return render(request, 'dashboard/home_medico.html')
 
 
-# --- PANEL DE ADMINISTRACIÓN (ADMIN TI / GESTIÓN CENTRAL) ---
 @login_required
 def panel_gobierno_ti(request):
     User = get_user_model()
 
-    # =========================================================
-    # 1. SEGURIDAD DE PANTALLA POR ROL (CANDADO PRINCIPAL)
-    # =========================================================
-    roles_permitidos = ['ADMIN', 'SUPERVISOR', 'PERSONAL']
-    if getattr(request.user, 'tipo_persona', None) not in roles_permitidos:
-        return render(request, '403_prohibido.html', {
-            'mensaje': 'ACCESO DENEGADO: Tu rol no tiene permisos para visualizar esta pantalla.'
-        })
-
-    # =========================================================
-    # 2. SEGURIDAD EXTRA: FIREWALL ANTI-CURIOSOS
-    # =========================================================
     if getattr(request.user, 'tipo_persona', None) != 'ADMIN':
-        if request.session.get('sec_firewall', False):
-            return render(request, '403_prohibido.html', {
-                'mensaje': 'ALERTA DE SEGURIDAD: El Firewall interno está activo. Solo Administración de Sistema puede ingresar.'
-            })
+        logout(request)
+        messages.error(request, 'ACCESO DENEGADO. No eres el Administrador del Sistema.')
+        return redirect('login')
 
-    # Log de entrada inteligente (1 vez por sesión)
-    if not request.session.get('ha_registrado_login', False):
-        AccessLog.objects.create(usuario=request.user, accion="Ingreso al Panel de Administración TI")
-        request.session['ha_registrado_login'] = True
-
-    # ---------------------------------------------------------
-    # ⚙️ CREACIÓN DINÁMICA DE LOS 4 PERMISOS EN LA BASE DE DATOS
-    # ---------------------------------------------------------
-    ct_group = ContentType.objects.get_for_model(Group)
-    p_ver, _ = Permission.objects.get_or_create(codename='perm_consultar', name='Puede Consultar Todo',
-                                                content_type=ct_group)
-    p_val, _ = Permission.objects.get_or_create(codename='perm_validar', name='Puede Validar/Aprobar',
-                                                content_type=ct_group)
-    p_obs, _ = Permission.objects.get_or_create(codename='perm_observar', name='Puede Añadir Observaciones',
-                                                content_type=ct_group)
-    p_desc, _ = Permission.objects.get_or_create(codename='perm_descargar', name='Puede Descargar Copias',
-                                                 content_type=ct_group)
-
-    # --- PROCESAMIENTO DE ACCIONES (POST / AJAX) ---
     if request.method == 'POST':
         is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
         accion = request.POST.get('action_type')
         response_data = {'status': 'success', 'msg': 'Acción realizada'}
 
         try:
-            # ==========================================
-            # 1. CREAR NUEVA PERSONA
-            # ==========================================
             if accion == 'create_user':
                 email = request.POST.get('email')
                 password = request.POST.get('password')
@@ -216,20 +122,11 @@ def panel_gobierno_ti(request):
                 tipo_persona = request.POST.get('tipo_persona')
                 num_empleado = request.POST.get('numero_empleado')
 
-                # VALIDACIONES
                 if User.objects.filter(email=email).exists():
-                    if is_ajax: return JsonResponse(
-                        {'status': 'error', 'msg': 'El CORREO electrónico ya está registrado en el sistema.'})
-
+                    if is_ajax: return JsonResponse({'status': 'error', 'msg': 'El CORREO ya está registrado.'})
                 if curp and User.objects.filter(curp=curp).exists():
-                    if is_ajax: return JsonResponse(
-                        {'status': 'error', 'msg': f'La CURP {curp} ya está asignada a otra persona.'})
+                    if is_ajax: return JsonResponse({'status': 'error', 'msg': f'La CURP ya está asignada.'})
 
-                if num_empleado and User.objects.filter(numero_empleado=num_empleado).exists():
-                    if is_ajax: return JsonResponse(
-                        {'status': 'error', 'msg': f'El Número de Empleado {num_empleado} ya existe.'})
-
-                # CREACIÓN
                 u = User.objects.create_user(username=email, email=email, password=password)
                 u.nombre = nombre
                 u.apellido_paterno = apellido_paterno
@@ -237,264 +134,206 @@ def panel_gobierno_ti(request):
                 u.curp = curp
                 u.tipo_persona = tipo_persona
                 u.numero_empleado = num_empleado
-
-                # --- VALIDACIÓN DE ACCESO EN LOGIN (Requisito del Inge) ---
                 u.estatus_operativo = True
                 u.is_active = True
 
-                # PERMISOS BASE
                 if tipo_persona == 'ADMIN':
                     u.is_superuser = True
                     u.is_staff = True
-                elif tipo_persona in ['SUPERVISOR', 'PERSONAL']:
+                else:
                     u.is_superuser = False
                     u.is_staff = True
-
                 u.save()
 
-                # AUDITORÍA
-                AccessLog.objects.create(usuario=request.user,
-                                         accion=f"CREACIÓN PERSONA: Registró a {nombre} {apellido_paterno} [{tipo_persona}] con CURP {curp}")
+                AccessLog.objects.create(usuario=request.user, accion=f"CREACIÓN: Registró a {nombre} [{tipo_persona}]")
                 response_data['msg'] = f'Persona {nombre} registrada exitosamente.'
 
-            # ==========================================
-            # 2. EDITAR PERSONA
-            # ==========================================
             elif accion == 'edit_user':
                 user_id = request.POST.get('user_id')
                 usr_edit = User.objects.get(id=user_id)
-
                 email = request.POST.get('email')
-                curp = request.POST.get('curp', '').upper()
-                num = request.POST.get('numero_empleado')
 
-                # Validar que no le robe los datos a OTRA persona
-                if User.objects.filter(email=email).exclude(id=user_id).exists():
-                    return JsonResponse({'status': 'error', 'msg': 'El correo ya está en uso por otra persona.'})
-                if curp and User.objects.filter(curp=curp).exclude(id=user_id).exists():
-                    return JsonResponse({'status': 'error', 'msg': 'La CURP ya está asignada a otra persona.'})
-                if num and User.objects.filter(numero_empleado=num).exclude(id=user_id).exists():
-                    return JsonResponse({'status': 'error', 'msg': 'Ese Número de Empleado ya existe en el sistema.'})
-
-                # Actualizar información
                 usr_edit.nombre = request.POST.get('nombre')
                 usr_edit.apellido_paterno = request.POST.get('apellido_paterno')
                 usr_edit.apellido_materno = request.POST.get('apellido_materno', '')
-                usr_edit.curp = curp
-                usr_edit.numero_empleado = num
+                usr_edit.curp = request.POST.get('curp', '').upper()
+                usr_edit.numero_empleado = request.POST.get('numero_empleado')
                 usr_edit.email = email
                 usr_edit.username = email
                 usr_edit.tipo_persona = request.POST.get('tipo_persona')
 
-                # --- MAGIA DE BLOQUEO PARA EL LOGIN (Requisito del Inge) ---
                 estatus = (request.POST.get('estatus_operativo') == 'true')
                 usr_edit.estatus_operativo = estatus
                 usr_edit.is_active = estatus
 
-                # Asignar permisos según nuevo tipo
-                if usr_edit.tipo_persona == 'ADMIN':
-                    usr_edit.is_superuser = True
-                    usr_edit.is_staff = True
-                else:
-                    usr_edit.is_superuser = False
-                    usr_edit.is_staff = True
-
-                # Si escribió una contraseña nueva, cambiarla
                 nueva_pass = request.POST.get('password')
                 if nueva_pass:
                     usr_edit.set_password(nueva_pass)
-
                 usr_edit.save()
-                AccessLog.objects.create(usuario=request.user,
-                                         accion=f"EDICIÓN PERSONA: Actualizó datos de {usr_edit.nombre}")
+
+                AccessLog.objects.create(usuario=request.user, accion=f"EDICIÓN: Actualizó a {usr_edit.nombre}")
                 response_data['msg'] = 'Información actualizada correctamente.'
 
-            # ==========================================
-            # 3. ELIMINAR USUARIO
-            # ==========================================
             elif accion == 'delete_user':
                 user_id = request.POST.get('user_id')
                 if int(user_id) != request.user.id:
                     User.objects.filter(id=user_id).delete()
                     response_data['msg'] = 'Persona eliminada del sistema.'
-                else:
-                    if is_ajax: return JsonResponse({'status': 'error', 'msg': 'Seguridad: No puedes auto-eliminarte.'})
 
-            # ==========================================
-            # 4. CREAR NUEVO PUESTO Y PERMISOS (Catálogo)
-            # ==========================================
-            elif accion == 'create_role':
-                nombre_rol = request.POST.get('nombre_rol', '').strip().title()
-                es_master = (request.POST.get('permiso_total') == 'on')
-
-                if nombre_rol:
-                    nombre_final = f"[MASTER] {nombre_rol}" if es_master else nombre_rol
-                    if Group.objects.filter(name=nombre_final).exists():
-                        if is_ajax: return JsonResponse(
-                            {'status': 'error', 'msg': f'El puesto "{nombre_final}" ya existe.'})
-
-                    grupo = Group.objects.create(name=nombre_final)
-
-                    # Le inyectamos los permisos de las casillas
-                    if request.POST.get('p_ver') == 'on': grupo.permissions.add(p_ver)
-                    if request.POST.get('p_val') == 'on': grupo.permissions.add(p_val)
-                    if request.POST.get('p_obs') == 'on': grupo.permissions.add(p_obs)
-                    if request.POST.get('p_desc') == 'on': grupo.permissions.add(p_desc)
-
-                    response_data['msg'] = f'Puesto "{nombre_rol}" guardado en el catálogo.'
-
-            # ==========================================
-            # 5. EDITAR PERMISOS DE UN PUESTO EXISTENTE
-            # ==========================================
-            elif accion == 'edit_role':
-                rol_id = request.POST.get('rol_id')
-                grupo = Group.objects.get(id=rol_id)
-
-                # Borrar los viejos y actualizar con los nuevos
-                grupo.permissions.clear()
-                if request.POST.get('p_ver') == 'on': grupo.permissions.add(p_ver)
-                if request.POST.get('p_val') == 'on': grupo.permissions.add(p_val)
-                if request.POST.get('p_obs') == 'on': grupo.permissions.add(p_obs)
-                if request.POST.get('p_desc') == 'on': grupo.permissions.add(p_desc)
-
-                response_data['msg'] = f'Permisos actualizados para el puesto: {grupo.name}'
-
-            # ==========================================
-            # 6. ASIGNAR PUESTO A UN EMPLEADO
-            # ==========================================
-            elif accion == 'assign_role':
+            elif accion == 'assign_fixed_role':
                 usuario_id = request.POST.get('usuario_id')
-                rol_id = request.POST.get('rol_id')
-
-                if not usuario_id or not rol_id:
-                    if is_ajax: return JsonResponse({'status': 'error', 'msg': 'Selecciona empleado y puesto.'})
+                rol_fijo = request.POST.get('rol_fijo')
+                semestre_id = request.POST.get('semestre_id')
 
                 empleado = User.objects.get(id=usuario_id)
-                nuevo_grupo = Group.objects.get(id=rol_id)
+                grupo, _ = Group.objects.get_or_create(name=rol_fijo)
 
-                # Validación de duplicados
-                if empleado.groups.exists():
-                    rol_actual = empleado.groups.first().name.replace('[MASTER] ', '')
-                    if is_ajax: return JsonResponse({'status': 'error',
-                                                     'msg': f'¡ALERTA! {empleado.nombre} ya es "{rol_actual}". No puede tener dos puestos a la vez.'})
+                if semestre_id:
+                    ciclo = Semestre.objects.get(id=semestre_id)
+                    AsignacionRolCiclo.objects.update_or_create(
+                        usuario=empleado, semestre=ciclo, defaults={'rol': grupo}
+                    )
 
-                empleado.groups.add(nuevo_grupo)
-                AccessLog.objects.create(usuario=request.user,
-                                         accion=f"ASIGNÓ CARGO: '{nuevo_grupo.name}' a {empleado.nombre}")
-                response_data['msg'] = f'Se vinculó a {empleado.nombre} como {nuevo_grupo.name}.'
+                empleado.groups.clear()
+                empleado.groups.add(grupo)
+                AccessLog.objects.create(usuario=request.user, accion=f"ASIGNÓ ROL: '{rol_fijo}' a {empleado.nombre}")
+                response_data['msg'] = f'Rol asignado correctamente.'
 
-            # ==========================================
-            # 7. ELIMINAR ROL SECUNDARIO DEL CATÁLOGO
-            # ==========================================
-            elif accion == 'delete_role':
-                Group.objects.filter(id=request.POST.get('rol_id')).delete()
-                response_data['msg'] = 'Rol eliminado.'
+            elif accion == 'remove_fixed_role':
+                usuario_id = request.POST.get('usuario_id')
+                empleado = User.objects.get(id=usuario_id)
+                empleado.groups.clear()
+                AccessLog.objects.create(usuario=request.user, accion=f"Removió roles a {empleado.nombre}")
+                response_data['msg'] = f'Roles removidos a {empleado.nombre}.'
 
-            # ==========================================
-            # 8. RELACIONAR DEPARTAMENTOS (PERMISOS CRUZADOS)
-            # ==========================================
-            elif accion == 'cross_relation':
-                origen_id = request.POST.get('rol_origen')
-                destino_id = request.POST.get('rol_destino')
+            elif accion == 'abandon_admin':
+                sucesor_id = request.POST.get('sucesor_id')
+                sucesor = User.objects.get(id=sucesor_id)
+                yo = request.user
+                sucesor.is_superuser = True
+                sucesor.tipo_persona = 'ADMIN'
+                sucesor.save()
+                yo.is_superuser = False
+                yo.tipo_persona = 'PERSONAL'
+                yo.save()
+                AccessLog.objects.create(usuario=yo, accion=f"CEDER MANDO: {sucesor.nombre} es el nuevo Administrador.")
+                response_data[
+                    'msg'] = 'Has cedido la Administración. Tus permisos se han revocado, tu sesión seguirá abierta hasta que salgas manualmente.'
 
-                if not origen_id or not destino_id:
-                    if is_ajax: return JsonResponse(
-                        {'status': 'error', 'msg': 'Selecciona ambos puestos para vincularlos.'})
+            elif accion == 'start_cycle':
+                nombre = request.POST.get('nombre_ciclo')
+                inicio = request.POST.get('fecha_inicio')
+                fin = request.POST.get('fecha_fin')
+                Semestre.objects.filter(estado__in=['ACTIVO', 'CONFIGURACION']).update(estado='CERRADO')
+                nuevo = Semestre.objects.create(nombre=nombre, estado='ACTIVO', fecha_inicio=inicio, fecha_fin=fin)
+                AccessLog.objects.create(usuario=request.user, accion=f"Inició ciclo: {nuevo.nombre}")
+                response_data['msg'] = f'¡Ciclo {nuevo.nombre} iniciado!'
 
-                if origen_id == destino_id:
-                    if is_ajax: return JsonResponse(
-                        {'status': 'error', 'msg': 'No puedes vincular un puesto consigo mismo.'})
+            elif accion == 'end_cycle':
+                Semestre.objects.filter(estado__in=['ACTIVO', 'CONFIGURACION']).update(estado='CERRADO')
+                response_data['msg'] = 'Ciclo cerrado.'
 
-                origen = Group.objects.get(id=origen_id)
-                destino = Group.objects.get(id=destino_id)
-
-                puede_ver = (request.POST.get('c_ver') == 'on')
-                puede_val = (request.POST.get('c_val') == 'on')
-                puede_obs = (request.POST.get('c_obs') == 'on')
-                puede_desc = (request.POST.get('c_desc') == 'on')
-
-                # Si la relación ya existe, la actualiza. Si no, la crea.
-                relacion, created = RelacionDepartamentos.objects.update_or_create(
-                    rol_origen=origen,
-                    rol_destino=destino,
-                    defaults={
-                        'puede_consultar': puede_ver,
-                        'puede_validar': puede_val,
-                        'puede_observar': puede_obs,
-                        'puede_descargar': puede_desc
-                    }
-                )
-
-                verbo = "Creó" if created else "Actualizó"
-                AccessLog.objects.create(usuario=request.user,
-                                         accion=f"{verbo} permiso cruzado: {origen.name} -> {destino.name}")
-                response_data['msg'] = f'Se configuró correctamente el permiso de {origen.name} sobre {destino.name}.'
-
-            # ==========================================
-            # 9. ELIMINAR RELACIÓN CRUZADA
-            # ==========================================
-            elif accion == 'delete_cross_relation':
-                rel_id = request.POST.get('rel_id')
-                RelacionDepartamentos.objects.filter(id=rel_id).delete()
-                response_data['msg'] = 'Vínculo entre departamentos eliminado.'
-
-            # ==========================================
-            # 10. SEGURIDAD: APLICAR PROTOCOLOS
-            # ==========================================
             elif accion == 'toggle_security':
                 request.session['sec_encrypt'] = True if request.POST.get('toggle_encrypt') else False
-                request.session['sec_manto'] = True if request.POST.get('toggle_manto') else False
-                request.session['sec_firewall'] = True if request.POST.get('toggle_firewall') else False
-                request.session['sec_inscrip'] = True if request.POST.get('toggle_inscrip') else False
-                response_data['msg'] = 'Protocolos de seguridad aplicados en el servidor.'
+                response_data['msg'] = 'Protocolos de seguridad aplicados.'
 
-            # ==========================================
-            # 11. LIMPIAR HISTORIAL
-            # ==========================================
             elif accion == 'clear_history':
-                AccessLog.objects.exclude(accion__startswith="REL_CONF:").exclude(
-                    accion__startswith="MASTER_CONF:").delete()
-                response_data['msg'] = 'Historial de auditoría depurado.'
+                AccessLog.objects.all().delete()
+                response_data['msg'] = 'Historial depurado.'
 
             if is_ajax: return JsonResponse(response_data)
 
         except Exception as e:
-            if is_ajax:
-                return JsonResponse({'status': 'error', 'msg': str(e)})
-            else:
-                messages.error(request, f'Error del sistema: {e}')
+            if is_ajax: return JsonResponse({'status': 'error', 'msg': str(e)})
 
         return redirect('panel_gobierno_ti')
 
-    # --- PREPARACIÓN DE DATOS PARA LA VISTA ---
     staff_list = User.objects.filter(is_staff=True).order_by('-date_joined')
-
-    if request.session.get('sec_encrypt', False):
-        for s in staff_list: s.email = enmascarar_datos(s.email)
-
-    logs_gen = AccessLog.objects.all().order_by('-fecha_acceso')[:50]
+    ciclos = []
+    try:
+        ciclos = Semestre.objects.all().order_by('-fecha_inicio')
+    except:
+        pass
 
     context = {
         'lista_staff': staff_list,
-        'roles': Group.objects.all(),
-        'relaciones_cruzadas': RelacionDepartamentos.objects.all(),  # <-- SE ENVIAN AL HTML
-        'logs': logs_gen,
+        'ciclos_historial': ciclos,
+        'logs': AccessLog.objects.all().order_by('-fecha_acceso')[:50],
         'encrypt_active': request.session.get('sec_encrypt', True),
-        'manto_active': request.session.get('sec_manto', False),
-        'firewall_active': request.session.get('sec_firewall', False),
-        'inscrip_active': request.session.get('sec_inscrip', False),
     }
-
     return render(request, 'portal/panel_ti.html', context)
 
 
 # ==============================================================
-# VISTAS DE PADRES (PÚBLICAS, COMO LO PEDISTE SIN INICIAR SESIÓN)
+# DESCARGA DE EXPEDIENTES EN PDF CON DOS LOGOS (CORREGIDO)
 # ==============================================================
-def portal_padres_home(request):
-    solicitud_activa = None
+@login_required
+def descargar_reporte_ciclo_pdf(request, ciclo_id):
+    if getattr(request.user, 'tipo_persona', None) != 'ADMIN':
+        logout(request)
+        messages.error(request, 'ACCESO DENEGADO. No tienes permisos para descargar reportes.')
+        return redirect('login')
 
     try:
+        ciclo = get_object_or_404(Semestre, id=ciclo_id)
+        asignaciones = AsignacionRolCiclo.objects.filter(semestre=ciclo)
+
+        # EL TRUCO MAESTRO: finders busca la ruta física exacta en todo tu proyecto
+        ruta_unach = finders.find('img/logo_unach.png')
+        ruta_eiu = finders.find('img/logo_eiu.png')
+
+        # Protegemos contra errores de lectura en Windows reemplazando barras invertidas
+        if ruta_unach: ruta_unach = ruta_unach.replace('\\', '/')
+        if ruta_eiu: ruta_eiu = ruta_eiu.replace('\\', '/')
+
+        context = {
+            'ciclo': ciclo,
+            'asignaciones': asignaciones,
+            'fecha_reporte': timezone.now(),
+            'ruta_logo_unach': ruta_unach,
+            'ruta_logo_eiu': ruta_eiu
+        }
+
+        if not pisa:
+            return HttpResponse('Error: Instale xhtml2pdf (pip install xhtml2pdf)', status=500)
+
+        template = get_template('portal/reporte_ciclo_pdf.html')
+        html = template.render(context)
+        response = HttpResponse(content_type='application/pdf')
+
+        # --- MAGIA DEL AUTONOMBRADO ---
+        meses = {1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril', 5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto',
+                 9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'}
+
+        if ciclo.fecha_inicio and ciclo.fecha_fin:
+            mes_inicio = meses[ciclo.fecha_inicio.month]
+            mes_fin = meses[ciclo.fecha_fin.month]
+            anio = ciclo.fecha_inicio.year
+            nombre_archivo = f"ciclo_escolar_{mes_inicio}_a_{mes_fin}_{anio}.pdf"
+        else:
+            nombre_archivo = f"ciclo_escolar_{ciclo.nombre.replace(' ', '_').lower()}.pdf"
+
+        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+        pisa_status = pisa.CreatePDF(io.BytesIO(html.encode('UTF-8')), dest=response)
+
+        if pisa_status.err:
+            return HttpResponse('Hubo un error al generar el PDF.', status=500)
+        return response
+
+    except Exception as e:
+        messages.error(request, f"Error al generar reporte: {e}")
+        return redirect('panel_gobierno_ti')
+
+
+@login_required
+def portal_padres_home(request):
+    solicitud_activa = None
+    ciclo_activo = False
+
+    try:
+        if Semestre.objects.filter(estado='ACTIVO').exists():
+            ciclo_activo = True
+
         solicitud_activa = Solicitud.objects.order_by("-id").first()
         if not solicitud_activa:
             kwargs = {}
@@ -512,7 +351,8 @@ def portal_padres_home(request):
         'portal/home_padres.html',
         {
             'solicitud_id': solicitud_id,
-            'folio': folio
+            'folio': folio,
+            'ciclo_activo': ciclo_activo
         }
     )
 

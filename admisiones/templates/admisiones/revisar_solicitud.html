@@ -281,37 +281,43 @@
 
                 <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-hearts me-1"></i> Del Menor</p>
                 <div class="d-grid gap-1 mb-3">
-                    {% if inscripcion.doc_menor_certificado_medico %}<a href="{{ inscripcion.doc_menor_certificado_medico.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Certificado Médico</a>{% endif %}
-                    {% if inscripcion.doc_menor_cartilla_vacunacion %}<a href="{{ inscripcion.doc_menor_cartilla_vacunacion.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Cartilla de Vacunación</a>{% endif %}
-                    {% if inscripcion.doc_menor_grupo_sanguineo %}<a href="{{ inscripcion.doc_menor_grupo_sanguineo.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Grupo Sanguíneo</a>{% endif %}
-                    {% if inscripcion.doc_menor_acta_nacimiento %}<a href="{{ inscripcion.doc_menor_acta_nacimiento.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
-                    {% if inscripcion.doc_menor_fotos %}<a href="{{ inscripcion.doc_menor_fotos.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Menor</a>{% endif %}
-                    {% if inscripcion.doc_menor_laboratorio %}<a href="{{ inscripcion.doc_menor_laboratorio.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Est. Laboratorio</a>{% endif %}
+                    {% if inscripcion.doc_menor_certificado_medico %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_certificado_medico' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Certificado Médico</a>{% endif %}
+                    {% if inscripcion.doc_menor_cartilla_vacunacion %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_cartilla_vacunacion' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Cartilla de Vacunación</a>{% endif %}
+                    {% if inscripcion.doc_menor_grupo_sanguineo %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_grupo_sanguineo' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Grupo Sanguíneo</a>{% endif %}
+                    {% if inscripcion.doc_menor_acta_nacimiento %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_acta_nacimiento' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
+                    {% if inscripcion.doc_menor_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Menor</a>{% endif %}
+                    {% if inscripcion.doc_menor_laboratorio %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_laboratorio' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Est. Laboratorio</a>{% endif %}
                 </div>
 
-                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-badge-fill me-1"></i> Del Tutor</p>
+                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-badge-fill me-1"></i> Del Beneficiario</p>
                 <div class="d-grid gap-1 mb-3">
-                    {% if inscripcion.doc_tutor_acta_nacimiento %}<a href="{{ inscripcion.doc_tutor_acta_nacimiento.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
-                    {% if inscripcion.doc_tutor_ine %}<a href="{{ inscripcion.doc_tutor_ine.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
-                    {% if inscripcion.doc_tutor_fotos %}<a href="{{ inscripcion.doc_tutor_fotos.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Tutor</a>{% endif %}
-                    {% if inscripcion.doc_tutor_domicilio %}<a href="{{ inscripcion.doc_tutor_domicilio.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Comp. Domicilio</a>{% endif %}
-                    {% if inscripcion.doc_tutor_pago %}<a href="{{ inscripcion.doc_tutor_pago.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Recibo de Pago</a>{% endif %}
-                    {% if inscripcion.doc_tutor_historial %}<a href="{{ inscripcion.doc_tutor_historial.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Historial Académico</a>{% endif %}
-                    {% if inscripcion.doc_tutor_horario %}<a href="{{ inscripcion.doc_tutor_horario.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Horario de Clases</a>{% endif %}
+                    {% if inscripcion.doc_tutor_acta_nacimiento %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_acta_nacimiento' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
+                    {% if inscripcion.doc_tutor_ine %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_ine' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
+                    {% if inscripcion.doc_tutor_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Tutor</a>{% endif %}
+
+                    {% if inscripcion.doc_segundo_padre_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_segundo_padre_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos de la Pareja</a>{% endif %}
+
+                    {% if inscripcion.doc_tutor_domicilio %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_domicilio' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Comp. Domicilio</a>{% endif %}
+                    {% if inscripcion.doc_tutor_pago %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_pago' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Recibo de Pago</a>{% endif %}
+                    {% if inscripcion.doc_tutor_historial %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_historial' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Historial Académico</a>{% endif %}
+                    {% if inscripcion.doc_tutor_horario %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_horario' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Horario de Clases</a>{% endif %}
                 </div>
 
-                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-check-fill me-1"></i> Del Autorizado</p>
+                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-check-fill me-1"></i> Familiares Autorizados</p>
                 <div class="d-grid gap-1 mb-3">
-                    {% if inscripcion.doc_autorizado_carta %}<a href="{{ inscripcion.doc_autorizado_carta.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Carta Autorización</a>{% endif %}
-                    {% if inscripcion.doc_autorizado_ine %}<a href="{{ inscripcion.doc_autorizado_ine.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
-                    {% if inscripcion.doc_autorizado_fotos %}<a href="{{ inscripcion.doc_autorizado_fotos.url }}" target="_blank" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos Autorizado</a>{% endif %}
+                    {% if inscripcion.doc_autorizado_carta %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_autorizado_carta' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Carta Autorización</a>{% endif %}
+                    {% if inscripcion.doc_autorizado_ine %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_autorizado_ine' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE (Todos)</a>{% endif %}
+
+                    {% if inscripcion.doc_contacto_1_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_1_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Foto Familiar 1</a>{% endif %}
+                    {% if inscripcion.doc_contacto_2_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_2_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Foto Familiar 2</a>{% endif %}
+                    {% if inscripcion.doc_contacto_3_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_3_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Foto Familiar 3</a>{% endif %}
                 </div>
 
                 <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-file-earmark-check-fill me-1"></i> Oficial</p>
                 <div class="d-grid gap-1">
                     {% if inscripcion.reglamento_firmado %}
-                    <a href="{{ inscripcion.reglamento_firmado.url }}" target="_blank" class="btn btn-primary btn-soft text-start fw-bold" style="font-size: 0.85rem;">
-                        <i class="bi bi-file-earmark-text-fill me-2 text-white"></i> Reglamento Firmado
+                    <a href="{% url 'descargar_archivo_expediente' inscripcion.id 'reglamento_firmado' %}" class="btn btn-primary btn-soft text-start fw-bold" style="font-size: 0.85rem;">
+                        <i class="bi bi-file-earmark-text-fill me-2 text-white"></i> Descargar Reglamento
                     </a>
                     {% else %}
                     <div class="alert alert-warning py-2 small fw-bold text-center border-warning m-0"><i class="bi bi-hourglass-split me-1"></i> Esperando Reglamento</div>
@@ -399,26 +405,34 @@
                     const docLinks = document.querySelectorAll('.doc-link-btn, a.btn-primary.btn-soft');
 
                     docLinks.forEach(link => {
-                        const url = link.getAttribute('href');
-                        if(!url) return;
-
                         let docName = "";
-                        if(url.includes('certificado')) docName = 'doc_menor_certificado_medico';
-                        else if(url.includes('cartilla')) docName = 'doc_menor_cartilla_vacunacion';
-                        else if(url.includes('sanguineo')) docName = 'doc_menor_grupo_sanguineo';
-                        else if(url.includes('menor_acta')) docName = 'doc_menor_acta_nacimiento';
-                        else if(url.includes('menor_foto')) docName = 'doc_menor_fotos';
-                        else if(url.includes('laboratorio')) docName = 'doc_menor_laboratorio';
-                        else if(url.includes('tutor_acta')) docName = 'doc_tutor_acta_nacimiento';
-                        else if(url.includes('tutor_ine')) docName = 'doc_tutor_ine';
-                        else if(url.includes('tutor_foto')) docName = 'doc_tutor_fotos';
-                        else if(url.includes('domicilio')) docName = 'doc_tutor_domicilio';
-                        else if(url.includes('historial')) docName = 'doc_tutor_historial';
-                        else if(url.includes('horario')) docName = 'doc_tutor_horario';
-                        else if(url.includes('autorizado_carta')) docName = 'doc_autorizado_carta';
-                        else if(url.includes('autorizado_ine')) docName = 'doc_autorizado_ine';
-                        else if(url.includes('autorizado_foto')) docName = 'doc_autorizado_fotos';
-                        else if(url.includes('reglamento')) docName = 'reglamento_firmado';
+                        const text = link.innerText.toLowerCase();
+
+                        if(text.includes('certificado')) docName = 'doc_menor_certificado_medico';
+                        else if(text.includes('cartilla')) docName = 'doc_menor_cartilla_vacunacion';
+                        else if(text.includes('sanguíneo')) docName = 'doc_menor_grupo_sanguineo';
+                        else if(text.includes('acta de nacimiento') && link.closest('div').previousElementSibling.innerText.includes('Menor')) docName = 'doc_menor_acta_nacimiento';
+                        else if(text.includes('acta de nacimiento') && link.closest('div').previousElementSibling.innerText.includes('Beneficiario')) docName = 'doc_tutor_acta_nacimiento';
+                        else if(text.includes('fotos del menor')) docName = 'doc_menor_fotos';
+                        else if(text.includes('laboratorio')) docName = 'doc_menor_laboratorio';
+
+                        else if(text.includes('ine') && link.closest('div').previousElementSibling.innerText.includes('Beneficiario')) docName = 'doc_tutor_ine';
+                        else if(text.includes('ine') && link.closest('div').previousElementSibling.innerText.includes('Autorizados')) docName = 'doc_autorizado_ine';
+
+                        else if(text.includes('fotos del tutor') || text.includes('beneficiario')) docName = 'doc_tutor_fotos';
+
+                        // NUEVOS MAPEOS DE RECHAZO
+                        else if(text.includes('pareja')) docName = 'doc_segundo_padre_fotos';
+                        else if(text.includes('foto familiar 1')) docName = 'doc_contacto_1_fotos';
+                        else if(text.includes('foto familiar 2')) docName = 'doc_contacto_2_fotos';
+                        else if(text.includes('foto familiar 3')) docName = 'doc_contacto_3_fotos';
+
+                        else if(text.includes('domicilio')) docName = 'doc_tutor_domicilio';
+                        else if(text.includes('recibo')) docName = 'doc_tutor_pago';
+                        else if(text.includes('historial')) docName = 'doc_tutor_historial';
+                        else if(text.includes('horario')) docName = 'doc_tutor_horario';
+                        else if(text.includes('carta')) docName = 'doc_autorizado_carta';
+                        else if(text.includes('reglamento')) docName = 'reglamento_firmado';
 
                         if(docName) {
                             const wrapper = document.createElement('div');
@@ -573,7 +587,6 @@
       color: '#0f172a'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Si el usuario hace clic en "Sí", enviamos el formulario
         document.getElementById('formAprobarSolicitud').submit();
       }
     });

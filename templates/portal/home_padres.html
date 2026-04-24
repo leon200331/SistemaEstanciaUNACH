@@ -182,138 +182,156 @@
         <i class="bi bi-house-heart-fill hero-icon d-none d-md-block"></i>
         <div class="position-relative" style="z-index: 2;">
             <h1>¡Bienvenido(a), {{ request.user.nombre|default:request.user.first_name }}!</h1>
-            <p class="lead">Ciclo Escolar 2026 - Panel de Gestión Familiar</p>
+            <p class="lead">Panel de Gestión Familiar</p>
             <div class="d-inline-flex align-items-center gap-2 mt-2 px-3 py-1 rounded-pill" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);">
                 <i class="bi bi-stars"></i> <span class="small fw-bold">Estamos listos para recibir a tus pequeños.</span>
             </div>
         </div>
     </div>
 
-    {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
-        <div class="card-header bg-success text-white py-3">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-check-circle-fill me-2"></i> ¡Inscripción Aprobada por Dirección!</h5>
-        </div>
-        <div class="card-body p-4" style="background-color: #f0fdf4;">
-            <div class="row align-items-center">
-                <div class="col-md-7">
-                    <h4 class="fw-black text-dark mb-3">Último Paso: Confirmar tu Pago</h4>
-                    <p class="text-muted fs-5">Felicidades, tu menor ha sido aceptado oficialmente. Para finalizar tu proceso, por favor sube tu comprobante de pago de inscripción.</p>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'descargar_reporte_final_padre' mi_inscripcion.id %}" class="btn btn-outline-success fw-bold rounded-pill">
-                            <i class="bi bi-download me-1"></i> Descargar Reporte Final
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="bg-white p-4 rounded-4 shadow-sm border">
-                        <form method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <label class="form-label fw-bold text-brand small mb-2 text-uppercase">Subir Comprobante (PDF o Imagen)</label>
-                            <input type="file" name="comprobante_pago" class="form-control mb-3" required>
-                            <button type="submit" name="subir_pago" class="btn btn-success w-100 fw-bold py-2 shadow-sm rounded-3">
-                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Enviar a Validación
-                            </button>
-                        </form>
-                        {% if mi_inscripcion.doc_tutor_pago %}
-                        <div class="text-center mt-3 text-success small fw-bold">
-                            <i class="bi bi-file-earmark-check"></i> Ya enviaste un archivo.
+    {% if ciclo_activo or mi_inscripcion %}
+
+        {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-header bg-success text-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-check-circle-fill me-2"></i> ¡Inscripción Aprobada por Dirección!</h5>
+            </div>
+            <div class="card-body p-4" style="background-color: #f0fdf4;">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <h4 class="fw-black text-dark mb-3">Último Paso: Confirmar tu Pago</h4>
+                        <p class="text-muted fs-5">Felicidades, tu menor ha sido aceptado oficialmente. Para finalizar tu proceso, por favor sube tu comprobante de pago de inscripción.</p>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'descargar_reporte_final_padre' mi_inscripcion.id %}" class="btn btn-outline-success fw-bold rounded-pill">
+                                <i class="bi bi-download me-1"></i> Descargar Reporte Final
+                            </a>
                         </div>
-                        {% endif %}
+                    </div>
+                    <div class="col-md-5">
+                        <div class="bg-white p-4 rounded-4 shadow-sm border">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <label class="form-label fw-bold text-brand small mb-2 text-uppercase">Subir Comprobante (PDF o Imagen)</label>
+                                <input type="file" name="comprobante_pago" class="form-control mb-3" required>
+                                <button type="submit" name="subir_pago" class="btn btn-success w-100 fw-bold py-2 shadow-sm rounded-3">
+                                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> Enviar a Validación
+                                </button>
+                            </form>
+                            {% if mi_inscripcion.doc_tutor_pago %}
+                            <div class="text-center mt-3 text-success small fw-bold">
+                                <i class="bi bi-file-earmark-check"></i> Ya enviaste un archivo.
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    {% if mi_inscripcion.estado == 'DEVUELTA' %}
-    <div class="alert-devuelta-home">
-        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-        <div class="w-100">
-            <h4 class="text-danger">¡Acción Requerida! Expediente Devuelto</h4>
-            <p class="text-dark">
-                Trabajo Social ha revisado tus documentos y encontró detalles que deben corregirse.
-                El trámite está <strong>pausado</strong> hasta que lo resuelvas.
-            </p>
-            <a href="{% url 'portal_inscripcion' %}" class="btn btn-danger btn-corregir shadow-sm">
-                <i class="bi bi-pencil-square me-2"></i> Ir a mi Expediente para Corregirlo
-            </a>
-        </div>
-    </div>
-    {% elif mi_inscripcion.estado == 'FILTROS' %}
-    <div class="alert alert-success d-flex align-items-center alert-custom mb-4" style="border-left: 6px solid #198754; background-color: #f6fcf9;">
-        <i class="bi bi-check-circle-fill fs-1 me-3 text-success"></i>
-        <div>
-            <h4 class="fw-bold mb-1 text-success">¡Documentación Aprobada!</h4>
-            <p class="mb-0 text-dark">Tu expediente ha sido validado correctamente. Has avanzado a la fase de Evaluaciones (Filtros Médicos y Psicológicos).</p>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="row g-4 mb-5">
-        <div class="col-md-6">
-            <div class="action-card">
-                <div class="w-100 text-center">
-                    <div class="icon-box-primary mx-auto">
-                        <i class="bi bi-folder-check"></i>
-                    </div>
-                    <h3 class="card-title-custom">Mi Expediente de Inscripción</h3>
-                    <p class="card-text-custom">
-                        Tu solicitud de ingreso fue aprobada. Haz clic aquí para llenar los datos médicos de tu menor, actualizar tu información familiar y firmar los reglamentos.
-                    </p>
-                </div>
-
-                <div class="w-100 mt-2">
-                    {% if not mi_inscripcion or mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}
-                        <a href="{% url 'portal_inscripcion' %}" class="btn btn-action btn-primary-custom">
-                            Continuar Inscripción <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
-                        </a>
-                    {% elif mi_inscripcion.estado == 'EN_REVISION' %}
-                        <div class="status-pill bg-warning text-dark shadow-sm">
-                            <i class="bi bi-hourglass-split"></i> En Revisión
-                        </div>
-                        <div class="text-center mt-3 text-warning-emphasis fw-bold small">
-                            Trabajo Social está verificando tus documentos.
-                        </div>
-                    {% else %}
-                        <div class="status-pill bg-secondary text-white shadow-sm opacity-75">
-                            <i class="bi bi-lock-fill"></i> Expediente Cerrado
-                        </div>
-                        <div class="text-center mt-3 text-success fw-bold small">
-                            <i class="bi bi-check-circle-fill me-1"></i> Trámite documental finalizado.
-                        </div>
-                    {% endif %}
-                </div>
+        {% if mi_inscripcion.estado == 'DEVUELTA' %}
+        <div class="alert-devuelta-home">
+            <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+            <div class="w-100">
+                <h4 class="text-danger">¡Acción Requerida! Expediente Devuelto</h4>
+                <p class="text-dark">
+                    Trabajo Social ha revisado tus documentos y encontró detalles que deben corregirse.
+                    El trámite está <strong>pausado</strong> hasta que lo resuelvas.
+                </p>
+                <a href="{% url 'portal_inscripcion' %}" class="btn btn-danger btn-corregir shadow-sm">
+                    <i class="bi bi-pencil-square me-2"></i> Ir a mi Expediente para Corregirlo
+                </a>
             </div>
         </div>
+        {% elif mi_inscripcion.estado == 'FILTROS' %}
+        <div class="alert alert-success d-flex align-items-center alert-custom mb-4" style="border-left: 6px solid #198754; background-color: #f6fcf9;">
+            <i class="bi bi-check-circle-fill fs-1 me-3 text-success"></i>
+            <div>
+                <h4 class="fw-bold mb-1 text-success">¡Documentación Aprobada!</h4>
+                <p class="mb-0 text-dark">Tu expediente ha sido validado correctamente. Has avanzado a la fase de Evaluaciones (Filtros Médicos y Psicológicos).</p>
+            </div>
+        </div>
+        {% endif %}
 
-        <div class="col-md-6">
-            <div class="action-card">
-                <div class="w-100 text-center">
-                    <div class="icon-box-success mx-auto">
-                        <i class="bi bi-clock-history"></i>
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="action-card">
+                    <div class="w-100 text-center">
+                        <div class="icon-box-primary mx-auto">
+                            <i class="bi bi-folder-check"></i>
+                        </div>
+                        <h3 class="card-title-custom">Mi Expediente de Inscripción</h3>
+                        <p class="card-text-custom">
+                            Tu solicitud de ingreso fue aprobada. Haz clic aquí para llenar los datos médicos de tu menor, actualizar tu información familiar y firmar los reglamentos.
+                        </p>
                     </div>
-                    <h3 class="card-title-custom">Consulta de Estatus</h3>
-                    <p class="card-text-custom">
-                        Una vez que envíes tu expediente definitivo, el área de Trabajo Social lo revisará. Ingresa a tu portal regularmente para monitorear el progreso de tu trámite.
-                    </p>
-                </div>
 
-                <div class="w-100 mt-2">
-                    <div class="status-pill border border-success text-success bg-white fw-bold">
-                        <i class="bi bi-info-circle-fill me-1"></i> Estatus:
-                        {% if not mi_inscripcion %}
-                            Sin Iniciar
+                    <div class="w-100 mt-2">
+                        {% if not mi_inscripcion or mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}
+                            <a href="{% url 'portal_inscripcion' %}" class="btn btn-action btn-primary-custom">
+                                Continuar Inscripción <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
+                            </a>
+                        {% elif mi_inscripcion.estado == 'EN_REVISION' %}
+                            <div class="status-pill bg-warning text-dark shadow-sm">
+                                <i class="bi bi-hourglass-split"></i> En Revisión
+                            </div>
+                            <div class="text-center mt-3 text-warning-emphasis fw-bold small">
+                                Trabajo Social está verificando tus documentos.
+                            </div>
                         {% else %}
-                            {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}
+                            <div class="status-pill bg-secondary text-white shadow-sm opacity-75">
+                                <i class="bi bi-lock-fill"></i> Expediente Cerrado
+                            </div>
+                            <div class="text-center mt-3 text-success fw-bold small">
+                                <i class="bi bi-check-circle-fill me-1"></i> Trámite documental finalizado.
+                            </div>
                         {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="action-card">
+                    <div class="w-100 text-center">
+                        <div class="icon-box-success mx-auto">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h3 class="card-title-custom">Consulta de Estatus</h3>
+                        <p class="card-text-custom">
+                            Una vez que envíes tu expediente definitivo, el área de Trabajo Social lo revisará. Ingresa a tu portal regularmente para monitorear el progreso de tu trámite.
+                        </p>
+                    </div>
+
+                    <div class="w-100 mt-2">
+                        <div class="status-pill border border-success text-success bg-white fw-bold">
+                            <i class="bi bi-info-circle-fill me-1"></i> Estatus:
+                            {% if not mi_inscripcion %}
+                                Sin Iniciar
+                            {% else %}
+                                {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
+    {% else %}
+
+        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px; background: white;">
+            <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-calendar-x-fill text-secondary" style="font-size: 5rem; opacity: 0.5;"></i>
+                </div>
+                <h2 class="fw-black text-dark mb-3">Convocatoria Cerrada</h2>
+                <p class="text-muted fs-5 mb-0" style="max-width: 600px; margin: 0 auto;">
+                    Actualmente no hay un ciclo escolar activo para nuevas inscripciones en la Estancia Infantil UNACH. Por favor, mantente atento(a) a las próximas fechas oficiales emitidas por la Administración.
+                </p>
+            </div>
+        </div>
+
+    {% endif %}
+
 </div>
 
 {% endwith %}

@@ -12,24 +12,16 @@ urlpatterns = [
     path("admisiones/<int:pk>/revisar/", views.revisar_solicitud, name="revisar_solicitud"),
     path("admisiones/<int:pk>/dictaminar/", views.dictaminar_solicitud, name="dictaminar_solicitud"),
 
-    # =========================================================
-    # NUEVAS RUTAS: ELIMINAR SOLICITUDES DESDE EL PANEL
-    # =========================================================
+    # RUTA PARA LA DESCARGA DIRECTA (USA ESTA EN TU HTML)
+    path('expediente/descargar/<int:inscripcion_id>/<str:campo>/', views.descargar_archivo_expediente,
+         name='descargar_archivo_expediente'),
+
     path("admisiones/solicitud/eliminar/<int:pk>/", views.eliminar_solicitud, name="eliminar_solicitud"),
     path("admisiones/eliminar-todo/", views.eliminar_todas_solicitudes, name="eliminar_todas_solicitudes"),
-
-    # =========================================================
-    # SPRINT 2: PORTAL DE INSCRIPCIÓN (PADRES)
-    # =========================================================
     path("mi-inscripcion/", views.portal_inscripcion, name="portal_inscripcion"),
-
-    # --- NUEVA RUTA PARA QUE EL PADRE DESCARGUE EL REPORTE FINAL ---
     path("mi-inscripcion/descargar-reporte/<int:inscripcion_id>/", views.descargar_reporte_final_padre,
          name="descargar_reporte_final_padre"),
 
-    # =========================================================
-    # FILTROS / DICTÁMENES POR ÁREA (PSICOLOGÍA / NUTRICIÓN / MÉDICO)
-    # =========================================================
     path("psicologia/", views.psicologia_pendientes, name="psicologia_pendientes"),
     path("psicologia/<int:pk>/", views.psicologia_dictaminar, name="psicologia_dictaminar"),
     path("psicologia/registro/", views.psicologia_registro, name="psicologia_registro"),
@@ -45,20 +37,12 @@ urlpatterns = [
     path("medico/registro/", views.medico_registro, name="medico_registro"),
     path("medico/<int:pk>/pdf/", views.medico_pdf, name="medico_pdf"),
 
-    # =========================================================
-    # REPORTE FINAL DE INGRESO (TRABAJO SOCIAL)
-    # =========================================================
     path("reporte-final-ingreso/", views.reporte_final_pendientes, name="reporte_final_pendientes"),
     path("reporte-final-ingreso/<int:pk>/", views.dictaminar_reporte_final, name="dictaminar_reporte_final"),
-
-    # =========================================================
-    # VISTA FINAL DE DIRECTORA (ÉPICA 2)
-    # =========================================================
     path('veredicto-final/<int:inscripcion_id>/', views.veredicto_final_directora, name='veredicto_final_directora'),
-
-    # =========================================================
-    # VALIDACIÓN DE PAGOS (TRABAJO SOCIAL)
-    # =========================================================
     path('pagos/pendientes/', views.validacion_pagos_pendientes, name='validacion_pagos_pendientes'),
     path('pagos/validar/<int:pk>/', views.registrar_pago_valido, name='registrar_pago_valido'),
+    path('semestres/', views.lista_semestres, name='lista_semestres'),
+    path('semestres/nuevo/', views.crear_semestre, name='crear_semestre'),
+    path('semestres/<int:semestre_id>/', views.detalle_semestre, name='detalle_semestre'),
 ]
