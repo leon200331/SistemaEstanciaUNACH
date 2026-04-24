@@ -542,6 +542,13 @@ class DictamenPsicologiaForm(forms.ModelForm):
             else:
                 field.widget.attrs["class"] = "form-control"
 
+        if "estado_psicologia" in self.fields:
+            self.fields["estado_psicologia"].choices = [
+                ("", "Seleccione una opción"),
+                ("APROBADO", "Aprobado"),
+                ("RECHAZADO", "Rechazado"),
+            ]
+
 
 SEXO_CHOICES_NUTRI = [
     ("", "Seleccione"),
@@ -1050,6 +1057,14 @@ class DictamenNutricionForm(forms.ModelForm):
 
                 if isinstance(field.widget, forms.Select):
                     field.widget.attrs["tabindex"] = "-1"
+
+        if "estado_nutricion" in self.fields:
+            self.fields["estado_nutricion"].choices = [
+                ("", "Seleccione una opción"),
+                ("APROBADO", "Aprobado"),
+                ("RECHAZADO", "Rechazado"),
+            ]
+
 
 
 TIPO_PARTO_CHOICES = [

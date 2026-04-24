@@ -274,27 +274,32 @@
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="label-custom">Tipo de Sangre <span class="text-danger">*</span></label>
-                        <input type="hidden" name="tipo_sangre_menor" id="tipo_sangre_real" value="{{ inscripcion.tipo_sangre_menor|default:'' }}">
-                        <select id="tipo_sangre_select" class="form-select" onchange="manejarTipoSangre()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                            <option value="">Seleccione...</option>
-                            <option value="O+" {% if inscripcion.tipo_sangre_menor == 'O+' %}selected{% endif %}>O+</option>
-                            <option value="O-" {% if inscripcion.tipo_sangre_menor == 'O-' %}selected{% endif %}>O-</option>
-                            <option value="A+" {% if inscripcion.tipo_sangre_menor == 'A+' %}selected{% endif %}>A+</option>
-                            <option value="A-" {% if inscripcion.tipo_sangre_menor == 'A-' %}selected{% endif %}>A-</option>
-                            <option value="B+" {% if inscripcion.tipo_sangre_menor == 'B+' %}selected{% endif %}>B+</option>
-                            <option value="B-" {% if inscripcion.tipo_sangre_menor == 'B-' %}selected{% endif %}>B-</option>
-                            <option value="Otro" {% if inscripcion.tipo_sangre_menor and inscripcion.tipo_sangre_menor not in 'O+,O-,A+,A-,B+,B-' %}selected{% endif %}>Otro (Especificar)</option>
-                        </select>
-                        <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
-                        <div id="div_sangre_otro" class="mt-2 fade-in" style="display: none;">
-                            <input type="text" id="tipo_sangre_otro_input" class="form-control border-primary" placeholder="Escribe el tipo de sangre..." oninput="actualizarSangreReal()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="col-md-4">
+    <label class="label-custom">Tipo de Sangre <span class="text-danger">*</span></label>
+
+    <input type="hidden" name="tipo_sangre_menor" id="tipo_sangre_real" value="{{ inscripcion.tipo_sangre_menor|default:'' }}">
+
+    <select id="tipo_sangre_select" class="form-select" onchange="document.getElementById('tipo_sangre_real').value = this.value"
+        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+
+        <option value="">Seleccione...</option>
+
+        <option value="O+" {% if inscripcion.tipo_sangre_menor == 'O+' %}selected{% endif %}>O+</option>
+        <option value="O-" {% if inscripcion.tipo_sangre_menor == 'O-' %}selected{% endif %}>O-</option>
+
+        <option value="A+" {% if inscripcion.tipo_sangre_menor == 'A+' %}selected{% endif %}>A+</option>
+        <option value="A-" {% if inscripcion.tipo_sangre_menor == 'A-' %}selected{% endif %}>A-</option>
+
+        <option value="B+" {% if inscripcion.tipo_sangre_menor == 'B+' %}selected{% endif %}>B+</option>
+        <option value="B-" {% if inscripcion.tipo_sangre_menor == 'B-' %}selected{% endif %}>B-</option>
+
+        <option value="AB+" {% if inscripcion.tipo_sangre_menor == 'AB+' %}selected{% endif %}>AB+</option>
+        <option value="AB-" {% if inscripcion.tipo_sangre_menor == 'AB-' %}selected{% endif %}>AB-</option>
+
+    </select>
+
+    <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
+</div>
 
         <div class="form-section-card" id="card_segundo_padre" style="display: none;">
             <div class="section-title">
@@ -321,7 +326,7 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="label-custom">Parentesco <span class="text-danger">*</span></label>
-                        <select id="parentesco_segundo_padre_select" name="parentesco_segundo_padre" class="form-select bg-light sp-required" style="pointer-events: none;" required>
+                        <select id="parentesco_segundo_padre_select" name="parentesco_segundo_padre" class="form-select bg-light sp-required"  required>
                             <option value="">Esperando selección...</option>
                             <option value="Madre" {% if inscripcion.parentesco_segundo_padre == 'Madre' %}selected{% endif %}>Madre</option>
                             <option value="Padre" {% if inscripcion.parentesco_segundo_padre == 'Padre' %}selected{% endif %}>Padre</option>
@@ -586,12 +591,18 @@
                             </div>
 
                             <div class="file-input-group">
-                                <label class="d-flex align-items-center">
-                                    5. Fotografía del Menor
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Tamaño infantil. Fondo claro. Peso máximo: 2MB."></i>
+                                <label>
+                                    5. 3 Fotos del menor a color (Actualizadas)
+                                    <button type="button"
+                                            class="btn btn-link btn-sm p-0 ms-1 align-baseline text-primary text-decoration-none"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalInfoFotosMenor"
+                                            style="vertical-align: baseline;">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </button>
                                 </label>
-                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
+                                <small class="text-muted d-block mt-1">Sube 3 fotos recientes, a color, rostro visible y fondo claro.</small>
                                 {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -620,12 +631,18 @@
                             </div>
 
                             <div class="file-input-group">
-                                <label class="d-flex align-items-center">
-                                    3. Fotografía del Tutor
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Tamaño credencial. Nítida y reciente. Peso máximo: 2MB."></i>
+                                <label>
+                                    3. 3 Fotos del beneficiario a color (Actualizadas)
+                                    <button type="button"
+                                            class="btn btn-link btn-sm p-0 ms-1 align-baseline text-primary text-decoration-none"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalInfoFotosBeneficiario"
+                                            style="vertical-align: baseline;">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </button>
                                 </label>
-                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
+                                <small class="text-muted d-block mt-1">Sube 3 fotos recientes, a color, rostro visible y fondo claro.</small>
                                 {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -676,12 +693,18 @@
                             </div>
 
                             <div class="file-input-group">
-                                <label class="d-flex align-items-center">
+                                <label>
                                     3. Fotografía Familiar 1
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Foto individual."></i>
+                                    <button type="button"
+                                            class="btn btn-link btn-sm p-0 ms-1 align-baseline text-primary text-decoration-none"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalInfoFotosAutorizado"
+                                            style="vertical-align: baseline;">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </button>
                                 </label>
-                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
+                                <small class="text-muted d-block mt-1">Sube 2 fotos recientes, a color, rostro visible y fondo claro.</small>
                                 {% if inscripcion.doc_contacto_1_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -691,7 +714,7 @@
                                     <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
                                        title="Obligatorio si registró un segundo familiar arriba."></i>
                                 </label>
-                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_contacto_2_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
 
@@ -701,7 +724,7 @@
                                     <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
                                        title="Obligatorio si registró un tercer familiar arriba."></i>
                                 </label>
-                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png,image/jpg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
                                 {% if inscripcion.doc_contacto_3_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
                             </div>
                         </div>
@@ -810,6 +833,78 @@
                             Entendido
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalInfoFotosMenor" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Especificaciones de las fotos del menor</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <ul class="mb-0 ps-3">
+                            <li>3 fotos a color y recientes.</li>
+                            <li>Tamaño infantil o credencial.</li>
+                            <li>Rostro de frente y claramente visible.</li>
+                            <li>Fondo blanco o claro.</li>
+                            <li>Sin filtros ni ediciones.</li>
+                            <li>Formato JPG, JPEG o PNG.</li>
+                            <li>Peso máximo sugerido: 2 MB por archivo.</li>
+                            <li>Buena iluminación y nitidez.</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Entendido</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalInfoFotosBeneficiario" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Especificaciones de las fotos del beneficiario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <ul class="mb-0 ps-3">
+                            <li>3 fotos a color y recientes.</li>
+                            <li>Tamaño infantil o credencial.</li>
+                            <li>Rostro de frente y claramente visible.</li>
+                            <li>Fondo blanco o claro.</li>
+                            <li>Sin filtros ni ediciones.</li>
+                            <li>Formato JPG, JPEG o PNG.</li>
+                            <li>Peso máximo sugerido: 2 MB por archivo.</li>
+                            <li>Buena iluminación y nitidez.</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Entendido</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalInfoFotosAutorizado" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i>Especificaciones de las fotos del autorizado</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <ul class="mb-0 ps-3">
+                            <li>2 fotos a color y recientes.</li>
+                            <li>Tamaño infantil o credencial.</li>
+                            <li>Rostro de frente y claramente visible.</li>
+                            <li>Fondo blanco o claro.</li>
+                            <li>Sin filtros ni ediciones.</li>
+                            <li>Formato JPG, JPEG o PNG.</li>
+                            <li>Peso máximo sugerido: 2 MB por archivo.</li>
+                            <li>Buena iluminación y nitidez.</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Entendido</button></div>
                 </div>
             </div>
         </div>
@@ -1235,7 +1330,7 @@
                         "Para poder enviar tu expediente definitivo, debes cargar los siguientes documentos:",
                         docsFaltantes
                     );
-                    return;
+                  //  return; //
                 }
 
                 if(myModal) myModal.show();
@@ -1287,11 +1382,16 @@
         const pageId = window.location.pathname + "_user_{{ request.user.id }}";
         const forms = document.querySelectorAll("form");
 
-        forms.forEach(form => {
-            const elements = form.querySelectorAll("input, select, textarea");
+        forms.forEach(formEl => {
+            const elements = formEl.querySelectorAll("input, select, textarea");
 
             elements.forEach(el => {
-                if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
+                if (
+                    el.type === "file" ||
+                    el.type === "hidden" ||
+                    el.type === "password" ||
+                    el.name === "csrfmiddlewaretoken"
+                ) return;
 
                 const key = el.name || el.id;
                 if (!key) return;
@@ -1308,38 +1408,36 @@
                 }
             });
 
-            function guardarDato(e) {
+            const guardarDato = (e) => {
                 const el = e.target;
-                if (el.type === "file" || el.type === "hidden" || el.type === "password" || el.name === "csrfmiddlewaretoken") return;
+                if (
+                    el.type === "file" ||
+                    el.type === "hidden" ||
+                    el.type === "password" ||
+                    el.name === "csrfmiddlewaretoken"
+                ) return;
 
                 const key = el.name || el.id;
                 if (!key) return;
 
-                let valueToSave = el.value;
-                if (el.type === "checkbox" || el.type === "radio") {
-                    valueToSave = el.checked ? "true" : "false";
-                }
+                const value = (el.type === "checkbox" || el.type === "radio") ? (el.checked ? "true" : "false") : el.value;
+                localStorage.setItem(`autosave_${pageId}_${key}`, value);
+            };
 
-                localStorage.setItem(`autosave_${pageId}_${key}`, valueToSave);
-            }
+            formEl.addEventListener("input", guardarDato);
+            formEl.addEventListener("change", guardarDato);
 
-            form.addEventListener("input", guardarDato);
-            form.addEventListener("change", guardarDato);
-
-            function limpiarMemoria() {
+            const limpiarMemoria = () => {
                 elements.forEach(el => {
                     const key = el.name || el.id;
                     if (!key) return;
                     localStorage.removeItem(`autosave_${pageId}_${key}`);
                 });
-            }
+            };
 
-            form.addEventListener("submit", limpiarMemoria);
-
+            formEl.addEventListener("submit", limpiarMemoria);
             const btnConfirmarFinalJS = document.getElementById('btnConfirmarFinalJS');
-            if(btnConfirmarFinalJS){
-                btnConfirmarFinalJS.addEventListener('click', limpiarMemoria);
-            }
+            if (btnConfirmarFinalJS) btnConfirmarFinalJS.addEventListener('click', limpiarMemoria);
         });
     });
 

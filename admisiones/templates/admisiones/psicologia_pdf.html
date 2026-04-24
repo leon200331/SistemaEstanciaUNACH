@@ -2,310 +2,378 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Dictamen Psicología - {{ sol.folio }}</title>
-    <style>
-        @page {
-            size: letter;
-            /* SE AUMENTÓ EL MARGEN INFERIOR A 2.5cm PARA QUE NO CHOQUE CON EL FOOTER */
-            margin: 1.5cm 2cm 2.5cm 2cm;
-            @frame footer {
-                -pdf-frame-content: footer_content;
-                /* SE BAJÓ EL FOOTER PARA SEPARARLO DEL CONTENIDO */
-                bottom: 0.5cm;
-                margin-left: 2cm;
-                margin-right: 2cm;
-                height: 1cm;
-            }
+<meta charset="UTF-8">
+<title>Dictamen Psicología</title>
+<style>
+    @page {
+        size: letter;
+        margin: 1.5cm 2cm 2.5cm 2cm;
+        @frame footer {
+            -pdf-frame-content: footer_content;
+            bottom: 0.5cm;
+            margin-left: 2cm;
+            margin-right: 2cm;
+            height: 1cm;
         }
-        body {
-            font-family: Helvetica, Arial, sans-serif;
-            font-size: 11px;
-            color: #000;
-        }
+    }
 
-        /* --- ENCABEZADO Y LOGOS --- */
-        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .header-table td { vertical-align: middle; border: none; padding: 0; }
-        .logo-left { width: 15%; text-align: left; }
-        .header-text { width: 70%; text-align: center; }
-        .logo-right { width: 15%; text-align: right; }
-        .logo-img { max-height: 55px; width: auto; }
-        .institucion { font-size: 14px; font-weight: bold; margin: 0; text-transform: uppercase; }
-        .dependencia { font-size: 12px; margin: 0; text-transform: uppercase; }
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 9px;
+        color: #000;
+    }
 
-        /* --- TÍTULOS --- */
-        .title-center { text-align: center; font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase; }
-        .folio-right { text-align: right; font-size: 11px; margin-bottom: 15px; }
-        .section-title {
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            /* ESTO EVITA QUE EL TÍTULO SE QUEDE SOLO AL FINAL DE UNA HOJA */
-            page-break-after: avoid;
-            -pdf-keep-with-next: true;
-        }
+    /* --- ENCABEZADO OFICIAL --- */
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+    .header-table td {
+        vertical-align: middle;
+        border: none;
+    }
+    .logo-img {
+        max-height: 50px;
+        width: auto;
+    }
+    .title-main {
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+    .title-sub {
+        text-align: center;
+        font-size: 10px;
+        font-weight: bold;
+        color: #333;
+        margin-top: 2px;
+    }
+    .folio-box {
+        text-align: right;
+        font-size: 11px;
+        font-weight: bold;
+        color: #dc3545;
+    }
 
-        /* --- TABLITAS (CUADRÍCULAS) --- */
-        .grid-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-        }
-        .grid-table th, .grid-table td {
-            border: 1px solid #000; /* Líneas de la tabla */
-            padding: 4px 6px;
-            vertical-align: top;
-            text-align: left;
-        }
-        .grid-table th {
-            font-weight: bold;
-            background-color: #f8f9fa; /* Un gris muy clarito para los títulos de las celdas */
-            font-size: 10px;
-        }
-        .grid-table td {
-            font-size: 11px;
-        }
-        /* Para las celdas que fungen como etiquetas al lado izquierdo */
-        .label-cell {
-            font-weight: bold;
-            width: 40%;
-        }
-    </style>
+    /* --- TABLAS TIPO FORMATO OFICIAL --- */
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+    .form-table th {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        font-weight: bold;
+        text-align: left;
+        padding: 4px 6px;
+        border: 1px solid #475569;
+        font-size: 10px;
+        text-transform: uppercase;
+    }
+    .form-table td {
+        padding: 4px 6px;
+        border: 1px solid #475569;
+        vertical-align: middle;
+    }
+    .col-label {
+        width: 35%;
+        font-weight: bold;
+        background-color: #f8fafc;
+        color: #334155;
+        vertical-align: top;
+    }
+
+    .obs-box {
+        border: 1px solid #475569;
+        padding: 6px;
+        min-height: 40px;
+        margin-bottom: 10px;
+        background-color: #ffffff;
+    }
+
+    .estado-aprobado { color: #166534; font-weight: bold; }
+    .estado-rechazado { color: #991b1b; font-weight: bold; }
+
+    .signatures {
+        width: 100%;
+        margin-top: 30px;
+        border-collapse: collapse;
+        page-break-inside: avoid;
+    }
+    .signatures td {
+        width: 50%;
+        text-align: center;
+        vertical-align: bottom;
+        padding-top: 25px;
+        border: none;
+    }
+    .line {
+        border-top: 1px solid #000;
+        width: 70%;
+        margin: 0 auto 5px auto;
+    }
+    .small {
+        font-size: 9px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .keep-together {
+        page-break-inside: avoid;
+    }
+
+    .center-text {
+        text-align: center;
+    }
+
+    .right-text {
+        text-align: right;
+    }
+</style>
 </head>
 <body>
 
-    <table class="header-table">
-        <tr>
-            <td class="logo-left">
-                <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" class="logo-img">
-            </td>
-            <td class="header-text">
-                <p class="institucion">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</p>
-                <p class="dependencia">ESTANCIA INFANTIL UNACH</p>
-            </td>
-            <td class="logo-right">
-                <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" class="logo-img">
-            </td>
-        </tr>
-    </table>
+<table class="header-table">
+    <tr>
+        <td style="width: 20%; text-align: left;">
+            <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" class="logo-img">
+        </td>
+        <td style="width: 60%;">
+            <div class="title-main">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
+            <div class="title-sub">ESTANCIA INFANTIL UNACH</div>
+            <div class="title-sub">DICTAMEN DEL ÁREA DE PSICOLOGÍA</div>
+        </td>
+        <td style="width: 20%; text-align: right;">
+            <div class="folio-box">Folio: #{{ sol.folio }}</div>
+            <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" class="logo-img" style="margin-top: 5px;">
+        </td>
+    </tr>
+</table>
 
-    <div class="title-center">DICTAMEN DEL ÁREA DE PSICOLOGÍA</div>
-    <div class="folio-right">FO-301-02-16</div>
+<table class="form-table keep-together">
+    <tr>
+        <td width="50%"><strong>Folio:</strong> {{ sol.folio }}</td>
+        <td width="50%"><strong>Fecha de Aplicación:</strong> {{ sol.fecha_aplicacion_psicologia|default:"-" }}</td>
+    </tr>
+</table>
 
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr>
-            <td width="50%"><b>Folio:</b> {{ sol.folio }}</td>
-            <td width="50%"><b>Fecha de Aplicación:</b> {{ sol.fecha_aplicacion_psicologia|default:"-" }}</td>
-        </tr>
-    </table>
+<table class="form-table">
+    <tr><th colspan="2">1. Ficha de Identidad</th></tr>
+    <tr><td class="col-label">Nombre del Menor</td><td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td></tr>
+    <tr><td class="col-label">Fecha de Nacimiento</td><td>{{ sol.fecha_nacimiento_menor|default:"-" }}</td></tr>
+    <tr><td class="col-label">Lugar de Nacimiento</td><td>{{ sol.inscripcion_oficial.municipio_nacimiento_menor|default:"-" }}, {{ sol.inscripcion_oficial.estado_nacimiento_menor|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad Actual</td><td>{{ sol.inscripcion_oficial.edad_anios_menor|default:"0" }} años, {{ sol.inscripcion_oficial.edad_meses_menor|default:"0" }} meses</td></tr>
+    <tr><td class="col-label">Cómo lo llaman en casa</td><td>{{ sol.como_lo_llaman_en_casa|default:"-" }}</td></tr>
+    <tr><td class="col-label">Tutor Principal</td><td>{{ sol.nombres_tutor }} {{ sol.apellido_paterno_tutor }}</td></tr>
+    <tr><td class="col-label">Correo Electrónico</td><td>{{ sol.correo|default:"-" }}</td></tr>
+</table>
 
-    <div class="section-title">1. Ficha de Identidad</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Nombre del Menor</td><td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td></tr>
-        <tr><td class="label-cell">Fecha de Nacimiento</td><td>{{ sol.fecha_nacimiento_menor|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Lugar de Nacimiento</td><td>{{ sol.inscripcion_oficial.municipio_nacimiento_menor|default:"-" }}, {{ sol.inscripcion_oficial.estado_nacimiento_menor|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad Actual</td><td>{{ sol.inscripcion_oficial.edad_anios_menor|default:"0" }} años, {{ sol.inscripcion_oficial.edad_meses_menor|default:"0" }} meses</td></tr>
-        <tr><td class="label-cell">Cómo lo llaman en casa</td><td>{{ sol.como_lo_llaman_en_casa|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Tutor Principal</td><td>{{ sol.nombres_tutor }} {{ sol.apellido_paterno_tutor }}</td></tr>
-        <tr><td class="label-cell">Correo Electrónico</td><td>{{ sol.correo|default:"-" }}</td></tr>
-    </table>
+{% if sol.nombre_padre_psicologia and sol.nombre_padre_psicologia != 'No especificado' and sol.nombre_padre_psicologia != 'No registrado' %}
+<table class="form-table">
+    <tr><th colspan="2">2. Antecedentes Familiares del Padre</th></tr>
+    <tr><td class="col-label">Nombre</td><td>{{ sol.nombre_padre_psicologia }}</td></tr>
+    <tr><td class="col-label">Edad</td><td>{{ sol.edad_padre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Nacionalidad</td><td>{{ sol.nacionalidad_padre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Estado Civil</td><td>{{ sol.estado_civil_padre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Religión</td><td>{{ sol.religion_padre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Ocupación</td><td>{{ sol.ocupacion_padre_psicologia|default:"-" }}</td></tr>
 
-    {% if sol.nombre_padre_psicologia and sol.nombre_padre_psicologia != 'No especificado' and sol.nombre_padre_psicologia != 'No registrado' %}
-    <div class="section-title">2. Antecedentes Familiares del Padre</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Nombre</td><td>{{ sol.nombre_padre_psicologia }}</td></tr>
-        <tr><td class="label-cell">Edad</td><td>{{ sol.edad_padre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Nacionalidad</td><td>{{ sol.nacionalidad_padre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Estado Civil</td><td>{{ sol.estado_civil_padre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Religión</td><td>{{ sol.religion_padre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Ocupación</td><td>{{ sol.ocupacion_padre_psicologia|default:"-" }}</td></tr>
-
-        {% if sol.ocupacion_padre_psicologia == 'Trabaja' or sol.ocupacion_padre_psicologia == 'Ambas' %}
-        <tr><td class="label-cell">Lugar de Trabajo</td><td>{{ sol.lugar_trabajo_padre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Horario</td><td>{{ sol.horario_trabajo_padre_psicologia|default:"-" }}</td></tr>
-        {% endif %}
-
-        <tr><td class="label-cell">Escolaridad</td><td>{{ sol.escolaridad_padre_psicologia|default:"-" }}</td></tr>
-
-        {% if sol.licenciatura_padre_psicologia %}
-        <tr><td class="label-cell">Licenciatura</td><td>{{ sol.licenciatura_padre_psicologia }}</td></tr>
-        <tr><td class="label-cell">Semestre</td><td>{{ sol.semestre_padre_psicologia }}</td></tr>
-        {% endif %}
-    </table>
+    {% if sol.ocupacion_padre_psicologia == 'Trabaja' or sol.ocupacion_padre_psicologia == 'Ambas' %}
+    <tr><td class="col-label">Lugar de Trabajo</td><td>{{ sol.lugar_trabajo_padre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Horario</td><td>{{ sol.horario_trabajo_padre_psicologia|default:"-" }}</td></tr>
     {% endif %}
 
-    {% if sol.nombre_madre_psicologia and sol.nombre_madre_psicologia != 'No especificado' and sol.nombre_madre_psicologia != 'No registrado' %}
-    <div class="section-title">3. Antecedentes Familiares de la Madre</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Nombre</td><td>{{ sol.nombre_madre_psicologia }}</td></tr>
-        <tr><td class="label-cell">Edad</td><td>{{ sol.edad_madre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Nacionalidad</td><td>{{ sol.nacionalidad_madre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Estado Civil</td><td>{{ sol.estado_civil_madre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Religión</td><td>{{ sol.religion_madre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Ocupación</td><td>{{ sol.ocupacion_madre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Escolaridad</td><td>{{ sol.escolaridad_padre_psicologia|default:"-" }}</td></tr>
 
-        {% if sol.ocupacion_madre_psicologia == 'Trabaja' or sol.ocupacion_madre_psicologia == 'Ambas' %}
-        <tr><td class="label-cell">Lugar de Trabajo</td><td>{{ sol.lugar_trabajo_madre_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Horario</td><td>{{ sol.horario_trabajo_madre_psicologia|default:"-" }}</td></tr>
-        {% endif %}
+    {% if sol.licenciatura_padre_psicologia %}
+    <tr><td class="col-label">Licenciatura</td><td>{{ sol.licenciatura_padre_psicologia }}</td></tr>
+    <tr><td class="col-label">Semestre</td><td>{{ sol.semestre_padre_psicologia }}</td></tr>
+    {% endif %}
+</table>
+{% endif %}
 
-        <tr><td class="label-cell">Escolaridad</td><td>{{ sol.escolaridad_madre_psicologia|default:"-" }}</td></tr>
+{% if sol.nombre_madre_psicologia and sol.nombre_madre_psicologia != 'No especificado' and sol.nombre_madre_psicologia != 'No registrado' %}
+<table class="form-table">
+    <tr><th colspan="2">3. Antecedentes Familiares de la Madre</th></tr>
+    <tr><td class="col-label">Nombre</td><td>{{ sol.nombre_madre_psicologia }}</td></tr>
+    <tr><td class="col-label">Edad</td><td>{{ sol.edad_madre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Nacionalidad</td><td>{{ sol.nacionalidad_madre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Estado Civil</td><td>{{ sol.estado_civil_madre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Religión</td><td>{{ sol.religion_madre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Ocupación</td><td>{{ sol.ocupacion_madre_psicologia|default:"-" }}</td></tr>
 
-        {% if sol.licenciatura_madre_psicologia %}
-        <tr><td class="label-cell">Licenciatura</td><td>{{ sol.licenciatura_madre_psicologia }}</td></tr>
-        <tr><td class="label-cell">Semestre</td><td>{{ sol.semestre_madre_psicologia }}</td></tr>
-        {% endif %}
-    </table>
+    {% if sol.ocupacion_madre_psicologia == 'Trabaja' or sol.ocupacion_madre_psicologia == 'Ambas' %}
+    <tr><td class="col-label">Lugar de Trabajo</td><td>{{ sol.lugar_trabajo_madre_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Horario</td><td>{{ sol.horario_trabajo_madre_psicologia|default:"-" }}</td></tr>
     {% endif %}
 
-    <div class="section-title">4. Prenatales, Perinatales y Posnatales</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr style="-pdf-keep-with-next: true;"><th colspan="2" style="text-align: center;">PRENATALES</th></tr>
-        <tr><td class="label-cell">Número de Gesta</td><td>{{ sol.numero_gesta_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Embarazo Planeado</td><td>{{ sol.embarazo_planeado_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Dificultad en Embarazo</td><td>{{ sol.dificultad_embarazo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Estado de Ánimo de la Madre</td><td>{{ sol.estado_animo_madre_embarazo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Supieron Sexo del Bebé</td><td>{{ sol.momento_supieron_sexo_bebe_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Quién Eligió el Nombre</td><td>{{ sol.quien_eligio_nombre_bebe_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Motivo del Nombre</td><td>{{ sol.motivo_nombre_bebe_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Escolaridad</td><td>{{ sol.escolaridad_madre_psicologia|default:"-" }}</td></tr>
 
-        <tr style="-pdf-keep-with-next: true;"><th colspan="2" style="text-align: center;">PERINATALES</th></tr>
-        <tr><td class="label-cell">Tipo de Nacimiento</td><td>{{ sol.tipo_nacimiento_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Semanas de Gestación</td><td>{{ sol.semanas_gestacion_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Peso al Nacer</td><td>{{ sol.peso_al_nacer_psicologia|default:"-" }} kg</td></tr>
-        <tr><td class="label-cell">Talla al Nacer</td><td>{{ sol.talla_al_nacer_psicologia|default:"-" }} cm</td></tr>
-        <tr><td class="label-cell">Dificultad Nacimiento</td><td>{{ sol.dificultad_nacimiento_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Apego Inmediato</td><td>{{ sol.apego_inmediato_psicologia|default:"-" }}</td></tr>
-
-        <tr style="-pdf-keep-with-next: true;"><th colspan="2" style="text-align: center;">POSNATALES</th></tr>
-        <tr><td class="label-cell">Método Alimentación Inicio</td><td>{{ sol.metodo_alimentacion_inicio_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad de Destete</td><td>{{ sol.edad_destete_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Motivo de Destete</td><td>{{ sol.motivo_destete_psicologia|default:"-" }}</td></tr>
-    </table>
-
-    <div class="section-title">5. Lenguaje y Motricidad</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Edad de Balbuceo</td><td>{{ sol.edad_balbuceo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad Primera Palabra</td><td>{{ sol.edad_primera_palabra_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Lenguaje Actual</td><td>{{ sol.lenguaje_actual_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Dificultad de Lenguaje</td><td>{{ sol.dificultad_lenguaje_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad se Sentó Solo</td><td>{{ sol.edad_se_sento_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Gateó</td><td>{{ sol.gateo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad Gateo</td><td>{{ sol.edad_gateo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad de Marcha Independiente</td><td>{{ sol.edad_marcha_independiente_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Dominancia Manual</td><td>{{ sol.dominancia_manual_psicologia|default:"-" }}</td></tr>
-    </table>
-
-    <div class="section-title">6. Comportamiento</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Comportamiento General</td><td>{{ sol.comportamiento_general_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Relación con otros Niños</td><td>{{ sol.relacion_otros_ninos_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Apego Figura Familiar</td><td>{{ sol.apego_figura_familiar_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Con quién</td><td>{{ sol.apego_con_quien_psicologia|default:"-" }}</td></tr>
-    </table>
-
-    {% if sol.inscripcion_oficial.edad_anios_menor|default:"0"|add:"0" >= 2 %}
-
-    <div class="section-title">7. Autonomía</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Se viste solo</td><td>{{ sol.se_viste_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Iniciativa para Jugar</td><td>{{ sol.iniciativa_para_jugar_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Se pone prendas solo</td><td>{{ sol.se_pone_prendas_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Cuáles prendas se pone</td><td>{{ sol.cuales_prendas_se_pone_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Se quita prendas solo</td><td>{{ sol.se_quita_prendas_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Cuáles prendas se quita</td><td>{{ sol.cuales_prendas_se_quita_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Intenta bañarse solo</td><td>{{ sol.intenta_banarse_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Se cepilla dientes solo</td><td>{{ sol.se_cepilla_dientes_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Come solo</td><td>{{ sol.come_solo_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Toma vaso solo</td><td>{{ sol.toma_vaso_solo_psicologia|default:"-" }}</td></tr>
-    </table>
-
-    <div class="section-title">8. Hábitos de Descanso y Actividades</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Realiza Siestas</td><td>{{ sol.realiza_siestas_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Cuántas</td><td>{{ sol.cuantas_siestas_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Con quién duerme</td><td>{{ sol.con_quien_duerme_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Hora duerme (noche)</td><td>{{ sol.hora_duerme_noche_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Hora despierta (mañana)</td><td>{{ sol.hora_despierta_manana_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Necesita algo para dormir</td><td>{{ sol.necesita_algo_para_dormir_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Qué necesita</td><td>{{ sol.que_necesita_para_dormir_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Despierta frecuencia</td><td>{{ sol.despierta_con_frecuencia_psicologia|default:"-" }}</td></tr>
-
-        <tr style="-pdf-keep-with-next: true;"><th colspan="2" style="text-align: center;">ACTIVIDADES Y ESFERAS</th></tr>
-        <tr><td class="label-cell">Actividades Tarde</td><td>{{ sol.actividades_tarde_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Actividad Extra tarde</td><td>{{ sol.actividad_extra_tarde_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Juego Favorito</td><td>{{ sol.juego_favorito_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Canción Favorita</td><td>{{ sol.cancion_favorita_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Personaje Favorito</td><td>{{ sol.personaje_favorito_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Tiempo pantallas</td><td>{{ sol.tiempo_pantallas_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Socializa tardes</td><td>{{ sol.socializa_tardes_con_quien_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Lugar para Jugar</td><td>{{ sol.lugar_para_jugar_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Comparte juguetes</td><td>{{ sol.comparte_juguetes_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Conducta líder</td><td>{{ sol.conducta_lider_juego_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Relación con otros Niños detalle</td><td>{{ sol.relacion_con_otros_ninos_detalle_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Se adapta entornos</td><td>{{ sol.se_adapta_nuevos_entornos_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Actividades fin semana</td><td>{{ sol.actividades_fin_semana_psicologia|default:"-" }}</td></tr>
-    </table>
-
-    <div class="section-title">9. Control de Esfínteres</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Controla orinar</td><td>{{ sol.controla_orinar_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Controla defecar</td><td>{{ sol.controla_defecar_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad comenzó avisar</td><td>{{ sol.edad_comenzo_avisar_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Dónde lo Realiza</td><td>{{ sol.donde_realiza_necesidades_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Algo significativo</td><td>{{ sol.algo_significativo_control_esfinteres_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Duerme pañal</td><td>{{ sol.duerme_con_panal_noche_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Reacción no controla</td><td>{{ sol.reaccion_no_controla_esfinteres_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Qué hace responsable</td><td>{{ sol.que_hace_responsable_cuando_sucede_psicologia|default:"-" }}</td></tr>
-    </table>
-
-    <div class="section-title">10. Dinámica Familiar</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Persona aparte padres crianza</td><td>{{ sol.persona_aparte_padres_crianza_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Persona aparte padres cuidado</td><td>{{ sol.persona_aparte_padres_cuidado_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Periodos Cuidado</td><td>{{ sol.periodos_cuidado_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Relación padre/madre con niño</td><td>{{ sol.relacion_padre_madre_con_nino_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Tiempo papá día</td><td>{{ sol.tiempo_papa_dia_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Tiempo mamá día</td><td>{{ sol.tiempo_mama_dia_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Método mejorar conducta casa</td><td>{{ sol.metodo_mejorar_conducta_casa_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Dificultad actual hogar</td><td>{{ sol.dificultad_actual_hogar_entorno_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Beneficio hijo</td><td>{{ sol.beneficio_esperado_hijo_estancia_psicologia|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Beneficio personal</td><td>{{ sol.beneficio_personal_estancia_psicologia|default:"-" }}</td></tr>
-    </table>
-
+    {% if sol.licenciatura_madre_psicologia %}
+    <tr><td class="col-label">Licenciatura</td><td>{{ sol.licenciatura_madre_psicologia }}</td></tr>
+    <tr><td class="col-label">Semestre</td><td>{{ sol.semestre_madre_psicologia }}</td></tr>
     {% endif %}
+</table>
+{% endif %}
 
-    <div class="section-title">Resolución y Dictamen Final</div>
-    <table class="grid-table" style="page-break-inside: avoid;">
-        <tr>
-            <th width="35%" style="text-align: left;">ESTADO DE LA EVALUACIÓN</th>
-            <td width="65%" style="font-weight: bold;">{{ sol.get_estado_psicologia_display|upper }}</td>
-        </tr>
-        <tr>
-            <th style="text-align: left; height: 40px;">OBSERVACIONES DEL ÁREA</th>
-            <td>{{ sol.observaciones_psicologia|default:"Ninguna observación registrada." }}</td>
-        </tr>
-    </table>
+<table class="form-table">
+    <tr><th colspan="2">4. Prenatales, Perinatales y Posnatales</th></tr>
 
-    <table style="width: 100%; margin-top: 50px; text-align: center; border: none; font-size: 11px; page-break-inside: avoid;">
-        <tr>
-            <td style="width: 50%; border: none;">
-                ________________________________________________<br>
-                <b>Nombre y Firma del Beneficiario y/o<br>Responsable del Menor</b>
-            </td>
-            <td style="width: 50%; border: none;">
-                ________________________________________________<br>
-                <b>Nombre y Firma de la Psicóloga</b><br>
-                <span style="color: #555;">Dictaminado por: {{ sol.psicologia_por.nombre|default:"Lic. Psicología" }}</span>
-            </td>
-        </tr>
-    </table>
+    <tr><td class="col-label">Número de Gesta</td><td>{{ sol.numero_gesta_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Embarazo Planeado</td><td>{{ sol.embarazo_planeado_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Dificultad en Embarazo</td><td>{{ sol.dificultad_embarazo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Estado de Ánimo de la Madre</td><td>{{ sol.estado_animo_madre_embarazo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Supieron Sexo del Bebé</td><td>{{ sol.momento_supieron_sexo_bebe_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Quién Eligió el Nombre</td><td>{{ sol.quien_eligio_nombre_bebe_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Motivo del Nombre</td><td>{{ sol.motivo_nombre_bebe_psicologia|default:"-" }}</td></tr>
 
-    <div id="footer_content" style="text-align: center; font-size: 9px; color: #888;">
-        Página <pdf:pagenumber> de <pdf:pagecount> - Estancia Infantil UNACH
-    </div>
+    <tr><th colspan="2" class="center-text">Perinatales</th></tr>
+    <tr><td class="col-label">Tipo de Nacimiento</td><td>{{ sol.tipo_nacimiento_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Semanas de Gestación</td><td>{{ sol.semanas_gestacion_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Peso al Nacer</td><td>{{ sol.peso_al_nacer_psicologia|default:"-" }} kg</td></tr>
+    <tr><td class="col-label">Talla al Nacer</td><td>{{ sol.talla_al_nacer_psicologia|default:"-" }} cm</td></tr>
+    <tr><td class="col-label">Dificultad Nacimiento</td><td>{{ sol.dificultad_nacimiento_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Apego Inmediato</td><td>{{ sol.apego_inmediato_psicologia|default:"-" }}</td></tr>
+
+    <tr><th colspan="2" class="center-text">Posnatales</th></tr>
+    <tr><td class="col-label">Método Alimentación Inicio</td><td>{{ sol.metodo_alimentacion_inicio_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad de Destete</td><td>{{ sol.edad_destete_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Motivo de Destete</td><td>{{ sol.motivo_destete_psicologia|default:"-" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">5. Lenguaje y Motricidad</th></tr>
+    <tr><td class="col-label">Edad de Balbuceo</td><td>{{ sol.edad_balbuceo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad Primera Palabra</td><td>{{ sol.edad_primera_palabra_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Lenguaje Actual</td><td>{{ sol.lenguaje_actual_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Dificultad de Lenguaje</td><td>{{ sol.dificultad_lenguaje_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad se Sentó Solo</td><td>{{ sol.edad_se_sento_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Gateó</td><td>{{ sol.gateo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad Gateo</td><td>{{ sol.edad_gateo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad de Marcha Independiente</td><td>{{ sol.edad_marcha_independiente_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Dominancia Manual</td><td>{{ sol.dominancia_manual_psicologia|default:"-" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">6. Comportamiento</th></tr>
+    <tr><td class="col-label">Comportamiento General</td><td>{{ sol.comportamiento_general_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Relación con otros Niños</td><td>{{ sol.relacion_otros_ninos_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Apego Figura Familiar</td><td>{{ sol.apego_figura_familiar_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Con quién</td><td>{{ sol.apego_con_quien_psicologia|default:"-" }}</td></tr>
+</table>
+
+{% if sol.inscripcion_oficial.edad_anios_menor|default:"0"|add:"0" >= 2 %}
+<table class="form-table">
+    <tr><th colspan="2">7. Autonomía</th></tr>
+    <tr><td class="col-label">Se viste solo</td><td>{{ sol.se_viste_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Iniciativa para Jugar</td><td>{{ sol.iniciativa_para_jugar_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Se pone prendas solo</td><td>{{ sol.se_pone_prendas_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Cuáles prendas se pone</td><td>{{ sol.cuales_prendas_se_pone_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Se quita prendas solo</td><td>{{ sol.se_quita_prendas_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Cuáles prendas se quita</td><td>{{ sol.cuales_prendas_se_quita_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Intenta bañarse solo</td><td>{{ sol.intenta_banarse_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Se cepilla dientes solo</td><td>{{ sol.se_cepilla_dientes_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Come solo</td><td>{{ sol.come_solo_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Toma vaso solo</td><td>{{ sol.toma_vaso_solo_psicologia|default:"-" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">8. Hábitos de Descanso y Actividades</th></tr>
+    <tr><td class="col-label">Realiza Siestas</td><td>{{ sol.realiza_siestas_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Cuántas</td><td>{{ sol.cuantas_siestas_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Con quién duerme</td><td>{{ sol.con_quien_duerme_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Hora duerme (noche)</td><td>{{ sol.hora_duerme_noche_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Hora despierta (mañana)</td><td>{{ sol.hora_despierta_manana_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Necesita algo para dormir</td><td>{{ sol.necesita_algo_para_dormir_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Qué necesita</td><td>{{ sol.que_necesita_para_dormir_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Despierta frecuencia</td><td>{{ sol.despierta_con_frecuencia_psicologia|default:"-" }}</td></tr>
+
+    <tr><th colspan="2" class="center-text">Actividades y Esferas</th></tr>
+    <tr><td class="col-label">Actividades Tarde</td><td>{{ sol.actividades_tarde_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Actividad Extra tarde</td><td>{{ sol.actividad_extra_tarde_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Juego Favorito</td><td>{{ sol.juego_favorito_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Canción Favorita</td><td>{{ sol.cancion_favorita_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Personaje Favorito</td><td>{{ sol.personaje_favorito_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Tiempo pantallas</td><td>{{ sol.tiempo_pantallas_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Socializa tardes</td><td>{{ sol.socializa_tardes_con_quien_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Lugar para Jugar</td><td>{{ sol.lugar_para_jugar_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Comparte juguetes</td><td>{{ sol.comparte_juguetes_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Conducta líder</td><td>{{ sol.conducta_lider_juego_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Relación con otros Niños detalle</td><td>{{ sol.relacion_con_otros_ninos_detalle_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Se adapta entornos</td><td>{{ sol.se_adapta_nuevos_entornos_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Actividades fin semana</td><td>{{ sol.actividades_fin_semana_psicologia|default:"-" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">9. Control de Esfínteres</th></tr>
+    <tr><td class="col-label">Controla orinar</td><td>{{ sol.controla_orinar_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Controla defecar</td><td>{{ sol.controla_defecar_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Edad comenzó avisar</td><td>{{ sol.edad_comenzo_avisar_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Dónde lo Realiza</td><td>{{ sol.donde_realiza_necesidades_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Algo significativo</td><td>{{ sol.algo_significativo_control_esfinteres_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Duerme pañal</td><td>{{ sol.duerme_con_panal_noche_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Reacción no controla</td><td>{{ sol.reaccion_no_controla_esfinteres_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Qué hace responsable</td><td>{{ sol.que_hace_responsable_cuando_sucede_psicologia|default:"-" }}</td></tr>
+</table>
+
+<table class="form-table">
+    <tr><th colspan="2">10. Dinámica Familiar</th></tr>
+    <tr><td class="col-label">Persona aparte padres crianza</td><td>{{ sol.persona_aparte_padres_crianza_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Persona aparte padres cuidado</td><td>{{ sol.persona_aparte_padres_cuidado_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Periodos Cuidado</td><td>{{ sol.periodos_cuidado_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Relación padre/madre con niño</td><td>{{ sol.relacion_padre_madre_con_nino_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Tiempo papá día</td><td>{{ sol.tiempo_papa_dia_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Tiempo mamá día</td><td>{{ sol.tiempo_mama_dia_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Método mejorar conducta casa</td><td>{{ sol.metodo_mejorar_conducta_casa_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Dificultad actual hogar</td><td>{{ sol.dificultad_actual_hogar_entorno_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Beneficio hijo</td><td>{{ sol.beneficio_esperado_hijo_estancia_psicologia|default:"-" }}</td></tr>
+    <tr><td class="col-label">Beneficio personal</td><td>{{ sol.beneficio_personal_estancia_psicologia|default:"-" }}</td></tr>
+</table>
+{% endif %}
+
+<table class="form-table">
+    <tr><th colspan="2">Resolución y Dictamen Final</th></tr>
+    <tr>
+        <td class="col-label">Estado de la evaluación</td>
+        <td>
+            {% if sol.estado_psicologia == "APROBADO" %}
+                <span class="estado-aprobado">APROBADO</span>
+            {% elif sol.estado_psicologia == "RECHAZADO" %}
+                <span class="estado-rechazado">RECHAZADO</span>
+            {% else %}
+                {{ sol.get_estado_psicologia_display|default:"PENDIENTE" }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td class="col-label">Observaciones del área</td>
+        <td>{{ sol.observaciones_psicologia|default:"Ninguna observación registrada." }}</td>
+    </tr>
+    <tr>
+        <td class="col-label">Psicóloga responsable</td>
+        <td>{{ sol.psicologia_por|default:"No asignado" }}</td>
+    </tr>
+</table>
+
+<table class="signatures">
+    <tr>
+        <td>
+            <div class="line"></div>
+            <div class="small">Firma del beneficiario y/o responsable del menor</div>
+        </td>
+        <td>
+            <div class="line"></div>
+            <div class="small">Firma de la Psicóloga</div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer_content" style="text-align: center; font-size: 9px; color: #888;">
+    Página <pdf:pagenumber> de <pdf:pagecount> - Estancia Infantil UNACH
+</div>
 
 </body>
 </html>
