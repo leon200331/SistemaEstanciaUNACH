@@ -330,12 +330,16 @@
         <div class="col-md-4">
           <label class="form-label">Estado <span class="req">*</span></label>
           {{ form.estado_domicilio }}
+          <datalist id="lista_estados_mexico"></datalist>
+          <div class="help-text">Escribe una letra, por ejemplo “S”, y aparecerán estados como Sinaloa o Sonora.</div>
           <div class="text-danger small mt-1">{{ form.estado_domicilio.errors }}</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Ciudad / Municipio <span class="req">*</span></label>
           {{ form.ciudad }}
+          <datalist id="lista_municipios_mexico"></datalist>
+          <div class="help-text">Primero selecciona un estado para cargar sus municipios.</div>
           <div class="text-danger small mt-1">{{ form.ciudad.errors }}</div>
         </div>
 
@@ -468,29 +472,24 @@
     }
   }
 
-  // Lógica para Formateo a Tipo Título (Primera letra mayúscula)
   function toTitleCase(str) {
       return str.replace(/\w\S*/g, function(txt){
           return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
       });
   }
 
-  // Lógica de Matrícula (Ocultarla si viene vacía desde el panel)
   const matriculaInput = document.getElementById("id_matricula");
   const boxMatricula = document.getElementById("box_matricula");
 
   if (matriculaInput && boxMatricula) {
       const valMatricula = matriculaInput.value.trim();
       if (!valMatricula) {
-          // Si no hay matrícula, ocultamos toda la caja
           boxMatricula.style.display = "none";
-          matriculaInput.required = false; // Le quitamos el requerido para que no bloquee el formulario
+          matriculaInput.required = false;
       } else {
-          // Si sí hay, la dejamos visible, pero sigue readonly (por tu forms.py)
           boxMatricula.style.display = "block";
       }
   }
-
 
   const prog = document.getElementById("id_programa_educativo");
   const boxProg = document.getElementById("box_prog_otro");
@@ -509,6 +508,7 @@
       if(!show){ progOtro.value = ""; clearState(progOtro); }
     }
   }
+
   function togglePar() {
     if (!par || !boxPar) return;
     const show = (par.value === "OTRO");
@@ -518,9 +518,197 @@
       if(!show){ parOtro.value = ""; clearState(parOtro); }
     }
   }
+
   if (prog) prog.addEventListener("change", () => { toggleProg(); setValid(prog); });
   if (par) par.addEventListener("change", () => { togglePar(); setValid(par); });
   toggleProg(); togglePar();
+
+  // ---------------------------------------------------------------
+  // BUSCADOR DE ESTADOS Y MUNICIPIOS DE MÉXICO
+  // ---------------------------------------------------------------
+
+  const ESTADOS_MEXICO = [
+    { nombre: "Aguascalientes", clave: "01" },
+    { nombre: "Baja California", clave: "02" },
+    { nombre: "Baja California Sur", clave: "03" },
+    { nombre: "Campeche", clave: "04" },
+    { nombre: "Chiapas", clave: "07" },
+    { nombre: "Chihuahua", clave: "08" },
+    { nombre: "Ciudad de México", clave: "09" },
+    { nombre: "Coahuila", clave: "05" },
+    { nombre: "Colima", clave: "06" },
+    { nombre: "Durango", clave: "10" },
+    { nombre: "Estado de México", clave: "15" },
+    { nombre: "Guanajuato", clave: "11" },
+    { nombre: "Guerrero", clave: "12" },
+    { nombre: "Hidalgo", clave: "13" },
+    { nombre: "Jalisco", clave: "14" },
+    { nombre: "Michoacán", clave: "16" },
+    { nombre: "Morelos", clave: "17" },
+    { nombre: "Nayarit", clave: "18" },
+    { nombre: "Nuevo León", clave: "19" },
+    { nombre: "Oaxaca", clave: "20" },
+    { nombre: "Puebla", clave: "21" },
+    { nombre: "Querétaro", clave: "22" },
+    { nombre: "Quintana Roo", clave: "23" },
+    { nombre: "San Luis Potosí", clave: "24" },
+    { nombre: "Sinaloa", clave: "25" },
+    { nombre: "Sonora", clave: "26" },
+    { nombre: "Tabasco", clave: "27" },
+    { nombre: "Tamaulipas", clave: "28" },
+    { nombre: "Tlaxcala", clave: "29" },
+    { nombre: "Veracruz", clave: "30" },
+    { nombre: "Yucatán", clave: "31" },
+    { nombre: "Zacatecas", clave: "32" }
+  ];
+
+  const estadoInput = document.getElementById("id_estado_domicilio");
+  const ciudadInput = document.getElementById("id_ciudad");
+  const listaEstados = document.getElementById("lista_estados_mexico");
+  const listaMunicipios = document.getElementById("lista_municipios_mexico");
+
+  if (estadoInput) {
+    estadoInput.setAttribute("list", "lista_estados_mexico");
+    estadoInput.setAttribute("autocomplete", "off");
+    estadoInput.setAttribute("placeholder", "Escribe o selecciona un estado...");
+    estadoInput.classList.add("form-control");
+  }
+
+  if (ciudadInput) {
+    ciudadInput.setAttribute("list", "lista_municipios_mexico");
+    ciudadInput.setAttribute("autocomplete", "off");
+    ciudadInput.setAttribute("placeholder", "Primero selecciona un estado...");
+    ciudadInput.classList.add("form-control");
+  }
+
+  function cargarListaEstados() {
+    if (!listaEstados) return;
+
+    listaEstados.innerHTML = "";
+
+    ESTADOS_MEXICO
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+      .forEach(estado => {
+        const option = document.createElement("option");
+        option.value = estado.nombre;
+        listaEstados.appendChild(option);
+      });
+  }
+
+  function obtenerClaveEstado(nombreEstado) {
+    const estado = ESTADOS_MEXICO.find(e => e.nombre.toLowerCase() === String(nombreEstado || "").trim().toLowerCase());
+    return estado ? estado.clave : null;
+  }
+
+  function limpiarMunicipios() {
+    if (listaMunicipios) listaMunicipios.innerHTML = "";
+    if (ciudadInput) {
+      ciudadInput.value = "";
+      ciudadInput.placeholder = "Primero selecciona un estado...";
+      clearState(ciudadInput);
+    }
+  }
+
+  async function cargarMunicipiosPorEstado(nombreEstado, conservarValor = false) {
+    if (!estadoInput || !ciudadInput || !listaMunicipios) return;
+
+    const claveEstado = obtenerClaveEstado(nombreEstado);
+
+    if (!claveEstado) {
+      limpiarMunicipios();
+      return;
+    }
+
+    const municipioActual = conservarValor ? ciudadInput.value : "";
+    ciudadInput.placeholder = "Cargando municipios...";
+    listaMunicipios.innerHTML = "";
+
+    try {
+      const response = await fetch(`https://gaia.inegi.org.mx/wscatgeo/v2/mgem/${claveEstado}`);
+
+      if (!response.ok) {
+        throw new Error("No se pudieron cargar los municipios");
+      }
+
+      const data = await response.json();
+
+      const municipios = Array.isArray(data.datos)
+        ? data.datos
+        : Array.isArray(data)
+          ? data
+          : [];
+
+      municipios
+        .map(item => item.nomgeo || item.nombre || item.NOMGEO || "")
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, "es"))
+        .forEach(nombreMunicipio => {
+          const option = document.createElement("option");
+          option.value = nombreMunicipio;
+          listaMunicipios.appendChild(option);
+        });
+
+      ciudadInput.placeholder = "Escribe o selecciona un municipio...";
+
+      if (municipioActual) {
+        ciudadInput.value = municipioActual;
+      }
+
+      setValid(estadoInput);
+
+    } catch (error) {
+      console.error("Error al cargar municipios:", error);
+      ciudadInput.placeholder = "No se pudieron cargar los municipios";
+      showToast("Error de conexión", "No se pudieron cargar los municipios desde INEGI. Revisa tu conexión a internet.");
+    }
+  }
+
+  cargarListaEstados();
+
+  if (estadoInput) {
+    estadoInput.addEventListener("input", () => {
+      const clave = obtenerClaveEstado(estadoInput.value);
+
+      if (!estadoInput.value.trim()) {
+        limpiarMunicipios();
+        clearState(estadoInput);
+        return;
+      }
+
+      if (clave) {
+        cargarMunicipiosPorEstado(estadoInput.value);
+      } else {
+        limpiarMunicipios();
+      }
+    });
+
+    estadoInput.addEventListener("blur", () => {
+      const clave = obtenerClaveEstado(estadoInput.value);
+
+      if (!estadoInput.value.trim()) {
+        clearState(estadoInput);
+        return;
+      }
+
+      if (!clave) {
+        setInvalid(estadoInput);
+        showToast("Estado inválido", "Selecciona un estado válido de la República Mexicana.");
+      } else {
+        setValid(estadoInput);
+      }
+    });
+
+    if (estadoInput.value.trim()) {
+      cargarMunicipiosPorEstado(estadoInput.value, true);
+    }
+  }
+
+  if (ciudadInput) {
+    ciudadInput.addEventListener("input", () => {
+      const v = String(ciudadInput.value || "").trim();
+      v ? setValid(ciudadInput) : clearState(ciudadInput);
+    });
+  }
 
   const ALL_REQUIRED_IDS = [
     "id_nombres_tutor",
@@ -538,23 +726,21 @@
     "id_fecha_nacimiento_menor",
     "id_curp_menor"
   ];
+
   ALL_REQUIRED_IDS.forEach(id => {
     const el = document.getElementById(id);
     if(el) el.required = true;
   });
 
-  // Evento de validación y formateo de Nombres
   ["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
 
-    // Al perder el foco (blur), formatea el texto a "Tipo Título"
     el.addEventListener("blur", () => {
         el.value = toTitleCase(el.value);
     });
 
     el.addEventListener("input", () => {
-      // Limpia caracteres no permitidos mientras escribe
       el.value = el.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '');
       const v = String(el.value || "").trim();
       if(!v){ clearState(el); return; }
@@ -599,6 +785,7 @@
       }
     });
   }
+
   if(parOtro){
     parOtro.addEventListener("input", () => {
       if(par && par.value === "OTRO"){
@@ -701,6 +888,15 @@
           showToast("Falta información", `Ingresa: ${label}`);
           focusField(el);
           return;
+        }
+
+        if(id === "id_estado_domicilio"){
+          const clave = obtenerClaveEstado(el.value);
+          if(!clave){
+            showToast("Estado inválido", "Selecciona un estado válido de la República Mexicana.");
+            focusField(el);
+            return;
+          }
         }
 
         if(["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].includes(id)){
