@@ -457,8 +457,17 @@
                         <div class="col-md-4"><label class="jira-label">Nombre(s) *</label><input type="text" name="nombre" class="jira-input" required style="text-transform: capitalize;"></div>
                         <div class="col-md-4"><label class="jira-label">Apellido Paterno *</label><input type="text" name="apellido_paterno" class="jira-input" required style="text-transform: capitalize;"></div>
                         <div class="col-md-4"><label class="jira-label">Apellido Materno</label><input type="text" name="apellido_materno" class="jira-input" style="text-transform: capitalize;"></div>
-                        <div class="col-md-6"><label class="jira-label">CURP *</label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" style="text-transform: uppercase;"></div>
-                        <div class="col-md-6"><label class="jira-label">Número de Empleado</label><input type="text" name="numero_empleado" class="jira-input" pattern="\d+"></div>
+
+                        <div class="col-md-4"><label class="jira-label">CURP *</label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" style="text-transform: uppercase;"></div>
+                        <div class="col-md-4"><label class="jira-label">Número de Empleado</label><input type="text" name="numero_empleado" class="jira-input" pattern="\d+"></div>
+                        <div class="col-md-4">
+                            <label class="jira-label">Tipo de Persona *</label>
+                            <select name="tipo_persona" class="jira-input" required>
+                                <option value="PERSONAL">Personal de la estancia</option>
+                                <option value="ADMIN">Administrador de Sistema</option>
+                            </select>
+                        </div>
+
                         <div class="col-md-6"><label class="jira-label">Correo Institucional *</label><input type="email" name="email" class="jira-input" required></div>
                         <div class="col-md-6"><label class="jira-label">Contraseña *</label><input type="password" name="password" class="jira-input" required></div>
                     </div>
@@ -568,12 +577,38 @@
 
     function submitAjax(event) {
         event.preventDefault();
+
+        // --- ESCUDO ANTI DOBLE CLIC ---
+        var btnSubmit = event.target.querySelector('button[type="submit"]');
+        var textoOriginal = "";
+        if (btnSubmit) {
+            textoOriginal = btnSubmit.innerHTML;
+            btnSubmit.disabled = true; // Bloquea el botón al instante
+            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cargando...';
+        }
+        // -------------------------------------------------------------
+
         fetch(window.location.href, { method: 'POST', body: new FormData(event.target), headers: {'X-Requested-With': 'XMLHttpRequest'} })
         .then(r => r.json())
         .then(d => {
-            if(d.status === 'success') { showToast(d.msg); setTimeout(() => window.location.reload(), 1000); }
-            else { alert("Error de validación: \n" + d.msg); }
-        }).catch(err => alert("Ocurrió un error en el servidor."));
+            if(d.status === 'success') {
+                showToast(d.msg);
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                alert("Aviso: \n" + d.msg);
+                // Si hay un error (ej. falta un dato), reactivamos el botón
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = textoOriginal;
+                }
+            }
+        }).catch(err => {
+            alert("Ocurrió un error en el servidor.");
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = textoOriginal;
+            }
+        });
     }
 
     function showToast(msg) {

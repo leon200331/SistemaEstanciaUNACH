@@ -112,20 +112,31 @@ def panel_gobierno_ti(request):
         response_data = {'status': 'success', 'msg': 'Acción realizada'}
 
         try:
+            # ==============================================================
+            # BLOQUE CORREGIDO: CREACIÓN DE USUARIO (BLINDADO CONTRA VALORES NULL)
+            # ==============================================================
             if accion == 'create_user':
-                email = request.POST.get('email')
+                email = request.POST.get('email', '').strip().lower()
                 password = request.POST.get('password')
-                nombre = request.POST.get('nombre')
-                apellido_paterno = request.POST.get('apellido_paterno')
-                apellido_materno = request.POST.get('apellido_materno', '')
-                curp = request.POST.get('curp', '').upper()
-                tipo_persona = request.POST.get('tipo_persona')
-                num_empleado = request.POST.get('numero_empleado')
+                nombre = request.POST.get('nombre', '').strip()
+                apellido_paterno = request.POST.get('apellido_paterno', '').strip()
+                apellido_materno = request.POST.get('apellido_materno', '').strip()
+                curp = request.POST.get('curp', '').strip().upper()
 
-                if User.objects.filter(email=email).exists():
-                    if is_ajax: return JsonResponse({'status': 'error', 'msg': 'El CORREO ya está registrado.'})
+                # BLINDAJE CONTRA NULL: Si viene vacío, asigna PERSONAL por defecto
+                tipo_persona = request.POST.get('tipo_persona')
+                if not tipo_persona:
+                    tipo_persona = 'PERSONAL'
+
+                num_empleado = request.POST.get('numero_empleado', '').strip()
+
+                if User.objects.filter(email=email).exists() or User.objects.filter(username=email).exists():
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': f'El correo "{email}" ya existe en el sistema.'})
+
                 if curp and User.objects.filter(curp=curp).exists():
-                    if is_ajax: return JsonResponse({'status': 'error', 'msg': f'La CURP ya está asignada.'})
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': f'La CURP "{curp}" ya está registrada con otro usuario.'})
 
                 u = User.objects.create_user(username=email, email=email, password=password)
                 u.nombre = nombre
@@ -143,6 +154,7 @@ def panel_gobierno_ti(request):
                 else:
                     u.is_superuser = False
                     u.is_staff = True
+
                 u.save()
 
                 AccessLog.objects.create(usuario=request.user, accion=f"CREACIÓN: Registró a {nombre} [{tipo_persona}]")
@@ -187,6 +199,10 @@ def panel_gobierno_ti(request):
 
                 empleado = User.objects.get(id=usuario_id)
                 grupo, _ = Group.objects.get_or_create(name=rol_fijo)
+
+                if empleado.groups.filter(id=grupo.id).exists():
+                    if is_ajax: return JsonResponse(
+                        {'status': 'error', 'msg': f'El empleado {empleado.nombre} ya tiene el rol de {rol_fijo}.'})
 
                 if semestre_id:
                     ciclo = Semestre.objects.get(id=semestre_id)

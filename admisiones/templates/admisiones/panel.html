@@ -271,52 +271,40 @@
 
             <div class="col-md-12">
               <label class="form-label fw-bold">Nombre(s) <span class="text-danger">*</span></label>
-              <input type="text" name="nombres_tutor" class="form-control" placeholder="Ej. Lucia" required autocomplete="off" oninput="formatNameAndBlockNumbers(this)">
+              {{ form_crear.nombres_tutor }}
               <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Apellido paterno <span class="text-danger">*</span></label>
-              <input type="text" name="apellido_paterno_tutor" class="form-control" placeholder="Ej. Perez" required autocomplete="off" oninput="formatNameAndBlockNumbers(this)">
+              {{ form_crear.apellido_paterno_tutor }}
               <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Apellido materno <span class="text-danger">*</span></label>
-              <input type="text" name="apellido_materno_tutor" class="form-control" placeholder="Ej. Sanchez" required autocomplete="off" oninput="formatNameAndBlockNumbers(this)">
+              {{ form_crear.apellido_materno_tutor }}
               <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Matrícula <span class="text-danger">*</span></label>
-              <input type="text" name="matricula" class="form-control" placeholder="Ej. A123456" required autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');">
+              {{ form_crear.matricula }}
               <div class="invalid-feedback fw-bold">Complete este campo.</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label fw-bold">Unidad Académica <span class="text-danger">*</span></label>
-              <select name="unidad_academica" id="unidad_academica_select" class="form-select" onchange="mostrarOtraUnidad(this.value)" required>
-                  <option value="">Seleccione una opción...</option>
-                  <option value="Facultad de Ingeniería">Facultad de Ingeniería</option>
-                  <option value="Facultad de Arquitectura">Facultad de Arquitectura</option>
-                  <option value="Facultad de Contaduría y Administración">Facultad de Contaduría y Administración</option>
-                  <option value="Facultad de Humanidades">Facultad de Humanidades</option>
-                  <option value="Facultad de Medicina Humana">Facultad de Medicina Humana</option>
-                  <option value="Facultad de Medicina Veterinaria y Zootecnia">Facultad de Medicina Veterinaria y Zootecnia</option>
-                  <option value="Facultad de Ciencias Químicas">Facultad de Ciencias Químicas</option>
-                  <option value="Facultad de Derecho">Facultad de Derecho</option>
-                  <option value="Facultad de Lenguas">Facultad de Lenguas</option>
-                  <option value="Otra">Otra</option>
-              </select>
+              {{ form_crear.unidad_academica }}
               <div class="invalid-feedback fw-bold">Seleccione una unidad académica.</div>
 
-              <input type="text" name="unidad_academica_otra" id="input_unidad_otra" class="form-control mt-2 d-none" placeholder="Especifica la unidad académica">
+              {{ form_crear.unidad_academica_otra }}
               <div class="invalid-feedback fw-bold">Por favor, escribe el nombre de la unidad.</div>
             </div>
 
             <div class="col-md-12">
               <label class="form-label fw-bold">Correo Institucional <span class="text-danger">*</span></label>
-              <input type="email" name="correo" class="form-control" placeholder="ejemplo@unach.mx" required autocomplete="off" pattern=".*@unach\.mx$">
+              {{ form_crear.correo }}
               <div class="invalid-feedback fw-bold">Ingrese un correo institucional válido.</div>
             </div>
 
@@ -353,13 +341,25 @@
       .catch(() => alert("No se pudo copiar el link ❌"));
   }
 
-  // 1. Mayúsculas automáticas y bloqueo de números
-  function formatNameAndBlockNumbers(input) {
-      let val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-      input.value = val.replace(/\b\w/g, function(char) {
-          return char.toUpperCase();
+  // 1. Mayúsculas automáticas y bloqueo de números (SE APLICAN A LOS INPUTS GENERADOS POR DJANGO)
+  document.addEventListener("DOMContentLoaded", function() {
+      const inputsTexto = document.querySelectorAll('input[name="nombres_tutor"], input[name="apellido_paterno_tutor"], input[name="apellido_materno_tutor"]');
+      inputsTexto.forEach(input => {
+          input.addEventListener('input', function() {
+              let val = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+              this.value = val.replace(/\b\w/g, function(char) {
+                  return char.toUpperCase();
+              });
+          });
       });
-  }
+
+      const inputMatricula = document.querySelector('input[name="matricula"]');
+      if(inputMatricula){
+          inputMatricula.addEventListener('input', function() {
+              this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+          });
+      }
+  });
 
   // LÓGICA NUEVA PARA MOSTRAR U OCULTAR "OTRA UNIDAD ACADÉMICA"
   function mostrarOtraUnidad(valor) {
