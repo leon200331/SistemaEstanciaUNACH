@@ -4,6 +4,9 @@
 {% block title %}Expediente de Inscripción - UNACH{% endblock %}
 
 {% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
 <style>
     body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
 
@@ -36,28 +39,46 @@
     .fade-in { animation: fadeIn 0.3s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Estilos para el nuevo modal de confirmación animado */
-    .animated.pulse.infinite {
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { transform: scale(0.95); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(0.95); }
-    }
+    .animated.pulse.infinite { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); } 50% { transform: scale(1.05); } 100% { transform: scale(0.95); } }
 
-    /* Estilos para las cajas de documentos */
     .doc-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 10px; padding: 15px; height: 100%; }
     .doc-title { font-weight: bold; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 15px; }
     .file-input-group { margin-bottom: 12px; transition: all 0.3s ease; }
     .file-input-group label { font-size: 0.85rem; font-weight: bold; color: #495057; margin-bottom: 4px; display: block; }
     .status-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .status-ok { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
-
     .status-missing { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; display: none; }
-
-    /* Estilo para el icono de información */
     .info-icon { cursor: help; color: #0d6efd; margin-left: 5px; font-size: 1.1rem; }
+
+    /* ESTILO PARA EL SELECT2 UNIFICADO */
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 8px;
+        min-height: 42px;
+        border: 1px solid #ced4da;
+        padding-top: 2px;
+    }
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+        border-color: #2980b9;
+        box-shadow: 0 0 0 0.25rem rgba(41, 128, 185, 0.25);
+    }
+    select.select2-buscador {
+        display: block !important; height: 1px !important; width: 1px !important; position: absolute !important; opacity: 0 !important; padding: 0 !important; margin: 0 !important; border: 0 !important; bottom: 0 !important;
+    }
+
+    /* CORRECCIÓN DE RECUADROS ROJOS EN ARCHIVOS Y SELECT2 */
+    .was-validated input[type="file"]:valid {
+        border-color: #ced4da !important;
+        background-image: none !important;
+        padding-right: 15px !important;
+        box-shadow: none !important;
+    }
+    .was-validated input[type="file"].is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .was-validated select:invalid + .select2-container .select2-selection {
+        border-color: #dc3545 !important;
+    }
 </style>
 {% endblock %}
 
@@ -117,7 +138,7 @@
     <div class="header-banner d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h2 class="fw-bold mb-1"><i class="bi bi-folder2-open me-2"></i> Expediente de Inscripción</h2>
-            <p class="mb-0 opacity-75">Revisa tus datos y completa la información médica y familiar faltante.</p>
+            <p class="mb-0 opacity-75">Revisa tus datos y sube los documentos solicitados.</p>
         </div>
         <div class="bg-white text-primary px-4 py-2 rounded-pill fw-bold shadow-sm">
             Folio: {{ inscripcion.solicitud_ingreso.folio }}
@@ -184,7 +205,7 @@
                     </div>
 
                     <div class="col-md-4 mt-5 fade-in" id="div_pregunta_pareja" style="display: none;">
-                        <label class="label-custom text-primary">¿Desea registrar datos de una pareja/cónyuge? <span class="text-danger">*</span></label>
+                        <label class="label-custom text-primary">¿Desea registrar datos de pareja/cónyuge? <span class="text-danger">*</span></label>
                         <select id="tiene_pareja_select" name="tiene_pareja" class="form-select border-primary" onchange="manejarEstadoCivil()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
                             <option value="NO">No, soy padre/madre soltero(a)</option>
                             <option value="SI" {% if inscripcion.nombres_segundo_padre %}selected{% endif %}>Sí, deseo registrar a mi pareja</option>
@@ -229,7 +250,7 @@
 
                     <div class="col-md-4">
                         <label class="label-custom">Fecha de Nacimiento <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
-                        <input type="date" id="fecha_nac_menor" name="fecha_nacimiento_menor" class="form-control bg-light text-muted" style="cursor: not-allowed;" value="{{ inscripcion.solicitud_ingreso.fecha_nacimiento_menor|date:'Y-m-d' }}" readonly required>
+                        <input type="date" id="fecha_nac_menor" name="fecha_nacimiento_menor" class="form-control bg-light text-muted" style="cursor: not-allowed;" value="{{ inscripcion.solicitud_ingreso.fecha_nacimiento_menor|date:'Y-m-d' }}" readonly required onchange="calcularEdadMenor()">
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">CURP <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
@@ -238,51 +259,31 @@
 
                     <div class="col-md-2">
                         <label class="label-custom">Edad (Años) <span class="text-danger">*</span></label>
-                        <input type="number" id="edad_anios_menor" name="edad_anios_menor" class="form-control border-primary" min="0" max="3" value="{{ inscripcion.edad_anios_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó.</div>
+                        <input type="number" id="edad_anios_menor" name="edad_anios_menor" class="form-control border-primary bg-light" value="{{ inscripcion.edad_anios_menor|default:'' }}" readonly required>
+                        <div class="invalid-feedback fw-bold">Calculando...</div>
                     </div>
                     <div class="col-md-2">
                         <label class="label-custom">Meses <span class="text-danger">*</span></label>
-                        <input type="number" id="edad_meses_menor" name="edad_meses_menor" class="form-control border-primary" min="0" max="11" value="{{ inscripcion.edad_meses_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó.</div>
+                        <input type="number" id="edad_meses_menor" name="edad_meses_menor" class="form-control border-primary bg-light" value="{{ inscripcion.edad_meses_menor|default:'' }}" readonly required>
+                        <div class="invalid-feedback fw-bold">Calculando...</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6 position-relative">
                         <label class="label-custom">Estado de Nacimiento <span class="text-danger">*</span></label>
-                        <input
-                            type="text"
-                            id="estado_nacimiento_menor"
-                            name="estado_nacimiento_menor"
-                            class="form-control"
-                            list="lista_estados_mexico"
-                            autocomplete="off"
-                            placeholder="Escribe o selecciona el estado..."
-                            value="{{ inscripcion.estado_nacimiento_menor|default:'' }}"
-                            {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-                            required
-                        >
-                        <datalist id="lista_estados_mexico"></datalist>
-                        <div class="invalid-feedback fw-bold">Selecciona un estado válido.</div>
-                        <input type="hidden" id="estado_nacimiento_hidden" value="{{ inscripcion.estado_nacimiento_menor|default:'' }}">
+                        <select id="sel_estado_menor" class="form-select select2-buscador" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <div class="d-none">
+                            <input type="hidden" id="estado_nacimiento_hidden" name="estado_nacimiento_menor" value="{{ inscripcion.estado_nacimiento_menor|default:'' }}">
+                        </div>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6 position-relative">
                         <label class="label-custom">Municipio / Ciudad <span class="text-danger">*</span></label>
-                        <input
-                            type="text"
-                            id="municipio_nacimiento_menor"
-                            name="municipio_nacimiento_menor"
-                            class="form-control"
-                            list="lista_municipios_mexico"
-                            autocomplete="off"
-                            placeholder="Primero selecciona un estado..."
-                            value="{{ inscripcion.municipio_nacimiento_menor|default:'' }}"
-                            {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-                            required
-                        >
-                        <datalist id="lista_municipios_mexico"></datalist>
-                        <div class="invalid-feedback fw-bold">Selecciona un municipio válido.</div>
-                        <input type="hidden" id="municipio_nacimiento_hidden" value="{{ inscripcion.municipio_nacimiento_menor|default:'' }}">
+                        <select id="sel_mun_menor" class="form-select select2-buscador" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <div class="d-none">
+                            <input type="hidden" id="municipio_nacimiento_hidden" name="municipio_nacimiento_menor" value="{{ inscripcion.municipio_nacimiento_menor|default:'' }}">
+                        </div>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
                     <div class="col-md-4">
@@ -395,41 +396,25 @@
                     <div class="col-md-12 mt-4">
                         <h6 class="fw-bold text-muted border-bottom pb-1" style="font-size: 0.9rem;">Dirección de la Pareja</h6>
                     </div>
-                    <div class="col-md-4">
-    <label class="label-custom">Estado <span class="text-danger">*</span></label>
-    <input
-        type="text"
-        id="estado_domicilio_segundo_padre"
-        name="estado_domicilio_segundo_padre"
-        class="form-control sp-required"
-        list="lista_estados_pareja"
-        autocomplete="off"
-        placeholder="Escribe o selecciona el estado..."
-        value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}"
-        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-        required
-    >
-    <datalist id="lista_estados_pareja"></datalist>
-    <div class="invalid-feedback fw-bold">Selecciona un estado válido.</div>
-</div>
 
-<div class="col-md-4">
-    <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
-    <input
-        type="text"
-        id="ciudad_segundo_padre"
-        name="ciudad_segundo_padre"
-        class="form-control sp-required"
-        list="lista_municipios_pareja"
-        autocomplete="off"
-        placeholder="Primero selecciona un estado..."
-        value="{{ inscripcion.ciudad_segundo_padre|default:'' }}"
-        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-        required
-    >
-    <datalist id="lista_municipios_pareja"></datalist>
-    <div class="invalid-feedback fw-bold">Selecciona un municipio válido.</div>
-</div>
+                    <div class="col-md-4 position-relative">
+                        <label class="label-custom">Estado <span class="text-danger">*</span></label>
+                        <select id="sel_estado_pareja" class="form-select select2-buscador sp-required" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <div class="d-none">
+                            <input type="hidden" id="estado_domicilio_segundo_padre" name="estado_domicilio_segundo_padre" value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}">
+                        </div>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                    </div>
+
+                    <div class="col-md-4 position-relative">
+                        <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
+                        <select id="sel_mun_pareja" class="form-select select2-buscador sp-required" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <div class="d-none">
+                            <input type="hidden" id="ciudad_segundo_padre" name="ciudad_segundo_padre" value="{{ inscripcion.ciudad_segundo_padre|default:'' }}">
+                        </div>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                    </div>
+
                     <div class="col-md-4">
                         <label class="label-custom">Código Postal <span class="text-danger">*</span></label>
                         <input type="text" name="codigo_postal_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="5" value="{{ inscripcion.codigo_postal_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
@@ -452,168 +437,6 @@
                 </div>
             </div>
         </div>
-<!-- ==========================================================
-     SCRIPT PARA BUSCADOR DE ESTADO Y MUNICIPIO DEL MENOR
-     PÉGALO ANTES DE </script> SI TU ARCHIVO COMPLETO YA TIENE UN SCRIPT.
-     Si este fragmento lo pegas tal cual, este bloque ya va incluido.
-========================================================== -->
-<script>
-const ESTADOS_MX_COMPLETOS = [
-    { nombre: "Aguascalientes", municipios: ["Aguascalientes", "Asientos", "Calvillo", "Cosío", "Jesús María", "Pabellón de Arteaga", "Rincón de Romos", "San José de Gracia", "Tepezalá", "El Llano", "San Francisco de los Romo"] },
-    { nombre: "Baja California", municipios: ["Ensenada", "Mexicali", "Tecate", "Tijuana", "Playas de Rosarito", "San Quintín", "San Felipe"] },
-    { nombre: "Baja California Sur", municipios: ["Comondú", "Mulegé", "La Paz", "Los Cabos", "Loreto"] },
-    { nombre: "Campeche", municipios: ["Calkiní", "Campeche", "Carmen", "Champotón", "Hecelchakán", "Hopelchén", "Palizada", "Tenabo", "Escárcega", "Calakmul", "Candelaria", "Seybaplaya", "Dzitbalché"] },
-    { nombre: "Chiapas", municipios: ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán de Domínguez", "Palenque", "Tonalá", "Chiapa de Corzo", "Ocosingo", "Villaflores", "Cintalapa", "Reforma", "Arriaga", "Las Margaritas", "Pichucalco", "Berriozábal"] },
-    { nombre: "Chihuahua", municipios: ["Chihuahua", "Juárez", "Cuauhtémoc", "Delicias", "Hidalgo del Parral", "Nuevo Casas Grandes", "Camargo", "Jiménez", "Meoqui", "Guachochi"] },
-    { nombre: "Ciudad de México", municipios: ["Álvaro Obregón", "Azcapotzalco", "Benito Juárez", "Coyoacán", "Cuajimalpa de Morelos", "Cuauhtémoc", "Gustavo A. Madero", "Iztacalco", "Iztapalapa", "La Magdalena Contreras", "Miguel Hidalgo", "Milpa Alta", "Tláhuac", "Tlalpan", "Venustiano Carranza", "Xochimilco"] },
-    { nombre: "Coahuila", municipios: ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña", "San Pedro", "Sabinas", "Frontera", "Ramos Arizpe", "Matamoros"] },
-    { nombre: "Colima", municipios: ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez", "Armería", "Comala", "Coquimatlán", "Cuauhtémoc", "Ixtlahuacán", "Minatitlán"] },
-    { nombre: "Durango", municipios: ["Durango", "Gómez Palacio", "Lerdo", "Santiago Papasquiaro", "Guadalupe Victoria", "Canatlán", "Pueblo Nuevo", "El Oro", "Mapimí", "Vicente Guerrero"] },
-    { nombre: "Estado de México", municipios: ["Toluca", "Ecatepec de Morelos", "Naucalpan de Juárez", "Nezahualcóyotl", "Tlalnepantla de Baz", "Chimalhuacán", "Atizapán de Zaragoza", "Cuautitlán Izcalli", "Ixtapaluca", "Tecámac", "Metepec", "Lerma", "Zinacantepec", "Valle de Chalco Solidaridad", "Huixquilucan"] },
-    { nombre: "Guanajuato", municipios: ["Guanajuato", "León", "Irapuato", "Celaya", "Salamanca", "Silao de la Victoria", "San Miguel de Allende", "Dolores Hidalgo Cuna de la Independencia Nacional", "Valle de Santiago", "Acámbaro"] },
-    { nombre: "Guerrero", municipios: ["Chilpancingo de los Bravo", "Acapulco de Juárez", "Iguala de la Independencia", "Taxco de Alarcón", "Zihuatanejo de Azueta", "Chilapa de Álvarez", "Tlapa de Comonfort", "Coyuca de Benítez", "Ometepec", "Atoyac de Álvarez"] },
-    { nombre: "Hidalgo", municipios: ["Pachuca de Soto", "Tulancingo de Bravo", "Tula de Allende", "Huejutla de Reyes", "Mineral de la Reforma", "Tepeji del Río de Ocampo", "Ixmiquilpan", "Actopan", "Apan", "Zimapán"] },
-    { nombre: "Jalisco", municipios: ["Guadalajara", "Zapopan", "San Pedro Tlaquepaque", "Tonalá", "Tlajomulco de Zúñiga", "Puerto Vallarta", "El Salto", "Lagos de Moreno", "Tepatitlán de Morelos", "Ocotlán"] },
-    { nombre: "Michoacán", municipios: ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán", "Zitácuaro", "La Piedad", "Pátzcuaro", "Sahuayo", "Hidalgo"] },
-    { nombre: "Morelos", municipios: ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco", "Yautepec", "Emiliano Zapata", "Ayala", "Xochitepec", "Jojutla", "Puente de Ixtla"] },
-    { nombre: "Nayarit", municipios: ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla", "Compostela", "Xalisco", "Ixtlán del Río", "Acaponeta", "Tecuala", "Tuxpan", "Rosamorada"] },
-    { nombre: "Nuevo León", municipios: ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "General Escobedo", "Santa Catarina", "San Pedro Garza García", "Juárez", "García", "Cadereyta Jiménez"] },
-    { nombre: "Oaxaca", municipios: ["Oaxaca de Juárez", "Salina Cruz", "Juchitán de Zaragoza", "San Juan Bautista Tuxtepec", "Huajuapan de León", "Santa Cruz Xoxocotlán", "Santa Lucía del Camino", "Santo Domingo Tehuantepec", "Pinotepa Nacional", "Miahuatlán de Porfirio Díaz"] },
-    { nombre: "Puebla", municipios: ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco", "San Pedro Cholula", "Amozoc", "Huauchinango", "Teziutlán", "Izúcar de Matamoros", "Cuautlancingo"] },
-    { nombre: "Querétaro", municipios: ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués", "Pedro Escobedo", "Tequisquiapan", "Cadereyta de Montes", "Colón", "Ezequiel Montes", "Amealco de Bonfil"] },
-    { nombre: "Quintana Roo", municipios: ["Othón P. Blanco", "Benito Juárez", "Solidaridad", "Cozumel", "Tulum", "Felipe Carrillo Puerto", "José María Morelos", "Lázaro Cárdenas", "Isla Mujeres", "Puerto Morelos", "Bacalar"] },
-    { nombre: "San Luis Potosí", municipios: ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala", "Rioverde", "Tamazunchale", "Ébano", "Xilitla", "Cárdenas", "Cerritos"] },
-    { nombre: "Sinaloa", municipios: ["Culiacán", "Mazatlán", "Ahome", "Guasave", "Navolato", "El Fuerte", "Salvador Alvarado", "Sinaloa", "Escuinapa", "Rosario"] },
-    { nombre: "Sonora", municipios: ["Hermosillo", "Cajeme", "Nogales", "San Luis Río Colorado", "Navojoa", "Guaymas", "Agua Prieta", "Caborca", "Empalme", "Huatabampo"] },
-    { nombre: "Tabasco", municipios: ["Centro", "Cárdenas", "Comalcalco", "Macuspana", "Huimanguillo", "Cunduacán", "Nacajuca", "Paraíso", "Tenosique", "Balancán"] },
-    { nombre: "Tamaulipas", municipios: ["Ciudad Victoria", "Tampico", "Reynosa", "Matamoros", "Nuevo Laredo", "Altamira", "Madero", "El Mante", "Río Bravo", "Valle Hermoso"] },
-    { nombre: "Tlaxcala", municipios: ["Tlaxcala", "Apizaco", "Huamantla", "Chiautempan", "Calpulalpan", "San Pablo del Monte", "Zacatelco", "Contla de Juan Cuamatzi", "Tlaxco", "Yauhquemehcan"] },
-    { nombre: "Veracruz", municipios: ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica de Hidalgo", "Boca del Río", "Orizaba", "Minatitlán", "Tuxpan", "Papantla"] },
-    { nombre: "Yucatán", municipios: ["Mérida", "Valladolid", "Tizimín", "Progreso", "Kanasín", "Umán", "Tekax", "Motul", "Hunucmá", "Izamal"] },
-    { nombre: "Zacatecas", municipios: ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez", "Río Grande", "Sombrerete", "Calera", "Ojocaliente", "Loreto", "Nochistlán de Mejía"] }
-];
-
-function normalizarMX(texto) {
-    return String(texto || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-function buscarEstadoMX(nombre) {
-    const limpio = normalizarMX(nombre);
-    return ESTADOS_MX_COMPLETOS.find(e => normalizarMX(e.nombre) === limpio);
-}
-
-function inicializarEstadosMunicipiosMenor() {
-    const inputEstado = document.getElementById("estado_nacimiento_menor");
-    const inputMunicipio = document.getElementById("municipio_nacimiento_menor");
-    const listaEstados = document.getElementById("lista_estados_mexico");
-    const listaMunicipios = document.getElementById("lista_municipios_mexico");
-    if (!inputEstado || !inputMunicipio || !listaEstados || !listaMunicipios) return;
-
-    listaEstados.innerHTML = "";
-    ESTADOS_MX_COMPLETOS.sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach(estado => {
-        const option = document.createElement("option");
-        option.value = estado.nombre;
-        listaEstados.appendChild(option);
-    });
-
-    inputEstado.addEventListener("input", cargarMunicipiosMenor);
-    inputEstado.addEventListener("change", cargarMunicipiosMenor);
-
-    if (inputEstado.value.trim()) cargarMunicipiosMenor(true);
-}
-
-function cargarMunicipiosMenor(esCargaInicial = false) {
-    const inputEstado = document.getElementById("estado_nacimiento_menor");
-    const inputMunicipio = document.getElementById("municipio_nacimiento_menor");
-    const listaMunicipios = document.getElementById("lista_municipios_mexico");
-    if (!inputEstado || !inputMunicipio || !listaMunicipios) return;
-
-    const estado = buscarEstadoMX(inputEstado.value);
-    const municipioGuardado = document.getElementById("municipio_nacimiento_hidden")?.value || "";
-    listaMunicipios.innerHTML = "";
-
-    if (!estado) {
-        if (!esCargaInicial) inputMunicipio.value = "";
-        inputMunicipio.placeholder = "Primero selecciona un estado válido...";
-        return;
-    }
-
-    if (!esCargaInicial) inputMunicipio.value = "";
-
-    estado.municipios.sort((a, b) => a.localeCompare(b, "es")).forEach(municipio => {
-        const option = document.createElement("option");
-        option.value = municipio;
-        listaMunicipios.appendChild(option);
-    });
-
-    inputMunicipio.placeholder = "Escribe o selecciona el municipio...";
-    if (esCargaInicial && municipioGuardado) inputMunicipio.value = municipioGuardado;
-}
-
-document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosMenor);
-    function inicializarEstadosMunicipiosPareja() {
-    const inputEstado = document.getElementById("estado_domicilio_segundo_padre");
-    const inputMunicipio = document.getElementById("ciudad_segundo_padre");
-    const listaEstados = document.getElementById("lista_estados_pareja");
-    const listaMunicipios = document.getElementById("lista_municipios_pareja");
-
-    if (!inputEstado || !inputMunicipio || !listaEstados || !listaMunicipios) return;
-
-    listaEstados.innerHTML = "";
-
-    ESTADOS_MX_COMPLETOS
-        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
-        .forEach(estado => {
-            const option = document.createElement("option");
-            option.value = estado.nombre;
-            listaEstados.appendChild(option);
-        });
-
-    inputEstado.addEventListener("input", cargarMunicipiosPareja);
-    inputEstado.addEventListener("change", cargarMunicipiosPareja);
-
-    if (inputEstado.value.trim()) {
-        cargarMunicipiosPareja(true);
-    }
-}
-
-function cargarMunicipiosPareja(esCargaInicial = false) {
-    const inputEstado = document.getElementById("estado_domicilio_segundo_padre");
-    const inputMunicipio = document.getElementById("ciudad_segundo_padre");
-    const listaMunicipios = document.getElementById("lista_municipios_pareja");
-
-    if (!inputEstado || !inputMunicipio || !listaMunicipios) return;
-
-    const estado = buscarEstadoMX(inputEstado.value);
-    const municipioGuardado = inputMunicipio.value || "";
-
-    listaMunicipios.innerHTML = "";
-
-    if (!estado) {
-        if (!esCargaInicial) inputMunicipio.value = "";
-        inputMunicipio.placeholder = "Primero selecciona un estado válido...";
-        return;
-    }
-
-    if (!esCargaInicial) inputMunicipio.value = "";
-
-    estado.municipios
-        .sort((a, b) => a.localeCompare(b, "es"))
-        .forEach(municipio => {
-            const option = document.createElement("option");
-            option.value = municipio;
-            listaMunicipios.appendChild(option);
-        });
-
-    inputMunicipio.placeholder = "Escribe o selecciona el municipio...";
-
-    if (esCargaInicial && municipioGuardado) {
-        inputMunicipio.value = municipioGuardado;
-    }
-}
-
-document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja);
-</script>
 
         <div class="form-section-card">
             <div class="section-title">
@@ -628,41 +451,23 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                     {% endif %}
                 </div>
 
-                <div class="col-md-4">
-    <label class="label-custom">Estado <span class="text-danger">*</span></label>
-    <input
-        type="text"
-        id="estado_domicilio_segundo_padre"
-        name="estado_domicilio_segundo_padre"
-        class="form-control sp-required"
-        list="lista_estados_pareja"
-        autocomplete="off"
-        placeholder="Escribe o selecciona el estado..."
-        value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}"
-        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-        required
-    >
-    <datalist id="lista_estados_pareja"></datalist>
-    <div class="invalid-feedback fw-bold">Selecciona un estado válido.</div>
-</div>
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <label class="label-custom">Nombre(s) Familiar 1 <span class="text-danger">*</span></label>
+                        <input type="text" id="contacto_1_nombres" name="contacto_1_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_nombres|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="label-custom">Ap. Paterno 1 <span class="text-danger">*</span></label>
+                        <input type="text" id="contacto_1_apellido_paterno" name="contacto_1_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_paterno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="label-custom">Ap. Materno 1 <span class="text-danger">*</span></label>
+                        <input type="text" id="contacto_1_apellido_materno" name="contacto_1_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_materno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                    </div>
 
-<div class="col-md-4">
-    <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
-    <input
-        type="text"
-        id="ciudad_segundo_padre"
-        name="ciudad_segundo_padre"
-        class="form-control sp-required"
-        list="lista_municipios_pareja"
-        autocomplete="off"
-        placeholder="Primero selecciona un estado..."
-        value="{{ inscripcion.ciudad_segundo_padre|default:'' }}"
-        {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}
-        required
-    >
-    <datalist id="lista_municipios_pareja"></datalist>
-    <div class="invalid-feedback fw-bold">Selecciona un municipio válido.</div>
-</div>
                     <div class="col-md-6 mt-2">
                         <label class="label-custom">Teléfono 1 <span class="text-danger">*</span></label>
                         <input type="text" name="contacto_1_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_1_telefono|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
@@ -685,7 +490,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                     </div>
                 </div>
 
-                <div id="familiar_2_div" class="bg-light p-3 rounded mb-3 border position-relative fade-in hidden-contact">
+                <div id="familiar_2_div" class="bg-light p-3 rounded mb-3 border position-relative fade-in hidden-contact mt-3">
                     {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' or inscripcion.estado == 'DEVUELTA' %}
                     <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 mt-2 me-2" onclick="eliminarFamiliar(2)" title="Eliminar familiar">
                         <i class="bi bi-trash-fill"></i>
@@ -725,7 +530,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                     </div>
                 </div>
 
-                <div id="familiar_3_div" class="bg-light p-3 rounded mb-3 border position-relative fade-in hidden-contact">
+                <div id="familiar_3_div" class="bg-light p-3 rounded mb-3 border position-relative fade-in hidden-contact mt-3">
                     {% if inscripcion.estado == 'NUEVA' or inscripcion.estado == 'EN_PROCESO' or inscripcion.estado == 'DEVUELTA' %}
                     <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 mt-2 me-2" onclick="eliminarFamiliar(3)" title="Eliminar familiar">
                         <i class="bi bi-trash-fill"></i>
@@ -768,172 +573,152 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
             </div>
         </div>
 
-        <div class="form-section-card border-warning" style="border: 2px solid #ffc107;">
-            <div class="section-title" style="background-color: #fff9e6;">
-                <i class="bi bi-cloud-arrow-up-fill fs-4 text-warning"></i> <span id="num_sec_expediente">5</span>. Expediente Digital (Documentos Obligatorios)
+        <div class="form-section-card">
+            <div class="section-title">
+                <i class="bi bi-folder-fill fs-4 text-primary"></i> <span id="num_sec_expediente">5</span>. Carga de Expediente Digital
             </div>
             <div class="card-body p-4">
-                <div class="alert alert-warning border-warning shadow-sm mb-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-exclamation-octagon-fill fs-1 me-3"></i>
-                        <div>
-                            <h5 class="fw-bold mb-1">Carga tus documentos</h5>
-                            <p class="mb-0 small text-dark">Sube tus archivos. Al seleccionarlos, verás cómo el sistema ajusta su nombre automáticamente.</p>
-                        </div>
-                    </div>
+                <div class="alert alert-primary shadow-sm mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i> <strong>Instrucciones:</strong> Sube los documentos solicitados. Puedes usar <strong>.PDF, .JPG o .PNG</strong> a menos que se te indique que solo debe ser imagen. Asegúrate de que sean legibles.
                 </div>
 
                 <div class="row g-4">
-                    <div class="col-lg-4">
-                        <div class="doc-box shadow-sm">
-                            <div class="doc-title"><i class="bi bi-person-hearts me-2"></i>Del Menor</div>
+                    <div class="col-md-4">
+                        <div class="doc-box">
+                            <div class="doc-title"><i class="bi bi-emoji-smile me-2"></i>Del Menor</div>
 
                             <div class="file-input-group">
-                                <label>1. Certificado Médico</label>
-                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_certificado_medico %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Certificado Médico Original <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_menor_certificado_medico %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>2. Cartilla de Vacunación</label>
-                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_cartilla_vacunacion %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Cartilla de Vacunación <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_menor_cartilla_vacunacion %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>3. Grupo Sanguíneo</label>
-                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_grupo_sanguineo %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Examen de Grupo Sanguíneo <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_menor_grupo_sanguineo %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>4. Acta de Nacimiento</label>
-                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Acta de Nacimiento Actualizada <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_menor_acta_nacimiento %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label class="d-flex align-items-center">
-                                    5. Fotografía del Menor
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Tamaño infantil. Fondo claro. Peso máximo: 2MB."></i>
-                                </label>
-                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
-                            </div>
-
-                            <div class="file-input-group">
-                                <label>6. Estudios de Laboratorio</label>
-                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_laboratorio %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_menor_laboratorio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>3 Fotografías del Menor <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) que contenga las 3 fotos juntas. Tamaño máximo permitido: 5MB."></i></label>
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_menor_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-4">
-                        <div class="doc-box shadow-sm">
-                            <div class="doc-title"><i class="bi bi-person-badge-fill me-2"></i>Del Beneficiario</div>
+                    <div class="col-md-4">
+                        <div class="doc-box">
+                            <div class="doc-title"><i class="bi bi-person-badge me-2"></i>Del Beneficiario</div>
 
                             <div class="file-input-group">
-                                <label>1. Acta de Nacimiento</label>
-                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_acta_nacimiento %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
-                            </div>
-
-                            <div class="file-input-group">
-                                <label>2. Copia de INE</label>
-                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Acta de Nacimiento <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_tutor_acta_nacimiento %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label class="d-flex align-items-center">
-                                    3. Fotografía del Tutor
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Tamaño credencial. Nítida y reciente. Peso máximo: 2MB."></i>
-                                </label>
-                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
-                            </div>
-
-                            <div class="file-input-group border border-primary p-2 rounded bg-white shadow-sm mt-3" id="group_foto_pareja" style="display: none;">
-                                <label class="d-flex align-items-center text-primary">
-                                    <i class="bi bi-camera-fill me-1"></i> Fotografía de la Pareja
-                                    <i class="bi bi-info-circle-fill info-icon text-primary" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Es obligatoria si registró los datos de su pareja arriba."></i>
-                                </label>
-                                <input type="file" name="doc_segundo_padre_fotos" class="form-control form-control-sm border-primary" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_segundo_padre_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_segundo_padre_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
-                            </div>
-
-                            <div class="file-input-group mt-3">
-                                <label>4. Comprobante de Domicilio</label>
-                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_domicilio %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Copia de INE / Pasaporte <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_tutor_ine %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>5. Historial Académico</label>
-                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_historial %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>3 Fotografías <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) que contenga las 3 fotos juntas. Tamaño máximo permitido: 5MB."></i></label>
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_tutor_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
+                            </div>
+
+                            <div class="file-input-group" id="group_foto_pareja" style="display: none;">
+                                <label>Foto de la Pareja <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
+                                <input type="file" name="doc_segundo_padre_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_segundo_padre_fotos %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_segundo_padre_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>6. Horario de Clases</label>
-                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_tutor_horario %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Comprobante de Domicilio <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_tutor_domicilio %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>Historial Académico <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_tutor_historial %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
+                            </div>
+
+                            <div class="file-input-group">
+                                <label>Horario de Clases Firmado <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_tutor_horario %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-4">
-                        <div class="doc-box shadow-sm">
-                            <div class="doc-title"><i class="bi bi-person-check-fill me-2"></i>De los Autorizados</div>
+                    <div class="col-md-4">
+                        <div class="doc-box">
+                            <div class="doc-title"><i class="bi bi-person-lines-fill me-2"></i>Personas Autorizadas</div>
 
                             <div class="file-input-group">
-                                <label>1. Carta de Autorización (Contestada)</label>
-                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_autorizado_carta %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Carta de Autorización <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_autorizado_carta %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
-                                <label>2. Copia de INE (de todos)</label>
-                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" accept=".pdf" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_autorizado_ine %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Copia de INE de TODOS <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_autorizado_ine %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
-                            <div class="file-input-group">
-                                <label class="d-flex align-items-center">
-                                    3. Fotografía Familiar 1
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Condiciones: Solo JPG o PNG. Foto individual."></i>
-                                </label>
-                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_contacto_1_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                            <div class="file-input-group mt-4 border-top pt-3">
+                                <label>Foto de Familiar Autorizado 1 <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
+                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_contacto_1_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group" id="group_foto_aut2" style="display: none;">
-                                <label class="d-flex align-items-center">
-                                    4. Fotografía Familiar 2
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Obligatorio si registró un segundo familiar arriba."></i>
-                                </label>
-                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_contacto_2_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Foto de Familiar Autorizado 2 <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
+                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_contacto_2_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group" id="group_foto_aut3" style="display: none;">
-                                <label class="d-flex align-items-center">
-                                    5. Fotografía Familiar 3
-                                    <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                       title="Obligatorio si registró un tercer familiar arriba."></i>
-                                </label>
-                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm" accept="image/jpeg,image/png" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
-                                {% if inscripcion.doc_contacto_3_fotos %}<span class="status-badge status-ok mt-1 d-inline-block"><i class="bi bi-check-circle-fill"></i> Subido</span>{% else %}<span class="status-badge status-missing mt-1" style="display: none;">Falta</span>{% endif %}
+                                <label>Foto de Familiar Autorizado 3 <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
+                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_contacto_3_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -952,7 +737,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                 </a>
 
                 <div class="form-check text-start bg-light p-4 rounded-3 border mb-4">
-                    <input class="form-check-input fs-4 mt-1" type="checkbox" name="acepto_reglamentos" id="acepto_reglamentos" {% if inscripcion.acepto_reglamentos %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} style="cursor: pointer;" required>
+                    <input class="form-check-input fs-4 mt-1" type="checkbox" value="True" name="acepto_reglamentos" id="acepto_reglamentos" {% if inscripcion.acepto_reglamentos %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} style="cursor: pointer;" required>
                     <label class="form-check-label ms-3 mt-1" for="acepto_reglamentos" style="cursor: pointer;">
                         <strong>He leído y acepto</strong> los lineamientos, normas y reglamentos estipulados por la Estancia Infantil UNACH para el ingreso y permanencia del menor. <span class="text-danger">*</span>
                     </label>
@@ -963,7 +748,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                     <label class="form-label fw-bold text-dark fs-5 mb-2"><i class="bi bi-upload me-2 text-primary"></i>Sube el Reglamento Firmado <span class="text-danger">*</span></label>
                     <p class="text-muted small mb-3">Imprime el documento, fírmalo, escanéalo y súbelo aquí obligatoriamente en formato PDF para poder enviar tu expediente.</p>
 
-                    <input type="file" name="reglamento_firmado" id="reglamento_firmado" class="form-control form-control-lg border-primary" accept="application/pdf"
+                    <input type="file" name="reglamento_firmado" id="reglamento_firmado" class="form-control form-control-lg border-primary" accept=".pdf"
                            {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.reglamento_firmado %}true{% else %}false{% endif %}">
                     <div class="invalid-feedback fw-bold">Debes subir el reglamento firmado en PDF para poder enviar tu expediente.</div>
 
@@ -1006,7 +791,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                         <h2 class="fw-bold text-dark mb-3">¿Estás seguro?</h2>
                         <p class="text-muted fs-5 mb-0">
                             Una vez enviado tu expediente definitivo a revisión por Trabajo Social,
-                            <strong class="text-danger">ya no podrás modificar tus datos</strong> ni volver a subir el reglamento.
+                            <strong class="text-danger">ya no podrás modificar tus datos</strong> ni volver a subir documentos.
                         </p>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0 gap-2 flex-column flex-sm-row">
@@ -1044,14 +829,13 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
     </form>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    // Variable global para bloquear inputs si el estado es solo de lectura
     const isReadOnly = ("{{ inscripcion.estado }}" === "EN_REVISION" || "{{ inscripcion.estado }}" === "FINALIZADA");
 
-    // -------------------------------------------------------------------
-    // INICIALIZAR TODOS LOS TOOLTIPS DE LA PÁGINA
-    // -------------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', function () {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -1059,9 +843,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         })
     });
 
-    // -------------------------------------------------------------------
-    // LÓGICA DE PALOMITAS ROJAS (ARCHIVOS DEVUELTOS)
-    // -------------------------------------------------------------------
     const rawObsInput = document.getElementById('raw_observaciones');
     if (rawObsInput) {
         let rawObs = rawObsInput.value;
@@ -1097,9 +878,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         if(container) container.innerHTML = `<strong><i class="bi bi-chat-left-text text-danger me-2"></i>"${cleanMsg}"</strong>`;
     }
 
-    // -------------------------------------------------------------------
-    // FUNCIÓN PARA MOSTRAR MODAL DE ERRORES PERSONALIZADO
-    // -------------------------------------------------------------------
     function mostrarErrorModal(titulo, mensaje, lista = []) {
         document.getElementById('errorModalTitle').innerText = titulo;
         document.getElementById('errorModalMessage').innerHTML = mensaje;
@@ -1122,9 +900,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         modal.show();
     }
 
-    // -------------------------------------------------------------------
-    // 1. Convertir Primera Letra en Mayúscula y Bloquear Números
-    // -------------------------------------------------------------------
     function formatName(input) {
         let val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
         input.value = val.replace(/\b\w/g, function(char) {
@@ -1132,9 +907,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         });
     }
 
-    // -------------------------------------------------------------------
-    // 2. LÓGICA DE ESTADO CIVIL Y PAREJA (MOSTRAR FOTO DINÁMICAMENTE)
-    // -------------------------------------------------------------------
     function manejarEstadoCivil() {
         const estadoCivil = document.getElementById('estado_civil_tutor_select').value;
         const preguntaParejaDiv = document.getElementById('div_pregunta_pareja');
@@ -1184,9 +956,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         }
     }
 
-    // -------------------------------------------------------------------
-    // 3. Lógica Excluyente de Parentescos (Madre / Padre)
-    // -------------------------------------------------------------------
     function sincronizarParentescos() {
         const selectTutor = document.getElementById('parentesco_tutor_select');
         const selectSegundoPadre = document.getElementById('parentesco_segundo_padre_select');
@@ -1200,9 +969,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         }
     }
 
-    // -------------------------------------------------------------------
-    // 4. Lógica Tipo de Sangre "Otro"
-    // -------------------------------------------------------------------
     function manejarTipoSangre() {
         const selectSangre = document.getElementById('tipo_sangre_select');
         const inputReal = document.getElementById('tipo_sangre_real');
@@ -1225,9 +991,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         document.getElementById('tipo_sangre_real').value = document.getElementById('tipo_sangre_otro_input').value;
     }
 
-    // -------------------------------------------------------------------
-    // 5. Lógica Parentesco "Otro" para Familiares
-    // -------------------------------------------------------------------
     function manejarPar(num) {
         const selectPar = document.getElementById(`sel_par_${num}`);
         const inputReal = document.getElementById(`real_par_${num}`);
@@ -1269,9 +1032,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         }
     }
 
-    // -------------------------------------------------------------------
-    // 6. Mostrar y Eliminar Familiares Dinámicamente (CON FOTOS)
-    // -------------------------------------------------------------------
     let familiaresMostrados = 1;
 
     function agregarFamiliar() {
@@ -1293,7 +1053,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         if(confirm(`¿Estás seguro de eliminar al familiar ${numero}?`)) {
             document.getElementById(`familiar_${numero}_div`).classList.add('hidden-contact');
 
-            // Ocultar y deshabilitar foto
             document.getElementById(`group_foto_aut${numero}`).style.display = 'none';
             document.querySelector(`input[name="doc_contacto_${numero}_fotos"]`).disabled = true;
 
@@ -1310,86 +1069,121 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         }
     }
 
-    // -------------------------------------------------------------------
-    // 7. LÓGICA DE ESTADOS Y MUNICIPIOS DE MÉXICO
-    // -------------------------------------------------------------------
-    const mexicoData = {
-    "Aguascalientes": ["Aguascalientes"],
-    "Baja California": ["Mexicali", "Tijuana", "Ensenada", "Tecate", "Playas de Rosarito"],
-    "Baja California Sur": ["La Paz", "Los Cabos", "Comondú", "Loreto", "Mulegé"],
-    "Campeche": ["Campeche", "Carmen", "Champotón", "Escárcega", "Calkiní"],
-    "Chiapas": ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán", "Palenque", "Tonalá"],
-    "Chihuahua": ["Chihuahua", "Ciudad Juárez", "Cuauhtémoc", "Delicias", "Parral"],
-    "Ciudad de México": ["Álvaro Obregón", "Coyoacán", "Cuauhtémoc", "Gustavo A. Madero", "Iztapalapa", "Tlalpan"],
-    "Coahuila": ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña"],
-    "Colima": ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez"],
-    "Durango": ["Durango", "Gómez Palacio", "Lerdo"],
-    "Estado de México": ["Toluca", "Ecatepec", "Naucalpan", "Nezahualcóyotl", "Tlalnepantla"],
-    "Guanajuato": ["Guanajuato", "León", "Irapuato", "Celaya", "Salamanca"],
-    "Guerrero": ["Chilpancingo", "Acapulco", "Iguala", "Taxco", "Zihuatanejo"],
-    "Hidalgo": ["Pachuca", "Tulancingo", "Tula de Allende", "Huejutla"],
-    "Jalisco": ["Guadalajara", "Zapopan", "Tlaquepaque", "Tonalá", "Puerto Vallarta"],
-    "Michoacán": ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán"],
-    "Morelos": ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco"],
-    "Nayarit": ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla"],
-    "Nuevo León": ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "San Pedro Garza García"],
-    "Oaxaca": ["Oaxaca de Juárez", "Salina Cruz", "Juchitán", "Tuxtepec", "Huajuapan"],
-    "Puebla": ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco"],
-    "Querétaro": ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués"],
-    "Quintana Roo": ["Chetumal", "Cancún", "Playa del Carmen", "Cozumel", "Tulum"],
-    "San Luis Potosí": ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala"],
-    "Sinaloa": ["Culiacán", "Mazatlán", "Los Mochis", "Guasave"],
-    "Sonora": ["Hermosillo", "Ciudad Obregón", "Nogales", "San Luis Río Colorado"],
-    "Tabasco": ["Villahermosa", "Cárdenas", "Comalcalco", "Macuspana", "Tenosique"],
-    "Tamaulipas": ["Ciudad Victoria", "Tampico", "Reynosa", "Matamoros", "Nuevo Laredo"],
-    "Tlaxcala": ["Tlaxcala", "Apizaco", "Huamantla", "Chiautempan"],
-    "Veracruz": ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica"],
-    "Yucatán": ["Mérida", "Valladolid", "Tizimín", "Progreso"],
-    "Zacatecas": ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez"]
-};
+    // ===================================================================
+    // LÓGICA DE ESTADOS Y MUNICIPIOS (CON SELECT2 Y DISEÑO ORIGINAL)
+    // ===================================================================
+    $(document).ready(function() {
+        const ESTADOS_MX_COMPLETOS = [
+            { nombre: "Aguascalientes", municipios: ["Aguascalientes", "Asientos", "Calvillo", "Cosío", "Jesús María", "Pabellón de Arteaga", "Rincón de Romos", "San José de Gracia", "Tepezalá", "El Llano", "San Francisco de los Romo"] },
+            { nombre: "Baja California", municipios: ["Ensenada", "Mexicali", "Tecate", "Tijuana", "Playas de Rosarito", "San Quintín", "San Felipe"] },
+            { nombre: "Baja California Sur", municipios: ["Comondú", "Mulegé", "La Paz", "Los Cabos", "Loreto"] },
+            { nombre: "Campeche", municipios: ["Calkiní", "Campeche", "Carmen", "Champotón", "Hecelchakán", "Hopelchén", "Palizada", "Tenabo", "Escárcega", "Calakmul", "Candelaria", "Seybaplaya", "Dzitbalché"] },
+            { nombre: "Chiapas", municipios: ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán de Domínguez", "Palenque", "Tonalá", "Chiapa de Corzo", "Ocosingo", "Villaflores", "Cintalapa", "Reforma", "Arriaga", "Las Margaritas", "Pichucalco", "Berriozábal"] },
+            { nombre: "Chihuahua", municipios: ["Chihuahua", "Juárez", "Cuauhtémoc", "Delicias", "Hidalgo del Parral", "Nuevo Casas Grandes", "Camargo", "Jiménez", "Meoqui", "Guachochi"] },
+            { nombre: "Ciudad de México", municipios: ["Álvaro Obregón", "Azcapotzalco", "Benito Juárez", "Coyoacán", "Cuajimalpa de Morelos", "Cuauhtémoc", "Gustavo A. Madero", "Iztacalco", "Iztapalapa", "La Magdalena Contreras", "Miguel Hidalgo", "Milpa Alta", "Tláhuac", "Tlalpan", "Venustiano Carranza", "Xochimilco"] },
+            { nombre: "Coahuila", municipios: ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña", "San Pedro", "Sabinas", "Frontera", "Ramos Arizpe", "Matamoros"] },
+            { nombre: "Colima", municipios: ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez", "Armería", "Comala", "Coquimatlán", "Cuauhtémoc", "Ixtlahuacán", "Minatitlán"] },
+            { nombre: "Durango", municipios: ["Durango", "Gómez Palacio", "Lerdo", "Santiago Papasquiaro", "Guadalupe Victoria", "Canatlán", "Pueblo Nuevo", "El Oro", "Mapimí", "Vicente Guerrero"] },
+            { nombre: "Estado de México", municipios: ["Toluca", "Ecatepec de Morelos", "Naucalpan de Juárez", "Nezahualcóyotl", "Tlalnepantla de Baz", "Chimalhuacán", "Atizapán de Zaragoza", "Cuautitlán Izcalli", "Ixtapaluca", "Tecámac", "Metepec", "Lerma", "Zinacantepec", "Valle de Chalco Solidaridad", "Huixquilucan"] },
+            { nombre: "Guanajuato", municipios: ["Guanajuato", "León", "Irapuato", "Celaya", "Salamanca", "Silao de la Victoria", "San Miguel de Allende", "Dolores Hidalgo Cuna de la Independencia Nacional", "Valle de Santiago", "Acámbaro"] },
+            { nombre: "Guerrero", municipios: ["Chilpancingo de los Bravo", "Acapulco de Juárez", "Iguala de la Independencia", "Taxco de Alarcón", "Zihuatanejo de Azueta", "Chilapa de Álvarez", "Tlapa de Comonfort", "Coyuca de Benítez", "Ometepec", "Atoyac de Álvarez"] },
+            { nombre: "Hidalgo", municipios: ["Pachuca de Soto", "Tulancingo de Bravo", "Tula de Allende", "Huejutla de Reyes", "Mineral de la Reforma", "Tepeji del Río de Ocampo", "Ixmiquilpan", "Actopan", "Apan", "Zimapán"] },
+            { nombre: "Jalisco", municipios: ["Guadalajara", "Zapopan", "San Pedro Tlaquepaque", "Tonalá", "Tlajomulco de Zúñiga", "Puerto Vallarta", "El Salto", "Lagos de Moreno", "Tepatitlán de Morelos", "Ocotlán"] },
+            { nombre: "Michoacán", municipios: ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán", "Zitácuaro", "La Piedad", "Pátzcuaro", "Sahuayo", "Hidalgo"] },
+            { nombre: "Morelos", municipios: ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco", "Yautepec", "Emiliano Zapata", "Ayala", "Xochitepec", "Jojutla", "Puente de Ixtla"] },
+            { nombre: "Nayarit", municipios: ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla", "Compostela", "Xalisco", "Ixtlán del Río", "Acaponeta", "Tecuala", "Tuxpan", "Rosamorada"] },
+            { nombre: "Nuevo León", municipios: ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "General Escobedo", "Santa Catarina", "San Pedro Garza García", "Juárez", "García", "Cadereyta Jiménez"] },
+            { nombre: "Oaxaca", municipios: ["Oaxaca de Juárez", "Salina Cruz", "Juchitán de Zaragoza", "San Juan Bautista Tuxtepec", "Huajuapan de León", "Santa Cruz Xoxocotlán", "Santa Lucía del Camino", "Santo Domingo Tehuantepec", "Pinotepa Nacional", "Miahuatlán de Porfirio Díaz"] },
+            { nombre: "Puebla", municipios: ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco", "San Pedro Cholula", "Amozoc", "Huauchinango", "Teziutlán", "Izúcar de Matamoros", "Cuautlancingo"] },
+            { nombre: "Querétaro", municipios: ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués", "Pedro Escobedo", "Tequisquiapan", "Cadereyta de Montes", "Colón", "Ezequiel Montes", "Amealco de Bonfil"] },
+            { nombre: "Quintana Roo", municipios: ["Othón P. Blanco", "Benito Juárez", "Solidaridad", "Cozumel", "Tulum", "Felipe Carrillo Puerto", "José María Morelos", "Lázaro Cárdenas", "Isla Mujeres", "Puerto Morelos", "Bacalar"] },
+            { nombre: "San Luis Potosí", municipios: ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala", "Rioverde", "Tamazunchale", "Ébano", "Xilitla", "Cárdenas", "Cerritos"] },
+            { nombre: "Sinaloa", municipios: ["Culiacán", "Mazatlán", "Ahome", "Guasave", "Navolato", "El Fuerte", "Salvador Alvarado", "Sinaloa", "Escuinapa", "Rosario"] },
+            { nombre: "Sonora", municipios: ["Hermosillo", "Cajeme", "Nogales", "San Luis Río Colorado", "Navojoa", "Guaymas", "Agua Prieta", "Caborca", "Empalme", "Huatabampo"] },
+            { nombre: "Tabasco", municipios: ["Centro", "Cárdenas", "Comalcalco", "Macuspana", "Huimanguillo", "Cunduacán", "Nacajuca", "Paraíso", "Tenosique", "Balancán"] },
+            { nombre: "Tamaulipas", municipios: ["Ciudad Victoria", "Tampico", "Reynosa", "Matamoros", "Nuevo Laredo", "Altamira", "Madero", "El Mante", "Río Bravo", "Valle Hermoso"] },
+            { nombre: "Tlaxcala", municipios: ["Tlaxcala", "Apizaco", "Huamantla", "Chiautempan", "Calpulalpan", "San Pablo del Monte", "Zacatelco", "Contla de Juan Cuamatzi", "Tlaxco", "Yauhquemehcan"] },
+            { nombre: "Veracruz", municipios: ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica de Hidalgo", "Boca del Río", "Orizaba", "Minatitlán", "Tuxpan", "Papantla"] },
+            { nombre: "Yucatán", municipios: ["Mérida", "Valladolid", "Tizimín", "Progreso", "Kanasín", "Umán", "Tekax", "Motul", "Hunucmá", "Izamal"] },
+            { nombre: "Zacatecas", municipios: ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez", "Río Grande", "Sombrerete", "Calera", "Ojocaliente", "Loreto", "Nochistlán de Mejía"] }
+        ];
 
-    function inicializarEstados() {
-    const listaEstados = document.getElementById('lista_estados_mexico');
-    const estados = Object.keys(mexicoData).sort((a, b) => a.localeCompare(b, 'es'));
+        $('.select2-buscador').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            language: { noResults: () => "Sin resultados" }
+        });
 
-    listaEstados.innerHTML = '';
+        // ESTADOS MENOR
+        const selEdoMenor = $('#sel_estado_menor');
+        const selMunMenor = $('#sel_mun_menor');
+        const hiddenEdoMenor = $('#estado_nacimiento_hidden');
+        const hiddenMunMenor = $('#municipio_nacimiento_hidden');
 
-    estados.forEach(function(estado) {
-        let option = document.createElement("option");
-        option.value = estado;
-        listaEstados.appendChild(option);
+        // ESTADOS PAREJA
+        const selEdoPareja = $('#sel_estado_pareja');
+        const selMunPareja = $('#sel_mun_pareja');
+        const hiddenEdoPareja = $('#estado_domicilio_segundo_padre');
+        const hiddenMunPareja = $('#ciudad_segundo_padre');
+
+        // CARGAR OPCIONES INICIALES DE ESTADO
+        selEdoMenor.append(new Option("Seleccione...", "", true, true));
+        selEdoPareja.append(new Option("Seleccione...", "", true, true));
+
+        ESTADOS_MX_COMPLETOS.forEach(e => {
+            selEdoMenor.append(new Option(e.nombre, e.nombre));
+            selEdoPareja.append(new Option(e.nombre, e.nombre));
+        });
+
+        // SINCRONIZACIÓN MENOR
+        selEdoMenor.on('change', function() {
+            hiddenEdoMenor.val(this.value);
+            selMunMenor.empty().append(new Option("Escribe o selecciona...", "", true, true));
+            const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === this.value);
+            if(data) data.municipios.sort().forEach(m => selMunMenor.append(new Option(m, m)));
+        });
+
+        selMunMenor.on('change', function() { hiddenMunMenor.val(this.value); });
+
+        // SINCRONIZACIÓN PAREJA
+        selEdoPareja.on('change', function() {
+            hiddenEdoPareja.val(this.value);
+            selMunPareja.empty().append(new Option("Escribe o selecciona...", "", true, true));
+            const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === this.value);
+            if(data) data.municipios.sort().forEach(m => selMunPareja.append(new Option(m, m)));
+        });
+
+        selMunPareja.on('change', function() { hiddenMunPareja.val(this.value); });
+
+        // RECUPERAR VALORES DE LA BASE DE DATOS (MENOR)
+        if(hiddenEdoMenor.val()) {
+            selEdoMenor.val(hiddenEdoMenor.val()).trigger('change.select2');
+            const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === hiddenEdoMenor.val());
+            if(data) {
+                selMunMenor.empty().append(new Option("Escribe o selecciona...", ""));
+                data.municipios.sort().forEach(m => selMunMenor.append(new Option(m, m)));
+                if(hiddenMunMenor.val()) {
+                    selMunMenor.val(hiddenMunMenor.val()).trigger('change.select2');
+                }
+            }
+        }
+
+        // RECUPERAR VALORES DE LA BASE DE DATOS (PAREJA)
+        if(hiddenEdoPareja.val()) {
+            selEdoPareja.val(hiddenEdoPareja.val()).trigger('change.select2');
+            const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === hiddenEdoPareja.val());
+            if(data) {
+                selMunPareja.empty().append(new Option("Escribe o selecciona...", ""));
+                data.municipios.sort().forEach(m => selMunPareja.append(new Option(m, m)));
+                if(hiddenMunPareja.val()) {
+                    selMunPareja.val(hiddenMunPareja.val()).trigger('change.select2');
+                }
+            }
+        }
     });
 
-    const estadoGuardado = document.getElementById('estado_nacimiento_menor').value;
-
-    if (estadoGuardado) {
-        cargarMunicipios('estado_nacimiento_menor', 'municipio_nacimiento_menor', true);
-    }
-}
-
-    function cargarMunicipios(idInputEstado, idSelectMunicipio, esCargaInicial = false) {
-    const inputEstado = document.getElementById(idInputEstado);
-    const selectMunicipio = document.getElementById(idSelectMunicipio);
-    const estadoSeleccionado = inputEstado.value.trim();
-
-    selectMunicipio.innerHTML = '<option value="">Selecciona el municipio...</option>';
-
-    if (estadoSeleccionado && mexicoData[estadoSeleccionado]) {
-        const municipioGuardado = document.getElementById('municipio_nacimiento_hidden').value;
-        const municipios = mexicoData[estadoSeleccionado];
-
-        municipios.forEach(function(municipio) {
-            let option = document.createElement("option");
-            option.text = municipio;
-            option.value = municipio;
-            if (esCargaInicial && municipio === municipioGuardado) option.selected = true;
-            selectMunicipio.add(option);
-        });
-    }
-}
-
     // -------------------------------------------------------------------
-    // 8. CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
+    // CÁLCULO AUTOMÁTICO DE EDAD (AÑOS Y MESES)
     // -------------------------------------------------------------------
     function calcularEdadMenor() {
         const fechaInput = document.getElementById('fecha_nac_menor').value;
@@ -1398,37 +1192,34 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
 
         if (!fechaInput) return;
 
-        if (inputAnios.value === '' && inputMeses.value === '') {
-            const partesFecha = fechaInput.split('-');
-            const nacimiento = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
-            const hoy = new Date();
+        const partesFecha = fechaInput.split('-');
+        const nacimiento = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+        const hoy = new Date();
 
-            let anios = hoy.getFullYear() - nacimiento.getFullYear();
-            let meses = hoy.getMonth() - nacimiento.getMonth();
+        let anios = hoy.getFullYear() - nacimiento.getFullYear();
+        let meses = hoy.getMonth() - nacimiento.getMonth();
 
-            if (hoy.getDate() < nacimiento.getDate()) {
-                meses--;
-            }
-
-            if (meses < 0) {
-                anios--;
-                meses += 12;
-            }
-
-            if(anios < 0) { anios = 0; meses = 0; }
-
-            inputAnios.value = anios;
-            inputMeses.value = meses;
+        if (hoy.getDate() < nacimiento.getDate()) {
+            meses--;
         }
+
+        if (meses < 0) {
+            anios--;
+            meses += 12;
+        }
+
+        if(anios < 0) { anios = 0; meses = 0; }
+
+        inputAnios.value = anios;
+        inputMeses.value = meses;
     }
 
     // -------------------------------------------------------------------
-    // 9. Arranque y Validaciones Generales
+    // Arranque y Validaciones Generales
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
         manejarEstadoCivil();
         sincronizarParentescos();
-        inicializarEstados();
         calcularEdadMenor();
         inicializarParentescosFamiliares();
 
@@ -1446,13 +1237,14 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
             btnEnviar.addEventListener('click', function(event) {
                 event.preventDefault();
 
-                if (!form.checkValidity()) {
-                    event.stopPropagation();
-                    form.classList.add('was-validated');
-                    const firstInvalid = form.querySelector(':invalid');
-                    if(firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    return;
-                }
+                // Sincronizar un último chequeo de seguridad de los selects
+                document.getElementById('estado_nacimiento_hidden').value = $('#sel_estado_menor').val();
+                document.getElementById('municipio_nacimiento_hidden').value = $('#sel_mun_menor').val();
+                if(document.getElementById('estado_domicilio_segundo_padre')) document.getElementById('estado_domicilio_segundo_padre').value = $('#sel_estado_pareja').val() || '';
+                if(document.getElementById('ciudad_segundo_padre')) document.getElementById('ciudad_segundo_padre').value = $('#sel_mun_pareja').val() || '';
+
+                let formValido = form.checkValidity();
+                form.classList.add('was-validated');
 
                 let todosSubidos = true;
                 let docsFaltantes = [];
@@ -1466,13 +1258,13 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
 
                     if (!estaEnBaseDeDatos && !tieneArchivoSeleccionadoAhora) {
                         todosSubidos = false;
+                        input.classList.add('is-invalid');
 
                         let labelElement = input.closest('.file-input-group') || input.closest('.text-start');
                         let nombreBonito = labelElement ? labelElement.querySelector('label').innerText : input.name;
                         nombreBonito = nombreBonito.split('\n')[0].replace(/^\d+\.\s*/, '').replace(/\*/g, '').trim();
 
                         docsFaltantes.push(nombreBonito);
-                        input.classList.add('is-invalid');
 
                         let badgeFalta = input.parentNode.querySelector('.status-missing');
                         if(badgeFalta) badgeFalta.style.display = 'inline-block';
@@ -1484,6 +1276,13 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
                         if(badgeFalta) badgeFalta.style.display = 'none';
                     }
                 });
+
+                if (!formValido) {
+                    const firstInvalid = form.querySelector(':invalid');
+                    if(firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    mostrarErrorModal("Campos Incompletos", "Por favor, llena todos los campos de texto obligatorios marcados en rojo.");
+                    return;
+                }
 
                 if (!todosSubidos) {
                     mostrarErrorModal(
@@ -1513,7 +1312,6 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
             });
         }
 
-        // Inicializar vistas de familiares extra si ya existen en base de datos
         if ("{{ inscripcion.contacto_2_nombres|default:'' }}" !== "") {
             document.getElementById('familiar_2_div').classList.remove('hidden-contact');
             document.getElementById('group_foto_aut2').style.display = 'block';
@@ -1537,7 +1335,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
     });
 
     // -------------------------------------------------------------------
-    // 10. AUTO-GUARDADO (LOCALSTORAGE)
+    // AUTO-GUARDADO (LOCALSTORAGE)
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
         const pageId = window.location.pathname + "_user_{{ request.user.id }}";
@@ -1600,7 +1398,7 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
     });
 
     // -------------------------------------------------------------------
-    // 11. RENOMBRADO VISUAL INMEDIATO AL SELECCIONAR ARCHIVO (MAGIA FRONTEND)
+    // RENOMBRADO VISUAL INMEDIATO Y LÍMITE DE 5MB PARA IMÁGENES
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
         const mapeoNombres = {
@@ -1630,12 +1428,26 @@ document.addEventListener("DOMContentLoaded", inicializarEstadosMunicipiosPareja
         fileInputs.forEach(input => {
             input.addEventListener('change', function(e) {
                 if (this.files && this.files.length > 0) {
+                    const originalFile = this.files[0];
 
+                    // --- VALIDACIÓN DE 5MB PARA LAS FOTOGRAFÍAS ---
+                    if (this.classList.contains('file-size-check')) {
+                        if (originalFile.size > 5 * 1024 * 1024) { // 5 Megabytes
+                            this.value = ''; // Limpiar el archivo seleccionado
+                            mostrarErrorModal(
+                                "Archivo muy pesado",
+                                "La fotografía seleccionada pesa más de 5MB. Por favor, comprímela o recórtala antes de subirla."
+                            );
+                            return; // Detener el proceso
+                        }
+                    }
+
+                    // Si pasa la validación, quitamos el color rojo
                     this.classList.remove('is-invalid');
                     let badgeFalta = this.parentNode.querySelector('.status-missing');
                     if(badgeFalta) badgeFalta.style.display = 'none';
 
-                    const originalFile = this.files[0];
+                    // --- RENOMBRADO AUTOMÁTICO DE ARCHIVO ---
                     const fieldName = this.name;
                     const baseName = mapeoNombres[fieldName];
 

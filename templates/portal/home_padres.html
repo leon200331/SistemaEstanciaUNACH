@@ -261,15 +261,15 @@
                             <i class="bi bi-folder-check"></i>
                         </div>
                         <h3 class="card-title-custom">Mi Expediente de Inscripción</h3>
-                        <p class="card-text-custom">
-                            Tu solicitud de ingreso fue aprobada. Haz clic aquí para llenar los datos médicos de tu menor, actualizar tu información familiar y firmar los reglamentos.
+                        <p class="card-text-custom text-dark">
+                            <strong>¡Tu solicitud fue aprobada!</strong> El siguiente paso es presentarte en la Estancia Infantil para realizar las <strong>valoraciones médicas, nutricionales y psicológicas presenciales.</strong>
                         </p>
                     </div>
 
                     <div class="w-100 mt-2">
                         {% if not mi_inscripcion or mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}
                             <a href="{% url 'portal_inscripcion' %}" class="btn btn-action btn-primary-custom">
-                                Continuar Inscripción <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
+                                Ver progreso del trámite <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
                             </a>
                         {% elif mi_inscripcion.estado == 'EN_REVISION' %}
                             <div class="status-pill bg-warning text-dark shadow-sm">

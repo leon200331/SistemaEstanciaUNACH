@@ -30,20 +30,11 @@
     .jira-label { font-size: 0.85rem; font-weight: 600; color: #44546f; margin-bottom: 4px; display: block; }
     .jira-input { background: #f4f5f7; border: 2px solid #dfe1e6; border-radius: 4px; padding: 8px 12px; font-size: 0.9rem; color: #172b4d; width: 100%; transition: 0.2s; }
     .jira-input:focus { background: white; border-color: #0c66e4; outline: none; }
-
-    #toast-notification {
-        visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px;
-        position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    #toast-notification.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-    @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-    @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
 
 {% block content %}
-<div id="toast-notification"><i class="bi bi-check-circle me-2"></i>Acción Realizada Correctamente</div>
-
 <nav class="navbar navbar-expand-lg navbar-ti fixed-top">
     <div class="container-fluid justify-content-center">
         <div class="d-flex align-items-center" style="width: 100%; max-width: 1200px; padding: 0 20px;">
@@ -222,7 +213,7 @@
                             </div>
                             <div class="col-md-3">
                               <label class="form-label fw-bold text-secondary small">2. Asignar Rol</label>
-                              <select name="rol_fijo" class="form-select" required>
+                              <select name="rol_fijo" class="form-select" required onchange="verificarRolMaestra(this)">
                                 <option value="">-- Elegir Rol --</option>
                                 <option value="Administrador del Sistema">Administrador del Sistema</option>
                                 <option value="Directora">Directora</option>
@@ -246,7 +237,42 @@
                             <div class="col-md-2">
                               <button type="submit" class="btn btn-primary w-100 fw-bold">Vincular</button>
                             </div>
-                        </form>
+
+                            <div class="col-12" id="seccion_maestra_extra" style="display: none;">
+                                <div class="p-3 mt-2 border rounded bg-white border-primary shadow-sm">
+                                    <h6 class="fw-bold text-primary mb-2 small"><i class="bi bi-person-badge-fill me-2"></i>Configuración de Asistente de Sala</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Sala a Cargo:</label>
+                                            <select name="sala_asignada" class="form-select form-select-sm">
+                                                <option value="">-- Seleccionar Sala --</option>
+                                                <optgroup label="Lactantes">
+                                                    <option value="L1">Sala L1</option>
+                                                    <option value="L2">Sala L2</option>
+                                                    <option value="L3">Sala L3</option>
+                                                </optgroup>
+                                                <optgroup label="Maternales">
+                                                    <option value="M1">Sala M1</option>
+                                                    <option value="M2">Sala M2</option>
+                                                    <option value="M3">Sala M3</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Tipo de Bitácora:</label>
+                                            <select name="tipo_bitacora" class="form-select form-select-sm">
+                                                <option value="">-- Seleccionar --</option>
+                                                <option value="LACTANTE">Bitácora Lactantes</option>
+                                                <option value="MATERNAL">Bitácora Maternales</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2" style="font-size: 0.75rem;">
+                                        Esta configuración es necesaria para filtrar a los alumnos correctos en el portal docente.
+                                    </div>
+                                </div>
+                            </div>
+                            </form>
 
                         <hr class="my-4">
                         <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-list-check me-1"></i> Personal con rol activo</h6>
@@ -418,30 +444,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalAdvertenciaPeligro" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-radius: 12px;">
-      <div class="modal-header bg-danger text-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
-        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Advertencia Irreversible</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body p-4 text-center">
-        <div class="mb-3">
-            <i class="bi bi-shield-x text-danger" style="font-size: 3.5rem;"></i>
-        </div>
-        <h4 class="fw-bold text-dark mb-3">¿Estás completamente seguro?</h4>
-        <p class="text-muted mb-0" style="font-size: 0.95rem;">
-            Estás a punto de ceder la <strong>Administración del Sistema</strong> a otra persona. Dejarás de tener permisos para realizar cambios críticos en el sistema en este exacto momento, aunque tu sesión siga abierta.
-        </p>
-      </div>
-      <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; justify-content: center;">
-        <button type="button" class="btn btn-outline-secondary fw-bold px-4" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger fw-bold px-4" onclick="ejecutarTransferenciaMando()">Sí, Ceder Mando</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal fade" id="modalCrearUser" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
@@ -454,15 +456,15 @@
                 </div>
                 <div class="modal-body p-4 bg-light">
                     <div class="row g-4">
-                        <div class="col-md-4"><label class="jira-label">Nombre(s) *</label><input type="text" name="nombre" class="jira-input" required style="text-transform: capitalize;"></div>
-                        <div class="col-md-4"><label class="jira-label">Apellido Paterno *</label><input type="text" name="apellido_paterno" class="jira-input" required style="text-transform: capitalize;"></div>
-                        <div class="col-md-4"><label class="jira-label">Apellido Materno</label><input type="text" name="apellido_materno" class="jira-input" style="text-transform: capitalize;"></div>
+                        <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">1. Identidad</h6></div>
+                        <div class="col-md-3"><label class="jira-label">Nombre(s) *</label><input type="text" name="nombre" class="jira-input" required style="text-transform: capitalize;"></div>
+                        <div class="col-md-3"><label class="jira-label">A. Paterno *</label><input type="text" name="apellido_paterno" class="jira-input" required style="text-transform: capitalize;"></div>
+                        <div class="col-md-3"><label class="jira-label">A. Materno</label><input type="text" name="apellido_materno" class="jira-input" style="text-transform: capitalize;"></div>
+                        <div class="col-md-3"><label class="jira-label">CURP *</label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" style="text-transform: uppercase;"></div>
 
-                        <div class="col-md-6"><label class="jira-label">CURP *</label><input type="text" name="curp" class="jira-input" required maxlength="18" minlength="18" style="text-transform: uppercase;"></div>
-                        <div class="col-md-6"><label class="jira-label">Número de Empleado</label><input type="text" name="numero_empleado" class="jira-input" pattern="\d+"></div>
-
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">2. Estructura</h6></div>
                         <div class="col-md-4">
-                            <label class="jira-label">Tipo de Persona *</label>
+                            <label class="jira-label">Tipo *</label>
                             <select name="tipo_persona" class="jira-input" required>
                                 <option value="">Seleccione...</option>
                                 <option value="PERSONAL">Personal de la estancia</option>
@@ -470,8 +472,18 @@
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
-                        <div class="col-md-4"><label class="jira-label">Correo Institucional *</label><input type="email" name="email" class="jira-input" required></div>
-                        <div class="col-md-4"><label class="jira-label">Contraseña *</label><input type="password" name="password" class="jira-input" required></div>
+                        <div class="col-md-4"><label class="jira-label">Nº Empleado *</label><input type="text" name="numero_empleado" class="jira-input" required pattern="\d+"></div>
+                        <div class="col-md-4">
+                            <label class="jira-label">Estatus *</label>
+                            <select name="estatus_operativo" class="jira-input" required>
+                                <option value="true" selected>Activo</option>
+                                <option value="false">Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">3. Credenciales</h6></div>
+                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Contraseña *</label><input type="password" name="password" class="jira-input" required></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -536,6 +548,19 @@
 </div>
 
 <script>
+    function verificarRolMaestra(select) {
+        const seccionExtra = document.getElementById('seccion_maestra_extra');
+        const textoSeleccionado = select.options[select.selectedIndex].text.toLowerCase();
+
+        if (textoSeleccionado.includes('asistente') || textoSeleccionado.includes('maestra')) {
+            seccionExtra.style.display = 'block';
+            seccionExtra.querySelectorAll('select').forEach(s => s.required = true);
+        } else {
+            seccionExtra.style.display = 'none';
+            seccionExtra.querySelectorAll('select').forEach(s => s.required = false);
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         var savedTabID = localStorage.getItem('activeTabID');
         if (savedTabID) {
@@ -557,67 +582,84 @@
         document.getElementById('edit_estatus').value = boton.getAttribute('data-estatus');
     }
 
-    var modalAdvertencia;
     function abrirModalTransferencia() {
         var select = document.getElementById('selectSucesor');
         if (select.value === "") { select.reportValidity(); return; }
-        modalAdvertencia = new bootstrap.Modal(document.getElementById('modalAdvertenciaPeligro'));
-        modalAdvertencia.show();
+
+        Swal.fire({
+            title: '¿Estás completamente seguro?',
+            text: "Estás a punto de ceder la Administración del Sistema. Perderás tus privilegios administrativos al instante.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, Ceder Mando',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ejecutarTransferenciaMando();
+            }
+        });
     }
 
     function ejecutarTransferenciaMando() {
-        modalAdvertencia.hide();
         var form = document.getElementById('formTransferenciaMando');
         var formData = new FormData(form);
         fetch(window.location.href, { method: 'POST', body: formData, headers: {'X-Requested-With': 'XMLHttpRequest'} })
         .then(r => r.json())
         .then(d => {
-            if(d.status === 'success') { showToast(d.msg); setTimeout(() => window.location.reload(), 2000); }
-            else { alert("Error: \n" + d.msg); }
-        }).catch(err => alert("Ocurrió un error en el servidor."));
+            if(d.status === 'success') {
+                Swal.fire('¡Transferido!', d.msg, 'success');
+                setTimeout(() => window.location.reload(), 2000);
+            }
+            else { Swal.fire('Error', d.msg, 'error'); }
+        }).catch(err => Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error'));
     }
 
     function submitAjax(event) {
         event.preventDefault();
 
-        // --- ESCUDO ANTI DOBLE CLIC ---
-        var btnSubmit = event.target.querySelector('button[type="submit"]');
-        var textoOriginal = "";
-        if (btnSubmit) {
-            textoOriginal = btnSubmit.innerHTML;
-            btnSubmit.disabled = true; // Bloquea el botón al instante
-            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cargando...';
+        // Evitar múltiples envíos y mostrar que está cargando en el botón si es eliminar
+        if(event.target.querySelector('input[name="action_type"]').value === 'delete_user'){
+            Swal.fire({
+                title: '¿Eliminar Empleado?',
+                text: "Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    enviarFormularioFetch(event.target);
+                }
+            });
+        } else {
+            enviarFormularioFetch(event.target);
         }
-        // -------------------------------------------------------------
+    }
 
-        fetch(window.location.href, { method: 'POST', body: new FormData(event.target), headers: {'X-Requested-With': 'XMLHttpRequest'} })
+    function enviarFormularioFetch(form){
+        fetch(window.location.href, { method: 'POST', body: new FormData(form), headers: {'X-Requested-With': 'XMLHttpRequest'} })
         .then(r => r.json())
         .then(d => {
             if(d.status === 'success') {
-                showToast(d.msg);
-                setTimeout(() => window.location.reload(), 1000);
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: d.msg,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.reload();
+                });
             } else {
-                alert("Aviso: \n" + d.msg);
-                // Si hay un error (ej. falta un dato), reactivamos el botón
-                if (btnSubmit) {
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = textoOriginal;
-                }
+                Swal.fire('Aviso', d.msg, 'warning');
             }
         }).catch(err => {
-            alert("Ocurrió un error en el servidor.");
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = textoOriginal;
-            }
+            Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error');
         });
-    }
-
-    function showToast(msg) {
-        var x = document.getElementById("toast-notification");
-        x.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + msg;
-        x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
     }
 </script>
 {% endblock %}

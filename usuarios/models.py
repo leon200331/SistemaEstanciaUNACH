@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
 from django.core.validators import RegexValidator
 
+
 class Usuario(AbstractUser):
     # =========================================================
     # 1. VALIDADORES ESTRICTOS (Condiciones de Seguridad)
@@ -24,12 +25,17 @@ class Usuario(AbstractUser):
     # =========================================================
     # 2. ESTRUCTURA DE LA PERSONA (Reglas de Negocio)
     # =========================================================
-    nombre = models.CharField(max_length=50, validators=[letras_validator], verbose_name='Nombre(s)', null=True, blank=True)
-    apellido_paterno = models.CharField(max_length=50, validators=[letras_validator], verbose_name='Apellido Paterno', null=True, blank=True)
-    apellido_materno = models.CharField(max_length=50, validators=[letras_validator], blank=True, null=True, verbose_name='Apellido Materno')
+    nombre = models.CharField(max_length=50, validators=[letras_validator], verbose_name='Nombre(s)', null=True,
+                              blank=True)
+    apellido_paterno = models.CharField(max_length=50, validators=[letras_validator], verbose_name='Apellido Paterno',
+                                        null=True, blank=True)
+    apellido_materno = models.CharField(max_length=50, validators=[letras_validator], blank=True, null=True,
+                                        verbose_name='Apellido Materno')
 
-    curp = models.CharField(max_length=18, unique=True, validators=[curp_validator], verbose_name='CURP', null=True, blank=True)
-    numero_empleado = models.CharField(max_length=20, unique=True, blank=True, null=True, validators=[numeros_validator], verbose_name='No. Empleado')
+    curp = models.CharField(max_length=18, unique=True, validators=[curp_validator], verbose_name='CURP', null=True,
+                            blank=True)
+    numero_empleado = models.CharField(max_length=20, unique=True, blank=True, null=True,
+                                       validators=[numeros_validator], verbose_name='No. Empleado')
 
     TIPO_CHOICES = [
         ('PERSONAL', '1. Personal de la estancia'),
@@ -38,7 +44,8 @@ class Usuario(AbstractUser):
         ('BENEFICIARIO', '4. Beneficiario (Padre/Tutor)'),
         ('ALUMNO', '5. Alumno'),
     ]
-    tipo_persona = models.CharField(max_length=20, choices=TIPO_CHOICES, default='BENEFICIARIO', verbose_name='Tipo de Persona')
+    tipo_persona = models.CharField(max_length=20, choices=TIPO_CHOICES,
+                                    verbose_name='Tipo de Persona')
     estatus_operativo = models.BooleanField(default=True, verbose_name='¿Está Activo?')
     telefono = models.CharField(max_length=15, blank=True, null=True)
     direccion = models.TextField(blank=True, null=True)
@@ -77,8 +84,10 @@ class AccessLog(models.Model):
 
 # --- MODELO: PERMISOS CRUZADOS ---
 class RelacionDepartamentos(models.Model):
-    rol_origen = models.ForeignKey(Group, related_name='permisos_otorgados', on_delete=models.CASCADE, verbose_name='Rol que entra (Origen)')
-    rol_destino = models.ForeignKey(Group, related_name='permisos_recibidos', on_delete=models.CASCADE, verbose_name='Módulo a visitar (Destino)')
+    rol_origen = models.ForeignKey(Group, related_name='permisos_otorgados', on_delete=models.CASCADE,
+                                   verbose_name='Rol que entra (Origen)')
+    rol_destino = models.ForeignKey(Group, related_name='permisos_recibidos', on_delete=models.CASCADE,
+                                    verbose_name='Módulo a visitar (Destino)')
     puede_consultar = models.BooleanField(default=False, verbose_name='Solo Consultar')
     puede_validar = models.BooleanField(default=False, verbose_name='Validar / Aprobar')
     puede_observar = models.BooleanField(default=False, verbose_name='Hacer Observaciones')
@@ -106,6 +115,11 @@ class AsignacionRolCiclo(models.Model):
     semestre = models.ForeignKey('admisiones.Semestre', on_delete=models.CASCADE, verbose_name='Ciclo Escolar')
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
 
+    # --- NUEVOS CAMPOS PARA LAS ASISTENTES DE SALAS (MAESTRAS) ---
+    sala = models.CharField(max_length=10, blank=True, null=True, verbose_name="Sala Asignada")
+    tipo_bitacora = models.CharField(max_length=20, blank=True, null=True,
+                                     verbose_name="Tipo de Bitácora")  # LACTANTE o MATERNAL
+
     class Meta:
         # Un usuario solo puede tener UN rol principal en un mismo semestre
         unique_together = ('usuario', 'semestre')
@@ -113,4 +127,7 @@ class AsignacionRolCiclo(models.Model):
         verbose_name_plural = 'Asignaciones de Roles por Ciclo'
 
     def __str__(self):
+        # Muestra la sala en el panel de admin si es que tiene una asignada
+        if self.sala:
+            return f"{self.usuario.nombre} como {self.rol.name} (Sala: {self.sala}) en {self.semestre.nombre}"
         return f"{self.usuario.nombre} como {self.rol.name} en {self.semestre.nombre}"

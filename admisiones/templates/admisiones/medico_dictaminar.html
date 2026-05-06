@@ -116,11 +116,11 @@
       margin:1.2rem 0;
     }
 
-    /* Estilo para los campos bloqueados (Solo para los datos inmutables del menor) */
+    /* ESTILO ESTRICTO PARA BLOQUEAR CASILLAS QUE YA TIENEN DATOS */
     .campo-bloqueado {
         background-color: #e9ecef !important;
-        pointer-events: none;
-        color: #495057;
+        pointer-events: none !important;
+        color: #495057 !important;
         font-weight: bold;
     }
   </style>
@@ -184,7 +184,13 @@
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">Estado médico</div>
-          <div class="info-value">{{ sol.get_estado_medico_display }}</div>
+          <div class="info-value">
+              {% if sol.estado_medico == 'PENDIENTE' %}
+                 En Revisión
+              {% else %}
+                 {{ sol.get_estado_medico_display }}
+              {% endif %}
+          </div>
         </div>
       </div>
       <div class="col-md-3">
@@ -229,20 +235,38 @@
   <div class="card card-panel p-4">
     <div class="section-title" style="color: #0f766e; font-size: 1.1rem; margin-bottom: 20px;">Formulario de dictamen médico</div>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="formDictamenMedico">
       {% csrf_token %}
 
       <div class="section-block">
         <div class="section-title">Datos del Menor</div>
         <div class="row g-3">
-          <div class="col-md-4 mb-3">{{ historia_form.nombres_paciente.label_tag }}{{ historia_form.nombres_paciente }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_paciente.label_tag }}{{ historia_form.apellido_paterno_paciente }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_paciente.label_tag }}{{ historia_form.apellido_materno_paciente }}</div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_nombres_paciente">Nombre(s) del menor</label>
+              <input type="text" name="nombres_paciente" id="id_nombres_paciente" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.nombres_menor|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_apellido_paterno_paciente">Apellido paterno</label>
+              <input type="text" name="apellido_paterno_paciente" id="id_apellido_paterno_paciente" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.apellido_paterno_menor|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_apellido_materno_paciente">Apellido materno</label>
+              <input type="text" name="apellido_materno_paciente" id="id_apellido_materno_paciente" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.apellido_materno_menor|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+          </div>
         </div>
         <div class="row g-3">
-          <div class="col-md-4 mb-3">{{ historia_form.fecha_nacimiento.label_tag }}{{ historia_form.fecha_nacimiento }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.edad.label_tag }}{{ historia_form.edad }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.sexo.label_tag }}{{ historia_form.sexo }}</div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_fecha_nacimiento">Fecha de nacimiento</label>
+              <input type="text" name="fecha_nacimiento" id="id_fecha_nacimiento" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.fecha_nacimiento_menor|date:'Y-m-d'|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_edad">Edad</label>
+              <input type="text" name="edad" id="id_edad" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.edad|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_sexo">Sexo</label>
+              <input type="text" name="sexo" id="id_sexo" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.sexo|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+          </div>
         </div>
 
         <div class="hr-soft"></div>
@@ -258,15 +282,64 @@
 
         <div class="subsection-title">Padre</div>
         <div class="row g-3">
-          <div class="col-md-4 mb-3">{{ historia_form.nombres_padre.label_tag }}{{ historia_form.nombres_padre }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_padre.label_tag }}{{ historia_form.apellido_paterno_padre }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_padre.label_tag }}{{ historia_form.apellido_materno_padre }}</div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_nombres_padre">Nombre(s) del padre</label>
+              {% if historia_form.initial.nombres_padre %}
+                  <input type="text" name="nombres_padre" id="id_nombres_padre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.nombres_padre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.nombres_padre }}
+              {% endif %}
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_apellido_paterno_padre">Apellido paterno</label>
+              {% if historia_form.initial.apellido_paterno_padre %}
+                  <input type="text" name="apellido_paterno_padre" id="id_apellido_paterno_padre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.apellido_paterno_padre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.apellido_paterno_padre }}
+              {% endif %}
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_apellido_materno_padre">Apellido materno</label>
+              {% if historia_form.initial.apellido_materno_padre %}
+                  <input type="text" name="apellido_materno_padre" id="id_apellido_materno_padre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.apellido_materno_padre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.apellido_materno_padre }}
+              {% endif %}
+          </div>
         </div>
         <div class="row g-3">
-          <div class="col-md-3 mb-3">{{ historia_form.edad_padre.label_tag }}{{ historia_form.edad_padre }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.tabaquismo_padre.label_tag }}{{ historia_form.tabaquismo_padre }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.alcoholismo_padre.label_tag }}{{ historia_form.alcoholismo_padre }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.drogas_padre.label_tag }}{{ historia_form.drogas_padre }}</div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_edad_padre">Edad</label>
+              {% if historia_form.initial.edad_padre %}
+                  <input type="text" name="edad_padre" id="id_edad_padre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.edad_padre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.edad_padre }}
+              {% endif %}
+          </div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_tabaquismo_padre">Tabaquismo</label>
+              <select name="tabaquismo_padre" class="form-select" id="id_tabaquismo_padre">
+                  <option value="">Seleccione</option>
+                  <option value="SI" {% if historia_form.initial.tabaquismo_padre == 'SI' or historia_form.initial.tabaquismo_padre == True %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.tabaquismo_padre == 'NO' or historia_form.initial.tabaquismo_padre == False %}selected{% endif %}>No</option>
+              </select>
+          </div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_alcoholismo_padre">Alcoholismo</label>
+              <select name="alcoholismo_padre" class="form-select" id="id_alcoholismo_padre">
+                  <option value="">Seleccione</option>
+                  <option value="SI" {% if historia_form.initial.alcoholismo_padre == 'SI' or historia_form.initial.alcoholismo_padre == True %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.alcoholismo_padre == 'NO' or historia_form.initial.alcoholismo_padre == False %}selected{% endif %}>No</option>
+              </select>
+          </div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_drogas_padre">Drogas</label>
+              <select name="drogas_padre" class="form-select" id="id_drogas_padre">
+                  <option value="">Seleccione</option>
+                  <option value="SI" {% if historia_form.initial.drogas_padre == 'SI' or historia_form.initial.drogas_padre == True %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.drogas_padre == 'NO' or historia_form.initial.drogas_padre == False %}selected{% endif %}>No</option>
+              </select>
+          </div>
         </div>
         <div class="row g-3">
           <div class="col-md-6 mb-3">{{ historia_form.enfermedades_actuales_padre.label_tag }}{{ historia_form.enfermedades_actuales_padre }}</div>
@@ -277,15 +350,64 @@
 
         <div class="subsection-title">Madre</div>
         <div class="row g-3">
-          <div class="col-md-4 mb-3">{{ historia_form.nombres_madre.label_tag }}{{ historia_form.nombres_madre }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.apellido_paterno_madre.label_tag }}{{ historia_form.apellido_paterno_madre }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.apellido_materno_madre.label_tag }}{{ historia_form.apellido_materno_madre }}</div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_nombres_madre">Nombre(s) de la madre</label>
+              {% if historia_form.initial.nombres_madre %}
+                  <input type="text" name="nombres_madre" id="id_nombres_madre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.nombres_madre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.nombres_madre }}
+              {% endif %}
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_apellido_paterno_madre">Apellido paterno</label>
+              {% if historia_form.initial.apellido_paterno_madre %}
+                  <input type="text" name="apellido_paterno_madre" id="id_apellido_paterno_madre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.apellido_paterno_madre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.apellido_paterno_madre }}
+              {% endif %}
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_apellido_materno_madre">Apellido materno</label>
+              {% if historia_form.initial.apellido_materno_madre %}
+                  <input type="text" name="apellido_materno_madre" id="id_apellido_materno_madre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.apellido_materno_madre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.apellido_materno_madre }}
+              {% endif %}
+          </div>
         </div>
         <div class="row g-3">
-          <div class="col-md-3 mb-3">{{ historia_form.edad_madre.label_tag }}{{ historia_form.edad_madre }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.tabaquismo_madre.label_tag }}{{ historia_form.tabaquismo_madre }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.alcoholismo_madre.label_tag }}{{ historia_form.alcoholismo_madre }}</div>
-          <div class="col-md-3 mb-3">{{ historia_form.drogas_madre.label_tag }}{{ historia_form.drogas_madre }}</div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_edad_madre">Edad</label>
+              {% if historia_form.initial.edad_madre %}
+                  <input type="text" name="edad_madre" id="id_edad_madre" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.edad_madre }}" readonly tabindex="-1">
+              {% else %}
+                  {{ historia_form.edad_madre }}
+              {% endif %}
+          </div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_tabaquismo_madre">Tabaquismo</label>
+              <select name="tabaquismo_madre" class="form-select" id="id_tabaquismo_madre">
+                  <option value="">Seleccione</option>
+                  <option value="SI" {% if historia_form.initial.tabaquismo_madre == 'SI' or historia_form.initial.tabaquismo_madre == True %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.tabaquismo_madre == 'NO' or historia_form.initial.tabaquismo_madre == False %}selected{% endif %}>No</option>
+              </select>
+          </div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_alcoholismo_madre">Alcoholismo</label>
+              <select name="alcoholismo_madre" class="form-select" id="id_alcoholismo_madre">
+                  <option value="">Seleccione</option>
+                  <option value="SI" {% if historia_form.initial.alcoholismo_madre == 'SI' or historia_form.initial.alcoholismo_madre == True %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.alcoholismo_madre == 'NO' or historia_form.initial.alcoholismo_madre == False %}selected{% endif %}>No</option>
+              </select>
+          </div>
+          <div class="col-md-3 mb-3">
+              <label class="form-label" for="id_drogas_madre">Drogas</label>
+              <select name="drogas_madre" class="form-select" id="id_drogas_madre">
+                  <option value="">Seleccione</option>
+                  <option value="SI" {% if historia_form.initial.drogas_madre == 'SI' or historia_form.initial.drogas_madre == True %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.drogas_madre == 'NO' or historia_form.initial.drogas_madre == False %}selected{% endif %}>No</option>
+              </select>
+          </div>
         </div>
         <div class="row g-3">
           <div class="col-md-4 mb-3">{{ historia_form.enfermedades_actuales_madre.label_tag }}{{ historia_form.enfermedades_actuales_madre }}</div>
@@ -297,9 +419,18 @@
       <div class="section-block">
         <div class="section-title">Antecedentes personales no patológicos</div>
         <div class="row g-3">
-          <div class="col-md-4 mb-3">{{ historia_form.numero_gestas.label_tag }}{{ historia_form.numero_gestas }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.semanas_gestacion.label_tag }}{{ historia_form.semanas_gestacion }}</div>
-          <div class="col-md-4 mb-3">{{ historia_form.tipo_parto.label_tag }}{{ historia_form.tipo_parto }}</div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_numero_gestas">Número de gestas</label>
+              <input type="text" name="numero_gestas" id="id_numero_gestas" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.numero_gestas|default:'⚠️ Falta dato' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_semanas_gestacion">Semanas de gestación</label>
+              <input type="text" name="semanas_gestacion" id="id_semanas_gestacion" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.semanas_gestacion|default:'⚠️ Falta dato' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-4 mb-3">
+              <label class="form-label" for="id_tipo_parto">Tipo de parto</label>
+              <input type="text" name="tipo_parto" id="id_tipo_parto" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.tipo_parto|default:'⚠️ Falta dato' }}" readonly tabindex="-1">
+          </div>
         </div>
         <div class="row g-3">
           <div class="col-md-6 mb-3">{{ historia_form.complicaciones_embarazo.label_tag }}{{ historia_form.complicaciones_embarazo }}</div>
@@ -353,8 +484,14 @@
       <div class="section-block">
         <div class="section-title">Exploración física</div>
         <div class="row g-3">
-          <div class="col-md-2 mb-3">{{ historia_form.peso_actual.label_tag }}{{ historia_form.peso_actual }}</div>
-          <div class="col-md-2 mb-3">{{ historia_form.talla.label_tag }}{{ historia_form.talla }}</div>
+          <div class="col-md-2 mb-3">
+              <label class="form-label" for="id_peso_actual">Peso actual (kg)</label>
+              <input type="text" name="peso_actual" id="id_peso_actual" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.peso_actual|default:'⚠️' }}" readonly tabindex="-1">
+          </div>
+          <div class="col-md-2 mb-3">
+              <label class="form-label" for="id_talla">Talla (cm)</label>
+              <input type="text" name="talla" id="id_talla" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.talla|default:'⚠️' }}" readonly tabindex="-1">
+          </div>
           <div class="col-md-2 mb-3">{{ historia_form.temperatura.label_tag }}{{ historia_form.temperatura }}</div>
           <div class="col-md-2 mb-3">{{ historia_form.frecuencia_cardiaca.label_tag }}{{ historia_form.frecuencia_cardiaca }}</div>
           <div class="col-md-2 mb-3">{{ historia_form.frecuencia_respiratoria.label_tag }}{{ historia_form.frecuencia_respiratoria }}</div>
@@ -459,7 +596,12 @@
 
       inputOriginal.style.display = 'none';
 
-      let valorActual = inputOriginal.value.trim() || valorDesdeBD.trim();
+      const formId = "autosave_" + window.location.pathname;
+      const valorGuardado = localStorage.getItem(formId + "_" + inputOriginal.name);
+
+      let valorActual = (valorGuardado !== null && valorGuardado !== "")
+                        ? valorGuardado.trim()
+                        : (inputOriginal.value.trim() || valorDesdeBD.trim());
 
       const select = document.createElement('select');
       select.className = 'form-select mb-2';
@@ -498,91 +640,18 @@
               inputOtro.style.display = 'none';
               inputOriginal.value = this.value;
           }
+          inputOriginal.dispatchEvent(new Event('change', { bubbles: true }));
       });
 
       inputOtro.addEventListener('input', function() {
           inputOriginal.value = this.value;
+          inputOriginal.dispatchEvent(new Event('input', { bubbles: true }));
       });
   }
 
   document.addEventListener("DOMContentLoaded", function() {
-      // 1. EXTRAER DATOS DEL MENOR
-      const nombreMenor = "{{ sol.nombres_menor|default:'' }}";
-      const paternoMenor = "{{ sol.apellido_paterno_menor|default:'' }}";
-      const maternoMenor = "{{ sol.apellido_materno_menor|default:'' }}";
-      const fechaNacMenor = document.getElementById("menor_fecha_nac").innerText.trim();
 
-      // EXTRAER EDAD (Priorizando la Inscripción, luego Nutrición, luego Psicología)
-      let edadAnios = "{{ sol.inscripcion_oficial.edad_anios_menor|default_if_none:'' }}";
-      let edadMeses = "{{ sol.inscripcion_oficial.edad_meses_menor|default_if_none:'' }}";
-      let edadNutricion = "{{ sol.edad_nutricion|default:'' }}";
-      let edadPsicologia = "{{ sol.edad_psicologia|default_if_none:'' }}";
-
-      let edadBD = "";
-      if (edadAnios !== "" && edadMeses !== "") {
-          edadBD = edadAnios + " años, " + edadMeses + " meses";
-      } else if (edadNutricion !== "") {
-          edadBD = edadNutricion;
-      } else if (edadPsicologia !== "") {
-          edadBD = edadPsicologia + " años";
-      }
-
-      // EXTRAER SEXO
-      const sexoBD = "{{ sol.inscripcion_oficial.sexo_menor|default:sol.sexo_nutricion|default:'' }}";
-
-      const inputNombre = document.getElementById("id_nombres_paciente");
-      const inputPaterno = document.getElementById("id_apellido_paterno_paciente");
-      const inputMaterno = document.getElementById("id_apellido_materno_paciente");
-      const inputFecha = document.getElementById("id_fecha_nacimiento");
-      const inputEdad = document.getElementById("id_edad");
-      const inputSexo = document.getElementById("id_sexo");
-
-      // Llenamos las columnas
-      if(inputNombre && !inputNombre.value) inputNombre.value = nombreMenor;
-      if(inputPaterno && !inputPaterno.value) inputPaterno.value = paternoMenor;
-      if(inputMaterno && !inputMaterno.value) inputMaterno.value = maternoMenor;
-
-      if(inputFecha && !inputFecha.value && fechaNacMenor) {
-          inputFecha.value = "{{ sol.fecha_nacimiento_menor|date:'Y-m-d' }}";
-      }
-
-      if(inputEdad && !inputEdad.value && edadBD !== "") {
-          inputEdad.value = edadBD;
-      }
-
-      if(inputSexo && (!inputSexo.value || inputSexo.value === "") && sexoBD) {
-          if (sexoBD === 'M') {
-              inputSexo.value = 'Masculino';
-          } else if (sexoBD === 'F') {
-              inputSexo.value = 'Femenino';
-          } else {
-              inputSexo.value = sexoBD;
-          }
-      }
-
-      // 2. BLOQUEAR LOS DATOS BÁSICOS
-      const camposBloquear = [
-          "id_nombres_paciente", "id_apellido_paterno_paciente",
-          "id_apellido_materno_paciente", "id_fecha_nacimiento"
-      ];
-
-      camposBloquear.forEach(id => {
-          let el = document.getElementById(id);
-          if(el && el.value) {
-              el.setAttribute("readonly", true);
-              el.classList.add("campo-bloqueado");
-          }
-      });
-
-      if(inputEdad && inputEdad.value) {
-          inputEdad.setAttribute("readonly", true);
-          inputEdad.classList.add("campo-bloqueado");
-      }
-      if(inputSexo && inputSexo.value && inputSexo.value !== "") {
-          inputSexo.classList.add("campo-bloqueado");
-      }
-
-      // 3. AUTOLLENAR LUGAR Y FECHA DE ELABORACIÓN
+      // AUTOLLENAR LUGAR Y FECHA DE ELABORACIÓN
       let lugarFechaInput = document.getElementById("id_lugar_fecha_elaboracion");
       if(lugarFechaInput && !lugarFechaInput.value) {
           const hoy = new Date();
@@ -590,7 +659,7 @@
           lugarFechaInput.value = "Tuxtla Gutiérrez, Chiapas a " + hoy.toLocaleDateString('es-MX', opciones);
       }
 
-      // 4. COMBOS DESPLEGABLES EDITABLES
+      // COMBOS DESPLEGABLES EDITABLES
       crearComboConOtro(
           "id_quien_cuida_menor",
           ['Mamá', 'Papá', 'Ambos (Mamá y Papá)', 'Abuelos', 'Tíos'],
@@ -600,5 +669,127 @@
   });
 </script>
 
+<script>
+  // ====================================================================
+  // SISTEMA DE AUTOGUARDADO LOCAL V3
+  // ====================================================================
+  document.addEventListener("DOMContentLoaded", function() {
+
+      let form = document.getElementById("formDictamen") ||
+                 document.getElementById("formDictamenMedico") ||
+                 document.getElementById("formDictamenNutricion");
+
+      if (!form) return;
+
+      let indicator = document.getElementById("autosave-indicator");
+      if (!indicator) {
+          indicator = document.createElement("div");
+          indicator.id = "autosave-indicator";
+          indicator.style.cssText = "position: fixed; bottom: 30px; right: 30px; padding: 10px 20px; border-radius: 50px; display: none; z-index: 2147483647; font-size: 0.95rem; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); align-items: center; gap: 10px; transition: all 0.3s ease;";
+          document.body.appendChild(indicator);
+      }
+
+      function showIndicator(status) {
+          indicator.style.display = "flex";
+          indicator.style.opacity = "1";
+          if (status === "saving") {
+              indicator.style.background = "#eab308";
+              indicator.style.color = "#000000";
+              indicator.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+          } else if (status === "saved") {
+              indicator.style.background = "#10b981";
+              indicator.style.color = "#ffffff";
+              indicator.innerHTML = '<i class="bi bi-cloud-check-fill" style="font-size:1.2rem;"></i> Guardado localmente';
+              setTimeout(() => {
+                  indicator.style.opacity = "0";
+                  setTimeout(() => { indicator.style.display = "none"; }, 300);
+              }, 3000);
+          }
+      }
+
+      // No sobreescribir campos bloqueados ni ocultos
+      const formId = "autosave_" + window.location.pathname;
+      const elements = form.querySelectorAll("input:not(.campo-bloqueado), select:not(.campo-bloqueado), textarea:not(.campo-bloqueado)");
+
+      let hayDatosRecuperados = false;
+      elements.forEach(el => {
+          if (el.type === "file" || el.type === "hidden" || el.name === "csrfmiddlewaretoken") return;
+          if (!el.name) return;
+
+          const savedValue = localStorage.getItem(formId + "_" + el.name);
+
+          if (savedValue !== null && savedValue !== "") {
+              hayDatosRecuperados = true;
+              if (el.type === "checkbox" || el.type === "radio") {
+                  el.checked = (savedValue === "true");
+              } else if (el.multiple && el.classList.contains("select2-multiple") && typeof jQuery !== 'undefined') {
+                  try {
+                      let values = JSON.parse(savedValue);
+                      values.forEach(val => {
+                          if (jQuery(el).find("option[value='" + val + "']").length === 0) {
+                              jQuery(el).append(new Option(val, val, true, true));
+                          }
+                      });
+                      jQuery(el).val(values).trigger('change.select2');
+                  } catch (e) { }
+              } else {
+                  el.value = savedValue;
+              }
+          }
+      });
+
+      if (hayDatosRecuperados) {
+          setTimeout(() => {
+              elements.forEach(el => {
+                  if (el.value || el.checked) {
+                      el.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+              });
+          }, 300);
+      }
+
+      function guardarTodo() {
+          showIndicator("saving");
+          elements.forEach(campo => {
+              if (campo.type === "file" || campo.type === "hidden" || campo.name === "csrfmiddlewaretoken" || campo.classList.contains("campo-bloqueado")) return;
+              if (!campo.name) return;
+
+              let valueToSave = campo.value;
+              if (campo.type === "checkbox" || campo.type === "radio") {
+                  valueToSave = campo.checked ? "true" : "false";
+              } else if (campo.multiple && campo.classList.contains("select2-multiple") && typeof jQuery !== 'undefined') {
+                  valueToSave = JSON.stringify(jQuery(campo).val() || []);
+              }
+
+              localStorage.setItem(formId + "_" + campo.name, valueToSave);
+          });
+          setTimeout(() => { showIndicator("saved"); }, 600);
+      }
+
+      setInterval(guardarTodo, 60000);
+
+      let timeoutId;
+      function autoGuardarAlEscribir() {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(guardarTodo, 2000);
+      }
+
+      form.addEventListener("input", autoGuardarAlEscribir);
+      form.addEventListener("change", autoGuardarAlEscribir);
+
+      if (typeof jQuery !== 'undefined') {
+          jQuery('.select2-multiple').on('change', autoGuardarAlEscribir);
+      }
+
+      form.addEventListener("submit", function() {
+          elements.forEach(el => {
+              if (el.name) {
+                  localStorage.removeItem(formId + "_" + el.name);
+              }
+          });
+      });
+
+  });
+</script>
 </body>
 </html>

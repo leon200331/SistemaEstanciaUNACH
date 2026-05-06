@@ -103,10 +103,10 @@
 
     <div class="section-title">1. Ficha de Identidad</div>
     <table class="grid-table" style="page-break-inside: avoid;">
-        <tr><td class="label-cell">Nombre del Menor</td><td>{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</td></tr>
+        <tr><td class="label-cell">Nombre del Menor</td><td>{{ insc.nombres_menor|default:sol.nombres_menor|default:"(No registrado)" }} {{ insc.apellido_paterno_menor|default:sol.apellido_paterno_menor|default:"" }} {{ insc.apellido_materno_menor|default:sol.apellido_materno_menor|default:"" }}</td></tr>
         <tr><td class="label-cell">Fecha de Nacimiento</td><td>{{ sol.fecha_nacimiento_menor|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Lugar de Nacimiento</td><td>{{ sol.inscripcion_oficial.municipio_nacimiento_menor|default:"-" }}, {{ sol.inscripcion_oficial.estado_nacimiento_menor|default:"-" }}</td></tr>
-        <tr><td class="label-cell">Edad Actual</td><td>{{ sol.inscripcion_oficial.edad_anios_menor|default:"0" }} años, {{ sol.inscripcion_oficial.edad_meses_menor|default:"0" }} meses</td></tr>
+        <tr><td class="label-cell">Lugar de Nacimiento</td><td>{{ insc.municipio_nacimiento_menor|default:"-" }}, {{ insc.estado_nacimiento_menor|default:"-" }}</td></tr>
+        <tr><td class="label-cell">Edad Actual</td><td>{{ insc.edad_anios_menor|default:"0" }} años, {{ insc.edad_meses_menor|default:"0" }} meses</td></tr>
         <tr><td class="label-cell">Cómo lo llaman en casa</td><td>{{ sol.como_lo_llaman_en_casa|default:"-" }}</td></tr>
         <tr><td class="label-cell">Tutor Principal</td><td>{{ sol.nombres_tutor }} {{ sol.apellido_paterno_tutor }}</td></tr>
         <tr><td class="label-cell">Correo Electrónico</td><td>{{ sol.correo|default:"-" }}</td></tr>
@@ -206,7 +206,7 @@
         <tr><td class="label-cell">Con quién</td><td>{{ sol.apego_con_quien_psicologia|default:"-" }}</td></tr>
     </table>
 
-    {% if sol.inscripcion_oficial.edad_anios_menor|default:"0"|add:"0" >= 2 %}
+    {% if insc.edad_anios_menor|default:"0"|add:"0" >= 2 %}
 
     <div class="section-title">7. Autonomía</div>
     <table class="grid-table" style="page-break-inside: avoid;">

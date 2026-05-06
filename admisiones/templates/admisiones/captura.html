@@ -8,6 +8,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
   <style>
     :root{
       --brand:#1e3a8a;
@@ -135,8 +138,8 @@
       margin:18px 0;
     }
 
-    .form-label{ font-weight:800; color:#0f172a; }
-    .help-text{ font-size:.82rem; color:var(--muted); margin-top:6px; }
+    .form-label{ font-weight:800; color:#0f172a; margin-bottom: 6px; }
+    .help-text{ font-size:.82rem; color:var(--muted); margin-top:4px; }
     .req{ color:#ef4444; font-weight:900; }
 
     .form-control, .form-select{
@@ -153,24 +156,37 @@
     .is-valid{ box-shadow:none !important; }
     .is-invalid{ box-shadow:none !important; }
 
+    .readonly-box { background: #f8fafc !important; cursor: not-allowed; color: #64748b; font-weight: 700; border-color: #e2e8f0; }
+
+    /* ESTILOS SELECT2 UNIFICADO */
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 12px;
+        min-height: 48px;
+        border: 1px solid rgba(15,23,42,.14);
+        padding-top: 4px;
+    }
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+        border-color: rgba(37,99,235,.55);
+        box-shadow: 0 0 0 .25rem rgba(37,99,235,.16);
+    }
+    .is-invalid-select2 .select2-selection {
+        border-color: #dc3545 !important;
+    }
+    select.select2-buscador {
+        display: block !important; height: 1px !important; width: 1px !important; position: absolute !important; opacity: 0 !important; padding: 0 !important; margin: 0 !important; border: 0 !important; bottom: 0 !important;
+    }
+
     .btn-primary{
       background:linear-gradient(135deg, var(--brand2), var(--brand));
-      border:0;
-      border-radius:12px;
-      padding:.72rem 1.05rem;
-      box-shadow:0 12px 22px rgba(37,99,235,.22);
-      font-weight:900;
+      border:0; border-radius:12px; padding:.72rem 1.05rem;
+      box-shadow:0 12px 22px rgba(37,99,235,.22); font-weight:900;
     }
     .btn-outline-secondary{
-      border-radius:12px;
-      padding:.72rem 1.05rem;
-      font-weight:800;
+      border-radius:12px; padding:.72rem 1.05rem; font-weight:800;
     }
 
     .card-inner{ padding:22px; }
-    @media (min-width: 768px){
-      .card-inner{ padding:26px; }
-    }
+    @media (min-width: 768px){ .card-inner{ padding:26px; } }
 
     #toast-notification{
       visibility:hidden; min-width:260px; max-width:92vw;
@@ -298,48 +314,57 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label">Programa educativo <span class="req">*</span></label>
-          {{ form.programa_educativo }}
-          <div class="text-danger small mt-1">{{ form.programa_educativo.errors }}</div>
-        </div>
-
-        <div class="col-md-4" id="box_prog_otro" style="display:none;">
-          <label class="form-label">Programa (Otro) <span class="req">*</span></label>
-          {{ form.programa_educativo_otro }}
-          <div class="text-danger small mt-1">{{ form.programa_educativo_otro.errors }}</div>
-        </div>
-
-        <div class="col-md-6">
           <label class="form-label">Correo electrónico <span class="req">*</span></label>
           {{ form.correo }}
           <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional.</div>
           <div class="text-danger small mt-1">{{ form.correo.errors }}</div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label class="form-label">Celular <span class="req">*</span></label>
           {{ form.celular }}
           <div class="help-text">10 dígitos exactos.</div>
           <div class="text-danger small mt-1">{{ form.celular.errors }}</div>
         </div>
 
-        <div class="col-md-12 mt-4 mb-2">
-            <h6 class="fw-bold border-bottom pb-2" style="color: var(--brand);"><i class="bi bi-geo-alt-fill me-1"></i> Dirección del Domicilio</h6>
+        <div class="col-md-12 mt-4 mb-1">
+            <h6 class="fw-bold border-bottom pb-2 text-primary"><i class="bi bi-book-fill me-1"></i> Información Académica</h6>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-6">
+            <label class="form-label">Facultad / Unidad Académica</label>
+            <input type="text" class="form-control readonly-box" value="{{ form.instance.unidad_academica|default:'No especificada' }}" readonly>
+            <div class="help-text">Dato obtenido de tu registro universitario.</div>
+        </div>
+
+        <div class="col-md-6 position-relative">
+            <label class="form-label">Programa educativo (Nombre de carrera) <span class="req">*</span></label>
+            <select id="sel_programa_educativo" class="form-select select2-buscador">
+                <option value="">Escribe o selecciona tu carrera...</option>
+            </select>
+            <div class="d-none">{{ form.programa_educativo }}</div>
+            <div class="text-danger small mt-1">{{ form.programa_educativo.errors }}</div>
+        </div>
+
+        <div class="col-md-12 mt-4 mb-1">
+            <h6 class="fw-bold border-bottom pb-2 text-primary"><i class="bi bi-geo-alt-fill me-1"></i> Dirección del Domicilio</h6>
+        </div>
+
+        <div class="col-md-4 position-relative">
           <label class="form-label">Estado <span class="req">*</span></label>
-          {{ form.estado_domicilio }}
-          <datalist id="lista_estados_mexico"></datalist>
-          <div class="help-text">Escribe una letra, por ejemplo “S”, y aparecerán estados como Sinaloa o Sonora.</div>
+          <select id="sel_estado_domicilio" class="form-select select2-buscador">
+              <option value="">Escribe o selecciona...</option>
+          </select>
+          <div class="d-none">{{ form.estado_domicilio }}</div>
           <div class="text-danger small mt-1">{{ form.estado_domicilio.errors }}</div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-4 position-relative">
           <label class="form-label">Ciudad / Municipio <span class="req">*</span></label>
-          {{ form.ciudad }}
-          <datalist id="lista_municipios_mexico"></datalist>
-          <div class="help-text">Primero selecciona un estado para cargar sus municipios.</div>
+          <select id="sel_ciudad" class="form-select select2-buscador">
+              <option value="">Primero selecciona estado...</option>
+          </select>
+          <div class="d-none">{{ form.ciudad }}</div>
           <div class="text-danger small mt-1">{{ form.ciudad.errors }}</div>
         </div>
 
@@ -367,8 +392,8 @@
           <div class="text-danger small mt-1">{{ form.numero_interior.errors }}</div>
         </div>
 
-        <div class="col-md-12 mt-4 mb-2">
-            <h6 class="fw-bold border-bottom pb-2" style="color: var(--brand);"><i class="bi bi-people-fill me-1"></i> Parentesco</h6>
+        <div class="col-md-12 mt-4 mb-1">
+            <h6 class="fw-bold border-bottom pb-2 text-primary"><i class="bi bi-people-fill me-1"></i> Parentesco</h6>
         </div>
 
         <div class="col-md-6">
@@ -419,549 +444,184 @@
         </a>
       </div>
 
-      <div class="muted small mt-3">
-        <i class="bi bi-info-circle me-1"></i>
-        Al guardar, la solicitud queda registrada y el personal podrá validarla en el panel de admisiones.
-      </div>
-
     </div>
   </form>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-(function () {
+$(document).ready(function() {
 
-  function showToast(title, msg){
-    const t = document.getElementById('toast-notification');
-    document.getElementById('toast-title').innerText = title || 'Atención';
-    document.getElementById('toast-msg').innerText = msg || 'Revisa los campos.';
-    t.classList.add('show');
-    setTimeout(()=> t.classList.remove('show'), 2600);
-  }
+    // === 1. LISTA DE ESTADOS, MUNICIPIOS Y CARRERAS ===
+    const ESTADOS_MX_COMPLETOS = [
+        { nombre: "Aguascalientes", municipios: ["Aguascalientes", "Asientos", "Calvillo", "Cosío", "Jesús María", "Pabellón de Arteaga", "Rincón de Romos", "San José de Gracia", "Tepezalá", "El Llano", "San Francisco de los Romo"] },
+        { nombre: "Baja California", municipios: ["Ensenada", "Mexicali", "Tecate", "Tijuana", "Playas de Rosarito", "San Quintín", "San Felipe"] },
+        { nombre: "Baja California Sur", municipios: ["Comondú", "Mulegé", "La Paz", "Los Cabos", "Loreto"] },
+        { nombre: "Campeche", municipios: ["Calkiní", "Campeche", "Carmen", "Champotón", "Hecelchakán", "Hopelchén", "Palizada", "Tenabo", "Escárcega", "Calakmul", "Candelaria", "Seybaplaya", "Dzitbalché"] },
+        { nombre: "Chiapas", municipios: ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de las Casas", "Comitán de Domínguez", "Palenque", "Tonalá", "Chiapa de Corzo", "Ocosingo", "Villaflores", "Cintalapa", "Reforma", "Arriaga", "Las Margaritas", "Pichucalco", "Berriozábal"] },
+        { nombre: "Chihuahua", municipios: ["Chihuahua", "Juárez", "Cuauhtémoc", "Delicias", "Hidalgo del Parral", "Nuevo Casas Grandes", "Camargo", "Jiménez", "Meoqui", "Guachochi"] },
+        { nombre: "Ciudad de México", municipios: ["Álvaro Obregón", "Azcapotzalco", "Benito Juárez", "Coyoacán", "Cuajimalpa de Morelos", "Cuauhtémoc", "Gustavo A. Madero", "Iztacalco", "Iztapalapa", "La Magdalena Contreras", "Miguel Hidalgo", "Milpa Alta", "Tláhuac", "Tlalpan", "Venustiano Carranza", "Xochimilco"] },
+        { nombre: "Coahuila", municipios: ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña", "San Pedro", "Sabinas", "Frontera", "Ramos Arizpe", "Matamoros"] },
+        { nombre: "Colima", municipios: ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez", "Armería", "Comala", "Coquimatlán", "Cuauhtémoc", "Ixtlahuacán", "Minatitlán"] },
+        { nombre: "Durango", municipios: ["Durango", "Gómez Palacio", "Lerdo", "Santiago Papasquiaro", "Guadalupe Victoria", "Canatlán", "Pueblo Nuevo", "El Oro", "Mapimí", "Vicente Guerrero"] },
+        { nombre: "Estado de México", municipios: ["Toluca", "Ecatepec de Morelos", "Naucalpan de Juárez", "Nezahualcóyotl", "Tlalnepantla de Baz", "Chimalhuacán", "Atizapán de Zaragoza", "Cuautitlán Izcalli", "Ixtapaluca", "Tecámac", "Metepec", "Lerma", "Zinacantepec", "Valle de Chalco Solidaridad", "Huixquilucan"] },
+        { nombre: "Guanajuato", municipios: ["Guanajuato", "León", "Irapuato", "Celaya", "Salamanca", "Silao de la Victoria", "San Miguel de Allende", "Dolores Hidalgo Cuna de la Independencia Nacional", "Valle de Santiago", "Acámbaro"] },
+        { nombre: "Guerrero", municipios: ["Chilpancingo de los Bravo", "Acapulco de Juárez", "Iguala de la Independencia", "Taxco de Alarcón", "Zihuatanejo de Azueta", "Chilapa de Álvarez", "Tlapa de Comonfort", "Coyuca de Benítez", "Ometepec", "Atoyac de Álvarez"] },
+        { nombre: "Hidalgo", municipios: ["Pachuca de Soto", "Tulancingo de Bravo", "Tula de Allende", "Huejutla de Reyes", "Mineral de la Reforma", "Tepeji del Río de Ocampo", "Ixmiquilpan", "Actopan", "Apan", "Zimapán"] },
+        { nombre: "Jalisco", municipios: ["Guadalajara", "Zapopan", "San Pedro Tlaquepaque", "Tonalá", "Tlajomulco de Zúñiga", "Puerto Vallarta", "El Salto", "Lagos de Moreno", "Tepatitlán de Morelos", "Ocotlán"] },
+        { nombre: "Michoacán", municipios: ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán", "Zitácuaro", "La Piedad", "Pátzcuaro", "Sahuayo", "Hidalgo"] },
+        { nombre: "Morelos", municipios: ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco", "Yautepec", "Emiliano Zapata", "Ayala", "Xochitepec", "Jojutla", "Puente de Ixtla"] },
+        { nombre: "Nayarit", municipios: ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla", "Compostela", "Xalisco", "Ixtlán del Río", "Acaponeta", "Tecuala", "Tuxpan", "Rosamorada"] },
+        { nombre: "Nuevo León", municipios: ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "General Escobedo", "Santa Catarina", "San Pedro Garza García", "Juárez", "García", "Cadereyta Jiménez"] },
+        { nombre: "Oaxaca", municipios: ["Oaxaca de Juárez", "Salina Cruz", "Juchitán de Zaragoza", "San Juan Bautista Tuxtepec", "Huajuapan de León", "Santa Cruz Xoxocotlán", "Santa Lucía del Camino", "Santo Domingo Tehuantepec", "Pinotepa Nacional", "Miahuatlán de Porfirio Díaz"] },
+        { nombre: "Puebla", municipios: ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco", "San Pedro Cholula", "Amozoc", "Huauchinango", "Teziutlán", "Izúcar de Matamoros", "Cuautlancingo"] },
+        { nombre: "Querétaro", municipios: ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués", "Pedro Escobedo", "Tequisquiapan", "Cadereyta de Montes", "Colón", "Ezequiel Montes", "Amealco de Bonfil"] },
+        { nombre: "Quintana Roo", municipios: ["Othón P. Blanco", "Benito Juárez", "Solidaridad", "Cozumel", "Tulum", "Felipe Carrillo Puerto", "José María Morelos", "Lázaro Cárdenas", "Isla Mujeres", "Puerto Morelos", "Bacalar"] },
+        { nombre: "San Luis Potosí", municipios: ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala", "Rioverde", "Tamazunchale", "Ébano", "Xilitla", "Cárdenas", "Cerritos"] },
+        { nombre: "Sinaloa", municipios: ["Culiacán", "Mazatlán", "Ahome", "Guasave", "Navolato", "El Fuerte", "Salvador Alvarado", "Sinaloa", "Escuinapa", "Rosario"] },
+        { nombre: "Sonora", municipios: ["Hermosillo", "Cajeme", "Nogales", "San Luis Río Colorado", "Navojoa", "Guaymas", "Agua Prieta", "Caborca", "Empalme", "Huatabampo"] },
+        { nombre: "Tabasco", municipios: ["Centro", "Cárdenas", "Comalcalco", "Macuspana", "Huimanguillo", "Cunduacán", "Nacajuca", "Paraíso", "Tenosique", "Balancán"] },
+        { nombre: "Tamaulipas", municipios: ["Ciudad Victoria", "Tampico", "Reynosa", "Matamoros", "Nuevo Laredo", "Altamira", "Madero", "El Mante", "Río Bravo", "Valle Hermoso"] },
+        { nombre: "Tlaxcala", municipios: ["Tlaxcala", "Apizaco", "Huamantla", "Chiautempan", "Calpulalpan", "San Pablo del Monte", "Zacatelco", "Contla de Juan Cuamatzi", "Tlaxco", "Yauhquemehcan"] },
+        { nombre: "Veracruz", municipios: ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Poza Rica de Hidalgo", "Boca del Río", "Orizaba", "Minatitlán", "Tuxpan", "Papantla"] },
+        { nombre: "Yucatán", municipios: ["Mérida", "Valladolid", "Tizimín", "Progreso", "Kanasín", "Umán", "Tekax", "Motul", "Hunucmá", "Izamal"] },
+        { nombre: "Zacatecas", municipios: ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez", "Río Grande", "Sombrerete", "Calera", "Ojocaliente", "Loreto", "Nochistlán de Mejía"] }
+    ];
 
-  const onlyLetters = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const curpOk = /^[A-Za-z0-9]{18}$/;
+    const ofertaEducativa = {
+        "Facultad de Contaduría y Administración": ["Licenciatura en Administración", "Licenciatura en Contaduría", "Licenciatura en Gestión Turística", "Licenciatura en Sistemas Computacionales", "PSU en Desarrollo Socioeconómico"],
+        "Facultad de Ingeniería": ["Ingeniería Civil", "Ingeniería Topográfica y Geomática", "PSU en Infraestructura y Desarrollo Comunitario"],
+        "Facultad de Arquitectura": ["Licenciatura en Arquitectura", "PSU en Infraestructura y Desarrollo Comunitario"],
+        "Facultad de Medicina Humana": ["Licenciatura en Médico Cirujano", "Licenciatura en Gerontología"],
+        "Facultad de Medicina Veterinaria y Zootecnia": ["Licenciatura en Medicina Veterinaria y Zootecnia", "PSU en Agropecuario y Forestal"],
+        "Facultad de Derecho": ["Licenciatura en Derecho", "PSU en Justicia Social"],
+        "Facultad de Ciencias Sociales": ["Licenciatura en Antropología Social", "Licenciatura en Economía", "Licenciatura en Historia", "Licenciatura en Sociología", "PSU en Bienestar Humano y Comunitario"],
+        "Facultad de Negocios": ["Licenciatura en Administración", "Licenciatura en Contaduría", "Licenciatura en Sistemas Computacionales", "Ingeniería en Desarrollo y Tecnologías de Software", "PSU en Desarrollo Socioeconómico"],
+        "Facultad de Ciencias Químicas": ["Químico Farmacobiólogo", "PSU en Biotecnología y Alimentos"],
+        "Facultad de Ciencias Agrícolas": ["Ingeniero Agrónomo", "Ingeniero Forestal"],
+        "Facultad de Humanidades": ["Licenciatura en Bibliotecología y Gestión de Información", "Licenciatura en Comunicación", "Licenciatura en Filosofía", "Licenciatura en Lengua y Literatura Hispanoamericanas", "Licenciatura en Pedagogía", "PSU en Bienestar Humano y Comunitario"],
+        "Facultad de Lenguas": ["Licenciatura en Enseñanza del Francés", "Licenciatura en Enseñanza del Inglés"],
+        "Facultad de Ciencias en Fisica y Matemáticas": ["Licenciatura en Física", "Ingeniería Física", "Licenciatura en Matemáticas", "Licenciatura en Matemáticas Aplicadas"],
+        "Facultad Maya de Estudios Agropecuarios": ["Licenciatura en Agronegocios", "Ingeniería en Desarrollo Rural", "Ingeniería en Procesos Agroindustriales", "Ingeniería en Agronomía", "Ingeniería en Sistemas Forestales", "Licenciatura en Medicina Veterinaria y Zootecnia", "PSU en Acuicultura"]
+    };
 
-  function setValid(el){ el.classList.add("is-valid"); el.classList.remove("is-invalid"); }
-  function setInvalid(el){ el.classList.add("is-invalid"); el.classList.remove("is-valid"); }
-  function clearState(el){ el.classList.remove("is-valid","is-invalid"); }
+    // Leemos la facultad que viene de Django con seguridad
+    let facultadPadre = "{{ form.instance.unidad_academica|escapejs }}";
+    if(facultadPadre === "None") facultadPadre = "";
 
-  function isEmpty(el){
-    if(!el) return true;
-    if(el.tagName === "SELECT") return !el.value;
-    return !String(el.value || "").trim();
-  }
+    // === 2. INICIALIZAR BUSCADORES VISUALES ===
+    $('.select2-buscador').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        language: { noResults: () => "Sin resultados" }
+    });
 
-  function isInViewport(el){
-    const r = el.getBoundingClientRect();
-    return r.top >= 120 && r.bottom <= (window.innerHeight - 80);
-  }
+    const selEdo = $('#sel_estado_domicilio');
+    const selMun = $('#sel_ciudad');
+    const selProg = $('#sel_programa_educativo');
 
-  function focusField(el){
-    setInvalid(el);
-    if(!isInViewport(el)){
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => {
-        try { el.focus({ preventScroll: true }); } catch(e) { el.focus(); }
-      }, 250);
-    } else {
-      try { el.focus({ preventScroll: true }); } catch(e) { el.focus(); }
+    const hiddenEdo = $('#id_estado_domicilio');
+    const hiddenMun = $('#id_ciudad');
+    const hiddenProg = $('#id_programa_educativo');
+
+    // === 3. CARGAR LAS OPCIONES A LOS BUSCADORES ===
+
+    // Cargar Estados
+    ESTADOS_MX_COMPLETOS.forEach(e => selEdo.append(new Option(e.nombre, e.nombre)));
+
+    // Cargar Carreras (INTELIGENCIA)
+    let carrerasMatch = [];
+    if (facultadPadre) {
+        for (const [key, value] of Object.entries(ofertaEducativa)) {
+            if (key.toLowerCase().includes(facultadPadre.toLowerCase().trim()) || facultadPadre.toLowerCase().includes(key.toLowerCase())) {
+                carrerasMatch = value;
+                break;
+            }
+        }
     }
-  }
 
-  function toTitleCase(str) {
-      return str.replace(/\w\S*/g, function(txt){
-          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    // Si no detectó la facultad, cargamos TODAS para no bloquear al estudiante
+    if (carrerasMatch.length === 0) {
+        Object.values(ofertaEducativa).forEach(lista => carrerasMatch = carrerasMatch.concat(lista));
+        carrerasMatch = [...new Set(carrerasMatch)];
+    }
+
+    carrerasMatch.sort().forEach(c => selProg.append(new Option(c, c)));
+
+    // === 4. SINCRONIZACIÓN (Visual -> Django) ===
+    selEdo.on('change', function() {
+        hiddenEdo.val(this.value);
+        selMun.empty().append(new Option("Escribe o selecciona...", ""));
+        const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === this.value);
+        if(data) data.municipios.sort().forEach(m => selMun.append(new Option(m, m)));
+    });
+
+    selMun.on('change', function() { hiddenMun.val(this.value); });
+    selProg.on('change', function() { hiddenProg.val(this.value); });
+
+    // === 5. RESTAURAR VALORES (Si hubo un error y se recarga la página) ===
+    if(hiddenEdo.val()) {
+        selEdo.val(hiddenEdo.val()).trigger('change.select2');
+        const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === hiddenEdo.val());
+        if(data) {
+            selMun.empty().append(new Option("Escribe o selecciona...", ""));
+            data.municipios.sort().forEach(m => selMun.append(new Option(m, m)));
+            if(hiddenMun.val() && selMun.find("option[value='" + hiddenMun.val() + "']").length > 0) {
+                selMun.val(hiddenMun.val()).trigger('change.select2');
+            } else if (hiddenMun.val()) {
+                selMun.append(new Option(hiddenMun.val(), hiddenMun.val(), true, true)).trigger('change.select2');
+            }
+        }
+    }
+
+    if(hiddenProg.val()) {
+        if(selProg.find("option[value='" + hiddenProg.val() + "']").length > 0) {
+            selProg.val(hiddenProg.val()).trigger('change.select2');
+        } else {
+            selProg.append(new Option(hiddenProg.val(), hiddenProg.val(), true, true)).trigger('change.select2');
+        }
+    }
+
+    // === 6. LÓGICA DE PARENTESCO ===
+    const par = document.getElementById("id_parentesco");
+    const boxPar = document.getElementById("box_parent_otro");
+    function togglePar() { if (boxPar) boxPar.style.display = (par && par.value === "OTRO") ? "block" : "none"; }
+    if (par) par.addEventListener("change", togglePar);
+    togglePar();
+
+    // === 7. VALIDACIÓN AL GUARDAR ===
+    const form = document.getElementById("form-solicitud");
+    const btn = document.getElementById("btn-guardar");
+
+    if(form && btn){
+      form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          // Sincronizar un último chequeo de seguridad
+          hiddenProg.val(selProg.val());
+          hiddenEdo.val(selEdo.val());
+          hiddenMun.val(selMun.val());
+
+          // Checar campos vacíos esenciales
+          if(!hiddenProg.val()) { alert("Por favor selecciona tu Programa Educativo (Carrera)."); return; }
+          if(!hiddenEdo.val()) { alert("Por favor selecciona el Estado de tu domicilio."); return; }
+          if(!hiddenMun.val()) { alert("Por favor selecciona el Municipio de tu domicilio."); return; }
+
+          btn.disabled = true;
+          btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2"></span>';
+
+          const t = document.getElementById('toast-notification');
+          document.getElementById('toast-title').innerText = "Enviando";
+          document.getElementById('toast-msg').innerText = "Guardando solicitud, por favor espere...";
+          t.classList.add('show');
+
+          form.submit();
       });
-  }
-
-  const matriculaInput = document.getElementById("id_matricula");
-  const boxMatricula = document.getElementById("box_matricula");
-
-  if (matriculaInput && boxMatricula) {
-      const valMatricula = matriculaInput.value.trim();
-      if (!valMatricula) {
-          boxMatricula.style.display = "none";
-          matriculaInput.required = false;
-      } else {
-          boxMatricula.style.display = "block";
-      }
-  }
-
-  const prog = document.getElementById("id_programa_educativo");
-  const boxProg = document.getElementById("box_prog_otro");
-  const progOtro = document.getElementById("id_programa_educativo_otro");
-
-  const par = document.getElementById("id_parentesco");
-  const boxPar = document.getElementById("box_parent_otro");
-  const parOtro = document.getElementById("id_parentesco_otro");
-
-  function toggleProg() {
-    if (!prog || !boxProg) return;
-    const show = (prog.value === "OTRO");
-    boxProg.style.display = show ? "block" : "none";
-    if(progOtro){
-      progOtro.required = show;
-      if(!show){ progOtro.value = ""; clearState(progOtro); }
     }
-  }
-
-  function togglePar() {
-    if (!par || !boxPar) return;
-    const show = (par.value === "OTRO");
-    boxPar.style.display = show ? "block" : "none";
-    if(parOtro){
-      parOtro.required = show;
-      if(!show){ parOtro.value = ""; clearState(parOtro); }
-    }
-  }
-
-  if (prog) prog.addEventListener("change", () => { toggleProg(); setValid(prog); });
-  if (par) par.addEventListener("change", () => { togglePar(); setValid(par); });
-  toggleProg(); togglePar();
-
-  // ---------------------------------------------------------------
-  // BUSCADOR DE ESTADOS Y MUNICIPIOS DE MÉXICO
-  // ---------------------------------------------------------------
-
-  const ESTADOS_MEXICO = [
-    { nombre: "Aguascalientes", clave: "01" },
-    { nombre: "Baja California", clave: "02" },
-    { nombre: "Baja California Sur", clave: "03" },
-    { nombre: "Campeche", clave: "04" },
-    { nombre: "Chiapas", clave: "07" },
-    { nombre: "Chihuahua", clave: "08" },
-    { nombre: "Ciudad de México", clave: "09" },
-    { nombre: "Coahuila", clave: "05" },
-    { nombre: "Colima", clave: "06" },
-    { nombre: "Durango", clave: "10" },
-    { nombre: "Estado de México", clave: "15" },
-    { nombre: "Guanajuato", clave: "11" },
-    { nombre: "Guerrero", clave: "12" },
-    { nombre: "Hidalgo", clave: "13" },
-    { nombre: "Jalisco", clave: "14" },
-    { nombre: "Michoacán", clave: "16" },
-    { nombre: "Morelos", clave: "17" },
-    { nombre: "Nayarit", clave: "18" },
-    { nombre: "Nuevo León", clave: "19" },
-    { nombre: "Oaxaca", clave: "20" },
-    { nombre: "Puebla", clave: "21" },
-    { nombre: "Querétaro", clave: "22" },
-    { nombre: "Quintana Roo", clave: "23" },
-    { nombre: "San Luis Potosí", clave: "24" },
-    { nombre: "Sinaloa", clave: "25" },
-    { nombre: "Sonora", clave: "26" },
-    { nombre: "Tabasco", clave: "27" },
-    { nombre: "Tamaulipas", clave: "28" },
-    { nombre: "Tlaxcala", clave: "29" },
-    { nombre: "Veracruz", clave: "30" },
-    { nombre: "Yucatán", clave: "31" },
-    { nombre: "Zacatecas", clave: "32" }
-  ];
-
-  const estadoInput = document.getElementById("id_estado_domicilio");
-  const ciudadInput = document.getElementById("id_ciudad");
-  const listaEstados = document.getElementById("lista_estados_mexico");
-  const listaMunicipios = document.getElementById("lista_municipios_mexico");
-
-  if (estadoInput) {
-    estadoInput.setAttribute("list", "lista_estados_mexico");
-    estadoInput.setAttribute("autocomplete", "off");
-    estadoInput.setAttribute("placeholder", "Escribe o selecciona un estado...");
-    estadoInput.classList.add("form-control");
-  }
-
-  if (ciudadInput) {
-    ciudadInput.setAttribute("list", "lista_municipios_mexico");
-    ciudadInput.setAttribute("autocomplete", "off");
-    ciudadInput.setAttribute("placeholder", "Primero selecciona un estado...");
-    ciudadInput.classList.add("form-control");
-  }
-
-  function cargarListaEstados() {
-    if (!listaEstados) return;
-
-    listaEstados.innerHTML = "";
-
-    ESTADOS_MEXICO
-      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
-      .forEach(estado => {
-        const option = document.createElement("option");
-        option.value = estado.nombre;
-        listaEstados.appendChild(option);
-      });
-  }
-
-  function obtenerClaveEstado(nombreEstado) {
-    const estado = ESTADOS_MEXICO.find(e => e.nombre.toLowerCase() === String(nombreEstado || "").trim().toLowerCase());
-    return estado ? estado.clave : null;
-  }
-
-  function limpiarMunicipios() {
-    if (listaMunicipios) listaMunicipios.innerHTML = "";
-    if (ciudadInput) {
-      ciudadInput.value = "";
-      ciudadInput.placeholder = "Primero selecciona un estado...";
-      clearState(ciudadInput);
-    }
-  }
-
-  async function cargarMunicipiosPorEstado(nombreEstado, conservarValor = false) {
-    if (!estadoInput || !ciudadInput || !listaMunicipios) return;
-
-    const claveEstado = obtenerClaveEstado(nombreEstado);
-
-    if (!claveEstado) {
-      limpiarMunicipios();
-      return;
-    }
-
-    const municipioActual = conservarValor ? ciudadInput.value : "";
-    ciudadInput.placeholder = "Cargando municipios...";
-    listaMunicipios.innerHTML = "";
-
-    try {
-      const response = await fetch(`https://gaia.inegi.org.mx/wscatgeo/v2/mgem/${claveEstado}`);
-
-      if (!response.ok) {
-        throw new Error("No se pudieron cargar los municipios");
-      }
-
-      const data = await response.json();
-
-      const municipios = Array.isArray(data.datos)
-        ? data.datos
-        : Array.isArray(data)
-          ? data
-          : [];
-
-      municipios
-        .map(item => item.nomgeo || item.nombre || item.NOMGEO || "")
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b, "es"))
-        .forEach(nombreMunicipio => {
-          const option = document.createElement("option");
-          option.value = nombreMunicipio;
-          listaMunicipios.appendChild(option);
-        });
-
-      ciudadInput.placeholder = "Escribe o selecciona un municipio...";
-
-      if (municipioActual) {
-        ciudadInput.value = municipioActual;
-      }
-
-      setValid(estadoInput);
-
-    } catch (error) {
-      console.error("Error al cargar municipios:", error);
-      ciudadInput.placeholder = "No se pudieron cargar los municipios";
-      showToast("Error de conexión", "No se pudieron cargar los municipios desde INEGI. Revisa tu conexión a internet.");
-    }
-  }
-
-  cargarListaEstados();
-
-  if (estadoInput) {
-    estadoInput.addEventListener("input", () => {
-      const clave = obtenerClaveEstado(estadoInput.value);
-
-      if (!estadoInput.value.trim()) {
-        limpiarMunicipios();
-        clearState(estadoInput);
-        return;
-      }
-
-      if (clave) {
-        cargarMunicipiosPorEstado(estadoInput.value);
-      } else {
-        limpiarMunicipios();
-      }
-    });
-
-    estadoInput.addEventListener("blur", () => {
-      const clave = obtenerClaveEstado(estadoInput.value);
-
-      if (!estadoInput.value.trim()) {
-        clearState(estadoInput);
-        return;
-      }
-
-      if (!clave) {
-        setInvalid(estadoInput);
-        showToast("Estado inválido", "Selecciona un estado válido de la República Mexicana.");
-      } else {
-        setValid(estadoInput);
-      }
-    });
-
-    if (estadoInput.value.trim()) {
-      cargarMunicipiosPorEstado(estadoInput.value, true);
-    }
-  }
-
-  if (ciudadInput) {
-    ciudadInput.addEventListener("input", () => {
-      const v = String(ciudadInput.value || "").trim();
-      v ? setValid(ciudadInput) : clearState(ciudadInput);
-    });
-  }
-
-  const ALL_REQUIRED_IDS = [
-    "id_nombres_tutor",
-    "id_apellido_paterno_tutor",
-    "id_apellido_materno_tutor",
-    "id_programa_educativo",
-    "id_correo",
-    "id_celular",
-    "id_estado_domicilio",
-    "id_ciudad",
-    "id_codigo_postal",
-    "id_calle",
-    "id_numero_exterior",
-    "id_parentesco",
-    "id_fecha_nacimiento_menor",
-    "id_curp_menor"
-  ];
-
-  ALL_REQUIRED_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.required = true;
-  });
-
-  ["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].forEach(id => {
-    const el = document.getElementById(id);
-    if(!el) return;
-
-    el.addEventListener("blur", () => {
-        el.value = toTitleCase(el.value);
-    });
-
-    el.addEventListener("input", () => {
-      el.value = el.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '');
-      const v = String(el.value || "").trim();
-      if(!v){ clearState(el); return; }
-      onlyLetters.test(v) ? setValid(el) : setInvalid(el);
-    });
-  });
-
-  const correo = document.getElementById("id_correo");
-  if(correo){
-    correo.addEventListener("input", () => {
-      const v = String(correo.value || "").trim();
-      if(!v){ clearState(correo); return; }
-      emailOk.test(v) ? setValid(correo) : setInvalid(correo);
-    });
-  }
-
-  const cel = document.getElementById("id_celular");
-  if(cel){
-    cel.addEventListener("input", () => {
-      cel.value = cel.value.replace(/\D/g, "");
-      const v = cel.value;
-      if(!v){ clearState(cel); return; }
-      (v.length === 10) ? setValid(cel) : setInvalid(cel);
-    });
-  }
-
-  const cp = document.getElementById("id_codigo_postal");
-  if(cp){
-    cp.addEventListener("input", () => {
-      cp.value = cp.value.replace(/\D/g, "");
-      const v = cp.value;
-      if(!v){ clearState(cp); return; }
-      (v.length === 5) ? setValid(cp) : setInvalid(cp);
-    });
-  }
-
-  if(progOtro){
-    progOtro.addEventListener("input", () => {
-      if(prog && prog.value === "OTRO"){
-        const v = String(progOtro.value || "").trim();
-        v ? setValid(progOtro) : setInvalid(progOtro);
-      }
-    });
-  }
-
-  if(parOtro){
-    parOtro.addEventListener("input", () => {
-      if(par && par.value === "OTRO"){
-        const v = String(parOtro.value || "").trim();
-        v ? setValid(parOtro) : setInvalid(parOtro);
-      }
-    });
-  }
-
-  const curp = document.getElementById("id_curp_menor");
-  if(curp){
-    curp.addEventListener("input", () => {
-      curp.value = curp.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-      const v = curp.value;
-      if(!v){ clearState(curp); return; }
-      curpOk.test(v) ? setValid(curp) : setInvalid(curp);
-    });
-  }
-
-  const fecha = document.getElementById("id_fecha_nacimiento_menor");
-
-  function monthsBetween(a, b){
-    let months = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
-    if (b.getDate() < a.getDate()) months -= 1;
-    return months;
-  }
-
-  function validateEdadMenor(){
-    if(!fecha) return true;
-    const v = (fecha.value || "").trim();
-
-    if(!v){
-        clearState(fecha);
-        return false;
-    }
-
-    const [y,m,d] = v.split("-").map(n => parseInt(n,10));
-    if(!y || !m || !d){ setInvalid(fecha); return false; }
-
-    const nacimiento = new Date(y, m-1, d);
-    const hoy = new Date();
-    if(nacimiento > hoy){ setInvalid(fecha); return false; }
-
-    const meses = monthsBetween(nacimiento, hoy);
-    const ok = (meses >= 6 && meses <= 36);
-    ok ? setValid(fecha) : setInvalid(fecha);
-    return ok;
-  }
-
-  if(fecha){
-    fecha.addEventListener("blur", () => {
-      const v = (fecha.value || "").trim();
-      if(v) {
-        const ok = validateEdadMenor();
-        if(!ok) showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
-      }
-    });
-
-    fecha.addEventListener("input", () => {
-       validateEdadMenor();
-    });
-  }
-
-  const ORDER = [
-    ["id_nombres_tutor", "Nombre(s)"],
-    ["id_apellido_paterno_tutor", "Apellido paterno"],
-    ["id_apellido_materno_tutor", "Apellido materno"],
-    ["id_programa_educativo", "Programa educativo"],
-    ["id_programa_educativo_otro", "Programa (Otro)", () => prog?.value === "OTRO"],
-    ["id_correo", "Correo electrónico"],
-    ["id_celular", "Celular"],
-    ["id_estado_domicilio", "Estado"],
-    ["id_ciudad", "Ciudad / Municipio"],
-    ["id_codigo_postal", "Código Postal"],
-    ["id_calle", "Calle"],
-    ["id_numero_exterior", "Número Exterior"],
-    ["id_parentesco", "Parentesco"],
-    ["id_parentesco_otro", "Parentesco (Otro)", () => par?.value === "OTRO"],
-    ["id_fecha_nacimiento_menor", "Fecha de nacimiento"],
-    ["id_curp_menor", "CURP del menor"],
-  ];
-
-  const form = document.getElementById("form-solicitud");
-  const btn = document.getElementById("btn-guardar");
-
-  if(form && btn){
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      toggleProg(); togglePar();
-
-      for(const item of ORDER){
-        const [id, label, cond] = item;
-        if(typeof cond === "function" && !cond()) continue;
-
-        const el = document.getElementById(id);
-        if(!el) continue;
-
-        if(isEmpty(el)){
-          showToast("Falta información", `Ingresa: ${label}`);
-          focusField(el);
-          return;
-        }
-
-        if(id === "id_estado_domicilio"){
-          const clave = obtenerClaveEstado(el.value);
-          if(!clave){
-            showToast("Estado inválido", "Selecciona un estado válido de la República Mexicana.");
-            focusField(el);
-            return;
-          }
-        }
-
-        if(["id_nombres_tutor","id_apellido_paterno_tutor","id_apellido_materno_tutor"].includes(id)){
-          const v = String(el.value || "").trim();
-          if(!onlyLetters.test(v)){
-            showToast("Dato inválido", `${label}: solo letras y espacios.`);
-            focusField(el);
-            return;
-          }
-        }
-
-        if(id === "id_correo"){
-          const v = String(el.value || "").trim();
-          if(!emailOk.test(v)){
-            showToast("Correo inválido", "Ingresa un correo válido.");
-            focusField(el);
-            return;
-          }
-        }
-
-        if(id === "id_celular"){
-          const v = String(el.value || "").replace(/\D/g,"");
-          if(v.length !== 10){
-            showToast("Celular inválido", "El celular debe tener 10 dígitos.");
-            focusField(el);
-            return;
-          }
-        }
-
-        if(id === "id_codigo_postal"){
-          const v = String(el.value || "").replace(/\D/g,"");
-          if(v.length !== 5){
-            showToast("Código Postal inválido", "El CP debe tener exactamente 5 dígitos.");
-            focusField(el);
-            return;
-          }
-        }
-
-        if(id === "id_fecha_nacimiento_menor"){
-          if(!validateEdadMenor()){
-            showToast("Fecha inválida", "La edad del menor debe estar entre 6 meses y 3 años.");
-            focusField(el);
-            return;
-          }
-        }
-
-        if(id === "id_curp_menor"){
-          const v = String(el.value || "").trim().toUpperCase();
-          if(!curpOk.test(v)){
-            showToast("CURP inválida", "La CURP debe tener 18 caracteres (letras/números).");
-            focusField(el);
-            return;
-          }
-        }
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>';
-      showToast("Enviando", "Guardando la solicitud, por favor espere...");
-      form.submit();
-    });
-  }
-
-})();
+});
 </script>
-
 </body>
 </html>

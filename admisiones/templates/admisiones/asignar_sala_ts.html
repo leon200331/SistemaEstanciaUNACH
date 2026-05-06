@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación de Sala | Sistema Inteligente</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --unach-blue: #1e3a8a;
+            --light-blue: #e0f2fe;
+            --bg-light: #f3f4f6;
+        }
+        body { background-color: var(--bg-light); font-family: 'Segoe UI', sans-serif; padding-top: 30px; }
+        .card-custom { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; }
+
+        .ai-header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px 30px; }
+        .recommendation-box { background-color: var(--light-blue); border-left: 5px solid #3b82f6; padding: 20px; border-radius: 0 15px 15px 0; margin-bottom: 25px; }
+    </style>
+</head>
+<body>
+
+<div class="container pb-5" style="max-width: 800px;">
+
+    <div class="card card-custom">
+        <div class="ai-header d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold mb-0"><i class="bi bi-robot me-2"></i>Asignación de Sala Definitiva</h3>
+                <p class="mb-0 opacity-75 mt-1">Análisis Integral de Desarrollo y Maduración</p>
+            </div>
+            <a href="{% url 'lista_asignacion_salas' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="bi bi-x-lg"></i> Cancelar
+            </a>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 1.5rem; color: var(--unach-blue);">
+                    <i class="bi bi-person-bounding-box"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">{{ inscripcion.solicitud_ingreso.nombre_menor_completo }}</h4>
+                    <span class="text-muted">
+                        <i class="bi bi-calendar-event me-1"></i> Edad cronológica: {{ inscripcion.edad_anios_menor }} años, {{ inscripcion.edad_meses_menor }} meses
+                    </span>
+                </div>
+            </div>
+
+            <h6 class="fw-bold text-secondary mb-3 text-uppercase" style="letter-spacing: 1px;"><i class="bi bi-cpu me-2"></i>Sugerencia del Sistema</h6>
+
+            <div class="recommendation-box">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary fs-5 px-3 py-2 rounded-pill me-3 shadow-sm">
+                        {{ inscripcion.sala_recomendada|default:"L1" }}
+                    </span>
+                    <h5 class="fw-bold text-primary mb-0">Sala Recomendada</h5>
+                </div>
+                <p class="text-dark mb-0 mt-3" style="font-size: 0.95rem; line-height: 1.6;">
+                    <strong>Justificación:</strong> {{ inscripcion.motivo_recomendacion_sala|default:"No se encontraron alertas. Asignación basada en edad cronológica." }}
+                </p>
+            </div>
+
+            <form id="form-asignacion" method="post" action="{% url 'asignar_sala_definitiva' inscripcion.id %}">
+                {% csrf_token %}
+
+                {% if inscripcion.estado == 'SALA_APROBADA' %}
+                    <input type="hidden" name="accion" value="GUARDAR_FINAL">
+
+                    <div class="alert alert-success d-flex align-items-center mb-4 border-0 shadow-sm" style="background-color: #d1fae5; color: #065f46;">
+                        <i class="bi bi-check-circle-fill fs-1 me-3"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1">¡Sala Autorizada por Dirección!</h5>
+                            <p class="mb-0">La Directora ha dado el visto bueno para que el alumno ingrese a la <strong>Sala {{ inscripcion.sala_asignada.nombre }}</strong>.</p>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="button" onclick="confirmarFinalizacion()" class="btn btn-success btn-lg px-5 shadow rounded-pill fw-bold w-100">
+                            <i class="bi bi-flag-fill me-2"></i> Finalizar Inscripción Oficialmente
+                        </button>
+                    </div>
+
+                {% else %}
+                    <input type="hidden" name="accion" value="ENVIAR_DIRECTORA">
+
+                    {% if inscripcion.estado == 'SALA_RECHAZADA' %}
+                    <div class="alert alert-danger d-flex mb-4 shadow-sm border-0">
+                        <i class="bi bi-exclamation-octagon-fill fs-3 me-3 mt-1"></i>
+                        <div class="w-100">
+                            <h6 class="fw-bold mb-1">Sala Rechazada por Dirección</h6>
+                            <p class="mb-2 small">La Directora ha rechazado la propuesta anterior. Por favor, selecciona una sala distinta.</p>
+
+                            <div class="p-3 bg-white rounded border border-danger border-opacity-25 mt-2">
+                                <strong class="text-danger small"><i class="bi bi-chat-left-text-fill me-1"></i> Comentario de la Directora:</strong>
+                                <p class="mb-0 mt-1 small text-dark fst-italic">"{{ inscripcion.motivo_rechazo_sala|default:'Sin comentarios adicionales.' }}"</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <h6 class="fw-bold text-secondary mb-3 mt-4 text-uppercase" style="letter-spacing: 1px;"><i class="bi bi-clipboard-check me-2"></i>Decisión de Trabajo Social</h6>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">Selecciona la sala a proponer para este semestre:</label>
+                        <select name="sala_id" id="sala_select" class="form-select form-select-lg shadow-sm" required style="border-radius: 12px; border-color: #cbd5e1; background-color: #f8fafc;">
+                            <option value="">-- Elige la sala a proponer --</option>
+                            {% for sala in salas %}
+                                <option value="{{ sala.id }}" {% if sala.nombre == inscripcion.sala_recomendada %}selected{% endif %}>
+                                    {{ sala.nombre }} {% if sala.nombre == inscripcion.sala_recomendada %}(Recomendada por Sistema){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text mt-2 text-primary">
+                            <i class="bi bi-info-circle-fill me-1"></i> <strong>Aviso:</strong> Al guardar, se enviará a la Directora para que apruebe tu selección.
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-5">
+                        <button type="button" onclick="confirmarPropuesta()" class="btn btn-primary btn-lg px-5 shadow rounded-pill fw-bold">
+                            <i class="bi bi-send-fill me-2"></i> Enviar Propuesta a Dirección
+                        </button>
+                    </div>
+                {% endif %}
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Alerta para enviar a la directora (Paso 1)
+    function confirmarPropuesta() {
+        const salaSelect = document.getElementById('sala_select');
+
+        if(salaSelect && salaSelect.value === "") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Falta información',
+                text: 'Por favor, selecciona una sala antes de continuar.',
+                confirmButtonColor: '#1e3a8a'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Enviar Propuesta?',
+            text: "Se notificará a la Directora para que autorice esta sala. ¿Deseas continuar?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-send"></i> Sí, enviar propuesta',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-asignacion').submit();
+            }
+        });
+    }
+
+    // Alerta para finalizar de lleno (Paso 2)
+    function confirmarFinalizacion() {
+        Swal.fire({
+            title: '¿Inscribir Alumno Oficialmente?',
+            text: "El alumno quedará registrado en la sala seleccionada y su Maestra ya podrá verlo en el panel de bitácoras. Esta acción es definitiva.",
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981', // Verde éxito
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-flag-fill"></i> Sí, Inscribir alumno',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-asignacion').submit();
+            }
+        });
+    }
+</script>
+</body>
+</html>

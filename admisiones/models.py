@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.conf import settings
 import uuid
+import re  # Para las validaciones numéricas del algoritmo
 
 
 class Solicitud(models.Model):
@@ -364,27 +365,18 @@ class Solicitud(models.Model):
 
     matricula = models.CharField(max_length=20, blank=True)
 
-    class ProgramaEducativo(models.TextChoices):
-        ING_SISTEMAS = "ING_SISTEMAS", "Ingeniería en Sistemas"
-        DERECHO = "DERECHO", "Derecho"
-        MEDICINA = "MEDICINA", "Medicina"
-        OTRO = "OTRO", "Otro"
+    # --- CAMPOS LIBERADOS DE RESTRICCIONES (SPRINT DE CORRECCIÓN) ---
+    programa_educativo = models.CharField(max_length=250, blank=True, null=True)
+    estado_domicilio = models.CharField(max_length=100, blank=True, null=True)
+    ciudad = models.CharField(max_length=100, blank=True, null=True)
+    # ------------------------------------------------------------------
 
-    programa_educativo = models.CharField(
-        max_length=30,
-        choices=ProgramaEducativo.choices,
-        blank=True
-    )
     programa_educativo_otro = models.CharField(max_length=80, blank=True)
-
     unidad_academica = models.CharField(max_length=120, blank=True)
 
     correo = models.EmailField(blank=True)
     celular = models.CharField(max_length=10, blank=True)
 
-    # --- Domicilio estructurado del tutor principal ---
-    estado_domicilio = models.CharField(max_length=100, blank=True)
-    ciudad = models.CharField(max_length=100, blank=True)
     codigo_postal = models.CharField(max_length=10, blank=True)
     calle = models.CharField(max_length=150, blank=True)
     numero_exterior = models.CharField(max_length=20, blank=True)
@@ -533,6 +525,9 @@ class SolicitudInscripcion(models.Model):
         EN_REVISION = "EN_REVISION", "Enviada para Revisión"
         FILTROS = "FILTROS", "En filtros (Físicos)"
         ESPERANDO_DIRECTORA = "ESPERANDO_DIRECTORA", "Esperando Veredicto de Dirección"
+        SALA_EN_REVISION = "SALA_EN_REVISION", "Sala Propuesta a Dirección"
+        SALA_RECHAZADA = "SALA_RECHAZADA", "Sala Rechazada por Dirección"
+        SALA_APROBADA = "SALA_APROBADA", "Sala Aprobada por Dirección"
         ACEPTADO_ESPERANDO_PAGO = "ACEPTADO_ESPERANDO_PAGO", "Aceptado - Esperando Pago"
         FINALIZADA = "FINALIZADA", "Inscripción Finalizada y Aprobada"
         RECHAZADA = "RECHAZADA", "Rechazada"
@@ -542,6 +537,27 @@ class SolicitudInscripcion(models.Model):
         choices=EstadoInscripcion.choices,
         default=EstadoInscripcion.NUEVA
     )
+
+    # --- CAMPO NUEVO AÑADIDO: SALA ASIGNADA ---
+    sala_asignada = models.ForeignKey(
+        "admisiones.Sala",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="alumnos_asignados",
+        verbose_name="Sala Asignada"
+    )
+
+    # === SISTEMA DE ASIGNACIÓN INTELIGENTE DE SALAS (AGREGADO) ===
+    sala_recomendada = models.CharField(max_length=10, blank=True, null=True,
+                                        verbose_name="Sala Recomendada por Sistema")
+    motivo_recomendacion_sala = models.TextField(blank=True, null=True, verbose_name="Justificación del Algoritmo")
+    sala_bloqueada = models.BooleanField(default=False, verbose_name="Candado del Semestre (Fijada por TS)")
+
+    # --- ¡CAMPO NUEVO PARA EL PING PONG! ---
+    motivo_rechazo_sala = models.TextField(blank=True, null=True,
+                                           verbose_name="Comentario de Directora (Rechazo de Sala)")
+    # =============================================================
 
     avance_academico = models.CharField(max_length=50, null=True, blank=True, verbose_name="Avance Académico")
     estado_civil_tutor = models.CharField(max_length=50, null=True, blank=True, verbose_name="Estado Civil")
@@ -688,6 +704,97 @@ class SolicitudInscripcion(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # === MÉTODO DEL ALGORITMO AGREGADO ===
+    def evaluar_y_recomendar_sala(self):
+        """
+        Algoritmo que evalúa los 3 dictámenes (Psicológico, Nutricional y Médico)
+        y la edad cronológica para recomendar la sala ideal (L1, L2, L3, M1, M2, M3).
+        """
+        if not self.edad_anios_menor and not self.edad_meses_menor:
+            return "L1", "No hay datos de edad suficientes. Se asigna L1 por defecto."
+
+        anios = self.edad_anios_menor or 0
+        meses = self.edad_meses_menor or 0
+        edad_total_meses = (anios * 12) + meses
+
+        sol = self.solicitud_ingreso
+
+        # 1. SALA BASE POR EDAD CRONOLÓGICA (Aproximación estándar)
+        if edad_total_meses < 7:
+            sala_base = "L1"
+        elif 7 <= edad_total_meses <= 12:
+            sala_base = "L2"
+        elif 13 <= edad_total_meses <= 18:
+            sala_base = "L3"
+        elif 19 <= edad_total_meses <= 24:
+            sala_base = "M1"
+        elif 25 <= edad_total_meses <= 30:
+            sala_base = "M2"
+        else:
+            sala_base = "M3"
+
+        # 2. SISTEMA DE PUNTUACIÓN (Penalizaciones / Alertas)
+        alertas = []
+        puntos_retraso = 0
+
+        # --- A) Filtro Psicológico ---
+        if str(sol.gateo_psicologia).upper() == "NO":
+            puntos_retraso += 1
+            alertas.append("No gatea aún.")
+
+        if not sol.edad_marcha_independiente_psicologia and edad_total_meses > 18:
+            puntos_retraso += 1
+            alertas.append("No camina de forma independiente.")
+
+        if str(sol.come_solo_psicologia).upper() == "NO":
+            puntos_retraso += 1
+            alertas.append("No come solo, requiere apoyo total.")
+
+        if str(sol.se_adapta_nuevos_entornos_psicologia).upper() == "NO":
+            alertas.append("Presenta dificultad para adaptarse a nuevos entornos (apego).")
+
+        # --- B) Filtro Nutricional ---
+        if str(sol.presentacion_alimentos).upper() in ["PURE", "MACHACADO"] and edad_total_meses > 12:
+            puntos_retraso += 1
+            alertas.append("Aún consume alimentos en papilla/puré.")
+
+        # --- C) Filtro Médico (Si existe la historia clínica) ---
+        if hasattr(self, 'historia_clinica_medica'):
+            hc = self.historia_clinica_medica
+            if hc:
+                try:
+                    semanas = int(re.sub(r'\D', '', hc.semanas_gestacion)) if hc.semanas_gestacion else 40
+                    if semanas < 37:
+                        puntos_retraso += 1
+                        alertas.append(f"Nacimiento prematuro ({semanas} semanas).")
+                except:
+                    pass
+
+        # 3. CÁLCULO DE SALA FINAL (Ajuste hacia abajo si hay retrasos/dependencia)
+        jerarquia_salas = ["L1", "L2", "L3", "M1", "M2", "M3"]
+        indice_actual = jerarquia_salas.index(sala_base)
+
+        # Si tiene puntos de retraso, lo bajamos de sala proporcionalmente (máximo hasta L1)
+        if puntos_retraso > 0:
+            nuevo_indice = max(0, indice_actual - (1 if puntos_retraso <= 2 else 2))
+            sala_recomendada = jerarquia_salas[nuevo_indice]
+        else:
+            sala_recomendada = sala_base
+
+        # Construimos la justificación
+        justificacion = f"Edad cronológica: {edad_total_meses} meses (Base: {sala_base}). "
+        if puntos_retraso > 0:
+            justificacion += f"Se ajustó a la sala {sala_recomendada} por las siguientes consideraciones integrales: " + ", ".join(
+                alertas)
+        else:
+            justificacion += "El desarrollo es acorde a su edad. No se detectaron alertas que requieran ajuste de sala."
+
+        self.sala_recomendada = sala_recomendada
+        self.motivo_recomendacion_sala = justificacion
+        self.save(update_fields=['sala_recomendada', 'motivo_recomendacion_sala'])
+
+        return sala_recomendada, justificacion
 
     def __str__(self):
         return f"Expediente de Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
@@ -950,3 +1057,46 @@ class Incidencia(models.Model):
 
     def __str__(self):
         return f"Incidencia {self.nivel}: {self.alumno.solicitud_ingreso.nombres_menor}"
+
+
+# =========================================================
+# MÓDULO DE BITÁCORAS DIARIAS (NUEVO)
+# =========================================================
+
+class BitacoraBase(models.Model):
+    class EstadoBitacora(models.TextChoices):
+        BORRADOR = "BORRADOR", "Borrador (Sin enviar)"
+        ENVIADO = "ENVIADO", "Enviado a Coordinación"
+        APROBADO = "APROBADO", "Aprobado (Palomita)"
+        RECHAZADO = "RECHAZADO", "Rechazado (Tacha)"
+        EN_DIRECTIVA = "EN_DIRECTIVA", "Enviada a Dirección"  # <-- AGREGADO PARA EL FLUJO FINAL
+
+    alumno = models.ForeignKey(SolicitudInscripcion, on_delete=models.CASCADE, related_name="%(class)s_bitacoras")
+    maestra = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
+                                related_name="%(class)s_creadas")
+    fecha = models.DateField(default=timezone.now)
+
+    estado = models.CharField(max_length=20, choices=EstadoBitacora.choices, default=EstadoBitacora.BORRADOR)
+    comentarios_coordinadora = models.TextField(null=True, blank=True, help_text="Espacio en blanco para correcciones")
+
+    archivo_pdf = models.FileField(upload_to="bitacoras_pdfs/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class BitacoraLactante(BitacoraBase):
+    # Se llenará con el contenido del documento que envíes
+    datos_json = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Bitácora Lactante - {self.alumno.solicitud_ingreso.nombres_menor} - {self.fecha}"
+
+
+class BitacoraMaternal(BitacoraBase):
+    # Se llenará con el contenido del documento que envíes
+    datos_json = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Bitácora Maternal - {self.alumno.solicitud_ingreso.nombres_menor} - {self.fecha}"

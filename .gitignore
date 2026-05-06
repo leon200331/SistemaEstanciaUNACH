@@ -1,13 +1,26 @@
-# Entornos virtuales
-venv/
-env/
-
-# Archivos de base de datos locales (Nunca subir datos reales)
+# ==========================================
+# 1. BASES DE DATOS LOCALES
+# Ignorar esto hace que no se suban tus usuarios ni los datos de tus pruebas.
+# Obliga a tus compañeros a tener su propia base de datos en blanco.
+# ==========================================
 db.sqlite3
 
-# Archivos compilados de Python
+# ==========================================
+# 2. ARCHIVOS SUBIDOS POR USUARIOS (¡LA REGLA DE ORO!)
+# Ignora todos los PDFs, fotos de niños, expedientes y bitácoras.
+# ==========================================
+media/
+expedientes/
+pdf_solicitudes/
+bitacoras_pdfs/
+reglamentos_firmados/
+
+# ==========================================
+# 3. ENTORNOS VIRTUALES Y CACHÉ
+# ==========================================
+venv/
+env/
+.venv/
 __pycache__/
 *.pyc
-
-# Archivos de configuración del sistema (PyCharm)
-.idea/
+.DS_Store

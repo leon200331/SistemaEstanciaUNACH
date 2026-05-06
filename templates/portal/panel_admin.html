@@ -144,6 +144,7 @@
   /* Colores de Borde Izquierdo y Botones */
   .card-blue { border-left-color: #0d6efd; }
   .card-yellow { border-left-color: #ffc107; }
+  .card-purple { border-left-color: #8b5cf6; } /* Nuevo color para Salas */
   .card-green { border-left-color: #198754; }
 
   /* Responsivo para celulares */
@@ -221,6 +222,21 @@
       <div>
         <a class="btn btn-warning btn-row shadow-sm fw-bold text-dark" href="{% url 'reporte_final_pendientes' %}">
           Ir a Reportes <i class="bi bi-arrow-right-short"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="module-row-card card-purple">
+      <div class="module-icon-row" style="background:#f5f3ff; color:#8b5cf6;">
+        <i class="bi bi-puzzle-fill"></i>
+      </div>
+      <div class="module-content-row">
+        <h4>Asignación de Salas</h4>
+        <p>Define y bloquea la sala definitiva del menor basándote en la sugerencia del sistema.</p>
+      </div>
+      <div>
+        <a class="btn btn-row shadow-sm text-white" style="background-color: #8b5cf6; border-color: #8b5cf6;" href="{% url 'lista_asignacion_salas' %}">
+          Asignar Salas <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from usuarios import views as user_views  # <--- AGREGADO: Importamos las vistas de la directora
 
 urlpatterns = [
     path("panel/", views.panel_admisiones, name="panel_admisiones"),
@@ -39,10 +40,38 @@ urlpatterns = [
 
     path("reporte-final-ingreso/", views.reporte_final_pendientes, name="reporte_final_pendientes"),
     path("reporte-final-ingreso/<int:pk>/", views.dictaminar_reporte_final, name="dictaminar_reporte_final"),
-    path('veredicto-final/<int:inscripcion_id>/', views.veredicto_final_directora, name='veredicto_final_directora'),
+
+    # =========================================================
+    # RUTAS DE ASIGNACIÓN DE SALAS Y DIRECTIVA (AQUÍ ESTÁ LA SOLUCIÓN)
+    # =========================================================
+    path("asignacion-salas/", views.lista_asignacion_salas, name="lista_asignacion_salas"),
+    path("asignar-sala/<int:inscripcion_id>/", views.asignar_sala_definitiva, name="asignar_sala_definitiva"),
+
+    # --- CORRECCIÓN APLICADA AQUÍ: user_views ---
+    path('veredicto-final/<int:inscripcion_id>/', user_views.veredicto_final_directora, name='veredicto_final_directora'),
+    path('dictaminar-sala-directora/<int:inscripcion_id>/', user_views.dictaminar_sala_directora, name='dictaminar_sala_directora'),
+
     path('pagos/pendientes/', views.validacion_pagos_pendientes, name='validacion_pagos_pendientes'),
     path('pagos/validar/<int:pk>/', views.registrar_pago_valido, name='registrar_pago_valido'),
     path('semestres/', views.lista_semestres, name='lista_semestres'),
     path('semestres/nuevo/', views.crear_semestre, name='crear_semestre'),
     path('semestres/<int:semestre_id>/', views.detalle_semestre, name='detalle_semestre'),
+
+    # =========================================================
+    # NUEVAS RUTAS PARA ASISTENTES DE SALAS Y COORDINACIÓN
+    # =========================================================
+    path("dashboard-maestra/", views.dashboard_maestra, name="dashboard_maestra"),
+    path("dashboard-coordinadora/", views.dashboard_coordinadora, name="dashboard_coordinadora"),
+    path("expediente-bitacoras/<int:alumno_id>/", views.expediente_bitacoras, name="expediente_bitacoras"),
+    path("nueva-bitacora/<int:alumno_id>/", views.crear_bitacora, name="crear_bitacora"),
+
+    path("bitacora/enviar-coord/<int:bitacora_id>/<str:tipo>/", views.enviar_bitacora_coordinadora,
+         name="enviar_bitacora_coordinadora"),
+    path("bitacora/aprobar/<int:bitacora_id>/<str:tipo>/", views.aprobar_bitacora_coordinadora,
+         name="aprobar_bitacora_coordinadora"),
+    path("bitacora/corregir/<int:bitacora_id>/<str:tipo>/", views.corregir_bitacora_coordinadora,
+         name="corregir_bitacora_coordinadora"),
+    path("bitacora/enviar-directora/<int:bitacora_id>/<str:tipo>/", views.enviar_bitacora_directora,
+         name="enviar_bitacora_directora"),
+    path("bitacora/pdf/<int:bitacora_id>/<str:tipo>/", views.descargar_pdf_bitacora, name="descargar_pdf_bitacora"),
 ]

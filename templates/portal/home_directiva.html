@@ -109,38 +109,114 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for ins in dictamenes_pendientes %}
+{% for ins in dictamenes_pendientes %}
+<tr>
+    <td>
+        <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
+        <span class="text-uppercase d-block fw-bold">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
+        <small class="text-muted">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
+    </td>
+    <td>
+        <span class="badge bg-success mb-1"><i class="bi bi-check-all"></i> Áreas OK</span>
+    </td>
+    <td class="text-center">
+        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-flex justify-content-center gap-1">
+            {% csrf_token %}
+            <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success btn-sm shadow-sm">
+                <i class="bi bi-check-circle-fill"></i>
+            </button>
+
+            <button type="submit" name="accion" value="PENDIENTE" class="btn btn-warning btn-sm text-dark shadow-sm">
+                <i class="bi bi-hourglass-split"></i>
+            </button>
+
+            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger btn-sm shadow-sm">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </form>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="3" class="text-center py-4 text-muted">
+        No hay expedientes pendientes.
+    </td>
+</tr>
+{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-card border-info mt-4">
+                <div class="dash-card-header bg-info bg-opacity-10 border-info border-opacity-25 pb-2">
+                    <span class="text-info-emphasis"><i class="bi bi-door-open-fill me-2"></i> Autorización de Asignación de Salas</span>
+                </div>
+                <div class="dash-card-body pt-2">
+                    <p class="small text-muted mb-3">Trabajo Social ha propuesto las siguientes salas para los alumnos aprobados. Confirme si está de acuerdo.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Alumno</th>
+                                    <th>Sala Propuesta</th>
+                                    <th class="text-center">Decisión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sala_req in salas_en_revision %}
                                 <tr>
                                     <td>
-                                        <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
-                                        <span class="text-uppercase d-block fw-bold">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
-                                        <small class="text-muted">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
+                                        <span class="fw-bold text-dark d-block">{{ sala_req.solicitud_ingreso.nombres_menor }} {{ sala_req.solicitud_ingreso.apellido_paterno_menor }}</span>
+                                        <small class="text-muted">Folio #{{ sala_req.solicitud_ingreso.folio }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success mb-1"><i class="bi bi-check-all"></i> Áreas OK</span>
+                                        <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm"><i class="bi bi-house-door-fill me-1"></i> Sala {{ sala_req.sala_asignada.nombre }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-flex justify-content-center gap-1">
+                                        <form action="{% url 'dictaminar_sala_directora' sala_req.id %}" method="POST" class="d-flex justify-content-center gap-2">
                                             {% csrf_token %}
-                                            <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success btn-sm shadow-sm" title="Aceptar y Firmar" onclick="return confirm('¿Aceptar a este alumno y generar Reporte Final FO-301?');">
-                                                <i class="bi bi-check-circle-fill"></i>
+                                            <button type="submit" name="accion" value="APROBAR" class="btn btn-success shadow-sm rounded-pill fw-bold px-3" onclick="return confirm('¿Autorizar el ingreso del alumno a la Sala {{ sala_req.sala_asignada.nombre }}?');">
+                                                <i class="bi bi-check-lg me-1"></i> Autorizar
                                             </button>
 
-                                            <button type="submit" name="accion" value="PENDIENTE" class="btn btn-warning btn-sm text-dark shadow-sm" title="Dejar en Pausa/Pendiente" onclick="return confirm('¿Dejar este expediente en PENDIENTE para revisión posterior?');">
-                                                <i class="bi bi-hourglass-split"></i>
-                                            </button>
-
-                                            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger btn-sm shadow-sm" title="Rechazar Inscripción" onclick="return confirm('¿Estás segura de RECHAZAR definitivamente esta inscripción?');">
-                                                <i class="bi bi-x-circle"></i>
+                                            <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rechazarModal{{ sala_req.id }}">
+                                                <i class="bi bi-x-lg"></i>
                                             </button>
                                         </form>
-                                    </td>
+
+                                        <div class="modal fade" id="rechazarModal{{ sala_req.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content" style="border-radius: 15px;">
+                                                    <div class="modal-header bg-danger text-white" style="border-radius: 15px 15px 0 0;">
+                                                        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Rechazar Sala Propuesta</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form action="{% url 'dictaminar_sala_directora' sala_req.id %}" method="POST">
+                                                        {% csrf_token %}
+                                                        <div class="modal-body text-start p-4">
+                                                            <p class="text-muted small">Estás a punto de devolver el expediente a Trabajo Social porque no estás de acuerdo con la <strong>Sala {{ sala_req.sala_asignada.nombre }}</strong> propuesta para {{ sala_req.solicitud_ingreso.nombres_menor }}.</p>
+
+                                                            <label class="fw-bold mb-2 text-dark">Escribe el motivo del rechazo (obligatorio):</label>
+                                                            <textarea name="motivo_rechazo" class="form-control" rows="4" placeholder="Ej. El menor aún no camina, sugiero cambiarlo a la L3 en lugar de M1..." required></textarea>
+                                                        </div>
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger rounded-pill px-4 fw-bold">Enviar Comentario a T.S.</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="3" class="text-center py-4 text-muted">
-                                        <i class="bi bi-check2-circle display-4 text-success mb-2 d-block opacity-50"></i>
-                                        <h6 class="fw-bold m-0">Bandeja limpia. No hay expedientes pendientes de firma.</h6>
+                                    <td colspan="3" class="text-center py-4 text-muted bg-light">
+                                        <i class="bi bi-inbox-fill fs-3 text-secondary mb-2 d-block opacity-25"></i>
+                                        <small class="fw-bold m-0 text-secondary">No hay propuestas de sala pendientes de revisión.</small>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -282,4 +358,4 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-{% endblock %}+
+{% endblock %}

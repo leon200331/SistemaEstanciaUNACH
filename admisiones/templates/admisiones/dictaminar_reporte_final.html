@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="d-grid mt-5 pt-4">
-                    <button type="submit" class="btn btn-primary btn-lg shadow fw-bold rounded-pill" onclick="return confirm('¿Estás segura de guardar el Reporte Final de Ingreso? El expediente pasará a la Directora.');">
+                    <button type="submit" class="btn btn-primary btn-lg shadow fw-bold rounded-pill">
                         <i class="bi bi-save-fill me-2"></i> Guardar y Enviar a Dirección
                     </button>
                 </div>
@@ -82,6 +82,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     function toggleMotivos() {
@@ -108,5 +110,38 @@
             boxRechazar.style.borderColor = 'transparent';
         }
     }
+
+    // --- ALERTA BONITA (SWEETALERT) AL ENVIAR EL FORMULARIO ---
+    document.getElementById('formReporte').addEventListener('submit', function(e) {
+        e.preventDefault(); // Detenemos el envío normal
+        const form = this;
+
+        // Detectamos si es Aprobar o Rechazar para cambiar el texto de la alerta
+        const esAprobar = document.getElementById('decision_aprobar').checked;
+        const titulo = esAprobar ? '¿Aprobar y enviar a Dirección?' : '¿Rechazar expediente?';
+        const texto = esAprobar ?
+            'El expediente pasará a la Directora para su veredicto final.' :
+            'Se guardarán los motivos y el expediente será marcado como rechazado.';
+        const icono = esAprobar ? 'info' : 'warning';
+        const colorBoton = esAprobar ? '#0d6efd' : '#dc3545'; // Azul para aprobar, Rojo para rechazar
+
+        Swal.fire({
+            title: titulo,
+            text: texto,
+            icon: icono,
+            showCancelButton: true,
+            confirmButtonColor: colorBoton,
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-check-circle"></i> Sí, confirmar',
+            cancelButtonText: '<i class="bi bi-x-circle"></i> Cancelar',
+            background: '#ffffff',
+            borderRadius: '15px',
+            backdrop: `rgba(0,0,0,0.5)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit(); // Si dice que sí, mandamos el formulario de verdad
+            }
+        });
+    });
 </script>
 {% endblock %}

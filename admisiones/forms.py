@@ -2,9 +2,13 @@ from django import forms
 from datetime import date, timedelta
 import re
 from django.forms import Select, SelectMultiple
+from django.utils import timezone
 
 # Se unificaron las importaciones conflictivas aquí:
-from .models import Solicitud, HistoriaClinicaMedica
+from .models import (
+    Solicitud, HistoriaClinicaMedica, Semestre, DiaFestivo,
+    Sala, SalaSemestre, AsignacionMaestra, BitacoraLactante, BitacoraMaternal
+)
 
 
 # --- CLASE ESPECIAL PARA PERMITIR ETIQUETAS NUEVAS (SELECT2) ---
@@ -14,128 +18,80 @@ class DynamicMultipleChoiceField(forms.MultipleChoiceField):
 
 
 class CapturaSolicitudForm(forms.ModelForm):
+    # --- LÍNEAS AGREGADAS PARA QUITAR EL CANDADO ESTRICTO ---
+    programa_educativo = forms.CharField(max_length=250, required=True)
+    estado_domicilio = forms.CharField(max_length=100, required=True)
+    ciudad = forms.CharField(max_length=100, required=True)
+
     class Meta:
         model = Solicitud
         fields = [
-            # Tutor
-            "nombres_tutor",
-            "apellido_paterno_tutor",
-            "apellido_materno_tutor",
-            "matricula",
-            "programa_educativo",
-            "programa_educativo_otro",
-
-            # ¡OJO AQUI! Se eliminó "unidad_academica" para que el papá no la sobreescriba y se borre.
-            "correo",
-            "celular",
-
-            # --- NUEVOS CAMPOS DE DOMICILIO ---
-            "estado_domicilio",
-            "ciudad",
-            "codigo_postal",
-            "calle",
-            "numero_exterior",
-            "numero_interior",
-
-            "parentesco",
-            "parentesco_otro",
-
-            # Menor (solo fecha y CURP)
-            "fecha_nacimiento_menor",
-            "curp_menor",
+            "nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor",
+            "matricula", "programa_educativo", "programa_educativo_otro",
+            "correo", "celular", "estado_domicilio", "ciudad", "codigo_postal",
+            "calle", "numero_exterior", "numero_interior", "parentesco",
+            "parentesco_otro", "fecha_nacimiento_menor", "curp_menor",
         ]
         widgets = {
             "nombres_tutor": forms.TextInput(attrs={"placeholder": "Ej. Juan Carlos"}),
             "apellido_paterno_tutor": forms.TextInput(attrs={"placeholder": "Ej. Pérez"}),
             "apellido_materno_tutor": forms.TextInput(attrs={"placeholder": "Ej. López"}),
-
-            # --- SE AGREGÓ READONLY A LA MATRÍCULA ---
             "matricula": forms.TextInput(attrs={"placeholder": "Ej. A123456", "readonly": "readonly",
                                                 "style": "background-color: #e9ecef; cursor: not-allowed;"}),
-
-            "programa_educativo": forms.Select(),
-            "programa_educativo_otro": forms.TextInput(attrs={
-                "placeholder": "Especifica el programa educativo"
+            "programa_educativo": forms.TextInput(attrs={
+                "list": "lista_carreras", "placeholder": "Escribe o selecciona tu carrera...", "autocomplete": "off"
             }),
-
-            "correo": forms.EmailInput(attrs={
-                "placeholder": "correo@unach.mx"
-            }),
-
-            "celular": forms.TextInput(attrs={
-                "placeholder": "10 dígitos"
-            }),
-
-            # --- WIDGETS DOMICILIO ---
+            "programa_educativo_otro": forms.TextInput(attrs={"placeholder": "Especifica el programa educativo"}),
+            "correo": forms.EmailInput(attrs={"placeholder": "correo@unach.mx"}),
+            "celular": forms.TextInput(attrs={"placeholder": "10 dígitos"}),
             "estado_domicilio": forms.TextInput(attrs={"placeholder": "Ej. Chiapas"}),
             "ciudad": forms.TextInput(attrs={"placeholder": "Ej. Tuxtla Gutiérrez"}),
             "codigo_postal": forms.TextInput(attrs={"placeholder": "Ej. 29000"}),
             "calle": forms.TextInput(attrs={"placeholder": "Ej. Av. Central"}),
             "numero_exterior": forms.TextInput(attrs={"placeholder": "Ej. 123"}),
             "numero_interior": forms.TextInput(attrs={"placeholder": "Ej. A (Opcional)"}),
-
             "parentesco": forms.Select(),
-            "parentesco_otro": forms.TextInput(attrs={
-                "placeholder": "Especifica el parentesco"
-            }),
-
-            "fecha_nacimiento_menor": forms.DateInput(attrs={
-                "type": "date"
-            }),
-
-            "curp_menor": forms.TextInput(attrs={
-                "placeholder": "18 caracteres"
-            }),
+            "parentesco_otro": forms.TextInput(attrs={"placeholder": "Especifica el parentesco"}),
+            "fecha_nacimiento_menor": forms.DateInput(attrs={"type": "date"}),
+            "curp_menor": forms.TextInput(attrs={"placeholder": "18 caracteres"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         for _, field in self.fields.items():
             css = field.widget.attrs.get("class", "")
-
-            if isinstance(field.widget, (Select, SelectMultiple)):
-                base_class = "form-select w-100"
-            else:
-                base_class = "form-control w-100"
-
+            base_class = "form-select w-100" if isinstance(field.widget,
+                                                           (Select, SelectMultiple)) else "form-control w-100"
             field.widget.attrs["class"] = f"{css} {base_class}".strip()
 
         self.fields["nombres_tutor"].required = True
         self.fields["apellido_paterno_tutor"].required = True
         self.fields["parentesco"].required = True
         self.fields["fecha_nacimiento_menor"].required = True
-
         self.fields["estado_domicilio"].required = True
         self.fields["ciudad"].required = True
         self.fields["calle"].required = True
 
     def clean_nombres_tutor(self):
         v = (self.cleaned_data.get("nombres_tutor") or "").strip()
-        if len(v) < 2:
-            raise forms.ValidationError("Ingresa un nombre válido.")
-        return v.title()  # FUERZA MAYUSCULA INICIAL
+        if len(v) < 2: raise forms.ValidationError("Ingresa un nombre válido.")
+        return v.title()
 
     def clean_apellido_paterno_tutor(self):
         v = (self.cleaned_data.get("apellido_paterno_tutor") or "").strip()
-        if len(v) < 2:
-            raise forms.ValidationError("Ingresa un apellido paterno válido.")
-        return v.title()  # FUERZA MAYUSCULA INICIAL
+        if len(v) < 2: raise forms.ValidationError("Ingresa un apellido paterno válido.")
+        return v.title()
 
     def clean_apellido_materno_tutor(self):
         v = (self.cleaned_data.get("apellido_materno_tutor") or "").strip()
-        return v.title() if v else v  # FUERZA MAYUSCULA INICIAL
+        return v.title() if v else v
 
-    # --- CAMBIO APLICADO: Solo acepta @unach.mx ---
     def clean_correo(self):
         correo = (self.cleaned_data.get("correo") or "").strip().lower()
-
         if correo and ("@" not in correo):
             raise forms.ValidationError("El correo debe contener el símbolo @.")
-
         if correo and not correo.endswith("@unach.mx"):
-            raise forms.ValidationError("Por políticas de CTI, solo se permiten correos institucionales con terminación @unach.mx.")
-
+            raise forms.ValidationError("Solo se permiten correos institucionales con terminación @unach.mx.")
         return correo
 
     def clean_celular(self):
@@ -153,12 +109,11 @@ class CapturaSolicitudForm(forms.ModelForm):
     def clean_curp_menor(self):
         curp = (self.cleaned_data.get("curp_menor") or "").strip().upper()
         if curp and not re.fullmatch(r"[A-Z0-9]{18}", curp):
-            raise forms.ValidationError("La CURP debe tener 18 caracteres (letras y números).")
+            raise forms.ValidationError("La CURP debe tener 18 caracteres.")
         return curp
 
     def clean(self):
         cleaned_data = super().clean()
-
         programa = cleaned_data.get("programa_educativo")
         programa_otro = (cleaned_data.get("programa_educativo_otro") or "").strip()
         if programa == "OTRO" and not programa_otro:
@@ -174,99 +129,85 @@ class CapturaSolicitudForm(forms.ModelForm):
             hoy = date.today()
             min_fecha = hoy - timedelta(days=365 * 3)
             max_fecha = hoy - timedelta(days=30 * 6)
-
             if fecha < min_fecha or fecha > max_fecha:
                 self.add_error("fecha_nacimiento_menor", "La edad del menor debe estar entre 6 meses y 3 años.")
-
         return cleaned_data
 
 
-# ======================================================
-# FORMULARIO MODIFICADO PARA SOPORTAR "OTRA" UNIDAD
-# ======================================================
 class CrearSolicitudPanelForm(forms.Form):
     UNIDADES_CHOICES = [
         ("", "Seleccione una opción..."),
-        ("Facultad de Arquitectura (Tuxtla)", "Facultad de Arquitectura (Tuxtla)"),
-        ("Facultad de Artes (Tuxtla)", "Facultad de Artes (Tuxtla)"),
-        ("Facultad de Ciencias Agrícolas (Huehuetán)", "Facultad de Ciencias Agrícolas (Huehuetán)"),
-        ("Facultad de Ciencias Agronómicas (Villaflores)", "Facultad de Ciencias Agronómicas (Villaflores)"),
-        ("Facultad de Ciencias de la Administración (Tapachula)",
-         "Facultad de Ciencias de la Administración (Tapachula)"),
-        ("Facultad de Ciencias en Física y Matemáticas (Tuxtla)",
-         "Facultad de Ciencias en Física y Matemáticas (Tuxtla)"),
-        ("Facultad de Ciencias Químicas (Tapachula)", "Facultad de Ciencias Químicas (Tapachula)"),
-        ("Facultad de Ciencias Sociales (San Cristóbal)", "Facultad de Ciencias Sociales (San Cristóbal)"),
-        ("Facultad de Contaduría y Administración (Tuxtla)", "Facultad de Contaduría y Administración (Tuxtla)"),
-        ("Facultad de Contaduría Pública (Tapachula)", "Facultad de Contaduría Pública (Tapachula)"),
-        ("Facultad de Derecho (San Cristóbal)", "Facultad de Derecho (San Cristóbal)"),
-        ("Facultad de Humanidades (Tuxtla)", "Facultad de Humanidades (Tuxtla)"),
-        ("Facultad de Ingeniería (Tuxtla)", "Facultad de Ingeniería (Tuxtla)"),
-        ("Facultad de Lenguas (Tuxtla)", "Facultad de Lenguas (Tuxtla)"),
-        ("Facultad de Medicina Humana (Tuxtla)", "Facultad de Medicina Humana (Tuxtla)"),
-        ("Facultad de Medicina Veterinaria y Zootecnia (Tuxtla)",
-         "Facultad de Medicina Veterinaria y Zootecnia (Tuxtla)"),
-        ("Facultad de Negocios (Tapachula)", "Facultad de Negocios (Tapachula)"),
+        ("Facultad de Contaduría y Administración, Campus I", "Facultad de Contaduría y Administración, Campus I"),
+        ("Facultad de Ingeniería, Campus I", "Facultad de Ingeniería, Campus I"),
+        ("Facultad de Arquitectura, Campus I", "Facultad de Arquitectura, Campus I"),
+        ("Facultad de Medicina Humana Dr. Manuel Velasco Suárez, Campus II",
+         "Facultad de Medicina Humana Dr. Manuel Velasco Suárez, Campus II"),
+        ("Facultad de Medicina Veterinaria y Zootecnia, Campus II",
+         "Facultad de Medicina Veterinaria y Zootecnia, Campus II"),
+        ("Facultad de Derecho, Campus III", "Facultad de Derecho, Campus III"),
+        ("Facultad de Ciencias Sociales, Campus III", "Facultad de Ciencias Sociales, Campus III"),
+        ("Facultad de Negocios, Campus IV", "Facultad de Negocios, Campus IV"),
+        ("Facultad de Ciencias de la Administración, Campus IV",
+         "Facultad de Ciencias de la Administración, Campus IV"),
+        ("Facultad de Ciencias Químicas, Campus IV", "Facultad de Ciencias Químicas, Campus IV"),
+        ("Facultad de Ciencias Agrícolas, Campus IV", "Facultad de Ciencias Agrícolas, Campus IV"),
+        ("Facultad de Ciencias Agronómicas, Campus V", "Facultad de Ciencias Agronómicas, Campus V"),
+        ("Facultad de Humanidades, Campus VI", "Facultad de Humanidades, Campus VI"),
+        ("Facultad de Ciencias Administrativas, Campus VIII", "Facultad de Ciencias Administrativas, Campus VIII"),
+        ("Facultad de Lenguas, Campus Tuxtla", "Facultad de Lenguas, Campus Tuxtla"),
+        ("Facultad de Ciencias en Física y Matemáticas", "Facultad de Ciencias en Física y Matemáticas"),
+        ("Facultad Maya de Estudios Agropecuarios", "Facultad Maya de Estudios Agropecuarios"),
+        ("Facultad de Medicina Humana Dr. Manuel Velasco Suárez, Campus IV",
+         "Facultad de Medicina Humana Dr. Manuel Velasco Suárez, Campus IV"),
+        ("Facultad de Ciencias Humanas para el Desarrollo Intercultural Sostenible",
+         "Facultad de Ciencias Humanas para el Desarrollo Intercultural Sostenible"),
+        ("Otra", "Otra unidad (especificar)"),
     ]
 
     nombres_tutor = forms.CharField(max_length=80, required=True)
     apellido_paterno_tutor = forms.CharField(max_length=60, required=True)
     apellido_materno_tutor = forms.CharField(max_length=60, required=False)
     matricula = forms.CharField(max_length=20, required=False)
-
     unidad_academica = forms.ChoiceField(choices=UNIDADES_CHOICES, required=True)
-
-    # --- CAMPO NUEVO PARA "OTRA" (Marcadores de Git eliminados) ---
     unidad_academica_otra = forms.CharField(max_length=100, required=False)
-
     correo = forms.EmailField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         for f in self.fields.values():
             f.widget.attrs["class"] = "form-control"
 
         self.fields["unidad_academica"].widget.attrs["class"] = "form-select"
-
-        # Le ponemos un evento JavaScript al Select para detectar cuando cambie
         self.fields["unidad_academica"].widget.attrs["onchange"] = "mostrarOtraUnidad(this.value)"
-
-        # Ocultamos la caja de "Otra" por defecto con la clase 'd-none' de Bootstrap
         self.fields["unidad_academica_otra"].widget.attrs["class"] = "form-control d-none mt-2"
         self.fields["unidad_academica_otra"].widget.attrs["placeholder"] = "Especifica la unidad académica"
         self.fields["unidad_academica_otra"].widget.attrs["id"] = "input_unidad_otra"
-
         self.fields["nombres_tutor"].widget.attrs["placeholder"] = "Ej. Juan Carlos"
         self.fields["apellido_paterno_tutor"].widget.attrs["placeholder"] = "Ej. Pérez"
         self.fields["apellido_materno_tutor"].widget.attrs["placeholder"] = "Ej. López"
         self.fields["matricula"].widget.attrs["placeholder"] = "Ej. A123456"
         self.fields["correo"].widget.attrs["placeholder"] = "Ej. correo@unach.mx"
 
-    # --- CAMBIO APLICADO: Solo acepta @unach.mx en el Panel de Trabajo Social ---
     def clean_correo(self):
         correo = (self.cleaned_data.get("correo") or "").strip().lower()
         if correo and not correo.endswith("@unach.mx"):
-            raise forms.ValidationError("Por políticas de CTI, solo se permiten correos institucionales con terminación @unach.mx")
+            raise forms.ValidationError("Solo se permiten correos institucionales con terminación @unach.mx")
         return correo
 
-    # --- NUEVA VALIDACIÓN: Si elige "Otra", debe escribir a fuerzas ---
     def clean(self):
         cleaned_data = super().clean()
         unidad = cleaned_data.get("unidad_academica")
         unidad_otra = cleaned_data.get("unidad_academica_otra")
-
         if unidad == "Otra" and not unidad_otra:
             self.add_error("unidad_academica_otra", "Por favor especifica la unidad académica.")
         return cleaned_data
 
     def _solo_letras(self, value, campo):
         value = (value or "").strip()
-        if not value:
-            return value
+        if not value: return value
         if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+", value):
-            raise forms.ValidationError(f"{campo}: solo letras y espacios (sin números ni caracteres especiales).")
-        return value.title()  # MAYUSCULA DESDE LA CREACIÓN
+            raise forms.ValidationError(f"{campo}: solo letras y espacios.")
+        return value.title()
 
     def clean_nombres_tutor(self):
         return self._solo_letras(self.cleaned_data.get("nombres_tutor"), "Nombre(s)")
@@ -278,213 +219,73 @@ class CrearSolicitudPanelForm(forms.Form):
         return self._solo_letras(self.cleaned_data.get("apellido_materno_tutor"), "Apellido materno")
 
 
-class SolicitudBasicaForm(forms.ModelForm):
-    class Meta:
-        model = Solicitud
-        fields = ["nombres_tutor", "apellido_paterno_tutor", "apellido_materno_tutor", "matricula", "correo"]
-        widgets = {
-            "nombres_tutor": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Nombre(s)"}),
-            "apellido_paterno_tutor": forms.TextInput(
-                attrs={"class": "form-control w-100", "placeholder": "Apellido paterno"}
-            ),
-            "apellido_materno_tutor": forms.TextInput(
-                attrs={"class": "form-control w-100", "placeholder": "Apellido materno"}
-            ),
-            "matricula": forms.TextInput(attrs={"class": "form-control w-100", "placeholder": "Matrícula"}),
-            "correo": forms.EmailInput(
-                attrs={"class": "form-control w-100", "placeholder": "correo@ejemplo.com"}
-            ),
-        }
-
-
-SI_NO_CHOICES = [
-    ("", "Seleccione..."),
-    ("SI", "Si"),
-    ("NO", "No"),
-]
-
-ESTADO_PSICOLOGIA_CHOICES = [
-    ("PENDIENTE", "Pendiente"),
-    ("APROBADO", "Aprobado"),
-    ("RECHAZADO", "Rechazado"),
-]
-
-TIPO_NACIMIENTO_CHOICES = [
-    ("", "Seleccione..."),
-    ("PARTO", "Parto"),
-    ("CESAREA", "Cesárea"),
-]
-
-METODO_ALIMENTACION_CHOICES = [
-    ("", "Seleccione..."),
-    ("LME", "LME"),
-    ("LM", "LM"),
-    ("SLM", "SLM"),
-]
-
-LENGUAJE_ACTUAL_CHOICES = [
-    ("", "Seleccione..."),
-    ("SILENCIOSO", "Silencioso"),
-    ("EXPLICITO", "Explícito"),
-    ("REPETITIVO", "Repetitivo"),
-]
-
-CONTROL_CHOICES = [
-    ("", "Seleccione..."),
-    ("SI", "Si"),
-    ("NO", "No"),
-    ("EN_PROCESO", "En proceso"),
-]
-
-ADAPTACION_CHOICES = [
-    ("", "Seleccione..."),
-    ("SI", "Si"),
-    ("NO", "No"),
-    ("A_VECES", "A veces"),
-]
-
-COMPARTE_CHOICES = [
-    ("", "Seleccione..."),
-    ("SI", "Si"),
-    ("NO", "No"),
-    ("A_VECES", "A veces"),
-]
-
-CONDUCTA_LIDER_CHOICES = [
-    ("", "Seleccione..."),
-    ("SI", "Si"),
-    ("NO", "No"),
-    ("OCASIONALMENTE", "Ocasionalmente"),
-]
+SI_NO_CHOICES = [("", "Seleccione..."), ("SI", "Si"), ("NO", "No")]
+ESTADO_PSICOLOGIA_CHOICES = [("", "Seleccione..."), ("APROBADO", "Aprobado"), ("RECHAZADO", "Rechazado")]
+TIPO_NACIMIENTO_CHOICES = [("", "Seleccione..."), ("PARTO", "Parto"), ("CESAREA", "Cesárea")]
+METODO_ALIMENTACION_CHOICES = [("", "Seleccione..."), ("LME", "LME"), ("LM", "LM"), ("SLM", "SLM")]
+LENGUAJE_ACTUAL_CHOICES = [("", "Seleccione..."), ("SILENCIOSO", "Silencioso"), ("EXPLICITO", "Explícito"),
+                           ("REPETITIVO", "Repetitivo")]
+CONTROL_CHOICES = [("", "Seleccione..."), ("SI", "Si"), ("NO", "No"), ("EN_PROCESO", "En proceso")]
+ADAPTACION_CHOICES = [("", "Seleccione..."), ("SI", "Si"), ("NO", "No"), ("A_VECES", "A veces")]
+COMPARTE_CHOICES = [("", "Seleccione..."), ("SI", "Si"), ("NO", "No"), ("A_VECES", "A veces")]
+CONDUCTA_LIDER_CHOICES = [("", "Seleccione..."), ("SI", "Si"), ("NO", "No"), ("OCASIONALMENTE", "Ocasionalmente")]
 
 
 class DictamenPsicologiaForm(forms.ModelForm):
+    estado_psicologia = forms.ChoiceField(
+        choices=ESTADO_PSICOLOGIA_CHOICES,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=True
+    )
+
     class Meta:
         model = Solicitud
         fields = [
-            "fecha_aplicacion_psicologia",
-            "como_lo_llaman_en_casa",
-            "edad_psicologia",
-            "lugar_nacimiento_menor_psicologia",
-
-            "nombre_padre_psicologia",
-            "edad_padre_psicologia",
-            "nacionalidad_padre_psicologia",
-            "estado_civil_padre_psicologia",
-            "religion_padre_psicologia",
-            "ocupacion_padre_psicologia",
-            "lugar_trabajo_padre_psicologia",
-            "horario_trabajo_padre_psicologia",
-            "escolaridad_padre_psicologia",
-            "estudiante_padre_psicologia",
-            "licenciatura_padre_psicologia",
-            "semestre_padre_psicologia",
-
-            "nombre_madre_psicologia",
-            "edad_madre_psicologia",
-            "nacionalidad_madre_psicologia",
-            "estado_civil_madre_psicologia",
-            "religion_madre_psicologia",
-            "ocupacion_madre_psicologia",
-            "lugar_trabajo_madre_psicologia",
-            "horario_trabajo_madre_psicologia",
-            "escolaridad_madre_psicologia",
-            "estudiante_madre_psicologia",
-            "licenciatura_madre_psicologia",
-            "semestre_madre_psicologia",
-
-            "numero_gesta_psicologia",
-            "embarazo_planeado_psicologia",
-            "dificultad_embarazo_psicologia",
-            "estado_animo_madre_embarazo_psicologia",
+            "nombres_menor", "apellido_paterno_menor", "apellido_materno_menor",
+            "fecha_aplicacion_psicologia", "como_lo_llaman_en_casa", "edad_psicologia",
+            "lugar_nacimiento_menor_psicologia", "nombre_padre_psicologia", "edad_padre_psicologia",
+            "nacionalidad_padre_psicologia", "estado_civil_padre_psicologia", "religion_padre_psicologia",
+            "ocupacion_padre_psicologia", "lugar_trabajo_padre_psicologia", "horario_trabajo_padre_psicologia",
+            "escolaridad_padre_psicologia", "estudiante_padre_psicologia", "licenciatura_padre_psicologia",
+            "semestre_padre_psicologia", "nombre_madre_psicologia", "edad_madre_psicologia",
+            "nacionalidad_madre_psicologia", "estado_civil_madre_psicologia", "religion_madre_psicologia",
+            "ocupacion_madre_psicologia", "lugar_trabajo_madre_psicologia", "horario_trabajo_madre_psicologia",
+            "escolaridad_madre_psicologia", "estudiante_madre_psicologia", "licenciatura_madre_psicologia",
+            "semestre_madre_psicologia", "numero_gesta_psicologia", "embarazo_planeado_psicologia",
+            "dificultad_embarazo_psicologia", "estado_animo_madre_embarazo_psicologia",
             "momento_supieron_sexo_bebe_psicologia",
-            "quien_eligio_nombre_bebe_psicologia",
-            "motivo_nombre_bebe_psicologia",
-
-            "tipo_nacimiento_psicologia",
-            "semanas_gestacion_psicologia",
-            "dificultad_nacimiento_psicologia",
-            "peso_al_nacer_psicologia",
-            "talla_al_nacer_psicologia",
-            "apego_inmediato_psicologia",
-            "metodo_alimentacion_inicio_psicologia",
-
-            "edad_destete_psicologia",
-            "motivo_destete_psicologia",
-
-            "edad_balbuceo_psicologia",
-            "edad_primera_palabra_psicologia",
-            "lenguaje_actual_psicologia",
-            "dificultad_lenguaje_psicologia",
-
-            "edad_se_sento_solo_psicologia",
-            "gateo_psicologia",
-            "edad_gateo_psicologia",
-            "edad_marcha_independiente_psicologia",
-            "dominancia_manual_psicologia",
-
-            "comportamiento_general_psicologia",
-            "relacion_otros_ninos_psicologia",
-            "apego_figura_familiar_psicologia",
-            "apego_con_quien_psicologia",
-            "se_viste_solo_psicologia",
-            "se_pone_prendas_solo_psicologia",
-            "cuales_prendas_se_pone_psicologia",
-            "se_quita_prendas_solo_psicologia",
-            "cuales_prendas_se_quita_psicologia",
-            "intenta_banarse_solo_psicologia",
-            "se_cepilla_dientes_solo_psicologia",
-            "come_solo_psicologia",
-            "toma_vaso_solo_psicologia",
-            "iniciativa_para_jugar_psicologia",
-
-            "realiza_siestas_psicologia",
-            "cuantas_siestas_psicologia",
-            "con_quien_duerme_psicologia",
-            "hora_duerme_noche_psicologia",
-            "hora_despierta_manana_psicologia",
-            "necesita_algo_para_dormir_psicologia",
-            "que_necesita_para_dormir_psicologia",
+            "quien_eligio_nombre_bebe_psicologia", "motivo_nombre_bebe_psicologia", "tipo_nacimiento_psicologia",
+            "semanas_gestacion_psicologia", "dificultad_nacimiento_psicologia", "peso_al_nacer_psicologia",
+            "talla_al_nacer_psicologia", "apego_inmediato_psicologia", "metodo_alimentacion_inicio_psicologia",
+            "edad_destete_psicologia", "motivo_destete_psicologia", "edad_balbuceo_psicologia",
+            "edad_primera_palabra_psicologia", "lenguaje_actual_psicologia", "dificultad_lenguaje_psicologia",
+            "edad_se_sento_solo_psicologia", "gateo_psicologia", "edad_gateo_psicologia",
+            "edad_marcha_independiente_psicologia", "dominancia_manual_psicologia", "comportamiento_general_psicologia",
+            "relacion_otros_ninos_psicologia", "apego_figura_familiar_psicologia", "apego_con_quien_psicologia",
+            "se_viste_solo_psicologia", "se_pone_prendas_solo_psicologia", "cuales_prendas_se_pone_psicologia",
+            "se_quita_prendas_solo_psicologia", "cuales_prendas_se_quita_psicologia", "intenta_banarse_solo_psicologia",
+            "se_cepilla_dientes_solo_psicologia", "come_solo_psicologia", "toma_vaso_solo_psicologia",
+            "iniciativa_para_jugar_psicologia", "realiza_siestas_psicologia", "cuantas_siestas_psicologia",
+            "con_quien_duerme_psicologia", "hora_duerme_noche_psicologia", "hora_despierta_manana_psicologia",
+            "necesita_algo_para_dormir_psicologia", "que_necesita_para_dormir_psicologia",
             "despierta_con_frecuencia_psicologia",
-
-            "actividades_tarde_psicologia",
-            "actividad_extra_tarde_psicologia",
-            "juego_favorito_psicologia",
-            "cancion_favorita_psicologia",
-            "personaje_favorito_psicologia",
-            "tiempo_pantallas_psicologia",
-            "socializa_tardes_con_quien_psicologia",
-            "lugar_para_jugar_psicologia",
-            "comparte_juguetes_psicologia",
-            "conducta_lider_juego_psicologia",
-            "relacion_con_otros_ninos_detalle_psicologia",
+            "actividades_tarde_psicologia", "actividad_extra_tarde_psicologia", "juego_favorito_psicologia",
+            "cancion_favorita_psicologia", "personaje_favorito_psicologia", "tiempo_pantallas_psicologia",
+            "socializa_tardes_con_quien_psicologia", "lugar_para_jugar_psicologia", "comparte_juguetes_psicologia",
+            "conducta_lider_juego_psicologia", "relacion_con_otros_ninos_detalle_psicologia",
             "se_adapta_nuevos_entornos_psicologia",
-            "actividades_fin_semana_psicologia",
-
-            "controla_orinar_psicologia",
-            "controla_defecar_psicologia",
-            "edad_comenzo_avisar_psicologia",
-            "donde_realiza_necesidades_psicologia",
+            "actividades_fin_semana_psicologia", "controla_orinar_psicologia", "controla_defecar_psicologia",
+            "edad_comenzo_avisar_psicologia", "donde_realiza_necesidades_psicologia",
             "algo_significativo_control_esfinteres_psicologia",
-            "duerme_con_panal_noche_psicologia",
-            "reaccion_no_controla_esfinteres_psicologia",
+            "duerme_con_panal_noche_psicologia", "reaccion_no_controla_esfinteres_psicologia",
             "que_hace_responsable_cuando_sucede_psicologia",
-
-            "persona_aparte_padres_crianza_psicologia",
-            "persona_aparte_padres_cuidado_psicologia",
+            "persona_aparte_padres_crianza_psicologia", "persona_aparte_padres_cuidado_psicologia",
             "periodos_cuidado_psicologia",
-            "relacion_padre_madre_con_nino_psicologia",
-            "tiempo_papa_dia_psicologia",
-            "tiempo_mama_dia_psicologia",
-            "metodo_mejorar_conducta_casa_psicologia",
-            "dificultad_actual_hogar_entorno_psicologia",
+            "relacion_padre_madre_con_nino_psicologia", "tiempo_papa_dia_psicologia", "tiempo_mama_dia_psicologia",
+            "metodo_mejorar_conducta_casa_psicologia", "dificultad_actual_hogar_entorno_psicologia",
             "beneficio_esperado_hijo_estancia_psicologia",
-            "beneficio_personal_estancia_psicologia",
-
-            "estado_psicologia",
-            "observaciones_psicologia",
+            "beneficio_personal_estancia_psicologia", "estado_psicologia", "observaciones_psicologia",
         ]
-
         widgets = {
             "fecha_aplicacion_psicologia": forms.DateInput(attrs={"type": "date"}),
             "embarazo_planeado_psicologia": forms.Select(choices=SI_NO_CHOICES),
@@ -511,7 +312,6 @@ class DictamenPsicologiaForm(forms.ModelForm):
             "controla_defecar_psicologia": forms.Select(choices=CONTROL_CHOICES),
             "duerme_con_panal_noche_psicologia": forms.Select(choices=SI_NO_CHOICES),
             "estado_psicologia": forms.Select(choices=ESTADO_PSICOLOGIA_CHOICES),
-
             "dificultad_embarazo_psicologia": forms.Textarea(attrs={"rows": 3}),
             "estado_animo_madre_embarazo_psicologia": forms.Textarea(attrs={"rows": 3}),
             "momento_supieron_sexo_bebe_psicologia": forms.Textarea(attrs={"rows": 3}),
@@ -542,9 +342,12 @@ class DictamenPsicologiaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        campos_identidad = ["nombres_menor", "apellido_paterno_menor", "apellido_materno_menor"]
         for name, field in self.fields.items():
-            if isinstance(field.widget, forms.Select):
+            if name in campos_identidad:
+                field.widget.attrs["readonly"] = "readonly"
+                field.widget.attrs["style"] = "background-color: #e9ecef; pointer-events: none;"
+            elif isinstance(field.widget, forms.Select):
                 field.widget.attrs["class"] = "form-select"
             elif isinstance(field.widget, forms.Textarea):
                 field.widget.attrs["class"] = "form-control"
@@ -556,109 +359,33 @@ class DictamenPsicologiaForm(forms.ModelForm):
                 field.widget.attrs["class"] = "form-control"
 
 
-SEXO_CHOICES_NUTRI = [
-    ("", "Seleccione"),
-    ("FEMENINO", "Femenino"),
-    ("MASCULINO", "Masculino"),
-    ("OTRO", "Otro"),
-]
+SEXO_CHOICES_NUTRI = [("", "Seleccione"), ("FEMENINO", "Femenino"), ("MASCULINO", "Masculino"), ("OTRO", "Otro")]
+TIPO_ALIMENTACION_CHOICES = [("", "Seleccione"), ("SENO_MATERNO", "Seno materno"), ("FORMULA_LACTEA", "Fórmula láctea"),
+                             ("MIXTA", "Mixta"), ("OTRA", "Otra")]
+PRESENTACION_LECHE_CHOICES = [("", "Seleccione"), ("BIBERON", "Biberón"), ("VASO_ENTRENADOR", "Vaso entrenador"),
+                              ("OTRA", "Otra")]
+FORMA_FORMULA_CHOICES = [("", "Seleccione"), ("PORTA_BEBE", "Porta bebé"), ("EN_BRAZOS", "En brazos"), ("OTRO", "Otro")]
+TIPO_COMPLICACION_CHOICES = [("", "Seleccione"), ("INTOLERANCIA_LACTOSA", "Intolerancia a la lactosa"),
+                             ("REFLUJO", "Reflujo"), ("DIFICULTAD_SUCCIONAR", "Dificultad para succionar"),
+                             ("ALERGIAS", "Alergias"), ("DIFICULTAD_DEGLUTIR", "Dificultad para deglutir"),
+                             ("OTRA", "Otra")]
+PRESENTACION_ALIMENTOS_CHOICES = [("", "Seleccione"), ("PURE", "Puré"), ("MACHACADO", "Machacado"),
+                                  ("PICADO_FINO", "Picado extra fino"), ("PICADO_EXTRA_FINO", "Picado extra fino"),
+                                  ("EN_TROZOS", "En trozos")]
+ORDEN_ALIMENTOS_CHOICES = [("", "Seleccione"), ("LECHE_LUEGO_SOLIDOS", "Primero leche y después sólidos"),
+                           ("SOLIDOS_LUEGO_LECHE", "Primero sólidos y después leche")]
+FRECUENCIA_SOLIDOS_CHOICES = [("", "Seleccione"), ("1_VEZ", "1 vez"), ("2_VECES", "2 veces"), ("3_VECES", "3 veces"),
+                              ("MAS_DE_3", "Más de 3 veces"), ("CON_CADA_TOMA", "Con cada toma de fórmula infantil")]
+DONDE_CONSUME_CHOICES = [("", "Seleccione"), ("PORTA_BEBE", "Porta bebé"), ("SILLA_PERIQUERA", "Silla periquera"),
+                         ("SILLA_MESA", "Silla y mesa"), ("OTRO", "Otro")]
+COMPANIA_CHOICES = [("", "Seleccione"), ("FAMILIA", "En compañía de la familia"), ("SOLO", "Solo"),
+                    ("TELEVISION", "Televisión"), ("JUGUETES", "Juguetes"), ("OTRO", "Otro")]
+COME_CON_CHOICES = [("", "Seleccione"), ("MANOS", "Las manos"), ("CUCHARA", "Cuchara"), ("TENEDOR", "Tenedor"),
+                    ("CUCHILLO", "Cuchillo")]
+BEBIDAS_EN_CHOICES = [("", "Seleccione"), ("BIBERON", "Biberón"), ("VASO_ENTRENADOR", "Vaso entrenador"),
+                      ("VASO", "Vaso"), ("OTRO", "Otro")]
+COME_SOLO_CHOICES = [("", "Seleccione"), ("SOLO", "Solo"), ("CON_AYUDA", "Con ayuda")]
 
-TIPO_ALIMENTACION_CHOICES = [
-    ("", "Seleccione"),
-    ("SENO_MATERNO", "Seno materno"),
-    ("FORMULA_LACTEA", "Fórmula láctea"),
-    ("MIXTA", "Mixta"),
-    ("OTRA", "Otra"),
-]
-
-PRESENTACION_LECHE_CHOICES = [
-    ("", "Seleccione"),
-    ("BIBERON", "Biberón"),
-    ("VASO_ENTRENADOR", "Vaso entrenador"),
-    ("OTRA", "Otra"),
-]
-
-FORMA_FORMULA_CHOICES = [
-    ("", "Seleccione"),
-    ("PORTA_BEBE", "Porta bebé"),
-    ("EN_BRAZOS", "En brazos"),
-    ("OTRO", "Otro"),
-]
-
-TIPO_COMPLICACION_CHOICES = [
-    ("", "Seleccione"),
-    ("INTOLERANCIA_LACTOSA", "Intolerancia a la lactosa"),
-    ("REFLUJO", "Reflujo"),
-    ("DIFICULTAD_SUCCIONAR", "Dificultad para succionar"),
-    ("ALERGIAS", "Alergias"),
-    ("DIFICULTAD_DEGLUTIR", "Dificultad para deglutir"),
-    ("OTRA", "Otra"),
-]
-
-PRESENTACION_ALIMENTOS_CHOICES = [
-    ("", "Seleccione"),
-    ("PURE", "Puré"),
-    ("MACHACADO", "Machacado"),
-    ("PICADO_FINO", "Picado fino"),
-    ("PICADO_EXTRA_FINO", "Picado extra fino"),
-    ("EN_TROZOS", "En trozos"),
-]
-
-ORDEN_ALIMENTOS_CHOICES = [
-    ("", "Seleccione"),
-    ("LECHE_LUEGO_SOLIDOS", "Primero leche y después sólidos"),
-    ("SOLIDOS_LUEGO_LECHE", "Primero sólidos y después leche"),
-]
-
-FRECUENCIA_SOLIDOS_CHOICES = [
-    ("", "Seleccione"),
-    ("1_VEZ", "1 vez"),
-    ("2_VECES", "2 veces"),
-    ("3_VECES", "3 veces"),
-    ("MAS_DE_3", "Más de 3 veces"),
-    ("CON_CADA_TOMA", "Con cada toma de fórmula infantil"),
-]
-
-DONDE_CONSUME_CHOICES = [
-    ("", "Seleccione"),
-    ("PORTA_BEBE", "Porta bebé"),
-    ("SILLA_PERIQUERA", "Silla periquera"),
-    ("SILLA_MESA", "Silla y mesa"),
-    ("OTRO", "Otro"),
-]
-
-COMPANIA_CHOICES = [
-    ("", "Seleccione"),
-    ("FAMILIA", "En compañía de la familia"),
-    ("SOLO", "Solo"),
-    ("TELEVISION", "Televisión"),
-    ("JUGUETES", "Juguetes"),
-    ("OTRO", "Otro"),
-]
-
-COME_CON_CHOICES = [
-    ("", "Seleccione"),
-    ("MANOS", "Las manos"),
-    ("CUCHARA", "Cuchara"),
-    ("TENEDOR", "Tenedor"),
-    ("CUCHILLO", "Cuchillo"),
-]
-
-BEBIDAS_EN_CHOICES = [
-    ("", "Seleccione"),
-    ("BIBERON", "Biberón"),
-    ("VASO_ENTRENADOR", "Vaso entrenador"),
-    ("VASO", "Vaso"),
-    ("OTRO", "Otro"),
-]
-
-COME_SOLO_CHOICES = [
-    ("", "Seleccione"),
-    ("SOLO", "Solo"),
-    ("CON_AYUDA", "Con ayuda"),
-]
-
-# --- LISTAS PREDEFINIDAS PARA LOS ALIMENTOS DEL AGRADO ---
 FRUTAS_CHOICES = [(x, x) for x in
                   ["Manzana", "Pera", "Plátano", "Melón", "Sandía", "Papaya", "Mango", "Naranja", "Fresa", "Uva",
                    "Guayaba", "Piña"]]
@@ -675,7 +402,11 @@ LACTEOS_CHOICES = [(x, x) for x in
 
 
 class DictamenNutricionForm(forms.ModelForm):
-    # --- CAMPOS DINÁMICOS PARA SELECT2 ---
+    estado_nutricion = forms.ChoiceField(
+        choices=[("", "Seleccione..."), ("APROBADO", "Aprobado"), ("RECHAZADO", "Rechazado")],
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=True
+    )
     alimentos_agrado_frutas = DynamicMultipleChoiceField(choices=FRUTAS_CHOICES, required=False,
                                                          widget=forms.SelectMultiple(
                                                              attrs={'class': 'form-select select2-multiple'}))
@@ -697,116 +428,33 @@ class DictamenNutricionForm(forms.ModelForm):
     class Meta:
         model = Solicitud
         fields = [
-            "edad_nutricion",
-            "sexo_nutricion",
-            "fecha_nacimiento_nutricion",
-            "peso_nacer",
-            "talla_nacer",
-            "peso_actual",
-            "talla_actual",
-
-            "seno_materno",
-            "tiempo_seno_materno",
-            "motivo_no_seno",
-            "acude_lactancia",
-            "tipo_alimentacion_lactante",
-            "formula_infantil",
-            "cual_formula",
-            "edad_inicio_formula",
-            "formula_especial",
-            "cual_formula_especial",
-            "causa_formula_especial",
-            "cantidad_leche_formula",
-            "cada_cuantas_horas_leche",
-            "presentacion_leche",
-            "presentacion_leche_otra",
-            "forma_proporcionar_formula",
-            "forma_proporcionar_formula_otra",
-
-            "complicaciones_alimentacion",
-            "tipo_complicacion",
-            "tipo_complicacion_otra",
-            "agrega_alimento_formula",
-            "cual_agrega_formula",
-            "edad_cambio_leche",
-            "edad_inicio_alimentacion_complementaria",
-
-            "orden_verduras",
-            "orden_frutas",
-            "orden_carnes",
-            "orden_jugo_frutas",
-            "orden_yema_huevo",
-            "orden_huevo_entero",
-            "orden_arroz",
-            "orden_galleta_pan",
-            "orden_pastas",
-            "orden_leguminosas",
-            "orden_citricos",
-
-            "alergia_alimentos",
-            "cual_alergia",
-            "reaccion_alergia",
-            "restriccion_alimentaria_actual",
-            "detalle_restriccion_alimentaria",
-
-            "presentacion_alimentos",
-            "orden_alimentos",
-            "frecuencia_solidos",
-
-            "alimentos_agrado_frutas",
-            "alimentos_agrado_verduras",
-            "alimentos_agrado_cereales",
-            "alimentos_agrado_leguminosas",
-            "alimentos_agrado_aoa",
-            "alimentos_agrado_lacteos",
-
-            "consume_agua",
-            "cantidad_agua",
-
-            "desayuna",
-            "hora_desayuno",
-            "come",
-            "hora_comida",
-            "cena",
-            "hora_cena",
-            "colacion",
-            "hora_colacion",
-
-            "acostumbra_comer_desayuno",
-            "acostumbra_comer_comida",
-            "acostumbra_comer_cena",
-            "acostumbra_comer_colaciones",
-
-            "misma_alimentacion_familia",
-            "detalle_misma_alimentacion",
-
-            "consume_golosinas",
-            "frecuencia_golosinas",
-            "cuales_golosinas",
-
-            "consume_refrescos",
-            "frecuencia_refrescos",
-            "cuales_refrescos",
-
-            "consume_jugos",
-            "frecuencia_jugos",
-            "cuales_jugos",
-
-            "donde_consume_alimentos",
-            "donde_consume_alimentos_otro",
-            "compania_comida",
-            "compania_comida_otro",
-            "come_con",
-            "consume_bebidas_en",
-            "consume_bebidas_en_otro",
-            "come_solo_o_ayuda",
-
-            "observaciones_nutricion_clinica",
-            "fecha_elaboracion_nutricion",
-            "estado_nutricion",
-            "observaciones_nutricion",
+            "nombres_menor", "apellido_paterno_menor", "apellido_materno_menor",
+            "edad_nutricion", "sexo_nutricion", "fecha_nacimiento_nutricion", "peso_nacer",
+            "talla_nacer", "peso_actual", "talla_actual", "seno_materno", "tiempo_seno_materno",
+            "motivo_no_seno", "acude_lactancia", "tipo_alimentacion_lactante", "formula_infantil",
+            "cual_formula", "edad_inicio_formula", "formula_especial", "cual_formula_especial",
+            "causa_formula_especial", "cantidad_leche_formula", "cada_cuantas_horas_leche",
+            "presentacion_leche", "presentacion_leche_otra", "forma_proporcionar_formula",
+            "forma_proporcionar_formula_otra", "complicaciones_alimentacion", "tipo_complicacion",
+            "tipo_complicacion_otra", "agrega_alimento_formula", "cual_agrega_formula",
+            "edad_cambio_leche", "edad_inicio_alimentacion_complementaria", "orden_verduras",
+            "orden_frutas", "orden_carnes", "orden_jugo_frutas", "orden_yema_huevo",
+            "orden_huevo_entero", "orden_arroz", "orden_galleta_pan", "orden_pastas",
+            "orden_leguminosas", "orden_citricos", "alergia_alimentos", "cual_alergia",
+            "reaccion_alergia", "restriccion_alimentaria_actual", "detalle_restriccion_alimentaria",
+            "presentacion_alimentos", "orden_alimentos", "frecuencia_solidos", "alimentos_agrado_frutas",
+            "alimentos_agrado_verduras", "alimentos_agrado_cereales", "alimentos_agrado_leguminosas",
+            "alimentos_agrado_aoa", "alimentos_agrado_lacteos", "consume_agua", "cantidad_agua",
+            "desayuna", "hora_desayuno", "come", "hora_comida", "cena", "hora_cena", "colacion",
+            "hora_colacion", "acostumbra_comer_desayuno", "acostumbra_comer_comida",
+            "acostumbra_comer_cena", "acostumbra_comer_colaciones", "misma_alimentacion_familia",
+            "detalle_misma_alimentacion", "consume_golosinas", "frecuencia_golosinas", "cuales_golosinas",
+            "consume_refrescos", "frecuencia_refrescos", "cuales_refrescos", "consume_jugos",
+            "frecuencia_jugos", "cuales_jugos", "donde_consume_alimentos", "donde_consume_alimentos_otro",
+            "compania_comida", "compania_comida_otro", "come_con", "consume_bebidas_en",
+            "consume_bebidas_en_otro", "come_solo_o_ayuda", "observaciones_nutricion_clinica",
+            "fecha_elaboracion_nutricion", "estado_nutricion", "observaciones_nutricion",
         ]
-
         widgets = {
             "sexo_nutricion": forms.Select(choices=SEXO_CHOICES_NUTRI),
             "seno_materno": forms.Select(choices=SI_NO_CHOICES),
@@ -816,18 +464,14 @@ class DictamenNutricionForm(forms.ModelForm):
             "formula_especial": forms.Select(choices=SI_NO_CHOICES),
             "presentacion_leche": forms.Select(choices=PRESENTACION_LECHE_CHOICES),
             "forma_proporcionar_formula": forms.Select(choices=FORMA_FORMULA_CHOICES),
-
             "complicaciones_alimentacion": forms.Select(choices=SI_NO_CHOICES),
             "tipo_complicacion": forms.Select(choices=TIPO_COMPLICACION_CHOICES),
             "agrega_alimento_formula": forms.Select(choices=SI_NO_CHOICES),
-
             "alergia_alimentos": forms.Select(choices=SI_NO_CHOICES),
             "restriccion_alimentaria_actual": forms.Select(choices=SI_NO_CHOICES),
-
             "presentacion_alimentos": forms.Select(choices=PRESENTACION_ALIMENTOS_CHOICES),
             "orden_alimentos": forms.Select(choices=ORDEN_ALIMENTOS_CHOICES),
             "frecuencia_solidos": forms.Select(choices=FRECUENCIA_SOLIDOS_CHOICES),
-
             "consume_agua": forms.Select(choices=SI_NO_CHOICES),
             "desayuna": forms.Select(choices=SI_NO_CHOICES),
             "come": forms.Select(choices=SI_NO_CHOICES),
@@ -837,13 +481,11 @@ class DictamenNutricionForm(forms.ModelForm):
             "consume_golosinas": forms.Select(choices=SI_NO_CHOICES),
             "consume_refrescos": forms.Select(choices=SI_NO_CHOICES),
             "consume_jugos": forms.Select(choices=SI_NO_CHOICES),
-
             "donde_consume_alimentos": forms.Select(choices=DONDE_CONSUME_CHOICES),
             "compania_comida": forms.Select(choices=COMPANIA_CHOICES),
             "come_con": forms.Select(choices=COME_CON_CHOICES),
             "consume_bebidas_en": forms.Select(choices=BEBIDAS_EN_CHOICES),
             "come_solo_o_ayuda": forms.Select(choices=COME_SOLO_CHOICES),
-
             "motivo_no_seno": forms.Textarea(attrs={"rows": 2}),
             "causa_formula_especial": forms.Textarea(attrs={"rows": 2}),
             "reaccion_alergia": forms.Textarea(attrs={"rows": 2}),
@@ -854,7 +496,6 @@ class DictamenNutricionForm(forms.ModelForm):
             "acostumbra_comer_comida": forms.Textarea(attrs={"rows": 2}),
             "acostumbra_comer_cena": forms.Textarea(attrs={"rows": 2}),
             "acostumbra_comer_colaciones": forms.Textarea(attrs={"rows": 2}),
-
             "peso_actual": forms.NumberInput(attrs={"step": "0.01", "min": "0", "placeholder": "kg"}),
             "talla_actual": forms.NumberInput(attrs={"step": "0.01", "min": "0", "placeholder": "cm"}),
             "hora_desayuno": forms.TimeInput(attrs={"type": "time"}),
@@ -863,194 +504,56 @@ class DictamenNutricionForm(forms.ModelForm):
             "hora_colacion": forms.TimeInput(attrs={"type": "time"}),
         }
 
-        labels = {
-            "edad_nutricion": "Edad",
-            "sexo_nutricion": "Sexo",
-            "fecha_nacimiento_nutricion": "Fecha de nacimiento",
-            "peso_nacer": "Peso al nacer",
-            "talla_nacer": "Talla al nacer",
-
-            "peso_actual": "Peso actual (kg)",
-            "talla_actual": "Talla actual (cm)",
-
-            "seno_materno": "¿El niño es o fue alimentado con seno materno?",
-            "tiempo_seno_materno": "¿Cuánto tiempo?",
-            "motivo_no_seno": "Si la respuesta es NO, indique por qué",
-            "acude_lactancia": "¿Acudirá a la estancia para proporcionar lactancia materna?",
-            "tipo_alimentacion_lactante": "Tipo de alimentación que le proporciona",
-            "formula_infantil": "¿Le da fórmula infantil?",
-            "cual_formula": "¿Cuál?",
-            "edad_inicio_formula": "¿A partir de qué edad comenzó a darle fórmula?",
-            "formula_especial": "¿Le proporciona o proporcionó fórmula especial?",
-            "cual_formula_especial": "¿Cuál?",
-            "causa_formula_especial": "¿Cuál fue la causa?",
-            "cantidad_leche_formula": "¿Cuántas onzas/ml por toma?",
-            "cada_cuantas_horas_leche": "¿Cada cuántas horas le proporciona leche/fórmula?",
-            "presentacion_leche": "La leche/fórmula se la proporciona en",
-            "presentacion_leche_otra": "Otra presentación",
-            "forma_proporcionar_formula": "¿Cómo le proporciona fórmula láctea?",
-            "forma_proporcionar_formula_otra": "Otra forma",
-            "complicaciones_alimentacion": "¿Ha presentado complicaciones con la alimentación?",
-            "tipo_complicacion": "Tipo de complicación",
-            "tipo_complicacion_otra": "Otra complicación",
-            "agrega_alimento_formula": "¿Agrega algún alimento en la preparación de la fórmula o leche?",
-            "cual_agrega_formula": "¿Cuál?",
-            "edad_cambio_leche": "Edad del cambio de leche entera o de transición",
-            "edad_inicio_alimentacion_complementaria": "Edad de inicio de alimentación complementaria",
-            "orden_verduras": "Verduras",
-            "orden_frutas": "Frutas",
-            "orden_carnes": "Carnes",
-            "orden_jugo_frutas": "Jugo de frutas",
-            "orden_yema_huevo": "Yema de huevo",
-            "orden_huevo_entero": "Huevo entero",
-            "orden_arroz": "Arroz",
-            "orden_galleta_pan": "Galleta o pan",
-            "orden_pastas": "Pastas",
-            "orden_leguminosas": "Leguminosas",
-            "orden_citricos": "Cítricos",
-            "alergia_alimentos": "¿Presentó intolerancia/alergia a algún alimento?",
-            "cual_alergia": "¿A cuál?",
-            "reaccion_alergia": "¿Qué tipo de reacción tuvo?",
-            "restriccion_alimentaria_actual": "¿Actualmente presenta alergia o restricción alimentaria?",
-            "detalle_restriccion_alimentaria": "Especifique",
-            "presentacion_alimentos": "¿En qué presentación le ofrece los alimentos?",
-            "orden_alimentos": "¿En qué orden acostumbra proporcionar los alimentos?",
-            "frecuencia_solidos": "¿Con qué frecuencia consume alimentos sólidos al día?",
-            "alimentos_agrado_frutas": "Frutas del agrado",
-            "alimentos_agrado_verduras": "Verduras del agrado",
-            "alimentos_agrado_cereales": "Cereales del agrado",
-            "alimentos_agrado_leguminosas": "Leguminosas del agrado",
-            "alimentos_agrado_aoa": "AOA del agrado",
-            "alimentos_agrado_lacteos": "Lácteos del agrado",
-            "consume_agua": "¿Consume agua natural?",
-            "cantidad_agua": "Cantidad",
-            "desayuna": "¿Desayuna?",
-            "hora_desayuno": "Hora desayuno",
-            "come": "¿Come?",
-            "hora_comida": "Hora comida",
-            "cena": "¿Cena?",
-            "hora_cena": "Hora cena",
-            "colacion": "¿Colación?",
-            "hora_colacion": "Hora colación",
-            "acostumbra_comer_desayuno": "¿Qué acostumbra comer en desayuno?",
-            "acostumbra_comer_comida": "¿Qué acostumbra comer en comida?",
-            "acostumbra_comer_cena": "¿Qué acostumbra comer en cena?",
-            "acostumbra_comer_colaciones": "¿Qué acostumbra comer en colaciones?",
-            "misma_alimentacion_familia": "¿Consume la misma alimentación que la familia?",
-            "detalle_misma_alimentacion": "Especifique",
-            "consume_golosinas": "¿Consume golosinas?",
-            "frecuencia_golosinas": "Frecuencia golosinas",
-            "cuales_golosinas": "¿Cuáles?",
-            "consume_refrescos": "¿Consume refrescos embotellados?",
-            "frecuencia_refrescos": "Frecuencia refrescos",
-            "cuales_refrescos": "¿Cuál?",
-            "consume_jugos": "¿Consume jugos?",
-            "frecuencia_jugos": "Frecuencia jugos",
-            "cuales_jugos": "¿Cuál?",
-            "donde_consume_alimentos": "¿Dónde consume sus alimentos?",
-            "donde_consume_alimentos_otro": "Otro lugar",
-            "compania_comida": "El niño come",
-            "compania_comida_otro": "Otro contexto",
-            "come_con": "Al momento de comer, come con",
-            "consume_bebidas_en": "Consume las bebidas en",
-            "consume_bebidas_en_otro": "Otro recipiente",
-            "come_solo_o_ayuda": "El niño come",
-            "observaciones_nutricion_clinica": "Observaciones clínicas",
-            "fecha_elaboracion_nutricion": "Fecha de elaboración",
-            "estado_nutricion": "Dictamen final",
-            "observaciones_nutricion": "Observaciones finales del dictamen",
-        }
-
-    # --- FUNCIONES PARA GUARDAR LOS ALIMENTOS COMO LISTA SEPARADA POR COMAS ---
     def clean_alimentos_agrado_frutas(self):
-        val = self.cleaned_data.get("alimentos_agrado_frutas")
-        return ", ".join(val) if val else ""
+        return ", ".join(self.cleaned_data.get("alimentos_agrado_frutas") or [])
 
     def clean_alimentos_agrado_verduras(self):
-        val = self.cleaned_data.get("alimentos_agrado_verduras")
-        return ", ".join(val) if val else ""
+        return ", ".join(self.cleaned_data.get("alimentos_agrado_verduras") or [])
 
     def clean_alimentos_agrado_cereales(self):
-        val = self.cleaned_data.get("alimentos_agrado_cereales")
-        return ", ".join(val) if val else ""
+        return ", ".join(self.cleaned_data.get("alimentos_agrado_cereales") or [])
 
     def clean_alimentos_agrado_leguminosas(self):
-        val = self.cleaned_data.get("alimentos_agrado_leguminosas")
-        return ", ".join(val) if val else ""
+        return ", ".join(self.cleaned_data.get("alimentos_agrado_leguminosas") or [])
 
     def clean_alimentos_agrado_aoa(self):
-        val = self.cleaned_data.get("alimentos_agrado_aoa")
-        return ", ".join(val) if val else ""
+        return ", ".join(self.cleaned_data.get("alimentos_agrado_aoa") or [])
 
     def clean_alimentos_agrado_lacteos(self):
-        val = self.cleaned_data.get("alimentos_agrado_lacteos")
-        return ", ".join(val) if val else ""
+        return ", ".join(self.cleaned_data.get("alimentos_agrado_lacteos") or [])
 
-    # ==============================================================
-    # --- AQUÍ EMPIEZA LA MAGIA DEL AUTOCOMPLETADO PARA NUTRICIÓN ---
-    # ==============================================================
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # 1. AUTOCOMPLETAR LOS DATOS SI EXISTE LA SOLICITUD
         if self.instance and self.instance.pk:
-            insc = None
-            if hasattr(self.instance, 'inscripcion_oficial'):
-                insc = self.instance.inscripcion_oficial
-
-            # --- Fecha de Nacimiento ---
+            insc = getattr(self.instance, 'inscripcion_oficial', None)
             if not self.initial.get("fecha_nacimiento_nutricion") and self.instance.fecha_nacimiento_menor:
                 self.initial["fecha_nacimiento_nutricion"] = self.instance.fecha_nacimiento_menor.strftime("%d/%m/%Y")
-
-            # --- Edad y Sexo (Del expediente del tutor) ---
             if insc:
                 if not self.initial.get("edad_nutricion"):
-                    anios = insc.edad_anios_menor or 0
-                    meses = insc.edad_meses_menor or 0
-                    self.initial["edad_nutricion"] = f"{anios} años, {meses} meses"
-
+                    self.initial[
+                        "edad_nutricion"] = f"{insc.edad_anios_menor or 0} años, {insc.edad_meses_menor or 0} meses"
                 if not self.initial.get("sexo_nutricion"):
-                    if insc.sexo_menor == "M":
-                        self.initial["sexo_nutricion"] = "MASCULINO"
-                    elif insc.sexo_menor == "F":
-                        self.initial["sexo_nutricion"] = "FEMENINO"
-
-            # --- Peso y Talla al Nacer (Extraídos de Psicología) ---
+                    self.initial[
+                        "sexo_nutricion"] = "MASCULINO" if insc.sexo_menor == "M" else "FEMENINO" if insc.sexo_menor == "F" else ""
             if not self.initial.get("peso_nacer") and self.instance.peso_al_nacer_psicologia:
                 self.initial["peso_nacer"] = f"{self.instance.peso_al_nacer_psicologia} kg"
-
             if not self.initial.get("talla_nacer") and self.instance.talla_al_nacer_psicologia:
                 self.initial["talla_nacer"] = f"{self.instance.talla_al_nacer_psicologia} cm"
 
-            # --- PREPARAR LAS ETIQUETAS EXISTENTES PARA QUE SELECT2 LAS LEA ---
-            multi_fields = [
-                "alimentos_agrado_frutas", "alimentos_agrado_verduras",
-                "alimentos_agrado_cereales", "alimentos_agrado_leguminosas",
-                "alimentos_agrado_aoa", "alimentos_agrado_lacteos"
-            ]
+            multi_fields = ["alimentos_agrado_frutas", "alimentos_agrado_verduras", "alimentos_agrado_cereales",
+                            "alimentos_agrado_leguminosas", "alimentos_agrado_aoa", "alimentos_agrado_lacteos"]
             for f in multi_fields:
                 val = getattr(self.instance, f)
-                if val:
-                    # Convertimos la cadena "Manzana, Pera" en lista ["Manzana", "Pera"]
-                    self.initial[f] = [x.strip() for x in val.split(',') if x.strip()]
+                if val: self.initial[f] = [x.strip() for x in val.split(',') if x.strip()]
 
-        # 2. LISTA DE CAMPOS QUE SE DEBEN BLOQUEAR
-        campos_bloqueados = [
-            "edad_nutricion",
-            "sexo_nutricion",
-            "fecha_nacimiento_nutricion",
-            "peso_nacer",
-            "talla_nacer"
-        ]
+        campos_bloqueados = ["nombres_menor", "apellido_paterno_menor", "apellido_materno_menor", "edad_nutricion",
+                             "sexo_nutricion", "fecha_nacimiento_nutricion", "peso_nacer", "talla_nacer"]
 
-        # 3. ASIGNACIÓN DE ESTILOS Y BLOQUEO DE CASILLAS
         for name, field in self.fields.items():
             existing_class = field.widget.attrs.get("class", "")
-
-            # Asignar las clases CSS de Bootstrap normales respetando las múltiples
             if isinstance(field.widget, forms.SelectMultiple):
-                if "form-select" not in existing_class:
-                    field.widget.attrs["class"] = f"form-select {existing_class}".strip()
+                if "form-select" not in existing_class: field.widget.attrs[
+                    "class"] = f"form-select {existing_class}".strip()
             elif isinstance(field.widget, forms.Select):
                 field.widget.attrs["class"] = "form-select"
             elif isinstance(field.widget, forms.Textarea):
@@ -1059,129 +562,105 @@ class DictamenNutricionForm(forms.ModelForm):
             else:
                 field.widget.attrs["class"] = "form-control"
 
-            # Aplicar el bloqueo visual y funcional a los 5 campos seleccionados
             if name in campos_bloqueados:
                 field.widget.attrs["readonly"] = "readonly"
-                # Estilo gris para indicar que no se puede editar y bloquear clicks
                 field.widget.attrs["style"] = "background-color: #e9ecef; pointer-events: none;"
-
-                # Si el campo es un menú desplegable (Select como el de sexo), le quitamos el "tab"
-                if isinstance(field.widget, forms.Select):
-                    field.widget.attrs["tabindex"] = "-1"
+                if isinstance(field.widget, forms.Select): field.widget.attrs["tabindex"] = "-1"
 
 
-TIPO_PARTO_CHOICES = [
-    ("", "Seleccione"),
-    ("Eutócico", "Eutócico"),
-    ("Distócico", "Distócico"),
-    ("Cesárea", "Cesárea"),
-]
-
-SEXO_CHOICES = [
-    ("", "Seleccione"),
-    ("Masculino", "Masculino"),
-    ("Femenino", "Femenino"),
-]
+TIPO_PARTO_CHOICES = [("", "Seleccione"), ("Eutócico", "Eutócico"), ("Distócico", "Distócico"), ("Cesárea", "Cesárea")]
+SEXO_CHOICES = [("", "Seleccione"), ("Masculino", "Masculino"), ("Femenino", "Femenino")]
 
 
 class DictamenMedicoForm(forms.ModelForm):
+    estado_medico = forms.ChoiceField(
+        choices=[("", "Seleccione..."), ("APROBADO", "Aprobado"), ("RECHAZADO", "Rechazado")],
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=True
+    )
+
     class Meta:
         model = Solicitud
-        fields = ["pdf", "estado_medico", "observaciones_medico"]
+        fields = ["nombres_menor", "apellido_paterno_menor", "apellido_materno_menor", "pdf", "estado_medico",
+                  "observaciones_medico"]
         widgets = {
-            "pdf": forms.ClearableFileInput(attrs={
-                "class": "form-control",
-                "accept": "application/pdf"
-            }),
-            "estado_medico": forms.Select(attrs={"class": "form-select"}),
-            "observaciones_medico": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 4,
-                "placeholder": "Escriba observaciones médicas relevantes..."
-            }),
+            "pdf": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "application/pdf"}),
+            "observaciones_medico": forms.Textarea(attrs={"class": "form-control", "rows": 4,
+                                                          "placeholder": "Escriba observaciones médicas relevantes..."}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        campos_identidad = ["nombres_menor", "apellido_paterno_menor", "apellido_materno_menor"]
+        for name, field in self.fields.items():
+            if name in campos_identidad:
+                field.widget.attrs["readonly"] = "readonly"
+                field.widget.attrs["style"] = "background-color: #e9ecef; pointer-events: none;"
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs["class"] = "form-select"
+            elif isinstance(field.widget, forms.Textarea):
+                field.widget.attrs["class"] = "form-control"
+            elif isinstance(field.widget, forms.DateInput):
+                field.widget.attrs["class"] = "form-control"
+            elif isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs["class"] = "form-check-input"
+            elif isinstance(field.widget, forms.ClearableFileInput):
+                pass
+            else:
+                field.widget.attrs["class"] = "form-control"
+
+
+# =========================================================
+# SOLUCIÓN DE ERRORES BOOLEANOS Y DE LÍMITE DE CARACTERES
+# =========================================================
+SI_NO_BOOL = [("", "Seleccione..."), ("SI", "Si"), ("NO", "No")]
 
 
 class HistoriaClinicaMedicaForm(forms.ModelForm):
-    # --- AQUI SE SEPARARON LOS NOMBRES DEL PACIENTE ---
     nombres_paciente = forms.CharField(label="Nombre(s)", required=False)
     apellido_paterno_paciente = forms.CharField(label="Apellido paterno", required=False)
     apellido_materno_paciente = forms.CharField(label="Apellido materno", required=False)
-
-    # --- AQUI SE SEPARARON LOS NOMBRES DEL PADRE ---
     nombres_padre = forms.CharField(label="Nombre(s) del padre", required=False)
     apellido_paterno_padre = forms.CharField(label="Apellido paterno", required=False)
     apellido_materno_padre = forms.CharField(label="Apellido materno", required=False)
-
-    # --- AQUI SE SEPARARON LOS NOMBRES DE LA MADRE ---
     nombres_madre = forms.CharField(label="Nombre(s) de la madre", required=False)
     apellido_paterno_madre = forms.CharField(label="Apellido paterno", required=False)
     apellido_materno_madre = forms.CharField(label="Apellido materno", required=False)
 
-    sexo = forms.ChoiceField(
-        choices=SEXO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
+    sexo = forms.ChoiceField(choices=SEXO_CHOICES, required=False, widget=forms.Select(attrs={"class": "form-select"}))
+    tipo_parto = forms.ChoiceField(choices=TIPO_PARTO_CHOICES, required=False,
+                                   widget=forms.Select(attrs={"class": "form-select"}))
 
-    tipo_parto = forms.ChoiceField(
-        choices=TIPO_PARTO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
-
-    tabaquismo_padre = forms.ChoiceField(
-        choices=SI_NO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
-    alcoholismo_padre = forms.ChoiceField(
-        choices=SI_NO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
-    drogas_padre = forms.ChoiceField(
-        choices=SI_NO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
-
-    tabaquismo_madre = forms.ChoiceField(
-        choices=SI_NO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
-    alcoholismo_madre = forms.ChoiceField(
-        choices=SI_NO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
-    drogas_madre = forms.ChoiceField(
-        choices=SI_NO_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"})
-    )
+    # --- CAMBIO VITAL: Usar TypedChoiceField para que convierta "SI" en True y "NO" en False ---
+    tabaquismo_padre = forms.TypedChoiceField(choices=SI_NO_BOOL, coerce=lambda x: x == 'SI', empty_value=False,
+                                              required=False, widget=forms.Select(attrs={"class": "form-select"}))
+    alcoholismo_padre = forms.TypedChoiceField(choices=SI_NO_BOOL, coerce=lambda x: x == 'SI', empty_value=False,
+                                               required=False, widget=forms.Select(attrs={"class": "form-select"}))
+    drogas_padre = forms.TypedChoiceField(choices=SI_NO_BOOL, coerce=lambda x: x == 'SI', empty_value=False,
+                                          required=False, widget=forms.Select(attrs={"class": "form-select"}))
+    tabaquismo_madre = forms.TypedChoiceField(choices=SI_NO_BOOL, coerce=lambda x: x == 'SI', empty_value=False,
+                                              required=False, widget=forms.Select(attrs={"class": "form-select"}))
+    alcoholismo_madre = forms.TypedChoiceField(choices=SI_NO_BOOL, coerce=lambda x: x == 'SI', empty_value=False,
+                                               required=False, widget=forms.Select(attrs={"class": "form-select"}))
+    drogas_madre = forms.TypedChoiceField(choices=SI_NO_BOOL, coerce=lambda x: x == 'SI', empty_value=False,
+                                          required=False, widget=forms.Select(attrs={"class": "form-select"}))
 
     class Meta:
         model = HistoriaClinicaMedica
-        # EXCLUIMOS los campos originales para que no estorben
         exclude = ["inscripcion", "created_at", "updated_at", "nombre_paciente", "nombre_padre", "nombre_madre"]
         widgets = {
             "fecha_nacimiento": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-
             "edad": forms.TextInput(attrs={"class": "form-control", "placeholder": "Edad"}),
             "lugar_fecha_elaboracion": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Lugar y fecha de elaboración"}),
             "religion": forms.TextInput(attrs={"class": "form-control", "placeholder": "Religión"}),
             "quien_cuida_menor": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Persona responsable del menor"}),
-
             "edad_padre": forms.TextInput(attrs={"class": "form-control", "placeholder": "Edad"}),
             "enfermedades_actuales_padre": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Describa enfermedades actuales"}),
             "alergias_padre": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Describa alergias"}),
-
             "edad_madre": forms.TextInput(attrs={"class": "form-control", "placeholder": "Edad"}),
             "enfermedades_actuales_madre": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Describa enfermedades actuales"}),
@@ -1189,7 +668,7 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Describa enfermedades de la infancia"}),
             "alergias_madre": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Describa alergias"}),
-
+            # No pondremos MaxLength en los TextInputs de Gestas y Semanas
             "numero_gestas": forms.TextInput(attrs={"class": "form-control", "placeholder": "Número de gestas"}),
             "complicaciones_embarazo": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Complicaciones durante el embarazo"}),
@@ -1203,7 +682,6 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Semanas de gestación"}),
             "motivo_cesarea": forms.Textarea(
                 attrs={"class": "form-control", "rows": 2, "placeholder": "Motivo de cesárea"}),
-
             "enfermedades_actuales": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "enfermedades_neonatales": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "enfermedades_exantematicas": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
@@ -1211,7 +689,6 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
             "alergia_medicamentos": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "alergia_alimentos": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "personas_enfermas_casa": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
-
             "vomitos": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "excreta_acuosa": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "fiebre": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
@@ -1219,7 +696,6 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
             "rinorrea": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "erupciones": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "dificultad_respiratoria": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
-
             "peso_actual": forms.TextInput(attrs={"class": "form-control", "placeholder": "kg"}),
             "talla": forms.TextInput(attrs={"class": "form-control", "placeholder": "cm"}),
             "temperatura": forms.TextInput(attrs={"class": "form-control", "placeholder": "°C"}),
@@ -1227,26 +703,103 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
             "frecuencia_respiratoria": forms.TextInput(attrs={"class": "form-control", "placeholder": "rpm"}),
             "tension_arterial": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej. 90/60"}),
             "estado_nutricional": forms.TextInput(attrs={"class": "form-control", "placeholder": "Estado nutricional"}),
-
             "diagnostico": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Diagnóstico médico"}),
             "pronostico": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Pronóstico"}),
             "elaborado_por": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre del médico"}),
         }
 
+    # Recorte inteligente de caracteres para que no explote la base de datos
+    def clean_numero_gestas(self):
+        val = self.cleaned_data.get('numero_gestas') or ''
+        if len(val) > 10:
+            if "1" in val:
+                val = "1"
+            elif "2" in val:
+                val = "2"
+            elif "3" in val:
+                val = "3"
+            elif "4" in val:
+                val = "4 o mas"
+            else:
+                val = val[:10]
+        return val
+
+    def clean_semanas_gestacion(self):
+        val = self.cleaned_data.get('semanas_gestacion') or ''
+        if len(val) > 20:
+            if "Menos" in val:
+                val = "< 37 sem"
+            elif "37 a 41" in val:
+                val = "37 a 41 sem"
+            elif "42" in val:
+                val = "> 42 sem"
+            elif "Desconoce" in val:
+                val = "Desconoce"
+            else:
+                val = val[:20]
+        return val
+
     def __init__(self, *args, **kwargs):
+        sol = kwargs.pop('solicitud', None)
         super().__init__(*args, **kwargs)
 
-        if self.instance and self.instance.pk:
-            self.initial["tabaquismo_padre"] = "si" if self.instance.tabaquismo_padre else "no"
-            self.initial["alcoholismo_padre"] = "si" if self.instance.alcoholismo_padre else "no"
-            self.initial["drogas_padre"] = "si" if self.instance.drogas_padre else "no"
-            self.initial["tabaquismo_madre"] = "si" if self.instance.tabaquismo_madre else "no"
-            self.initial["alcoholismo_madre"] = "si" if self.instance.alcoholismo_madre else "no"
-            self.initial["drogas_madre"] = "si" if self.instance.drogas_madre else "no"
+        # Inyectar datos iniciales a la fuerza desde la base de datos (solicitud)
+        if sol:
+            # 1. Nombre del niño
+            if not self.initial.get('nombres_paciente'):
+                self.initial['nombres_paciente'] = sol.nombres_menor
+                self.initial['apellido_paterno_paciente'] = sol.apellido_paterno_menor
+                self.initial['apellido_materno_paciente'] = sol.apellido_materno_menor
 
-            # INTENTAMOS SEPARAR EL NOMBRE DEL PACIENTE
-            if self.instance.nombre_paciente:
+            # 2. Datos técnicos
+            if not self.initial.get('numero_gestas'):
+                self.initial['numero_gestas'] = sol.numero_gesta_psicologia
+            if not self.initial.get('semanas_gestacion'):
+                self.initial['semanas_gestacion'] = sol.semanas_gestacion_psicologia
+            if not self.initial.get('peso_actual'):
+                self.initial['peso_actual'] = sol.peso_actual or sol.peso_al_nacer_psicologia
+            if not self.initial.get('talla'):
+                self.initial['talla'] = sol.talla_actual or sol.talla_al_nacer_psicologia
+
+            parto = (sol.tipo_nacimiento_psicologia or "").upper()
+            if not self.initial.get('tipo_parto'):
+                if "CESAREA" in parto:
+                    self.initial['tipo_parto'] = "Cesárea"
+                elif "PARTO" in parto:
+                    self.initial['tipo_parto'] = "Eutócico"
+
+            # 3. Lógica de Padre y Madre (Solteros)
+            if sol.nombre_padre_psicologia and not self.initial.get('nombres_padre'):
+                parts = sol.nombre_padre_psicologia.split()
+                if len(parts) >= 3:
+                    self.initial['nombres_padre'] = " ".join(parts[:-2])
+                    self.initial['apellido_paterno_padre'] = parts[-2]
+                    self.initial['apellido_materno_padre'] = parts[-1]
+                else:
+                    self.initial['nombres_padre'] = sol.nombre_padre_psicologia
+                self.initial['edad_padre'] = sol.edad_padre_psicologia
+
+            if sol.nombre_madre_psicologia and not self.initial.get('nombres_madre'):
+                parts = sol.nombre_madre_psicologia.split()
+                if len(parts) >= 3:
+                    self.initial['nombres_madre'] = " ".join(parts[:-2])
+                    self.initial['apellido_paterno_madre'] = parts[-2]
+                    self.initial['apellido_materno_madre'] = parts[-1]
+                else:
+                    self.initial['nombres_madre'] = sol.nombre_madre_psicologia
+                self.initial['edad_madre'] = sol.edad_madre_psicologia
+
+        # Parsear nombres guardados previamente (si existen)
+        if self.instance and self.instance.pk:
+            self.initial["tabaquismo_padre"] = "SI" if self.instance.tabaquismo_padre else "NO"
+            self.initial["alcoholismo_padre"] = "SI" if self.instance.alcoholismo_padre else "NO"
+            self.initial["drogas_padre"] = "SI" if self.instance.drogas_padre else "NO"
+            self.initial["tabaquismo_madre"] = "SI" if self.instance.tabaquismo_madre else "NO"
+            self.initial["alcoholismo_madre"] = "SI" if self.instance.alcoholismo_madre else "NO"
+            self.initial["drogas_madre"] = "SI" if self.instance.drogas_madre else "NO"
+
+            if self.instance.nombre_paciente and not self.initial.get("nombres_paciente"):
                 parts = self.instance.nombre_paciente.split()
                 if len(parts) >= 3:
                     self.initial["nombres_paciente"] = " ".join(parts[:-2])
@@ -1258,8 +811,7 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
                 else:
                     self.initial["nombres_paciente"] = self.instance.nombre_paciente
 
-            # INTENTAMOS SEPARAR EL NOMBRE DEL PADRE
-            if self.instance.nombre_padre:
+            if self.instance.nombre_padre and not self.initial.get("nombres_padre"):
                 parts = self.instance.nombre_padre.split()
                 if len(parts) >= 3:
                     self.initial["nombres_padre"] = " ".join(parts[:-2])
@@ -1271,8 +823,7 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
                 else:
                     self.initial["nombres_padre"] = self.instance.nombre_padre
 
-            # INTENTAMOS SEPARAR EL NOMBRE DE LA MADRE
-            if self.instance.nombre_madre:
+            if self.instance.nombre_madre and not self.initial.get("nombres_madre"):
                 parts = self.instance.nombre_madre.split()
                 if len(parts) >= 3:
                     self.initial["nombres_madre"] = " ".join(parts[:-2])
@@ -1297,15 +848,8 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        instance.tabaquismo_padre = self.cleaned_data.get("tabaquismo_padre") == "si"
-        instance.alcoholismo_padre = self.cleaned_data.get("alcoholismo_padre") == "si"
-        instance.drogas_padre = self.cleaned_data.get("drogas_padre") == "si"
+        # OMITIMOS TABAQUISMO, DROGAS Y ALCOHOL PORQUE TypedChoiceField YA LOS CONVIRTIÓ A TRUE/FALSE
 
-        instance.tabaquismo_madre = self.cleaned_data.get("tabaquismo_madre") == "si"
-        instance.alcoholismo_madre = self.cleaned_data.get("alcoholismo_madre") == "si"
-        instance.drogas_madre = self.cleaned_data.get("drogas_madre") == "si"
-
-        # AQUI VOLVEMOS A UNIR LOS 3 CAMPOS PARA QUE LA BASE DE DATOS NO EXPLOTE
         np = self.cleaned_data.get("nombres_paciente", "").strip()
         app = self.cleaned_data.get("apellido_paterno_paciente", "").strip()
         amp = self.cleaned_data.get("apellido_materno_paciente", "").strip()
@@ -1321,15 +865,13 @@ class HistoriaClinicaMedicaForm(forms.ModelForm):
         ammad = self.cleaned_data.get("apellido_materno_madre", "").strip()
         instance.nombre_madre = f"{nmad} {apmad} {ammad}".strip()
 
-        if commit:
-            instance.save()
+        if commit: instance.save()
         return instance
 
 
 # =========================================================
 # ÉPICA 3: CONFIGURACIÓN DE SEMESTRE Y SALAS
 # =========================================================
-from .models import Semestre, DiaFestivo, Sala, SalaSemestre, AsignacionMaestra
 
 class SemestreForm(forms.ModelForm):
     class Meta:
@@ -1354,3 +896,133 @@ class SemestreForm(forms.ModelForm):
             'psicologa_asignada': forms.Select(attrs={'class': 'form-select'}),
             'fecha_encuesta_satisfaccion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
+
+
+# =========================================================
+# NUEVOS FORMULARIOS PARA ASISTENTES DE SALA (BITÁCORAS)
+# =========================================================
+
+CHOICES_SALUD = [('', 'Seleccione'), ('BUENO', 'Bueno'), ('REGULAR', 'Regular'), ('MALO', 'Malo')]
+CHOICES_ACEPTACION = [('', 'Seleccione'), ('COMPLETO', 'Completó'), ('POCO', 'Poco'), ('NADA', 'Nada')]
+
+
+class BitacoraLactanteForm(forms.ModelForm):
+    fecha_str = forms.CharField(label="Fecha del Reporte", required=False)
+    nombre_completo_menor = forms.CharField(label="Nombre Completo del Menor", required=False)
+    sala_str = forms.CharField(label="Sala", required=False)
+    sexo_str = forms.CharField(label="Sexo", required=False)
+    edad_str = forms.CharField(label="Edad Actual", required=False)
+    fecha_nacimiento_str = forms.CharField(label="Fecha de Nacimiento", required=False)
+
+    estado_salud = forms.ChoiceField(choices=CHOICES_SALUD, required=False, label="Estado de Salud")
+    estado_salud_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                         label="Observaciones de salud")
+    aceptacion_desayuno = forms.ChoiceField(choices=CHOICES_ACEPTACION, required=False, label="Desayuno")
+    aceptacion_desayuno_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                                label="Notas desayuno")
+    aceptacion_comida = forms.ChoiceField(choices=CHOICES_ACEPTACION, required=False, label="Comida")
+    aceptacion_comida_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                              label="Notas comida")
+
+    evacuacion_num = forms.IntegerField(min_value=0, required=False, label="Nº Evacuaciones (Popó)")
+    pipi_num = forms.IntegerField(min_value=0, required=False, label="Nº Pipí")
+    higiene_bano = forms.BooleanField(required=False, label="¿Se bañó?")
+    higiene_ropa = forms.BooleanField(required=False, label="¿Cambio de ropa?")
+    higiene_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                    label="Observaciones higiene")
+
+    sueno_hora_despertar = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}), required=False,
+                                           label="Hora que se despertó")
+    sueno_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                  label="Observaciones descanso")
+
+    comentarios_generales = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False,
+                                            label="Comentarios generales del día")
+
+    class Meta:
+        model = BitacoraLactante
+        fields = ['estado', 'comentarios_coordinadora']
+        widgets = {
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+            'comentarios_coordinadora': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Observaciones de corrección...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select'
+            else:
+                field.widget.attrs['class'] = 'form-control'
+
+        campos_bloqueados = ['fecha_str', 'nombre_completo_menor', 'sala_str', 'sexo_str', 'edad_str',
+                             'fecha_nacimiento_str']
+        for name in campos_bloqueados:
+            self.fields[name].widget.attrs['readonly'] = 'readonly'
+            self.fields[name].widget.attrs['style'] = 'background-color: #e9ecef; pointer-events: none;'
+            self.fields[name].widget.attrs['tabindex'] = '-1'
+
+
+class BitacoraMaternalForm(forms.ModelForm):
+    fecha_str = forms.CharField(label="Fecha del Reporte", required=False)
+    nombre_completo_menor = forms.CharField(label="Nombre Completo del Menor", required=False)
+    sala_str = forms.CharField(label="Sala", required=False)
+    sexo_str = forms.CharField(label="Sexo", required=False)
+    edad_str = forms.CharField(label="Edad Actual", required=False)
+    fecha_nacimiento_str = forms.CharField(label="Fecha de Nacimiento", required=False)
+
+    estado_salud = forms.ChoiceField(choices=CHOICES_SALUD, required=False, label="Estado de Salud")
+    estado_salud_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                         label="Observaciones de salud")
+    estado_animo = forms.ChoiceField(choices=[('', 'Seleccione'), ('ALEGRE', 'Alegre'), ('INQUIETO', 'Inquieto/Lloró'),
+                                              ('COOPERATIVO', 'Cooperativo')], required=False, label="Estado de Ánimo")
+    aceptacion_desayuno = forms.ChoiceField(choices=CHOICES_ACEPTACION, required=False, label="Desayuno")
+    aceptacion_desayuno_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                                label="Notas desayuno")
+    aceptacion_comida = forms.ChoiceField(choices=CHOICES_ACEPTACION, required=False, label="Comida")
+    aceptacion_comida_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                              label="Notas comida")
+
+    aviso_bano = forms.BooleanField(required=False, label="¿Avisó para ir al baño?")
+    evacuacion_num = forms.IntegerField(min_value=0, required=False, label="Nº Evacuaciones (Popó)")
+    pipi_num = forms.IntegerField(min_value=0, required=False, label="Nº Pipí")
+    higiene_bano = forms.BooleanField(required=False, label="¿Se bañó?")
+    higiene_ropa = forms.BooleanField(required=False, label="¿Cambio de ropa?")
+    higiene_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                    label="Observaciones higiene")
+
+    sueno_hora_despertar = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}), required=False,
+                                           label="Hora que se despertó")
+    sueno_notas = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False,
+                                  label="Observaciones descanso")
+    comentarios_generales = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False,
+                                            label="Comentarios generales del día")
+
+    class Meta:
+        model = BitacoraMaternal
+        fields = ['estado', 'comentarios_coordinadora']
+        widgets = {
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+            'comentarios_coordinadora': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Observaciones de corrección...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select'
+            else:
+                field.widget.attrs['class'] = 'form-control'
+
+        campos_bloqueados = ['fecha_str', 'nombre_completo_menor', 'sala_str', 'sexo_str', 'edad_str',
+                             'fecha_nacimiento_str']
+        for name in campos_bloqueados:
+            self.fields[name].widget.attrs['readonly'] = 'readonly'
+            self.fields[name].widget.attrs['style'] = 'background-color: #e9ecef; pointer-events: none;'
+            self.fields[name].widget.attrs['tabindex'] = '-1'
