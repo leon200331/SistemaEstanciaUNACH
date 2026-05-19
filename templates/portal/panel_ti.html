@@ -1086,6 +1086,12 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 bg-light">
+                    <div class="alert alert-info border-0 shadow-sm small mb-4">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        El <strong>correo</strong>, la <strong>CURP</strong> y el <strong>Nº de empleado</strong> deben ser únicos.
+                        Si alguno ya existe, el sistema no debe guardar el registro.
+                    </div>
+
                     <div class="row g-4">
                         <div class="col-12"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">1. Identidad</h6></div>
                         <div class="col-md-3"><label class="jira-label">Nombre(s) *</label><input type="text" name="nombre" class="jira-input" required style="text-transform: capitalize;"></div>
@@ -1103,7 +1109,7 @@
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
-                        <div class="col-md-4"><label class="jira-label">Nº Empleado *</label><input type="text" name="numero_empleado" class="jira-input" required pattern="\d+"></div>
+                        <div class="col-md-4"><label class="jira-label">Nº Empleado *</label><input type="text" name="numero_empleado" class="jira-input" required pattern="\d+" inputmode="numeric" autocomplete="off"></div>
                         <div class="col-md-4">
                             <label class="jira-label">Estatus *</label>
                             <select name="estatus_operativo" class="jira-input" required>
@@ -1113,7 +1119,7 @@
                         </div>
 
                         <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">3. Credenciales</h6></div>
-                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" name="email" class="jira-input" required autocomplete="off" oninput="this.value=this.value.trim().toLowerCase();"></div>
                         <div class="col-md-6"><label class="jira-label">Contraseña *</label><input type="password" name="password" class="jira-input" required></div>
                     </div>
                 </div>
@@ -1156,7 +1162,7 @@
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
-                        <div class="col-md-4"><label class="jira-label">Nº Empleado *</label><input type="text" id="edit_num" name="numero_empleado" class="jira-input" required></div>
+                        <div class="col-md-4"><label class="jira-label">Nº Empleado *</label><input type="text" id="edit_num" name="numero_empleado" class="jira-input" required pattern="\d+" inputmode="numeric" autocomplete="off"></div>
                         <div class="col-md-4">
                             <label class="jira-label">Estatus *</label>
                             <select name="estatus_operativo" id="edit_estatus" class="jira-input" required>
@@ -1165,7 +1171,7 @@
                             </select>
                         </div>
                         <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">3. Credenciales</h6></div>
-                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" id="edit_email" name="email" class="jira-input" required></div>
+                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" id="edit_email" name="email" class="jira-input" required autocomplete="off" oninput="this.value=this.value.trim().toLowerCase();"></div>
                         <div class="col-md-6"><label class="jira-label">Cambiar Contraseña (Opcional)</label><input type="password" name="password" class="jira-input"></div>
                     </div>
                 </div>
@@ -1240,6 +1246,74 @@
         }).catch(err => Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error'));
     }
 
+    const STAFF_EXISTENTES = [
+        {% for u in lista_staff %}
+        {
+            id: "{{ u.id }}",
+            email: "{{ u.email|default:''|lower|escapejs }}",
+            curp: "{{ u.curp|default:''|upper|escapejs }}",
+            numero: "{{ u.numero_empleado|default:''|escapejs }}"
+        },
+        {% endfor %}
+    ];
+
+    function limpiarValor(valor) {
+        return (valor || "").toString().trim();
+    }
+
+    function validarDuplicadosLocales(form) {
+        const accionInput = form.querySelector('input[name="action_type"]');
+        const accion = accionInput ? accionInput.value : "";
+
+        if (accion !== "create_user" && accion !== "edit_user") {
+            return true;
+        }
+
+        const userIdInput = form.querySelector('input[name="user_id"]');
+        const userId = userIdInput ? limpiarValor(userIdInput.value) : "";
+
+        const emailInput = form.querySelector('input[name="email"]');
+        const curpInput = form.querySelector('input[name="curp"]');
+        const numInput = form.querySelector('input[name="numero_empleado"]');
+
+        const email = emailInput ? limpiarValor(emailInput.value).toLowerCase() : "";
+        const curp = curpInput ? limpiarValor(curpInput.value).toUpperCase() : "";
+        const numero = numInput ? limpiarValor(numInput.value) : "";
+
+        if (emailInput) emailInput.value = email;
+        if (curpInput) curpInput.value = curp;
+        if (numInput) numInput.value = numero;
+
+        const repetido = STAFF_EXISTENTES.find(item => {
+            if (userId && item.id === userId) return false;
+
+            return (
+                (email && item.email === email) ||
+                (curp && item.curp === curp) ||
+                (numero && item.numero === numero)
+            );
+        });
+
+        if (repetido) {
+            let mensaje = "Ya existe una persona registrada con ";
+
+            if (email && repetido.email === email) {
+                mensaje += `el correo "${email}".`;
+            } else if (curp && repetido.curp === curp) {
+                mensaje += `la CURP "${curp}".`;
+            } else if (numero && repetido.numero === numero) {
+                mensaje += `el Nº de empleado "${numero}".`;
+            } else {
+                mensaje += "los mismos datos.";
+            }
+
+            Swal.fire("Aviso", mensaje + " Usa editar en lugar de crear otro registro.", "warning");
+            return false;
+        }
+
+        return true;
+    }
+
     function submitAjax(event) {
         event.preventDefault();
 
@@ -1265,7 +1339,27 @@
     }
 
     function enviarFormularioFetch(form){
-        fetch(window.location.href, { method: 'POST', body: new FormData(form), headers: {'X-Requested-With': 'XMLHttpRequest'} })
+        if (!validarDuplicadosLocales(form)) {
+            return;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalHtml = submitBtn ? submitBtn.innerHTML : "";
+
+        if (submitBtn && submitBtn.disabled) {
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Procesando...';
+        }
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
         .then(r => r.json())
         .then(d => {
             if(d.status === 'success') {
@@ -1280,9 +1374,17 @@
                 });
             } else {
                 Swal.fire('Aviso', d.msg, 'warning');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHtml;
+                }
             }
         }).catch(err => {
             Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHtml;
+            }
         });
     }
 </script>

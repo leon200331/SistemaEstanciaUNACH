@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.utils import timezone
 from django.utils.html import escape
+from django.db import transaction
 
 try:
     from xhtml2pdf import pisa
@@ -502,48 +503,89 @@ def panel_gobierno_ti(request):
                 apellido_paterno = request.POST.get("apellido_paterno", "").strip()
                 apellido_materno = request.POST.get("apellido_materno", "").strip()
                 curp = request.POST.get("curp", "").strip().upper()
-
                 tipo_persona = request.POST.get("tipo_persona") or "PERSONAL"
                 num_empleado = request.POST.get("numero_empleado", "").strip()
 
-                if User.objects.filter(email=email).exists() or User.objects.filter(username=email).exists():
+                # =====================================================
+                # VALIDACIONES ANTES DE GUARDAR
+                # Evita usuarios/correos huérfanos cuando falla otro dato.
+                # =====================================================
+                errores = []
+
+                if not email:
+                    errores.append("El correo es obligatorio.")
+
+                if not password:
+                    errores.append("La contraseña es obligatoria.")
+
+                if not nombre:
+                    errores.append("El nombre es obligatorio.")
+
+                if not apellido_paterno:
+                    errores.append("El apellido paterno es obligatorio.")
+
+                if not curp:
+                    errores.append("La CURP es obligatoria.")
+
+                if not num_empleado:
+                    errores.append("El número de empleado es obligatorio.")
+
+                if email and (
+                    User.objects.filter(email__iexact=email).exists()
+                    or User.objects.filter(username__iexact=email).exists()
+                ):
+                    errores.append(f'El correo "{email}" ya existe en el sistema.')
+
+                if curp and User.objects.filter(curp__iexact=curp).exists():
+                    errores.append(f'La CURP "{curp}" ya está registrada con otro usuario.')
+
+                if num_empleado and User.objects.filter(numero_empleado=num_empleado).exists():
+                    errores.append(f'El número de empleado "{num_empleado}" ya está registrado con otro usuario.')
+
+                if errores:
+                    mensaje_error = " ".join(errores)
+
                     if is_ajax:
                         return JsonResponse(
                             {
                                 "status": "error",
-                                "msg": f'El correo "{email}" ya existe en el sistema.',
+                                "msg": mensaje_error,
                             }
                         )
 
-                if curp and User.objects.filter(curp=curp).exists():
-                    if is_ajax:
-                        return JsonResponse(
-                            {
-                                "status": "error",
-                                "msg": f'La CURP "{curp}" ya está registrada con otro usuario.',
-                            }
-                        )
+                    messages.error(request, mensaje_error)
+                    return redirect("panel_gobierno_ti")
 
-                u = User.objects.create_user(username=email, email=email, password=password)
-                u.nombre = nombre
-                u.apellido_paterno = apellido_paterno
-                u.apellido_materno = apellido_materno
-                u.curp = curp
-                u.tipo_persona = tipo_persona
-                u.numero_empleado = num_empleado
-                u.estatus_operativo = True
-                u.is_active = True
-                u.is_staff = True
+                # =====================================================
+                # GUARDADO ATÓMICO
+                # Si algo falla al crear usuario o bitácora, se cancela todo.
+                # =====================================================
+                with transaction.atomic():
+                    u = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=password,
+                    )
 
-                if tipo_persona == "ADMIN":
-                    u.is_superuser = True
+                    u.nombre = nombre
+                    u.apellido_paterno = apellido_paterno
+                    u.apellido_materno = apellido_materno
+                    u.curp = curp
+                    u.tipo_persona = tipo_persona
+                    u.numero_empleado = num_empleado
+                    u.estatus_operativo = True
+                    u.is_active = True
+                    u.is_staff = True
 
-                u.save()
+                    if tipo_persona == "ADMIN":
+                        u.is_superuser = True
 
-                AccessLog.objects.create(
-                    usuario=request.user,
-                    accion=f"CREACIÓN: Registró a {nombre} [{tipo_persona}]",
-                )
+                    u.save()
+
+                    AccessLog.objects.create(
+                        usuario=request.user,
+                        accion=f"CREACIÓN: Registró a {nombre} [{tipo_persona}]",
+                    )
 
                 response_data["msg"] = f"Persona {nombre} registrada exitosamente."
 
