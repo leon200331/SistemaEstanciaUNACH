@@ -1,0 +1,995 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Abrir día | Operación diaria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --yellow:#ca8a04;
+            --red:#dc2626;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(22,163,74,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(37,99,235,.15), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        .page{
+            max-width:1180px;
+            margin:0 auto;
+            padding:24px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.94);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.9);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand-logo{
+            width:64px;
+            height:64px;
+            border-radius:18px;
+            background:white;
+            border:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
+            box-shadow:0 10px 24px rgba(15,23,42,.08);
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .top-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-end;
+        }
+
+        .btn-soft{
+            border-radius:999px;
+            padding:.72rem 1rem;
+            font-weight:850;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .btn-main{
+            border-radius:999px;
+            padding:.84rem 1.16rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-green{
+            background:linear-gradient(135deg,#16a34a,#22c55e);
+            color:white;
+        }
+
+        .btn-blue{
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:white;
+        }
+
+        .hero{
+            background:linear-gradient(135deg,#16a34a,#2563eb,#0891b2);
+            color:white;
+            border-radius:30px;
+            padding:28px;
+            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:280px;
+            height:280px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-90px;
+            top:-100px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:900;
+            margin-bottom:12px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:800px;
+            font-weight:600;
+            opacity:.94;
+        }
+
+        .day-info{
+            min-width:270px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .day-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .day-value{
+            font-size:1.18rem;
+            font-weight:950;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:.86fr 1.14fr;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.95);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{
+            padding:20px;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+
+        .status-card{
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:16px;
+            border:1px solid var(--border);
+        }
+
+        .status-ready{
+            background:#f0fdf4;
+            border-color:#bbf7d0;
+            color:#14532d;
+        }
+
+        .status-open{
+            background:#eff6ff;
+            border-color:#bfdbfe;
+            color:#1e3a8a;
+        }
+
+        .status-closed{
+            background:#f8fafc;
+            border-color:#cbd5e1;
+            color:#334155;
+        }
+
+        .status-warning{
+            background:#fff7ed;
+            border-color:#fed7aa;
+            color:#9a3412;
+        }
+
+        .status-top{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+        }
+
+        .status-icon{
+            width:48px;
+            height:48px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.4rem;
+            background:rgba(255,255,255,.72);
+            flex-shrink:0;
+        }
+
+        .status-title{
+            font-weight:950;
+            color:inherit;
+            margin-bottom:3px;
+            font-size:1.05rem;
+        }
+
+        .status-text{
+            margin:0;
+            font-weight:650;
+            line-height:1.45;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            margin-top:16px;
+        }
+
+        .info-item{
+            background:white;
+            border:1px solid rgba(148,163,184,.28);
+            border-radius:16px;
+            padding:12px;
+        }
+
+        .info-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .info-value{
+            font-weight:900;
+            color:#0f172a;
+        }
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .steps{
+            display:grid;
+            gap:12px;
+        }
+
+        .step{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            padding:13px;
+            border:1px solid var(--border);
+            background:white;
+            border-radius:18px;
+        }
+
+        .step-number{
+            width:32px;
+            height:32px;
+            border-radius:999px;
+            background:#dcfce7;
+            color:#15803d;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:950;
+            flex-shrink:0;
+        }
+
+        .step-title{
+            font-weight:950;
+            color:#0f172a;
+            margin-bottom:2px;
+        }
+
+        .step-text{
+            color:#64748b;
+            font-size:.86rem;
+            margin:0;
+            font-weight:650;
+            line-height:1.4;
+        }
+
+        .form-section{
+            border:1px solid var(--border);
+            background:#f8fafc;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .form-section-title{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:14px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.02em;
+        }
+
+        .form-label{
+            font-weight:900;
+            color:#334155;
+            margin-bottom:7px;
+            font-size:.88rem;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:16px;
+            border:1px solid #cbd5e1;
+            padding:.78rem .9rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+        }
+
+        textarea.form-control{
+            min-height:118px;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        .form-check{
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:16px;
+            padding:14px 14px 14px 44px;
+            min-height:54px;
+            display:flex;
+            align-items:center;
+        }
+
+        .form-check-input{
+            margin-left:-28px;
+            width:1.15rem;
+            height:1.15rem;
+        }
+
+        .form-check-label{
+            font-weight:850;
+            color:#334155;
+        }
+
+        .errors{
+            margin-top:7px;
+            color:#b91c1c;
+            font-weight:700;
+            font-size:.82rem;
+        }
+
+        .errors ul{
+            margin:0;
+            padding-left:18px;
+        }
+
+        .submit-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            padding-top:4px;
+        }
+
+        .submit-note{
+            color:#64748b;
+            font-weight:650;
+            font-size:.86rem;
+            max-width:560px;
+        }
+
+        .mini-help{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:7px;
+        }
+
+        .readonly-box{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            border-radius:18px;
+            padding:14px;
+            color:#475569;
+            font-weight:650;
+            line-height:1.45;
+        }
+
+        @media(max-width:1050px){
+            .layout{grid-template-columns:1fr;}
+            .hero-content{grid-template-columns:1fr;}
+            .day-info{min-width:0;}
+        }
+
+        @media(max-width:720px){
+            .page{padding:14px;}
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+
+            .top-actions,
+            .btn-soft,
+            .btn-main{
+                width:100%;
+                justify-content:center;
+            }
+
+            .hero{
+                padding:22px;
+                border-radius:22px;
+            }
+
+            .hero h1{font-size:1.55rem;}
+
+            .info-grid{
+                grid-template-columns:1fr;
+            }
+
+            .submit-bar{
+                align-items:stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Abrir día operativo</h1>
+                <p class="brand-subtitle">
+                    Inicio de operación diaria para las maestras de la sede.
+                </p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Volver al panel
+            </a>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="hero">
+        <div class="hero-content">
+            <div>
+                <div class="hero-kicker">
+                    <i class="bi bi-unlock-fill"></i>
+                    Apertura por sede
+                </div>
+
+                <h1>Inicio de operación del día</h1>
+
+                <p>
+                    Al abrir el día, se habilita la captura de entradas, bitácoras, salidas y cierre diario.
+                    La apertura quedará registrada con tu usuario, fecha y hora.
+                </p>
+            </div>
+
+            <div class="day-info">
+                <div class="day-label">Día operativo</div>
+                <div class="day-value">{{ dia.fecha|date:"d/m/Y" }}</div>
+                <div class="mt-2">
+                    {% if dia.estado == "PROGRAMADO" %}
+                        <span class="badge-soft badge-yellow">
+                            <i class="bi bi-clock-history"></i>
+                            Pendiente de apertura
+                        </span>
+                    {% elif dia.estado == "ABIERTO" %}
+                        <span class="badge-soft badge-green">
+                            <i class="bi bi-unlock-fill"></i>
+                            Ya abierto
+                        </span>
+                    {% elif dia.estado == "CERRADO" %}
+                        <span class="badge-soft badge-gray">
+                            <i class="bi bi-lock-fill"></i>
+                            Cerrado
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+
+        <aside>
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-calendar-day-fill"></i>
+                        Datos del día
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    {% if dia.estado == "PROGRAMADO" %}
+                        <div class="status-card status-ready">
+                            <div class="status-top">
+                                <div class="status-icon">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="status-title">Día listo para abrir</div>
+                                    <p class="status-text">
+                                        El calendario operativo tiene este día programado. Puedes abrirlo para iniciar la recepción de niños.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif dia.estado == "ABIERTO" %}
+                        <div class="status-card status-open">
+                            <div class="status-top">
+                                <div class="status-icon">
+                                    <i class="bi bi-unlock-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="status-title">Este día ya está abierto</div>
+                                    <p class="status-text">
+                                        Puedes continuar con la operación diaria desde la lista de alumnos del día.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif dia.estado == "CERRADO" %}
+                        <div class="status-card status-closed">
+                            <div class="status-top">
+                                <div class="status-icon">
+                                    <i class="bi bi-lock-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="status-title">Este día ya está cerrado</div>
+                                    <p class="status-text">
+                                        La información de este día queda solo para consulta histórica.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Fecha</div>
+                            <div class="info-value">{{ dia.fecha|date:"d/m/Y" }}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Semestre</div>
+                            <div class="info-value">{{ semestre.nombre }}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Sede</div>
+                            <div class="info-value">{{ semestre.sede_nombre }}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Estado</div>
+                            <div class="info-value">{{ dia.get_estado_display }}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Día hábil</div>
+                            <div class="info-value">
+                                {% if dia.es_habil %}
+                                    Sí
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Apertura</div>
+                            <div class="info-value">
+                                {% if dia.abierto_en %}
+                                    {{ dia.abierto_en|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    Pendiente
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if dia.abierto_por %}
+                        <div class="help-card mt-3 mb-0">
+                            <i class="bi bi-person-check-fill me-1"></i>
+                            Este día fue abierto por:
+                            <strong>{{ dia.abierto_por.get_full_name|default:dia.abierto_por.username }}</strong>.
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        Flujo después de abrir
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <div class="step-title">Abrir día</div>
+                                <p class="step-text">
+                                    Se registra quién abrió la operación y a qué hora.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <div class="step-title">Preparar alumnos</div>
+                                <p class="step-text">
+                                    El sistema prepara los registros diarios de los niños de tus salas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div>
+                                <div class="step-title">Registrar entradas</div>
+                                <p class="step-text">
+                                    Se valida responsable, credencial y código de seguridad.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div>
+                                <div class="step-title">Cerrar día</div>
+                                <p class="step-text">
+                                    Al final se cierra cuando todos los niños que ingresaron tengan salida y bitácoras completas.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <main>
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-unlock-fill"></i>
+                        Confirmar apertura
+                    </h2>
+
+                    {% if dia.estado == "PROGRAMADO" %}
+                        <span class="badge-soft badge-yellow">
+                            <i class="bi bi-clock-history"></i>
+                            Requiere confirmación
+                        </span>
+                    {% elif dia.estado == "ABIERTO" %}
+                        <span class="badge-soft badge-green">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Ya abierto
+                        </span>
+                    {% else %}
+                        <span class="badge-soft badge-gray">
+                            <i class="bi bi-eye-fill"></i>
+                            Solo consulta
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="panel-body">
+                    {% if dia.estado == "PROGRAMADO" %}
+                        <div class="help-card">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            Cualquier maestra asignada a una sala del semestre puede abrir la operación del día.
+                            Esta acción no debe repetirse si otra maestra ya lo abrió.
+                        </div>
+
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger alert-custom">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-check2-square"></i>
+                                    Confirmación obligatoria
+                                </div>
+
+                                <div class="form-check">
+                                    {{ form.confirmar }}
+                                    <label for="{{ form.confirmar.id_for_label }}" class="form-check-label">
+                                        Confirmo que deseo abrir la operación del día
+                                    </label>
+                                </div>
+                                {% if form.confirmar.errors %}
+                                    <div class="errors">{{ form.confirmar.errors }}</div>
+                                {% endif %}
+
+                                <div class="mini-help">
+                                    Al confirmar, se habilitará la captura de entradas, bitácoras y salidas.
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-chat-left-text-fill"></i>
+                                    Observaciones de apertura
+                                </div>
+
+                                <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                    Observaciones
+                                </label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="errors">{{ form.observaciones.errors }}</div>
+                                {% endif %}
+
+                                <div class="mini-help">
+                                    Campo opcional. Ejemplo: “Apertura normal de operación diaria.”
+                                </div>
+                            </div>
+
+                            <div class="submit-bar">
+                                <div class="submit-note">
+                                    La apertura quedará registrada con tu usuario, fecha y hora.
+                                </div>
+
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        Cancelar
+                                    </a>
+
+                                    <button type="submit" class="btn-main btn-green">
+                                        <i class="bi bi-unlock-fill"></i>
+                                        Abrir día
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    {% elif dia.estado == "ABIERTO" %}
+                        <div class="status-card status-open">
+                            <div class="status-top">
+                                <div class="status-icon">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="status-title">La operación ya está abierta</div>
+                                    <p class="status-text">
+                                        Continúa con el registro de entradas, bitácoras y salidas de los alumnos del día.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-main btn-blue">
+                            <i class="bi bi-people-fill"></i>
+                            Ir a alumnos del día
+                        </a>
+                    {% else %}
+                        <div class="warning-card">
+                            <i class="bi bi-lock-fill me-1"></i>
+                            Este día no puede abrirse porque está cerrado o no se encuentra disponible para operación.
+                        </div>
+
+                        <div class="readonly-box">
+                            Puedes consultar la información desde el panel de maestra o desde la lista de alumnos,
+                            pero no se permitirá capturar ni modificar registros.
+                        </div>
+
+                        <div class="mt-3">
+                            <a href="{% url 'dashboard_maestra' %}" class="btn-main btn-blue">
+                                <i class="bi bi-house-door-fill"></i>
+                                Volver al panel
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

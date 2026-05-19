@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Bitácora diaria</title>
+
+<style>
+    @page {
+        size: letter;
+        margin: 1.4cm 1.2cm;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #111827;
+        font-size: 10.5px;
+        line-height: 1.35;
+    }
+
+    .header {
+        width: 100%;
+        border-bottom: 2px solid #1d4ed8;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+    }
+
+    .logo {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+    }
+
+    .title {
+        font-size: 17px;
+        font-weight: bold;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .subtitle {
+        font-size: 10px;
+        color: #475569;
+        margin-top: 2px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 7px;
+        border-radius: 10px;
+        background: #dbeafe;
+        color: #1e40af;
+        font-weight: bold;
+        font-size: 9px;
+    }
+
+    .section {
+        margin-top: 12px;
+        page-break-inside: avoid;
+    }
+
+    .section-title {
+        background: #eff6ff;
+        color: #1e3a8a;
+        border-left: 5px solid #2563eb;
+        padding: 6px 8px;
+        font-weight: bold;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .section-title.green {
+        background: #f0fdf4;
+        color: #14532d;
+        border-left-color: #16a34a;
+    }
+
+    .section-title.red {
+        background: #fef2f2;
+        color: #991b1b;
+        border-left-color: #dc2626;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 5px;
+        text-align: left;
+        font-size: 9.5px;
+    }
+
+    td {
+        border: 1px solid #cbd5e1;
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .label {
+        width: 28%;
+        font-weight: bold;
+        color: #334155;
+        background: #f8fafc;
+    }
+
+    .empty {
+        color: #64748b;
+        font-style: italic;
+        border: 1px solid #cbd5e1;
+        padding: 8px;
+        background: #f8fafc;
+    }
+
+    .incidencia {
+        border: 1px solid #fecaca;
+        border-left: 5px solid #dc2626;
+        padding: 8px;
+        margin-bottom: 8px;
+        page-break-inside: avoid;
+    }
+
+    .inc-title {
+        font-weight: bold;
+        color: #991b1b;
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    .inc-meta {
+        color: #475569;
+        font-size: 9px;
+        margin-bottom: 6px;
+    }
+
+    .inc-text {
+        margin-bottom: 5px;
+    }
+
+    .seguimiento {
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        padding: 5px;
+        margin-top: 5px;
+    }
+
+    .firma-wrap {
+        margin-top: 32px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .firma {
+        width: 46%;
+        display: inline-block;
+        text-align: center;
+        margin: 0 1.5%;
+        vertical-align: top;
+    }
+
+    .linea {
+        border-top: 1px solid #111827;
+        margin-top: 42px;
+        padding-top: 6px;
+        font-weight: bold;
+        font-size: 10px;
+    }
+
+    .footer {
+        margin-top: 16px;
+        font-size: 8.5px;
+        color: #64748b;
+        text-align: center;
+        border-top: 1px solid #cbd5e1;
+        padding-top: 6px;
+    }
+</style>
+</head>
+
+<body>
+
+<table class="header">
+    <tr>
+        <td style="width: 85px; border: none;">
+            <img src="{% static 'img/logo.png' %}" class="logo" alt="Logo">
+        </td>
+        <td style="border: none;">
+            <h1 class="title">Bitácora diaria del menor</h1>
+            <div class="subtitle">Estancia Infantil Universitaria - Universidad Autónoma de Chiapas</div>
+            <div class="subtitle">
+                Generado: {{ fecha_generacion|date:"d/m/Y H:i" }} hrs.
+            </div>
+        </td>
+        <td style="width: 150px; border: none; text-align: right;">
+            <span class="badge">{{ registro.formulario_bitacora|default:"Bitácora" }}</span>
+        </td>
+    </tr>
+</table>
+
+<div class="section">
+    <div class="section-title">Datos generales del menor</div>
+    <table>
+        <tr>
+            <td class="label">Fecha</td>
+            <td>
+                {% if registro.dia_operativo %}
+                    {{ registro.dia_operativo.fecha|date:"d/m/Y" }}
+                {% else %}
+                    Sin día operativo
+                {% endif %}
+            </td>
+            <td class="label">Sala</td>
+            <td>{{ sala_nombre }}</td>
+        </tr>
+        <tr>
+            <td class="label">Nombre del niño/a</td>
+            <td colspan="3">{{ nombre_menor }}</td>
+        </tr>
+        <tr>
+            <td class="label">Edad</td>
+            <td>
+                {{ alumno.edad_anios_menor|default:"0" }} años,
+                {{ alumno.edad_meses_menor|default:"0" }} meses
+            </td>
+            <td class="label">Semestre</td>
+            <td>
+                {% if registro.dia_operativo and registro.dia_operativo.semestre %}
+                    {{ registro.dia_operativo.semestre.nombre }}
+                {% elif alumno.semestre %}
+                    {{ alumno.semestre.nombre }}
+                {% else %}
+                    Sin semestre
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">1. ¿Cómo estuvo en casa?</div>
+
+    {% if campos_casa %}
+        <table>
+            {% for fila in campos_casa %}
+                <tr>
+                    <td class="label">{{ fila.etiqueta }}</td>
+                    <td>{{ fila.valor }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="empty">No se capturó información de cómo estuvo en casa.</div>
+    {% endif %}
+</div>
+
+<div class="section">
+    <div class="section-title green">2. Durante mi estancia en la EIU</div>
+
+    {% if campos_estancia %}
+        <table>
+            {% for fila in campos_estancia %}
+                <tr>
+                    <td class="label">{{ fila.etiqueta }}</td>
+                    <td>{{ fila.valor }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="empty">No se capturó información durante la estancia.</div>
+    {% endif %}
+</div>
+
+{% if incidencias %}
+<div class="section">
+    <div class="section-title red">3. Incidencias del día</div>
+
+    {% for incidencia in incidencias %}
+        <div class="incidencia">
+            <div class="inc-title">
+                {{ incidencia.get_tipo_display }} - {{ incidencia.get_nivel_display }}
+            </div>
+
+            <div class="inc-meta">
+                Fecha y hora: {{ incidencia.fecha_reporte|date:"d/m/Y H:i" }} hrs.
+                · Registrada por: {{ incidencia.registrada_por|default:"Sin usuario" }}
+                {% if incidencia.categoria %} · Categoría: {{ incidencia.categoria }}{% endif %}
+            </div>
+
+            <div class="inc-text">
+                <strong>Descripción de la incidencia:</strong><br>
+                {{ incidencia.descripcion }}
+            </div>
+
+            <div class="inc-text">
+                <strong>Intervención del personal:</strong><br>
+                {{ incidencia.intervencion_personal|default:"Sin intervención registrada." }}
+            </div>
+
+            {% if incidencia.seguimientos.all %}
+                <div class="inc-text"><strong>Seguimiento:</strong></div>
+                {% for seguimiento in incidencia.seguimientos.all %}
+                    <div class="seguimiento">
+                        {{ seguimiento.creado_en|date:"d/m/Y H:i" }} hrs.
+                        - {{ seguimiento.creado_por|default:"Sin usuario" }}<br>
+                        {{ seguimiento.nota }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if incidencia.resolucion %}
+                <div class="inc-text">
+                    <strong>Resolución:</strong><br>
+                    {{ incidencia.resolucion }}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="section">
+    <div class="section-title">Firmas</div>
+
+    <div class="firma-wrap">
+        <div class="firma">
+            <div class="linea">Nombre y Firma de la Asistente educativa</div>
+        </div>
+
+        <div class="firma">
+            <div class="linea">Responsable de Sala</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    Este documento integra la bitácora del menor: cómo estuvo en casa, durante su estancia en la EIU,
+    incidencias del día si existieron y firmas correspondientes.
+</div>
+
+</body>
+</html>

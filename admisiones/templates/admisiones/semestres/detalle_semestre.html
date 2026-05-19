@@ -1,0 +1,1558 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Semestre | Estancia Infantil UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --azul:#1d4ed8;
+            --azul-oscuro:#1e3a8a;
+            --azul-suave:#eff6ff;
+            --gris-fondo:#f3f6fb;
+            --texto:#0f172a;
+            --muted:#64748b;
+            --borde:#dbe4ef;
+            --verde:#16a34a;
+            --amarillo:#f59e0b;
+            --rojo:#dc2626;
+            --morado:#7c3aed;
+            --cyan:#0891b2;
+        }
+
+        body{
+            margin:0;
+            background:var(--gris-fondo);
+            color:var(--texto);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .topbar{
+            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
+            color:#fff;
+            box-shadow:0 8px 22px rgba(15,23,42,.18);
+            position:sticky;
+            top:0;
+            z-index:50;
+        }
+
+        .topbar-inner{
+            max-width:1280px;
+            margin:auto;
+            padding:14px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:13px;
+            min-width:0;
+        }
+
+        .brand img{
+            height:44px;
+            max-width:115px;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            font-size:1.02rem;
+            font-weight:950;
+            letter-spacing:.04em;
+            text-transform:uppercase;
+            line-height:1.12;
+        }
+
+        .brand-subtitle{
+            font-size:.82rem;
+            opacity:.9;
+            margin-top:2px;
+        }
+
+        .btn-top{
+            border-radius:12px;
+            font-weight:850;
+            padding:.55rem .9rem;
+        }
+
+        .main{
+            max-width:1280px;
+            margin:26px auto 70px;
+            padding:0 18px;
+        }
+
+        .hero{
+            background:linear-gradient(135deg, #1d4ed8, #2563eb);
+            border-radius:24px;
+            color:white;
+            padding:30px 34px;
+            box-shadow:0 22px 50px rgba(29,78,216,.22);
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:20px;
+            align-items:center;
+            margin-bottom:22px;
+        }
+
+        .hero h1{
+            font-size:2rem;
+            font-weight:950;
+            margin:0 0 8px;
+            letter-spacing:-.03em;
+        }
+
+        .hero p{
+            margin:0;
+            opacity:.92;
+            font-size:1rem;
+        }
+
+        .hero-icon{
+            width:92px;
+            height:92px;
+            border-radius:22px;
+            background:rgba(255,255,255,.16);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2.7rem;
+        }
+
+        .badge-status{
+            border-radius:999px;
+            padding:.45rem .75rem;
+            font-weight:950;
+            font-size:.78rem;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            white-space:nowrap;
+        }
+
+        .badge-activo{
+            background:#dcfce7;
+            color:#166534;
+            border:1px solid #86efac;
+        }
+
+        .badge-config{
+            background:#fef3c7;
+            color:#92400e;
+            border:1px solid #fcd34d;
+        }
+
+        .badge-cerrado{
+            background:#fee2e2;
+            color:#991b1b;
+            border:1px solid #fecaca;
+        }
+
+        .badge-borrador{
+            background:#ede9fe;
+            color:#5b21b6;
+            border:1px solid #c4b5fd;
+        }
+
+        .quick-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:20px;
+        }
+
+        .action-btn{
+            border-radius:14px;
+            font-weight:850;
+            padding:.72rem 1rem;
+            box-shadow:0 10px 22px rgba(15,23,42,.08);
+        }
+
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(6,minmax(0,1fr));
+            gap:12px;
+            margin-bottom:20px;
+        }
+
+        .stat-card{
+            background:#fff;
+            border:1px solid var(--borde);
+            border-radius:18px;
+            padding:16px;
+            box-shadow:0 10px 22px rgba(15,23,42,.06);
+        }
+
+        .stat-label{
+            color:var(--muted);
+            font-size:.72rem;
+            font-weight:950;
+            letter-spacing:.06em;
+            text-transform:uppercase;
+            margin-bottom:8px;
+        }
+
+        .stat-value{
+            font-size:1.45rem;
+            font-weight:950;
+            color:#0f172a;
+            line-height:1;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:1fr 360px;
+            gap:18px;
+            align-items:start;
+        }
+
+        .panel{
+            background:#fff;
+            border:1px solid var(--borde);
+            border-radius:22px;
+            overflow:hidden;
+            box-shadow:0 18px 38px rgba(15,23,42,.07);
+            margin-bottom:18px;
+        }
+
+        .panel-header{
+            padding:17px 20px;
+            background:#f8fafc;
+            border-bottom:1px solid var(--borde);
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+        }
+
+        .panel-title{
+            margin:0;
+            color:#334155;
+            font-size:.96rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+        }
+
+        .panel-body{
+            padding:18px 20px;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:12px;
+        }
+
+        .info-card{
+            background:#f8fafc;
+            border:1px solid var(--borde);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .info-label{
+            color:#526b8b;
+            font-size:.74rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:7px;
+        }
+
+        .info-value{
+            color:#0f172a;
+            font-weight:850;
+            word-break:break-word;
+        }
+
+        .table{
+            margin:0;
+            vertical-align:middle;
+        }
+
+        .table th{
+            background:#f8fafc;
+            color:#475569;
+            font-size:.74rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            font-weight:950;
+            border-bottom:1px solid var(--borde);
+            padding:13px 15px;
+            white-space:nowrap;
+        }
+
+        .table td{
+            padding:14px 15px;
+            border-bottom:1px solid #edf2f7;
+        }
+
+        .btn-mini{
+            border-radius:11px;
+            font-size:.82rem;
+            font-weight:850;
+            padding:.42rem .68rem;
+        }
+
+        .btn-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            justify-content:flex-end;
+        }
+
+        .section-note{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            border-radius:16px;
+            color:#475569;
+            padding:12px 14px;
+            font-size:.9rem;
+            margin-bottom:12px;
+        }
+
+        .error-box{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:5px solid #f97316;
+            border-radius:16px;
+            padding:14px 15px;
+            color:#7c2d12;
+            margin-bottom:14px;
+        }
+
+        .error-box h6{
+            margin:0 0 8px;
+            font-weight:950;
+            color:#9a3412;
+        }
+
+        .success-box{
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-left:5px solid var(--verde);
+            border-radius:16px;
+            padding:14px 15px;
+            color:#14532d;
+            margin-bottom:14px;
+            font-weight:750;
+        }
+
+        .timeline-list{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+
+        .timeline-item{
+            border:1px solid var(--borde);
+            background:#f8fafc;
+            border-radius:15px;
+            padding:12px 13px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+        }
+
+        .timeline-date{
+            font-weight:950;
+            color:#0f172a;
+        }
+
+        .timeline-meta{
+            color:var(--muted);
+            font-size:.86rem;
+        }
+
+        .pill{
+            border-radius:999px;
+            padding:.28rem .6rem;
+            font-size:.75rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            white-space:nowrap;
+        }
+
+        .pill-green{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+        .pill-yellow{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+        .pill-red{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+        .pill-blue{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
+        .pill-gray{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;}
+
+        .maestra-list{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            margin-top:10px;
+        }
+
+        .maestra-item{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:14px;
+            padding:10px 12px;
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            align-items:center;
+        }
+
+        .maestra-name{
+            font-weight:900;
+            color:#0f172a;
+        }
+
+        .maestra-meta{
+            font-size:.82rem;
+            color:#64748b;
+        }
+
+        .empty-state{
+            padding:32px 20px;
+            text-align:center;
+            color:var(--muted);
+        }
+
+        .empty-state i{
+            font-size:2.4rem;
+            color:#94a3b8;
+            margin-bottom:10px;
+        }
+
+        .empty-state h5{
+            color:#334155;
+            font-weight:950;
+            margin-bottom:6px;
+        }
+
+        .side-panel{
+            position:sticky;
+            top:92px;
+        }
+
+        .danger-zone{
+            background:#fff1f2;
+            border:1px solid #fecdd3;
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .modal-content{
+            border-radius:22px;
+            border:0;
+            box-shadow:0 22px 60px rgba(15,23,42,.25);
+        }
+
+        .modal-header{
+            border-bottom:1px solid #e5e7eb;
+            background:#f8fafc;
+            border-top-left-radius:22px;
+            border-top-right-radius:22px;
+        }
+
+
+        .calendar-help{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            border-radius:18px;
+            padding:15px 17px;
+            color:#1e3a8a;
+            margin-bottom:18px;
+            box-shadow:0 8px 20px rgba(15,23,42,.05);
+        }
+
+        .calendar-help-title{
+            font-weight:950;
+            margin-bottom:4px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .calendar-help p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.45;
+        }
+
+        .calendar-status-card{
+            border-radius:18px;
+            padding:15px;
+            border:1px solid #e2e8f0;
+            background:#fff;
+            box-shadow:0 10px 22px rgba(15,23,42,.06);
+            margin-bottom:14px;
+        }
+
+        .calendar-status-top{
+            display:flex;
+            align-items:flex-start;
+            gap:12px;
+            margin-bottom:12px;
+        }
+
+        .calendar-icon{
+            width:42px;
+            height:42px;
+            border-radius:13px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            font-size:1.25rem;
+        }
+
+        .calendar-ok{
+            background:#f0fdf4;
+            border-color:#bbf7d0;
+            color:#14532d;
+        }
+
+        .calendar-ok .calendar-icon{
+            background:#dcfce7;
+            color:#15803d;
+        }
+
+        .calendar-pending{
+            background:#fff7ed;
+            border-color:#fed7aa;
+            color:#9a3412;
+        }
+
+        .calendar-pending .calendar-icon{
+            background:#ffedd5;
+            color:#c2410c;
+        }
+
+        .calendar-readonly{
+            background:#f8fafc;
+            border-color:#cbd5e1;
+            color:#475569;
+        }
+
+        .calendar-readonly .calendar-icon{
+            background:#e2e8f0;
+            color:#475569;
+        }
+
+        .calendar-status-title{
+            font-weight:950;
+            margin-bottom:2px;
+            color:inherit;
+        }
+
+        .calendar-status-text{
+            font-size:.88rem;
+            line-height:1.4;
+            margin:0;
+        }
+
+        .calendar-mini-grid{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:8px;
+            margin-top:12px;
+        }
+
+        .calendar-mini{
+            background:rgba(255,255,255,.72);
+            border:1px solid rgba(148,163,184,.32);
+            border-radius:13px;
+            padding:9px;
+            text-align:center;
+        }
+
+        .calendar-mini-label{
+            font-size:.68rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            opacity:.78;
+            margin-bottom:3px;
+        }
+
+        .calendar-mini-value{
+            font-size:1.1rem;
+            font-weight:950;
+            color:#0f172a;
+        }
+
+        .calendar-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:12px;
+        }
+
+        @media(max-width:1100px){
+            .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+            .layout{grid-template-columns:1fr;}
+            .side-panel{position:static;}
+        }
+
+        @media(max-width:768px){
+            .topbar-inner{flex-direction:column;align-items:flex-start;}
+            .hero{grid-template-columns:1fr;padding:24px 20px;}
+            .hero-icon{display:none;}
+            .hero h1{font-size:1.55rem;}
+            .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+            .info-grid{grid-template-columns:1fr;}
+            .btn-row{justify-content:flex-start;}
+        }
+
+        @media(max-width:520px){
+            .stats-grid{grid-template-columns:1fr;}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">
+            <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+
+            <div>
+                <div class="brand-title">Detalle de Semestre</div>
+                <div class="brand-subtitle">Configuración operativa · Administrador del sistema</div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
+                <i class="bi bi-arrow-left me-1"></i> Semestres
+            </a>
+            {% if request.GET.origen == "ti" %}
+                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
+                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
+                </a>
+            {% endif %}
+            <a href="{% url 'lista_asignacion_salas' %}?semestre={{ semestre.id }}{% if request.GET.origen == 'ti' %}&origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
+                <i class="bi bi-diagram-3-fill me-1"></i> Asignar salas
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="main">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="hero">
+        <div>
+            <div class="mb-2">
+                {% if semestre.estado == "ACTIVO" %}
+                    <span class="badge-status badge-activo"><i class="bi bi-check-circle-fill"></i> Activo</span>
+                {% elif semestre.estado == "CERRADO" %}
+                    <span class="badge-status badge-cerrado"><i class="bi bi-lock-fill"></i> Cerrado</span>
+                {% elif semestre.estado == "BORRADOR" %}
+                    <span class="badge-status badge-borrador"><i class="bi bi-pencil-square"></i> Borrador</span>
+                {% else %}
+                    <span class="badge-status badge-config"><i class="bi bi-gear-fill"></i> En configuración</span>
+                {% endif %}
+            </div>
+            <h1>{{ semestre.nombre }}</h1>
+            <p>
+                {{ semestre.sede_nombre }} ·
+                {{ semestre.fecha_inicio|date:"d/m/Y" }} al {{ semestre.fecha_fin|date:"d/m/Y" }}
+            </p>
+        </div>
+        <div class="hero-icon">
+            <i class="bi bi-calendar2-check-fill"></i>
+        </div>
+    </section>
+
+    <div class="quick-actions">
+        {% if semestre.estado != "CERRADO" %}
+            <a href="{% url 'editar_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-primary action-btn">
+                <i class="bi bi-pencil-square me-2"></i>Modificar semestre
+            </a>
+            <a href="{% url 'agregar_dia_festivo' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-warning bg-white action-btn">
+                <i class="bi bi-calendar-event me-2"></i>Día festivo / suspensión
+            </a>
+            <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-success bg-white action-btn">
+                <i class="bi bi-door-open-fill me-2"></i>Agregar sala
+            </a>
+        {% endif %}
+
+        <a href="{% url 'enviar_encuesta_satisfaccion' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-info bg-white action-btn">
+            <i class="bi bi-envelope-check-fill me-2"></i>Encuesta B
+        </a>
+
+        {% if semestre.estado == "CERRADO" %}
+            <span class="btn btn-outline-secondary bg-white action-btn disabled">
+                <i class="bi bi-lock-fill me-2"></i>Calendario solo consulta
+            </span>
+        {% elif calendario_operativo_generado %}
+            <form method="POST" action="{% url 'generar_dias_operativos_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}">
+                {% csrf_token %}
+                {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                <button type="submit" class="btn btn-outline-dark bg-white action-btn">
+                    <i class="bi bi-arrow-repeat me-2"></i>Actualizar calendario
+                </button>
+            </form>
+        {% else %}
+            <form method="POST" action="{% url 'generar_dias_operativos_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}">
+                {% csrf_token %}
+                {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                <button type="submit" class="btn btn-dark action-btn">
+                    <i class="bi bi-calendar-plus me-2"></i>Generar calendario operativo
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="calendar-help">
+        <div class="calendar-help-title">
+            <i class="bi bi-info-circle-fill"></i>
+            ¿Qué es el calendario operativo?
+        </div>
+        <p>
+            Es la lista de días hábiles/laborales del semestre. Sirve para controlar la operación diaria,
+            futuras bitácoras, incidencias y la validación de cierre del semestre. Si ya está generado,
+            el botón de actualizar no duplica días; solo crea los que falten.
+        </p>
+    </div>
+
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Salas activas</div>
+            <div class="stat-value">{{ resumen.salas_activas|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Maestras</div>
+            <div class="stat-value">{{ resumen.total_maestras|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Alumnos</div>
+            <div class="stat-value">{{ resumen.total_alumnos|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Calendario</div>
+            <div class="stat-value">{{ resumen.dias_operativos|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Días abiertos</div>
+            <div class="stat-value">{{ resumen.dias_abiertos|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Incidencias</div>
+            <div class="stat-value">{{ resumen.incidencias_abiertas|default:0 }}</div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <div>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-info-circle-fill me-2"></i>Información general
+                    </h2>
+                </div>
+                <div class="panel-body">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Sede</div>
+                            <div class="info-value">{{ semestre.sede_nombre }}</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Periodo</div>
+                            <div class="info-value">
+                                {{ semestre.fecha_inicio|date:"d/m/Y" }} al {{ semestre.fecha_fin|date:"d/m/Y" }}
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Encuesta Satisfacción B</div>
+                            <div class="info-value">
+                                {% if semestre.fecha_encuesta_satisfaccion %}
+                                    {{ semestre.fecha_encuesta_satisfaccion|date:"d/m/Y" }}
+                                {% else %}
+                                    Sin fecha
+                                {% endif %}
+                                {% if semestre.encuesta_enviada %}
+                                    <span class="pill pill-green ms-2"><i class="bi bi-send-check-fill"></i> Enviada</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Médica asignada</div>
+                            <div class="info-value">{{ semestre.medico_asignado|default:"Sin asignar" }}</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Nutrióloga asignada</div>
+                            <div class="info-value">{{ semestre.nutriologa_asignada|default:"Sin asignar" }}</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Psicóloga asignada</div>
+                            <div class="info-value">{{ semestre.psicologa_asignada|default:"Sin asignar" }}</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Inicio real</div>
+                            <div class="info-value">
+                                {% if semestre.fecha_inicio_real %}
+                                    {{ semestre.fecha_inicio_real|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    No iniciado
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Cierre</div>
+                            <div class="info-value">
+                                {% if semestre.fecha_cierre %}
+                                    {{ semestre.fecha_cierre|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    No cerrado
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-label">Correo copia encuesta</div>
+                            <div class="info-value">{{ semestre.correo_copia_encuesta|default:"Sin correo" }}</div>
+                        </div>
+                    </div>
+
+                    {% if semestre.observaciones %}
+                        <div class="section-note mt-3">
+                            <strong>Observaciones:</strong> {{ semestre.observaciones }}
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-door-open-fill me-2"></i>Salas y horarios
+                    </h2>
+                    {% if semestre.estado != "CERRADO" %}
+                        <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-success btn-mini">
+                            <i class="bi bi-plus-lg me-1"></i>Agregar sala
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% for sala_semestre in salas_semestre %}
+                    <div class="panel-body border-bottom">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                            <div>
+                                <h5 class="fw-black mb-1" style="font-weight:950;">
+                                    {{ sala_semestre.sala.nombre }}
+                                    {% if sala_semestre.activa %}
+                                        <span class="pill pill-green ms-1">Activa</span>
+                                    {% else %}
+                                        <span class="pill pill-gray ms-1">Inactiva</span>
+                                    {% endif %}
+                                </h5>
+                                <div class="text-muted">
+                                    Tipo: {{ sala_semestre.sala.get_tipo_sala_display }} ·
+                                    Cupo: {{ sala_semestre.cupo_real }}
+                                </div>
+                            </div>
+
+                            <div class="btn-row">
+                                {% if semestre.estado != "CERRADO" %}
+                                    <a href="{% url 'editar_sala_semestre' sala_semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-primary btn-mini">
+                                        <i class="bi bi-pencil-fill me-1"></i>Editar
+                                    </a>
+                                    <a href="{% url 'asignar_maestra_sala' sala_semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-success btn-mini">
+                                        <i class="bi bi-person-plus-fill me-1"></i>Maestra
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Entrada maestras</th>
+                                        <th>Recepción</th>
+                                        <th>Desayuno</th>
+                                        <th>Actividad</th>
+                                        <th>Recreo</th>
+                                        <th>Colación</th>
+                                        <th>Siesta</th>
+                                        <th>Comida</th>
+                                        <th>Salida maestras</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ sala_semestre.entrada_maestras|time:"H:i"|default:"-" }}</td>
+                                        <td>
+                                            {{ sala_semestre.recepcion_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ sala_semestre.recepcion_fin|time:"H:i"|default:"-" }}
+                                        </td>
+                                        <td>
+                                            {{ sala_semestre.desayuno_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ sala_semestre.desayuno_fin|time:"H:i"|default:"-" }}
+                                        </td>
+                                        <td>
+                                            <strong>{{ sala_semestre.actividad_pedagogica_nombre|default:"-" }}</strong><br>
+                                            <span class="text-muted">
+                                                {{ sala_semestre.actividad_pedagogica_inicio|time:"H:i"|default:"-" }}
+                                                -
+                                                {{ sala_semestre.actividad_pedagogica_fin|time:"H:i"|default:"-" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {{ sala_semestre.recreo_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ sala_semestre.recreo_fin|time:"H:i"|default:"-" }}
+                                        </td>
+                                        <td>
+                                            {{ sala_semestre.colacion_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ sala_semestre.colacion_fin|time:"H:i"|default:"-" }}
+                                        </td>
+                                        <td>
+                                            {{ sala_semestre.siesta_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ sala_semestre.siesta_fin|time:"H:i"|default:"-" }}
+                                        </td>
+                                        <td>
+                                            {{ sala_semestre.comida_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ sala_semestre.comida_fin|time:"H:i"|default:"-" }}
+                                        </td>
+                                        <td>{{ sala_semestre.salida_maestras|time:"H:i"|default:"-" }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="section-note">
+                            <strong>Personal asignado actividad pedagógica:</strong>
+                            {{ sala_semestre.actividad_pedagogica_personal|default:"Sin asignar" }}
+                        </div>
+
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-people-fill me-1"></i>Maestras asignadas
+                        </h6>
+
+                        <div class="maestra-list">
+                            {% for asignacion in sala_semestre.maestras_asignadas.all %}
+                                <div class="maestra-item">
+                                    <div>
+                                        <div class="maestra-name">
+                                            {% if asignacion.maestra.get_full_name %}
+                                                {{ asignacion.maestra.get_full_name }}
+                                            {% else %}
+                                                {{ asignacion.maestra.username }}
+                                            {% endif %}
+                                            {% if not asignacion.activo %}
+                                                <span class="pill pill-gray ms-1">Inactiva</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="maestra-meta">
+                                            {{ asignacion.get_rol_display }} ·
+                                            Jornada:
+                                            {{ asignacion.horario_entrada|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ asignacion.horario_salida|time:"H:i"|default:"-" }}
+                                            · Desayuno:
+                                            {{ asignacion.desayuno_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ asignacion.desayuno_fin|time:"H:i"|default:"-" }}
+                                            · Tiempo fuera:
+                                            {{ asignacion.tiempo_fuera_inicio|time:"H:i"|default:"-" }}
+                                            -
+                                            {{ asignacion.tiempo_fuera_fin|time:"H:i"|default:"-" }}
+                                        </div>
+                                    </div>
+
+                                    {% if semestre.estado != "CERRADO" %}
+                                        <div class="btn-row">
+                                            <a href="{% url 'editar_asignacion_maestra' asignacion.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-mini">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="POST" action="{% url 'eliminar_asignacion_maestra' asignacion.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" onsubmit="return confirm('¿Eliminar esta asignación de maestra?');">
+                                                {% csrf_token %}
+            {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                                                <button type="submit" class="btn btn-outline-danger btn-mini">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <div class="section-note mb-0">
+                                    Esta sala todavía no tiene maestras asignadas.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state">
+                        <i class="bi bi-door-closed"></i>
+                        <h5>Sin salas configuradas</h5>
+                        <p>Agrega al menos una sala para poder iniciar el semestre.</p>
+                        {% if semestre.estado != "CERRADO" %}
+                            <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-success rounded-pill fw-bold px-4">
+                                Agregar sala
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-calendar-event-fill me-2"></i>Días festivos y suspensiones
+                    </h2>
+                    {% if semestre.estado != "CERRADO" %}
+                        <a href="{% url 'agregar_dia_festivo' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-warning btn-mini">
+                            <i class="bi bi-plus-lg me-1"></i>Agregar
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if dias_festivos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Motivo</th>
+                                    <th>Recepción</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dia in dias_festivos %}
+                                    <tr>
+                                        <td><strong>{{ dia.fecha|date:"d/m/Y" }}</strong></td>
+                                        <td>{{ dia.get_tipo_display }}</td>
+                                        <td>{{ dia.motivo }}</td>
+                                        <td>
+                                            {% if dia.afecta_recepcion %}
+                                                <span class="pill pill-red">Suspende recepción</span>
+                                            {% else %}
+                                                <span class="pill pill-green">No afecta</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-row">
+                                                {% if semestre.estado != "CERRADO" %}
+                                                    <form method="POST" action="{% url 'eliminar_dia_festivo' dia.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" onsubmit="return confirm('¿Eliminar este día festivo o suspensión?');">
+                                                        {% csrf_token %}
+            {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                                                        <button type="submit" class="btn btn-outline-danger btn-mini">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <h5>Sin días registrados</h5>
+                        <p>No hay días festivos ni suspensiones configurados.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-people-fill me-2"></i>Alumnos asignados al semestre
+                    </h2>
+                    <a href="{% url 'lista_asignacion_salas' %}?semestre={{ semestre.id }}{% if request.GET.origen == 'ti' %}&origen=ti{% endif %}" class="btn btn-outline-primary btn-mini">
+                        <i class="bi bi-person-check-fill me-1"></i>Asignar alumnos
+                    </a>
+                </div>
+
+                {% if alumnos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Folio</th>
+                                    <th>Alumno</th>
+                                    <th>Matrícula</th>
+                                    <th>Sala</th>
+                                    <th>Asignación</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inscripcion in alumnos %}
+                                    <tr>
+                                        <td>#{{ inscripcion.solicitud_ingreso.folio }}</td>
+                                        <td>
+                                            <strong>
+                                                {{ inscripcion.solicitud_ingreso.nombres_menor }}
+                                                {{ inscripcion.solicitud_ingreso.apellido_paterno_menor }}
+                                                {{ inscripcion.solicitud_ingreso.apellido_materno_menor }}
+                                            </strong>
+                                            <div class="text-muted small">
+                                                Tutor: {{ inscripcion.solicitud_ingreso.nombre_tutor_completo }}
+                                            </div>
+                                        </td>
+                                        <td>{{ inscripcion.solicitud_ingreso.matricula|default:"-" }}</td>
+                                        <td>
+                                            {% if inscripcion.sala_semestre_asignada %}
+                                                {{ inscripcion.sala_semestre_asignada.sala.nombre }}
+                                            {% else %}
+                                                <span class="pill pill-yellow">Sin sala</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if inscripcion.sala_bloqueada %}
+                                                <span class="pill pill-green"><i class="bi bi-lock-fill"></i> Bloqueada</span>
+                                            {% else %}
+                                                <span class="pill pill-blue">Editable</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-row">
+                                                <a href="{% url 'asignar_sala_definitiva' inscripcion.id %}?semestre={{ semestre.id }}{% if request.GET.origen == 'ti' %}&origen=ti{% endif %}" class="btn btn-outline-primary btn-mini">
+                                                    <i class="bi bi-diagram-3-fill me-1"></i>Asignar
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-person-x"></i>
+                        <h5>Sin alumnos asignados</h5>
+                        <p>Los alumnos finalizados aparecerán aquí cuando se asignen a este semestre.</p>
+                    </div>
+                {% endif %}
+            </section>
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Incidencias abiertas
+                    </h2>
+                </div>
+
+                <div class="section-note m-3">
+                    <strong>Solo validación para cierre:</strong>
+                    el Administrador del Sistema no registra ni cierra incidencias.
+                    Las incidencias pedagógicas serán registradas y atendidas por Coordinación de Sala en otro sprint.
+                    Para cerrar el semestre, esta lista debe estar vacía.
+                </div>
+
+                {% if incidencias_abiertas %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Alumno</th>
+                                    <th>Nivel</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for incidencia in incidencias_abiertas %}
+                                    <tr>
+                                        <td>{{ incidencia.fecha_reporte|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            {% if incidencia.alumno %}
+                                                {{ incidencia.alumno.solicitud_ingreso.nombres_menor }}
+                                                {{ incidencia.alumno.solicitud_ingreso.apellido_paterno_menor }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if incidencia.nivel == "ALTO" %}
+                                                <span class="pill pill-red">{{ incidencia.get_nivel_display }}</span>
+                                            {% else %}
+                                                <span class="pill pill-yellow">{{ incidencia.get_nivel_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ incidencia.descripcion|truncatechars:110 }}</td>
+                                        <td>
+                                            <span class="pill pill-red">
+                                                <i class="bi bi-exclamation-circle-fill"></i>
+                                                Abierta
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-shield-check"></i>
+                        <h5>No hay incidencias abiertas</h5>
+                        <p>Esta validación está correcta para el cierre del semestre.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+        </div>
+
+        <aside class="side-panel">
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-play-circle-fill me-2"></i>Control del semestre
+                    </h2>
+                </div>
+                <div class="panel-body">
+
+                    {% if semestre.estado == "CONFIGURACION" or semestre.estado == "BORRADOR" %}
+                        {% if errores_inicio %}
+                            <div class="error-box">
+                                <h6><i class="bi bi-exclamation-circle-fill me-1"></i>No se puede iniciar todavía</h6>
+                                <ul class="mb-0 ps-3">
+                                    {% for error in errores_inicio %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="success-box">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                El semestre cumple las validaciones para iniciar.
+                            </div>
+
+                            <button class="btn btn-success w-100 fw-bold rounded-4 py-2" data-bs-toggle="modal" data-bs-target="#modalIniciar">
+                                <i class="bi bi-play-fill me-1"></i> Iniciar semestre
+                            </button>
+                        {% endif %}
+                    {% elif semestre.estado == "ACTIVO" %}
+                        <div class="success-box">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Este semestre se encuentra activo.
+                        </div>
+
+                        {% if errores_cierre %}
+                            <div class="error-box">
+                                <h6><i class="bi bi-lock-fill me-1"></i>No se puede cerrar todavía</h6>
+                                <ul class="mb-0 ps-3">
+                                    {% for error in errores_cierre %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <button class="btn btn-danger w-100 fw-bold rounded-4 py-2" data-bs-toggle="modal" data-bs-target="#modalCerrar">
+                                <i class="bi bi-lock-fill me-1"></i> Cerrar semestre
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <div class="danger-zone">
+                            <h6 class="fw-bold text-danger">
+                                <i class="bi bi-lock-fill me-1"></i>Semestre cerrado
+                            </h6>
+                            <p class="mb-0 small">
+                                Este semestre ya no puede modificarse.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-calendar-day-fill me-2"></i>Calendario operativo
+                    </h2>
+                </div>
+                <div class="panel-body">
+
+                    {% if semestre.estado == "CERRADO" %}
+                        <div class="calendar-status-card calendar-readonly">
+                            <div class="calendar-status-top">
+                                <div class="calendar-icon">
+                                    <i class="bi bi-lock-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="calendar-status-title">Calendario solo consulta</div>
+                                    <p class="calendar-status-text">
+                                        El semestre está cerrado. Los días operativos ya no pueden modificarse.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="calendar-mini-grid">
+                                <div class="calendar-mini">
+                                    <div class="calendar-mini-label">Total</div>
+                                    <div class="calendar-mini-value">{{ total_dias_operativos|default:0 }}</div>
+                                </div>
+                                <div class="calendar-mini">
+                                    <div class="calendar-mini-label">Abiertos</div>
+                                    <div class="calendar-mini-value">{{ dias_operativos_abiertos|default:0 }}</div>
+                                </div>
+                                <div class="calendar-mini">
+                                    <div class="calendar-mini-label">Cerrados</div>
+                                    <div class="calendar-mini-value">{{ dias_operativos_cerrados|default:0 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif calendario_operativo_generado %}
+                        <div class="calendar-status-card calendar-ok">
+                            <div class="calendar-status-top">
+                                <div class="calendar-icon">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="calendar-status-title">Calendario operativo generado</div>
+                                    <p class="calendar-status-text">
+                                        El calendario laboral del semestre ya existe. Puedes actualizarlo si cambiaste fechas,
+                                        festivos o suspensiones.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="calendar-mini-grid">
+                                <div class="calendar-mini">
+                                    <div class="calendar-mini-label">Total</div>
+                                    <div class="calendar-mini-value">{{ total_dias_operativos|default:0 }}</div>
+                                </div>
+                                <div class="calendar-mini">
+                                    <div class="calendar-mini-label">Abiertos</div>
+                                    <div class="calendar-mini-value">{{ dias_operativos_abiertos|default:0 }}</div>
+                                </div>
+                                <div class="calendar-mini">
+                                    <div class="calendar-mini-label">Cerrados</div>
+                                    <div class="calendar-mini-value">{{ dias_operativos_cerrados|default:0 }}</div>
+                                </div>
+                            </div>
+
+                            <form method="POST" action="{% url 'generar_dias_operativos_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="calendar-actions">
+                                {% csrf_token %}
+                                {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                                <button type="submit" class="btn btn-outline-dark btn-mini">
+                                    <i class="bi bi-arrow-repeat me-1"></i>Actualizar calendario
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="calendar-status-card calendar-pending">
+                            <div class="calendar-status-top">
+                                <div class="calendar-icon">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="calendar-status-title">Calendario pendiente de generar</div>
+                                    <p class="calendar-status-text">
+                                        Genera el calendario para crear los días laborales del semestre. Esto será necesario
+                                        para cerrar días y después cerrar el semestre.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <form method="POST" action="{% url 'generar_dias_operativos_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="calendar-actions">
+                                {% csrf_token %}
+                                {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                                <button type="submit" class="btn btn-dark btn-mini">
+                                    <i class="bi bi-calendar-plus me-1"></i>Generar calendario operativo
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+
+                    {% if dias_operativos %}
+                        <div class="timeline-list">
+                            {% for dia in dias_operativos %}
+                                <div class="timeline-item">
+                                    <div>
+                                        <div class="timeline-date">{{ dia.fecha|date:"d/m/Y" }}</div>
+                                        <div class="timeline-meta">
+                                            {% if dia.es_habil %}
+                                                Día hábil
+                                            {% else %}
+                                                No hábil
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if dia.estado == "CERRADO" %}
+                                            <span class="pill pill-green">Cerrado</span>
+                                        {% else %}
+                                            <span class="pill pill-yellow">Abierto</span>
+                                            {% if dia.es_habil and semestre.estado == "ACTIVO" %}
+                                                <form method="POST" action="{% url 'cerrar_dia_operativo' dia.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="mt-2" onsubmit="return confirm('¿Cerrar este día operativo?');">
+                                                    {% csrf_token %}
+                                                    {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                                                    <input type="hidden" name="observaciones" value="Cerrado desde detalle del semestre.">
+                                                    <button type="submit" class="btn btn-outline-success btn-mini">
+                                                        Cerrar día
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if total_dias_operativos > 15 %}
+                            <div class="section-note mt-3 mb-0">
+                                Se muestran los primeros 15 días del calendario. Total registrado:
+                                <strong>{{ total_dias_operativos }}</strong>.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-plus"></i>
+                            <h5>Sin calendario generado</h5>
+                            <p>Genera el calendario operativo para crear los días hábiles del semestre.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-send-check-fill me-2"></i>Encuesta B
+                    </h2>
+                </div>
+                <div class="panel-body">
+                    <div class="section-note">
+                        <strong>Fecha programada:</strong>
+                        {% if semestre.fecha_encuesta_satisfaccion %}
+                            {{ semestre.fecha_encuesta_satisfaccion|date:"d/m/Y" }}
+                        {% else %}
+                            Sin fecha
+                        {% endif %}
+                        <br>
+                        <strong>Estado:</strong>
+                        {% if semestre.encuesta_enviada %}
+                            Enviada el {{ semestre.fecha_envio_encuesta|date:"d/m/Y H:i" }}
+                        {% else %}
+                            No enviada
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'enviar_encuesta_satisfaccion' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-info w-100 fw-bold rounded-4">
+                        <i class="bi bi-envelope-check-fill me-1"></i> Gestionar envío
+                    </a>
+                </div>
+            </section>
+
+        </aside>
+    </div>
+
+</main>
+
+<!-- Modal iniciar semestre -->
+<div class="modal fade" id="modalIniciar" tabindex="-1" aria-labelledby="modalIniciarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" action="{% url 'iniciar_semestre' semestre.id %}" class="modal-content">
+            {% csrf_token %}
+            {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalIniciarLabel">
+                    <i class="bi bi-play-circle-fill text-success me-2"></i>Iniciar semestre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Al iniciar el semestre se activará la operación de salas y se generará/validará el calendario operativo, es decir, los días hábiles del periodo.
+                </p>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="confirmar" value="on" id="confirmarInicio" required>
+                    <label class="form-check-label fw-bold" for="confirmarInicio">
+                        Confirmo que deseo iniciar este semestre.
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-3 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success rounded-3 fw-bold">
+                    <i class="bi bi-play-fill me-1"></i>Iniciar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal cerrar semestre -->
+<div class="modal fade" id="modalCerrar" tabindex="-1" aria-labelledby="modalCerrarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" action="{% url 'cerrar_semestre' semestre.id %}" class="modal-content">
+            {% csrf_token %}
+            {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalCerrarLabel">
+                    <i class="bi bi-lock-fill text-danger me-2"></i>Cerrar semestre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    El semestre solo puede cerrarse si todos los días están cerrados, todas las incidencias están cerradas y la fecha fin ya venció.
+                </p>
+
+                <label class="form-label fw-bold">Observaciones finales</label>
+                <textarea name="observaciones" class="form-control rounded-4 mb-3" rows="3" placeholder="Opcional"></textarea>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="confirmar" value="on" id="confirmarCierre" required>
+                    <label class="form-check-label fw-bold" for="confirmarCierre">
+                        Confirmo que deseo cerrar este semestre.
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-3 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger rounded-3 fw-bold">
+                    <i class="bi bi-lock-fill me-1"></i>Cerrar semestre
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

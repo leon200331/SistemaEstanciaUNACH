@@ -420,6 +420,26 @@
       </div>
 
       <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nombre(s) del menor <span class="req">*</span></label>
+          {{ form.nombres_menor }}
+          <div class="help-text">Solo letras y espacios.</div>
+          <div class="text-danger small mt-1">{{ form.nombres_menor.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Apellido paterno <span class="req">*</span></label>
+          {{ form.apellido_paterno_menor }}
+          <div class="help-text">Solo letras.</div>
+          <div class="text-danger small mt-1">{{ form.apellido_paterno_menor.errors }}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Apellido materno <span class="req">*</span></label>
+          {{ form.apellido_materno_menor }}
+          <div class="help-text">Solo letras.</div>
+          <div class="text-danger small mt-1">{{ form.apellido_materno_menor.errors }}</div>
+        </div>
         <div class="col-md-6">
           <label class="form-label">Fecha de nacimiento <span class="req">*</span></label>
           {{ form.fecha_nacimiento_menor }}
@@ -451,9 +471,87 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function() {
+
+    // === CAMPOS CRÍTICOS DEL MENOR ===
+    // Estos datos se guardan en Solicitud y después se muestran en Psicología, Nutrición y Médico.
+    const camposIdentidadMenor = [
+        'id_nombres_menor',
+        'id_apellido_paterno_menor',
+        'id_apellido_materno_menor',
+        'id_fecha_nacimiento_menor',
+        'id_curp_menor'
+    ];
+
+    camposIdentidadMenor.forEach(function(id) {
+        const campo = document.getElementById(id);
+        if (campo) {
+            campo.setAttribute('required', 'required');
+            campo.setAttribute('autocomplete', 'off');
+        }
+    });
+
+    // === REGLAS ESTRICTAS PARA NOMBRES (SOLO LETRAS Y FORMATO TÍTULO) ===
+    const camposNombres = ['id_nombres_menor', 'id_apellido_paterno_menor', 'id_apellido_materno_menor'];
+
+    camposNombres.forEach(function(id) {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                // 1. Quitar números y símbolos al instante
+                let valorLimpio = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+
+                // 2. Aplicar Formato Título (Ej. maria -> Maria)
+                valorLimpio = valorLimpio.split(' ').map(palabra => {
+                    if (palabra.length > 0) {
+                        return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
+                    }
+                    return '';
+                }).join(' ');
+
+                this.value = valorLimpio;
+            });
+        }
+    });
+
+    // === REGLAS ESTRICTAS PARA NÚMERO EXTERIOR E INTERIOR (SOLO NÚMEROS) ===
+    const camposNumeros = ['id_numero_exterior', 'id_numero_interior'];
+    camposNumeros.forEach(function(id) {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                // Elimina todo lo que no sea un número (del 0 al 9)
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+    });
+
+    // === REGLAS ESTRICTAS PARA EL CURP ===
+    const curpInput = document.getElementById('id_curp_menor');
+    if(curpInput) {
+        // Bloqueamos a 18 caracteres máximo desde el HTML
+        curpInput.setAttribute('maxlength', '18');
+
+        curpInput.addEventListener('input', function() {
+            // Convierte a mayúscula al instante y borra minúsculas o caracteres especiales
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        });
+    }
+
+    // === REGLAS ESTRICTAS PARA EL CELULAR ===
+    const celularInput = document.getElementById('id_celular');
+    if(celularInput) {
+        // Bloqueamos a 10 caracteres máximo desde el HTML
+        celularInput.setAttribute('maxlength', '10');
+
+        celularInput.addEventListener('input', function() {
+            // Elimina al instante cualquier cosa que NO sea un número del 0 al 9
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
 
     // === 1. LISTA DE ESTADOS, MUNICIPIOS Y CARRERAS ===
     const ESTADOS_MX_COMPLETOS = [
@@ -504,11 +602,16 @@ $(document).ready(function() {
         "Facultad de Ciencias Agrícolas": ["Ingeniero Agrónomo", "Ingeniero Forestal"],
         "Facultad de Humanidades": ["Licenciatura en Bibliotecología y Gestión de Información", "Licenciatura en Comunicación", "Licenciatura en Filosofía", "Licenciatura en Lengua y Literatura Hispanoamericanas", "Licenciatura en Pedagogía", "PSU en Bienestar Humano y Comunitario"],
         "Facultad de Lenguas": ["Licenciatura en Enseñanza del Francés", "Licenciatura en Enseñanza del Inglés"],
-        "Facultad de Ciencias en Fisica y Matemáticas": ["Licenciatura en Física", "Ingeniería Física", "Licenciatura en Matemáticas", "Licenciatura en Matemáticas Aplicadas"],
+        "Facultad de Ciencias en Fisica y Matematicas": ["Licenciatura en Física", "Ingeniería Física", "Licenciatura en Matemáticas", "Licenciatura en Matemáticas Aplicadas"],
         "Facultad Maya de Estudios Agropecuarios": ["Licenciatura en Agronegocios", "Ingeniería en Desarrollo Rural", "Ingeniería en Procesos Agroindustriales", "Ingeniería en Agronomía", "Ingeniería en Sistemas Forestales", "Licenciatura en Medicina Veterinaria y Zootecnia", "PSU en Acuicultura"]
     };
 
-    // Leemos la facultad que viene de Django con seguridad
+    // Función para quitar acentos y que las comparaciones sean exactas
+    const quitarAcentos = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    };
+
+    // Leemos la facultad que viene de Django
     let facultadPadre = "{{ form.instance.unidad_academica|escapejs }}";
     if(facultadPadre === "None") facultadPadre = "";
 
@@ -532,11 +635,14 @@ $(document).ready(function() {
     // Cargar Estados
     ESTADOS_MX_COMPLETOS.forEach(e => selEdo.append(new Option(e.nombre, e.nombre)));
 
-    // Cargar Carreras (INTELIGENCIA)
+    // Cargar Carreras (LÓGICA CORREGIDA)
     let carrerasMatch = [];
     if (facultadPadre) {
+        let facNormalizada = quitarAcentos(facultadPadre);
+
         for (const [key, value] of Object.entries(ofertaEducativa)) {
-            if (key.toLowerCase().includes(facultadPadre.toLowerCase().trim()) || facultadPadre.toLowerCase().includes(key.toLowerCase())) {
+            let keyNormalizada = quitarAcentos(key);
+            if (keyNormalizada === facNormalizada || keyNormalizada.includes(facNormalizada) || facNormalizada.includes(keyNormalizada)) {
                 carrerasMatch = value;
                 break;
             }
@@ -562,7 +668,7 @@ $(document).ready(function() {
     selMun.on('change', function() { hiddenMun.val(this.value); });
     selProg.on('change', function() { hiddenProg.val(this.value); });
 
-    // === 5. RESTAURAR VALORES (Si hubo un error y se recarga la página) ===
+    // === 5. RESTAURAR VALORES ===
     if(hiddenEdo.val()) {
         selEdo.val(hiddenEdo.val()).trigger('change.select2');
         const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === hiddenEdo.val());
@@ -592,7 +698,7 @@ $(document).ready(function() {
     if (par) par.addEventListener("change", togglePar);
     togglePar();
 
-    // === 7. VALIDACIÓN AL GUARDAR ===
+    // === 7. VALIDACIÓN AL GUARDAR CON SWEETALERT ===
     const form = document.getElementById("form-solicitud");
     const btn = document.getElementById("btn-guardar");
 
@@ -600,25 +706,97 @@ $(document).ready(function() {
       form.addEventListener("submit", (e) => {
           e.preventDefault();
 
-          // Sincronizar un último chequeo de seguridad
+          // Sincronizar selectores
           hiddenProg.val(selProg.val());
           hiddenEdo.val(selEdo.val());
           hiddenMun.val(selMun.val());
 
-          // Checar campos vacíos esenciales
-          if(!hiddenProg.val()) { alert("Por favor selecciona tu Programa Educativo (Carrera)."); return; }
-          if(!hiddenEdo.val()) { alert("Por favor selecciona el Estado de tu domicilio."); return; }
-          if(!hiddenMun.val()) { alert("Por favor selecciona el Municipio de tu domicilio."); return; }
+          // 0. Validar explícitamente identidad del menor.
+          // Si estos campos llegan vacíos, los filtros aparecerán como "No capturado".
+          const nombresMenor = document.getElementById('id_nombres_menor');
+          const paternoMenor = document.getElementById('id_apellido_paterno_menor');
+          const maternoMenor = document.getElementById('id_apellido_materno_menor');
+          const fechaMenor = document.getElementById('id_fecha_nacimiento_menor');
 
-          btn.disabled = true;
-          btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2"></span>';
+          if (
+              !nombresMenor || !nombresMenor.value.trim() ||
+              !paternoMenor || !paternoMenor.value.trim() ||
+              !maternoMenor || !maternoMenor.value.trim() ||
+              !fechaMenor || !fechaMenor.value.trim()
+          ) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Faltan datos del menor',
+                  text: 'Captura nombre, apellidos y fecha de nacimiento del menor. Estos datos se usarán en Psicología, Nutrición y Médico.',
+                  confirmButtonColor: '#1d4ed8'
+              });
+              return;
+          }
 
-          const t = document.getElementById('toast-notification');
-          document.getElementById('toast-title').innerText = "Enviando";
-          document.getElementById('toast-msg').innerText = "Guardando solicitud, por favor espere...";
-          t.classList.add('show');
+          // 1. Validar que no falten campos obligatorios
+          // checkValidity revisa todos los inputs con atributo "required"
+          if(!form.checkValidity() || !hiddenProg.val() || !hiddenEdo.val() || !hiddenMun.val()) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Campos incompletos',
+                  text: 'Hacen falta campos obligatorios para poder enviar la solicitud.',
+                  confirmButtonColor: '#1d4ed8'
+              });
+              form.reportValidity(); // Muestra visualmente qué campo falta
+              return;
+          }
 
-          form.submit();
+          // 2. Validar CURP explícitamente (18 caracteres)
+          if(curpInput && curpInput.value.length !== 18) {
+              Swal.fire({
+                  icon: 'warning',
+                  title: 'CURP Inválido',
+                  text: 'El CURP debe tener exactamente 18 caracteres.',
+                  confirmButtonColor: '#1d4ed8'
+              });
+              return;
+          }
+
+          // 2.5 Validar Celular explícitamente (10 dígitos)
+          if(celularInput && celularInput.value.length !== 10) {
+              Swal.fire({
+                  icon: 'warning',
+                  title: 'Celular Inválido',
+                  text: 'El número de celular debe tener exactamente 10 dígitos numéricos.',
+                  confirmButtonColor: '#1d4ed8'
+              });
+              return;
+          }
+
+          // 3. Alerta bonita de confirmación final
+          Swal.fire({
+              title: '¿Estás seguro de enviarlo?',
+              text: "Una vez que lo envíes no podrás modificar los datos.",
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonColor: '#1d4ed8', // Azul acorde a tu diseño
+              cancelButtonColor: '#6b7280',  // Gris
+              confirmButtonText: 'Sí, enviar',
+              cancelButtonText: 'Revisar',
+              reverseButtons: true
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  // Bloquear botón para evitar doble clic
+                  btn.disabled = true;
+                  btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2"></span>';
+
+                  // Normalizar espacios antes de enviar al backend
+                  camposNombres.forEach(function(id) {
+                      const campo = document.getElementById(id);
+                      if (campo) {
+                          campo.value = campo.value.trim().replace(/\s+/g, ' ');
+                      }
+                  });
+
+                  // Enviar el formulario
+                  form.submit();
+              }
+          });
       });
     }
 });

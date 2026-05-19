@@ -1,89 +1,207 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes Finales Pendientes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block extra_css %}
-<style>
-  body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-  .navbar-unach {
-      background-color: #1e3a8a;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      padding: 10px 0;
-  }
-  .navbar-brand { font-weight: 800; color: white !important; }
-  .logo-img { max-height: 45px; margin-right: 12px; }
+    <style>
+        body {
+            background: #f3f5f8;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-  .container-page { max-width: 1100px; margin: 0 auto; padding-top: 100px; }
-</style>
-{% endblock %}
+        .navbar-ts {
+            background: #7c3aed;
+            padding: .75rem 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,.12);
+        }
 
-{% block content %}
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: .5px;
+            line-height: 1.15;
+        }
 
-<nav class="navbar navbar-expand-lg navbar-unach fixed-top">
-  <div class="container">
-    <div class="navbar-brand d-flex align-items-center">
-      <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img">
-      <div style="line-height: 1.1;">
-          <div style="font-size: 1.1rem; letter-spacing: 0.5px;">TRABAJO SOCIAL</div>
-          <div style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">Reportes Finales de Ingreso (FO-301)</div>
-      </div>
+        .brand-subtitle {
+            color: rgba(255,255,255,.78);
+            font-size: .85rem;
+        }
+
+        .container-panel {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 22px 16px;
+            margin-top: 92px;
+        }
+
+        .card-panel {
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,.08);
+            border: none;
+            background: #fff;
+        }
+
+        .table-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-soft {
+            border-radius: 10px;
+            font-weight: 700;
+            padding: .5rem .9rem;
+        }
+
+        .badge-state {
+            border-radius: 999px;
+            padding: .45rem .75rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-ts fixed-top">
+    <div class="container-fluid justify-content-center">
+        <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'reporte_final_pendientes' %}">
+                <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
+                <div>
+                    <div class="brand-title">REPORTE FINAL DE INGRESO</div>
+                    <div class="brand-subtitle">Trabajo Social · FO-301-02-18</div>
+                </div>
+            </a>
+
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <a href="{% url 'dashboard_admin' %}" class="btn btn-light btn-soft">
+                    <i class="bi bi-arrow-left me-1"></i> Panel Trabajo Social
+                </a>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-soft">
+                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="ms-auto d-flex gap-2">
-      <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-light rounded-pill fw-bold">
-        <i class="bi bi-arrow-left me-1"></i> Volver al panel
-      </a>
-    </div>
-  </div>
 </nav>
 
-<div class="container-page pb-5">
+<div class="container-panel">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-primary m-0"><i class="bi bi-file-earmark-check-fill me-2"></i> Expedientes Listos para FO-301</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card card-panel p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">
+                    <i class="bi bi-file-earmark-check-fill me-2 text-primary"></i>
+                    Reportes Finales Pendientes
+                </h3>
+                <p class="text-muted mb-0">
+                    Expedientes que terminaron los filtros de Psicología, Nutrición y Médico.
+                </p>
+            </div>
+
+            <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2">
+                Pendientes: {{ inscripciones|length }}
+            </span>
+        </div>
     </div>
 
-    <div class="alert alert-info shadow-sm border-0 rounded-3">
-        <i class="bi bi-info-circle-fill me-2"></i> Aquí aparecen únicamente los menores que <strong>ya aprobaron los 3 filtros</strong> y están pendientes de su Reporte Final.
-    </div>
-
-    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mt-4">
-        <div class="card-body p-0">
+    <div class="card card-panel p-0 table-card">
+        <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4 py-3 text-secondary">Folio</th>
-                        <th class="text-secondary">Nombre del Menor</th>
-                        <th class="text-secondary">Tutor Principal</th>
-                        <th class="text-secondary">Estatus Filtros</th>
-                        <th class="text-end pe-4 text-secondary">Acción</th>
+                        <th>Folio</th>
+                        <th>Menor</th>
+                        <th>Tutor</th>
+                        <th>Filtros</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acción</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    {% for insc in inscripciones %}
+                    {% for inscripcion in inscripciones %}
                     <tr>
-                        <td class="ps-4 fw-bold text-primary fs-5">#{{ insc.solicitud_ingreso.folio }}</td>
-                        <td class="fw-bold text-dark text-uppercase">
-                            {{ insc.solicitud_ingreso.nombres_menor }} {{ insc.solicitud_ingreso.apellido_paterno_menor }}
+                        <td class="fw-bold">
+                            #{{ inscripcion.solicitud_ingreso.folio }}
                         </td>
-                        <td class="text-muted">
-                            <i class="bi bi-person me-1"></i>{{ insc.solicitud_ingreso.nombres_tutor }}
-                        </td>
+
                         <td>
-                            <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm">
-                                <i class="bi bi-check-all me-1"></i> 3/3 Aprobados
+                            <div class="fw-bold">
+                                {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                            </div>
+                            <div class="text-muted small">
+                                CURP: {{ inscripcion.solicitud_ingreso.curp_menor|default:"No capturada" }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="fw-bold">
+                                {{ inscripcion.solicitud_ingreso.nombre_tutor_completo }}
+                            </div>
+                            <div class="text-muted small">
+                                {{ inscripcion.solicitud_ingreso.correo }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column gap-1 small">
+                                <span>
+                                    Psicología:
+                                    <strong>{{ inscripcion.solicitud_ingreso.get_estado_psicologia_display }}</strong>
+                                </span>
+                                <span>
+                                    Nutrición:
+                                    <strong>{{ inscripcion.solicitud_ingreso.get_estado_nutricion_display }}</strong>
+                                </span>
+                                <span>
+                                    Médico:
+                                    <strong>{{ inscripcion.solicitud_ingreso.get_estado_medico_display }}</strong>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge bg-warning-subtle text-warning-emphasis badge-state">
+                                {{ inscripcion.get_estado_display }}
                             </span>
                         </td>
-                        <td class="text-end pe-4">
-                            <a href="{% url 'dictaminar_reporte_final' insc.id %}" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">
-                                Generar FO-301 <i class="bi bi-arrow-right ms-1"></i>
+
+                        <td class="text-end">
+                            <a href="{% url 'dictaminar_reporte_final' inscripcion.id %}" class="btn btn-primary btn-soft">
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Registrar reporte
                             </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
-                            No hay expedientes listos para reporte final en este momento.
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted"></i>
+                            <h5 class="fw-bold mt-3">No hay reportes finales pendientes</h5>
+                            <p class="text-muted mb-0">
+                                Cuando los tres filtros terminen, aparecerán aquí.
+                            </p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -91,5 +209,9 @@
             </table>
         </div>
     </div>
+
 </div>
-{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

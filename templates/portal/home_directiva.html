@@ -28,6 +28,242 @@
     .incidencia-baja { background: #fffaf0; border: 1px solid #fbd38d; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
     .badge-alto { background: #e53e3e; color: white; }
     .badge-bajo { background: #dd6b20; color: white; }
+
+    .filter-mini { display: flex; flex-direction: column; gap: 4px; }
+    .filter-mini .badge { width: fit-content; }
+    .action-btn-circle {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content-directiva {
+        border-radius: 16px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, .25);
+    }
+    .modal-header-success {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: #fff;
+    }
+    .modal-header-danger {
+        background: linear-gradient(135deg, #dc2626, #991b1b);
+        color: #fff;
+    }
+
+    .estado-operativo{
+        border-radius: 18px;
+        padding: 18px 22px;
+        margin-bottom: 24px;
+        display:flex;
+        gap:14px;
+        align-items:flex-start;
+        box-shadow:0 8px 22px rgba(15,23,42,.06);
+        border:1px solid transparent;
+    }
+    .estado-operativo .status-icon{
+        width:48px;
+        height:48px;
+        border-radius:14px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-shrink:0;
+        font-size:1.4rem;
+    }
+    .estado-operativo h5{
+        margin:0 0 5px;
+        font-weight:900;
+    }
+    .estado-operativo p{
+        margin:0;
+        line-height:1.5;
+        font-size:.95rem;
+    }
+    .estado-activo{
+        background:#f0fdf4;
+        border-color:#bbf7d0;
+        border-left:7px solid #16a34a;
+        color:#14532d;
+    }
+    .estado-activo .status-icon{
+        background:#dcfce7;
+        color:#15803d;
+    }
+    .estado-consulta{
+        background:#fff7ed;
+        border-color:#fed7aa;
+        border-left:7px solid #f97316;
+        color:#9a3412;
+    }
+    .estado-consulta .status-icon{
+        background:#ffedd5;
+        color:#c2410c;
+    }
+    .solo-consulta-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        border-radius:999px;
+        padding:.38rem .68rem;
+        font-size:.76rem;
+        font-weight:900;
+        background:#ffedd5;
+        color:#9a3412;
+        border:1px solid #fed7aa;
+    }
+    .operacion-activa-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        border-radius:999px;
+        padding:.38rem .68rem;
+        font-size:.76rem;
+        font-weight:900;
+        background:#dcfce7;
+        color:#166534;
+        border:1px solid #86efac;
+    }
+    .readonly-card-note{
+        background:#fff7ed;
+        border:1px solid #fed7aa;
+        border-left:5px solid #f97316;
+        color:#9a3412;
+        border-radius:12px;
+        padding:10px 12px;
+        font-size:.86rem;
+        font-weight:600;
+    }
+    .sprint4-salas-note{
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left:5px solid #2563eb;
+        color:#1e3a8a;
+        border-radius:12px;
+        padding:12px 14px;
+        font-size:.9rem;
+        font-weight:600;
+    }
+
+    .final-report-note {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 5px solid #2563eb;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: .86rem;
+        color: #1e3a8a;
+    }
+
+    /* =========================================================
+       SPRINT 5 - INCIDENCIAS / VISTA DIRECTIVA
+       ========================================================= */
+    .incidencias-directiva-hero{
+        background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+        border:1px solid #bfdbfe;
+        border-left:7px solid #2563eb;
+        border-radius:16px;
+        padding:16px 18px;
+        margin-bottom:18px;
+        color:#1e3a8a;
+        box-shadow:0 8px 18px rgba(15,23,42,.06);
+    }
+    .incidencias-directiva-hero h6{
+        margin:0 0 5px;
+        font-weight:900;
+        color:#1e3a8a;
+    }
+    .incidencias-directiva-hero p{
+        margin:0;
+        font-size:.9rem;
+        line-height:1.45;
+        font-weight:600;
+    }
+    .incidencias-directiva-actions{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:10px;
+        margin-bottom:18px;
+    }
+    .incidencias-directiva-btn{
+        border-radius:14px;
+        padding:12px;
+        text-decoration:none;
+        font-weight:900;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        border:1px solid #e2e8f0;
+        background:#fff;
+        color:#0f172a;
+        box-shadow:0 6px 15px rgba(15,23,42,.05);
+        transition:.18s ease;
+    }
+    .incidencias-directiva-btn:hover{
+        transform:translateY(-1px);
+        box-shadow:0 10px 22px rgba(15,23,42,.09);
+        color:#0f172a;
+    }
+    .incidencias-directiva-btn .icon{
+        width:36px;
+        height:36px;
+        border-radius:12px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-shrink:0;
+        font-size:1.05rem;
+    }
+    .incidencia-item{
+        border-radius:14px;
+        padding:12px;
+        margin-bottom:10px;
+        box-shadow:0 6px 15px rgba(15,23,42,.05);
+    }
+    .incidencia-item-alta{
+        background:#fef2f2;
+        border:1px solid #fecaca;
+        border-left:6px solid #dc2626;
+    }
+    .incidencia-item-seguimiento{
+        background:#fff7ed;
+        border:1px solid #fed7aa;
+        border-left:6px solid #f97316;
+    }
+    .incidencia-item .inc-title{
+        font-weight:900;
+        color:#0f172a;
+        margin-bottom:2px;
+    }
+    .incidencia-item .inc-desc{
+        color:#334155;
+        font-size:.84rem;
+        line-height:1.35;
+        margin-bottom:6px;
+    }
+    .incidencia-item .inc-meta{
+        color:#64748b;
+        font-size:.78rem;
+        font-weight:700;
+    }
+    .incidencia-link{
+        border-radius:999px;
+        font-size:.76rem;
+        font-weight:900;
+        padding:.35rem .65rem;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        gap:5px;
+    }
+    @media(max-width:576px){
+        .incidencias-directiva-actions{
+            grid-template-columns:1fr;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -42,6 +278,9 @@
             <span class="text-white me-3 align-self-center fw-bold">
                 <i class="bi bi-person-circle"></i> {{ request.user.nombre|default:request.user.email }} ({{ request.user.puesto|default:"Directiva" }})
             </span>
+            <a href="{% url 'panel_incidencias' %}" class="btn btn-outline-light btn-sm me-2">
+                <i class="bi bi-clipboard2-pulse-fill"></i> Incidencias
+            </a>
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-light btn-sm">
@@ -53,14 +292,6 @@
 </nav>
 
 <div class="container-fluid px-4 mb-5">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm mb-4" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <div class="welcome-banner">
         <div>
@@ -74,6 +305,39 @@
             <i class="bi bi-shield-lock-fill display-1 opacity-25"></i>
         </div>
     </div>
+
+    {% if modo_solo_consulta %}
+    <div class="estado-operativo estado-consulta">
+        <div class="status-icon">
+            <i class="bi bi-lock-fill"></i>
+        </div>
+        <div>
+            <h5>Modo solo consulta</h5>
+            <p>
+                {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Dirección puede consultar información existente, pero no puede aprobar, rechazar, modificar ni autorizar operaciones hasta que el Administrador inicie un nuevo semestre." }}
+            </p>
+            <span class="solo-consulta-badge mt-2">
+                <i class="bi bi-eye-fill"></i> Consulta histórica habilitada
+            </span>
+        </div>
+    </div>
+    {% else %}
+    <div class="estado-operativo estado-activo">
+        <div class="status-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div>
+            <h5>Semestre activo</h5>
+            <p>
+                Dirección puede operar normalmente en el semestre:
+                <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+            </p>
+            <span class="operacion-activa-badge mt-2">
+                <i class="bi bi-pencil-square"></i> Operación activa
+            </span>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="row g-3 mb-4">
         <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #198754, #146c43);"><div><p>Alumnos Activos</p><h3>{{ kpi_alumnos|default:"0" }}</h3></div><i class="bi bi-people-fill"></i></div></div>
@@ -91,6 +355,13 @@
                     <span><i class="bi bi-award-fill text-warning me-2"></i> Bandeja de Veredicto Final (Firma)</span>
                 </div>
                 <div class="dash-card-body pt-2">
+                    {% if modo_solo_consulta %}
+                    <div class="readonly-card-note mb-3">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        <strong>Semestre cerrado o sin semestre activo:</strong>
+                        puedes revisar expedientes y reportes, pero las acciones de aprobar, rechazar o mantener pendiente están bloqueadas.
+                    </div>
+                    {% else %}
                     <div class="alert alert-primary border-0 bg-light shadow-sm d-flex align-items-center mb-3">
                         <i class="bi bi-info-circle-fill fs-3 text-primary me-3"></i>
                         <div>
@@ -98,6 +369,7 @@
                             <p class="mb-0 small text-dark">Al hacer clic en <strong>Aceptar</strong>, el sistema estampará su nombre en el formato FO-301 y notificará al beneficiario.</p>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="table-responsive">
                         <table class="table table-hover align-middle border mb-0">
@@ -114,26 +386,162 @@
     <td>
         <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
         <span class="text-uppercase d-block fw-bold">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
-        <small class="text-muted">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
+        <small class="text-muted d-block">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
+        <small class="text-muted">
+            <i class="bi bi-envelope me-1"></i>{{ ins.solicitud_ingreso.correo|default:"Sin correo" }}
+        </small>
     </td>
+
     <td>
-        <span class="badge bg-success mb-1"><i class="bi bi-check-all"></i> Áreas OK</span>
+        <div class="filter-mini">
+            {% if ins.solicitud_ingreso.estado_psicologia == 'APROBADO' %}
+                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Psicología aprobó</span>
+            {% elif ins.solicitud_ingreso.estado_psicologia == 'RECHAZADO' %}
+                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Psicología rechazó</span>
+            {% else %}
+                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Psicología pendiente</span>
+            {% endif %}
+
+            {% if ins.solicitud_ingreso.estado_nutricion == 'APROBADO' %}
+                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Nutrición aprobó</span>
+            {% elif ins.solicitud_ingreso.estado_nutricion == 'RECHAZADO' %}
+                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Nutrición rechazó</span>
+            {% else %}
+                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Nutrición pendiente</span>
+            {% endif %}
+
+            {% if ins.solicitud_ingreso.estado_medico == 'APROBADO' %}
+                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Médico aprobó</span>
+            {% elif ins.solicitud_ingreso.estado_medico == 'RECHAZADO' %}
+                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Médico rechazó</span>
+            {% else %}
+                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Médico pendiente</span>
+            {% endif %}
+        </div>
     </td>
+
     <td class="text-center">
-        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST" class="d-flex justify-content-center gap-1">
-            {% csrf_token %}
-            <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success btn-sm shadow-sm">
+        {% if modo_solo_consulta %}
+        <span class="solo-consulta-badge">
+            <i class="bi bi-lock-fill"></i> Solo consulta
+        </span>
+        {% else %}
+        <span class="operacion-activa-badge mb-2">
+            <i class="bi bi-check2-circle"></i> Puede resolver
+        </span>
+        {% endif %}
+
+        <div class="d-flex justify-content-center gap-1 flex-wrap">
+            <button type="button" class="btn btn-success btn-sm shadow-sm action-btn-circle"
+                    title="Aprobar inscripción final"
+                    data-bs-toggle="modal"
+                    data-bs-target="#aprobarFinalModal{{ ins.id }}" {% if modo_solo_consulta %}disabled{% endif %}>
                 <i class="bi bi-check-circle-fill"></i>
             </button>
 
-            <button type="submit" name="accion" value="PENDIENTE" class="btn btn-warning btn-sm text-dark shadow-sm">
-                <i class="bi bi-hourglass-split"></i>
-            </button>
+            <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" name="accion" value="PENDIENTE"
+                        class="btn btn-warning btn-sm text-dark shadow-sm action-btn-circle"
+                        title="Mantener pendiente"
+                        onclick="return confirm('¿Deseas mantener este expediente pendiente de resolución final?');" {% if modo_solo_consulta %}disabled{% endif %}>
+                    <i class="bi bi-hourglass-split"></i>
+                </button>
+            </form>
 
-            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger btn-sm shadow-sm">
+            <button type="button" class="btn btn-danger btn-sm shadow-sm action-btn-circle"
+                    title="Rechazar inscripción final"
+                    data-bs-toggle="modal"
+                    data-bs-target="#rechazarFinalModal{{ ins.id }}" {% if modo_solo_consulta %}disabled{% endif %}>
                 <i class="bi bi-x-circle"></i>
             </button>
-        </form>
+        </div>
+
+        <div class="modal fade" id="aprobarFinalModal{{ ins.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content modal-content-directiva">
+                    <div class="modal-header modal-header-success">
+                        <h5 class="modal-title fw-bold">
+                            <i class="bi bi-check-circle-fill me-2"></i>Aprobar inscripción final
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
+                        {% csrf_token %}
+                        <div class="modal-body text-start p-4">
+                            <p class="mb-2">
+                                Confirmas la aprobación final de:
+                                <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
+                            </p>
+
+                            <div class="final-report-note mb-3">
+                                Al aprobar, el sistema generará el Reporte Final FO-301-02-18,
+                                lo guardará en el expediente y enviará correo al beneficiario.
+                            </div>
+
+                            <label class="form-label fw-bold">Observaciones de Dirección (opcional)</label>
+                            <textarea name="directora_observaciones"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Ej. Se autoriza la inscripción conforme al reporte final."></textarea>
+                        </div>
+
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success rounded-pill px-4 fw-bold" {% if modo_solo_consulta %}disabled{% endif %}>
+                                <i class="bi bi-check-circle me-1"></i> Aprobar y enviar correo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="rechazarFinalModal{{ ins.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content modal-content-directiva">
+                    <div class="modal-header modal-header-danger">
+                        <h5 class="modal-title fw-bold">
+                            <i class="bi bi-x-octagon-fill me-2"></i>Rechazar inscripción final
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
+                        {% csrf_token %}
+                        <div class="modal-body text-start p-4">
+                            <p class="mb-2">
+                                Estás por rechazar la inscripción final de:
+                                <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
+                            </p>
+
+                            <div class="alert alert-danger py-2 small mb-3">
+                                Para rechazar es obligatorio escribir el motivo. Este texto se incluirá como observación de Dirección.
+                            </div>
+
+                            <label class="form-label fw-bold">Motivo / observaciones de rechazo</label>
+                            <textarea name="directora_observaciones"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Escribe el motivo del rechazo final..."
+                                      required></textarea>
+                        </div>
+
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger rounded-pill px-4 fw-bold" {% if modo_solo_consulta %}disabled{% endif %}>
+                                <i class="bi bi-x-circle me-1"></i> Rechazar y enviar correo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </td>
 </tr>
 {% empty %}
@@ -151,72 +559,65 @@
 
             <div class="dash-card border-info mt-4">
                 <div class="dash-card-header bg-info bg-opacity-10 border-info border-opacity-25 pb-2">
-                    <span class="text-info-emphasis"><i class="bi bi-door-open-fill me-2"></i> Autorización de Asignación de Salas</span>
+                    <span class="text-info-emphasis">
+                        <i class="bi bi-door-open-fill me-2"></i> Consulta de Asignación de Salas
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                        Sprint 4
+                    </span>
                 </div>
                 <div class="dash-card-body pt-2">
-                    <p class="small text-muted mb-3">Trabajo Social ha propuesto las siguientes salas para los alumnos aprobados. Confirme si está de acuerdo.</p>
+                    <div class="sprint4-salas-note mb-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Con el Sprint 4, la asignación de salas, maestras y horarios corresponde al
+                        <strong>Administrador del Sistema</strong> desde Gestión de Semestres.
+                        Dirección conserva esta sección solo como consulta histórica si existen registros anteriores.
+                    </div>
 
                     <div class="table-responsive">
                         <table class="table table-hover align-middle border mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Alumno</th>
-                                    <th>Sala Propuesta</th>
-                                    <th class="text-center">Decisión</th>
+                                    <th>Sala registrada</th>
+                                    <th class="text-center">Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for sala_req in salas_en_revision %}
                                 <tr>
                                     <td>
-                                        <span class="fw-bold text-dark d-block">{{ sala_req.solicitud_ingreso.nombres_menor }} {{ sala_req.solicitud_ingreso.apellido_paterno_menor }}</span>
+                                        <span class="fw-bold text-dark d-block">
+                                            {{ sala_req.solicitud_ingreso.nombres_menor }} {{ sala_req.solicitud_ingreso.apellido_paterno_menor }}
+                                        </span>
                                         <small class="text-muted">Folio #{{ sala_req.solicitud_ingreso.folio }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm"><i class="bi bi-house-door-fill me-1"></i> Sala {{ sala_req.sala_asignada.nombre }}</span>
+                                        {% if sala_req.sala_asignada %}
+                                            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
+                                                <i class="bi bi-house-door-fill me-1"></i> Sala {{ sala_req.sala_asignada.nombre }}
+                                            </span>
+                                        {% elif sala_req.sala_semestre_asignada %}
+                                            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
+                                                <i class="bi bi-house-door-fill me-1"></i> {{ sala_req.sala_semestre_asignada.sala.nombre }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Sin sala</span>
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        <form action="{% url 'dictaminar_sala_directora' sala_req.id %}" method="POST" class="d-flex justify-content-center gap-2">
-                                            {% csrf_token %}
-                                            <button type="submit" name="accion" value="APROBAR" class="btn btn-success shadow-sm rounded-pill fw-bold px-3" onclick="return confirm('¿Autorizar el ingreso del alumno a la Sala {{ sala_req.sala_asignada.nombre }}?');">
-                                                <i class="bi bi-check-lg me-1"></i> Autorizar
-                                            </button>
-
-                                            <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rechazarModal{{ sala_req.id }}">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </form>
-
-                                        <div class="modal fade" id="rechazarModal{{ sala_req.id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content" style="border-radius: 15px;">
-                                                    <div class="modal-header bg-danger text-white" style="border-radius: 15px 15px 0 0;">
-                                                        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Rechazar Sala Propuesta</h5>
-                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <form action="{% url 'dictaminar_sala_directora' sala_req.id %}" method="POST">
-                                                        {% csrf_token %}
-                                                        <div class="modal-body text-start p-4">
-                                                            <p class="text-muted small">Estás a punto de devolver el expediente a Trabajo Social porque no estás de acuerdo con la <strong>Sala {{ sala_req.sala_asignada.nombre }}</strong> propuesta para {{ sala_req.solicitud_ingreso.nombres_menor }}.</p>
-
-                                                            <label class="fw-bold mb-2 text-dark">Escribe el motivo del rechazo (obligatorio):</label>
-                                                            <textarea name="motivo_rechazo" class="form-control" rows="4" placeholder="Ej. El menor aún no camina, sugiero cambiarlo a la L3 en lugar de M1..." required></textarea>
-                                                        </div>
-                                                        <div class="modal-footer bg-light">
-                                                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                                                            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger rounded-pill px-4 fw-bold">Enviar Comentario a T.S.</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        </td>
+                                        <span class="solo-consulta-badge">
+                                            <i class="bi bi-eye-fill"></i> Consulta
+                                        </span>
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
                                     <td colspan="3" class="text-center py-4 text-muted bg-light">
                                         <i class="bi bi-inbox-fill fs-3 text-secondary mb-2 d-block opacity-25"></i>
-                                        <small class="fw-bold m-0 text-secondary">No hay propuestas de sala pendientes de revisión.</small>
+                                        <small class="fw-bold m-0 text-secondary">
+                                            No hay registros de sala pendientes o históricos para mostrar.
+                                        </small>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -276,31 +677,140 @@
         <div class="col-lg-5">
 
             <div class="dash-card border border-danger border-opacity-25">
-                <div class="header-section text-danger bg-white pb-2 pt-3 px-4">
-                    <i class="bi bi-shield-exclamation me-2"></i> Reporte de Incidencias Activas
+                <div class="header-section text-danger bg-white pb-2 pt-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span>
+                        <i class="bi bi-shield-exclamation me-2"></i> Consulta directiva de incidencias
+                    </span>
+                    <a href="{% url 'panel_incidencias' %}" class="btn btn-danger btn-sm rounded-pill fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Abrir módulo
+                    </a>
                 </div>
-                <div class="dash-card-body pt-0">
 
-                    <h6 class="fw-bold small text-danger border-bottom pb-1"><i class="bi bi-fire"></i> ALTO RIESGO (CRÍTICAS)</h6>
-                    {% for inc in incidencias_alto %}
-                    <div class="incidencia-alta d-flex justify-content-between align-items-center shadow-sm">
-                        <div>
-                            <strong class="d-block text-danger">{{ inc.alumno.solicitud_ingreso.nombres_menor }}</strong>
-                            <small class="text-dark">{{ inc.descripcion }}</small>
-                            <div class="mt-1"><small class="text-muted"><i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}</small></div>
+                <div class="dash-card-body pt-0">
+                    <div class="incidencias-directiva-hero">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:44px;height:44px;background:#dbeafe;color:#1d4ed8;">
+                                <i class="bi bi-eye-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <h6>Vista de supervisión</h6>
+                                <p>
+                                    Dirección puede consultar incidencias pedagógicas, nutricionales, médicas y psicológicas,
+                                    revisar seguimientos, archivos y resolución. La creación y seguimiento corresponden al área responsable.
+                                </p>
+                            </div>
                         </div>
-                        <span class="badge badge-alto px-2 py-1"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                    </div>
+
+                    {% if modo_solo_consulta %}
+                    <div class="readonly-card-note mb-3">
+                        <i class="bi bi-eye-fill me-2"></i>
+                        Las incidencias de semestres cerrados son de consulta. No se pueden modificar desde Dirección.
+                    </div>
+                    {% endif %}
+
+                    <div class="incidencias-directiva-actions">
+                        <a href="{% url 'panel_incidencias' %}?estado=ABIERTA" class="incidencias-directiva-btn">
+                            <span class="icon" style="background:#fef3c7;color:#b45309;">
+                                <i class="bi bi-folder2-open"></i>
+                            </span>
+                            <span>Abiertas</span>
+                        </a>
+
+                        <a href="{% url 'panel_incidencias' %}?nivel=ALTO" class="incidencias-directiva-btn">
+                            <span class="icon" style="background:#fee2e2;color:#b91c1c;">
+                                <i class="bi bi-exclamation-octagon-fill"></i>
+                            </span>
+                            <span>Riesgo alto</span>
+                        </a>
+
+                        <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="incidencias-directiva-btn">
+                            <span class="icon" style="background:#fee2e2;color:#b91c1c;">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                            </span>
+                            <span>Médicas</span>
+                        </a>
+
+                        <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="incidencias-directiva-btn">
+                            <span class="icon" style="background:#dbeafe;color:#1d4ed8;">
+                                <i class="bi bi-person-hearts"></i>
+                            </span>
+                            <span>Psicológicas</span>
+                        </a>
+
+                        <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="incidencias-directiva-btn">
+                            <span class="icon" style="background:#dcfce7;color:#15803d;">
+                                <i class="bi bi-egg-fried"></i>
+                            </span>
+                            <span>Nutricionales</span>
+                        </a>
+
+                        <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="incidencias-directiva-btn">
+                            <span class="icon" style="background:#ede9fe;color:#6d28d9;">
+                                <i class="bi bi-easel2-fill"></i>
+                            </span>
+                            <span>Pedagógicas</span>
+                        </a>
+                    </div>
+
+                    <h6 class="fw-bold small text-danger border-bottom pb-1">
+                        <i class="bi bi-fire"></i> RIESGO ALTO / CRÍTICAS
+                    </h6>
+
+                    {% for inc in incidencias_alto %}
+                    <div class="incidencia-item incidencia-item-alta">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <div class="inc-title">
+                                    {{ inc.nombre_alumno|default:inc.alumno.solicitud_ingreso.nombres_menor }}
+                                </div>
+                                <div class="inc-desc">
+                                    {{ inc.descripcion|truncatechars:120 }}
+                                </div>
+                                <div class="inc-meta">
+                                    <i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}
+                                    · {{ inc.get_tipo_display|default:"Incidencia" }}
+                                    · {{ inc.get_estado_display|default:"Abierta" }}
+                                </div>
+                            </div>
+                            <span class="badge badge-alto px-2 py-1">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </span>
+                        </div>
+
+                        <div class="mt-2">
+                            <a href="{% url 'detalle_incidencia' inc.id %}" class="incidencia-link bg-danger-subtle text-danger border border-danger-subtle">
+                                <i class="bi bi-eye-fill"></i> Ver detalle
+                            </a>
+                        </div>
                     </div>
                     {% empty %}
                     <p class="small text-muted py-1 fst-italic">Sin incidencias de alto riesgo.</p>
                     {% endfor %}
 
-                    <h6 class="fw-bold small text-warning border-bottom pb-1 mt-4"><i class="bi bi-exclamation-circle"></i> BAJO RIESGO (SEGUIMIENTO)</h6>
+                    <h6 class="fw-bold small text-warning border-bottom pb-1 mt-4">
+                        <i class="bi bi-exclamation-circle"></i> LEVE / BAJO RIESGO O SEGUIMIENTO
+                    </h6>
+
                     {% for inc in incidencias_bajo %}
-                    <div class="incidencia-baja shadow-sm">
-                        <strong class="text-dark">{{ inc.alumno.solicitud_ingreso.nombres_menor }}</strong>
-                        <br><small class="text-dark">{{ inc.descripcion }}</small>
-                        <div class="mt-1"><small class="text-muted"><i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}</small></div>
+                    <div class="incidencia-item incidencia-item-seguimiento">
+                        <div class="inc-title">
+                            {{ inc.nombre_alumno|default:inc.alumno.solicitud_ingreso.nombres_menor }}
+                        </div>
+                        <div class="inc-desc">
+                            {{ inc.descripcion|truncatechars:120 }}
+                        </div>
+                        <div class="inc-meta">
+                            <i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}
+                            · {{ inc.get_tipo_display|default:"Incidencia" }}
+                            · {{ inc.get_estado_display|default:"Abierta" }}
+                        </div>
+                        <div class="mt-2">
+                            <a href="{% url 'detalle_incidencia' inc.id %}" class="incidencia-link bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <i class="bi bi-eye-fill"></i> Ver detalle
+                            </a>
+                        </div>
                     </div>
                     {% empty %}
                     <p class="small text-muted py-1 fst-italic">Sin incidencias menores.</p>

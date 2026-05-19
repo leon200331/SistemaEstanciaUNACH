@@ -1,0 +1,1172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generar código de seguridad | Trabajo Social</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --yellow:#ca8a04;
+            --red:#dc2626;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(22,163,74,.14), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        .page{
+            max-width:1220px;
+            margin:0 auto;
+            padding:24px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.94);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.9);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand-logo{
+            width:64px;
+            height:64px;
+            border-radius:18px;
+            background:white;
+            border:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
+            box-shadow:0 10px 24px rgba(15,23,42,.08);
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .top-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-end;
+        }
+
+        .btn-soft{
+            border-radius:999px;
+            padding:.72rem 1rem;
+            font-weight:850;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .btn-main{
+            border-radius:999px;
+            padding:.84rem 1.16rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-blue{
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:white;
+        }
+
+        .btn-green{
+            background:linear-gradient(135deg,#16a34a,#22c55e);
+            color:white;
+        }
+
+        .btn-red{
+            background:linear-gradient(135deg,#dc2626,#f97316);
+            color:white;
+        }
+
+        .btn-purple{
+            background:linear-gradient(135deg,#7c3aed,#2563eb);
+            color:white;
+        }
+
+        .hero{
+            background:linear-gradient(135deg,#2563eb,#16a34a,#0891b2);
+            color:white;
+            border-radius:30px;
+            padding:26px;
+            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:270px;
+            height:270px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-85px;
+            top:-95px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:900;
+            margin-bottom:12px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:820px;
+            font-weight:600;
+            opacity:.94;
+        }
+
+        .hero-info{
+            min-width:270px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .hero-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .hero-value{
+            font-size:1.12rem;
+            font-weight:950;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:.86fr 1.14fr;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.95);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{
+            padding:20px;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .student-card{
+            background:linear-gradient(135deg,#eff6ff,#f0fdf4);
+            border:1px solid #bfdbfe;
+            border-radius:24px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .student-top{
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+        }
+
+        .student-avatar{
+            width:66px;
+            height:66px;
+            border-radius:22px;
+            background:linear-gradient(135deg,#dbeafe,#dcfce7);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.9rem;
+            flex-shrink:0;
+        }
+
+        .student-name{
+            font-weight:950;
+            font-size:1.2rem;
+            color:#0f172a;
+            letter-spacing:-.03em;
+            margin-bottom:4px;
+        }
+
+        .student-meta{
+            color:#475569;
+            font-size:.9rem;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            margin-top:16px;
+        }
+
+        .info-item{
+            background:white;
+            border:1px solid rgba(148,163,184,.28);
+            border-radius:16px;
+            padding:12px;
+        }
+
+        .info-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .info-value{
+            font-weight:900;
+            color:#0f172a;
+        }
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .danger-card{
+            background:#fef2f2;
+            border:1px solid #fecaca;
+            border-left:6px solid #dc2626;
+            color:#991b1b;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .success-card{
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-left:6px solid #16a34a;
+            color:#14532d;
+            border-radius:24px;
+            padding:20px;
+            margin-bottom:18px;
+            box-shadow:0 14px 30px rgba(22,163,74,.10);
+        }
+
+        .code-box{
+            margin:18px 0;
+            background:white;
+            border:2px dashed #16a34a;
+            border-radius:24px;
+            padding:24px;
+            text-align:center;
+        }
+
+        .code-label{
+            color:#64748b;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            font-size:.76rem;
+            margin-bottom:8px;
+        }
+
+        .code-value{
+            font-size:3.3rem;
+            font-weight:950;
+            letter-spacing:.2em;
+            color:#0f172a;
+            line-height:1;
+            font-family:"Segoe UI", system-ui, sans-serif;
+        }
+
+        .code-help{
+            color:#166534;
+            font-weight:750;
+            margin-top:10px;
+            font-size:.92rem;
+        }
+
+        .form-section{
+            border:1px solid var(--border);
+            background:#f8fafc;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .form-section-title{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:14px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.02em;
+        }
+
+        .form-label{
+            font-weight:900;
+            color:#334155;
+            margin-bottom:7px;
+            font-size:.88rem;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:16px;
+            border:1px solid #cbd5e1;
+            padding:.78rem .9rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+        }
+
+        textarea.form-control{
+            min-height:118px;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        .form-check{
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:16px;
+            padding:14px 14px 14px 44px;
+            min-height:54px;
+            display:flex;
+            align-items:center;
+        }
+
+        .form-check-input{
+            margin-left:-28px;
+            width:1.15rem;
+            height:1.15rem;
+        }
+
+        .form-check-label{
+            font-weight:850;
+            color:#334155;
+        }
+
+        .errors{
+            margin-top:7px;
+            color:#b91c1c;
+            font-weight:700;
+            font-size:.82rem;
+        }
+
+        .errors ul{
+            margin:0;
+            padding-left:18px;
+        }
+
+        .submit-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            padding-top:4px;
+        }
+
+        .submit-note{
+            color:#64748b;
+            font-weight:650;
+            font-size:.86rem;
+            max-width:580px;
+        }
+
+        .mini-help{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:7px;
+        }
+
+        .steps{
+            display:grid;
+            gap:12px;
+        }
+
+        .step{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            padding:13px;
+            border:1px solid var(--border);
+            background:white;
+            border-radius:18px;
+        }
+
+        .step-number{
+            width:32px;
+            height:32px;
+            border-radius:999px;
+            background:#dbeafe;
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:950;
+            flex-shrink:0;
+        }
+
+        .step-title{
+            font-weight:950;
+            color:#0f172a;
+            margin-bottom:2px;
+        }
+
+        .step-text{
+            color:#64748b;
+            font-size:.86rem;
+            margin:0;
+            font-weight:650;
+            line-height:1.4;
+        }
+
+        .print-area{
+            display:none;
+        }
+
+        @media print{
+            body{
+                background:white;
+            }
+
+            .topbar,
+            .hero,
+            .layout,
+            .alert,
+            .no-print{
+                display:none !important;
+            }
+
+            .print-area{
+                display:block;
+                padding:32px;
+                font-family:"Segoe UI", Arial, sans-serif;
+                color:#0f172a;
+            }
+
+            .print-card{
+                border:2px solid #0f172a;
+                border-radius:18px;
+                padding:28px;
+                max-width:720px;
+                margin:0 auto;
+            }
+
+            .print-title{
+                font-size:22px;
+                font-weight:900;
+                margin-bottom:10px;
+                text-align:center;
+            }
+
+            .print-code{
+                font-size:56px;
+                font-weight:900;
+                letter-spacing:.22em;
+                text-align:center;
+                border:2px dashed #0f172a;
+                border-radius:16px;
+                padding:20px;
+                margin:22px 0;
+            }
+
+            .print-text{
+                font-size:14px;
+                line-height:1.5;
+                margin-bottom:8px;
+            }
+        }
+
+        @media(max-width:1050px){
+            .layout{grid-template-columns:1fr;}
+            .hero-content{grid-template-columns:1fr;}
+            .hero-info{min-width:0;}
+        }
+
+        @media(max-width:720px){
+            .page{padding:14px;}
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+
+            .top-actions,
+            .btn-soft,
+            .btn-main{
+                width:100%;
+                justify-content:center;
+            }
+
+            .hero{
+                padding:22px;
+                border-radius:22px;
+            }
+
+            .hero h1{font-size:1.55rem;}
+
+            .info-grid{
+                grid-template-columns:1fr;
+            }
+
+            .student-top{flex-direction:column;}
+            .submit-bar{align-items:stretch;}
+            .code-value{font-size:2.5rem;}
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="topbar no-print">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">
+                    {% if es_reset %}
+                        Resetear código de seguridad
+                    {% else %}
+                        Generar código de seguridad
+                    {% endif %}
+                </h1>
+                <p class="brand-subtitle">
+                    Código de 4 dígitos para entrada y salida del menor.
+                </p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <a href="{% url 'codigos_responsable_pendientes' %}" class="btn-soft">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Volver a códigos
+            </a>
+
+            <a href="{% url 'panel_admisiones' %}" class="btn-soft">
+                <i class="bi bi-house-door-fill"></i>
+                Panel admisiones
+            </a>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3 no-print">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="hero no-print">
+        <div class="hero-content">
+            <div>
+                <div class="hero-kicker">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Trabajo Social
+                </div>
+
+                <h1>
+                    {% if es_reset %}
+                        Resetear llave del responsable
+                    {% else %}
+                        Crear llave del responsable
+                    {% endif %}
+                </h1>
+
+                <p>
+                    El código debe entregarse únicamente al adulto responsable junto con la credencial.
+                    El sistema lo guarda de forma segura y no volverá a mostrarlo como texto.
+                </p>
+            </div>
+
+            <div class="hero-info">
+                <div class="hero-label">Alumno</div>
+                <div class="hero-value">
+                    {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                </div>
+                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
+                    {% if inscripcion.codigo_responsable_hash %}
+                        Código existente
+                    {% else %}
+                        Sin código generado
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout no-print">
+
+        <aside>
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-person-heart"></i>
+                        Datos del menor
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="student-card">
+                        <div class="student-top">
+                            <div class="student-avatar">
+                                <i class="bi bi-person-heart"></i>
+                            </div>
+                            <div>
+                                <div class="student-name">
+                                    {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                                </div>
+                                <div class="student-meta">
+                                    Estado: <strong>{{ inscripcion.estado }}</strong><br>
+                                    Pago:
+                                    {% if inscripcion.pago_validado or inscripcion.estado_pago == "VALIDADO" %}
+                                        <strong>Validado</strong>
+                                    {% else %}
+                                        <strong>Pendiente de validar</strong>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Semestre</div>
+                                <div class="info-value">
+                                    {% if inscripcion.semestre %}
+                                        {{ inscripcion.semestre.nombre }}
+                                    {% else %}
+                                        Sin semestre
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Sala</div>
+                                <div class="info-value">
+                                    {% if inscripcion.sala_semestre_asignada and inscripcion.sala_semestre_asignada.sala %}
+                                        {{ inscripcion.sala_semestre_asignada.sala.nombre }}
+                                    {% else %}
+                                        Sin sala
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Código</div>
+                                <div class="info-value">
+                                    {% if inscripcion.codigo_responsable_hash %}
+                                        Generado
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Entrega</div>
+                                <div class="info-value">
+                                    {% if inscripcion.codigo_responsable_entregado %}
+                                        Confirmada
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if es_reset %}
+                        <div class="danger-card">
+                            <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                            Estás por invalidar el código anterior y generar uno nuevo. Debes capturar un motivo claro.
+                        </div>
+                    {% else %}
+                        <div class="help-card">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            El código se genera después de inscripción finalizada, pago validado, semestre asignado y sala asignada.
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-list-check"></i>
+                        Reglas de uso
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <div class="step-title">Generar código</div>
+                                <p class="step-text">
+                                    Trabajo Social lo genera cuando el expediente y pago están completos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <div class="step-title">Entregar credencial</div>
+                                <p class="step-text">
+                                    Se entrega credencial y código al adulto responsable.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div>
+                                <div class="step-title">Validación diaria</div>
+                                <p class="step-text">
+                                    La maestra lo solicita en entrada y salida junto con la credencial.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div>
+                                <div class="step-title">Reset seguro</div>
+                                <p class="step-text">
+                                    Si se pierde, se genera uno nuevo y el anterior queda inválido.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <main>
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-key-fill"></i>
+                        {% if codigo_generado %}
+                            Código generado
+                        {% elif es_reset %}
+                            Confirmar reseteo
+                        {% else %}
+                            Confirmar generación
+                        {% endif %}
+                    </h2>
+
+                    {% if codigo_generado %}
+                        <span class="badge-soft badge-green">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Mostrar una sola vez
+                        </span>
+                    {% elif es_reset %}
+                        <span class="badge-soft badge-red">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Reset
+                        </span>
+                    {% else %}
+                        <span class="badge-soft badge-blue">
+                            <i class="bi bi-shield-lock-fill"></i>
+                            Nuevo código
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="panel-body">
+                    {% if codigo_generado %}
+                        <div class="success-card">
+                            <h3 class="mb-2" style="font-weight:950; letter-spacing:-.03em;">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                Código listo para entregar
+                            </h3>
+                            <div>
+                                Entrega este código únicamente al responsable autorizado junto con la credencial.
+                                Después de salir de esta pantalla, el código no volverá a mostrarse.
+                            </div>
+
+                            <div class="code-box">
+                                <div class="code-label">Código de seguridad</div>
+                                <div class="code-value" id="codigoVisible">{{ codigo_generado }}</div>
+                                <div class="code-help">
+                                    Válido para entrada y salida del menor.
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn-main btn-blue" onclick="copiarCodigo()">
+                                    <i class="bi bi-clipboard-check-fill"></i>
+                                    Copiar código
+                                </button>
+
+                                <button type="button" class="btn-main btn-purple" onclick="window.print()">
+                                    <i class="bi bi-printer-fill"></i>
+                                    Imprimir entrega
+                                </button>
+
+                                <a href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}" class="btn-main btn-green">
+                                    <i class="bi bi-person-check-fill"></i>
+                                    Confirmar entrega
+                                </a>
+
+                                <a href="{% url 'codigos_responsable_pendientes' %}" class="btn-soft">
+                                    <i class="bi bi-list-check"></i>
+                                    Volver a lista
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="warning-card">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            No envíes este código por medios no autorizados. Debe entregarse de forma controlada al responsable.
+                        </div>
+                    {% else %}
+                        {% if es_reset %}
+                            <div class="danger-card">
+                                <i class="bi bi-shield-exclamation me-1"></i>
+                                Este alumno ya tiene un código generado. Al resetearlo, el código anterior dejará de ser válido.
+                            </div>
+                        {% else %}
+                            <div class="help-card">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                El código será de 4 dígitos, generado automáticamente y guardado de forma segura.
+                            </div>
+                        {% endif %}
+
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger alert-custom">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-check2-square"></i>
+                                    Confirmación
+                                </div>
+
+                                <div class="form-check">
+                                    {{ form.confirmar }}
+                                    <label for="{{ form.confirmar.id_for_label }}" class="form-check-label">
+                                        {{ form.confirmar.label }}
+                                    </label>
+                                </div>
+                                {% if form.confirmar.errors %}
+                                    <div class="errors">{{ form.confirmar.errors }}</div>
+                                {% endif %}
+
+                                <div class="mini-help">
+                                    Esta acción quedará registrada con tu usuario, fecha y hora.
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-chat-left-text-fill"></i>
+                                    {% if es_reset %}
+                                        Motivo del reseteo
+                                    {% else %}
+                                        Observaciones de entrega
+                                    {% endif %}
+                                </div>
+
+                                <label for="{{ form.motivo.id_for_label }}" class="form-label">
+                                    {{ form.motivo.label }}
+                                </label>
+                                {{ form.motivo }}
+                                {% if form.motivo.errors %}
+                                    <div class="errors">{{ form.motivo.errors }}</div>
+                                {% endif %}
+
+                                <div class="mini-help">
+                                    {% if es_reset %}
+                                        Obligatorio. Ejemplo: “El responsable extravió el código anterior.”
+                                    {% else %}
+                                        Opcional. Ejemplo: “Se entregará junto con la credencial al responsable.”
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="submit-bar">
+                                <div class="submit-note">
+                                    El código visible se mostrará solo después de confirmar esta acción.
+                                </div>
+
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a href="{% url 'codigos_responsable_pendientes' %}" class="btn-soft">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        Cancelar
+                                    </a>
+
+                                    {% if es_reset %}
+                                        <button type="submit" class="btn-main btn-red">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                            Resetear código
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn-main btn-green">
+                                            <i class="bi bi-key-fill"></i>
+                                            Generar código
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+
+    </div>
+</div>
+
+{% if codigo_generado %}
+<div class="print-area">
+    <div class="print-card">
+        <div class="print-title">Código de seguridad del responsable</div>
+
+        <p class="print-text">
+            <strong>Alumno:</strong> {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+        </p>
+        <p class="print-text">
+            <strong>Semestre:</strong>
+            {% if inscripcion.semestre %}
+                {{ inscripcion.semestre.nombre }}
+            {% else %}
+                Sin semestre
+            {% endif %}
+        </p>
+        <p class="print-text">
+            <strong>Sala:</strong>
+            {% if inscripcion.sala_semestre_asignada and inscripcion.sala_semestre_asignada.sala %}
+                {{ inscripcion.sala_semestre_asignada.sala.nombre }}
+            {% else %}
+                Sin sala
+            {% endif %}
+        </p>
+
+        <div class="print-code">{{ codigo_generado }}</div>
+
+        <p class="print-text">
+            Este código deberá presentarse junto con la credencial para entrada y salida del menor.
+        </p>
+        <p class="print-text">
+            Trabajo Social deberá confirmar la entrega de la credencial y del código en el sistema.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function copiarCodigo(){
+        const codigo = document.getElementById("codigoVisible")?.innerText?.trim();
+
+        if(!codigo){
+            return;
+        }
+
+        navigator.clipboard.writeText(codigo).then(() => {
+            alert("Código copiado correctamente.");
+        }).catch(() => {
+            alert("No se pudo copiar automáticamente. Copia el código manualmente.");
+        });
+    }
+</script>
+
+</body>
+</html>

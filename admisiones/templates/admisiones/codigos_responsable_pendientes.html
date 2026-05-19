@@ -1,0 +1,1065 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Códigos de seguridad | Trabajo Social</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --yellow:#ca8a04;
+            --red:#dc2626;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(22,163,74,.13), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        .page{
+            max-width:1380px;
+            margin:0 auto;
+            padding:24px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.94);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.9);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand-logo{
+            width:64px;
+            height:64px;
+            border-radius:18px;
+            background:white;
+            border:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
+            box-shadow:0 10px 24px rgba(15,23,42,.08);
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .top-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-end;
+        }
+
+        .btn-soft{
+            border-radius:999px;
+            padding:.72rem 1rem;
+            font-weight:850;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .btn-main{
+            border-radius:999px;
+            padding:.78rem 1rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-blue{
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:white;
+        }
+
+        .btn-green{
+            background:linear-gradient(135deg,#16a34a,#22c55e);
+            color:white;
+        }
+
+        .btn-purple{
+            background:linear-gradient(135deg,#7c3aed,#2563eb);
+            color:white;
+        }
+
+        .hero{
+            background:linear-gradient(135deg,#2563eb,#16a34a,#0891b2);
+            color:white;
+            border-radius:30px;
+            padding:26px;
+            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:270px;
+            height:270px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-85px;
+            top:-95px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:900;
+            margin-bottom:12px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:850px;
+            font-weight:600;
+            opacity:.94;
+        }
+
+        .hero-info{
+            min-width:270px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .hero-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .hero-value{
+            font-size:1.12rem;
+            font-weight:950;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .summary-grid{
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:14px;
+            margin-bottom:20px;
+        }
+
+        .summary-card{
+            background:white;
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:16px;
+            box-shadow:0 14px 34px rgba(15,23,42,.07);
+            min-height:118px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .summary-card:after{
+            content:"";
+            position:absolute;
+            width:82px;
+            height:82px;
+            border-radius:50%;
+            right:-28px;
+            top:-28px;
+            background:rgba(37,99,235,.08);
+        }
+
+        .summary-icon{
+            width:42px;
+            height:42px;
+            border-radius:15px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.25rem;
+            margin-bottom:10px;
+        }
+
+        .icon-blue{background:#dbeafe;color:#1d4ed8;}
+        .icon-green{background:#dcfce7;color:#15803d;}
+        .icon-yellow{background:#fef3c7;color:#b45309;}
+        .icon-purple{background:#ede9fe;color:#6d28d9;}
+
+        .summary-number{
+            font-size:1.65rem;
+            font-weight:950;
+            letter-spacing:-.04em;
+            line-height:1;
+        }
+
+        .summary-label{
+            color:#64748b;
+            font-weight:800;
+            font-size:.82rem;
+            margin-top:4px;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.95);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{
+            padding:20px;
+        }
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .tools-row{
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:12px;
+            margin-bottom:16px;
+        }
+
+        .search-box{
+            position:relative;
+        }
+
+        .search-box i{
+            position:absolute;
+            left:14px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#94a3b8;
+        }
+
+        .search-input{
+            width:100%;
+            border:1px solid var(--border);
+            border-radius:999px;
+            padding:.82rem 1rem .82rem 2.6rem;
+            outline:none;
+            font-weight:650;
+            background:#f8fafc;
+        }
+
+        .search-input:focus{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+            background:white;
+        }
+
+        .filter-pills{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+
+        .filter-pill{
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            border-radius:999px;
+            padding:.7rem .9rem;
+            font-weight:900;
+            font-size:.84rem;
+            cursor:pointer;
+            transition:.16s ease;
+        }
+
+        .filter-pill:hover,
+        .filter-pill.active{
+            background:#0f172a;
+            color:white;
+            border-color:#0f172a;
+        }
+
+        .table-wrap{
+            overflow:auto;
+            border-radius:18px;
+            border:1px solid var(--border);
+            background:white;
+        }
+
+        .table{
+            margin:0;
+            min-width:1120px;
+        }
+
+        .table thead th{
+            background:#f8fafc;
+            color:#475569;
+            text-transform:uppercase;
+            font-size:.72rem;
+            letter-spacing:.06em;
+            border-bottom:1px solid var(--border);
+            font-weight:950;
+            padding:13px 14px;
+            white-space:nowrap;
+        }
+
+        .table tbody td{
+            padding:14px;
+            vertical-align:middle;
+            border-bottom:1px solid #eef2f7;
+            font-size:.9rem;
+        }
+
+        .table tbody tr:last-child td{
+            border-bottom:none;
+        }
+
+        .student-cell{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            min-width:260px;
+        }
+
+        .avatar{
+            width:46px;
+            height:46px;
+            border-radius:16px;
+            background:linear-gradient(135deg,#dbeafe,#dcfce7);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.25rem;
+            flex-shrink:0;
+        }
+
+        .student-name{
+            font-weight:950;
+            color:#0f172a;
+            line-height:1.2;
+        }
+
+        .student-meta{
+            color:#64748b;
+            font-size:.8rem;
+            font-weight:650;
+            margin-top:2px;
+        }
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+
+        .code-status{
+            display:grid;
+            gap:7px;
+            min-width:170px;
+        }
+
+        .code-line{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+            font-weight:850;
+            font-size:.8rem;
+            color:#475569;
+        }
+
+        .code-line i{
+            font-size:.96rem;
+        }
+
+        .ok{color:#16a34a;}
+        .pending{color:#ca8a04;}
+        .missing{color:#dc2626;}
+        .muted{color:#94a3b8;}
+
+        .action-group{
+            display:flex;
+            gap:7px;
+            flex-wrap:wrap;
+            min-width:270px;
+        }
+
+        .mini-btn{
+            border-radius:999px;
+            padding:.46rem .72rem;
+            font-size:.78rem;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            transition:.15s ease;
+        }
+
+        .mini-btn:hover{
+            background:#f8fafc;
+            color:#0f172a;
+            transform:translateY(-1px);
+        }
+
+        .mini-btn.primary{
+            background:#eff6ff;
+            color:#1d4ed8;
+            border-color:#bfdbfe;
+        }
+
+        .mini-btn.success{
+            background:#f0fdf4;
+            color:#15803d;
+            border-color:#bbf7d0;
+        }
+
+        .mini-btn.warning{
+            background:#fff7ed;
+            color:#c2410c;
+            border-color:#fed7aa;
+        }
+
+        .mini-btn.danger{
+            background:#fef2f2;
+            color:#b91c1c;
+            border-color:#fecaca;
+        }
+
+        .empty-state{
+            text-align:center;
+            padding:44px 20px;
+            color:#64748b;
+        }
+
+        .empty-state i{
+            font-size:2.8rem;
+            color:#94a3b8;
+            margin-bottom:10px;
+        }
+
+        .empty-state h5{
+            color:#334155;
+            font-weight:950;
+            margin-bottom:6px;
+        }
+
+        .empty-state p{
+            margin:0;
+            font-weight:650;
+        }
+
+        @media(max-width:1100px){
+            .hero-content{
+                grid-template-columns:1fr;
+            }
+
+            .hero-info{
+                min-width:0;
+            }
+
+            .summary-grid{
+                grid-template-columns:repeat(2,minmax(0,1fr));
+            }
+
+            .tools-row{
+                grid-template-columns:1fr;
+            }
+
+            .filter-pills{
+                justify-content:flex-start;
+            }
+        }
+
+        @media(max-width:720px){
+            .page{padding:14px;}
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+
+            .top-actions,
+            .btn-soft,
+            .btn-main{
+                width:100%;
+                justify-content:center;
+            }
+
+            .hero{
+                padding:22px;
+                border-radius:22px;
+            }
+
+            .hero h1{font-size:1.55rem;}
+
+            .summary-grid{
+                grid-template-columns:1fr;
+            }
+
+            .filter-pill{
+                flex:1;
+                text-align:center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Códigos de seguridad</h1>
+                <p class="brand-subtitle">
+                    Generación y control del código de 4 dígitos para entrada y salida del menor.
+                </p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <a href="{% url 'panel_admisiones' %}" class="btn-soft">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Panel admisiones
+            </a>
+
+            <a href="{% url 'validacion_pagos_pendientes' %}" class="btn-soft">
+                <i class="bi bi-receipt-cutoff"></i>
+                Pagos
+            </a>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="hero">
+        <div class="hero-content">
+            <div>
+                <div class="hero-kicker">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Trabajo Social
+                </div>
+
+                <h1>Control de códigos del responsable</h1>
+
+                <p>
+                    Aquí se muestran los alumnos con inscripción finalizada y pago validado. Trabajo Social puede generar
+                    el código de seguridad, resetearlo si se extravía y confirmar la entrega de la credencial junto con el código.
+                </p>
+            </div>
+
+            <div class="hero-info">
+                <div class="hero-label">Semestre operativo</div>
+                <div class="hero-value">
+                    {% if semestre %}
+                        {{ semestre.nombre }}
+                    {% else %}
+                        Sin semestre activo
+                    {% endif %}
+                </div>
+                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
+                    Alumnos listos: <strong>{{ inscripciones.count }}</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if aviso_semestre_operativo %}
+        <div class="warning-card">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            {{ aviso_semestre_operativo }}
+        </div>
+    {% endif %}
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-icon icon-blue">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="summary-number">{{ inscripciones.count }}</div>
+            <div class="summary-label">Alumnos finalizados</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-yellow">
+                <i class="bi bi-key-fill"></i>
+            </div>
+            <div class="summary-number" id="contadorSinCodigo">0</div>
+            <div class="summary-label">Sin código</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-green">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="summary-number" id="contadorConCodigo">0</div>
+            <div class="summary-label">Con código</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-purple">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div class="summary-number" id="contadorEntregados">0</div>
+            <div class="summary-label">Entrega confirmada</div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <i class="bi bi-list-check"></i>
+                Alumnos listos para código
+            </h2>
+
+            <span class="badge-soft badge-blue">
+                <i class="bi bi-shield-lock-fill"></i>
+                Código + credencial
+            </span>
+        </div>
+
+        <div class="panel-body">
+            <div class="help-card">
+                <i class="bi bi-info-circle-fill me-1"></i>
+                El código visible solo debe entregarse al responsable. Después se guarda con hash y ya no se muestra como texto.
+                Si se pierde, se debe usar la opción <strong>Resetear</strong> y capturar el motivo.
+            </div>
+
+            <div class="tools-row">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="buscarAlumno" class="search-input" placeholder="Buscar por alumno, sala, semestre o estado...">
+                </div>
+
+                <div class="filter-pills">
+                    <button type="button" class="filter-pill active" data-filter="TODOS">Todos</button>
+                    <button type="button" class="filter-pill" data-filter="SIN_CODIGO">Sin código</button>
+                    <button type="button" class="filter-pill" data-filter="CON_CODIGO">Con código</button>
+                    <button type="button" class="filter-pill" data-filter="ENTREGADO">Entregados</button>
+                </div>
+            </div>
+
+            {% if inscripciones %}
+                <div class="table-wrap">
+                    <table class="table align-middle" id="tablaCodigos">
+                        <thead>
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Sala</th>
+                                <th>Semestre</th>
+                                <th>Pago</th>
+                                <th>Código</th>
+                                <th>Entrega</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for inscripcion in inscripciones %}
+                                <tr
+                                    data-texto="
+                                        {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                                        {{ inscripcion.sala_semestre_asignada.sala.nombre }}
+                                        {{ inscripcion.semestre.nombre }}
+                                        {{ inscripcion.estado }}
+                                    "
+                                    data-codigo="{% if inscripcion.codigo_responsable_hash %}CON_CODIGO{% else %}SIN_CODIGO{% endif %}"
+                                    data-entrega="{% if inscripcion.codigo_responsable_entregado %}ENTREGADO{% else %}PENDIENTE_ENTREGA{% endif %}"
+                                >
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="avatar">
+                                                <i class="bi bi-person-heart"></i>
+                                            </div>
+                                            <div>
+                                                <div class="student-name">
+                                                    {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                                                </div>
+                                                <div class="student-meta">
+                                                    Estado: {{ inscripcion.estado }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if inscripcion.sala_semestre_asignada and inscripcion.sala_semestre_asignada.sala %}
+                                            <strong>{{ inscripcion.sala_semestre_asignada.sala.nombre }}</strong>
+                                            <div class="student-meta">
+                                                {{ inscripcion.sala_semestre_asignada.sala.get_tipo_sala_display }}
+                                            </div>
+                                        {% else %}
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                                Sin sala
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if inscripcion.semestre %}
+                                            <strong>{{ inscripcion.semestre.nombre }}</strong>
+                                            <div class="student-meta">
+                                                Sede: {{ inscripcion.semestre.sede_nombre }}
+                                            </div>
+                                        {% else %}
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-calendar-x-fill"></i>
+                                                Sin semestre
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if inscripcion.pago_validado or inscripcion.estado_pago == "VALIDADO" %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Validado
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-clock-fill"></i>
+                                                Revisar
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <div class="code-status">
+                                            <div class="code-line">
+                                                <span>Generado</span>
+                                                {% if inscripcion.codigo_responsable_hash %}
+                                                    <i class="bi bi-check-circle-fill ok"></i>
+                                                {% else %}
+                                                    <i class="bi bi-x-circle-fill missing"></i>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="code-line">
+                                                <span>Seguro</span>
+                                                {% if inscripcion.codigo_responsable_hash %}
+                                                    <i class="bi bi-shield-lock-fill ok"></i>
+                                                {% else %}
+                                                    <i class="bi bi-shield-x missing"></i>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if inscripcion.codigo_responsable_entregado %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-person-check-fill"></i>
+                                                Entregado
+                                            </span>
+                                            {% if inscripcion.codigo_responsable_entregado_en %}
+                                                <div class="student-meta">
+                                                    {{ inscripcion.codigo_responsable_entregado_en|date:"d/m/Y H:i" }}
+                                                </div>
+                                            {% endif %}
+                                        {% elif inscripcion.codigo_responsable_hash %}
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-clock-fill"></i>
+                                                Pendiente
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-gray">
+                                                <i class="bi bi-dash-circle-fill"></i>
+                                                Sin código
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <div class="action-group">
+                                            {% if not inscripcion.codigo_responsable_hash %}
+                                                <a href="{% url 'generar_codigo_responsable' inscripcion.id %}" class="mini-btn primary">
+                                                    <i class="bi bi-key-fill"></i>
+                                                    Generar
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'generar_codigo_responsable' inscripcion.id %}" class="mini-btn danger">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                    Resetear
+                                                </a>
+
+                                                {% if not inscripcion.codigo_responsable_entregado %}
+                                                    <a href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}" class="mini-btn success">
+                                                        <i class="bi bi-person-check-fill"></i>
+                                                        Confirmar entrega
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-shield-lock"></i>
+                    <h5>No hay alumnos listos para generar código</h5>
+                    <p>
+                        Deben tener inscripción finalizada, pago validado, semestre y sala asignados.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const inputBuscar = document.getElementById("buscarAlumno");
+    const filas = Array.from(document.querySelectorAll("#tablaCodigos tbody tr"));
+    const filtros = document.querySelectorAll(".filter-pill");
+
+    const contadorSinCodigo = document.getElementById("contadorSinCodigo");
+    const contadorConCodigo = document.getElementById("contadorConCodigo");
+    const contadorEntregados = document.getElementById("contadorEntregados");
+
+    let filtroActivo = "TODOS";
+
+    function actualizarContadores(){
+        let sinCodigo = 0;
+        let conCodigo = 0;
+        let entregados = 0;
+
+        filas.forEach(fila => {
+            if((fila.dataset.codigo || "").trim() === "SIN_CODIGO"){
+                sinCodigo++;
+            }
+
+            if((fila.dataset.codigo || "").trim() === "CON_CODIGO"){
+                conCodigo++;
+            }
+
+            if((fila.dataset.entrega || "").trim() === "ENTREGADO"){
+                entregados++;
+            }
+        });
+
+        if(contadorSinCodigo){ contadorSinCodigo.textContent = sinCodigo; }
+        if(contadorConCodigo){ contadorConCodigo.textContent = conCodigo; }
+        if(contadorEntregados){ contadorEntregados.textContent = entregados; }
+    }
+
+    function aplicarFiltros(){
+        const texto = (inputBuscar?.value || "").toLowerCase().trim();
+
+        filas.forEach(fila => {
+            const contenido = (fila.dataset.texto || "").toLowerCase();
+            const codigo = (fila.dataset.codigo || "").trim();
+            const entrega = (fila.dataset.entrega || "").trim();
+
+            const coincideTexto = !texto || contenido.includes(texto);
+
+            let coincideFiltro = true;
+
+            if(filtroActivo === "SIN_CODIGO"){
+                coincideFiltro = codigo === "SIN_CODIGO";
+            }else if(filtroActivo === "CON_CODIGO"){
+                coincideFiltro = codigo === "CON_CODIGO";
+            }else if(filtroActivo === "ENTREGADO"){
+                coincideFiltro = entrega === "ENTREGADO";
+            }
+
+            fila.style.display = coincideTexto && coincideFiltro ? "" : "none";
+        });
+    }
+
+    if(inputBuscar){
+        inputBuscar.addEventListener("input", aplicarFiltros);
+    }
+
+    filtros.forEach(btn => {
+        btn.addEventListener("click", () => {
+            filtros.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            filtroActivo = btn.dataset.filter;
+            aplicarFiltros();
+        });
+    });
+
+    actualizarContadores();
+</script>
+
+</body>
+</html>

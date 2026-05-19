@@ -1,0 +1,1252 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de incidencias | EIU UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --yellow:#ca8a04;
+            --red:#dc2626;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+            --soft:#f8fafc;
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(124,58,237,.12), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        .page{
+            max-width:1450px;
+            margin:0 auto;
+            padding:24px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.94);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.9);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand-logo{
+            width:64px;
+            height:64px;
+            border-radius:18px;
+            background:white;
+            border:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
+            box-shadow:0 10px 24px rgba(15,23,42,.08);
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .top-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-end;
+        }
+
+        .btn-soft{
+            border-radius:999px;
+            padding:.72rem 1rem;
+            font-weight:850;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .btn-main{
+            border-radius:999px;
+            padding:.78rem 1rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-blue{background:linear-gradient(135deg,#2563eb,#0891b2);color:white;}
+        .btn-green{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;}
+        .btn-purple{background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;}
+        .btn-red{background:linear-gradient(135deg,#dc2626,#f97316);color:white;}
+
+        .hero{
+            background:linear-gradient(135deg,#2563eb,#7c3aed,#0891b2);
+            color:white;
+            border-radius:30px;
+            padding:26px;
+            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:285px;
+            height:285px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-90px;
+            top:-100px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:900;
+            margin-bottom:12px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:880px;
+            font-weight:600;
+            opacity:.94;
+        }
+
+        .hero-info{
+            min-width:300px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .hero-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .hero-value{
+            font-size:1.12rem;
+            font-weight:950;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .summary-grid{
+            display:grid;
+            grid-template-columns:repeat(5,minmax(0,1fr));
+            gap:14px;
+            margin-bottom:20px;
+        }
+
+        .summary-card{
+            background:white;
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:16px;
+            box-shadow:0 14px 34px rgba(15,23,42,.07);
+            min-height:118px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .summary-card:after{
+            content:"";
+            position:absolute;
+            width:82px;
+            height:82px;
+            border-radius:50%;
+            right:-28px;
+            top:-28px;
+            background:rgba(37,99,235,.08);
+        }
+
+        .summary-icon{
+            width:42px;
+            height:42px;
+            border-radius:15px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.25rem;
+            margin-bottom:10px;
+        }
+
+        .icon-blue{background:#dbeafe;color:#1d4ed8;}
+        .icon-green{background:#dcfce7;color:#15803d;}
+        .icon-yellow{background:#fef3c7;color:#b45309;}
+        .icon-purple{background:#ede9fe;color:#6d28d9;}
+        .icon-red{background:#fee2e2;color:#b91c1c;}
+
+        .summary-number{
+            font-size:1.65rem;
+            font-weight:950;
+            letter-spacing:-.04em;
+            line-height:1;
+        }
+
+        .summary-label{
+            color:#64748b;
+            font-weight:800;
+            font-size:.82rem;
+            margin-top:4px;
+        }
+
+        .quick-actions{
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:12px;
+            margin-bottom:20px;
+        }
+
+        .quick-card{
+            background:white;
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:16px;
+            text-decoration:none;
+            color:#0f172a;
+            box-shadow:0 14px 34px rgba(15,23,42,.07);
+            transition:.18s ease;
+            position:relative;
+            overflow:hidden;
+            min-height:130px;
+        }
+
+        .quick-card:hover{
+            transform:translateY(-2px);
+            color:#0f172a;
+            box-shadow:0 20px 42px rgba(15,23,42,.11);
+        }
+
+        .quick-card.disabled{
+            opacity:.55;
+            pointer-events:none;
+        }
+
+        .quick-icon{
+            width:44px;
+            height:44px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.3rem;
+            margin-bottom:10px;
+        }
+
+        .quick-title{
+            font-weight:950;
+            letter-spacing:-.03em;
+            margin-bottom:4px;
+        }
+
+        .quick-text{
+            color:#64748b;
+            font-weight:650;
+            font-size:.86rem;
+            margin:0;
+            line-height:1.35;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.96);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{
+            padding:20px;
+        }
+
+        .filters{
+            background:#f8fafc;
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:16px;
+            margin-bottom:16px;
+        }
+
+        .filters-grid{
+            display:grid;
+            grid-template-columns:1.3fr .7fr .7fr .7fr 1fr auto;
+            gap:10px;
+            align-items:end;
+        }
+
+        .form-label{
+            font-weight:900;
+            color:#334155;
+            margin-bottom:6px;
+            font-size:.82rem;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:16px;
+            border:1px solid #cbd5e1;
+            padding:.72rem .86rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+        .badge-cyan{background:#cffafe;color:#155e75;}
+
+        .table-wrap{
+            overflow:auto;
+            border-radius:18px;
+            border:1px solid var(--border);
+            background:white;
+        }
+
+        .table{
+            margin:0;
+            min-width:1260px;
+        }
+
+        .table thead th{
+            background:#f8fafc;
+            color:#475569;
+            text-transform:uppercase;
+            font-size:.72rem;
+            letter-spacing:.06em;
+            border-bottom:1px solid var(--border);
+            font-weight:950;
+            padding:13px 14px;
+            white-space:nowrap;
+        }
+
+        .table tbody td{
+            padding:14px;
+            vertical-align:middle;
+            border-bottom:1px solid #eef2f7;
+            font-size:.9rem;
+        }
+
+        .table tbody tr:last-child td{border-bottom:none;}
+
+        .student-cell{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            min-width:270px;
+        }
+
+        .avatar{
+            width:46px;
+            height:46px;
+            border-radius:16px;
+            background:linear-gradient(135deg,#dbeafe,#ede9fe);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.25rem;
+            flex-shrink:0;
+        }
+
+        .student-name{
+            font-weight:950;
+            color:#0f172a;
+            line-height:1.2;
+        }
+
+        .student-meta{
+            color:#64748b;
+            font-size:.8rem;
+            font-weight:650;
+            margin-top:2px;
+        }
+
+        .description-cell{
+            max-width:340px;
+            color:#334155;
+            font-weight:650;
+            line-height:1.35;
+        }
+
+        .action-group{
+            display:flex;
+            gap:7px;
+            flex-wrap:wrap;
+            min-width:260px;
+        }
+
+        .mini-btn{
+            border-radius:999px;
+            padding:.46rem .72rem;
+            font-size:.78rem;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            transition:.15s ease;
+        }
+
+        .mini-btn:hover{
+            background:#f8fafc;
+            color:#0f172a;
+            transform:translateY(-1px);
+        }
+
+        .mini-btn.primary{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+        .mini-btn.success{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+        .mini-btn.warning{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+        .mini-btn.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca;}
+        .mini-btn.purple{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe;}
+
+        .empty-state{
+            text-align:center;
+            padding:48px 20px;
+            color:#64748b;
+        }
+
+        .empty-state i{
+            font-size:3rem;
+            color:#94a3b8;
+            margin-bottom:10px;
+        }
+
+        .empty-state h5{
+            color:#334155;
+            font-weight:950;
+            margin-bottom:6px;
+        }
+
+        .empty-state p{
+            margin:0;
+            font-weight:650;
+        }
+
+        .readonly-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        /* =========================================================
+           SPRINT 5 - TIPO DE INCIDENCIA FIJO POR ÁREA
+           ========================================================= */
+        .fixed-type-box{
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:16px;
+            padding:.72rem .86rem;
+            min-height:48px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            font-weight:900;
+            color:#0f172a;
+        }
+
+        .fixed-type-help{
+            color:#64748b;
+            font-size:.76rem;
+            font-weight:700;
+            margin-top:5px;
+            line-height:1.25;
+        }
+
+        .area-lock-note{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            border-radius:16px;
+            padding:12px 14px;
+            margin-bottom:16px;
+            color:#475569;
+            font-size:.88rem;
+            font-weight:650;
+            display:flex;
+            gap:10px;
+            align-items:flex-start;
+        }
+
+        .area-lock-note i{
+            color:#2563eb;
+            font-size:1.05rem;
+            margin-top:1px;
+        }
+
+        @media(max-width:1250px){
+            .summary-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+            .quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));}
+            .filters-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+            .filters-grid .wide{grid-column:1 / -1;}
+        }
+
+        @media(max-width:850px){
+            .page{padding:14px;}
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+
+            .top-actions,
+            .btn-soft,
+            .btn-main{
+                width:100%;
+                justify-content:center;
+            }
+
+            .hero{
+                padding:22px;
+                border-radius:22px;
+            }
+
+            .hero-content{grid-template-columns:1fr;}
+            .hero-info{min-width:0;}
+            .hero h1{font-size:1.55rem;}
+
+            .summary-grid,
+            .quick-actions,
+            .filters-grid{
+                grid-template-columns:1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Panel de incidencias</h1>
+                <p class="brand-subtitle">
+                    Control de incidencias pedagógicas, nutricionales, médicas y psicológicas.
+                </p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            {% if puede_crear_alguna %}
+                {% if tipos_creables|length == 1 and not es_admin and not es_directora %}
+                    {% if "PEDAGOGICA" in tipos_creables %}
+                        <a href="{% url 'crear_incidencia_tipo' 'PEDAGOGICA' %}" class="btn-main btn-purple">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Nueva incidencia pedagógica
+                        </a>
+                    {% elif "NUTRICIONAL" in tipos_creables %}
+                        <a href="{% url 'crear_incidencia_tipo' 'NUTRICIONAL' %}" class="btn-main btn-green">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Nueva incidencia nutricional
+                        </a>
+                    {% elif "MEDICA" in tipos_creables %}
+                        <a href="{% url 'crear_incidencia_tipo' 'MEDICA' %}" class="btn-main btn-red">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Nueva incidencia médica
+                        </a>
+                    {% elif "PSICOLOGICA" in tipos_creables %}
+                        <a href="{% url 'crear_incidencia_tipo' 'PSICOLOGICA' %}" class="btn-main btn-blue">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Nueva incidencia psicológica
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'crear_incidencia' %}" class="btn-main btn-blue">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        Nueva incidencia
+                    </a>
+                {% endif %}
+            {% endif %}
+
+            {% if es_directora %}
+                <a href="/" class="btn-soft">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Panel directora
+                </a>
+            {% elif es_admin %}
+                <a href="{% url 'lista_semestres' %}" class="btn-soft">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Semestres
+                </a>
+            {% else %}
+                <a href="/" class="btn-soft">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Volver al panel
+                </a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="hero">
+        <div class="hero-content">
+            <div>
+                <div class="hero-kicker">
+                    <i class="bi bi-clipboard2-pulse-fill"></i>
+                    Sprint 5 · Épica 3
+                </div>
+
+                <h1>Seguimiento y cierre de incidencias</h1>
+
+                <p>
+                    Desde este módulo se registran incidencias por área, se agregan seguimientos,
+                    se adjuntan evidencias y se cierran con resolución. Las incidencias del día se integrarán
+                    al historial y al informe diario del menor.
+                </p>
+            </div>
+
+            <div class="hero-info">
+                <div class="hero-label">Modo de acceso</div>
+                <div class="hero-value">
+                    {% if es_directora %}
+                        Consulta directiva
+                    {% elif es_admin %}
+                        Administración
+                    {% else %}
+                        Área operativa
+                    {% endif %}
+                </div>
+                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
+                    {% if puede_crear_alguna %}
+                        Puedes crear incidencias de tu área.
+                    {% else %}
+                        Solo tienes permisos de consulta.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if aviso_semestre_operativo %}
+        <div class="readonly-card">
+            <i class="bi bi-info-circle-fill me-1"></i>
+            {{ aviso_semestre_operativo }}
+        </div>
+    {% endif %}
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-icon icon-blue">
+                <i class="bi bi-collection-fill"></i>
+            </div>
+            <div class="summary-number">{{ resumen.total }}</div>
+            <div class="summary-label">Total visibles</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-yellow">
+                <i class="bi bi-folder2-open"></i>
+            </div>
+            <div class="summary-number">{{ resumen.abiertas }}</div>
+            <div class="summary-label">Abiertas</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-green">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="summary-number">{{ resumen.cerradas }}</div>
+            <div class="summary-label">Cerradas</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-red">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+            <div class="summary-number">{{ resumen.alto }}</div>
+            <div class="summary-label">Riesgo alto</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon icon-purple">
+                <i class="bi bi-chat-left-text-fill"></i>
+            </div>
+            <div class="summary-number">{{ resumen.sin_seguimiento }}</div>
+            <div class="summary-label">Sin seguimiento</div>
+        </div>
+    </section>
+
+    {% if puede_crear_alguna %}
+        <section class="quick-actions">
+            {% if "PEDAGOGICA" in tipos_creables %}
+                <a href="{% url 'crear_incidencia_tipo' 'PEDAGOGICA' %}" class="quick-card">
+                    <div class="quick-icon icon-purple">
+                        <i class="bi bi-easel2-fill"></i>
+                    </div>
+                    <div class="quick-title">Pedagógica</div>
+                    <p class="quick-text">Para Coordinación de Sala: material, actividades y observaciones pedagógicas.</p>
+                </a>
+            {% endif %}
+
+            {% if "NUTRICIONAL" in tipos_creables %}
+                <a href="{% url 'crear_incidencia_tipo' 'NUTRICIONAL' %}" class="quick-card">
+                    <div class="quick-icon icon-green">
+                        <i class="bi bi-egg-fried"></i>
+                    </div>
+                    <div class="quick-title">Nutricional</div>
+                    <p class="quick-text">Para Nutrición: alergias, intolerancias, alimentos o atragantamiento.</p>
+                </a>
+            {% endif %}
+
+            {% if "MEDICA" in tipos_creables %}
+                <a href="{% url 'crear_incidencia_tipo' 'MEDICA' %}" class="quick-card">
+                    <div class="quick-icon icon-red">
+                        <i class="bi bi-heart-pulse-fill"></i>
+                    </div>
+                    <div class="quick-title">Médica</div>
+                    <p class="quick-text">Para Médico: síntomas, caídas, diarrea, fiebre o estado general.</p>
+                </a>
+            {% endif %}
+
+            {% if "PSICOLOGICA" in tipos_creables %}
+                <a href="{% url 'crear_incidencia_tipo' 'PSICOLOGICA' %}" class="quick-card">
+                    <div class="quick-icon icon-blue">
+                        <i class="bi bi-person-hearts"></i>
+                    </div>
+                    <div class="quick-title">Psicológica</div>
+                    <p class="quick-text">Para Psicología: adaptación, socioemocional, cognitivo o conducta.</p>
+                </a>
+            {% endif %}
+        </section>
+
+        {% if tipos_creables|length == 1 and not es_admin and not es_directora %}
+            <div class="area-lock-note">
+                <i class="bi bi-shield-lock-fill"></i>
+                <div>
+                    Tu usuario pertenece a un área operativa. Por seguridad, solo puedes consultar y crear incidencias del tipo asignado a tu área.
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <section class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <i class="bi bi-list-check"></i>
+                Incidencias registradas
+            </h2>
+
+            <span class="badge-soft badge-blue">
+                <i class="bi bi-eye-fill"></i>
+                Vista filtrada por permisos
+            </span>
+        </div>
+
+        <div class="panel-body">
+
+            <form method="get" class="filters">
+                <div class="filters-grid">
+                    <div class="wide">
+                        <label class="form-label" for="q">Buscar</label>
+                        <input
+                            type="text"
+                            id="q"
+                            name="q"
+                            class="form-control"
+                            value="{{ filtros.q }}"
+                            placeholder="Buscar por niño, sala, descripción, intervención o resolución..."
+                        >
+                    </div>
+
+                    <div>
+                        <label class="form-label" for="estado">Estado</label>
+                        <select id="estado" name="estado" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="ABIERTA" {% if filtros.estado == "ABIERTA" %}selected{% endif %}>Abierta</option>
+                            <option value="CERRADA" {% if filtros.estado == "CERRADA" %}selected{% endif %}>Cerrada</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label" for="tipo">Tipo</label>
+
+                        {% if tipos_creables|length == 1 and not es_admin and not es_directora %}
+                            {% if "PEDAGOGICA" in tipos_creables %}
+                                <input type="hidden" name="tipo" value="PEDAGOGICA">
+                                <div class="fixed-type-box">
+                                    <span class="badge-soft badge-purple">
+                                        <i class="bi bi-easel2-fill"></i>
+                                        Pedagógica
+                                    </span>
+                                </div>
+                            {% elif "NUTRICIONAL" in tipos_creables %}
+                                <input type="hidden" name="tipo" value="NUTRICIONAL">
+                                <div class="fixed-type-box">
+                                    <span class="badge-soft badge-green">
+                                        <i class="bi bi-egg-fried"></i>
+                                        Nutricional
+                                    </span>
+                                </div>
+                            {% elif "MEDICA" in tipos_creables %}
+                                <input type="hidden" name="tipo" value="MEDICA">
+                                <div class="fixed-type-box">
+                                    <span class="badge-soft badge-red">
+                                        <i class="bi bi-heart-pulse-fill"></i>
+                                        Médica
+                                    </span>
+                                </div>
+                            {% elif "PSICOLOGICA" in tipos_creables %}
+                                <input type="hidden" name="tipo" value="PSICOLOGICA">
+                                <div class="fixed-type-box">
+                                    <span class="badge-soft badge-blue">
+                                        <i class="bi bi-person-hearts"></i>
+                                        Psicológica
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <div class="fixed-type-help">El tipo está fijo por tu rol.</div>
+                        {% else %}
+                            <select id="tipo" name="tipo" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="PEDAGOGICA" {% if filtros.tipo == "PEDAGOGICA" %}selected{% endif %}>Pedagógica</option>
+                                <option value="NUTRICIONAL" {% if filtros.tipo == "NUTRICIONAL" %}selected{% endif %}>Nutricional</option>
+                                <option value="MEDICA" {% if filtros.tipo == "MEDICA" %}selected{% endif %}>Médica</option>
+                                <option value="PSICOLOGICA" {% if filtros.tipo == "PSICOLOGICA" %}selected{% endif %}>Psicológica</option>
+                            </select>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="form-label" for="nivel">Riesgo</label>
+                        <select id="nivel" name="nivel" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="LEVE" {% if filtros.nivel == "LEVE" %}selected{% endif %}>Leve</option>
+                            <option value="MEDIO" {% if filtros.nivel == "MEDIO" %}selected{% endif %}>Medio</option>
+                            <option value="ALTO" {% if filtros.nivel == "ALTO" %}selected{% endif %}>Alto</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label" for="semestre">Semestre</label>
+                        <select id="semestre" name="semestre" class="form-select">
+                            <option value="">Todos</option>
+                            {% for semestre in semestres %}
+                                <option value="{{ semestre.id }}" {% if filtros.semestre|stringformat:"s" == semestre.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ semestre.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-main btn-blue">
+                            <i class="bi bi-search"></i>
+                            Filtrar
+                        </button>
+
+                        {% if tipos_creables|length == 1 and not es_admin and not es_directora %}
+                            {% if "PEDAGOGICA" in tipos_creables %}
+                                <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="btn-soft">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Limpiar
+                                </a>
+                            {% elif "NUTRICIONAL" in tipos_creables %}
+                                <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn-soft">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Limpiar
+                                </a>
+                            {% elif "MEDICA" in tipos_creables %}
+                                <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn-soft">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Limpiar
+                                </a>
+                            {% elif "PSICOLOGICA" in tipos_creables %}
+                                <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn-soft">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Limpiar
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'panel_incidencias' %}" class="btn-soft">
+                                <i class="bi bi-x-circle-fill"></i>
+                                Limpiar
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+
+            {% if incidencias %}
+                <div class="table-wrap">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Niño/a</th>
+                                <th>Tipo</th>
+                                <th>Riesgo</th>
+                                <th>Estado</th>
+                                <th>Fecha y hora</th>
+                                <th>Descripción</th>
+                                <th>Seguimiento</th>
+                                <th>Responsable informado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for incidencia in incidencias %}
+                                <tr>
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="avatar">
+                                                <i class="bi bi-person-heart"></i>
+                                            </div>
+                                            <div>
+                                                <div class="student-name">
+                                                    {{ incidencia.nombre_alumno }}
+                                                </div>
+                                                <div class="student-meta">
+                                                    Sala: {{ incidencia.nombre_sala }}
+                                                </div>
+                                                {% if incidencia.semestre %}
+                                                    <div class="student-meta">
+                                                        {{ incidencia.semestre.nombre }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if incidencia.tipo == "PEDAGOGICA" %}
+                                            <span class="badge-soft badge-purple">
+                                                <i class="bi bi-easel2-fill"></i>
+                                                {{ incidencia.get_tipo_display }}
+                                            </span>
+                                        {% elif incidencia.tipo == "NUTRICIONAL" %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-egg-fried"></i>
+                                                {{ incidencia.get_tipo_display }}
+                                            </span>
+                                        {% elif incidencia.tipo == "MEDICA" %}
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-heart-pulse-fill"></i>
+                                                {{ incidencia.get_tipo_display }}
+                                            </span>
+                                        {% elif incidencia.tipo == "PSICOLOGICA" %}
+                                            <span class="badge-soft badge-blue">
+                                                <i class="bi bi-person-hearts"></i>
+                                                {{ incidencia.get_tipo_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-gray">
+                                                {{ incidencia.get_tipo_display }}
+                                            </span>
+                                        {% endif %}
+
+                                        {% if incidencia.categoria %}
+                                            <div class="student-meta mt-1">
+                                                {{ incidencia.categoria }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if incidencia.nivel == "ALTO" %}
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-exclamation-octagon-fill"></i>
+                                                {{ incidencia.get_nivel_display }}
+                                            </span>
+                                        {% elif incidencia.nivel == "MEDIO" %}
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                                {{ incidencia.get_nivel_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                {{ incidencia.get_nivel_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if incidencia.estado == "ABIERTA" %}
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-folder2-open"></i>
+                                                Abierta
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Cerrada
+                                            </span>
+                                            {% if incidencia.cerrada_en %}
+                                                <div class="student-meta">
+                                                    {{ incidencia.cerrada_en|date:"d/m/Y H:i" }}
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <strong>{{ incidencia.fecha_reporte|date:"d/m/Y" }}</strong>
+                                        <div class="student-meta">
+                                            {{ incidencia.fecha_reporte|date:"H:i" }} hrs.
+                                        </div>
+                                        <div class="student-meta">
+                                            Por: {{ incidencia.registrada_por|default:"Sin usuario" }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="description-cell">
+                                            {{ incidencia.descripcion|truncatechars:120 }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if incidencia.total_seguimientos > 0 %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-chat-left-text-fill"></i>
+                                                {{ incidencia.total_seguimientos }} seguimiento(s)
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-chat-left"></i>
+                                                Sin seguimiento
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if incidencia.responsable_informado %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-person-check-fill"></i>
+                                                Informado
+                                            </span>
+                                            {% if incidencia.responsable_informado_nombre %}
+                                                <div class="student-meta">
+                                                    {{ incidencia.responsable_informado_nombre }}
+                                                </div>
+                                            {% endif %}
+                                            {% if incidencia.medio_aviso_responsable %}
+                                                <div class="student-meta">
+                                                    {{ incidencia.get_medio_aviso_responsable_display }}
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge-soft badge-gray">
+                                                <i class="bi bi-dash-circle-fill"></i>
+                                                No informado
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <div class="action-group">
+                                            <a href="{% url 'detalle_incidencia' incidencia.id %}" class="mini-btn primary">
+                                                <i class="bi bi-eye-fill"></i>
+                                                Ver detalle
+                                            </a>
+
+                                            {% if incidencia.estado == "ABIERTA" and incidencia.registrada_por_id == request.user.id %}
+                                                <a href="{% url 'registrar_seguimiento_incidencia' incidencia.id %}" class="mini-btn success">
+                                                    <i class="bi bi-plus-circle-fill"></i>
+                                                    Seguimiento
+                                                </a>
+                                            {% endif %}
+
+                                            {% if incidencia.estado == "ABIERTA" %}
+                                                {% if incidencia.registrada_por_id == request.user.id or es_admin %}
+                                                    <a href="{% url 'cerrar_incidencia' incidencia.id %}" class="mini-btn danger">
+                                                        <i class="bi bi-lock-fill"></i>
+                                                        Cerrar
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-clipboard2-check"></i>
+                    <h5>No hay incidencias para mostrar</h5>
+                    <p>
+                        No se encontraron incidencias con los filtros actuales o todavía no se han registrado incidencias.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

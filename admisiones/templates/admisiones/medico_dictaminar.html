@@ -123,6 +123,279 @@
         color: #495057 !important;
         font-weight: bold;
     }
+
+
+    .estado-operativo{
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 8px 20px rgba(0,0,0,.06);
+      padding:16px 18px;
+      margin-bottom:20px;
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      border:1px solid transparent;
+    }
+
+    .estado-operativo .status-icon{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      font-size:1.35rem;
+    }
+
+    .estado-operativo h5{
+      margin:0 0 4px;
+      font-weight:900;
+    }
+
+    .estado-operativo p{
+      margin:0;
+      line-height:1.5;
+      font-size:.94rem;
+    }
+
+    .estado-activo{
+      background:#f0fdf4;
+      border-color:#bbf7d0;
+      border-left:7px solid #16a34a;
+      color:#14532d;
+    }
+
+    .estado-activo .status-icon{
+      background:#dcfce7;
+      color:#15803d;
+    }
+
+    .estado-consulta{
+      background:#fff7ed;
+      border-color:#fed7aa;
+      border-left:7px solid #f97316;
+      color:#9a3412;
+    }
+
+    .estado-consulta .status-icon{
+      background:#ffedd5;
+      color:#c2410c;
+    }
+
+    .modo-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:.38rem .7rem;
+      font-size:.76rem;
+      font-weight:900;
+      margin-top:8px;
+    }
+
+    .modo-badge-activo{
+      background:#dcfce7;
+      color:#166534;
+      border:1px solid #86efac;
+    }
+
+    .modo-badge-consulta{
+      background:#ffedd5;
+      color:#9a3412;
+      border:1px solid #fed7aa;
+    }
+
+    .readonly-warning{
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-left:6px solid #f97316;
+      border-radius:14px;
+      padding:14px 16px;
+      margin-bottom:18px;
+      color:#9a3412;
+    }
+
+    .readonly-warning .title{
+      font-weight:900;
+      margin-bottom:3px;
+    }
+
+    .lock-banner{
+      background:#f8fafc;
+      border:1px solid #cbd5e1;
+      border-left:6px solid #64748b;
+      border-radius:14px;
+      padding:14px 16px;
+      margin-bottom:18px;
+    }
+
+    .lock-banner .title{
+      font-weight:800;
+      color:#334155;
+      margin-bottom:3px;
+    }
+
+    /* =========================================================
+       SPRINT 5 - INCIDENCIAS MÉDICAS
+       ========================================================= */
+    .incidencias-card{
+      background:linear-gradient(135deg,#fef2f2,#fff7ed);
+      border:1px solid #fecaca;
+      border-left:7px solid #dc2626;
+      border-radius:16px;
+      padding:16px 18px;
+      margin-bottom:20px;
+      box-shadow:0 8px 20px rgba(0,0,0,.06);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .incidencias-card .icon-box{
+      width:48px;
+      height:48px;
+      border-radius:15px;
+      background:#fee2e2;
+      color:#b91c1c;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.45rem;
+      flex-shrink:0;
+    }
+
+    .incidencias-card h5{
+      margin:0 0 4px;
+      font-weight:900;
+      color:#991b1b;
+    }
+
+    .incidencias-card p{
+      margin:0;
+      color:#7f1d1d;
+      line-height:1.45;
+      font-size:.94rem;
+    }
+
+    .incidencias-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+      min-width:260px;
+    }
+
+    .btn-incidencia{
+      border-radius:999px;
+      font-weight:800;
+      padding:.62rem .92rem;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .btn-incidencia-create{
+      background:#dc2626;
+      color:white;
+      border:1px solid #dc2626;
+    }
+
+    .btn-incidencia-create:hover{
+      background:#b91c1c;
+      color:white;
+    }
+
+    .btn-incidencia-list{
+      background:white;
+      color:#991b1b;
+      border:1px solid #fecaca;
+    }
+
+    .btn-incidencia-list:hover{
+      background:#fef2f2;
+      color:#991b1b;
+    }
+
+    @media(max-width:768px){
+      .incidencias-card{
+        flex-direction:column;
+      }
+
+      .incidencias-actions,
+      .btn-incidencia{
+        width:100%;
+        justify-content:center;
+      }
+    }
+
+    /* =========================================================
+       ACLARACIÓN: DICTAMEN DE INSCRIPCIÓN, NO OPERACIÓN DIARIA
+       ========================================================= */
+    .dictamen-incidencias-note{
+      background:#fef2f2;
+      border:1px solid #fecaca;
+      border-left:6px solid #dc2626;
+      color:#991b1b;
+      border-radius:16px;
+      padding:14px 16px;
+      margin-bottom:20px;
+      box-shadow:0 8px 20px rgba(0,0,0,.05);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .dictamen-incidencias-note .note-left{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .dictamen-incidencias-note .note-icon{
+      width:40px;
+      height:40px;
+      border-radius:13px;
+      background:#fee2e2;
+      color:#b91c1c;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      font-size:1.18rem;
+    }
+
+    .dictamen-incidencias-note .note-title{
+      font-weight:900;
+      margin-bottom:3px;
+    }
+
+    .dictamen-incidencias-note p{
+      margin:0;
+      font-size:.9rem;
+      line-height:1.4;
+    }
+
+    .dictamen-incidencias-note .note-actions{
+      flex-shrink:0;
+    }
+
+    @media(max-width:768px){
+      .dictamen-incidencias-note{
+        flex-direction:column;
+      }
+
+      .dictamen-incidencias-note .note-actions,
+      .dictamen-incidencias-note .note-actions a{
+        width:100%;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -139,6 +412,10 @@
       </a>
 
       <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn btn-outline-light btn-soft">
+          <i class="bi bi-clipboard2-pulse me-1"></i> Incidencias
+        </a>
+
         <a href="{% url 'medico_pendientes' %}" class="btn btn-outline-light btn-soft">
           <i class="bi bi-arrow-left me-1"></i> Regresar
         </a>
@@ -156,17 +433,63 @@
 
 <div class="container-panel">
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {% endfor %}
+  {% if modo_solo_consulta %}
+  <div class="estado-operativo estado-consulta">
+    <div class="status-icon">
+      <i class="bi bi-lock-fill"></i>
+    </div>
+    <div>
+      <h5>Modo solo consulta</h5>
+      <p>
+        {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar este dictamen médico, pero no puedes guardar, modificar ni registrar evaluaciones hasta que el Administrador inicie un nuevo semestre." }}
+      </p>
+      <span class="modo-badge modo-badge-consulta">
+        <i class="bi bi-eye-fill"></i> Consulta histórica habilitada
+      </span>
+    </div>
+  </div>
+  {% else %}
+  <div class="estado-operativo estado-activo">
+    <div class="status-icon">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div>
+      <h5>Semestre activo</h5>
+      <p>
+        Médico puede operar normalmente en el semestre:
+        <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+      </p>
+      <span class="modo-badge modo-badge-activo">
+        <i class="bi bi-pencil-square"></i> Operación activa
+      </span>
+    </div>
+  </div>
   {% endif %}
+  <div class="dictamen-incidencias-note">
+    <div class="note-left">
+      <div class="note-icon">
+        <i class="bi bi-info-circle-fill"></i>
+      </div>
+      <div>
+        <div class="note-title">Este formulario es un dictamen de inscripción</div>
+        <p>
+          Aquí no se crean incidencias porque la solicitud todavía pertenece al proceso de admisión.
+          Las incidencias médicas se registran solo para niñas y niños ya inscritos en operación diaria.
+        </p>
+      </div>
+    </div>
 
-  <div class="card card-panel p-4 mb-4">
+    <div class="note-actions">
+      <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn-incidencia btn-incidencia-list">
+        <i class="bi bi-eye-fill"></i>
+        Ver incidencias
+      </a>
+    </div>
+  </div>
+
+<div class="card card-panel p-4 mb-4">
     <div class="section-title" style="color: #64748b;">Información de la solicitud</div>
+    <!-- DATOS DEL MENOR: se toman automáticamente del expediente; no se capturan en Médico. -->
 
     <div class="row g-3">
       <div class="col-md-3">
@@ -202,7 +525,7 @@
       <div class="col-md-6">
         <div class="info-box">
           <div class="info-label">Tutor</div>
-          <div class="info-value">{{ sol.nombres_tutor }} {{ sol.apellido_paterno_tutor }} {{ sol.apellido_materno_tutor }}</div>
+          <div class="info-value">{{ sol.nombre_tutor_completo }}</div>
         </div>
       </div>
       <div class="col-md-6">
@@ -211,28 +534,68 @@
           <div class="info-value">{{ sol.correo|default:"No capturado" }}</div>
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="info-box">
-          <div class="info-label">Menor</div>
-          <div class="info-value" id="menor_nombre_completo">{{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</div>
+          <div class="info-label">Nombre(s) del menor</div>
+          <div class="info-value">{% firstof nombre_nino sol.nombres_menor insc.nombres_menor "No capturado" %}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <div class="info-label">Apellido paterno del menor</div>
+          <div class="info-value">{% firstof paterno_nino sol.apellido_paterno_menor insc.apellido_paterno_menor "No capturado" %}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <div class="info-label">Apellido materno del menor</div>
+          <div class="info-value">{% firstof materno_nino sol.apellido_materno_menor insc.apellido_materno_menor "No capturado" %}</div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">Fecha de nacimiento</div>
-          <div class="info-value" id="menor_fecha_nac">{{ sol.fecha_nacimiento_menor|default:"" }}</div>
+          <div class="info-value" id="menor_fecha_nac">{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:"d/m/Y" }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:"d/m/Y" }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}No capturada{% endif %}</div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="info-box">
           <div class="info-label">CURP menor</div>
-          <div class="info-value">{{ sol.curp_menor|default:"No capturada" }}</div>
+          <div class="info-value">{% firstof curp_menor sol.curp_menor insc.curp_menor "No capturada" %}</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="card card-panel p-4">
+    {% if modo_solo_consulta %}
+    <div class="readonly-warning">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-eye-fill fs-4 me-3"></i>
+        <div>
+          <div class="title">Dictamen médico en solo lectura</div>
+          <div>
+            El semestre está cerrado o no hay semestre activo. Puedes revisar la información existente,
+            pero no se permite guardar cambios ni emitir nuevos dictámenes.
+          </div>
+        </div>
+      </div>
+    </div>
+    {% elif bloqueado %}
+    <div class="lock-banner">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-lock-fill fs-4 me-3 text-secondary"></i>
+        <div>
+          <div class="title">Dictamen médico finalizado</div>
+          <div class="text-muted">
+            Este dictamen ya fue enviado y no puede modificarse.
+            Solo Administrador o Directora pueden realizar correcciones.
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="section-title" style="color: #0f766e; font-size: 1.1rem; margin-bottom: 20px;">Formulario de dictamen médico</div>
 
     <form method="post" enctype="multipart/form-data" id="formDictamenMedico">
@@ -240,32 +603,34 @@
 
       <div class="section-block">
         <div class="section-title">Datos del Menor</div>
+
         <div class="row g-3">
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_nombres_paciente">Nombre(s) del menor</label>
-              <input type="text" name="nombres_paciente" id="id_nombres_paciente" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.nombres_menor|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+              <input type="text" name="nombres_paciente" id="id_nombres_paciente" class="form-control campo-bloqueado text-primary fw-bold text-uppercase" value="{% firstof nombre_nino sol.nombres_menor insc.nombres_menor "" %}" readonly tabindex="-1">
           </div>
           <div class="col-md-4 mb-3">
-              <label class="form-label" for="id_apellido_paterno_paciente">Apellido paterno</label>
-              <input type="text" name="apellido_paterno_paciente" id="id_apellido_paterno_paciente" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.apellido_paterno_menor|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+              <label class="form-label" for="id_apellido_paterno_paciente">Apellido paterno del menor</label>
+              <input type="text" name="apellido_paterno_paciente" id="id_apellido_paterno_paciente" class="form-control campo-bloqueado text-primary fw-bold text-uppercase" value="{% firstof paterno_nino sol.apellido_paterno_menor insc.apellido_paterno_menor "" %}" readonly tabindex="-1">
           </div>
           <div class="col-md-4 mb-3">
-              <label class="form-label" for="id_apellido_materno_paciente">Apellido materno</label>
-              <input type="text" name="apellido_materno_paciente" id="id_apellido_materno_paciente" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.apellido_materno_menor|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+              <label class="form-label" for="id_apellido_materno_paciente">Apellido materno del menor</label>
+              <input type="text" name="apellido_materno_paciente" id="id_apellido_materno_paciente" class="form-control campo-bloqueado text-primary fw-bold text-uppercase" value="{% firstof materno_nino sol.apellido_materno_menor insc.apellido_materno_menor "" %}" readonly tabindex="-1">
           </div>
         </div>
-        <div class="row g-3">
+
+        <div class="row g-3 mt-1">
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_fecha_nacimiento">Fecha de nacimiento</label>
-              <input type="text" name="fecha_nacimiento" id="id_fecha_nacimiento" class="form-control campo-bloqueado text-primary fw-bold" value="{{ sol.fecha_nacimiento_menor|date:'Y-m-d'|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+              <input type="text" name="fecha_nacimiento" id="id_fecha_nacimiento" class="form-control campo-bloqueado text-primary fw-bold" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'Y-m-d' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'Y-m-d' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'Y-m-d' }}{% else %}⚠️ Faltan datos{% endif %}" readonly tabindex="-1">
           </div>
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_edad">Edad</label>
-              <input type="text" name="edad" id="id_edad" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.edad|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+              <input type="text" name="edad" id="id_edad" class="form-control campo-bloqueado text-primary fw-bold" value="{% if insc.edad_anios_menor or insc.edad_meses_menor %}{{ insc.edad_anios_menor|default:'0' }} años, {{ insc.edad_meses_menor|default:'0' }} meses{% elif historia_form.initial.edad %}{{ historia_form.initial.edad }}{% else %}0 años, 0 meses{% endif %}" readonly tabindex="-1">
           </div>
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_sexo">Sexo</label>
-              <input type="text" name="sexo" id="id_sexo" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.sexo|default:'⚠️ Faltan datos' }}" readonly tabindex="-1">
+              <input type="text" name="sexo" id="id_sexo" class="form-control campo-bloqueado text-primary fw-bold" value="{% if insc.sexo_menor == 'M' or sol.sexo_menor == 'M' %}Masculino{% elif insc.sexo_menor == 'F' or sol.sexo_menor == 'F' %}Femenino{% elif insc.sexo_menor %}{{ insc.sexo_menor }}{% elif sol.sexo_menor %}{{ sol.sexo_menor }}{% else %}⚠️ Faltan datos{% endif %}" readonly tabindex="-1">
           </div>
         </div>
 
@@ -320,24 +685,24 @@
               <label class="form-label" for="id_tabaquismo_padre">Tabaquismo</label>
               <select name="tabaquismo_padre" class="form-select" id="id_tabaquismo_padre">
                   <option value="">Seleccione</option>
-                  <option value="SI" {% if historia_form.initial.tabaquismo_padre == 'SI' or historia_form.initial.tabaquismo_padre == True %}selected{% endif %}>Sí</option>
-                  <option value="NO" {% if historia_form.initial.tabaquismo_padre == 'NO' or historia_form.initial.tabaquismo_padre == False %}selected{% endif %}>No</option>
+                  <option value="SI" {% if historia_form.initial.tabaquismo_padre == 'SI' %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.tabaquismo_padre == 'NO' %}selected{% endif %}>No</option>
               </select>
           </div>
           <div class="col-md-3 mb-3">
               <label class="form-label" for="id_alcoholismo_padre">Alcoholismo</label>
               <select name="alcoholismo_padre" class="form-select" id="id_alcoholismo_padre">
                   <option value="">Seleccione</option>
-                  <option value="SI" {% if historia_form.initial.alcoholismo_padre == 'SI' or historia_form.initial.alcoholismo_padre == True %}selected{% endif %}>Sí</option>
-                  <option value="NO" {% if historia_form.initial.alcoholismo_padre == 'NO' or historia_form.initial.alcoholismo_padre == False %}selected{% endif %}>No</option>
+                  <option value="SI" {% if historia_form.initial.alcoholismo_padre == 'SI' %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.alcoholismo_padre == 'NO' %}selected{% endif %}>No</option>
               </select>
           </div>
           <div class="col-md-3 mb-3">
               <label class="form-label" for="id_drogas_padre">Drogas</label>
               <select name="drogas_padre" class="form-select" id="id_drogas_padre">
                   <option value="">Seleccione</option>
-                  <option value="SI" {% if historia_form.initial.drogas_padre == 'SI' or historia_form.initial.drogas_padre == True %}selected{% endif %}>Sí</option>
-                  <option value="NO" {% if historia_form.initial.drogas_padre == 'NO' or historia_form.initial.drogas_padre == False %}selected{% endif %}>No</option>
+                  <option value="SI" {% if historia_form.initial.drogas_padre == 'SI' %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.drogas_padre == 'NO' %}selected{% endif %}>No</option>
               </select>
           </div>
         </div>
@@ -388,24 +753,24 @@
               <label class="form-label" for="id_tabaquismo_madre">Tabaquismo</label>
               <select name="tabaquismo_madre" class="form-select" id="id_tabaquismo_madre">
                   <option value="">Seleccione</option>
-                  <option value="SI" {% if historia_form.initial.tabaquismo_madre == 'SI' or historia_form.initial.tabaquismo_madre == True %}selected{% endif %}>Sí</option>
-                  <option value="NO" {% if historia_form.initial.tabaquismo_madre == 'NO' or historia_form.initial.tabaquismo_madre == False %}selected{% endif %}>No</option>
+                  <option value="SI" {% if historia_form.initial.tabaquismo_madre == 'SI' %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.tabaquismo_madre == 'NO' %}selected{% endif %}>No</option>
               </select>
           </div>
           <div class="col-md-3 mb-3">
               <label class="form-label" for="id_alcoholismo_madre">Alcoholismo</label>
               <select name="alcoholismo_madre" class="form-select" id="id_alcoholismo_madre">
                   <option value="">Seleccione</option>
-                  <option value="SI" {% if historia_form.initial.alcoholismo_madre == 'SI' or historia_form.initial.alcoholismo_madre == True %}selected{% endif %}>Sí</option>
-                  <option value="NO" {% if historia_form.initial.alcoholismo_madre == 'NO' or historia_form.initial.alcoholismo_madre == False %}selected{% endif %}>No</option>
+                  <option value="SI" {% if historia_form.initial.alcoholismo_madre == 'SI' %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.alcoholismo_madre == 'NO' %}selected{% endif %}>No</option>
               </select>
           </div>
           <div class="col-md-3 mb-3">
               <label class="form-label" for="id_drogas_madre">Drogas</label>
               <select name="drogas_madre" class="form-select" id="id_drogas_madre">
                   <option value="">Seleccione</option>
-                  <option value="SI" {% if historia_form.initial.drogas_madre == 'SI' or historia_form.initial.drogas_madre == True %}selected{% endif %}>Sí</option>
-                  <option value="NO" {% if historia_form.initial.drogas_madre == 'NO' or historia_form.initial.drogas_madre == False %}selected{% endif %}>No</option>
+                  <option value="SI" {% if historia_form.initial.drogas_madre == 'SI' %}selected{% endif %}>Sí</option>
+                  <option value="NO" {% if historia_form.initial.drogas_madre == 'NO' %}selected{% endif %}>No</option>
               </select>
           </div>
         </div>
@@ -567,7 +932,11 @@
       {% endif %}
 
       <div class="d-flex gap-2 flex-wrap">
-        {% if bloqueado %}
+        {% if modo_solo_consulta %}
+          <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
+            <i class="bi bi-eye-fill me-1"></i> Solo consulta
+          </button>
+        {% elif bloqueado %}
           <button type="button" class="btn btn-secondary btn-soft" disabled>
             <i class="bi bi-lock me-1"></i> Evaluación finalizada
           </button>
@@ -588,6 +957,68 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
+      const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+
+      window.evaluacionBloqueadaOperacion = evaluacionBloqueada;
+      window.modoSoloConsultaOperacion = modoSoloConsulta;
+
+      if (evaluacionBloqueada || modoSoloConsulta) {
+          document.querySelectorAll('#formDictamenMedico input, #formDictamenMedico select, #formDictamenMedico textarea, #formDictamenMedico button').forEach(function(el) {
+              if (el.name !== 'csrfmiddlewaretoken') {
+                  el.disabled = true;
+              }
+          });
+      }
+
+      const formMedico = document.getElementById("formDictamenMedico");
+      if (formMedico) {
+          formMedico.addEventListener("submit", function(event) {
+              if (modoSoloConsulta) {
+                  event.preventDefault();
+                  alert("Modo solo consulta: no se puede guardar porque no hay semestre activo/iniciado.");
+                  return false;
+              }
+          });
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      let iconType = 'info';
+      let tags = '{{ message.tags }}'.toLowerCase();
+      if (tags.includes('success')) iconType = 'success';
+      if (tags.includes('error') || tags.includes('danger')) iconType = 'error';
+      if (tags.includes('warning')) iconType = 'warning';
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      Toast.fire({
+        icon: iconType,
+        title: '{{ message }}'
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}
+
 <script>
   // Convertidor de Input a Select + "Otro"
   function crearComboConOtro(inputId, opciones, placeholder, valorDesdeBD) {
@@ -603,6 +1034,12 @@
                         ? valorGuardado.trim()
                         : (inputOriginal.value.trim() || valorDesdeBD.trim());
 
+      // BORRAR "N/A por edad" SI SE COLÓ DE OTRA VISTA
+      if (valorActual === "N/A por edad" || valorActual === "N/A") {
+          valorActual = "";
+          inputOriginal.value = "";
+      }
+
       const select = document.createElement('select');
       select.className = 'form-select mb-2';
       select.innerHTML = `<option value="">${placeholder}</option>`;
@@ -614,11 +1051,17 @@
       const inputOtro = document.createElement('input');
       inputOtro.type = 'text';
       inputOtro.className = 'form-control';
-      inputOtro.placeholder = 'Escriba aquí...';
+      inputOtro.placeholder = 'Escriba por favor...';
       inputOtro.style.display = 'none';
 
       inputOriginal.parentNode.insertBefore(select, inputOriginal.nextSibling);
       inputOriginal.parentNode.insertBefore(inputOtro, select.nextSibling);
+
+      if (window.modoSoloConsultaOperacion || window.evaluacionBloqueadaOperacion) {
+          select.disabled = true;
+          inputOtro.disabled = true;
+          inputOriginal.disabled = true;
+      }
 
       if (valorActual) {
           inputOriginal.value = valorActual;
@@ -635,6 +1078,7 @@
       select.addEventListener('change', function() {
           if (this.value === "OTRO") {
               inputOtro.style.display = 'block';
+              if (inputOtro.value === "N/A por edad") inputOtro.value = "";
               inputOriginal.value = inputOtro.value;
           } else {
               inputOtro.style.display = 'none';
@@ -653,7 +1097,7 @@
 
       // AUTOLLENAR LUGAR Y FECHA DE ELABORACIÓN
       let lugarFechaInput = document.getElementById("id_lugar_fecha_elaboracion");
-      if(lugarFechaInput && !lugarFechaInput.value) {
+      if(lugarFechaInput && !lugarFechaInput.value && !window.modoSoloConsultaOperacion) {
           const hoy = new Date();
           const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
           lugarFechaInput.value = "Tuxtla Gutiérrez, Chiapas a " + hoy.toLocaleDateString('es-MX', opciones);
@@ -674,6 +1118,9 @@
   // SISTEMA DE AUTOGUARDADO LOCAL V3
   // ====================================================================
   document.addEventListener("DOMContentLoaded", function() {
+      const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
+      const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+      if (evaluacionBloqueada || modoSoloConsulta) return;
 
       let form = document.getElementById("formDictamen") ||
                  document.getElementById("formDictamenMedico") ||

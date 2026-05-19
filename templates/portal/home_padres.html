@@ -169,19 +169,11 @@
 
 <div class="container" style="padding-top: 90px; max-width: 1100px;">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show alert-custom mt-2 mb-0" role="alert">
-                <strong><i class="bi bi-info-circle-fill me-2"></i>Aviso:</strong> {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <div class="hero-card">
         <i class="bi bi-house-heart-fill hero-icon d-none d-md-block"></i>
         <div class="position-relative" style="z-index: 2;">
-            <h1>¡Bienvenido(a), {{ request.user.nombre|default:request.user.first_name }}!</h1>
+            <h1>¡Bienvenido(a), {{ mi_inscripcion.solicitud_ingreso.nombres_tutor|default:"Beneficiario" }}!</h1>
+
             <p class="lead">Panel de Gestión Familiar</p>
             <div class="d-inline-flex align-items-center gap-2 mt-2 px-3 py-1 rounded-pill" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);">
                 <i class="bi bi-stars"></i> <span class="small fw-bold">Estamos listos para recibir a tus pequeños.</span>

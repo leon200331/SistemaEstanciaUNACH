@@ -146,6 +146,132 @@
   .card-yellow { border-left-color: #ffc107; }
   .card-purple { border-left-color: #8b5cf6; } /* Nuevo color para Salas */
   .card-green { border-left-color: #198754; }
+  .card-cyan { border-left-color: #0891b2; }
+
+
+  .sprint4-note{
+      max-width:950px;
+      margin:0 auto 1.5rem auto;
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-left:6px solid #0d6efd;
+      color:#1e3a8a;
+      border-radius:18px;
+      padding:16px 20px;
+      font-size:.95rem;
+      font-weight:600;
+      box-shadow:0 4px 15px rgba(0,0,0,.03);
+  }
+  .sprint4-note strong{ font-weight:900; }
+
+
+  .estado-operativo{
+      max-width:950px;
+      margin:0 auto 1.5rem auto;
+      border-radius:20px;
+      padding:18px 22px;
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+      box-shadow:0 8px 22px rgba(15,23,42,.06);
+      border:1px solid transparent;
+  }
+
+  .estado-operativo .status-icon{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.35rem;
+      flex-shrink:0;
+  }
+
+  .estado-operativo h5{
+      margin:0 0 4px;
+      font-weight:900;
+  }
+
+  .estado-operativo p{
+      margin:0;
+      font-size:.94rem;
+      line-height:1.5;
+  }
+
+  .estado-activo{
+      background:#f0fdf4;
+      border-color:#bbf7d0;
+      color:#14532d;
+      border-left:7px solid #16a34a;
+  }
+
+  .estado-activo .status-icon{
+      background:#dcfce7;
+      color:#15803d;
+  }
+
+  .estado-bloqueado{
+      background:#fff7ed;
+      border-color:#fed7aa;
+      color:#9a3412;
+      border-left:7px solid #f97316;
+  }
+
+  .estado-bloqueado .status-icon{
+      background:#ffedd5;
+      color:#c2410c;
+  }
+
+  .mode-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:.38rem .68rem;
+      border-radius:999px;
+      font-size:.76rem;
+      font-weight:900;
+      margin-top:9px;
+  }
+
+  .mode-badge-active{
+      background:#dcfce7;
+      color:#166534;
+      border:1px solid #86efac;
+  }
+
+  .mode-badge-readonly{
+      background:#ffedd5;
+      color:#9a3412;
+      border:1px solid #fed7aa;
+  }
+
+  .readonly-summary{
+      max-width:950px;
+      margin:1.5rem auto 0 auto;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      border-radius:20px;
+      padding:18px 22px;
+      color:#475569;
+      box-shadow:0 4px 15px rgba(0,0,0,.03);
+  }
+
+  .readonly-summary h6{
+      font-weight:900;
+      color:#0f172a;
+      margin-bottom:.5rem;
+  }
+
+  .readonly-summary ul{
+      margin:0;
+      padding-left:1.25rem;
+  }
+
+  .readonly-summary li{
+      margin:.22rem 0;
+      font-weight:600;
+  }
 
   /* Responsivo para celulares */
   @media (max-width: 768px) {
@@ -194,6 +320,41 @@
     <div class="muted">Accede a los módulos del personal autorizado.</div>
   </div>
 
+  {% if modo_solo_consulta %}
+    <div class="estado-operativo estado-bloqueado">
+      <div class="status-icon">
+        <i class="bi bi-lock-fill"></i>
+      </div>
+      <div>
+        <h5>Modo solo consulta</h5>
+        <p>
+          {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar información existente, pero no puedes operar, agregar, modificar ni eliminar registros hasta que el Administrador inicie un nuevo semestre." }}
+        </p>
+      </div>
+    </div>
+  {% else %}
+    <div class="estado-operativo estado-activo">
+      <div class="status-icon">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div>
+        <h5>Semestre activo</h5>
+        <p>
+          Trabajo Social puede operar normalmente en el semestre:
+          <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="sprint4-note">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    <strong>Actualización Sprint 4:</strong>
+    la asignación de salas, maestras y horarios ahora corresponde al
+    <strong>Administrador del Sistema</strong> desde Gestión de Semestres.
+    Trabajo Social conserva solicitudes, reportes finales y validación de pagos.
+  </div>
+
   <div class="list-grid">
 
     <div class="module-row-card card-blue">
@@ -202,11 +363,27 @@
       </div>
       <div class="module-content-row">
         <h4>Solicitudes de ingreso</h4>
-        <p>Genera enlaces de captura, revisa estados y descarga PDFs FO-301-02-01.</p>
+        <p>
+          {% if modo_solo_consulta %}
+            Consulta solicitudes existentes y descarga PDFs FO-301-02-01. La creación y edición quedan bloqueadas.
+          {% else %}
+            Genera enlaces de captura, revisa estados y descarga PDFs FO-301-02-01.
+          {% endif %}
+        </p>
+        {% if modo_solo_consulta %}
+          <span class="mode-badge mode-badge-readonly">
+            <i class="bi bi-eye-fill"></i> Solo consulta
+          </span>
+        {% else %}
+          <span class="mode-badge mode-badge-active">
+            <i class="bi bi-pencil-square"></i> Operación activa
+          </span>
+        {% endif %}
       </div>
       <div>
         <a class="btn btn-primary btn-row shadow-sm" href="{% url 'panel_admisiones' %}">
-          Ir a Panel Admisiones <i class="bi bi-arrow-right-short"></i>
+          {% if modo_solo_consulta %}Consultar solicitudes{% else %}Ir a Panel Admisiones{% endif %}
+          <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>
@@ -217,45 +394,113 @@
       </div>
       <div class="module-content-row">
         <h4>Reportes Finales</h4>
-        <p>Genera el Reporte Final (FO-301-02-18) de los menores que aprobaron los filtros.</p>
+        <p>
+          {% if modo_solo_consulta %}
+            Consulta reportes finales existentes. Registrar nuevos reportes queda bloqueado hasta que exista semestre activo.
+          {% else %}
+            Genera el Reporte Final (FO-301-02-18) de los menores que aprobaron los filtros.
+          {% endif %}
+        </p>
+        {% if modo_solo_consulta %}
+          <span class="mode-badge mode-badge-readonly">
+            <i class="bi bi-eye-fill"></i> Solo consulta
+          </span>
+        {% else %}
+          <span class="mode-badge mode-badge-active">
+            <i class="bi bi-pencil-square"></i> Operación activa
+          </span>
+        {% endif %}
       </div>
       <div>
         <a class="btn btn-warning btn-row shadow-sm fw-bold text-dark" href="{% url 'reporte_final_pendientes' %}">
-          Ir a Reportes <i class="bi bi-arrow-right-short"></i>
+          {% if modo_solo_consulta %}Consultar reportes{% else %}Ir a Reportes{% endif %}
+          <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>
-
-    <div class="module-row-card card-purple">
-      <div class="module-icon-row" style="background:#f5f3ff; color:#8b5cf6;">
-        <i class="bi bi-puzzle-fill"></i>
-      </div>
-      <div class="module-content-row">
-        <h4>Asignación de Salas</h4>
-        <p>Define y bloquea la sala definitiva del menor basándote en la sugerencia del sistema.</p>
-      </div>
-      <div>
-        <a class="btn btn-row shadow-sm text-white" style="background-color: #8b5cf6; border-color: #8b5cf6;" href="{% url 'lista_asignacion_salas' %}">
-          Asignar Salas <i class="bi bi-arrow-right-short"></i>
-        </a>
-      </div>
-    </div>
-
     <div class="module-row-card card-green">
       <div class="module-icon-row" style="background:#f0fdf4; color:#22c55e;">
         <i class="bi bi-cash-coin"></i>
       </div>
       <div class="module-content-row">
         <h4>Validación de Pagos</h4>
-        <p>Revisa y aprueba los comprobantes de pago para finalizar la inscripción.</p>
+        <p>
+          {% if modo_solo_consulta %}
+            Consulta comprobantes y pagos existentes. Validar, rechazar o registrar pagos queda bloqueado.
+          {% else %}
+            Revisa y aprueba los comprobantes de pago para finalizar la inscripción.
+          {% endif %}
+        </p>
+        {% if modo_solo_consulta %}
+          <span class="mode-badge mode-badge-readonly">
+            <i class="bi bi-eye-fill"></i> Solo consulta
+          </span>
+        {% else %}
+          <span class="mode-badge mode-badge-active">
+            <i class="bi bi-pencil-square"></i> Operación activa
+          </span>
+        {% endif %}
       </div>
       <div>
         <a class="btn btn-success btn-row shadow-sm fw-bold text-white" href="{% url 'validacion_pagos_pendientes' %}">
-          Ir a Pagos <i class="bi bi-arrow-right-short"></i>
+          {% if modo_solo_consulta %}Consultar pagos{% else %}Ir a Pagos{% endif %}
+          <i class="bi bi-arrow-right-short"></i>
         </a>
       </div>
     </div>
 
+
+    <div class="module-row-card card-cyan">
+      <div class="module-icon-row" style="background:#ecfeff; color:#0891b2;">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <div class="module-content-row">
+        <h4>Códigos de seguridad</h4>
+        <p>
+          {% if modo_solo_consulta %}
+            Consulta el estado de códigos existentes. Generar, resetear o confirmar entregas queda bloqueado hasta que exista semestre activo.
+          {% else %}
+            Genera, resetea y confirma la entrega del código de 4 dígitos junto con la credencial del responsable.
+          {% endif %}
+        </p>
+        {% if modo_solo_consulta %}
+          <span class="mode-badge mode-badge-readonly">
+            <i class="bi bi-eye-fill"></i> Solo consulta
+          </span>
+        {% else %}
+          <span class="mode-badge mode-badge-active">
+            <i class="bi bi-key-fill"></i> Operación activa
+          </span>
+        {% endif %}
+      </div>
+      <div>
+        <a class="btn btn-info btn-row shadow-sm fw-bold text-white" href="{% url 'codigos_responsable_pendientes' %}">
+          {% if modo_solo_consulta %}Consultar códigos{% else %}Gestionar códigos{% endif %}
+          <i class="bi bi-arrow-right-short"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="readonly-summary">
+    <h6>
+      <i class="bi bi-shield-check me-1"></i>
+      Reglas operativas por semestre
+    </h6>
+    {% if modo_solo_consulta %}
+      <ul>
+        <li>Trabajo Social puede consultar información histórica y descargar documentos.</li>
+        <li>No se permite crear, modificar, validar pagos ni registrar reportes nuevos.</li>
+        <li>La operación se habilitará cuando el Administrador del Sistema inicie un nuevo semestre.</li>
+      </ul>
+    {% else %}
+      <ul>
+        <li>El semestre activo permite operar solicitudes, reportes finales y validación de pagos.</li>
+        <li>Cuando el semestre se cierre, esta área pasará automáticamente a modo solo consulta.</li>
+        <li>La asignación de salas, maestras y horarios corresponde al Administrador del Sistema.</li>
+      </ul>
+    {% endif %}
   </div>
 
 </div>

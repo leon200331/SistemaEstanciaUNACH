@@ -19,18 +19,13 @@ body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .section-title{font-weight:800;margin-bottom:12px;color:#6b21a8;font-size:1.05rem;}
 .btn-soft{border-radius:10px;font-weight:700;padding:.55rem 1rem;}
 
-/* --- CAMBIO: Fondo morado pastel suave y bordes morados claros --- */
 .sub-card{background:#faf5ff;border:1px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:18px;}
 
-/* ========================================================
-   TRUCO DE DISEÑO: PREGUNTAS Y CAJAS JUNTAS ABAJO (CORREGIDO)
-   ======================================================== */
 .sub-card .row > div[class*="col-"] {
     display: flex;
     flex-direction: column;
 }
 
-/* --- CAMBIO: Letras de preguntas sin negritas --- */
 .sub-card .row > div[class*="col-"] > label,
 label {
     margin-bottom: 6px !important;
@@ -42,11 +37,10 @@ label {
 .sub-card .row > div[class*="col-"] > select,
 .sub-card .row > div[class*="col-"] > textarea,
 .sub-card .row > div[class*="col-"] > .select2-container {
-    margin-top: auto; /* Esto empuja la caja hacia abajo de forma segura */
+    margin-top: auto;
     flex: 0 0 auto;
 }
 
-/* Estilos de Select2 para que combine con Bootstrap */
 .select2-container .select2-selection--multiple {
     min-height: 38px;
     border: 1px solid #dee2e6;
@@ -57,14 +51,12 @@ label {
     border: none;
     color: white;
     border-radius: 4px;
-    /* --- CORRECCIÓN CSS PARA EVITAR QUE LA "X" SE AMONTONE --- */
     padding: 2px 8px 2px 24px;
     margin-top: 5px;
     position: relative;
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
     color: white;
-    /* --- SEPARAMOS LA "X" DE LA LETRA --- */
     position: absolute;
     left: 6px;
     top: 50%;
@@ -77,12 +69,276 @@ label {
     background: transparent;
 }
 
-/* --- CLASE PARA BLOQUEAR CAMPOS --- */
 .readonly-box {
     background-color: #e9ecef !important;
     pointer-events: none !important;
     color: #495057 !important;
 }
+
+.info-card-grid{
+    margin-bottom: 28px;
+}
+.info-box{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:10px 12px;
+    min-height:66px;
+}
+.info-label{
+    font-size:.78rem;
+    color:#64748b;
+    font-weight:700;
+    margin-bottom:5px;
+}
+.info-value{
+    font-size:.96rem;
+    font-weight:700;
+    color:#0f172a;
+}
+
+
+
+.estado-operativo{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    padding:16px 18px;
+    margin-bottom:20px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    border:1px solid transparent;
+}
+.estado-operativo .status-icon{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.35rem;
+}
+.estado-operativo h5{
+    margin:0 0 4px;
+    font-weight:900;
+}
+.estado-operativo p{
+    margin:0;
+    line-height:1.5;
+    font-size:.94rem;
+}
+.estado-activo{
+    background:#f0fdf4;
+    border-color:#bbf7d0;
+    border-left:7px solid #16a34a;
+    color:#14532d;
+}
+.estado-activo .status-icon{
+    background:#dcfce7;
+    color:#15803d;
+}
+.estado-consulta{
+    background:#fff7ed;
+    border-color:#fed7aa;
+    border-left:7px solid #f97316;
+    color:#9a3412;
+}
+.estado-consulta .status-icon{
+    background:#ffedd5;
+    color:#c2410c;
+}
+.modo-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border-radius:999px;
+    padding:.38rem .7rem;
+    font-size:.76rem;
+    font-weight:900;
+    margin-top:8px;
+}
+.modo-badge-activo{
+    background:#dcfce7;
+    color:#166534;
+    border:1px solid #86efac;
+}
+.modo-badge-consulta{
+    background:#ffedd5;
+    color:#9a3412;
+    border:1px solid #fed7aa;
+}
+.readonly-warning{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    border-left:6px solid #f97316;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:18px;
+    color:#9a3412;
+}
+.readonly-warning .title{
+    font-weight:900;
+    margin-bottom:3px;
+}
+
+.lock-banner{
+    background:#f8fafc;
+    border:1px solid #cbd5e1;
+    border-left:6px solid #64748b;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:18px;
+}
+.lock-banner .title{
+    font-weight:800;
+    color:#334155;
+    margin-bottom:3px;
+}
+
+/* =========================================================
+   SPRINT 5 - INCIDENCIAS NUTRICIONALES
+   ========================================================= */
+.incidencias-card{
+    background:linear-gradient(135deg,#f0fdf4,#ecfeff);
+    border:1px solid #bbf7d0;
+    border-left:7px solid #16a34a;
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+}
+.incidencias-card .icon-box{
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    background:#dcfce7;
+    color:#15803d;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.45rem;
+    flex-shrink:0;
+}
+.incidencias-card h5{
+    margin:0 0 4px;
+    font-weight:900;
+    color:#14532d;
+}
+.incidencias-card p{
+    margin:0;
+    color:#166534;
+    line-height:1.45;
+    font-size:.94rem;
+}
+.incidencias-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    align-items:center;
+    min-width:260px;
+}
+.btn-incidencia{
+    border-radius:999px;
+    font-weight:800;
+    padding:.62rem .92rem;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    text-decoration:none;
+    white-space:nowrap;
+}
+.btn-incidencia-create{
+    background:#16a34a;
+    color:white;
+    border:1px solid #16a34a;
+}
+.btn-incidencia-create:hover{
+    background:#15803d;
+    color:white;
+}
+.btn-incidencia-list{
+    background:white;
+    color:#14532d;
+    border:1px solid #86efac;
+}
+.btn-incidencia-list:hover{
+    background:#f0fdf4;
+    color:#14532d;
+}
+@media(max-width:768px){
+    .incidencias-card{
+        flex-direction:column;
+    }
+    .incidencias-actions,
+    .btn-incidencia{
+        width:100%;
+        justify-content:center;
+    }
+}
+
+/* =========================================================
+   ACLARACIÓN: DICTAMEN DE INSCRIPCIÓN, NO OPERACIÓN DIARIA
+   ========================================================= */
+.dictamen-incidencias-note{
+    background:#f0fdf4;
+    border:1px solid #bbf7d0;
+    border-left:6px solid #16a34a;
+    color:#14532d;
+    border-radius:16px;
+    padding:14px 16px;
+    margin-bottom:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.05);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+}
+.dictamen-incidencias-note .note-left{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+}
+.dictamen-incidencias-note .note-icon{
+    width:40px;
+    height:40px;
+    border-radius:13px;
+    background:#dcfce7;
+    color:#15803d;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.18rem;
+}
+.dictamen-incidencias-note .note-title{
+    font-weight:900;
+    margin-bottom:3px;
+}
+.dictamen-incidencias-note p{
+    margin:0;
+    font-size:.9rem;
+    line-height:1.4;
+}
+.dictamen-incidencias-note .note-actions{
+    flex-shrink:0;
+}
+@media(max-width:768px){
+    .dictamen-incidencias-note{
+        flex-direction:column;
+    }
+    .dictamen-incidencias-note .note-actions,
+    .dictamen-incidencias-note .note-actions a{
+        width:100%;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -99,6 +355,10 @@ label {
 </a>
 
 <div class="ms-auto d-flex gap-2 align-items-center">
+<a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn btn-outline-light btn-soft">
+<i class="bi bi-clipboard2-pulse me-1"></i> Incidencias
+</a>
+
 <a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-light btn-soft">
 <i class="bi bi-arrow-left me-1"></i> Volver
 </a>
@@ -109,21 +369,192 @@ label {
 
 <div class="container-panel">
 <div class="card card-panel p-4">
-<h4 class="fw-bold mb-3">Solicitud #{{ sol.folio }}</h4>
 
-<div class="row mb-4">
-    <div class="col-md-6">
-        <p class="mb-1"><strong>Tutor:</strong> {{ sol.nombre_tutor_completo }}</p>
-        <p class="mb-1"><strong>Correo:</strong> {{ sol.correo }}</p>
+{% if modo_solo_consulta %}
+<div class="estado-operativo estado-consulta">
+    <div class="status-icon">
+        <i class="bi bi-lock-fill"></i>
     </div>
-    <div class="col-md-6">
-        <p class="mb-1"><strong>Menor:</strong> {{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}</p>
-        <p class="mb-1"><strong>Fecha nacimiento general:</strong> {{ sol.fecha_nacimiento_menor }}</p>
+    <div>
+        <h5>Modo solo consulta</h5>
+        <p>
+            {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar esta valoración nutricional, pero no puedes guardar, modificar ni registrar dictámenes hasta que el Administrador inicie un nuevo semestre." }}
+        </p>
+        <span class="modo-badge modo-badge-consulta">
+            <i class="bi bi-eye-fill"></i> Consulta histórica habilitada
+        </span>
+    </div>
+</div>
+{% else %}
+<div class="estado-operativo estado-activo">
+    <div class="status-icon">
+        <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div>
+        <h5>Semestre activo</h5>
+        <p>
+            Nutrición puede operar normalmente en el semestre:
+            <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+        </p>
+        <span class="modo-badge modo-badge-activo">
+            <i class="bi bi-pencil-square"></i> Operación activa
+        </span>
+    </div>
+</div>
+{% endif %}
+<div class="dictamen-incidencias-note">
+    <div class="note-left">
+        <div class="note-icon">
+            <i class="bi bi-info-circle-fill"></i>
+        </div>
+        <div>
+            <div class="note-title">Este formulario es un dictamen de inscripción</div>
+            <p>
+                Aquí no se crean incidencias porque la solicitud todavía pertenece al proceso de admisión.
+                Las incidencias nutricionales se registran solo para niñas y niños ya inscritos en operación diaria.
+            </p>
+        </div>
+    </div>
+
+    <div class="note-actions">
+        <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn-incidencia btn-incidencia-list">
+            <i class="bi bi-eye-fill"></i>
+            Ver incidencias
+        </a>
     </div>
 </div>
 
+<div class="section-title" style="color:#64748b;">Información de la solicitud</div>
+<!-- DATOS DEL MENOR: se toman automáticamente del expediente; no se capturan en Nutrición. -->
+
+<div class="row g-3 info-card-grid">
+    <div class="col-md-3">
+        <div class="info-box">
+            <div class="info-label">Folio</div>
+            <div class="info-value">#{{ sol.folio|default:"-" }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="info-box">
+            <div class="info-label">Estado general</div>
+            <div class="info-value">{{ sol.get_estado_display }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="info-box">
+            <div class="info-label">Estado nutrición</div>
+            <div class="info-value">
+                {% if sol.estado_nutricion == 'PENDIENTE' %}
+                    En Revisión
+                {% else %}
+                    {{ sol.get_estado_nutricion_display }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="info-box">
+            <div class="info-label">Fecha de registro</div>
+            <div class="info-value">{{ sol.created_at|date:"d/m/Y" }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="info-box">
+            <div class="info-label">Tutor</div>
+            <div class="info-value">{{ sol.nombre_tutor_completo }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="info-box">
+            <div class="info-label">Correo</div>
+            <div class="info-value">{{ sol.correo|default:"No capturado" }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="info-box">
+            <div class="info-label">Nombre(s) del menor</div>
+            <div class="info-value">{% firstof nombre_nino sol.nombres_menor insc.nombres_menor "No capturado" %}</div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="info-box">
+            <div class="info-label">Apellido paterno del menor</div>
+            <div class="info-value">{% firstof paterno_nino sol.apellido_paterno_menor insc.apellido_paterno_menor "No capturado" %}</div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="info-box">
+            <div class="info-label">Apellido materno del menor</div>
+            <div class="info-value">{% firstof materno_nino sol.apellido_materno_menor insc.apellido_materno_menor "No capturado" %}</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="info-box">
+            <div class="info-label">Fecha de nacimiento</div>
+            <div class="info-value">
+                {% if fecha_nacimiento_menor %}
+                    {{ fecha_nacimiento_menor|date:"d/m/Y" }}
+                {% elif sol.fecha_nacimiento_menor %}
+                    {{ sol.fecha_nacimiento_menor|date:"d/m/Y" }}
+                {% elif insc.fecha_nacimiento_menor %}
+                    {{ insc.fecha_nacimiento_menor|date:"d/m/Y" }}
+                {% else %}
+                    No capturada
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="info-box">
+            <div class="info-label">CURP menor</div>
+            <div class="info-value">{% firstof curp_menor sol.curp_menor insc.curp_menor "No capturada" %}</div>
+        </div>
+    </div>
+</div>
+
+{% if modo_solo_consulta %}
+<div class="readonly-warning">
+    <div class="d-flex align-items-start">
+        <i class="bi bi-eye-fill fs-4 me-3"></i>
+        <div>
+            <div class="title">Valoración nutricional en solo lectura</div>
+            <div>
+                El semestre está cerrado o no hay semestre activo. Puedes revisar la información existente,
+                pero no se permite guardar cambios ni emitir nuevos dictámenes.
+            </div>
+        </div>
+    </div>
+</div>
+{% elif bloqueado %}
+<div class="lock-banner">
+    <div class="d-flex align-items-start">
+        <i class="bi bi-lock-fill fs-4 me-3 text-secondary"></i>
+        <div>
+            <div class="title">Evaluación nutricional finalizada</div>
+            <div class="text-muted">
+                Este dictamen ya fue enviado y no puede modificarse.
+                Solo Administrador o Directora pueden realizar correcciones.
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="section-title" style="color:#6b21a8; font-size:1.1rem; margin-bottom:20px;">Formulario de valoración nutricional</div>
+
 <form method="post" id="formDictamenNutricion">
 {% csrf_token %}
+
 
 <div class="sub-card">
     <div class="section-title">1. Ficha de identidad</div>
@@ -131,21 +562,30 @@ label {
     <div class="row">
         <div class="col-md-4 mb-3">
             <label class="form-label">Nombre(s) del menor</label>
-            <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ sol.nombres_menor|default:'⚠️ Faltan datos' }}" readonly>
-            <div class="d-none">{{ form.nombres_menor }}</div>
+            <input type="text" name="nombres_menor" class="form-control readonly-box text-primary fw-bold text-uppercase" value="{% firstof nombre_nino sol.nombres_menor insc.nombres_menor "" %}" readonly>
         </div>
         <div class="col-md-4 mb-3">
-            <label class="form-label">Apellido paterno</label>
-            <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ sol.apellido_paterno_menor|default:'⚠️ Faltan datos' }}" readonly>
-            <div class="d-none">{{ form.apellido_paterno_menor }}</div>
+            <label class="form-label">Apellido paterno del menor</label>
+            <input type="text" name="apellido_paterno_menor" class="form-control readonly-box text-primary fw-bold text-uppercase" value="{% firstof paterno_nino sol.apellido_paterno_menor insc.apellido_paterno_menor "" %}" readonly>
         </div>
         <div class="col-md-4 mb-3">
-            <label class="form-label">Apellido materno</label>
-            <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ sol.apellido_materno_menor|default:'⚠️ Faltan datos' }}" readonly>
-            <div class="d-none">{{ form.apellido_materno_menor }}</div>
+            <label class="form-label">Apellido materno del menor</label>
+            <input type="text" name="apellido_materno_menor" class="form-control readonly-box text-primary fw-bold text-uppercase" value="{% firstof materno_nino sol.apellido_materno_menor insc.apellido_materno_menor "" %}" readonly>
         </div>
     </div>
-    <div class="row">
+
+    <div class="row mt-2">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha de nacimiento del expediente</label>
+            <input type="text" class="form-control readonly-box" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'d/m/Y' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'d/m/Y' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'d/m/Y' }}{% else %}-{% endif %}" readonly>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">CURP del expediente</label>
+            <input type="text" class="form-control readonly-box text-uppercase" value="{% firstof curp_menor sol.curp_menor insc.curp_menor "-" %}" readonly>
+        </div>
+    </div>
+
+    <div class="row mt-2">
         <div class="col-md-4 mb-3">{{ form.edad_nutricion.label_tag }}{{ form.edad_nutricion }}</div>
         <div class="col-md-4 mb-3">{{ form.sexo_nutricion.label_tag }}{{ form.sexo_nutricion }}</div>
         <div class="col-md-4 mb-3">{{ form.fecha_nacimiento_nutricion.label_tag }}{{ form.fecha_nacimiento_nutricion }}</div>
@@ -338,10 +778,23 @@ label {
 </div>
 
 <div class="d-flex gap-2 mt-4">
-    <button type="submit" class="btn btn-success btn-soft">
-        <i class="bi bi-save me-1"></i> Guardar valoración
-    </button>
-    <a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-secondary btn-soft">Cancelar</a>
+    {% if modo_solo_consulta %}
+        <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
+            <i class="bi bi-eye-fill me-1"></i> Solo consulta
+        </button>
+    {% elif bloqueado %}
+        <button type="button" class="btn btn-secondary btn-soft" disabled>
+            <i class="bi bi-lock me-1"></i> Evaluación finalizada
+        </button>
+    {% else %}
+        <button type="submit" class="btn btn-success btn-soft">
+            <i class="bi bi-save me-1"></i> Guardar valoración
+        </button>
+    {% endif %}
+
+    <a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-secondary btn-soft">
+        <i class="bi bi-arrow-left me-1"></i> Regresar
+    </a>
 </div>
 
 </form>
@@ -402,7 +855,28 @@ function initToggles() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    // INICIALIZACIÓN DE SELECT2 PARA LOS ALIMENTOS DEL AGRADO
+    const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
+    const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+
+    if (evaluacionBloqueada || modoSoloConsulta) {
+        document.querySelectorAll('#formDictamenNutricion input, #formDictamenNutricion select, #formDictamenNutricion textarea, #formDictamenNutricion button').forEach(function(el) {
+            if (el.name !== 'csrfmiddlewaretoken') {
+                el.disabled = true;
+            }
+        });
+    }
+
+    const formNutricion = document.getElementById("formDictamenNutricion");
+    if (formNutricion) {
+        formNutricion.addEventListener("submit", function(event) {
+            if (modoSoloConsulta) {
+                event.preventDefault();
+                alert("Modo solo consulta: no se puede guardar porque no hay semestre activo/iniciado.");
+                return false;
+            }
+        });
+    }
+
     $('.select2-multiple').select2({
         tags: true,
         tokenSeparators: [',', ' '],
@@ -441,7 +915,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     initToggles();
 
-    // --- Script para llenar la fecha de elaboración automáticamente ---
     const fechaInput = document.getElementById('fecha_automatica');
     if (fechaInput) {
         const hoy = new Date();
@@ -455,21 +928,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
   // ====================================================================
-  // SISTEMA DE AUTOGUARDADO LOCAL V3 (ESTILO GOOGLE FORMS - CORREGIDO)
+  // SISTEMA DE AUTOGUARDADO LOCAL V3
   // ====================================================================
   document.addEventListener("DOMContentLoaded", function() {
+      const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
+      const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+      if (evaluacionBloqueada || modoSoloConsulta) return;
 
-      // 1. BUSCAMOS EL FORMULARIO CORRECTO (Ignorando el form de Cerrar Sesión)
       let form = document.getElementById("formDictamen") ||
                  document.getElementById("formDictamenMedico") ||
                  document.getElementById("formDictamenNutricion");
 
-      if (!form) {
-          console.error("Error: No se encontró el formulario principal.");
-          return;
-      }
+      if (!form) return;
 
-      // 2. CREAR EL LETRERO VISUAL (Estilo Google Forms en la esquina inferior derecha)
       let indicator = document.getElementById("autosave-indicator");
       if (!indicator) {
           indicator = document.createElement("div");
@@ -482,15 +953,13 @@ document.addEventListener("DOMContentLoaded", function() {
           indicator.style.display = "flex";
           indicator.style.opacity = "1";
           if (status === "saving") {
-              indicator.style.background = "#eab308"; // Amarillo
+              indicator.style.background = "#eab308";
               indicator.style.color = "#000000";
               indicator.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
           } else if (status === "saved") {
-              indicator.style.background = "#10b981"; // Verde
+              indicator.style.background = "#10b981";
               indicator.style.color = "#ffffff";
               indicator.innerHTML = '<i class="bi bi-cloud-check-fill" style="font-size:1.2rem;"></i> Guardado localmente';
-
-              // Se oculta solito después de 3 segundos
               setTimeout(() => {
                   indicator.style.opacity = "0";
                   setTimeout(() => { indicator.style.display = "none"; }, 300);
@@ -498,11 +967,9 @@ document.addEventListener("DOMContentLoaded", function() {
           }
       }
 
-      // --- CAMBIO: EXCLUIR CASILLAS READONLY DEL AUTOGUARDADO ---
       const formId = "autosave_" + window.location.pathname;
       const elements = form.querySelectorAll("input:not([readonly]), select:not([readonly]), textarea:not([readonly])");
 
-      // 3. RECUPERAR DATOS AL ABRIR LA PÁGINA
       let hayDatosRecuperados = false;
       elements.forEach(el => {
           if (el.type === "file" || el.type === "hidden" || el.name === "csrfmiddlewaretoken") return;
@@ -530,7 +997,6 @@ document.addEventListener("DOMContentLoaded", function() {
           }
       });
 
-      // Disparar eventos para que se muestren las cajitas que estaban ocultas
       if (hayDatosRecuperados) {
           setTimeout(() => {
               elements.forEach(el => {
@@ -541,7 +1007,6 @@ document.addEventListener("DOMContentLoaded", function() {
           }, 300);
       }
 
-      // 4. FUNCIÓN MAESTRA QUE GUARDA TODO
       function guardarTodo() {
           showIndicator("saving");
 
@@ -563,12 +1028,8 @@ document.addEventListener("DOMContentLoaded", function() {
           setTimeout(() => { showIndicator("saved"); }, 600);
       }
 
-      // 5. DISPARADORES: CUÁNDO GUARDAR
-
-      // A) Cada 1 minuto exacto (60,000 milisegundos)
       setInterval(guardarTodo, 60000);
 
-      // B) 2 Segundos después de que el usuario deja de escribir/seleccionar algo
       let timeoutId;
       function autoGuardarAlEscribir() {
           clearTimeout(timeoutId);
@@ -578,12 +1039,10 @@ document.addEventListener("DOMContentLoaded", function() {
       form.addEventListener("input", autoGuardarAlEscribir);
       form.addEventListener("change", autoGuardarAlEscribir);
 
-      // Compatibilidad especial para las listas de Nutrición (Select2)
       if (typeof jQuery !== 'undefined') {
           jQuery('.select2-multiple').on('change', autoGuardarAlEscribir);
       }
 
-      // 6. BORRAR TODO CUANDO MANDEN EL FORMULARIO FINAL (APROBADO/RECHAZADO)
       form.addEventListener("submit", function() {
           elements.forEach(el => {
               if (el.name) {
@@ -591,7 +1050,6 @@ document.addEventListener("DOMContentLoaded", function() {
               }
           });
       });
-
   });
 </script>
 

@@ -1,147 +1,321 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dictaminar Reporte Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block content %}
-<div class="container mt-5 pt-5 mb-5" style="max-width: 900px;">
-    
-    <div class="mb-3">
-        <a href="{% url 'reporte_final_pendientes' %}" class="text-decoration-none text-muted fw-bold">
-            <i class="bi bi-arrow-left"></i> Volver a la lista
-        </a>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f3f5f8;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar-ts {
+            background: #7c3aed;
+            padding: .75rem 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,.12);
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: .5px;
+            line-height: 1.15;
+        }
+
+        .brand-subtitle {
+            color: rgba(255,255,255,.78);
+            font-size: .85rem;
+        }
+
+        .container-panel {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 22px 16px;
+            margin-top: 92px;
+        }
+
+        .card-panel {
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,.08);
+            border: none;
+            background: #fff;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            min-height: 70px;
+        }
+
+        .info-label {
+            font-size: .78rem;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: .96rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .btn-soft {
+            border-radius: 10px;
+            font-weight: 700;
+            padding: .55rem 1rem;
+        }
+
+        .section-title {
+            color: #6b21a8;
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 14px;
+        }
+
+        .report-preview {
+            background: #ffffff;
+            border: 1px dashed #94a3b8;
+            border-radius: 14px;
+            padding: 28px;
+        }
+
+        .line-box {
+            border-bottom: 1px solid #111;
+            height: 28px;
+        }
+
+        textarea {
+            min-height: 150px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-ts fixed-top">
+    <div class="container-fluid justify-content-center">
+        <div class="d-flex align-items-center" style="width:100%; max-width:1100px; padding:0 18px;">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'reporte_final_pendientes' %}">
+                <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" class="me-3" style="height:44px;">
+                <div>
+                    <div class="brand-title">DICTAMEN DE REPORTE FINAL</div>
+                    <div class="brand-subtitle">Trabajo Social · FO-301-02-18</div>
+                </div>
+            </a>
+
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <a href="{% url 'reporte_final_pendientes' %}" class="btn btn-light btn-soft">
+                    <i class="bi bi-arrow-left me-1"></i> Pendientes
+                </a>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-soft">
+                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-panel">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card card-panel p-4 mb-4">
+        <h3 class="fw-bold mb-1">
+            <i class="bi bi-file-earmark-medical-fill me-2 text-primary"></i>
+            Reporte Final de Ingreso
+        </h3>
+        <p class="text-muted mb-0">
+            Revisa los filtros y registra si el menor se encuentra en condiciones para concluir el trámite.
+        </p>
     </div>
 
-    <div class="card shadow-lg border-0" style="border-radius: 2px;">
-        <div class="card-body p-5 bg-white text-dark" style="font-family: 'Arial', sans-serif;">
-            
-            <div class="row mb-5 align-items-center border-bottom pb-4">
-                <div class="col-3 text-center">
-                    <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" style="max-height: 70px;">
-                </div>
-                <div class="col-6 text-center">
-                    <h5 class="fw-bold mb-0">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</h5>
-                    <h6 class="text-muted mb-0">ESTANCIA INFANTIL UNACH</h6>
-                </div>
-                <div class="col-3 text-end">
-                    <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" style="max-height: 60px;">
-                    <div class="fw-bold mt-1" style="font-size: 0.8rem;">FO-301-02-18</div>
+    <div class="card card-panel p-4 mb-4">
+        <div class="section-title">Información del expediente</div>
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="info-box">
+                    <div class="info-label">Folio</div>
+                    <div class="info-value">#{{ solicitud.folio }}</div>
                 </div>
             </div>
 
-            <h4 class="text-center fw-bold mb-5 text-uppercase">REPORTE FINAL DE INGRESO</h4>
-
-            <p class="mb-4 text-justify" style="line-height: 1.8;">
-                Derivado de la información proporcionada por las diversas áreas que participan en el proceso de inscripción al servicio que proporciona la Estancia Infantil UNACH, se determina que el menor <strong class="text-decoration-underline ms-1 text-uppercase">{{ inscripcion.solicitud_ingreso.nombres_menor }} {{ inscripcion.solicitud_ingreso.apellido_paterno_menor }} {{ inscripcion.solicitud_ingreso.apellido_materno_menor }}</strong>
-            </p>
-
-            <form method="POST" id="formReporte">
-                {% csrf_token %}
-
-                <div class="form-check mb-4 p-3 rounded" id="box_aprobar" style="transition: 0.3s; border: 1px solid transparent;">
-                    <input class="form-check-input fs-4" type="radio" name="decision" id="decision_aprobar" value="APROBAR" required onchange="toggleMotivos()">
-                    <label class="form-check-label ms-2 mt-1 fs-5" for="decision_aprobar" style="cursor: pointer;">
-                        ( &nbsp;&nbsp; ) Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.
-                    </label>
+            <div class="col-md-3">
+                <div class="info-box">
+                    <div class="info-label">Estado</div>
+                    <div class="info-value">{{ inscripcion.get_estado_display }}</div>
                 </div>
+            </div>
 
-                <div class="form-check mb-2 p-3 rounded" id="box_rechazar" style="transition: 0.3s; border: 1px solid transparent;">
-                    <input class="form-check-input fs-4" type="radio" name="decision" id="decision_rechazar" value="RECHAZAR" required onchange="toggleMotivos()">
-                    <label class="form-check-label ms-2 mt-1 fs-5" for="decision_rechazar" style="cursor: pointer;">
-                        ( &nbsp;&nbsp; ) No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza la inscripción del mismo por los siguientes motivos:
-                    </label>
+            <div class="col-md-3">
+                <div class="info-box">
+                    <div class="info-label">Psicología</div>
+                    <div class="info-value">{{ solicitud.get_estado_psicologia_display }}</div>
                 </div>
+            </div>
 
-                <div class="ms-5 ps-3 mb-5" id="div_motivos" style="display: none;">
-                    <textarea class="form-control bg-light border-secondary" name="motivos" id="input_motivos" rows="3" placeholder="Escriba los motivos de rechazo aquí..."></textarea>
+            <div class="col-md-3">
+                <div class="info-box">
+                    <div class="info-label">Nutrición</div>
+                    <div class="info-value">{{ solicitud.get_estado_nutricion_display }}</div>
                 </div>
+            </div>
 
-                <div class="row mt-5 pt-5 text-center">
-                    <div class="col-6">
-                        <div class="border-bottom border-dark mx-auto" style="width: 80%;">
-                            <span class="d-block mb-1 text-primary fw-bold text-uppercase" style="font-family: 'Courier New', Courier, monospace;">
-                                {{ request.user.nombre }} {{ request.user.apellido_paterno }} {{ request.user.apellido_materno|default:"" }}
-                            </span>
-                        </div>
-                        <div class="mt-2 fw-bold">Nombre y Firma de la Trabajadora Social</div>
-                    </div>
-                    <div class="col-6">
-                        <div class="border-bottom border-dark mx-auto" style="width: 80%;">
-                            <span class="d-block mb-1 text-muted fst-italic" style="height: 24px;">
-                                (Pendiente de firma de Directora)
-                            </span>
-                        </div>
-                        <div class="mt-2 fw-bold">Nombre y Firma de la Directora</div>
-                    </div>
+            <div class="col-md-3">
+                <div class="info-box">
+                    <div class="info-label">Médico</div>
+                    <div class="info-value">{{ solicitud.get_estado_medico_display }}</div>
                 </div>
+            </div>
 
-                <div class="d-grid mt-5 pt-4">
-                    <button type="submit" class="btn btn-primary btn-lg shadow fw-bold rounded-pill">
-                        <i class="bi bi-save-fill me-2"></i> Guardar y Enviar a Dirección
-                    </button>
+            <div class="col-md-9">
+                <div class="info-box">
+                    <div class="info-label">Menor</div>
+                    <div class="info-value">{{ solicitud.nombre_menor_completo }}</div>
                 </div>
-            </form>
+            </div>
+
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Tutor / Beneficiario</div>
+                    <div class="info-value">{{ solicitud.nombre_tutor_completo }}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">Correo</div>
+                    <div class="info-value">{{ solicitud.correo }}</div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="card card-panel p-4 mb-4">
+        <div class="section-title">Vista previa del contenido FO-301-02-18</div>
+
+        <div class="report-preview">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" style="height:62px;">
+                <div class="text-center">
+                    <div class="fw-bold text-secondary">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
+                    <div class="text-muted fw-semibold">ESTANCIA INFANTIL UNACH</div>
+                    <div class="fw-bold mt-3">REPORTE FINAL DE INGRESO</div>
+                </div>
+                <div class="text-center">
+                    <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" style="height:62px;">
+                    <div class="fw-bold small mt-1">FO-301-02-18</div>
+                </div>
+            </div>
+
+            <p class="text-end mb-4">
+                Fecha:
+                <span style="display:inline-block; width:260px; border-bottom:1px solid #111;">
+                    {{ now|date:"d/m/Y" }}
+                </span>
+            </p>
+
+            <p>
+                Derivado de la información proporcionada por las diversas áreas que participan
+                en el proceso de inscripción al servicio que proporciona la Estancia Infantil UNACH,
+                se determina que el menor
+                <strong>{{ solicitud.nombre_menor_completo }}</strong>:
+            </p>
+
+            <p class="mb-2">
+                ( &nbsp; ) Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.
+            </p>
+
+            <p class="mb-3">
+                ( &nbsp; ) No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza
+                la inscripción del mismo por los siguientes motivos:
+            </p>
+
+            <div class="line-box"></div>
+            <div class="line-box"></div>
+            <div class="line-box"></div>
+
+            <div class="row mt-5 pt-4">
+                <div class="col-md-6 text-center">
+                    <div style="border-top:1px solid #111; padding-top:6px;">
+                        Nombre y Firma de la Trabajadora Social
+                    </div>
+                </div>
+
+                <div class="col-md-6 text-center">
+                    <div style="border-top:1px solid #111; padding-top:6px;">
+                        Nombre y Firma de la Directora
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="card card-panel p-4">
+        {% csrf_token %}
+
+        <div class="section-title">Resolución de Trabajo Social</div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Motivos / observaciones del Reporte Final</label>
+            <textarea
+                name="reporte_final_motivos"
+                class="form-control"
+                placeholder="Escribe aquí los motivos si se rechaza, o una observación general si se acepta.">{{ inscripcion.reporte_final_motivos|default:"" }}</textarea>
+            <div class="form-text">
+                Si rechazas la inscripción, este campo es obligatorio.
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 flex-wrap">
+            <a href="{% url 'reporte_final_pendientes' %}" class="btn btn-outline-secondary btn-soft">
+                <i class="bi bi-arrow-left me-1"></i> Cancelar
+            </a>
+
+            <button
+                type="submit"
+                name="accion_reporte_final"
+                value="RECHAZAR"
+                class="btn btn-danger btn-soft"
+                onclick="return confirm('¿Confirmas rechazar la inscripción desde Trabajo Social?');">
+                <i class="bi bi-x-circle me-1"></i> Rechazar inscripción
+            </button>
+
+            <button
+                type="submit"
+                name="accion_reporte_final"
+                value="ACEPTAR"
+                class="btn btn-success btn-soft"
+                onclick="return confirm('¿Confirmas aceptar la inscripción y enviarla a Dirección?');">
+                <i class="bi bi-check-circle me-1"></i> Aceptar y enviar a Dirección
+            </button>
+        </div>
+    </form>
+
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    function toggleMotivos() {
-        const rechazar = document.getElementById('decision_rechazar').checked;
-        const divMotivos = document.getElementById('div_motivos');
-        const inputMotivos = document.getElementById('input_motivos');
-        const boxAprobar = document.getElementById('box_aprobar');
-        const boxRechazar = document.getElementById('box_rechazar');
-
-        if (rechazar) {
-            divMotivos.style.display = 'block';
-            inputMotivos.required = true;
-            boxRechazar.style.backgroundColor = '#fff5f5';
-            boxRechazar.style.borderColor = '#dc3545';
-            boxAprobar.style.backgroundColor = 'transparent';
-            boxAprobar.style.borderColor = 'transparent';
-        } else {
-            divMotivos.style.display = 'none';
-            inputMotivos.required = false;
-            inputMotivos.value = '';
-            boxAprobar.style.backgroundColor = '#f0fdf4';
-            boxAprobar.style.borderColor = '#198754';
-            boxRechazar.style.backgroundColor = 'transparent';
-            boxRechazar.style.borderColor = 'transparent';
-        }
-    }
-
-    // --- ALERTA BONITA (SWEETALERT) AL ENVIAR EL FORMULARIO ---
-    document.getElementById('formReporte').addEventListener('submit', function(e) {
-        e.preventDefault(); // Detenemos el envío normal
-        const form = this;
-
-        // Detectamos si es Aprobar o Rechazar para cambiar el texto de la alerta
-        const esAprobar = document.getElementById('decision_aprobar').checked;
-        const titulo = esAprobar ? '¿Aprobar y enviar a Dirección?' : '¿Rechazar expediente?';
-        const texto = esAprobar ?
-            'El expediente pasará a la Directora para su veredicto final.' :
-            'Se guardarán los motivos y el expediente será marcado como rechazado.';
-        const icono = esAprobar ? 'info' : 'warning';
-        const colorBoton = esAprobar ? '#0d6efd' : '#dc3545'; // Azul para aprobar, Rojo para rechazar
-
-        Swal.fire({
-            title: titulo,
-            text: texto,
-            icon: icono,
-            showCancelButton: true,
-            confirmButtonColor: colorBoton,
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="bi bi-check-circle"></i> Sí, confirmar',
-            cancelButtonText: '<i class="bi bi-x-circle"></i> Cancelar',
-            background: '#ffffff',
-            borderRadius: '15px',
-            backdrop: `rgba(0,0,0,0.5)`
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit(); // Si dice que sí, mandamos el formulario de verdad
-            }
-        });
-    });
-</script>
-{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

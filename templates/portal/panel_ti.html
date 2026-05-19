@@ -30,6 +30,328 @@
     .jira-label { font-size: 0.85rem; font-weight: 600; color: #44546f; margin-bottom: 4px; display: block; }
     .jira-input { background: #f4f5f7; border: 2px solid #dfe1e6; border-radius: 4px; padding: 8px 12px; font-size: 0.9rem; color: #172b4d; width: 100%; transition: 0.2s; }
     .jira-input:focus { background: white; border-color: #0c66e4; outline: none; }
+
+    .sprint-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      padding: 18px;
+      height: 100%;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+      transition: .2s ease;
+    }
+    .sprint-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(15,23,42,.10);
+    }
+    .sprint-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+    }
+    .sprint-title {
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .sprint-desc {
+      color: #64748b;
+      font-size: .88rem;
+      min-height: 42px;
+    }
+    .sprint-alert {
+      border-radius: 16px;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+      padding: 14px 16px;
+      font-size: .92rem;
+      font-weight: 600;
+    }
+    .role-note {
+      border-left: 5px solid #2563eb;
+      background: #eff6ff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: #1e3a8a;
+      font-size: .9rem;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .flow-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+      height: 100%;
+      transition: .2s ease;
+    }
+    .flow-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(15,23,42,.10);
+    }
+    .flow-head {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .flow-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      background:#dbeafe;
+      color:#1e40af;
+      flex-shrink:0;
+    }
+    .flow-title {
+      font-weight: 900;
+      color: #0f172a;
+      line-height:1.15;
+    }
+    .flow-desc {
+      color:#64748b;
+      font-size:.88rem;
+      margin-bottom:12px;
+      min-height:50px;
+    }
+    .prep-box {
+      background:#f8fafc;
+      border:1px dashed #cbd5e1;
+      border-radius:18px;
+      padding:16px;
+    }
+    .step-label {
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:900;
+      color:#64748b;
+      margin-bottom:4px;
+    }
+    .semestre-table-actions {
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    @media(max-width: 992px) {
+      .flow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media(max-width: 576px) {
+      .flow-grid { grid-template-columns: 1fr; }
+    }
+
+
+    .admin-status {
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+      border: 1px solid transparent;
+      margin-bottom: 18px;
+    }
+    .admin-status .status-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.35rem;
+    }
+    .admin-status h6 {
+      margin: 0 0 4px;
+      font-weight: 900;
+      color: inherit;
+    }
+    .admin-status p {
+      margin: 0;
+      line-height: 1.45;
+      font-size: .92rem;
+    }
+    .admin-status .status-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .admin-status-active {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      border-left: 7px solid #16a34a;
+      color: #14532d;
+    }
+    .admin-status-active .status-icon {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .admin-status-setup {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      border-left: 7px solid #f97316;
+      color: #9a3412;
+    }
+    .admin-status-setup .status-icon {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+    .admin-status-info {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      border-left: 7px solid #2563eb;
+      color: #1e3a8a;
+    }
+    .admin-status-info .status-icon {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .state-help {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: #475569;
+      font-size: .88rem;
+      margin-bottom: 18px;
+    }
+    .state-help strong { color: #0f172a; }
+    .quick-state-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .quick-state-card {
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      box-shadow: 0 6px 16px rgba(15,23,42,.04);
+    }
+    .quick-state-card .label {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #64748b;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+    .quick-state-card .value {
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    @media(max-width: 768px) {
+      .quick-state-grid { grid-template-columns: 1fr; }
+    }
+
+    .legacy-muted {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: #475569;
+      font-size: .86rem;
+    }
+
+    /* =========================================================
+       SPRINT 5 - INCIDENCIAS / ADMINISTRADOR DEL SISTEMA
+       ========================================================= */
+    .incidencias-admin-hero {
+      border-radius: 20px;
+      padding: 18px;
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 1px solid #bfdbfe;
+      border-left: 7px solid #2563eb;
+      color: #1e3a8a;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+    }
+    .incidencias-admin-hero h6 {
+      font-weight: 900;
+      margin-bottom: 5px;
+      color: #1e3a8a;
+    }
+    .incidencias-admin-hero p {
+      margin: 0;
+      font-size: .92rem;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+    .incidencias-admin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .incidencias-admin-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+      height: 100%;
+      transition: .2s ease;
+    }
+    .incidencias-admin-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(15,23,42,.10);
+    }
+    .incidencias-admin-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+    }
+    .incidencias-admin-title {
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .incidencias-admin-desc {
+      color: #64748b;
+      font-size: .88rem;
+      min-height: 48px;
+      margin-bottom: 12px;
+    }
+    .incidencias-admin-note {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-left: 6px solid #f97316;
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: #9a3412;
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+    @media(max-width: 992px) {
+      .incidencias-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media(max-width: 576px) {
+      .incidencias-admin-grid { grid-template-columns: 1fr; }
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
@@ -61,13 +383,13 @@
                 <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
                     <button class="nav-link active" id="tab-staff-btn" data-bs-toggle="pill" data-bs-target="#tab-staff" onclick="rememberTab(this.id)"><i class="bi bi-briefcase-fill me-2"></i> Personal Interno</button>
 
-                    <button class="nav-link" id="tab-ciclos-btn" data-bs-toggle="pill" data-bs-target="#tab-ciclos" onclick="rememberTab(this.id)"><i class="bi bi-calendar-plus me-2"></i> Gestión de Ciclos</button>
+                    <button class="nav-link" id="tab-ciclos-btn" data-bs-toggle="pill" data-bs-target="#tab-ciclos" onclick="rememberTab(this.id)"><i class="bi bi-calendar2-week me-2"></i> Gestión de Semestres</button>
 
-                    <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)"><i class="bi bi-diagram-3-fill me-2"></i> Asignación de Roles</button>
-
-                    <button class="nav-link" id="tab-historial-btn" data-bs-toggle="pill" data-bs-target="#tab-historial" onclick="rememberTab(this.id)"><i class="bi bi-folder-fill me-2"></i> Historial de Ciclos</button>
+                    <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)"><i class="bi bi-person-lock me-2"></i> Roles y Permisos</button>
 
                     <button class="nav-link" id="tab-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-logs" onclick="rememberTab(this.id)"><i class="bi bi-terminal me-2"></i> Auditoría Técnica</button>
+
+                    <button class="nav-link" id="tab-incidencias-btn" data-bs-toggle="pill" data-bs-target="#tab-incidencias" onclick="rememberTab(this.id)"><i class="bi bi-clipboard2-pulse-fill me-2"></i> Incidencias</button>
 
                     <button class="nav-link" id="tab-sec-btn" data-bs-toggle="pill" data-bs-target="#tab-sec" onclick="rememberTab(this.id)"><i class="bi bi-lock-fill me-2"></i> Seguridad</button>
                 </div>
@@ -103,7 +425,13 @@
                                         <td>
                                             <div class="small fw-bold mt-1" style="color: #6f42c1;">
                                                 {% for cargo in u.groups.all %}
-                                                    <i class="bi bi-person-badge text-primary"></i> {{ cargo.name }}<br>
+                                                    <i class="bi bi-person-badge text-primary"></i>
+                                                    {% if cargo.name == "Asistentes de Salas (Maestras)" %}
+                                                        Maestra / Asistente de Sala
+                                                    {% else %}
+                                                        {{ cargo.name }}
+                                                    {% endif %}
+                                                    <br>
                                                 {% empty %}
                                                     <span class="text-muted fw-normal fst-italic">Sin rol asignado</span>
                                                 {% endfor %}
@@ -145,48 +473,275 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-ciclos">
                     <div class="content-card mb-4 border-success border-top border-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
                             <div>
-                                <h5 class="fw-bold m-0"><i class="bi bi-calendar-plus text-success me-2"></i>Gestión de Semestres</h5>
-                                <p class="text-muted small m-0">Controla la apertura y cierre oficial del sistema.</p>
+                                <h5 class="fw-bold m-0">
+                                    <i class="bi bi-calendar2-week text-success me-2"></i>Gestión de Semestres
+                                </h5>
+                                <p class="text-muted small m-0">
+                                    Sprint 4 / Épica 3: sigue el orden de configuración para no omitir pasos.
+                                </p>
                             </div>
-                            <form onsubmit="submitAjax(event)" class="m-0">
-                                {% csrf_token %}
-                                <input type="hidden" name="action_type" value="end_cycle">
-                                <button type="submit" class="btn btn-outline-danger fw-bold btn-sm">
-                                    <i class="bi bi-stop-circle-fill me-1"></i> Terminar Semestre Actual
-                                </button>
-                            </form>
+
+                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-success fw-bold">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Abrir módulo completo
+                            </a>
                         </div>
 
-                        <div class="alert alert-success bg-light border-success p-4 rounded">
-                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-play-circle-fill me-1"></i> Abrir Nuevo Semestre</h6>
-                            <form onsubmit="submitAjax(event)" class="row g-3 align-items-end">
-                                {% csrf_token %}
-                                <input type="hidden" name="action_type" value="start_cycle">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-secondary small mb-1">Nombre del Semestre</label>
-                                    <input type="text" name="nombre_semestre" class="form-control" placeholder="Ej: Enero - Junio 2026" required>
+                        {% if hay_semestre_activo_operativo %}
+                        <div class="admin-status admin-status-active">
+                            <div class="status-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div>
+                                <h6>Semestre activo/iniciado</h6>
+                                <p>
+                                    El sistema está en operación con:
+                                    <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+                                    Los roles operativos pueden trabajar según sus permisos. Cuando este semestre se cierre,
+                                    pasará a modo consulta y se deberá iniciar uno nuevo para operar nuevamente.
+                                </p>
+                                <div class="status-actions">
+                                    <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-success btn-sm fw-bold rounded-pill px-3">
+                                        <i class="bi bi-eye-fill me-1"></i> Ver semestre activo
+                                    </a>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold text-secondary small mb-1">Fecha de Inicio</label>
-                                    <input type="date" name="fecha_inicio" class="form-control" required>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="admin-status admin-status-setup">
+                            <div class="status-icon">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div>
+                                <h6>No hay semestre activo/iniciado</h6>
+                                <p>
+                                    El Administrador del Sistema puede seguir entrando porque es quien crea y configura el semestre.
+                                    Los demás roles solo podrán consultar información histórica hasta que se inicie un nuevo semestre.
+                                </p>
+                                <div class="status-actions">
+                                    <a href="{% url 'crear_sede' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
+                                        <i class="bi bi-building-add me-1"></i> Crear sede
+                                    </a>
+                                    <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-primary btn-sm fw-bold rounded-pill px-3">
+                                        <i class="bi bi-calendar-plus me-1"></i> Crear semestre
+                                    </a>
+                                    <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark btn-sm fw-bold rounded-pill px-3">
+                                        <i class="bi bi-list-check me-1"></i> Ver semestres
+                                    </a>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold text-secondary small mb-1">Fecha de Término</label>
-                                    <input type="date" name="fecha_fin" class="form-control" required>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="state-help">
+                            <div class="quick-state-grid">
+                                <div class="quick-state-card">
+                                    <div class="label">Configuración</div>
+                                    <div class="value">Solo Admin prepara sede, semestre, salas, personal y horarios.</div>
                                 </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-success w-100 fw-bold">Iniciar</button>
+                                <div class="quick-state-card">
+                                    <div class="label">Activo</div>
+                                    <div class="value">Los roles pueden operar según sus permisos.</div>
                                 </div>
-                            </form>
+                                <div class="quick-state-card">
+                                    <div class="label">Cerrado</div>
+                                    <div class="value">Todos consultan historial; nadie modifica ese semestre.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sprint-alert mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Orden recomendado: primero prepara personal y roles, después crea sede, crea semestre,
+                            entra a <strong>Ver detalle</strong> para configurar días, salas, maestras y horarios,
+                            luego inicia, envía encuesta B y al final cierra el semestre.
+                        </div>
+
+                        <div class="prep-box mb-4">
+                            <div class="step-label">Paso 0 · Preparación necesaria</div>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-8">
+                                    <div class="fw-bold text-dark mb-1">Personal interno y roles/permisos</div>
+                                    <div class="text-muted small">
+                                        Antes de asignar médica, nutrióloga, psicóloga o maestras al semestre,
+                                        el personal debe existir y tener su rol. El rol permite iniciar sesión;
+                                        la asignación al semestre se hace después en Gestión de Semestres.
+                                    </div>
+                                </div>
+                                <div class="col-md-4 d-flex gap-2 flex-wrap justify-content-md-end">
+                                    <a href="#" onclick="new bootstrap.Tab(document.getElementById('tab-staff-btn')).show(); rememberTab('tab-staff-btn'); return false;" class="btn btn-outline-secondary btn-sm fw-bold">
+                                        Personal
+                                    </a>
+                                    <a href="#" onclick="new bootstrap.Tab(document.getElementById('tab-roles-btn')).show(); rememberTab('tab-roles-btn'); return false;" class="btn btn-outline-primary btn-sm fw-bold">
+                                        Roles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-grid mb-4">
+                            <div class="flow-card">
+                                <div class="flow-head">
+                                    <div class="flow-num">1</div>
+                                    <div class="flow-title">Crear sede</div>
+                                </div>
+                                <div class="flow-desc">
+                                    Registra la sede para operar de forma segmentada y evitar que salas como L1, L2, M1 o M2 choquen entre sedes.
+                                </div>
+                                <a href="{% url 'crear_sede' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold w-100">
+                                    Crear sede
+                                </a>
+                            </div>
+
+                            <div class="flow-card">
+                                <div class="flow-head">
+                                    <div class="flow-num">2</div>
+                                    <div class="flow-title">Crear semestre</div>
+                                </div>
+                                <div class="flow-desc">
+                                    Captura nombre, sede, fechas, médica, nutrióloga, psicóloga y fecha de encuesta B.
+                                </div>
+                                <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-outline-primary btn-sm fw-bold w-100">
+                                    Crear semestre
+                                </a>
+                            </div>
+
+                            <div class="flow-card">
+                                <div class="flow-head">
+                                    <div class="flow-num">3</div>
+                                    <div class="flow-title">Ver detalle / configurar</div>
+                                </div>
+                                <div class="flow-desc">
+                                    Desde el detalle agregas días festivos, suspensiones, salas, horarios, maestras y alumnos.
+                                </div>
+                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark btn-sm fw-bold w-100">
+                                    Ver semestres
+                                </a>
+                            </div>
+
+                            <div class="flow-card">
+                                <div class="flow-head">
+                                    <div class="flow-num">4</div>
+                                    <div class="flow-title">Iniciar semestre</div>
+                                </div>
+                                <div class="flow-desc">
+                                    Se inicia desde el detalle. Valida que cada sala activa tenga maestra asignada.
+                                </div>
+                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold w-100">
+                                    Ir al detalle
+                                </a>
+                            </div>
+
+                            <div class="flow-card">
+                                <div class="flow-head">
+                                    <div class="flow-num">5</div>
+                                    <div class="flow-title">Enviar encuesta B</div>
+                                </div>
+                                <div class="flow-desc">
+                                    Se envía desde el detalle del semestre y se marca copia al correo genérico.
+                                </div>
+                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-info btn-sm fw-bold w-100">
+                                    Gestionar encuesta
+                                </a>
+                            </div>
+
+                            <div class="flow-card">
+                                <div class="flow-head">
+                                    <div class="flow-num">6</div>
+                                    <div class="flow-title">Cerrar semestre</div>
+                                </div>
+                                <div class="flow-desc">
+                                    Valida días cerrados, incidencias cerradas y que la fecha fin ya haya vencido.
+                                </div>
+                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-danger btn-sm fw-bold w-100">
+                                    Validar cierre
+                                </a>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    <i class="bi bi-calendar2-check-fill me-1"></i> Semestres registrados
+                                </h6>
+                                <p class="text-muted small mb-0">
+                                    Desde aquí entra al detalle para configurar el semestre o descarga el informe/expediente.
+                                </p>
+                            </div>
+                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
+                                Ver todos
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle small border">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Semestre</th>
+                                        <th>Sede</th>
+                                        <th>Periodo</th>
+                                        <th>Estado</th>
+                                        <th class="text-end">Configuración / Informe</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ciclo in ciclos_historial %}
+                                    <tr>
+                                        <td class="fw-bold">{{ ciclo.nombre }}</td>
+                                        <td>{% firstof ciclo.sede.nombre ciclo.sede_nombre "Sin sede" %}</td>
+                                        <td>{{ ciclo.fecha_inicio|date:"d/m/Y"|default:"--" }} - {{ ciclo.fecha_fin|date:"d/m/Y"|default:"--" }}</td>
+                                        <td>
+                                            {% if ciclo.estado == 'ACTIVO' %}
+                                                <span class="badge bg-success">ACTIVO</span>
+                                            {% elif ciclo.estado == 'CERRADO' %}
+                                                <span class="badge bg-secondary">CERRADO</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">CONFIGURACIÓN</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="semestre-table-actions">
+                                                <a href="{% url 'detalle_semestre' ciclo.id %}?origen=ti" class="btn btn-sm {% if ciclo.estado == 'CERRADO' %}btn-outline-secondary{% elif ciclo.estado == 'ACTIVO' %}btn-success{% else %}btn-primary{% endif %} fw-bold rounded-pill px-3">
+                                                    <i class="bi bi-eye-fill me-1"></i>
+                                                    {% if ciclo.estado == 'CERRADO' %}
+                                                        Consultar
+                                                    {% elif ciclo.estado == 'ACTIVO' %}
+                                                        Operar / Ver
+                                                    {% else %}
+                                                        Configurar
+                                                    {% endif %}
+                                                </a>
+                                                <a href="{% url 'descargar_reporte_ciclo_pdf' ciclo.id %}" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3">
+                                                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF / Informe
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted fst-italic py-4">
+                                            No hay semestres creados todavía. Inicia con Paso 1: Crear sede y después Paso 2: Crear semestre.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="legacy-muted">
+                            <strong><i class="bi bi-arrow-repeat me-1"></i>Cambio importante:</strong>
+                            la asignación de maestras a salas ya no se realiza desde “Roles y Permisos”.
+                            Ahora se hace desde:
+                            <strong>Gestión de Semestres → Ver detalle → Sala → Maestra</strong>.
+                            Las incidencias ya se gestionan en Sprint 5 desde el módulo de Incidencias; el Administrador puede consultar todas y cerrar administrativamente cuando corresponda.
                         </div>
                     </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-roles">
                     <div class="content-card mb-4 border-primary border-top border-4">
                         <div class="d-flex align-items-center mb-4">
@@ -194,16 +749,27 @@
                               <i class="bi bi-person-badge"></i>
                             </div>
                             <div>
-                              <h4 class="fw-bold text-primary mb-0">Asignación de Roles Oficiales</h4>
-                              <p class="text-muted small mb-0">Vincula al personal con los roles operativos del sistema.</p>
+                              <h4 class="fw-bold text-primary mb-0">Roles y Permisos del Personal</h4>
+                              <p class="text-muted small mb-0">
+                                  Aquí solo se define el tipo de empleado y sus permisos de acceso.
+                              </p>
                             </div>
+                        </div>
+
+                        <div class="role-note mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Rol = acceso al sistema.</strong>
+                            La asignación operativa se realiza después en Gestión de Semestres:
+                            médica, nutrióloga y psicóloga se asignan al semestre; maestras se asignan a salas y horarios.
+                            Si no hay semestre activo, el personal puede iniciar sesión, pero solo podrá consultar información histórica.
                         </div>
 
                         <form onsubmit="submitAjax(event)" class="row g-3 align-items-end bg-light p-3 rounded border border-light mb-4">
                             {% csrf_token %}
                             <input type="hidden" name="action_type" value="assign_fixed_role">
-                            <div class="col-md-4">
-                              <label class="form-label fw-bold text-secondary small">1. Seleccionar Empleado</label>
+
+                            <div class="col-md-5">
+                              <label class="form-label fw-bold text-secondary small">1. Seleccionar empleado</label>
                               <select name="usuario_id" class="form-select" required>
                                 <option value="">-- Elegir Persona --</option>
                                 {% for u in lista_staff %}
@@ -211,9 +777,10 @@
                                 {% endfor %}
                               </select>
                             </div>
-                            <div class="col-md-3">
-                              <label class="form-label fw-bold text-secondary small">2. Asignar Rol</label>
-                              <select name="rol_fijo" class="form-select" required onchange="verificarRolMaestra(this)">
+
+                            <div class="col-md-5">
+                              <label class="form-label fw-bold text-secondary small">2. Asignar rol oficial</label>
+                              <select name="rol_fijo" class="form-select" required>
                                 <option value="">-- Elegir Rol --</option>
                                 <option value="Administrador del Sistema">Administrador del Sistema</option>
                                 <option value="Directora">Directora</option>
@@ -222,60 +789,30 @@
                                 <option value="Médico">Médico</option>
                                 <option value="Psicóloga">Psicóloga</option>
                                 <option value="Nutrióloga">Nutrióloga</option>
-                                <option value="Asistentes de Salas (Maestras)">Asistentes de Salas (Maestras)</option>
+                                <option value="Maestra / Asistente de Sala">Maestra / Asistente de Sala</option>
                               </select>
-                            </div>
-                            <div class="col-md-3">
-                              <label class="form-label fw-bold text-secondary small">3. Ciclo Aplicable</label>
-                              <select name="semestre_id" class="form-select" required>
-                                <option value="">-- Seleccionar Ciclo --</option>
-                                {% for c in ciclos_historial %}
-                                  <option value="{{ c.id }}">{{ c.nombre }}</option>
-                                {% endfor %}
-                              </select>
-                            </div>
-                            <div class="col-md-2">
-                              <button type="submit" class="btn btn-primary w-100 fw-bold">Vincular</button>
                             </div>
 
-                            <div class="col-12" id="seccion_maestra_extra" style="display: none;">
-                                <div class="p-3 mt-2 border rounded bg-white border-primary shadow-sm">
-                                    <h6 class="fw-bold text-primary mb-2 small"><i class="bi bi-person-badge-fill me-2"></i>Configuración de Asistente de Sala</h6>
-                                    <div class="row g-2">
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Sala a Cargo:</label>
-                                            <select name="sala_asignada" class="form-select form-select-sm">
-                                                <option value="">-- Seleccionar Sala --</option>
-                                                <optgroup label="Lactantes">
-                                                    <option value="L1">Sala L1</option>
-                                                    <option value="L2">Sala L2</option>
-                                                    <option value="L3">Sala L3</option>
-                                                </optgroup>
-                                                <optgroup label="Maternales">
-                                                    <option value="M1">Sala M1</option>
-                                                    <option value="M2">Sala M2</option>
-                                                    <option value="M3">Sala M3</option>
-                                                </optgroup>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Tipo de Bitácora:</label>
-                                            <select name="tipo_bitacora" class="form-select form-select-sm">
-                                                <option value="">-- Seleccionar --</option>
-                                                <option value="LACTANTE">Bitácora Lactantes</option>
-                                                <option value="MATERNAL">Bitácora Maternales</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-text mt-2" style="font-size: 0.75rem;">
-                                        Esta configuración es necesaria para filtrar a los alumnos correctos en el portal docente.
-                                    </div>
+                            <div class="col-md-2">
+                              <button type="submit" class="btn btn-primary w-100 fw-bold">Asignar rol</button>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="legacy-muted">
+                                    <i class="bi bi-diagram-3-fill me-1"></i>
+                                    Este formulario no asigna semestre, sala ni horario.
+                                    Esa configuración se realiza en:
+                                    <a href="{% url 'lista_semestres' %}?origen=ti" class="fw-bold text-decoration-none">Gestión de Semestres</a>.
                                 </div>
                             </div>
-                            </form>
+                        </form>
 
                         <hr class="my-4">
-                        <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-list-check me-1"></i> Personal con rol activo</h6>
+
+                        <h6 class="fw-bold text-secondary mb-3">
+                            <i class="bi bi-list-check me-1"></i> Personal con rol activo
+                        </h6>
+
                         <div class="table-responsive">
                             <table class="table table-hover align-middle" style="font-size: 0.9rem;">
                               <thead class="table-light">
@@ -294,7 +831,13 @@
                                     <td>{{ u.email }}</td>
                                     <td>
                                       {% for grupo in u.groups.all %}
-                                        <span class="badge bg-primary px-3 py-2 rounded-pill">{{ grupo.name }}</span>
+                                        <span class="badge bg-primary px-3 py-2 rounded-pill">
+                                            {% if grupo.name == "Asistentes de Salas (Maestras)" %}
+                                                Maestra / Asistente de Sala
+                                            {% else %}
+                                                {{ grupo.name }}
+                                            {% endif %}
+                                        </span>
                                       {% endfor %}
                                     </td>
                                     <td class="text-center">
@@ -309,50 +852,6 @@
                                   {% endif %}
                                 {% endfor %}
                               </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="tab-historial">
-                    <div class="content-card">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-folder-fill text-warning me-2"></i>Historial de Expedientes (PDF)</h5>
-                        <p class="small text-muted mb-4">Aquí puedes consultar y descargar la documentación formal generada automáticamente en cada ciclo escolar.</p>
-
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle small border">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nombre del Ciclo</th>
-                                        <th>Inicio</th>
-                                        <th>Término</th>
-                                        <th>Estatus</th>
-                                        <th class="text-center">Expediente Oficial</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for ciclo in ciclos_historial %}
-                                    <tr>
-                                        <td class="fw-bold">{{ ciclo.nombre }}</td>
-                                        <td>{{ ciclo.fecha_inicio|date:"d/m/Y"|default:"--" }}</td>
-                                        <td>{{ ciclo.fecha_fin|date:"d/m/Y"|default:"--" }}</td>
-                                        <td>
-                                            {% if ciclo.estado == 'ACTIVO' %}
-                                                <span class="badge bg-success">ACTIVO</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">CERRADO</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="{% url 'descargar_reporte_ciclo_pdf' ciclo.id %}" class="btn btn-sm btn-outline-danger shadow-sm fw-bold rounded-pill px-3">
-                                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr><td colspan="5" class="text-center text-muted fst-italic py-4">No hay ciclos registrados en la base de datos.</td></tr>
-                                    {% endfor %}
-                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -382,6 +881,138 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-incidencias">
+                    <div class="content-card mb-4 border-primary border-top border-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                            <div>
+                                <h5 class="fw-bold m-0">
+                                    <i class="bi bi-clipboard2-pulse-fill text-primary me-2"></i>Gestión de Incidencias
+                                </h5>
+                                <p class="text-muted small m-0">
+                                    Sprint 5 / Épica 3: consulta general, seguimiento y cierre administrativo de incidencias.
+                                </p>
+                            </div>
+
+                            <a href="{% url 'panel_incidencias' %}" class="btn btn-primary fw-bold">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Abrir módulo de incidencias
+                            </a>
+                        </div>
+
+                        <div class="incidencias-admin-hero">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="incidencias-admin-icon" style="background:#dbeafe; color:#1d4ed8; margin-bottom:0;">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div>
+                                    <h6>Vista administrativa de incidencias</h6>
+                                    <p>
+                                        El Administrador del Sistema puede consultar todas las incidencias registradas por Coordinación de Sala,
+                                        Nutrición, Médico y Psicología. También puede cerrar incidencias como autoridad administrativa cuando el
+                                        creador no pueda hacerlo, siempre que ya exista al menos un seguimiento.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="incidencias-admin-grid">
+                            <div class="incidencias-admin-card">
+                                <div class="incidencias-admin-icon" style="background:#dbeafe; color:#1d4ed8;">
+                                    <i class="bi bi-eye-fill"></i>
+                                </div>
+                                <div class="incidencias-admin-title">Consultar todas</div>
+                                <div class="incidencias-admin-desc">
+                                    Revisa incidencias abiertas, cerradas, de riesgo alto o sin seguimiento.
+                                </div>
+                                <a href="{% url 'panel_incidencias' %}" class="btn btn-outline-primary btn-sm fw-bold w-100 rounded-pill">
+                                    Ver panel
+                                </a>
+                            </div>
+
+                            <div class="incidencias-admin-card">
+                                <div class="incidencias-admin-icon" style="background:#fef3c7; color:#b45309;">
+                                    <i class="bi bi-folder2-open"></i>
+                                </div>
+                                <div class="incidencias-admin-title">Incidencias abiertas</div>
+                                <div class="incidencias-admin-desc">
+                                    Consulta incidencias pendientes de seguimiento o resolución.
+                                </div>
+                                <a href="{% url 'panel_incidencias' %}?estado=ABIERTA" class="btn btn-outline-warning btn-sm fw-bold w-100 rounded-pill">
+                                    Ver abiertas
+                                </a>
+                            </div>
+
+                            <div class="incidencias-admin-card">
+                                <div class="incidencias-admin-icon" style="background:#fee2e2; color:#b91c1c;">
+                                    <i class="bi bi-exclamation-octagon-fill"></i>
+                                </div>
+                                <div class="incidencias-admin-title">Riesgo alto</div>
+                                <div class="incidencias-admin-desc">
+                                    Revisa registros críticos donde debe quedar evidencia del aviso al responsable.
+                                </div>
+                                <a href="{% url 'panel_incidencias' %}?nivel=ALTO" class="btn btn-outline-danger btn-sm fw-bold w-100 rounded-pill">
+                                    Ver riesgo alto
+                                </a>
+                            </div>
+
+                            <div class="incidencias-admin-card">
+                                <div class="incidencias-admin-icon" style="background:#ede9fe; color:#6d28d9;">
+                                    <i class="bi bi-easel2-fill"></i>
+                                </div>
+                                <div class="incidencias-admin-title">Pedagógicas</div>
+                                <div class="incidencias-admin-desc">
+                                    Registros de Coordinación de Sala relacionados con actividades, material o conducta pedagógica.
+                                </div>
+                                <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="btn btn-outline-primary btn-sm fw-bold w-100 rounded-pill">
+                                    Ver pedagógicas
+                                </a>
+                            </div>
+
+                            <div class="incidencias-admin-card">
+                                <div class="incidencias-admin-icon" style="background:#dcfce7; color:#15803d;">
+                                    <i class="bi bi-egg-fried"></i>
+                                </div>
+                                <div class="incidencias-admin-title">Nutricionales</div>
+                                <div class="incidencias-admin-desc">
+                                    Incidencias de alimentación, alergias, intolerancias, rechazo o atragantamiento.
+                                </div>
+                                <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn btn-outline-success btn-sm fw-bold w-100 rounded-pill">
+                                    Ver nutricionales
+                                </a>
+                            </div>
+
+                            <div class="incidencias-admin-card">
+                                <div class="incidencias-admin-icon" style="background:#fee2e2; color:#b91c1c;">
+                                    <i class="bi bi-heart-pulse-fill"></i>
+                                </div>
+                                <div class="incidencias-admin-title">Médicas y psicológicas</div>
+                                <div class="incidencias-admin-desc">
+                                    Consulta eventos médicos y observaciones psicológicas del menor.
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn btn-outline-danger btn-sm fw-bold w-50 rounded-pill">
+                                        Médicas
+                                    </a>
+                                    <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn btn-outline-primary btn-sm fw-bold w-50 rounded-pill">
+                                        Psicológicas
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="incidencias-admin-note">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            El Administrador no crea incidencias de área. Las crea cada responsable:
+                            Coordinadora de Sala, Nutrióloga, Médico o Psicóloga. Desde aquí solo se consulta y se apoya el cierre administrativo cuando sea necesario.
+                        </div>
+
+                        <div class="legacy-muted">
+                            <strong><i class="bi bi-check2-circle me-1"></i>Regla de cierre:</strong>
+                            ninguna incidencia puede cerrarse sin mínimo un seguimiento. Si existen incidencias abiertas,
+                            el cierre del día no se bloquea; solo se muestra aviso. Para cerrar semestre, las incidencias deben quedar resueltas.
                         </div>
                     </div>
                 </div>
@@ -549,16 +1180,9 @@
 
 <script>
     function verificarRolMaestra(select) {
-        const seccionExtra = document.getElementById('seccion_maestra_extra');
-        const textoSeleccionado = select.options[select.selectedIndex].text.toLowerCase();
-
-        if (textoSeleccionado.includes('asistente') || textoSeleccionado.includes('maestra')) {
-            seccionExtra.style.display = 'block';
-            seccionExtra.querySelectorAll('select').forEach(s => s.required = true);
-        } else {
-            seccionExtra.style.display = 'none';
-            seccionExtra.querySelectorAll('select').forEach(s => s.required = false);
-        }
+        // Sprint 4: las maestras ya no se vinculan a salas desde este panel.
+        // La asignación a sala y horarios se hace en Gestión de Semestres.
+        return true;
     }
 
     document.addEventListener("DOMContentLoaded", function() {

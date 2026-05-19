@@ -1,0 +1,740 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo|default:"Registrar incidencia" }} | Estancia Infantil UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --azul:#1d4ed8;
+            --azul-oscuro:#1e3a8a;
+            --gris-fondo:#f3f6fb;
+            --texto:#0f172a;
+            --muted:#64748b;
+            --borde:#dbe4ef;
+            --verde:#16a34a;
+            --amarillo:#f59e0b;
+            --rojo:#dc2626;
+            --naranja:#f97316;
+            --morado:#7c3aed;
+        }
+
+        body{
+            margin:0;
+            background:var(--gris-fondo);
+            color:var(--texto);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .topbar{
+            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
+            color:white;
+            box-shadow:0 8px 22px rgba(15,23,42,.18);
+        }
+
+        .topbar-inner{
+            max-width:1160px;
+            margin:auto;
+            padding:14px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            min-width:0;
+        }
+
+        .brand img{
+            height:48px;
+            width:auto;
+            object-fit:contain;
+            background:rgba(255,255,255,.12);
+            border-radius:12px;
+            padding:4px;
+        }
+
+        .brand-title{
+            font-size:1.02rem;
+            font-weight:950;
+            letter-spacing:.04em;
+            text-transform:uppercase;
+            line-height:1.1;
+        }
+
+        .brand-subtitle{
+            font-size:.82rem;
+            opacity:.9;
+            margin-top:2px;
+        }
+
+        .btn-top{
+            border-radius:12px;
+            font-weight:850;
+            padding:.55rem .9rem;
+        }
+
+        .main{
+            max-width:1160px;
+            margin:28px auto 70px;
+            padding:0 18px;
+        }
+
+        .hero{
+            background:linear-gradient(135deg, #b91c1c, #f97316);
+            border-radius:24px;
+            color:white;
+            padding:30px 34px;
+            box-shadow:0 22px 50px rgba(249,115,22,.22);
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:20px;
+            align-items:center;
+            margin-bottom:22px;
+        }
+
+        .hero h1{
+            font-size:1.9rem;
+            font-weight:950;
+            margin:0 0 8px;
+            letter-spacing:-.03em;
+        }
+
+        .hero p{
+            margin:0;
+            opacity:.94;
+            font-size:1rem;
+        }
+
+        .hero-icon{
+            width:88px;
+            height:88px;
+            border-radius:22px;
+            background:rgba(255,255,255,.18);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2.5rem;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:1fr 345px;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:white;
+            border:1px solid var(--borde);
+            border-radius:22px;
+            overflow:hidden;
+            box-shadow:0 18px 38px rgba(15,23,42,.07);
+            margin-bottom:18px;
+        }
+
+        .panel-header{
+            padding:18px 22px;
+            background:#f8fafc;
+            border-bottom:1px solid var(--borde);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+        }
+
+        .panel-title{
+            margin:0;
+            color:#334155;
+            font-size:1rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+        }
+
+        .panel-body{
+            padding:24px;
+        }
+
+        .section-title{
+            font-size:.82rem;
+            font-weight:950;
+            color:#b91c1c;
+            text-transform:uppercase;
+            letter-spacing:.07em;
+            margin:5px 0 14px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .field-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:16px;
+            margin-bottom:16px;
+            height:calc(100% - 16px);
+        }
+
+        .form-label{
+            font-size:.8rem;
+            font-weight:950;
+            color:#334155;
+            text-transform:uppercase;
+            letter-spacing:.04em;
+            margin-bottom:8px;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:14px;
+            border:1px solid #cbd5e1;
+            padding:.72rem .9rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#f97316;
+            box-shadow:0 0 0 .22rem rgba(249,115,22,.16);
+        }
+
+        textarea.form-control{
+            min-height:150px;
+        }
+
+        .field-help{
+            color:var(--muted);
+            font-size:.84rem;
+            margin-top:6px;
+        }
+
+        .error-text{
+            background:#fee2e2;
+            color:#991b1b;
+            border:1px solid #fecaca;
+            border-radius:12px;
+            padding:8px 10px;
+            font-size:.85rem;
+            font-weight:700;
+            margin-top:8px;
+        }
+
+        .actions{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            flex-wrap:wrap;
+            padding-top:16px;
+            border-top:1px solid #e5e7eb;
+            margin-top:12px;
+        }
+
+        .btn-main{
+            border-radius:14px;
+            font-weight:900;
+            padding:.72rem 1.1rem;
+        }
+
+        .semestre-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-radius:18px;
+            padding:16px;
+            color:#1e3a8a;
+            margin-bottom:18px;
+        }
+
+        .semestre-card h6{
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .semestre-card p{
+            margin:0;
+            font-size:.9rem;
+            font-weight:650;
+        }
+
+        .side-note{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid var(--naranja);
+            border-radius:18px;
+            padding:18px;
+            color:#9a3412;
+            margin-bottom:18px;
+        }
+
+        .side-note h6{
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .info-card{
+            background:#f8fafc;
+            border:1px solid var(--borde);
+            border-radius:18px;
+            padding:16px;
+            margin-bottom:18px;
+        }
+
+        .info-title{
+            font-weight:950;
+            color:#0f172a;
+            margin-bottom:8px;
+        }
+
+        .info-text{
+            color:#64748b;
+            font-size:.9rem;
+            margin:0;
+        }
+
+        .badge-note{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.45rem .72rem;
+            font-weight:950;
+            font-size:.78rem;
+        }
+
+        .badge-alta{
+            background:#fee2e2;
+            color:#991b1b;
+            border:1px solid #fecaca;
+        }
+
+        .badge-baja{
+            background:#fef3c7;
+            color:#92400e;
+            border:1px solid #fcd34d;
+        }
+
+        .badge-cerrada{
+            background:#dcfce7;
+            color:#166534;
+            border:1px solid #86efac;
+        }
+
+        .check-list{
+            list-style:none;
+            padding:0;
+            margin:0;
+        }
+
+        .check-list li{
+            display:flex;
+            gap:10px;
+            padding:10px 0;
+            border-bottom:1px solid #edf2f7;
+            color:#475569;
+            font-weight:650;
+        }
+
+        .check-list li:last-child{
+            border-bottom:none;
+        }
+
+        .check-list i{
+            color:#f97316;
+            margin-top:2px;
+        }
+
+        .warning-box{
+            background:#fef2f2;
+            border:1px solid #fecaca;
+            border-left:6px solid var(--rojo);
+            border-radius:18px;
+            padding:16px;
+            color:#991b1b;
+            margin-bottom:18px;
+        }
+
+        .warning-box h6{
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .flow-step{
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            padding:10px 0;
+            border-bottom:1px solid #edf2f7;
+        }
+
+        .flow-step:last-child{
+            border-bottom:none;
+        }
+
+        .flow-num{
+            width:28px;
+            height:28px;
+            border-radius:999px;
+            background:#ffedd5;
+            color:#9a3412;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            font-size:.85rem;
+        }
+
+        .flow-title{
+            font-weight:900;
+            color:#0f172a;
+            line-height:1.2;
+        }
+
+        .flow-text{
+            color:#64748b;
+            font-size:.84rem;
+            margin-top:2px;
+        }
+
+        @media(max-width:900px){
+            .hero{grid-template-columns:1fr;}
+            .hero-icon{display:none;}
+            .layout{grid-template-columns:1fr;}
+        }
+
+        @media(max-width:576px){
+            .topbar-inner{flex-direction:column;align-items:flex-start;}
+            .hero{padding:24px 20px;}
+            .hero h1{font-size:1.55rem;}
+            .panel-body{padding:18px;}
+            .actions{justify-content:stretch;}
+            .actions .btn{width:100%;}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">
+            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div>
+                <div class="brand-title">Registro de Incidencias</div>
+                <div class="brand-subtitle">Sprint 4 · Control para cierre de semestre · Administrador del sistema</div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
+                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
+                </a>
+            {% endif %}
+            <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
+                <i class="bi bi-arrow-left me-1"></i> Detalle semestre
+            </a>
+            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
+                <i class="bi bi-calendar2-week-fill me-1"></i> Semestres
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="main">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="hero">
+        <div>
+            <h1>{{ titulo|default:"Registrar incidencia" }}</h1>
+            <p>
+                Registra incidencias del semestre para dar seguimiento y controlar que todo quede cerrado antes del cierre final.
+            </p>
+        </div>
+        <div class="hero-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+    </section>
+
+    <div class="layout">
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="bi bi-clipboard-plus-fill me-2"></i>Datos de la incidencia
+                </h2>
+            </div>
+
+            <div class="panel-body">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger rounded-4">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="section-title">
+                        <i class="bi bi-person-fill-exclamation"></i>
+                        Alumno y ubicación
+                    </div>
+
+                    <div class="field-card">
+                        <label for="{{ form.alumno.id_for_label }}" class="form-label">
+                            Alumno <span class="text-danger">*</span>
+                        </label>
+                        {{ form.alumno }}
+                        <div class="field-help">
+                            Selecciona el alumno finalizado/asignado al semestre.
+                        </div>
+                        {% if form.alumno.errors %}
+                            <div class="error-text">
+                                {% for error in form.alumno.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="field-card">
+                                <label for="{{ form.semestre.id_for_label }}" class="form-label">
+                                    Semestre
+                                </label>
+                                {{ form.semestre }}
+                                <div class="field-help">
+                                    Se recomienda mantener el semestre actual.
+                                </div>
+                                {% if form.semestre.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.semestre.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="field-card">
+                                <label for="{{ form.sala_semestre.id_for_label }}" class="form-label">
+                                    Sala del semestre
+                                </label>
+                                {{ form.sala_semestre }}
+                                <div class="field-help">
+                                    Selecciona la sala relacionada con la incidencia.
+                                </div>
+                                {% if form.sala_semestre.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.sala_semestre.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title mt-2">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                        Nivel y estado
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="field-card">
+                                <label for="{{ form.nivel.id_for_label }}" class="form-label">
+                                    Nivel de incidencia <span class="text-danger">*</span>
+                                </label>
+                                {{ form.nivel }}
+                                <div class="field-help">
+                                    Alto riesgo requiere atención urgente. Bajo riesgo queda para seguimiento.
+                                </div>
+                                {% if form.nivel.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.nivel.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="field-card">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                    Estado <span class="text-danger">*</span>
+                                </label>
+                                {{ form.estado }}
+                                <div class="field-help">
+                                    Para cierre de semestre, todas las incidencias deben quedar cerradas.
+                                </div>
+                                {% if form.estado.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.estado.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title mt-2">
+                        <i class="bi bi-card-text"></i>
+                        Descripción
+                    </div>
+
+                    <div class="field-card">
+                        <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                            Descripción de la incidencia <span class="text-danger">*</span>
+                        </label>
+                        {{ form.descripcion }}
+                        <div class="field-help">
+                            Describe de manera clara qué ocurrió, fecha/hora aproximada, personal involucrado y seguimiento requerido.
+                        </div>
+                        {% if form.descripcion.errors %}
+                            <div class="error-text">
+                                {% for error in form.descripcion.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="actions">
+                        <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </a>
+
+                        <button type="submit" class="btn btn-danger btn-main">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Registrar incidencia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <aside>
+            <div class="semestre-card">
+                <h6>
+                    <i class="bi bi-calendar2-week-fill me-1"></i>
+                    Semestre
+                </h6>
+                <p>
+                    {{ semestre.nombre }}<br>
+                    {{ semestre.sede_nombre }}<br>
+                    {{ semestre.fecha_inicio|date:"d/m/Y" }} al {{ semestre.fecha_fin|date:"d/m/Y" }}
+                </p>
+            </div>
+
+            <div class="side-note">
+                <h6>
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    ¿Para qué sirve?
+                </h6>
+                <p class="mb-0">
+                    Las incidencias permiten dar seguimiento a situaciones del semestre y son requisito para validar el cierre final.
+                </p>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-activity me-2"></i>Niveles
+                    </h2>
+                </div>
+                <div class="panel-body">
+                    <div class="mb-3">
+                        <span class="badge-note badge-alta">
+                            <i class="bi bi-exclamation-octagon-fill"></i>
+                            Alto riesgo
+                        </span>
+                        <p class="mt-2 mb-0 text-muted small fw-semibold">
+                            Situación urgente que requiere atención inmediata o seguimiento especial.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span class="badge-note badge-baja">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            Bajo riesgo
+                        </span>
+                        <p class="mt-2 mb-0 text-muted small fw-semibold">
+                            Situación menor que debe documentarse y cerrarse con seguimiento.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-list-check text-primary me-1"></i>
+                    Flujo de atención
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-num">1</div>
+                    <div>
+                        <div class="flow-title">Registrar</div>
+                        <div class="flow-text">Captura alumno, sala, nivel y descripción.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-num">2</div>
+                    <div>
+                        <div class="flow-title">Dar seguimiento</div>
+                        <div class="flow-text">El personal responsable atiende o documenta la situación.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-num">3</div>
+                    <div>
+                        <div class="flow-title">Cerrar</div>
+                        <div class="flow-text">Debe cerrarse antes de cerrar el semestre.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h6>
+                    <i class="bi bi-lock-fill me-1"></i>
+                    Regla de cierre
+                </h6>
+                <p class="mb-0 small fw-semibold">
+                    El semestre no podrá cerrarse mientras existan incidencias abiertas.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    Estado cerrado
+                </div>
+                <p class="info-text">
+                    Cuando la incidencia quede atendida, desde el detalle del semestre podrás marcarla como cerrada.
+                </p>
+            </div>
+        </aside>
+    </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -21,14 +21,14 @@
     .muted{ color:#6c757d; }
     .table-wrap{ overflow:auto; border-radius:14px; }
     .table-wrap table { border-collapse: separate; border-spacing: 0; }
+    .table-hover tbody tr:hover { background-color: #f8fbff; }
+
     .table thead th{
       background:#f8f9fa; font-weight:800; text-transform:uppercase;
       font-size:.78rem; color:#5b6470; letter-spacing:.06em;
       border-bottom:1px solid #e9edf2; white-space:nowrap;
     }
     .table tbody td{ border-color:#eef2f6; vertical-align:middle; }
-
-    .table-hover tbody tr:hover { background-color: #f8fbff; }
 
     /* Badges por estado */
     .badge-pill{ border-radius:999px; padding:.35rem .55rem; font-size:.75rem; font-weight:800; }
@@ -44,31 +44,10 @@
     .btn-icon{ width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:10px; }
     .link-note{ font-size:.82rem; color:#6c757d; margin-top:4px; }
 
-    /* Toast simple */
-    #toast-notification{
-      visibility:hidden; min-width:260px; max-width:92vw;
-      background:#111827; color:#fff; text-align:left;
-      border-radius:12px; padding:12px 14px;
-      position:fixed; z-index:9999;
-      left:50%; bottom:24px; transform:translateX(-50%);
-      box-shadow:0 10px 25px rgba(0,0,0,.25);
-      display:flex; gap:10px; align-items:flex-start;
-    }
-    #toast-notification.show{ visibility:visible; animation:fadein .25s, fadeout .25s 2.4s; }
-    @keyframes fadein{ from{ opacity:0; transform:translateX(-50%) translateY(10px);} to{ opacity:1; transform:translateX(-50%) translateY(0);} }
-    @keyframes fadeout{ from{ opacity:1;} to{ opacity:0;} }
   </style>
 </head>
 
 <body>
-
-<div id="toast-notification">
-  <i class="bi bi-info-circle-fill" style="font-size:1.15rem; color:#0dcaf0;"></i>
-  <div>
-    <div id="toast-title" class="fw-bold">Listo</div>
-    <div id="toast-msg" style="font-size:.92rem; opacity:.9;">Acción realizada</div>
-  </div>
-</div>
 
 <nav class="navbar navbar-expand-lg navbar-ti fixed-top">
   <div class="container-fluid justify-content-center">
@@ -96,15 +75,6 @@
 </nav>
 
 <div class="container-panel">
-
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show shadow-sm mb-3">
-        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
 
   <div class="d-flex justify-content-between align-items-center mb-3 px-2">
       <div class="d-flex align-items-center gap-2">
@@ -194,7 +164,7 @@
 
                   <a href="{% url 'editar_solicitud' solicitud_id=s.id %}" class="btn btn-outline-secondary btn-icon btn-sm" title="Editar datos"><i class="bi bi-pencil-square"></i></a>
 
-                  <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="showToast('Documento Pendiente', 'El PDF estará disponible cuando el tutor finalice la solicitud.')" title="PDF no disponible aún">
+                  <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="mostrarAlertaPdf('El PDF estará disponible cuando el tutor finalice la solicitud.')" title="PDF no disponible aún">
                       <i class="bi bi-file-earmark-pdf-fill text-secondary fs-5"></i>
                   </button>
 
@@ -204,7 +174,7 @@
 
                   <a href="{% url 'editar_solicitud' solicitud_id=s.id %}" class="btn btn-outline-secondary btn-icon btn-sm" title="Editar datos"><i class="bi bi-pencil-square"></i></a>
 
-                  <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="showToast('Documento Pendiente', 'El PDF se habilitará cuando se dictamine la solicitud.')" title="PDF no disponible aún">
+                  <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="mostrarAlertaPdf('El PDF se habilitará cuando se dictamine la solicitud.')" title="PDF no disponible aún">
                       <i class="bi bi-file-earmark-pdf-fill text-secondary fs-5"></i>
                   </button>
 
@@ -215,12 +185,12 @@
                   </a>
 
                   {% if s.estado == "APROBADA" %}
-                      {% if s.inscripcion_oficial %}
+                      {% if s.inscripcion_oficial and s.inscripcion_oficial.estado != 'NUEVA' %}
                           <a class="btn btn-outline-secondary btn-icon btn-sm border-2 border-danger shadow-sm" href="{% url 'descargar_pdf_solicitud' s.id %}" target="_blank" title="Descargar FO301 Lleno (PDF)">
                               <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
                           </a>
                       {% else %}
-                          <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="showToast('Documento Pendiente', 'Falta que el beneficiario llene su solicitud final y suba sus documentos.')" title="Esperando al beneficiario">
+                          <button type="button" class="btn btn-outline-secondary btn-icon btn-sm border-2 opacity-50" onclick="mostrarAlertaPdf('Falta que el beneficiario llene su solicitud de inscripción final y suba sus documentos.')" title="Esperando al beneficiario">
                               <i class="bi bi-file-earmark-pdf-fill text-secondary fs-5"></i>
                           </button>
                       {% endif %}
@@ -324,20 +294,61 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+{% if messages %}
 <script>
-  function showToast(title, msg){
-    const t = document.getElementById('toast-notification');
-    document.getElementById('toast-title').innerText = title || 'Listo';
-    document.getElementById('toast-msg').innerText = msg || 'Acción realizada';
-    t.classList.add('show');
-    setTimeout(()=> t.classList.remove('show'), 2700);
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      let iconType = 'info';
+      let tags = '{{ message.tags }}'.toLowerCase();
+      if (tags.includes('success')) iconType = 'success';
+      if (tags.includes('error') || tags.includes('danger')) iconType = 'error';
+      if (tags.includes('warning')) iconType = 'warning';
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      Toast.fire({
+        icon: iconType,
+        title: '{{ message }}'
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}
+<script>
+  function mostrarAlertaPdf(msg){
+      Swal.fire({
+          icon: 'info',
+          title: 'Documento Pendiente',
+          text: msg,
+          confirmButtonColor: '#1e3a8a'
+      });
   }
 
   function copiarLink(path) {
     const full = window.location.origin + path;
     navigator.clipboard.writeText(full)
-      .then(() => showToast("Copiado", "Link copiado correctamente ✅"))
+      .then(() => {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Link copiado correctamente',
+              showConfirmButton: false,
+              timer: 3000
+          });
+      })
       .catch(() => alert("No se pudo copiar el link ❌"));
   }
 

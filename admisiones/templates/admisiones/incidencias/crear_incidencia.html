@@ -1,0 +1,1340 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo|default:"Crear incidencia" }} | EIU UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --yellow:#ca8a04;
+            --red:#dc2626;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+            --soft:#f8fafc;
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(124,58,237,.12), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        .page{
+            max-width:1320px;
+            margin:0 auto;
+            padding:24px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.94);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.9);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand-logo{
+            width:64px;
+            height:64px;
+            border-radius:18px;
+            background:white;
+            border:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
+            box-shadow:0 10px 24px rgba(15,23,42,.08);
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .top-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-end;
+        }
+
+        .btn-soft{
+            border-radius:999px;
+            padding:.72rem 1rem;
+            font-weight:850;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .btn-main{
+            border-radius:999px;
+            padding:.84rem 1.18rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-blue{background:linear-gradient(135deg,#2563eb,#0891b2);color:white;}
+        .btn-green{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;}
+        .btn-purple{background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;}
+        .btn-red{background:linear-gradient(135deg,#dc2626,#f97316);color:white;}
+
+        .hero{
+            color:white;
+            border-radius:30px;
+            padding:26px;
+            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero-pedagogica{background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);}
+        .hero-nutricional{background:linear-gradient(135deg,#16a34a,#0891b2,#2563eb);}
+        .hero-medica{background:linear-gradient(135deg,#dc2626,#f97316,#2563eb);}
+        .hero-psicologica{background:linear-gradient(135deg,#2563eb,#7c3aed,#db2777);}
+        .hero-default{background:linear-gradient(135deg,#2563eb,#7c3aed,#0891b2);}
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:285px;
+            height:285px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-90px;
+            top:-100px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:900;
+            margin-bottom:12px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:860px;
+            font-weight:600;
+            opacity:.94;
+        }
+
+        .hero-info{
+            min-width:310px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .hero-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .hero-value{
+            font-size:1.12rem;
+            font-weight:950;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:.82fr 1.18fr;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.96);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{padding:20px;}
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+        .badge-cyan{background:#cffafe;color:#155e75;}
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .student-card{
+            background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+            border:1px solid #bfdbfe;
+            border-radius:24px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .student-top{
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+        }
+
+        .student-avatar{
+            width:66px;
+            height:66px;
+            border-radius:22px;
+            background:linear-gradient(135deg,#dbeafe,#ede9fe);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.9rem;
+            flex-shrink:0;
+        }
+
+        .student-name{
+            font-weight:950;
+            font-size:1.2rem;
+            color:#0f172a;
+            letter-spacing:-.03em;
+            margin-bottom:4px;
+        }
+
+        .student-meta{
+            color:#475569;
+            font-size:.9rem;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .steps{
+            display:grid;
+            gap:12px;
+        }
+
+        .step{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            padding:13px;
+            border:1px solid var(--border);
+            background:white;
+            border-radius:18px;
+        }
+
+        .step-number{
+            width:32px;
+            height:32px;
+            border-radius:999px;
+            background:#dbeafe;
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:950;
+            flex-shrink:0;
+        }
+
+        .step-title{
+            font-weight:950;
+            color:#0f172a;
+            margin-bottom:2px;
+        }
+
+        .step-text{
+            color:#64748b;
+            font-size:.86rem;
+            margin:0;
+            font-weight:650;
+            line-height:1.4;
+        }
+
+        .form-section{
+            border:1px solid var(--border);
+            background:#f8fafc;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .form-section-title{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:14px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.02em;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+
+        .form-group.full{grid-column:1 / -1;}
+
+        .form-label{
+            font-weight:900;
+            color:#334155;
+            margin-bottom:7px;
+            font-size:.88rem;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:16px;
+            border:1px solid #cbd5e1;
+            padding:.78rem .9rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+        }
+
+        textarea.form-control{
+            min-height:118px;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        .form-check{
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:16px;
+            padding:14px 14px 14px 44px;
+            min-height:54px;
+            display:flex;
+            align-items:center;
+        }
+
+        .form-check-input{
+            margin-left:-28px;
+            width:1.15rem;
+            height:1.15rem;
+        }
+
+        .form-check-label{
+            font-weight:850;
+            color:#334155;
+        }
+
+        .errors{
+            margin-top:7px;
+            color:#b91c1c;
+            font-weight:700;
+            font-size:.82rem;
+        }
+
+        .errors ul{
+            margin:0;
+            padding-left:18px;
+        }
+
+        .mini-help{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:7px;
+        }
+
+        /* =========================================================
+           SPRINT 5 - TIPO FIJO POR ROL / ÁREA
+           ========================================================= */
+        .tipo-fijo-card{
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:18px;
+            padding:14px 16px;
+            min-height:56px;
+        }
+
+        .tipo-fijo-title{
+            font-weight:900;
+            color:#334155;
+            font-size:.88rem;
+            margin-bottom:7px;
+        }
+
+        .tipo-fijo-help{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:8px;
+            line-height:1.35;
+        }
+
+        .tipo-fijo-lock{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            border-radius:16px;
+            padding:12px 14px;
+            margin-bottom:16px;
+            color:#475569;
+            font-size:.88rem;
+            font-weight:650;
+            display:flex;
+            gap:10px;
+            align-items:flex-start;
+        }
+
+        .tipo-fijo-lock i{
+            color:#2563eb;
+            font-size:1.05rem;
+            margin-top:1px;
+        }
+
+        .special-section{
+            display:none;
+            animation:fadeIn .18s ease;
+        }
+
+        .special-section.active{display:block;}
+
+        @keyframes fadeIn{
+            from{opacity:0; transform:translateY(4px);}
+            to{opacity:1; transform:translateY(0);}
+        }
+
+        .file-card{
+            background:white;
+            border:1px dashed #94a3b8;
+            border-radius:20px;
+            padding:16px;
+        }
+
+        .file-card i{
+            color:#2563eb;
+            font-size:1.35rem;
+        }
+
+        .submit-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            padding-top:4px;
+        }
+
+        .submit-note{
+            color:#64748b;
+            font-weight:650;
+            font-size:.86rem;
+            max-width:600px;
+        }
+
+        @media(max-width:1060px){
+            .layout{grid-template-columns:1fr;}
+            .hero-content{grid-template-columns:1fr;}
+            .hero-info{min-width:0;}
+        }
+
+        @media(max-width:720px){
+            .page{padding:14px;}
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+
+            .top-actions,
+            .btn-soft,
+            .btn-main{
+                width:100%;
+                justify-content:center;
+            }
+
+            .hero{
+                padding:22px;
+                border-radius:22px;
+            }
+
+            .hero h1{font-size:1.55rem;}
+
+            .form-grid{
+                grid-template-columns:1fr;
+            }
+
+            .student-top{flex-direction:column;}
+            .submit-bar{align-items:stretch;}
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">{{ titulo|default:"Crear incidencia" }}</h1>
+                <p class="brand-subtitle">
+                    Registro formal de una incidencia del menor, con intervención del personal y evidencias.
+                </p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            {% if tipo_forzado %}
+                <a href="{% url 'panel_incidencias' %}?tipo={{ tipo_forzado }}" class="btn-soft">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Panel de incidencias
+                </a>
+            {% else %}
+                <a href="{% url 'panel_incidencias' %}" class="btn-soft">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Panel de incidencias
+                </a>
+            {% endif %}
+
+            <a href="/" class="btn-soft">
+                <i class="bi bi-house-door-fill"></i>
+                Panel principal
+            </a>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section
+        class="hero
+        {% if tipo_forzado == 'PEDAGOGICA' %}hero-pedagogica
+        {% elif tipo_forzado == 'NUTRICIONAL' %}hero-nutricional
+        {% elif tipo_forzado == 'MEDICA' %}hero-medica
+        {% elif tipo_forzado == 'PSICOLOGICA' %}hero-psicologica
+        {% else %}hero-default{% endif %}"
+    >
+        <div class="hero-content">
+            <div>
+                <div class="hero-kicker">
+                    {% if tipo_forzado == "PEDAGOGICA" %}
+                        <i class="bi bi-easel2-fill"></i> Incidencia pedagógica
+                    {% elif tipo_forzado == "NUTRICIONAL" %}
+                        <i class="bi bi-egg-fried"></i> Incidencia nutricional
+                    {% elif tipo_forzado == "MEDICA" %}
+                        <i class="bi bi-heart-pulse-fill"></i> Incidencia médica
+                    {% elif tipo_forzado == "PSICOLOGICA" %}
+                        <i class="bi bi-person-hearts"></i> Incidencia psicológica
+                    {% else %}
+                        <i class="bi bi-clipboard2-pulse-fill"></i> Nueva incidencia
+                    {% endif %}
+                </div>
+
+                <h1>
+                    {% if tipo_forzado == "PEDAGOGICA" %}
+                        Registrar incidencia pedagógica
+                    {% elif tipo_forzado == "NUTRICIONAL" %}
+                        Registrar incidencia nutricional
+                    {% elif tipo_forzado == "MEDICA" %}
+                        Registrar incidencia médica
+                    {% elif tipo_forzado == "PSICOLOGICA" %}
+                        Registrar incidencia psicológica
+                    {% else %}
+                        Registrar nueva incidencia
+                    {% endif %}
+                </h1>
+
+                <p>
+                    Captura la información principal del formato: fecha y hora automática,
+                    nombre del niño/a, sala, tipo de incidencia, descripción, intervención del personal,
+                    seguimiento posterior y resolución al cierre.
+                </p>
+            </div>
+
+            <div class="hero-info">
+                <div class="hero-label">Semestre operativo</div>
+                <div class="hero-value">
+                    {% if semestre %}
+                        {{ semestre.nombre }}
+                    {% else %}
+                        Sin semestre activo
+                    {% endif %}
+                </div>
+                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
+                    {% if registro_diario %}
+                        Registro diario vinculado
+                    {% else %}
+                        Selecciona alumno y, si aplica, registro diario
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if aviso_semestre_operativo %}
+        <div class="warning-card">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            {{ aviso_semestre_operativo }}
+        </div>
+    {% endif %}
+
+    <div class="layout">
+
+        <aside>
+            {% if registro_diario %}
+                <section class="panel mb-4">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="bi bi-person-heart"></i>
+                            Registro diario vinculado
+                        </h2>
+                    </div>
+
+                    <div class="panel-body">
+                        <div class="student-card">
+                            <div class="student-top">
+                                <div class="student-avatar">
+                                    <i class="bi bi-person-heart"></i>
+                                </div>
+                                <div>
+                                    <div class="student-name">
+                                        {{ registro_diario.alumno.solicitud_ingreso.nombre_menor_completo }}
+                                    </div>
+                                    <div class="student-meta">
+                                        Fecha:
+                                        {% if registro_diario.dia_operativo %}
+                                            {{ registro_diario.dia_operativo.fecha|date:"d/m/Y" }}
+                                        {% else %}
+                                            Sin día
+                                        {% endif %}
+                                        <br>
+                                        Sala:
+                                        {% if registro_diario.sala_semestre and registro_diario.sala_semestre.sala %}
+                                            {{ registro_diario.sala_semestre.sala.nombre }}
+                                        {% else %}
+                                            Sin sala
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-card">
+                            <i class="bi bi-link-45deg me-1"></i>
+                            Esta incidencia quedará conectada con la bitácora del día y podrá aparecer en el informe diario del menor.
+                        </div>
+                    </div>
+                </section>
+            {% endif %}
+
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-list-check"></i>
+                        Proceso de la incidencia
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <div class="step-title">Crear incidencia</div>
+                                <p class="step-text">
+                                    El área correspondiente registra descripción, intervención, riesgo y evidencias.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <div class="step-title">Agregar seguimiento</div>
+                                <p class="step-text">
+                                    Solo quien creó la incidencia puede registrar la nota de seguimiento.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div>
+                                <div class="step-title">Cerrar con resolución</div>
+                                <p class="step-text">
+                                    Para cerrar debe existir mínimo un seguimiento y debe capturarse resolución.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div>
+                                <div class="step-title">Informe diario</div>
+                                <p class="step-text">
+                                    La incidencia se muestra después de “En casa” y “Durante mi estancia”.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-shield-exclamation"></i>
+                        Reglas importantes
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="help-card">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        Las maestras no crean incidencias. Ellas avisan al área correspondiente y el área registra la incidencia.
+                    </div>
+
+                    <div class="warning-card">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        Si la incidencia es de riesgo alto, debe marcarse que se informó al responsable.
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <main>
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-pencil-square"></i>
+                        Formulario de incidencia
+                    </h2>
+
+                    {% if tipo_forzado == "PEDAGOGICA" %}
+                        <span class="badge-soft badge-purple"><i class="bi bi-easel2-fill"></i> Pedagógica</span>
+                    {% elif tipo_forzado == "NUTRICIONAL" %}
+                        <span class="badge-soft badge-green"><i class="bi bi-egg-fried"></i> Nutricional</span>
+                    {% elif tipo_forzado == "MEDICA" %}
+                        <span class="badge-soft badge-red"><i class="bi bi-heart-pulse-fill"></i> Médica</span>
+                    {% elif tipo_forzado == "PSICOLOGICA" %}
+                        <span class="badge-soft badge-blue"><i class="bi bi-person-hearts"></i> Psicológica</span>
+                    {% else %}
+                        <span class="badge-soft badge-gray"><i class="bi bi-clipboard2-pulse-fill"></i> General</span>
+                    {% endif %}
+                </div>
+
+                <div class="panel-body">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        {% if registro_diario %}
+                            <input type="hidden" name="registro_diario_inicial" value="{{ registro_diario.id }}">
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-custom">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        {% if tipo_forzado %}
+                            <div class="tipo-fijo-lock">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <div>
+                                    El tipo de incidencia está fijo por tu rol/área. No se puede cambiar desde este formulario.
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-person-vcard-fill"></i>
+                                Datos principales
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label for="{{ form.alumno.id_for_label }}" class="form-label">
+                                        {{ form.alumno.label }}
+                                    </label>
+                                    {{ form.alumno }}
+                                    {% if form.alumno.errors %}
+                                        <div class="errors">{{ form.alumno.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Selecciona el niño o niña al que corresponde la incidencia.
+                                    </div>
+                                </div>
+
+                                <div class="form-group full">
+                                    <label for="{{ form.registro_diario.id_for_label }}" class="form-label">
+                                        {{ form.registro_diario.label }}
+                                    </label>
+                                    {{ form.registro_diario }}
+                                    {% if form.registro_diario.errors %}
+                                        <div class="errors">{{ form.registro_diario.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Opcional, pero recomendable. Permite conectar la incidencia con la bitácora del día.
+                                    </div>
+                                </div>
+
+                                <div>
+                                    {% if tipo_forzado %}
+                                        <input type="hidden" name="tipo" value="{{ tipo_forzado }}">
+
+                                        <div class="tipo-fijo-card">
+                                            <div class="tipo-fijo-title">
+                                                Tipo de incidencia
+                                            </div>
+
+                                            {% if tipo_forzado == "PEDAGOGICA" %}
+                                                <span class="badge-soft badge-purple">
+                                                    <i class="bi bi-easel2-fill"></i>
+                                                    Pedagógica
+                                                </span>
+                                            {% elif tipo_forzado == "NUTRICIONAL" %}
+                                                <span class="badge-soft badge-green">
+                                                    <i class="bi bi-egg-fried"></i>
+                                                    Nutricional
+                                                </span>
+                                            {% elif tipo_forzado == "MEDICA" %}
+                                                <span class="badge-soft badge-red">
+                                                    <i class="bi bi-heart-pulse-fill"></i>
+                                                    Médica
+                                                </span>
+                                            {% elif tipo_forzado == "PSICOLOGICA" %}
+                                                <span class="badge-soft badge-blue">
+                                                    <i class="bi bi-person-hearts"></i>
+                                                    Psicológica
+                                                </span>
+                                            {% endif %}
+
+                                            <div class="tipo-fijo-help">
+                                                Este tipo fue asignado automáticamente según el área que registra la incidencia.
+                                            </div>
+                                        </div>
+
+                                        {% if form.tipo.errors %}
+                                            <div class="errors">{{ form.tipo.errors }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <label for="{{ form.tipo.id_for_label }}" class="form-label">
+                                            {{ form.tipo.label }}
+                                        </label>
+                                        {{ form.tipo }}
+                                        {% if form.tipo.errors %}
+                                            <div class="errors">{{ form.tipo.errors }}</div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                        {{ form.categoria.label }}
+                                    </label>
+                                    {{ form.categoria }}
+                                    {% if form.categoria.errors %}
+                                        <div class="errors">{{ form.categoria.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.subtipo.id_for_label }}" class="form-label">
+                                        {{ form.subtipo.label }}
+                                    </label>
+                                    {{ form.subtipo }}
+                                    {% if form.subtipo.errors %}
+                                        <div class="errors">{{ form.subtipo.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.nivel.id_for_label }}" class="form-label">
+                                        {{ form.nivel.label }}
+                                    </label>
+                                    {{ form.nivel }}
+                                    {% if form.nivel.errors %}
+                                        <div class="errors">{{ form.nivel.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-card-text"></i>
+                                Descripción e intervención
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                        {{ form.descripcion.label }}
+                                    </label>
+                                    {{ form.descripcion }}
+                                    {% if form.descripcion.errors %}
+                                        <div class="errors">{{ form.descripcion.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Describe claramente qué ocurrió, cómo se observó y en qué momento.
+                                    </div>
+                                </div>
+
+                                <div class="form-group full">
+                                    <label for="{{ form.intervencion_personal.id_for_label }}" class="form-label">
+                                        {{ form.intervencion_personal.label }}
+                                    </label>
+                                    {{ form.intervencion_personal }}
+                                    {% if form.intervencion_personal.errors %}
+                                        <div class="errors">{{ form.intervencion_personal.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Describe qué hizo el personal ante la incidencia.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section special-section" id="seccionMedica">
+                            <div class="form-section-title">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                                Datos médicos específicos
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label for="{{ form.sintomas_medicos.id_for_label }}" class="form-label">
+                                        {{ form.sintomas_medicos.label }}
+                                    </label>
+                                    {{ form.sintomas_medicos }}
+                                    {% if form.sintomas_medicos.errors %}
+                                        <div class="errors">{{ form.sintomas_medicos.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Puedes seleccionar varios síntomas o signos observados.
+                                    </div>
+                                </div>
+
+                                <div class="campo-diarrea">
+                                    <label for="{{ form.consistencia_evacuacion.id_for_label }}" class="form-label">
+                                        {{ form.consistencia_evacuacion.label }}
+                                    </label>
+                                    {{ form.consistencia_evacuacion }}
+                                    {% if form.consistencia_evacuacion.errors %}
+                                        <div class="errors">{{ form.consistencia_evacuacion.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="campo-diarrea">
+                                    <label for="{{ form.numero_evacuaciones.id_for_label }}" class="form-label">
+                                        {{ form.numero_evacuaciones.label }}
+                                    </label>
+                                    {{ form.numero_evacuaciones }}
+                                    {% if form.numero_evacuaciones.errors %}
+                                        <div class="errors">{{ form.numero_evacuaciones.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section special-section" id="seccionNutricional">
+                            <div class="form-section-title">
+                                <i class="bi bi-egg-fried"></i>
+                                Datos nutricionales específicos
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label for="{{ form.alimento_relacionado.id_for_label }}" class="form-label">
+                                        {{ form.alimento_relacionado.label }}
+                                    </label>
+                                    {{ form.alimento_relacionado }}
+                                    {% if form.alimento_relacionado.errors %}
+                                        <div class="errors">{{ form.alimento_relacionado.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Útil para reacciones alérgicas, intolerancias, rechazo de alimento o restricción alimentaria.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section special-section" id="seccionPsicologica">
+                            <div class="form-section-title">
+                                <i class="bi bi-person-hearts"></i>
+                                Datos psicológicos específicos
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label for="{{ form.conducta_observada.id_for_label }}" class="form-label">
+                                        {{ form.conducta_observada.label }}
+                                    </label>
+                                    {{ form.conducta_observada }}
+                                    {% if form.conducta_observada.errors %}
+                                        <div class="errors">{{ form.conducta_observada.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group full">
+                                    <label for="{{ form.contexto_observacion.id_for_label }}" class="form-label">
+                                        {{ form.contexto_observacion.label }}
+                                    </label>
+                                    {{ form.contexto_observacion }}
+                                    {% if form.contexto_observacion.errors %}
+                                        <div class="errors">{{ form.contexto_observacion.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-person-check-fill"></i>
+                                Aviso al responsable
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <div class="form-check">
+                                        {{ form.responsable_informado }}
+                                        <label for="{{ form.responsable_informado.id_for_label }}" class="form-check-label">
+                                            {{ form.responsable_informado.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.responsable_informado.errors %}
+                                        <div class="errors">{{ form.responsable_informado.errors }}</div>
+                                    {% endif %}
+                                    <div class="mini-help">
+                                        Obligatorio si el nivel de riesgo es alto.
+                                    </div>
+                                </div>
+
+                                <div class="aviso-responsable">
+                                    <label for="{{ form.medio_aviso_responsable.id_for_label }}" class="form-label">
+                                        {{ form.medio_aviso_responsable.label }}
+                                    </label>
+                                    {{ form.medio_aviso_responsable }}
+                                    {% if form.medio_aviso_responsable.errors %}
+                                        <div class="errors">{{ form.medio_aviso_responsable.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="aviso-responsable">
+                                    <label for="{{ form.responsable_informado_nombre.id_for_label }}" class="form-label">
+                                        {{ form.responsable_informado_nombre.label }}
+                                    </label>
+                                    {{ form.responsable_informado_nombre }}
+                                    {% if form.responsable_informado_nombre.errors %}
+                                        <div class="errors">{{ form.responsable_informado_nombre.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-paperclip"></i>
+                                Archivos adjuntos
+                            </div>
+
+                            <div class="file-card">
+                                <div class="d-flex gap-3 align-items-start">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                    <div class="flex-grow-1">
+                                        <label for="{{ form.archivos.id_for_label }}" class="form-label">
+                                            {{ form.archivos.label }}
+                                        </label>
+                                        {{ form.archivos }}
+                                        {% if form.archivos.errors %}
+                                            <div class="errors">{{ form.archivos.errors }}</div>
+                                        {% endif %}
+                                        <div class="mini-help">
+                                            Puedes adjuntar PDF, imágenes o documentos Word. Máximo recomendado: 10 MB por archivo.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="submit-bar">
+                            <div class="submit-note">
+                                Al guardar, la incidencia quedará abierta. Después podrás registrar seguimiento y cerrarla con resolución.
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if tipo_forzado %}
+                                    <a href="{% url 'panel_incidencias' %}?tipo={{ tipo_forzado }}" class="btn-soft">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        Cancelar
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'panel_incidencias' %}" class="btn-soft">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        Cancelar
+                                    </a>
+                                {% endif %}
+
+                                <button type="submit" class="btn-main btn-green">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Guardar incidencia
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const tipoForzado = "{{ tipo_forzado|default:'' }}";
+    const tipoField = tipoForzado ? null : document.getElementById("{{ form.tipo.id_for_label }}");
+    const categoriaField = document.getElementById("{{ form.categoria.id_for_label }}");
+    const nivelField = document.getElementById("{{ form.nivel.id_for_label }}");
+    const responsableCheck = document.getElementById("{{ form.responsable_informado.id_for_label }}");
+    const avisoFields = document.querySelectorAll(".aviso-responsable");
+
+    function valorTipo(){
+        if(tipoForzado){
+            return tipoForzado;
+        }
+        return (tipoField?.value || "").trim();
+    }
+
+    function toggleSecciones(){
+        const tipo = valorTipo();
+        const categoria = (categoriaField?.value || "").trim();
+
+        const seccionMedica = document.getElementById("seccionMedica");
+        const seccionNutricional = document.getElementById("seccionNutricional");
+        const seccionPsicologica = document.getElementById("seccionPsicologica");
+        const camposDiarrea = document.querySelectorAll(".campo-diarrea");
+
+        [seccionMedica, seccionNutricional, seccionPsicologica].forEach(sec => {
+            if(sec){ sec.classList.remove("active"); }
+        });
+
+        if(tipo === "MEDICA" && seccionMedica){
+            seccionMedica.classList.add("active");
+        }
+
+        if(tipo === "NUTRICIONAL" && seccionNutricional){
+            seccionNutricional.classList.add("active");
+        }
+
+        if(tipo === "PSICOLOGICA" && seccionPsicologica){
+            seccionPsicologica.classList.add("active");
+        }
+
+        camposDiarrea.forEach(campo => {
+            campo.style.display = categoria === "DIARREA" ? "" : "none";
+        });
+    }
+
+    function toggleAvisoResponsable(){
+        const riesgoAlto = (nivelField?.value || "").trim() === "ALTO";
+
+        if(riesgoAlto && responsableCheck){
+            responsableCheck.checked = true;
+        }
+
+        const mostrar = responsableCheck?.checked || riesgoAlto;
+
+        avisoFields.forEach(el => {
+            el.style.display = mostrar ? "" : "none";
+        });
+    }
+
+    if(tipoField){
+        tipoField.addEventListener("change", toggleSecciones);
+    }
+
+    if(categoriaField){
+        categoriaField.addEventListener("change", toggleSecciones);
+    }
+
+    if(nivelField){
+        nivelField.addEventListener("change", toggleAvisoResponsable);
+    }
+
+    if(responsableCheck){
+        responsableCheck.addEventListener("change", toggleAvisoResponsable);
+    }
+
+    toggleSecciones();
+    toggleAvisoResponsable();
+</script>
+
+</body>
+</html>

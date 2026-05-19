@@ -88,7 +88,6 @@
       top:92px;
     }
 
-    /* ESTILOS PARA LOS BOTONES DE DESCARGA DE PDF */
     .doc-link-btn {
         display: flex; align-items: center; justify-content: start; width: 100%;
         background-color: #f8f9fa; border: 1px solid #dee2e6; color: #212529;
@@ -98,7 +97,6 @@
     .doc-link-btn:hover { background-color: #e9ecef; border-color: #ced4da; }
     .doc-link-btn i { font-size: 1.1rem; margin-right: 8px; }
 
-    /* PERSONALIZACIÓN EXTRA DE SWEETALERT SI ES NECESARIA */
     .swal2-styled.swal2-confirm {
       border-radius: 12px !important;
       font-weight: 800 !important;
@@ -183,7 +181,7 @@
                 <div class="fw-bold">Recomendación</div>
                 <div class="small-muted">
                   Revisa los datos capturados por el tutor. Si procede, dictamina en el panel derecho.
-                  Si rechazas o devuelves, escribe el motivo para que se envíe en el correo.
+                  Al aceptar o rechazar se generará un PDF de dictamen y se enviará al correo del tutor.
                 </div>
               </div>
             </div>
@@ -219,18 +217,11 @@
             <dt>Matrícula</dt>
             <dd>{{ s.matricula|default:"-" }}</dd>
 
-            <dt>Programa educativo</dt>
-            <dd>
-              {% if s.programa_educativo %}
-                {{ s.get_programa_educativo_display }}
-                {% if s.programa_educativo == "OTRO" and s.programa_educativo_otro %}
-                  ({{ s.programa_educativo_otro }})
-                {% endif %}
-              {% else %}-{% endif %}
-            </dd>
-
             <dt>Unidad académica</dt>
             <dd>{{ s.unidad_academica|default:"-" }}</dd>
+
+            <dt>Programa educativo</dt>
+            <dd>{{ s.programa_educativo|default:"-" }}</dd>
 
             <dt>Correo</dt>
             <dd>{{ s.correo|default:"-" }}</dd>
@@ -250,6 +241,9 @@
         </div>
         <div class="card-body">
           <dl class="kv">
+            <dt>Nombre del menor</dt>
+            <dd>{{ s.nombre_menor_completo|default:"-" }}</dd>
+
             <dt>Fecha de nacimiento</dt>
             <dd>{% if s.fecha_nacimiento_menor %}{{ s.fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}-{% endif %}</dd>
 
@@ -324,6 +318,7 @@
                     {% endif %}
                 </div>
             </div>
+
             {% if inscripcion.comentario_tutor %}
             <div class="alert alert-info py-2 small shadow-sm border-info mb-3">
               <span class="fw-bold text-dark"><i class="bi bi-chat-left-text-fill me-1 text-primary"></i> Mensaje del Tutor:</span><br>
@@ -338,7 +333,6 @@
             <form method="post" action="{% url 'revisar_solicitud' s.id %}" id="formRevisionInscripcion">
               {% csrf_token %}
               <input type="hidden" name="docs_erroneos" id="docs_erroneos" value="">
-
               <input type="hidden" name="accion_inscripcion" id="input_accion_inscripcion" value="">
 
               <div class="alert alert-warning small py-2 my-3 border-warning shadow-sm">
@@ -362,7 +356,6 @@
             </form>
 
             <script>
-                // Funciones de SweetAlert para Inscripción
                 function confirmarPaseFiltros() {
                     Swal.fire({
                         title: '¿Pasar a filtros?',
@@ -401,7 +394,6 @@
 
                 document.addEventListener('DOMContentLoaded', function() {
                     const form = document.getElementById('formRevisionInscripcion');
-                    // Buscamos los botones de documentos y el botón del reglamento
                     const docLinks = document.querySelectorAll('.doc-link-btn, a.btn-primary.btn-soft');
 
                     docLinks.forEach(link => {
@@ -421,7 +413,6 @@
 
                         else if(text.includes('fotos del tutor') || text.includes('beneficiario')) docName = 'doc_tutor_fotos';
 
-                        // NUEVOS MAPEOS DE RECHAZO
                         else if(text.includes('pareja')) docName = 'doc_segundo_padre_fotos';
                         else if(text.includes('foto familiar 1')) docName = 'doc_contacto_1_fotos';
                         else if(text.includes('foto familiar 2')) docName = 'doc_contacto_2_fotos';
@@ -467,7 +458,7 @@
         </div>
         {% elif s.estado == 'APROBADA' %}
         <div class="alert alert-secondary shadow-sm small border mb-3">
-            <i class="bi bi-info-circle-fill me-1"></i> Este folio fue aprobado antes de la actualización, por lo que no tiene panel de seguimiento de PDF. (Para ver el nuevo panel, aprueba un folio nuevo).
+            <i class="bi bi-info-circle-fill me-1"></i> Este folio fue aprobado antes de la actualización, por lo que no tiene panel de seguimiento de PDF. Para ver el nuevo panel, aprueba un folio nuevo.
         </div>
         {% endif %}
 
@@ -493,7 +484,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="APROBAR">
                 <button class="btn btn-success btn-soft" type="button" onclick="confirmarAprobacion()">
-                  <i class="bi bi-check2-circle me-1"></i> Aprobar y Generar Acceso
+                  <i class="bi bi-check2-circle me-1"></i> Aprobar, generar PDF y enviar correo
                 </button>
               </form>
 
@@ -504,7 +495,7 @@
               </button>
 
               <div class="small-muted mt-2 text-center">
-                Al rechazar, el motivo se guardará y se enviará al correo del tutor.
+                Al rechazar, el motivo se guardará, se generará el PDF y se enviará al correo del tutor.
               </div>
 
             {% else %}
@@ -550,20 +541,20 @@
       </div>
 
       <div class="modal-body">
-        <label class="form-label fw-semibold text-muted">Escribe el motivo de rechazo de la solicitud (obligatorio)</label>
-        <textarea name="comentario" class="form-control bg-light" rows="5"
+        <label class="form-label fw-semibold text-muted">Escribe el motivo de rechazo de la solicitud</label>
+        <textarea name="comentario_respuesta" class="form-control bg-light" rows="5"
                   placeholder="Ej: Documentación incompleta / datos inconsistentes / fuera de convocatoria..."
                   required></textarea>
 
         <div class="form-text mt-2 text-primary fw-bold">
-          <i class="bi bi-envelope-fill me-1"></i> Este mensaje le llegará al tutor por correo electrónico.
+          <i class="bi bi-envelope-fill me-1"></i> Este mensaje aparecerá en el PDF y se enviará al tutor por correo electrónico.
         </div>
       </div>
 
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="btn btn-outline-secondary btn-soft px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
         <button type="submit" class="btn btn-danger btn-soft px-4 rounded-pill shadow-sm">
-          Confirmar Rechazo
+          Confirmar rechazo, generar PDF y enviar correo
         </button>
       </div>
     </form>
@@ -576,12 +567,12 @@
   function confirmarAprobacion() {
     Swal.fire({
       title: '¿Aprobar solicitud?',
-      text: "Se aprobará este folio y el tutor quedará habilitado para continuar con su proceso de inscripción.",
+      text: "Se aprobará este folio, se generará el PDF de aceptación y se enviará el correo al tutor.",
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#1e3a8a', // Azul Institucional
-      cancelButtonColor: '#dc3545',  // Rojo para cancelar
-      confirmButtonText: 'Sí, Aprobar',
+      confirmButtonColor: '#1e3a8a',
+      cancelButtonColor: '#dc3545',
+      confirmButtonText: 'Sí, aprobar',
       cancelButtonText: 'Cancelar',
       background: '#ffffff',
       color: '#0f172a'

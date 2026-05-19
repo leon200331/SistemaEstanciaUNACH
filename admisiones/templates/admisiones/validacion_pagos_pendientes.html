@@ -1,0 +1,501 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Validación de Pagos - Trabajo Social</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f7f6;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar-ts {
+            background: #0f766e;
+            padding: .75rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,.16);
+        }
+
+        .brand-title {
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.08rem;
+            letter-spacing: .4px;
+            line-height: 1.15;
+        }
+
+        .brand-subtitle {
+            color: rgba(255,255,255,.78);
+            font-size: .84rem;
+        }
+
+        .container-panel {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            margin-top: 92px;
+        }
+
+        .card-panel {
+            background: #fff;
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 10px 26px rgba(15,23,42,.08);
+        }
+
+        .summary-card {
+            border-radius: 18px;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            color: #fff;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15,118,110,.22);
+        }
+
+        .table-card {
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-soft {
+            border-radius: 999px;
+            font-weight: 700;
+            padding: .45rem .9rem;
+        }
+
+        .badge-state {
+            border-radius: 999px;
+            padding: .45rem .75rem;
+            font-weight: 800;
+            font-size: .78rem;
+        }
+
+        .student-name {
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+        }
+
+        .small-muted {
+            font-size: .82rem;
+            color: #64748b;
+        }
+
+        .payment-proof-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .modal-content-custom {
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 18px 45px rgba(15,23,42,.28);
+            overflow: hidden;
+        }
+
+        .modal-header-presencial {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #fff;
+        }
+
+        .modal-header-success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+        }
+
+        .modal-header-danger {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: #fff;
+        }
+
+        .empty-state {
+            padding: 56px 20px;
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #94a3b8;
+        }
+
+        .action-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .action-grid {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-ts fixed-top">
+    <div class="container-fluid justify-content-center">
+        <div class="d-flex align-items-center" style="width:100%; max-width:1280px; padding:0 18px;">
+            <a class="navbar-brand d-flex align-items-center text-decoration-none" href="{% url 'validacion_pagos_pendientes' %}">
+                <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
+                <div>
+                    <div class="brand-title">VALIDACIÓN DE COMPROBANTES DE PAGO</div>
+                    <div class="brand-subtitle">Trabajo Social · Inscripciones aceptadas por Dirección</div>
+                </div>
+            </a>
+
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <a href="{% url 'dashboard_admin' %}" class="btn btn-light btn-soft">
+                    <i class="bi bi-arrow-left me-1"></i> Panel Trabajo Social
+                </a>
+
+                <form method="post" action="{% url 'logout' %}" class="mb-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-soft">
+                        <i class="bi bi-box-arrow-right me-1"></i> Salir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-panel">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                <strong><i class="bi bi-info-circle-fill me-2"></i>Aviso:</strong> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="summary-card mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">
+                    <i class="bi bi-receipt-cutoff me-2"></i>
+                    Pagos pendientes de validación
+                </h3>
+                <p class="mb-0 opacity-75">
+                    Aquí aparecen los expedientes aprobados por Dirección que están esperando comprobante de pago.
+                </p>
+            </div>
+
+            <div class="bg-white text-success rounded-pill px-4 py-2 fw-bold shadow-sm">
+                Pendientes: {{ inscripciones|length }}
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-panel table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width:130px;">Folio</th>
+                        <th style="min-width:270px;">Beneficiario / Menor</th>
+                        <th style="min-width:220px;">Estado del comprobante</th>
+                        <th style="min-width:260px;">Comprobante</th>
+                        <th style="min-width:300px;" class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for ins in inscripciones %}
+                    <tr>
+                        <td>
+                            <span class="fw-bold text-primary">#{{ ins.solicitud_ingreso.folio }}</span>
+                            <div class="small-muted">
+                                ID inscripción: {{ ins.id }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="student-name">
+                                {{ ins.solicitud_ingreso.nombre_menor_completo }}
+                            </div>
+                            <div class="small-muted">
+                                Tutor: {{ ins.solicitud_ingreso.nombre_tutor_completo }}
+                            </div>
+                            <div class="small-muted">
+                                <i class="bi bi-envelope me-1"></i>{{ ins.solicitud_ingreso.correo|default:"Sin correo" }}
+                            </div>
+                            <div class="small-muted">
+                                Matrícula: {{ ins.solicitud_ingreso.matricula|default:"SIN_MATRICULA" }}
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if ins.estado_pago == 'VALIDADO' %}
+                                <span class="badge bg-success badge-state">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Validado
+                                </span>
+
+                            {% elif ins.estado_pago == 'SUBIDO_BENEFICIARIO' %}
+                                <span class="badge bg-primary badge-state">
+                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subido por beneficiario
+                                </span>
+
+                            {% elif ins.estado_pago == 'ENTREGADO_PRESENCIAL' or ins.pago_entregado_presencial %}
+                                <span class="badge bg-info text-dark badge-state">
+                                    <i class="bi bi-person-check-fill me-1"></i> Entregado presencial
+                                </span>
+
+                            {% elif ins.estado_pago == 'RECHAZADO' %}
+                                <span class="badge bg-danger badge-state">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazado
+                                </span>
+
+                            {% else %}
+                                <span class="badge bg-warning text-dark badge-state">
+                                    <i class="bi bi-hourglass-split me-1"></i> Pendiente
+                                </span>
+                            {% endif %}
+
+                            {% if ins.pago_observaciones %}
+                                <div class="small-muted mt-2">
+                                    <strong>Obs:</strong> {{ ins.pago_observaciones|truncatechars:90 }}
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="payment-proof-box">
+                                {% if ins.doc_tutor_pago %}
+                                    <div class="fw-bold text-success mb-2">
+                                        <i class="bi bi-file-earmark-check-fill me-1"></i>
+                                        Archivo disponible
+                                    </div>
+
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a href="{{ ins.doc_tutor_pago.url }}" target="_blank" class="btn btn-outline-success btn-sm btn-soft">
+                                            <i class="bi bi-eye-fill me-1"></i> Ver
+                                        </a>
+
+                                        <a href="{% url 'descargar_archivo_expediente' ins.id 'doc_tutor_pago' %}" class="btn btn-outline-primary btn-sm btn-soft">
+                                            <i class="bi bi-download me-1"></i> Descargar
+                                        </a>
+                                    </div>
+
+                                {% elif ins.pago_entregado_presencial %}
+                                    <div class="fw-bold text-info">
+                                        <i class="bi bi-person-check-fill me-1"></i>
+                                        Ticket recibido presencialmente
+                                    </div>
+                                    {% if ins.pago_recibido_presencial_en %}
+                                    <div class="small-muted mt-1">
+                                        {{ ins.pago_recibido_presencial_en|date:"d/m/Y H:i" }}
+                                    </div>
+                                    {% endif %}
+
+                                {% else %}
+                                    <div class="fw-bold text-warning">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        Sin comprobante
+                                    </div>
+                                    <div class="small-muted mt-1">
+                                        El beneficiario puede subirlo desde su portal o entregarlo presencialmente.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td class="text-end">
+                            <div class="action-grid">
+
+                                {% if not ins.doc_tutor_pago and not ins.pago_entregado_presencial %}
+                                <button type="button"
+                                        class="btn btn-info btn-sm btn-soft text-dark"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalPresencial{{ ins.id }}">
+                                    <i class="bi bi-person-check-fill me-1"></i> Presencial
+                                </button>
+                                {% endif %}
+
+                                {% if ins.doc_tutor_pago or ins.pago_entregado_presencial %}
+                                <button type="button"
+                                        class="btn btn-success btn-sm btn-soft"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalValidar{{ ins.id }}">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Validar
+                                </button>
+                                {% endif %}
+
+                                {% if ins.doc_tutor_pago %}
+                                <button type="button"
+                                        class="btn btn-danger btn-sm btn-soft"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalRechazar{{ ins.id }}">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazar
+                                </button>
+                                {% endif %}
+                            </div>
+
+                            <!-- MODAL ENTREGA PRESENCIAL -->
+                            <div class="modal fade" id="modalPresencial{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content modal-content-custom">
+                                        <div class="modal-header modal-header-presencial">
+                                            <h5 class="modal-title fw-bold">
+                                                <i class="bi bi-person-check-fill me-2"></i>
+                                                Registrar entrega presencial
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-body text-start p-4">
+                                                <p>
+                                                    Confirma que el beneficiario entregó presencialmente el comprobante de pago de:
+                                                    <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>.
+                                                </p>
+
+                                                <label class="form-label fw-bold">Observaciones opcionales</label>
+                                                <textarea name="pago_observaciones"
+                                                          class="form-control"
+                                                          rows="3"
+                                                          placeholder="Ej. Ticket recibido físicamente en Trabajo Social."></textarea>
+                                            </div>
+
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">
+                                                    Cancelar
+                                                </button>
+                                                <button type="submit" name="accion_pago" value="PRESENCIAL" class="btn btn-info btn-soft text-dark">
+                                                    <i class="bi bi-person-check-fill me-1"></i> Registrar presencial
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MODAL VALIDAR -->
+                            <div class="modal fade" id="modalValidar{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content modal-content-custom">
+                                        <div class="modal-header modal-header-success">
+                                            <h5 class="modal-title fw-bold">
+                                                <i class="bi bi-check-circle-fill me-2"></i>
+                                                Validar pago
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-body text-start p-4">
+                                                <p>
+                                                    Al validar el pago, la inscripción de
+                                                    <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
+                                                    quedará como <strong>FINALIZADA</strong>.
+                                                </p>
+
+                                                <div class="alert alert-success small">
+                                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                                    Esta acción confirma que el comprobante digital o presencial fue aceptado por Trabajo Social.
+                                                </div>
+
+                                                <label class="form-label fw-bold">Observaciones opcionales</label>
+                                                <textarea name="pago_observaciones"
+                                                          class="form-control"
+                                                          rows="3"
+                                                          placeholder="Ej. Pago validado correctamente.">{{ ins.pago_observaciones|default:"" }}</textarea>
+                                            </div>
+
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">
+                                                    Cancelar
+                                                </button>
+                                                <button type="submit" name="accion_pago" value="VALIDAR" class="btn btn-success btn-soft">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Validar y finalizar
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MODAL RECHAZAR -->
+                            <div class="modal fade" id="modalRechazar{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content modal-content-custom">
+                                        <div class="modal-header modal-header-danger">
+                                            <h5 class="modal-title fw-bold">
+                                                <i class="bi bi-x-octagon-fill me-2"></i>
+                                                Rechazar comprobante
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-body text-start p-4">
+                                                <p>
+                                                    Indica por qué se rechaza el comprobante de
+                                                    <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>.
+                                                </p>
+
+                                                <div class="alert alert-danger small">
+                                                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                                                    El beneficiario podrá subir un nuevo comprobante desde su portal.
+                                                </div>
+
+                                                <label class="form-label fw-bold">Motivo del rechazo <span class="text-danger">*</span></label>
+                                                <textarea name="pago_observaciones"
+                                                          class="form-control"
+                                                          rows="4"
+                                                          required
+                                                          placeholder="Ej. El comprobante no es legible, no corresponde al pago o está incompleto."></textarea>
+                                            </div>
+
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">
+                                                    Cancelar
+                                                </button>
+                                                <button type="submit" name="accion_pago" value="RECHAZAR" class="btn btn-danger btn-soft">
+                                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazar comprobante
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <h5 class="fw-bold mt-3">No hay pagos pendientes</h5>
+                                <p class="text-muted mb-0">
+                                    Cuando Dirección apruebe una inscripción, aparecerá aquí para registrar o validar el comprobante de pago.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

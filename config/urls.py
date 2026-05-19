@@ -36,7 +36,7 @@ urlpatterns = [
     path('panel-directiva/', user_views.dashboard_directiva, name='dashboard_directiva'),
 
     # 5. INSCRIPCIÓN
-    path('inscripcion-nueva/', user_views.registro_inscripcion, name='registro_inscripcion'),
+    # path('inscripcion-nueva/', user_views.registro_inscripcion, name='registro_inscripcion'),
 
     # 6. SALIR
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),

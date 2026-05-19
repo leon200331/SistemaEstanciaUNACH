@@ -16,7 +16,65 @@ body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
 .ti-subtext{color:rgba(255,255,255,.75);font-size:.85rem;}
 .container-panel{max-width:1200px;margin:0 auto;padding:22px 16px;margin-top:92px;}
 .card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
-.info-box{background:#fff;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.06);padding:14px 16px;margin-bottom:16px;}
+.info-box{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    padding:22px 24px;
+    margin-bottom:20px;
+}
+.solicitud-title{
+    color:#526b8b;
+    font-size:1rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:14px;
+}
+.solicitud-grid{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap:12px;
+}
+.solicitud-card{
+    background:#f8fafc;
+    border:1px solid #dbe4ef;
+    border-radius:13px;
+    padding:13px 14px;
+    min-height:68px;
+}
+.solicitud-card.card-wide-2{
+    grid-column: span 2;
+}
+.solicitud-card.card-wide-3{
+    grid-column: span 3;
+}
+.solicitud-label{
+    color:#526b8b;
+    font-size:.76rem;
+    font-weight:800;
+    margin-bottom:7px;
+    letter-spacing:.03em;
+}
+.solicitud-value{
+    color:#001b3f;
+    font-size:.95rem;
+    font-weight:800;
+    word-break:break-word;
+}
+.solicitud-value.normal{
+    font-weight:700;
+}
+@media (max-width: 992px){
+    .solicitud-grid{grid-template-columns: repeat(2, minmax(0, 1fr));}
+    .solicitud-card.card-wide-2,
+    .solicitud-card.card-wide-3{grid-column: span 2;}
+}
+@media (max-width: 576px){
+    .solicitud-grid{grid-template-columns: 1fr;}
+    .solicitud-card.card-wide-2,
+    .solicitud-card.card-wide-3{grid-column: span 1;}
+}
 .btn-soft{border-radius:10px;font-weight:700;padding:.5rem .9rem;}
 
 /* Letras sin negritas resaltadas */
@@ -61,6 +119,248 @@ textarea.form-control{min-height:90px;}
     margin-top: auto;
     flex: 0 0 auto;
 }
+
+
+.estado-operativo{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    padding:16px 18px;
+    margin-bottom:20px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    border:1px solid transparent;
+}
+.estado-operativo .status-icon{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.35rem;
+}
+.estado-operativo h5{
+    margin:0 0 4px;
+    font-weight:900;
+}
+.estado-operativo p{
+    margin:0;
+    line-height:1.5;
+    font-size:.94rem;
+}
+.estado-activo{
+    background:#f0fdf4;
+    border-color:#bbf7d0;
+    border-left:7px solid #16a34a;
+    color:#14532d;
+}
+.estado-activo .status-icon{
+    background:#dcfce7;
+    color:#15803d;
+}
+.estado-consulta{
+    background:#fff7ed;
+    border-color:#fed7aa;
+    border-left:7px solid #f97316;
+    color:#9a3412;
+}
+.estado-consulta .status-icon{
+    background:#ffedd5;
+    color:#c2410c;
+}
+.modo-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border-radius:999px;
+    padding:.38rem .7rem;
+    font-size:.76rem;
+    font-weight:900;
+    margin-top:8px;
+}
+.modo-badge-activo{
+    background:#dcfce7;
+    color:#166534;
+    border:1px solid #86efac;
+}
+.modo-badge-consulta{
+    background:#ffedd5;
+    color:#9a3412;
+    border:1px solid #fed7aa;
+}
+.readonly-warning{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    border-left:6px solid #f97316;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:18px;
+    color:#9a3412;
+}
+.readonly-warning .title{
+    font-weight:900;
+    margin-bottom:3px;
+}
+
+.lock-banner{
+    background:#f8fafc;
+    border:1px solid #cbd5e1;
+    border-left:6px solid #64748b;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:18px;
+}
+.lock-banner .title{
+    font-weight:800;
+    color:#334155;
+    margin-bottom:3px;
+}
+
+/* =========================================================
+   SPRINT 5 - INCIDENCIAS PSICOLÓGICAS
+   ========================================================= */
+.incidencias-card{
+    background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+    border:1px solid #bfdbfe;
+    border-left:7px solid #2563eb;
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+}
+.incidencias-card .icon-box{
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    background:#dbeafe;
+    color:#1d4ed8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.45rem;
+    flex-shrink:0;
+}
+.incidencias-card h5{
+    margin:0 0 4px;
+    font-weight:900;
+    color:#1e3a8a;
+}
+.incidencias-card p{
+    margin:0;
+    color:#1e40af;
+    line-height:1.45;
+    font-size:.94rem;
+}
+.incidencias-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    align-items:center;
+    min-width:260px;
+}
+.btn-incidencia{
+    border-radius:999px;
+    font-weight:800;
+    padding:.62rem .92rem;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    text-decoration:none;
+    white-space:nowrap;
+}
+.btn-incidencia-create{
+    background:#2563eb;
+    color:white;
+    border:1px solid #2563eb;
+}
+.btn-incidencia-create:hover{
+    background:#1d4ed8;
+    color:white;
+}
+.btn-incidencia-list{
+    background:white;
+    color:#1e3a8a;
+    border:1px solid #bfdbfe;
+}
+.btn-incidencia-list:hover{
+    background:#eff6ff;
+    color:#1e3a8a;
+}
+@media(max-width:768px){
+    .incidencias-card{
+        flex-direction:column;
+    }
+    .incidencias-actions,
+    .btn-incidencia{
+        width:100%;
+        justify-content:center;
+    }
+}
+
+/* =========================================================
+   ACLARACIÓN: DICTAMEN DE INSCRIPCIÓN, NO OPERACIÓN DIARIA
+   ========================================================= */
+.dictamen-incidencias-note{
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-left:6px solid #2563eb;
+    color:#1e3a8a;
+    border-radius:16px;
+    padding:14px 16px;
+    margin-bottom:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.05);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+}
+.dictamen-incidencias-note .note-left{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+}
+.dictamen-incidencias-note .note-icon{
+    width:40px;
+    height:40px;
+    border-radius:13px;
+    background:#dbeafe;
+    color:#1d4ed8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.18rem;
+}
+.dictamen-incidencias-note .note-title{
+    font-weight:900;
+    margin-bottom:3px;
+}
+.dictamen-incidencias-note p{
+    margin:0;
+    font-size:.9rem;
+    line-height:1.4;
+}
+.dictamen-incidencias-note .note-actions{
+    flex-shrink:0;
+}
+@media(max-width:768px){
+    .dictamen-incidencias-note{
+        flex-direction:column;
+    }
+    .dictamen-incidencias-note .note-actions,
+    .dictamen-incidencias-note .note-actions a{
+        width:100%;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -77,6 +377,10 @@ textarea.form-control{min-height:90px;}
       </a>
 
       <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn btn-outline-light btn-soft">
+          <i class="bi bi-clipboard2-pulse me-1"></i> Incidencias
+        </a>
+
         <a href="{% url 'psicologia_pendientes' %}" class="btn btn-light btn-soft">
           <i class="bi bi-arrow-left me-1"></i> Pendientes
         </a>
@@ -121,26 +425,152 @@ textarea.form-control{min-height:90px;}
   </div>
   {% endif %}
 
-  <div class="info-box">
-    <div class="row">
-      <div class="col-md-6">
-        <p class="mb-1"><strong>Folio:</strong> #{{ sol.folio }}</p>
-        <p class="mb-1"><strong>Tutor:</strong> {{ sol.nombre_tutor_completo }}</p>
-        <p class="mb-1"><strong>Correo:</strong> {{ sol.correo }}</p>
+  {% if modo_solo_consulta %}
+  <div class="estado-operativo estado-consulta">
+    <div class="status-icon">
+      <i class="bi bi-lock-fill"></i>
+    </div>
+    <div>
+      <h5>Modo solo consulta</h5>
+      <p>
+        {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar este dictamen, pero no puedes guardar, modificar ni registrar evaluaciones hasta que el Administrador inicie un nuevo semestre." }}
+      </p>
+      <span class="modo-badge modo-badge-consulta">
+        <i class="bi bi-eye-fill"></i> Consulta histórica habilitada
+      </span>
+    </div>
+  </div>
+  {% else %}
+  <div class="estado-operativo estado-activo">
+    <div class="status-icon">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div>
+      <h5>Semestre activo</h5>
+      <p>
+        Psicología puede operar normalmente en el semestre:
+        <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+      </p>
+      <span class="modo-badge modo-badge-activo">
+        <i class="bi bi-pencil-square"></i> Operación activa
+      </span>
+    </div>
+  </div>
+  {% endif %}
+  <div class="dictamen-incidencias-note">
+    <div class="note-left">
+      <div class="note-icon">
+        <i class="bi bi-info-circle-fill"></i>
       </div>
-      <div class="col-md-6">
-        <p class="mb-1"><strong>Menor:</strong>
-          {% if sol.nombres_menor %}
-             {{ sol.nombres_menor }} {{ sol.apellido_paterno_menor }} {{ sol.apellido_materno_menor }}
-          {% else %}
-             <span class="text-danger fw-bold">⚠️ FALTA GUARDAR EL NOMBRE EN EL PORTAL DEL PADRE</span>
-          {% endif %}
+      <div>
+        <div class="note-title">Este formulario es un dictamen de inscripción</div>
+        <p>
+          Aquí no se crean incidencias porque la solicitud todavía pertenece al proceso de admisión.
+          Las incidencias psicológicas se registran solo para niñas y niños ya inscritos en operación diaria.
         </p>
-        <p class="mb-1"><strong>Fecha nacimiento:</strong> {{ sol.fecha_nacimiento_menor }}</p>
-        <p class="mb-1"><strong>Estado psicología:</strong> {{ sol.get_estado_psicologia_display }}</p>
+      </div>
+    </div>
+
+    <div class="note-actions">
+      <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn-incidencia btn-incidencia-list">
+        <i class="bi bi-eye-fill"></i>
+        Ver incidencias
+      </a>
+    </div>
+  </div>
+
+<div class="info-box">
+    <div class="solicitud-title">Información de la solicitud</div>
+
+    <div class="solicitud-grid">
+      <div class="solicitud-card">
+        <div class="solicitud-label">Folio</div>
+        <div class="solicitud-value">#{{ sol.folio }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Estado general</div>
+        <div class="solicitud-value">{{ sol.get_estado_display }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Estado psicología</div>
+        <div class="solicitud-value">{{ sol.get_estado_psicologia_display }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Fecha de registro</div>
+        <div class="solicitud-value">
+          {% if sol.created_at %}{{ sol.created_at|date:"d/m/Y" }}{% else %}-{% endif %}
+        </div>
+      </div>
+
+      <div class="solicitud-card card-wide-2">
+        <div class="solicitud-label">Tutor</div>
+        <div class="solicitud-value normal">{{ sol.nombre_tutor_completo }}</div>
+      </div>
+
+      <div class="solicitud-card card-wide-2">
+        <div class="solicitud-label">Correo</div>
+        <div class="solicitud-value normal">{{ sol.correo|default:"-" }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Nombre(s) del menor</div>
+        <div class="solicitud-value">{{ nombre_nino|default:"-" }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Apellido paterno del menor</div>
+        <div class="solicitud-value">{{ paterno_nino|default:"-" }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Apellido materno del menor</div>
+        <div class="solicitud-value">{{ materno_nino|default:"-" }}</div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">Fecha de nacimiento</div>
+        <div class="solicitud-value">
+          {% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}-{% endif %}
+        </div>
+      </div>
+
+      <div class="solicitud-card">
+        <div class="solicitud-label">CURP menor</div>
+        <div class="solicitud-value">{{ curp_menor|default:"-" }}</div>
       </div>
     </div>
   </div>
+
+  {% if modo_solo_consulta %}
+  <div class="readonly-warning">
+    <div class="d-flex align-items-start">
+      <i class="bi bi-eye-fill fs-4 me-3"></i>
+      <div>
+        <div class="title">Evaluación psicológica en solo lectura</div>
+        <div>
+          El semestre está cerrado o no hay semestre activo. Puedes revisar la información existente,
+          pero no se permite guardar cambios ni emitir nuevos dictámenes.
+        </div>
+      </div>
+    </div>
+  </div>
+  {% elif bloqueado %}
+  <div class="lock-banner">
+    <div class="d-flex align-items-start">
+      <i class="bi bi-lock-fill fs-4 me-3 text-secondary"></i>
+      <div>
+        <div class="title">Evaluación psicológica finalizada</div>
+        <div class="text-muted">
+          Este dictamen ya fue enviado y no puede modificarse.
+          Solo Administrador o Directora pueden realizar correcciones.
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
   <form method="post" id="formDictamen">
     {% csrf_token %}
@@ -165,32 +595,32 @@ textarea.form-control{min-height:90px;}
                 {{ form.como_lo_llaman_en_casa }}
               </div>
 
-              <div class="col-md-2">
+              <div class="col-md-3">
                 <label class="form-label">Edad</label>
-                <input type="text" class="form-control readonly-box" value="{{ sol.inscripcion_oficial.edad_anios_menor|default:'0' }} años, {{ sol.inscripcion_oficial.edad_meses_menor|default:'0' }} meses" readonly>
+                <input type="text" class="form-control readonly-box" value="{{ insc.edad_anios_menor|default:'0' }} años, {{ insc.edad_meses_menor|default:'0' }} meses" readonly>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label class="form-label">Lugar de nacimiento</label>
-                <input type="text" class="form-control readonly-box" value="{{ sol.inscripcion_oficial.municipio_nacimiento_menor|default:'' }}, {{ sol.inscripcion_oficial.estado_nacimiento_menor|default:'' }}" readonly>
+                <input type="text" class="form-control readonly-box" value="{{ insc.municipio_nacimiento_menor|default:'' }}, {{ insc.estado_nacimiento_menor|default:'' }}" readonly>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Nombre(s) del niño</label>
-                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ sol.nombres_menor|default:'⚠️ Faltan datos' }}" readonly>
+                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ nombre_nino|default:'⚠️ Faltan datos' }}" readonly>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Apellido paterno</label>
-                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ sol.apellido_paterno_menor|default:'⚠️ Faltan datos' }}" readonly>
+                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ paterno_nino|default:'⚠️ Faltan datos' }}" readonly>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Apellido materno</label>
-                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ sol.apellido_materno_menor|default:'⚠️ Faltan datos' }}" readonly>
+                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ materno_nino|default:'⚠️ Faltan datos' }}" readonly>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label">Fecha de nacimiento</label>
-                <input type="text" class="form-control readonly-box" value="{{ sol.fecha_nacimiento_menor }}" readonly>
+                <input type="text" class="form-control readonly-box" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'d/m/Y' }}{% else %}-{% endif %}" readonly>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Folio</label>
@@ -228,11 +658,11 @@ textarea.form-control{min-height:90px;}
               <div class="col-md-4"><label class="form-label">Apellido paterno</label><input type="text" id="p_paterno" class="form-control"></div>
               <div class="col-md-4"><label class="form-label">Apellido materno</label><input type="text" id="p_materno" class="form-control"></div>
 
-              <div class="col-md-3"><label class="form-label">Edad</label>{{ form.edad_padre_psicologia }}</div>
-              <div class="col-md-5"><label class="form-label">Nacionalidad</label>{{ form.nacionalidad_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Edad</label>{{ form.edad_padre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Nacionalidad</label>{{ form.nacionalidad_padre_psicologia }}</div>
               <div class="col-md-4"><label class="form-label">Estado civil</label>{{ form.estado_civil_padre_psicologia }}</div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                   <label class="form-label">Religión</label>
                   <select id="p_religion_sel" class="form-select">
                       <option value="">Seleccione...</option>
@@ -246,7 +676,7 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.religion_padre_psicologia }}</div>
               </div>
 
-              <div class="col-md-8">
+              <div class="col-md-6">
                   <label class="form-label">Ocupación</label>
                   <select id="p_ocupacion_sel" class="form-select">
                       <option value="">Seleccione...</option>
@@ -286,8 +716,8 @@ textarea.form-control{min-height:90px;}
                      <label class="form-check-label ms-1 fw-bold">Estudiante</label>
                  </div>
               </div>
-              <div class="col-md-4 p-wrap-estudio d-none"><label class="form-label">Licenciatura</label>{{ form.licenciatura_padre_psicologia }}</div>
-              <div class="col-md-2 p-wrap-estudio d-none"><label class="form-label">Semestre</label>{{ form.semestre_padre_psicologia }}</div>
+              <div class="col-md-3 p-wrap-estudio d-none"><label class="form-label">Licenciatura</label>{{ form.licenciatura_padre_psicologia }}</div>
+              <div class="col-md-3 p-wrap-estudio d-none"><label class="form-label">Semestre</label>{{ form.semestre_padre_psicologia }}</div>
 
             </div>
           </div>
@@ -321,11 +751,11 @@ textarea.form-control{min-height:90px;}
               <div class="col-md-4"><label class="form-label">Apellido paterno</label><input type="text" id="m_paterno" class="form-control"></div>
               <div class="col-md-4"><label class="form-label">Apellido materno</label><input type="text" id="m_materno" class="form-control"></div>
 
-              <div class="col-md-3"><label class="form-label">Edad</label>{{ form.edad_madre_psicologia }}</div>
-              <div class="col-md-5"><label class="form-label">Nacionalidad</label>{{ form.nacionalidad_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Edad</label>{{ form.edad_madre_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Nacionalidad</label>{{ form.nacionalidad_madre_psicologia }}</div>
               <div class="col-md-4"><label class="form-label">Estado civil</label>{{ form.estado_civil_madre_psicologia }}</div>
 
-              <div class="col-md-4">
+              <div class="col-md-6">
                   <label class="form-label">Religión</label>
                   <select id="m_religion_sel" class="form-select">
                       <option value="">Seleccione...</option>
@@ -339,7 +769,7 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.religion_madre_psicologia }}</div>
               </div>
 
-              <div class="col-md-8">
+              <div class="col-md-6">
                   <label class="form-label">Ocupación</label>
                   <select id="m_ocupacion_sel" class="form-select">
                       <option value="">Seleccione...</option>
@@ -379,8 +809,8 @@ textarea.form-control{min-height:90px;}
                      <label class="form-check-label ms-1 fw-bold">Estudiante</label>
                  </div>
               </div>
-              <div class="col-md-4 m-wrap-estudio d-none"><label class="form-label">Licenciatura</label>{{ form.licenciatura_madre_psicologia }}</div>
-              <div class="col-md-2 m-wrap-estudio d-none"><label class="form-label">Semestre</label>{{ form.semestre_madre_psicologia }}</div>
+              <div class="col-md-3 m-wrap-estudio d-none"><label class="form-label">Licenciatura</label>{{ form.licenciatura_madre_psicologia }}</div>
+              <div class="col-md-3 m-wrap-estudio d-none"><label class="form-label">Semestre</label>{{ form.semestre_madre_psicologia }}</div>
 
             </div>
           </div>
@@ -447,7 +877,7 @@ textarea.form-control{min-height:90px;}
               <div class="col-md-3">
                   <label class="form-label">Peso al nacer</label>
                   <div class="input-group">
-                      <input type="text" id="peso_txt" class="form-control" placeholder="Ej. 3.200">
+                      <input type="text" id="peso_txt" class="form-control solo-numeros" placeholder="Ej. 3.200">
                       <span class="input-group-text fw-bold text-secondary">kg</span>
                   </div>
                   <div class="d-none">{{ form.peso_al_nacer_psicologia }}</div>
@@ -455,16 +885,14 @@ textarea.form-control{min-height:90px;}
               <div class="col-md-3">
                   <label class="form-label">Talla al nacer</label>
                   <div class="input-group">
-                      <input type="text" id="talla_txt" class="form-control" placeholder="Ej. 50">
+                      <input type="text" id="talla_txt" class="form-control solo-numeros" placeholder="Ej. 50">
                       <span class="input-group-text fw-bold text-secondary">cm</span>
                   </div>
                   <div class="d-none">{{ form.talla_al_nacer_psicologia }}</div>
               </div>
 
               <div class="col-md-6"><label class="form-label">Dificultad nacimiento</label>{{ form.dificultad_nacimiento_psicologia }}</div>
-
-              <div class="col-md-3">
-                  <label class="form-label">Apego inmediato</label>
+              <div class="col-md-6"><label class="form-label">Apego inmediato</label>
                   <select id="apego_sel" class="form-select">
                       <option value="">Seleccione...</option>
                       <option value="Si">Si</option>
@@ -473,9 +901,9 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.apego_inmediato_psicologia }}</div>
               </div>
 
-              <div class="col-md-3"><label class="form-label">Metodo alimentacion inicial</label>{{ form.metodo_alimentacion_inicio_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Metodo alimentacion inicial</label>{{ form.metodo_alimentacion_inicio_psicologia }}</div>
 
-              <div class="col-md-3">
+              <div class="col-md-6">
                   <label class="form-label">Edad del destete</label>
                   <select id="destete_sel" class="form-select">
                       <option value="">Seleccione...</option>
@@ -489,7 +917,7 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.edad_destete_psicologia }}</div>
               </div>
 
-              <div class="col-md-9"><label class="form-label">Motivo del destete</label>{{ form.motivo_destete_psicologia }}</div>
+              <div class="col-md-12"><label class="form-label">Motivo del destete</label>{{ form.motivo_destete_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -504,15 +932,18 @@ textarea.form-control{min-height:90px;}
         <div id="sec5" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
           <div class="accordion-body">
             <div class="row g-3">
-              <div class="col-md-3"><label class="form-label">Edad de balbuceo</label>{{ form.edad_balbuceo_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Primera palabra</label>{{ form.edad_primera_palabra_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Lenguaje actual</label>{{ form.lenguaje_actual_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Dificultad del lenguaje</label>{{ form.dificultad_lenguaje_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Edad de balbuceo</label>{{ form.edad_balbuceo_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Primera palabra</label>{{ form.edad_primera_palabra_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Lenguaje actual</label>{{ form.lenguaje_actual_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Dificultad del lenguaje</label>{{ form.dificultad_lenguaje_psicologia }}</div>
+
               <div class="col-md-3"><label class="form-label">Edad se sentó solo</label>{{ form.edad_se_sento_solo_psicologia }}</div>
-              <div class="col-md-2"><label class="form-label">Gateó</label>{{ form.gateo_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Gateó</label>{{ form.gateo_psicologia }}</div>
               <div class="col-md-3" id="wrap_edad_gateo"><label class="form-label">Edad gateo</label>{{ form.edad_gateo_psicologia }}</div>
-              <div class="col-md-4"><label class="form-label">Marcha independiente</label>{{ form.edad_marcha_independiente_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Dominancia manual</label>{{ form.dominancia_manual_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Marcha independiente</label>{{ form.edad_marcha_independiente_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Dominancia manual</label>{{ form.dominancia_manual_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -527,10 +958,10 @@ textarea.form-control{min-height:90px;}
         <div id="sec6" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
           <div class="accordion-body">
             <div class="row g-3">
-              <div class="col-md-6"><label class="form-label">Comportamiento general</label>{{ form.comportamiento_general_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Relación con otros niños</label>{{ form.relacion_otros_ninos_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Apego familiar</label>{{ form.apego_figura_familiar_psicologia }}</div>
-              <div class="col-md-3" id="wrap_apego_con_quien"><label class="form-label">Con quién</label>{{ form.apego_con_quien_psicologia }}</div>
+              <div class="col-md-12"><label class="form-label">Comportamiento general</label>{{ form.comportamiento_general_psicologia }}</div>
+              <div class="col-md-12"><label class="form-label">Relación con otros niños</label>{{ form.relacion_otros_ninos_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Apego familiar</label>{{ form.apego_figura_familiar_psicologia }}</div>
+              <div class="col-md-6" id="wrap_apego_con_quien"><label class="form-label">Con quién</label>{{ form.apego_con_quien_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -545,16 +976,19 @@ textarea.form-control{min-height:90px;}
         <div id="sec7" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
           <div class="accordion-body">
             <div class="row g-3">
-              <div class="col-md-2"><label class="form-label">Se viste solo</label>{{ form.se_viste_solo_psicologia }}</div>
-              <div class="col-md-2"><label class="form-label">Se pone prendas</label>{{ form.se_pone_prendas_solo_psicologia }}</div>
-              <div class="col-md-2"><label class="form-label">Se quita prendas</label>{{ form.se_quita_prendas_solo_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Se viste solo</label>{{ form.se_viste_solo_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Se pone prendas</label>{{ form.se_pone_prendas_solo_psicologia }}</div>
+              <div class="col-md-4"><label class="form-label">Se quita prendas</label>{{ form.se_quita_prendas_solo_psicologia }}</div>
+
               <div class="col-md-6" id="wrap_cuales_prendas_se_pone"><label class="form-label">Cuáles prendas se pone</label>{{ form.cuales_prendas_se_pone_psicologia }}</div>
               <div class="col-md-6" id="wrap_cuales_prendas_se_quita"><label class="form-label">Cuáles prendas se quita</label>{{ form.cuales_prendas_se_quita_psicologia }}</div>
+
               <div class="col-md-3"><label class="form-label">Intenta bañarse solo</label>{{ form.intenta_banarse_solo_psicologia }}</div>
               <div class="col-md-3"><label class="form-label">Se cepilla dientes solo</label>{{ form.se_cepilla_dientes_solo_psicologia }}</div>
               <div class="col-md-3"><label class="form-label">Come solo</label>{{ form.come_solo_psicologia }}</div>
               <div class="col-md-3"><label class="form-label">Toma vaso solo</label>{{ form.toma_vaso_solo_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Iniciativa para jugar</label>{{ form.iniciativa_para_jugar_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Iniciativa para jugar</label>{{ form.iniciativa_para_jugar_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -569,10 +1003,10 @@ textarea.form-control{min-height:90px;}
         <div id="sec8" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
           <div class="accordion-body">
             <div class="row g-3">
-              <div class="col-md-2"><label class="form-label">Realiza siestas</label>{{ form.realiza_siestas_psicologia }}</div>
-              <div class="col-md-2" id="wrap_cuantas_siestas"><label class="form-label">Cuántas</label>{{ form.cuantas_siestas_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Realiza siestas</label>{{ form.realiza_siestas_psicologia }}</div>
+              <div class="col-md-6" id="wrap_cuantas_siestas"><label class="form-label">Cuántas</label>{{ form.cuantas_siestas_psicologia }}</div>
 
-              <div class="col-md-8">
+              <div class="col-md-12">
                   <label class="form-label">Con quién duerme</label>
                   <div class="d-flex gap-2">
                       <select id="con_quien_duerme_sel" class="form-select" style="width:30%;">
@@ -587,7 +1021,7 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.con_quien_duerme_psicologia }}</div>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-6">
                   <label class="form-label">Hora duerme</label>
                   <div class="time-combo">
                       <select id="h_duerme" class="form-select sel-time"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
@@ -598,7 +1032,7 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.hora_duerme_noche_psicologia }}</div>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-6">
                   <label class="form-label">Hora despierta</label>
                   <div class="time-combo">
                       <select id="h_despierta" class="form-select sel-time"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
@@ -609,23 +1043,29 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.hora_despierta_manana_psicologia }}</div>
               </div>
 
-              <div class="col-md-2"><label class="form-label">Necesita algo para dormir</label>{{ form.necesita_algo_para_dormir_psicologia }}</div>
-              <div class="col-md-4" id="wrap_que_necesita_para_dormir"><label class="form-label">Qué necesita</label>{{ form.que_necesita_para_dormir_psicologia }}</div>
-              <div class="col-md-4"><label class="form-label">Despierta con frecuencia</label>{{ form.despierta_con_frecuencia_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Necesita algo para dormir</label>{{ form.necesita_algo_para_dormir_psicologia }}</div>
+              <div class="col-md-6" id="wrap_que_necesita_para_dormir"><label class="form-label">Qué necesita</label>{{ form.que_necesita_para_dormir_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Despierta con frecuencia</label>{{ form.despierta_con_frecuencia_psicologia }}</div>
 
               <div class="col-md-6"><label class="form-label">Actividades de la tarde</label>{{ form.actividades_tarde_psicologia }}</div>
               <div class="col-md-6"><label class="form-label">Actividad extra</label>{{ form.actividad_extra_tarde_psicologia }}</div>
+
               <div class="col-md-4"><label class="form-label">Juego favorito</label>{{ form.juego_favorito_psicologia }}</div>
               <div class="col-md-4"><label class="form-label">Canción favorita</label>{{ form.cancion_favorita_psicologia }}</div>
               <div class="col-md-4"><label class="form-label">Personaje favorito</label>{{ form.personaje_favorito_psicologia }}</div>
+
               <div class="col-md-4"><label class="form-label">Tiempo pantallas</label>{{ form.tiempo_pantallas_psicologia }}</div>
               <div class="col-md-4"><label class="form-label">Socializa con</label>{{ form.socializa_tardes_con_quien_psicologia }}</div>
               <div class="col-md-4"><label class="form-label">Lugar para jugar</label>{{ form.lugar_para_jugar_psicologia }}</div>
-              <div class="col-md-4"><label class="form-label">Comparte juguetes</label>{{ form.comparte_juguetes_psicologia }}</div>
-              <div class="col-md-4"><label class="form-label">Conducta líder</label>{{ form.conducta_lider_juego_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Relación con otros niños</label>{{ form.relacion_con_otros_ninos_detalle_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Se adapta a nuevos entornos</label>{{ form.se_adapta_nuevos_entornos_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Actividades fin de semana</label>{{ form.actividades_fin_semana_psicologia }}</div>
+
+              <div class="col-md-6"><label class="form-label">Comparte juguetes</label>{{ form.comparte_juguetes_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Conducta líder</label>{{ form.conducta_lider_juego_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Relación con otros niños</label>{{ form.relacion_con_otros_ninos_detalle_psicologia }}</div>
+
+              <div class="col-md-6"><label class="form-label">Se adapta a nuevos entornos</label>{{ form.se_adapta_nuevos_entornos_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Actividades fin de semana</label>{{ form.actividades_fin_semana_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -644,10 +1084,13 @@ textarea.form-control{min-height:90px;}
               <div class="col-md-3"><label class="form-label">Controla defecar</label>{{ form.controla_defecar_psicologia }}</div>
               <div class="col-md-3"><label class="form-label">Edad comenzó a avisar</label>{{ form.edad_comenzo_avisar_psicologia }}</div>
               <div class="col-md-3"><label class="form-label">Dónde lo realiza</label>{{ form.donde_realiza_necesidades_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Algo significativo</label>{{ form.algo_significativo_control_esfinteres_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Duerme con pañal</label>{{ form.duerme_con_panal_noche_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Reacción al no controlar</label>{{ form.reaccion_no_controla_esfinteres_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Qué hace el responsable</label>{{ form.que_hace_responsable_cuando_sucede_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Algo significativo</label>{{ form.algo_significativo_control_esfinteres_psicologia }}</div>
+
+              <div class="col-md-6"><label class="form-label">Duerme con pañal</label>{{ form.duerme_con_panal_noche_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Reacción al no controlar</label>{{ form.reaccion_no_controla_esfinteres_psicologia }}</div>
+
+              <div class="col-md-12"><label class="form-label">Qué hace el responsable</label>{{ form.que_hace_responsable_cuando_sucede_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -664,14 +1107,17 @@ textarea.form-control{min-height:90px;}
             <div class="row g-3">
               <div class="col-md-6"><label class="form-label">Persona aparte de padres que interviene en crianza</label>{{ form.persona_aparte_padres_crianza_psicologia }}</div>
               <div class="col-md-6"><label class="form-label">Persona aparte de padres que cuida al menor</label>{{ form.persona_aparte_padres_cuidado_psicologia }}</div>
+
               <div class="col-md-6"><label class="form-label">Periodos de cuidado</label>{{ form.periodos_cuidado_psicologia }}</div>
               <div class="col-md-6"><label class="form-label">Relación padre/madre con niño</label>{{ form.relacion_padre_madre_con_nino_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Tiempo papá al día</label>{{ form.tiempo_papa_dia_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Tiempo mamá al día</label>{{ form.tiempo_mama_dia_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Método para mejorar conducta</label>{{ form.metodo_mejorar_conducta_casa_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Dificultad actual hogar/entorno</label>{{ form.dificultad_actual_hogar_entorno_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Beneficio esperado para el hijo</label>{{ form.beneficio_esperado_hijo_estancia_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Beneficio personal esperado</label>{{ form.beneficio_personal_estancia_psicologia }}</div>
+
+              <div class="col-md-6"><label class="form-label">Tiempo papá al día (Horas)</label> <input type="text" name="tiempo_papa_dia_psicologia" id="id_tiempo_papa_dia_psicologia" class="form-control solo-numeros" value="{{ form.tiempo_papa_dia_psicologia.value|default_if_none:'' }}"></div>
+              <div class="col-md-6"><label class="form-label">Tiempo mamá al día (Horas)</label><input type="text" name="tiempo_mama_dia_psicologia" id="id_tiempo_mama_dia_psicologia" class="form-control solo-numeros" value="{{ form.tiempo_mama_dia_psicologia.value|default_if_none:'' }}"></div>
+
+              <div class="col-md-12"><label class="form-label">Método para mejorar conducta</label>{{ form.metodo_mejorar_conducta_casa_psicologia }}</div>
+              <div class="col-md-12"><label class="form-label">Dificultad actual hogar/entorno</label>{{ form.dificultad_actual_hogar_entorno_psicologia }}</div>
+              <div class="col-md-12"><label class="form-label">Beneficio esperado para el hijo</label>{{ form.beneficio_esperado_hijo_estancia_psicologia }}</div>
+              <div class="col-md-12"><label class="form-label">Beneficio personal esperado</label>{{ form.beneficio_personal_estancia_psicologia }}</div>
             </div>
           </div>
         </div>
@@ -699,9 +1145,19 @@ textarea.form-control{min-height:90px;}
           <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary btn-soft">
             Cancelar
           </a>
-          <button type="submit" class="btn btn-primary btn-soft" {% if bloqueado %}disabled{% endif %}>
+          {% if modo_solo_consulta %}
+          <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
+            <i class="bi bi-eye-fill me-1"></i> Solo consulta
+          </button>
+          {% elif bloqueado %}
+          <button type="button" class="btn btn-secondary btn-soft" disabled>
+            <i class="bi bi-lock me-1"></i> Evaluación finalizada
+          </button>
+          {% else %}
+          <button type="submit" class="btn btn-primary btn-soft">
             <i class="bi bi-save me-1"></i> Guardar dictamen
           </button>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -713,6 +1169,40 @@ textarea.form-control{min-height:90px;}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
+  const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+
+  if (evaluacionBloqueada || modoSoloConsulta) {
+      document.querySelectorAll('#formDictamen input, #formDictamen select, #formDictamen textarea').forEach(function(el) {
+          if (el.name !== 'csrfmiddlewaretoken') {
+              el.disabled = true;
+          }
+      });
+  }
+
+
+  // ============================================================================
+  // ASIGNACIÓN AUTOMÁTICA DE FECHA DE HOY (SI ESTÁ VACÍA)
+  // ============================================================================
+  const inputFechaAplicacion = document.querySelector('input[name="fecha_aplicacion_psicologia"]');
+  if (inputFechaAplicacion && !inputFechaAplicacion.value) {
+      const hoy = new Date();
+      // Formatea a YYYY-MM-DD
+      const anio = hoy.getFullYear();
+      const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoy.getDate()).padStart(2, '0');
+      inputFechaAplicacion.value = `${anio}-${mes}-${dia}`;
+  }
+
+  // ============================================================================
+  // BLOQUEO DE LETRAS EN CAMPOS DE EDAD/NÚMEROS
+  // ============================================================================
+const camposNumericos = document.querySelectorAll('.solo-numeros, input[name*="edad"]:not([name="edad_primera_palabra_psicologia"]), input[name*="tiempo"]');  camposNumericos.forEach(campo => {
+      campo.addEventListener('input', function() {
+          // Permite solo números y opcionalmente un punto o guion medio (para rangos o decimales si los usan)
+          this.value = this.value.replace(/[^0-9.-]/g, '');
+      });
+  });
 
   function toggleField(triggerId, targetWrapId, showValues = ["SI", "Si"]) {
     const trigger = document.getElementById(triggerId);
@@ -750,21 +1240,21 @@ document.addEventListener("DOMContentLoaded", function () {
       nombres: "{{ sol.nombres_tutor|default:''|escapejs }}",
       paterno: "{{ sol.apellido_paterno_tutor|default:''|escapejs }}",
       materno: "{{ sol.apellido_materno_tutor|default:''|escapejs }}",
-      estadoCivil: "{{ sol.inscripcion_oficial.estado_civil_tutor|default:''|escapejs }}",
+      estadoCivil: "{{ insc.estado_civil_tutor|default:''|escapejs }}",
       licenciatura: "{{ sol.programa_educativo|default:''|escapejs }}",
-      semestre: "{{ sol.inscripcion_oficial.avance_academico|default:''|escapejs }}"
+      semestre: "{{ insc.avance_academico|default:''|escapejs }}"
   };
 
   const dataSegundo = {
-      nombres: "{{ sol.inscripcion_oficial.nombres_segundo_padre|default:''|escapejs }}",
-      paterno: "{{ sol.inscripcion_oficial.apellido_paterno_segundo_padre|default:''|escapejs }}",
-      materno: "{{ sol.inscripcion_oficial.apellido_materno_segundo_padre|default:''|escapejs }}",
-      estadoCivil: "{{ sol.inscripcion_oficial.estado_civil_segundo_padre|default:''|escapejs }}",
-      ocupacion: "{{ sol.inscripcion_oficial.ocupacion_segundo_padre|default:''|escapejs }}"
+      nombres: "{{ insc.nombres_segundo_padre|default:''|escapejs }}",
+      paterno: "{{ insc.apellido_paterno_segundo_padre|default:''|escapejs }}",
+      materno: "{{ insc.apellido_materno_segundo_padre|default:''|escapejs }}",
+      estadoCivil: "{{ insc.estado_civil_segundo_padre|default:''|escapejs }}",
+      ocupacion: "{{ insc.ocupacion_segundo_padre|default:''|escapejs }}"
   };
 
-  const parentescoTutor = "{{ sol.inscripcion_oficial.parentesco_tutor|default:''|upper }}";
-  const parentescoSegundo = "{{ sol.inscripcion_oficial.parentesco_segundo_padre|default:''|upper }}";
+  const parentescoTutor = "{{ insc.parentesco_tutor|default:''|upper }}";
+  const parentescoSegundo = "{{ insc.parentesco_segundo_padre|default:''|upper }}";
 
   function fillSection(prefix, data, isTutorPrincipal) {
       document.getElementById(`${prefix.charAt(0)}_nombres`).value = data.nombres;
@@ -1071,7 +1561,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setupNumericInput('peso_txt', 'id_peso_al_nacer_psicologia');
   setupNumericInput('talla_txt', 'id_talla_al_nacer_psicologia');
 
-  const edadMenorAnios = parseInt("{{ sol.inscripcion_oficial.edad_anios_menor|default:'0' }}", 10);
+  const edadMenorAnios = parseInt("{{ insc.edad_anios_menor|default:'0' }}", 10);
 
   if (edadMenorAnios < 2) {
       document.querySelectorAll('.hide-if-under-2').forEach(el => {
@@ -1104,7 +1594,12 @@ document.addEventListener("DOMContentLoaded", function () {
       }
   }
 
-  document.getElementById('formDictamen').addEventListener('submit', function() {
+  document.getElementById('formDictamen').addEventListener('submit', function(event) {
+      if (modoSoloConsulta) {
+          event.preventDefault();
+          alert("Modo solo consulta: no se puede guardar porque no hay semestre activo/iniciado.");
+          return false;
+      }
       if (edadMenorAnios < 2) {
           document.querySelectorAll('.hide-if-under-2').forEach(wrap => {
 
@@ -1177,6 +1672,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // SISTEMA DE AUTOGUARDADO LOCAL V3 (ESTILO GOOGLE FORMS)
   // ====================================================================
   document.addEventListener("DOMContentLoaded", function() {
+      const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
+      const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+      if (evaluacionBloqueada || modoSoloConsulta) return;
 
       let form = document.getElementById("formDictamen") ||
                  document.getElementById("formDictamenMedico") ||

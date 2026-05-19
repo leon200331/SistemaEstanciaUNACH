@@ -1,0 +1,429 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Coordinadora de Sala | EIU UNACH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --azul:#2563eb;
+      --morado:#7c3aed;
+      --verde:#16a34a;
+      --naranja:#f97316;
+      --rojo:#dc2626;
+      --texto:#0f172a;
+      --muted:#64748b;
+      --borde:#e2e8f0;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(124,58,237,.14), transparent 30%),
+        radial-gradient(circle at top right, rgba(37,99,235,.14), transparent 32%),
+        linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+      font-family:'Segoe UI', system-ui, sans-serif;
+      color:var(--texto);
+    }
+
+    .page{max-width:1320px;margin:0 auto;padding:24px;}
+
+    .topbar{
+      background:rgba(255,255,255,.95);
+      border:1px solid var(--borde);
+      border-radius:24px;
+      padding:18px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      box-shadow:0 18px 45px rgba(15,23,42,.08);
+      margin-bottom:22px;
+    }
+
+    .brand{display:flex;align-items:center;gap:14px;}
+    .brand-logo{
+      width:64px;height:64px;border-radius:18px;background:white;border:1px solid var(--borde);
+      display:flex;align-items:center;justify-content:center;padding:8px;box-shadow:0 10px 24px rgba(15,23,42,.08);
+    }
+    .brand-logo img{width:100%;height:100%;object-fit:contain;}
+    .brand-title{margin:0;font-weight:950;letter-spacing:-.04em;font-size:1.35rem;color:#0f172a;}
+    .brand-subtitle{margin:2px 0 0;color:var(--muted);font-weight:650;font-size:.92rem;}
+
+    .top-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;}
+    .btn-soft{
+      border-radius:999px;padding:.72rem 1rem;font-weight:850;border:1px solid var(--borde);
+      background:white;color:#334155;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      transition:.18s ease;
+    }
+    .btn-soft:hover{transform:translateY(-1px);color:#0f172a;background:#f8fafc;box-shadow:0 12px 25px rgba(15,23,42,.09);}
+    .btn-main{
+      border-radius:999px;padding:.82rem 1.1rem;font-weight:950;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      text-decoration:none;border:none;transition:.18s ease;
+    }
+    .btn-main:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(15,23,42,.16);}
+    .btn-purple{background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;}
+
+    .hero{
+      background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);
+      color:white;border-radius:30px;padding:28px;box-shadow:0 24px 60px rgba(37,99,235,.22);
+      margin-bottom:22px;position:relative;overflow:hidden;
+    }
+    .hero:after{content:"";position:absolute;width:310px;height:310px;border-radius:50%;background:rgba(255,255,255,.14);right:-100px;top:-110px;}
+    .hero-content{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;}
+    .hero-kicker{
+      display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.26);
+      border-radius:999px;padding:.45rem .8rem;font-size:.78rem;font-weight:900;margin-bottom:12px;
+    }
+    .hero h1{margin:0;font-size:2rem;font-weight:950;letter-spacing:-.05em;}
+    .hero p{margin:8px 0 0;max-width:850px;font-weight:600;opacity:.94;}
+    .hero-info{min-width:310px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:22px;padding:16px;}
+    .hero-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.82;font-weight:950;margin-bottom:4px;}
+    .hero-value{font-size:1.12rem;font-weight:950;}
+
+    .alert-custom{border:none;border-radius:20px;padding:14px 16px;box-shadow:0 12px 26px rgba(15,23,42,.08);font-weight:650;}
+
+    .estado-operativo{
+      border-radius:20px;padding:16px 18px;margin-bottom:22px;display:flex;gap:14px;align-items:flex-start;
+      box-shadow:0 12px 28px rgba(15,23,42,.07);border:1px solid transparent;
+    }
+    .estado-operativo .status-icon{width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;}
+    .estado-operativo h5{margin:0 0 4px;font-weight:950;}
+    .estado-operativo p{margin:0;line-height:1.45;font-size:.94rem;font-weight:650;}
+    .estado-activo{background:#f0fdf4;border-color:#bbf7d0;border-left:7px solid #16a34a;color:#14532d;}
+    .estado-activo .status-icon{background:#dcfce7;color:#15803d;}
+    .estado-consulta{background:#fff7ed;border-color:#fed7aa;border-left:7px solid #f97316;color:#9a3412;}
+    .estado-consulta .status-icon{background:#ffedd5;color:#c2410c;}
+    .mode-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:.38rem .68rem;font-size:.76rem;font-weight:900;margin-top:8px;}
+    .mode-active{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+    .mode-readonly{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
+
+    .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start;}
+    .panel{background:rgba(255,255,255,.96);border:1px solid var(--borde);border-radius:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);overflow:hidden;}
+    .panel-header{padding:18px 20px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:white;}
+    .panel-title{margin:0;font-size:1.08rem;font-weight:950;letter-spacing:-.03em;color:#0f172a;display:flex;align-items:center;gap:8px;}
+    .panel-body{padding:20px;}
+
+    .badge-soft{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:.42rem .68rem;font-size:.76rem;font-weight:950;white-space:nowrap;}
+    .badge-green{background:#dcfce7;color:#166534;}
+    .badge-orange{background:#ffedd5;color:#9a3412;}
+
+    .action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+    .action-card{
+      background:white;border:1px solid var(--borde);border-radius:22px;padding:18px;box-shadow:0 12px 28px rgba(15,23,42,.07);
+      transition:.18s ease;min-height:205px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .action-card:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(15,23,42,.11);}
+    .action-card.disabled{opacity:.62;}
+    .action-icon{width:52px;height:52px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.55rem;margin-bottom:12px;}
+    .icon-purple{background:#ede9fe;color:#6d28d9;}
+    .icon-blue{background:#dbeafe;color:#1d4ed8;}
+    .icon-green{background:#dcfce7;color:#15803d;}
+    .icon-orange{background:#ffedd5;color:#c2410c;}
+    .icon-red{background:#fee2e2;color:#b91c1c;}
+    .action-title{margin:0 0 6px;font-weight:950;color:#0f172a;letter-spacing:-.03em;font-size:1.05rem;}
+    .action-desc{margin:0;color:#64748b;font-weight:650;font-size:.9rem;line-height:1.45;}
+    .action-footer{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+
+    .mini-btn{
+      border-radius:999px;padding:.52rem .78rem;font-size:.82rem;font-weight:900;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+      border:1px solid var(--borde);background:white;color:#334155;transition:.15s ease;
+    }
+    .mini-btn:hover{background:#f8fafc;color:#0f172a;transform:translateY(-1px);}
+    .mini-btn.purple{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe;}
+    .mini-btn.blue{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+    .mini-btn.green{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+    .mini-btn.orange{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+
+    .help-card{background:#eff6ff;border:1px solid #bfdbfe;border-left:6px solid #2563eb;color:#1e3a8a;border-radius:20px;padding:15px 16px;font-weight:650;margin-bottom:14px;line-height:1.45;}
+    .warning-card{background:#fff7ed;border:1px solid #fed7aa;border-left:6px solid #f97316;color:#9a3412;border-radius:20px;padding:15px 16px;font-weight:650;margin-bottom:14px;line-height:1.45;}
+
+    .steps{display:grid;gap:12px;}
+    .step{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--borde);background:white;border-radius:18px;}
+    .step-number{width:34px;height:34px;border-radius:999px;background:#ede9fe;color:#6d28d9;display:flex;align-items:center;justify-content:center;font-weight:950;flex-shrink:0;}
+    .step-title{font-weight:950;color:#0f172a;margin-bottom:2px;}
+    .step-text{color:#64748b;font-size:.86rem;margin:0;font-weight:650;line-height:1.4;}
+
+    .quick-links{display:grid;gap:10px;}
+    .quick-link{background:white;border:1px solid var(--borde);border-radius:18px;padding:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none;color:#0f172a;transition:.16s ease;}
+    .quick-link:hover{color:#0f172a;background:#f8fafc;transform:translateY(-1px);box-shadow:0 10px 22px rgba(15,23,42,.08);}
+    .quick-link-left{display:flex;gap:10px;align-items:center;}
+    .quick-link-icon{width:38px;height:38px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .quick-link-title{font-weight:950;line-height:1.2;}
+    .quick-link-desc{color:#64748b;font-size:.8rem;font-weight:650;margin-top:2px;}
+
+    @media(max-width:1080px){.layout{grid-template-columns:1fr;}.hero-content{grid-template-columns:1fr;}.hero-info{min-width:0;}}
+    @media(max-width:760px){
+      .page{padding:14px;}.topbar{flex-direction:column;align-items:flex-start;border-radius:20px;}.top-actions,.btn-soft,.btn-main,.mini-btn{width:100%;justify-content:center;}
+      .hero{padding:22px;border-radius:22px;}.hero h1{font-size:1.55rem;}.action-grid{grid-template-columns:1fr;}.estado-operativo{flex-direction:column;}
+    }
+  </style>
+</head>
+
+<body>
+<div class="page">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+      </div>
+      <div>
+        <h1 class="brand-title">Panel Coordinadora de Sala</h1>
+        <p class="brand-subtitle">Seguimiento pedagógico, consulta de incidencias y supervisión de sala.</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="btn-main btn-purple">
+        <i class="bi bi-clipboard2-pulse-fill"></i> Incidencias pedagógicas
+      </a>
+      <a href="/" class="btn-soft"><i class="bi bi-house-door-fill"></i> Inicio</a>
+      <form action="{% url 'logout' %}" method="post" class="m-0">
+        {% csrf_token %}
+        <button type="submit" class="btn-soft"><i class="bi bi-box-arrow-right"></i> Salir</button>
+      </form>
+    </div>
+  </header>
+
+  {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="hero">
+    <div class="hero-content">
+      <div>
+        <div class="hero-kicker"><i class="bi bi-easel2-fill"></i> Sprint 5 · Épica 3</div>
+        <h1>Bienvenida(o), {{ request.user.nombre|default:request.user.username }}</h1>
+        <p>
+          Desde este panel la Coordinadora de Sala registra incidencias pedagógicas, consulta seguimientos
+          y supervisa registros relacionados con sala, actividades y observaciones del menor.
+        </p>
+      </div>
+      <div class="hero-info">
+        <div class="hero-label">Rol operativo</div>
+        <div class="hero-value">Coordinadora de Sala</div>
+        <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
+          Incidencias permitidas: <strong>Pedagógicas</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if modo_solo_consulta %}
+    <div class="estado-operativo estado-consulta">
+      <div class="status-icon"><i class="bi bi-lock-fill"></i></div>
+      <div>
+        <h5>Modo solo consulta</h5>
+        <p>
+          {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar información histórica, pero no puedes crear incidencias ni modificar registros hasta que se inicie un nuevo semestre." }}
+        </p>
+        <span class="mode-badge mode-readonly"><i class="bi bi-eye-fill"></i> Consulta histórica habilitada</span>
+      </div>
+    </div>
+  {% else %}
+    <div class="estado-operativo estado-activo">
+      <div class="status-icon"><i class="bi bi-check-circle-fill"></i></div>
+      <div>
+        <h5>Semestre activo</h5>
+        <p>
+          Puedes operar normalmente en el semestre:
+          <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+        </p>
+        <span class="mode-badge mode-active"><i class="bi bi-pencil-square"></i> Operación activa</span>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="layout">
+    <main>
+      <section class="panel mb-4">
+        <div class="panel-header">
+          <h2 class="panel-title"><i class="bi bi-lightning-charge-fill"></i> Acciones principales</h2>
+          {% if modo_solo_consulta %}
+            <span class="badge-soft badge-orange"><i class="bi bi-lock-fill"></i> Solo consulta</span>
+          {% else %}
+            <span class="badge-soft badge-green"><i class="bi bi-check-circle-fill"></i> Operación activa</span>
+          {% endif %}
+        </div>
+
+        <div class="panel-body">
+          <div class="action-grid">
+
+            <div class="action-card {% if modo_solo_consulta %}disabled{% endif %}">
+              <div>
+                <div class="action-icon icon-purple"><i class="bi bi-plus-circle-fill"></i></div>
+                <h3 class="action-title">Crear incidencia pedagógica</h3>
+                <p class="action-desc">
+                  Registra incidencias relacionadas con material, caja de emergencia, dificultades en actividades
+                  o conducta observada durante el trabajo pedagógico.
+                </p>
+              </div>
+              <div class="action-footer">
+                {% if modo_solo_consulta %}
+                  <span class="mini-btn orange"><i class="bi bi-lock-fill"></i> Bloqueado</span>
+                {% else %}
+                  <a href="{% url 'crear_incidencia_tipo' 'PEDAGOGICA' %}" class="mini-btn purple">
+                    <i class="bi bi-plus-circle-fill"></i> Crear incidencia
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="action-card">
+              <div>
+                <div class="action-icon icon-blue"><i class="bi bi-eye-fill"></i></div>
+                <h3 class="action-title">Ver incidencias pedagógicas</h3>
+                <p class="action-desc">
+                  Consulta incidencias creadas, abiertas, cerradas, seguimientos, archivos adjuntos y resolución final.
+                </p>
+              </div>
+              <div class="action-footer">
+                <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="mini-btn blue">
+                  <i class="bi bi-clipboard2-pulse-fill"></i> Ver incidencias
+                </a>
+              </div>
+            </div>
+
+            <div class="action-card">
+              <div>
+                <div class="action-icon icon-orange"><i class="bi bi-folder2-open"></i></div>
+                <h3 class="action-title">Incidencias abiertas</h3>
+                <p class="action-desc">
+                  Revisa incidencias pedagógicas pendientes de seguimiento o cierre. No bloquean cierre de día,
+                  pero deben resolverse antes del cierre del semestre.
+                </p>
+              </div>
+              <div class="action-footer">
+                <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA&estado=ABIERTA" class="mini-btn orange">
+                  <i class="bi bi-folder2-open"></i> Ver abiertas
+                </a>
+              </div>
+            </div>
+
+            <div class="action-card">
+              <div>
+                <div class="action-icon icon-green"><i class="bi bi-check-circle-fill"></i></div>
+                <h3 class="action-title">Incidencias cerradas</h3>
+                <p class="action-desc">
+                  Consulta el historial de incidencias pedagógicas cerradas con su seguimiento y resolución final.
+                </p>
+              </div>
+              <div class="action-footer">
+                <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA&estado=CERRADA" class="mini-btn green">
+                  <i class="bi bi-check-circle-fill"></i> Ver cerradas
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title"><i class="bi bi-journal-check"></i> ¿Cuándo registrar una incidencia pedagógica?</h2>
+        </div>
+        <div class="panel-body">
+          <div class="steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div>
+                <div class="step-title">La maestra avisa verbalmente</div>
+                <p class="step-text">La maestra de sala detecta la situación y la comunica a Coordinación de Sala.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <div>
+                <div class="step-title">Coordinación registra</div>
+                <p class="step-text">La Coordinadora captura la incidencia pedagógica, descripción, intervención y nivel de riesgo.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <div>
+                <div class="step-title">Seguimiento obligatorio</div>
+                <p class="step-text">Para cerrar la incidencia debe existir mínimo una nota de seguimiento.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <div>
+                <div class="step-title">Resolución y cierre</div>
+                <p class="step-text">Solo quien creó la incidencia o el Administrador del Sistema puede cerrarla con resolución final.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside>
+      <section class="panel mb-4">
+        <div class="panel-header">
+          <h2 class="panel-title"><i class="bi bi-info-circle-fill"></i> Reglas del módulo</h2>
+        </div>
+        <div class="panel-body">
+          <div class="help-card"><i class="bi bi-check-circle-fill me-1"></i> La Coordinadora de Sala solo crea incidencias de tipo <strong>Pedagógica</strong>.</div>
+          <div class="help-card"><i class="bi bi-chat-left-text-fill me-1"></i> Solo la persona que creó la incidencia puede registrar seguimiento.</div>
+          <div class="warning-card"><i class="bi bi-exclamation-triangle-fill me-1"></i> Si hay incidencias abiertas, el cierre del día no se bloquea; solo se muestra aviso. Deben cerrarse antes del cierre del semestre.</div>
+          <div class="help-card mb-0"><i class="bi bi-file-earmark-text-fill me-1"></i> Las incidencias aparecerán en el historial del menor y en el informe diario, después de “En casa” y “Durante mi estancia”.</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title"><i class="bi bi-link-45deg"></i> Accesos rápidos</h2>
+        </div>
+        <div class="panel-body">
+          <div class="quick-links">
+            <a href="{% url 'panel_incidencias' %}" class="quick-link">
+              <div class="quick-link-left">
+                <div class="quick-link-icon icon-blue"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+                <div><div class="quick-link-title">Panel general</div><div class="quick-link-desc">Lista, filtros y detalle de incidencias</div></div>
+              </div>
+              <i class="bi bi-chevron-right"></i>
+            </a>
+            <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA&nivel=ALTO" class="quick-link">
+              <div class="quick-link-left">
+                <div class="quick-link-icon icon-red"><i class="bi bi-exclamation-octagon-fill"></i></div>
+                <div><div class="quick-link-title">Riesgo alto</div><div class="quick-link-desc">Incidencias pedagógicas críticas</div></div>
+              </div>
+              <i class="bi bi-chevron-right"></i>
+            </a>
+            <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA&estado=ABIERTA" class="quick-link">
+              <div class="quick-link-left">
+                <div class="quick-link-icon icon-orange"><i class="bi bi-folder2-open"></i></div>
+                <div><div class="quick-link-title">Pendientes</div><div class="quick-link-desc">Abiertas o sin cierre</div></div>
+              </div>
+              <i class="bi bi-chevron-right"></i>
+            </a>
+            {% if not modo_solo_consulta %}
+            <a href="{% url 'crear_incidencia_tipo' 'PEDAGOGICA' %}" class="quick-link">
+              <div class="quick-link-left">
+                <div class="quick-link-icon icon-purple"><i class="bi bi-plus-circle-fill"></i></div>
+                <div><div class="quick-link-title">Nueva incidencia</div><div class="quick-link-desc">Crear registro pedagógico</div></div>
+              </div>
+              <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

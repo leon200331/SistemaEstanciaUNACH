@@ -1,26 +1,131 @@
-# ==========================================
-# 1. BASES DE DATOS LOCALES
-# Ignorar esto hace que no se suban tus usuarios ni los datos de tus pruebas.
-# Obliga a tus compañeros a tener su propia base de datos en blanco.
-# ==========================================
-db.sqlite3
+# =========================================================
+# SISTEMA ESTANCIA UNACH - .gitignore DEFINITIVO
+# Objetivo:
+# - Subir solo código fuente.
+# - NO subir base de datos local.
+# - NO subir expedientes, PDFs, fotos, comprobantes ni documentos de niños.
+# - NO subir entorno virtual ni archivos temporales.
+# =========================================================
 
-# ==========================================
-# 2. ARCHIVOS SUBIDOS POR USUARIOS (¡LA REGLA DE ORO!)
-# Ignora todos los PDFs, fotos de niños, expedientes y bitácoras.
-# ==========================================
+
+# =========================================================
+# 1. BASES DE DATOS LOCALES
+# =========================================================
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal
+
+
+# =========================================================
+# 2. VARIABLES Y CONFIGURACIÓN LOCAL / SENSIBLE
+# =========================================================
+.env
+.env.local
+.env.*.local
+*.env
+local_settings.py
+
+
+# =========================================================
+# 3. ARCHIVOS SUBIDOS POR USUARIOS
+# Expedientes, documentos, comprobantes, fotos, bitácoras, PDFs generados.
+# =========================================================
 media/
 expedientes/
+expedientes_llenos/
 pdf_solicitudes/
 bitacoras_pdfs/
 reglamentos_firmados/
+dictamenes/
+solicitudes/pdf/
 
-# ==========================================
-# 3. ENTORNOS VIRTUALES Y CACHÉ
-# ==========================================
+
+# =========================================================
+# 4. DOCUMENTOS GENERADOS O SENSIBLES
+# Evita subir PDFs, Word, Excel, ZIP/RAR con datos personales.
+# =========================================================
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.csv
+*.zip
+*.rar
+*.7z
+
+
+# =========================================================
+# 5. ENTORNOS VIRTUALES
+# =========================================================
 venv/
 env/
 .venv/
+ENV/
+
+
+# =========================================================
+# 6. PYTHON / DJANGO CACHE
+# =========================================================
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+
+# =========================================================
+# 7. DJANGO / STATIC GENERADO
+# No ignores tu carpeta static/ del proyecto si ahí tienes logo.png.
+# Solo ignoramos staticfiles/, que normalmente se genera con collectstatic.
+# =========================================================
+staticfiles/
+
+
+# =========================================================
+# 8. LOGS Y ARCHIVOS TEMPORALES
+# =========================================================
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+
+# =========================================================
+# 9. SISTEMA OPERATIVO
+# =========================================================
 .DS_Store
+Thumbs.db
+desktop.ini
+
+
+# =========================================================
+# 10. EDITORES / IDE
+# =========================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+
+# =========================================================
+# 11. NODE / FRONTEND SI ALGÚN DÍA LO USAS
+# =========================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# =========================================================
+# 12. ARCHIVOS DE BACKUP
+# =========================================================
+*.bak
+*.backup
+*.old
+*.orig

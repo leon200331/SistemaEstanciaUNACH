@@ -79,6 +79,50 @@
     .was-validated select:invalid + .select2-container .select2-selection {
         border-color: #dc3545 !important;
     }
+
+    #inscripcionForm input:disabled,
+    #inscripcionForm select:disabled,
+    #inscripcionForm textarea:disabled {
+        background-color: #e9ecef !important;
+        cursor: not-allowed;
+    }
+
+    .payment-card {
+        border: 2px solid #198754 !important;
+        overflow: hidden;
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        color: #fff;
+        padding: 18px 25px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .payment-status-box {
+        background: #f8fafc;
+        border: 1px solid #dbe4ef;
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    .payment-file-box {
+        background: #ffffff;
+        border: 1px dashed #198754;
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .payment-help {
+        background: #ecfdf5;
+        border-left: 5px solid #198754;
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: #065f46;
+    }
 </style>
 {% endblock %}
 
@@ -125,7 +169,7 @@
     </div>
     {% endif %}
 
-    {% if inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or inscripcion.estado == 'RECHAZADA' %}
+    {% if inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or inscripcion.estado == 'FINALIZADA' or inscripcion.estado == 'RECHAZADA' %}
     <div class="alert alert-success shadow-sm mb-4 border-0" style="background-color: #eaf8f0; border-left: 5px solid #198754 !important; border-radius: 12px;">
         <h4 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i> ¡Tu dictamen está listo!</h4>
         <p class="text-dark mb-3">La Dirección de la Estancia Infantil UNACH ha emitido el Veredicto Final de tu solicitud y se ha enviado una copia a tu correo electrónico.</p>
@@ -144,6 +188,194 @@
             Folio: {{ inscripcion.solicitud_ingreso.folio }}
         </div>
     </div>
+
+    {% if inscripcion_bloqueada %}
+    <div class="alert alert-warning shadow-sm mb-4 border-0" style="border-left: 6px solid #f59e0b; border-radius: 12px;">
+        <div class="d-flex align-items-start">
+            <i class="bi bi-lock-fill text-warning fs-2 me-3"></i>
+            <div>
+                <h5 class="fw-bold mb-1">Expediente bloqueado para edición</h5>
+                <p class="mb-0 text-dark">
+                    Tu expediente ya fue enviado o se encuentra en una etapa de revisión.
+                    {% if inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+                        No puedes modificar los datos del expediente, pero sí puedes subir tu comprobante de pago en la sección correspondiente.
+                    {% else %}
+                        Por ahora no puedes modificar datos ni subir nuevos documentos.
+                    {% endif %}
+                </p>
+                <div class="small text-muted mt-1">
+                    Estado actual: <strong>{{ inscripcion.get_estado_display }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+    <div class="form-section-card payment-card shadow-sm">
+        <div class="payment-header">
+            <i class="bi bi-receipt-cutoff fs-3"></i>
+            <div>
+                <div class="fs-5">Comprobante de Pago</div>
+                <div class="small fw-normal opacity-75">Último paso para finalizar tu inscripción</div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="payment-help mb-4">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Puedes subir tu comprobante en formato <strong>PDF, JPG o PNG</strong> con tamaño máximo de <strong>5 MB</strong>.
+                Si entregaste el ticket presencialmente con Trabajo Social, no necesitas subir archivo; ellos registrarán la entrega.
+            </div>
+
+            <div class="row g-3 align-items-stretch">
+                <div class="col-lg-5">
+                    <div class="payment-status-box h-100">
+                        <h6 class="fw-bold text-success mb-3">
+                            <i class="bi bi-clipboard-check me-2"></i>Estado del pago
+                        </h6>
+
+                        {% if inscripcion.estado_pago == 'VALIDADO' %}
+                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                <i class="bi bi-check-circle-fill me-1"></i> Pago validado
+                            </span>
+                            <p class="text-muted small mt-3 mb-0">
+                                Trabajo Social validó tu comprobante. Tu inscripción se encuentra finalizada.
+                            </p>
+
+                        {% elif inscripcion.estado_pago == 'SUBIDO_BENEFICIARIO' and inscripcion.doc_tutor_pago %}
+                            <span class="badge bg-primary rounded-pill px-3 py-2">
+                                <i class="bi bi-hourglass-split me-1"></i> En revisión por Trabajo Social
+                            </span>
+                            <p class="text-muted small mt-3 mb-0">
+                                Tu comprobante ya fue recibido. Trabajo Social revisará el archivo para finalizar tu inscripción.
+                            </p>
+
+                        {% elif inscripcion.estado_pago == 'ENTREGADO_PRESENCIAL' or inscripcion.pago_entregado_presencial %}
+                            <span class="badge bg-info text-dark rounded-pill px-3 py-2">
+                                <i class="bi bi-person-check-fill me-1"></i> Entregado presencialmente
+                            </span>
+                            <p class="text-muted small mt-3 mb-0">
+                                Trabajo Social registró la entrega física del comprobante. Está pendiente de validación final.
+                            </p>
+
+                        {% elif inscripcion.estado_pago == 'RECHAZADO' %}
+                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                <i class="bi bi-x-circle-fill me-1"></i> Comprobante rechazado
+                            </span>
+                            <p class="text-muted small mt-3 mb-0">
+                                Revisa las observaciones y sube un nuevo comprobante.
+                            </p>
+
+                        {% else %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Pendiente de comprobante
+                            </span>
+                            <p class="text-muted small mt-3 mb-0">
+                                Sube tu comprobante digital o entrégalo presencialmente a Trabajo Social.
+                            </p>
+                        {% endif %}
+
+                        {% if inscripcion.pago_observaciones %}
+                        <div class="alert alert-light border mt-3 mb-0 small">
+                            <strong>Observaciones:</strong><br>
+                            {{ inscripcion.pago_observaciones }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="payment-file-box h-100">
+                        {% if inscripcion.estado_pago == 'SUBIDO_BENEFICIARIO' or inscripcion.estado_pago == 'VALIDADO' or inscripcion.doc_tutor_pago and inscripcion.estado_pago != 'RECHAZADO' %}
+                            <h6 class="fw-bold text-success mb-3">
+                                <i class="bi bi-send-check-fill me-2"></i>Comprobante enviado
+                            </h6>
+
+                            <div class="alert alert-success mb-3">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Tu comprobante fue enviado correctamente. Ya no necesitas volver a subirlo mientras Trabajo Social lo revisa.
+                            </div>
+
+                            {% if inscripcion.doc_tutor_pago %}
+                            <a href="{{ inscripcion.doc_tutor_pago.url }}" target="_blank" class="btn btn-outline-success rounded-pill fw-bold px-4">
+                                <i class="bi bi-eye-fill me-2"></i>Ver comprobante enviado
+                            </a>
+                            {% endif %}
+
+                        {% else %}
+                            {% if inscripcion.estado_pago == 'RECHAZADO' and inscripcion.doc_tutor_pago %}
+                                <div class="alert alert-danger small">
+                                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                                    El comprobante anterior fue rechazado.
+                                    <a href="{{ inscripcion.doc_tutor_pago.url }}" target="_blank" class="fw-bold text-danger">
+                                        Ver archivo rechazado
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                            <h6 class="fw-bold text-success mb-3">
+                                <i class="bi bi-upload me-2"></i>Subir comprobante digital
+                            </h6>
+
+                            <form method="POST" enctype="multipart/form-data" id="formComprobantePago" class="needs-validation" novalidate
+                                  onsubmit="return confirmarEnvioComprobantePago();">
+                                {% csrf_token %}
+                                <input type="hidden" name="subir_comprobante_pago" value="1">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Archivo del comprobante <span class="text-danger">*</span></label>
+                                    <input type="file"
+                                           name="doc_tutor_pago"
+                                           id="doc_tutor_pago"
+                                           class="form-control"
+                                           accept=".pdf,.jpg,.jpeg,.png"
+                                           required>
+                                    <div class="form-text">
+                                        Formatos permitidos: PDF, JPG, JPEG o PNG. Tamaño máximo: 5 MB.
+                                    </div>
+                                    <div class="invalid-feedback fw-bold">
+                                        Selecciona tu comprobante de pago.
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Comentario opcional</label>
+                                    <textarea name="pago_observaciones"
+                                              class="form-control"
+                                              rows="2"
+                                              placeholder="Ej. Pago realizado en ventanilla, transferencia, fecha del pago, etc."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-success rounded-pill fw-bold px-4">
+                                    <i class="bi bi-cloud-arrow-up-fill me-2"></i>Subir comprobante
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif inscripcion.estado == 'FINALIZADA' %}
+    <div class="form-section-card shadow-sm" style="border: 2px solid #198754;">
+        <div class="payment-header">
+            <i class="bi bi-patch-check-fill fs-3"></i>
+            <div>
+                <div class="fs-5">Inscripción finalizada</div>
+                <div class="small fw-normal opacity-75">Tu pago fue validado por Trabajo Social</div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="alert alert-success mb-0">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Tu inscripción fue finalizada correctamente. Conserva tu Reporte Final de Ingreso y atiende las indicaciones de la Estancia Infantil UNACH.
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <form method="POST" id="inscripcionForm" class="needs-validation" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
@@ -191,12 +423,12 @@
 
                     <div class="col-md-4 mt-5">
                         <label class="label-custom">Avance Académico <span class="text-danger">*</span></label>
-                        <input type="text" name="avance_academico" class="form-control" value="{{ inscripcion.avance_academico|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="avance_academico" class="form-control" value="{{ inscripcion.avance_academico|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4 mt-5">
                         <label class="label-custom">Estado Civil <span class="text-danger">*</span></label>
-                        <select id="estado_civil_tutor_select" name="estado_civil_tutor" class="form-select" onchange="manejarEstadoCivil()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select id="estado_civil_tutor_select" name="estado_civil_tutor" class="form-select" onchange="manejarEstadoCivil()" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
                             <option value="Soltero(a)" {% if inscripcion.estado_civil_tutor == 'Soltero(a)' %}selected{% endif %}>Soltero(a)</option>
                             <option value="Casado(a)" {% if inscripcion.estado_civil_tutor == 'Casado(a)' %}selected{% endif %}>Casado(a)</option>
@@ -206,7 +438,7 @@
 
                     <div class="col-md-4 mt-5 fade-in" id="div_pregunta_pareja" style="display: none;">
                         <label class="label-custom text-primary">¿Desea registrar datos de pareja/cónyuge? <span class="text-danger">*</span></label>
-                        <select id="tiene_pareja_select" name="tiene_pareja" class="form-select border-primary" onchange="manejarEstadoCivil()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                        <select id="tiene_pareja_select" name="tiene_pareja" class="form-select border-primary" onchange="manejarEstadoCivil()" {% if inscripcion_bloqueada %}disabled{% endif %}>
                             <option value="NO">No, soy padre/madre soltero(a)</option>
                             <option value="SI" {% if inscripcion.nombres_segundo_padre %}selected{% endif %}>Sí, deseo registrar a mi pareja</option>
                         </select>
@@ -214,7 +446,7 @@
 
                     <div class="col-md-4 mt-5">
                         <label class="label-custom">Tu parentesco con el menor <span class="text-danger">*</span></label>
-                        <select id="parentesco_tutor_select" name="parentesco_tutor" class="form-select" onchange="sincronizarParentescos()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select id="parentesco_tutor_select" name="parentesco_tutor" class="form-select" onchange="sincronizarParentescos()" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
                             <option value="Madre" {% if inscripcion.parentesco_tutor == 'Madre' %}selected{% endif %}>Soy la Madre</option>
                             <option value="Padre" {% if inscripcion.parentesco_tutor == 'Padre' %}selected{% endif %}>Soy el Padre</option>
@@ -233,19 +465,16 @@
             <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-md-4">
-                        <label class="label-custom">Nombre(s) <span class="text-danger">*</span></label>
-                        <input type="text" name="nombres_menor" class="form-control" oninput="formatName(this)" value="{{ inscripcion.solicitud_ingreso.nombres_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                        <label class="label-custom">Nombre(s) <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" name="nombres_menor" class="form-control bg-light text-muted" style="cursor: not-allowed;" value="{{ inscripcion.solicitud_ingreso.nombres_menor|default:'' }}" readonly required>
                     </div>
                     <div class="col-md-4">
-                        <label class="label-custom">Apellido Paterno <span class="text-danger">*</span></label>
-                        <input type="text" name="apellido_paterno_menor" class="form-control" oninput="formatName(this)" value="{{ inscripcion.solicitud_ingreso.apellido_paterno_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                        <label class="label-custom">Apellido Paterno <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" name="apellido_paterno_menor" class="form-control bg-light text-muted" style="cursor: not-allowed;" value="{{ inscripcion.solicitud_ingreso.apellido_paterno_menor|default:'' }}" readonly required>
                     </div>
                     <div class="col-md-4">
-                        <label class="label-custom">Apellido Materno <span class="text-danger">*</span></label>
-                        <input type="text" name="apellido_materno_menor" class="form-control" oninput="formatName(this)" value="{{ inscripcion.solicitud_ingreso.apellido_materno_menor|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
-                        <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
+                        <label class="label-custom">Apellido Materno <i class="bi bi-lock-fill text-muted ms-1" title="Dato bloqueado"></i></label>
+                        <input type="text" name="apellido_materno_menor" class="form-control bg-light text-muted" style="cursor: not-allowed;" value="{{ inscripcion.solicitud_ingreso.apellido_materno_menor|default:'' }}" readonly required>
                     </div>
 
                     <div class="col-md-4">
@@ -270,7 +499,7 @@
 
                     <div class="col-md-6 position-relative">
                         <label class="label-custom">Estado de Nacimiento <span class="text-danger">*</span></label>
-                        <select id="sel_estado_menor" class="form-select select2-buscador" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <select id="sel_estado_menor" class="form-select select2-buscador" required {% if inscripcion_bloqueada %}disabled{% endif %}></select>
                         <div class="d-none">
                             <input type="hidden" id="estado_nacimiento_hidden" name="estado_nacimiento_menor" value="{{ inscripcion.estado_nacimiento_menor|default:'' }}">
                         </div>
@@ -279,7 +508,7 @@
 
                     <div class="col-md-6 position-relative">
                         <label class="label-custom">Municipio / Ciudad <span class="text-danger">*</span></label>
-                        <select id="sel_mun_menor" class="form-select select2-buscador" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <select id="sel_mun_menor" class="form-select select2-buscador" required {% if inscripcion_bloqueada %}disabled{% endif %}></select>
                         <div class="d-none">
                             <input type="hidden" id="municipio_nacimiento_hidden" name="municipio_nacimiento_menor" value="{{ inscripcion.municipio_nacimiento_menor|default:'' }}">
                         </div>
@@ -288,31 +517,28 @@
 
                     <div class="col-md-4">
                         <label class="label-custom">Sexo <span class="text-danger">*</span></label>
-                        <select name="sexo_menor" class="form-select" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select name="sexo_menor" class="form-select" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
-                            <option value="M" {% if inscripcion.sexo_menor == 'M' %}selected{% endif %}>Masculino</option>
-                            <option value="F" {% if inscripcion.sexo_menor == 'F' %}selected{% endif %}>Femenino</option>
+                            <option value="M" {% if inscripcion.solicitud_ingreso.sexo_menor == 'M' or inscripcion.sexo_menor == 'M' %}selected{% endif %}>Masculino</option>
+                            <option value="F" {% if inscripcion.solicitud_ingreso.sexo_menor == 'F' or inscripcion.sexo_menor == 'F' %}selected{% endif %}>Femenino</option>
                         </select>
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
                     </div>
 
                     <div class="col-md-4">
                         <label class="label-custom">Tipo de Sangre <span class="text-danger">*</span></label>
-                        <input type="hidden" name="tipo_sangre_menor" id="tipo_sangre_real" value="{{ inscripcion.tipo_sangre_menor|default:'' }}">
-                        <select id="tipo_sangre_select" class="form-select" onchange="manejarTipoSangre()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select id="tipo_sangre_select" name="tipo_sangre_menor" class="form-select" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
-                            <option value="O+" {% if inscripcion.tipo_sangre_menor == 'O+' %}selected{% endif %}>O+</option>
-                            <option value="O-" {% if inscripcion.tipo_sangre_menor == 'O-' %}selected{% endif %}>O-</option>
-                            <option value="A+" {% if inscripcion.tipo_sangre_menor == 'A+' %}selected{% endif %}>A+</option>
-                            <option value="A-" {% if inscripcion.tipo_sangre_menor == 'A-' %}selected{% endif %}>A-</option>
-                            <option value="B+" {% if inscripcion.tipo_sangre_menor == 'B+' %}selected{% endif %}>B+</option>
-                            <option value="B-" {% if inscripcion.tipo_sangre_menor == 'B-' %}selected{% endif %}>B-</option>
-                            <option value="Otro" {% if inscripcion.tipo_sangre_menor and inscripcion.tipo_sangre_menor not in 'O+,O-,A+,A-,B+,B-' %}selected{% endif %}>Otro (Especificar)</option>
+                            <option value="O+" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'O+' or inscripcion.tipo_sangre_menor == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'O-' or inscripcion.tipo_sangre_menor == 'O-' %}selected{% endif %}>O-</option>
+                            <option value="A+" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'A+' or inscripcion.tipo_sangre_menor == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'A-' or inscripcion.tipo_sangre_menor == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'B+' or inscripcion.tipo_sangre_menor == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'B-' or inscripcion.tipo_sangre_menor == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'AB+' or inscripcion.tipo_sangre_menor == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if inscripcion.solicitud_ingreso.tipo_sangre_menor == 'AB-' or inscripcion.tipo_sangre_menor == 'AB-' %}selected{% endif %}>AB-</option>
                         </select>
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
-                        <div id="div_sangre_otro" class="mt-2 fade-in" style="display: none;">
-                            <input type="text" id="tipo_sangre_otro_input" class="form-control border-primary" placeholder="Escribe el tipo de sangre..." oninput="actualizarSangreReal()" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -329,11 +555,11 @@
                         <label class="label-custom d-block">¿Esta persona es el padre/madre biológico(a) del menor? <span class="text-danger">*</span></label>
                         <div class="d-flex flex-wrap gap-4 mt-2">
                             <div class="form-check">
-                                <input class="form-check-input sp-required" type="radio" name="vinculo_segundo_padre" id="vinculo_bio" value="BIOLOGICO" {% if inscripcion.vinculo_segundo_padre == 'BIOLOGICO' %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input class="form-check-input sp-required" type="radio" name="vinculo_segundo_padre" id="vinculo_bio" value="BIOLOGICO" {% if inscripcion.vinculo_segundo_padre == 'BIOLOGICO' %}checked{% endif %} {% if inscripcion_bloqueada %}disabled{% endif %}>
                                 <label class="form-check-label fw-bold text-success" for="vinculo_bio">Sí (Padre/Madre de sangre)</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input sp-required" type="radio" name="vinculo_segundo_padre" id="vinculo_pol" value="POLITICO" {% if inscripcion.vinculo_segundo_padre == 'POLITICO' %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input class="form-check-input sp-required" type="radio" name="vinculo_segundo_padre" id="vinculo_pol" value="POLITICO" {% if inscripcion.vinculo_segundo_padre == 'POLITICO' %}checked{% endif %} {% if inscripcion_bloqueada %}disabled{% endif %}>
                                 <label class="form-check-label fw-bold text-primary" for="vinculo_pol">No (Madrastra/Padrastro)</label>
                             </div>
                         </div>
@@ -353,23 +579,23 @@
 
                     <div class="col-md-3">
                         <label class="label-custom">Nombre(s) <span class="text-danger">*</span></label>
-                        <input type="text" name="nombres_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.nombres_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="nombres_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.nombres_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Apellido Paterno <span class="text-danger">*</span></label>
-                        <input type="text" name="apellido_paterno_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.apellido_paterno_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="apellido_paterno_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.apellido_paterno_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Apellido Materno <span class="text-danger">*</span></label>
-                        <input type="text" name="apellido_materno_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.apellido_materno_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="apellido_materno_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.apellido_materno_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
                     <div class="col-md-4 mt-3">
                         <label class="label-custom">Estado Civil <span class="text-danger">*</span></label>
-                        <select name="estado_civil_segundo_padre" class="form-select sp-required" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select name="estado_civil_segundo_padre" class="form-select sp-required" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
                             <option value="Soltero(a)" {% if inscripcion.estado_civil_segundo_padre == 'Soltero(a)' %}selected{% endif %}>Soltero(a)</option>
                             <option value="Casado(a)" {% if inscripcion.estado_civil_segundo_padre == 'Casado(a)' %}selected{% endif %}>Casado(a)</option>
@@ -378,18 +604,18 @@
                     </div>
                     <div class="col-md-4 mt-3">
                         <label class="label-custom">Ocupación <span class="text-danger">*</span></label>
-                        <input type="text" name="ocupacion_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.ocupacion_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="ocupacion_segundo_padre" class="form-control sp-required" oninput="formatName(this)" value="{{ inscripcion.ocupacion_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4 mt-3">
                         <label class="label-custom">Celular <span class="text-danger">*</span></label>
-                        <input type="text" name="celular_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.celular_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="celular_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.celular_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
                     <div class="col-md-6 mt-3">
                         <label class="label-custom">Correo Electrónico <span class="text-danger">*</span></label>
-                        <input type="email" name="correo_segundo_padre" class="form-control sp-required" value="{{ inscripcion.correo_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="email" name="correo_segundo_padre" class="form-control sp-required" value="{{ inscripcion.correo_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Ingresa un correo válido.</div>
                     </div>
 
@@ -399,7 +625,7 @@
 
                     <div class="col-md-4 position-relative">
                         <label class="label-custom">Estado <span class="text-danger">*</span></label>
-                        <select id="sel_estado_pareja" class="form-select select2-buscador sp-required" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <select id="sel_estado_pareja" class="form-select select2-buscador sp-required" required {% if inscripcion_bloqueada %}disabled{% endif %}></select>
                         <div class="d-none">
                             <input type="hidden" id="estado_domicilio_segundo_padre" name="estado_domicilio_segundo_padre" value="{{ inscripcion.estado_domicilio_segundo_padre|default:'' }}">
                         </div>
@@ -408,7 +634,7 @@
 
                     <div class="col-md-4 position-relative">
                         <label class="label-custom">Ciudad / Municipio <span class="text-danger">*</span></label>
-                        <select id="sel_mun_pareja" class="form-select select2-buscador sp-required" required {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}></select>
+                        <select id="sel_mun_pareja" class="form-select select2-buscador sp-required" required {% if inscripcion_bloqueada %}disabled{% endif %}></select>
                         <div class="d-none">
                             <input type="hidden" id="ciudad_segundo_padre" name="ciudad_segundo_padre" value="{{ inscripcion.ciudad_segundo_padre|default:'' }}">
                         </div>
@@ -417,22 +643,22 @@
 
                     <div class="col-md-4">
                         <label class="label-custom">Código Postal <span class="text-danger">*</span></label>
-                        <input type="text" name="codigo_postal_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="5" value="{{ inscripcion.codigo_postal_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="codigo_postal_segundo_padre" class="form-control sp-required" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="5" value="{{ inscripcion.codigo_postal_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="label-custom">Calle <span class="text-danger">*</span></label>
-                        <input type="text" name="calle_segundo_padre" class="form-control sp-required" value="{{ inscripcion.calle_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="calle_segundo_padre" class="form-control sp-required" value="{{ inscripcion.calle_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Número Ext. <span class="text-danger">*</span></label>
-                        <input type="text" name="numero_exterior_segundo_padre" class="form-control sp-required" value="{{ inscripcion.numero_exterior_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="numero_exterior_segundo_padre" class="form-control sp-required" value="{{ inscripcion.numero_exterior_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="label-custom">Número Int. (Opcional)</label>
-                        <input type="text" name="numero_interior_segundo_padre" class="form-control" value="{{ inscripcion.numero_interior_segundo_padre|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                        <input type="text" name="numero_interior_segundo_padre" class="form-control" value="{{ inscripcion.numero_interior_segundo_padre|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                     </div>
                 </div>
             </div>
@@ -454,29 +680,29 @@
                 <div class="row g-2 align-items-center">
                     <div class="col-md-4">
                         <label class="label-custom">Nombre(s) Familiar 1 <span class="text-danger">*</span></label>
-                        <input type="text" id="contacto_1_nombres" name="contacto_1_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_nombres|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" id="contacto_1_nombres" name="contacto_1_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_nombres|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Ap. Paterno 1 <span class="text-danger">*</span></label>
-                        <input type="text" id="contacto_1_apellido_paterno" name="contacto_1_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_paterno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" id="contacto_1_apellido_paterno" name="contacto_1_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_paterno|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-4">
                         <label class="label-custom">Ap. Materno 1 <span class="text-danger">*</span></label>
-                        <input type="text" id="contacto_1_apellido_materno" name="contacto_1_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_materno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" id="contacto_1_apellido_materno" name="contacto_1_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_1_apellido_materno|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
 
                     <div class="col-md-6 mt-2">
                         <label class="label-custom">Teléfono 1 <span class="text-danger">*</span></label>
-                        <input type="text" name="contacto_1_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_1_telefono|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <input type="text" name="contacto_1_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_1_telefono|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                         <div class="invalid-feedback fw-bold">Te faltó este campo.</div>
                     </div>
                     <div class="col-md-6 mt-2">
                         <label class="label-custom">Parentesco 1 <span class="text-danger">*</span></label>
                         <input type="hidden" name="contacto_1_parentesco" id="real_par_1" value="{{ inscripcion.contacto_1_parentesco|default:'' }}">
-                        <select id="sel_par_1" class="form-select form-select-sm" onchange="manejarPar(1)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} required>
+                        <select id="sel_par_1" class="form-select form-select-sm" onchange="manejarPar(1)" {% if inscripcion_bloqueada %}disabled{% endif %} required>
                             <option value="">Seleccione...</option>
                             <option value="Abuelo(a)">Abuelo(a)</option>
                             <option value="Tío(a)">Tío(a)</option>
@@ -485,7 +711,7 @@
                         </select>
                         <div class="invalid-feedback fw-bold">Selecciona una opción.</div>
                         <div id="div_otro_par_1" class="mt-2 fade-in" style="display: none;">
-                            <input type="text" id="inp_otro_par_1" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(1)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="inp_otro_par_1" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(1)" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                     </div>
                 </div>
@@ -499,24 +725,24 @@
                     <div class="row g-2">
                         <div class="col-md-4">
                             <label class="label-custom">Nombre(s) Familiar 2</label>
-                            <input type="text" id="contacto_2_nombres" name="contacto_2_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_2_nombres|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_2_nombres" name="contacto_2_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_2_nombres|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-4">
                             <label class="label-custom">Ap. Paterno 2</label>
-                            <input type="text" id="contacto_2_apellido_paterno" name="contacto_2_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_2_apellido_paterno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_2_apellido_paterno" name="contacto_2_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_2_apellido_paterno|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-4">
                             <label class="label-custom">Ap. Materno 2</label>
-                            <input type="text" id="contacto_2_apellido_materno" name="contacto_2_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_2_apellido_materno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_2_apellido_materno" name="contacto_2_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_2_apellido_materno|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-6 mt-2">
                             <label class="label-custom">Teléfono 2</label>
-                            <input type="text" id="contacto_2_telefono" name="contacto_2_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_2_telefono|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_2_telefono" name="contacto_2_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_2_telefono|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-6 mt-2">
                             <label class="label-custom">Parentesco 2</label>
                             <input type="hidden" name="contacto_2_parentesco" id="real_par_2" value="{{ inscripcion.contacto_2_parentesco|default:'' }}">
-                            <select id="sel_par_2" class="form-select form-select-sm" onchange="manejarPar(2)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <select id="sel_par_2" class="form-select form-select-sm" onchange="manejarPar(2)" {% if inscripcion_bloqueada %}disabled{% endif %}>
                                 <option value="">Seleccione...</option>
                                 <option value="Abuelo(a)">Abuelo(a)</option>
                                 <option value="Tío(a)">Tío(a)</option>
@@ -524,7 +750,7 @@
                                 <option value="Otro">Otro (Especificar)</option>
                             </select>
                             <div id="div_otro_par_2" class="mt-2 fade-in" style="display: none;">
-                                <input type="text" id="inp_otro_par_2" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(2)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="text" id="inp_otro_par_2" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(2)" {% if inscripcion_bloqueada %}disabled{% endif %}>
                             </div>
                         </div>
                     </div>
@@ -539,24 +765,24 @@
                     <div class="row g-2">
                         <div class="col-md-4">
                             <label class="label-custom">Nombre(s) Familiar 3</label>
-                            <input type="text" id="contacto_3_nombres" name="contacto_3_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_3_nombres|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_3_nombres" name="contacto_3_nombres" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_3_nombres|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-4">
                             <label class="label-custom">Ap. Paterno 3</label>
-                            <input type="text" id="contacto_3_apellido_paterno" name="contacto_3_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_3_apellido_paterno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_3_apellido_paterno" name="contacto_3_apellido_paterno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_3_apellido_paterno|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-4">
                             <label class="label-custom">Ap. Materno 3</label>
-                            <input type="text" id="contacto_3_apellido_materno" name="contacto_3_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_3_apellido_materno|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_3_apellido_materno" name="contacto_3_apellido_materno" class="form-control form-control-sm" oninput="formatName(this)" value="{{ inscripcion.contacto_3_apellido_materno|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-6 mt-2">
                             <label class="label-custom">Teléfono 3</label>
-                            <input type="text" id="contacto_3_telefono" name="contacto_3_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_3_telefono|default:'' }}" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <input type="text" id="contacto_3_telefono" name="contacto_3_telefono" class="form-control form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" value="{{ inscripcion.contacto_3_telefono|default:'' }}" {% if inscripcion_bloqueada %}disabled{% endif %}>
                         </div>
                         <div class="col-md-6 mt-2">
                             <label class="label-custom">Parentesco 3</label>
                             <input type="hidden" name="contacto_3_parentesco" id="real_par_3" value="{{ inscripcion.contacto_3_parentesco|default:'' }}">
-                            <select id="sel_par_3" class="form-select form-select-sm" onchange="manejarPar(3)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                            <select id="sel_par_3" class="form-select form-select-sm" onchange="manejarPar(3)" {% if inscripcion_bloqueada %}disabled{% endif %}>
                                 <option value="">Seleccione...</option>
                                 <option value="Abuelo(a)">Abuelo(a)</option>
                                 <option value="Tío(a)">Tío(a)</option>
@@ -564,7 +790,7 @@
                                 <option value="Otro">Otro (Especificar)</option>
                             </select>
                             <div id="div_otro_par_3" class="mt-2 fade-in" style="display: none;">
-                                <input type="text" id="inp_otro_par_3" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(3)" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %}>
+                                <input type="text" id="inp_otro_par_3" class="form-control form-control-sm border-primary" placeholder="Especifica el parentesco" oninput="actualizarPar(3)" {% if inscripcion_bloqueada %}disabled{% endif %}>
                             </div>
                         </div>
                     </div>
@@ -589,37 +815,43 @@
 
                             <div class="file-input-group">
                                 <label>Certificado Médico Original <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_menor_certificado_medico" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_certificado_medico %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_menor_certificado_medico %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Cartilla de Vacunación <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_menor_cartilla_vacunacion" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_cartilla_vacunacion %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_menor_cartilla_vacunacion %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Examen de Grupo Sanguíneo <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_menor_grupo_sanguineo" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_grupo_sanguineo %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_menor_grupo_sanguineo %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Acta de Nacimiento Actualizada <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_menor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_acta_nacimiento %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_menor_acta_nacimiento %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>3 Fotografías del Menor <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) que contenga las 3 fotos juntas. Tamaño máximo permitido: 5MB."></i></label>
-                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_menor_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_fotos %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_menor_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
+                            </div>
+                            <div class="file-input-group">
+                                <label>Estudios de Laboratorio <span class="text-danger">*</span></label>
+                                <input type="file" name="doc_menor_laboratorio" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_menor_laboratorio %}true{% else %}false{% endif %}">
+                                <span class="status-missing">Falta cargar</span>
+                                {% if inscripcion.doc_menor_laboratorio %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
                         </div>
                     </div>
@@ -630,49 +862,49 @@
 
                             <div class="file-input-group">
                                 <label>Acta de Nacimiento <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_acta_nacimiento" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_acta_nacimiento %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_tutor_acta_nacimiento %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Copia de INE / Pasaporte <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_ine" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_ine %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_tutor_ine %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>3 Fotografías <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) que contenga las 3 fotos juntas. Tamaño máximo permitido: 5MB."></i></label>
-                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_fotos %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_tutor_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group" id="group_foto_pareja" style="display: none;">
                                 <label>Foto de la Pareja <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
-                                <input type="file" name="doc_segundo_padre_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_segundo_padre_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_segundo_padre_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_segundo_padre_fotos %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_segundo_padre_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Comprobante de Domicilio <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_domicilio" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_domicilio %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_tutor_domicilio %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Historial Académico <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_historial" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_historial %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_tutor_historial %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Horario de Clases Firmado <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_tutor_horario" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_tutor_horario %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_tutor_horario %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
@@ -685,35 +917,35 @@
 
                             <div class="file-input-group">
                                 <label>Carta de Autorización <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_autorizado_carta" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_carta %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_autorizado_carta %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group">
                                 <label>Copia de INE de TODOS <span class="text-danger">*</span></label>
-                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_autorizado_ine" class="form-control form-control-sm" accept=".pdf, .jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_autorizado_ine %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_autorizado_ine %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group mt-4 border-top pt-3">
                                 <label>Foto de Familiar Autorizado 1 <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
-                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_1_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_1_fotos %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_contacto_1_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group" id="group_foto_aut2" style="display: none;">
                                 <label>Foto de Familiar Autorizado 2 <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
-                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_2_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_2_fotos %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_contacto_2_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
 
                             <div class="file-input-group" id="group_foto_aut3" style="display: none;">
                                 <label>Foto de Familiar Autorizado 3 <span class="text-danger">*</span> <i class="bi bi-question-circle info-icon" data-bs-toggle="tooltip" title="Sube una sola IMAGEN (.jpg o .png) con la fotografía. Tamaño máximo permitido: 5MB."></i></label>
-                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
+                                <input type="file" name="doc_contacto_3_fotos" class="form-control form-control-sm file-size-check" accept=".jpg, .png, .jpeg" {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.doc_contacto_3_fotos %}true{% else %}false{% endif %}">
                                 <span class="status-missing">Falta cargar</span>
                                 {% if inscripcion.doc_contacto_3_fotos %}<div class="status-badge status-ok mt-1"><i class="bi bi-check-circle-fill"></i> Cargado</div>{% endif %}
                             </div>
@@ -737,7 +969,7 @@
                 </a>
 
                 <div class="form-check text-start bg-light p-4 rounded-3 border mb-4">
-                    <input class="form-check-input fs-4 mt-1" type="checkbox" value="True" name="acepto_reglamentos" id="acepto_reglamentos" {% if inscripcion.acepto_reglamentos %}checked{% endif %} {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} style="cursor: pointer;" required>
+                    <input class="form-check-input fs-4 mt-1" type="checkbox" value="True" name="acepto_reglamentos" id="acepto_reglamentos" {% if inscripcion.acepto_reglamentos %}checked{% endif %} {% if inscripcion_bloqueada %}disabled{% endif %} style="cursor: pointer;" required>
                     <label class="form-check-label ms-3 mt-1" for="acepto_reglamentos" style="cursor: pointer;">
                         <strong>He leído y acepto</strong> los lineamientos, normas y reglamentos estipulados por la Estancia Infantil UNACH para el ingreso y permanencia del menor. <span class="text-danger">*</span>
                     </label>
@@ -749,7 +981,7 @@
                     <p class="text-muted small mb-3">Imprime el documento, fírmalo, escanéalo y súbelo aquí obligatoriamente en formato PDF para poder enviar tu expediente.</p>
 
                     <input type="file" name="reglamento_firmado" id="reglamento_firmado" class="form-control form-control-lg border-primary" accept=".pdf"
-                           {% if inscripcion.estado == 'EN_REVISION' or inscripcion.estado == 'FINALIZADA' %}disabled{% endif %} data-uploaded="{% if inscripcion.reglamento_firmado %}true{% else %}false{% endif %}">
+                           {% if inscripcion_bloqueada %}disabled{% endif %} data-uploaded="{% if inscripcion.reglamento_firmado %}true{% else %}false{% endif %}">
                     <div class="invalid-feedback fw-bold">Debes subir el reglamento firmado en PDF para poder enviar tu expediente.</div>
 
                     {% if inscripcion.reglamento_firmado %}
@@ -834,7 +1066,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    const isReadOnly = ("{{ inscripcion.estado }}" === "EN_REVISION" || "{{ inscripcion.estado }}" === "FINALIZADA");
+    const isReadOnly = {{ inscripcion_bloqueada|yesno:"true,false" }};
 
     document.addEventListener('DOMContentLoaded', function () {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -967,28 +1199,6 @@
         } else {
             selectSegundoPadre.value = '';
         }
-    }
-
-    function manejarTipoSangre() {
-        const selectSangre = document.getElementById('tipo_sangre_select');
-        const inputReal = document.getElementById('tipo_sangre_real');
-        const divOtro = document.getElementById('div_sangre_otro');
-        const inputOtro = document.getElementById('tipo_sangre_otro_input');
-
-        if (selectSangre.value === 'Otro') {
-            divOtro.style.display = 'block';
-            inputReal.value = inputOtro.value;
-            inputOtro.required = true;
-        } else {
-            divOtro.style.display = 'none';
-            inputReal.value = selectSangre.value;
-            inputOtro.required = false;
-            inputOtro.value = '';
-        }
-    }
-
-    function actualizarSangreReal() {
-        document.getElementById('tipo_sangre_real').value = document.getElementById('tipo_sangre_otro_input').value;
     }
 
     function manejarPar(num) {
@@ -1338,6 +1548,8 @@
     // AUTO-GUARDADO (LOCALSTORAGE)
     // -------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
+        if (isReadOnly) return;
+
         const pageId = window.location.pathname + "_user_{{ request.user.id }}";
         const forms = document.querySelectorAll("form");
 
@@ -1420,7 +1632,8 @@
             'doc_contacto_1_fotos': 'Fotografia_Autorizado_1',
             'doc_contacto_2_fotos': 'Fotografia_Autorizado_2',
             'doc_contacto_3_fotos': 'Fotografia_Autorizado_3',
-            'reglamento_firmado': 'Reglamento_Interno_Firmado'
+            'reglamento_firmado': 'Reglamento_Interno_Firmado',
+            'doc_tutor_pago': 'Comprobante_de_Pago'
         };
 
         const fileInputs = document.querySelectorAll('input[type="file"]');
@@ -1429,6 +1642,30 @@
             input.addEventListener('change', function(e) {
                 if (this.files && this.files.length > 0) {
                     const originalFile = this.files[0];
+
+                    // --- VALIDACIÓN DEL COMPROBANTE DE PAGO ---
+                    if (this.name === 'doc_tutor_pago') {
+                        const extPago = originalFile.name.split('.').pop().toLowerCase();
+                        const permitidosPago = ['pdf', 'jpg', 'jpeg', 'png'];
+
+                        if (!permitidosPago.includes(extPago)) {
+                            this.value = '';
+                            mostrarErrorModal(
+                                "Formato no permitido",
+                                "El comprobante de pago debe estar en formato PDF, JPG, JPEG o PNG."
+                            );
+                            return;
+                        }
+
+                        if (originalFile.size > 5 * 1024 * 1024) {
+                            this.value = '';
+                            mostrarErrorModal(
+                                "Archivo muy pesado",
+                                "El comprobante de pago pesa más de 5MB. Por favor, comprímelo o sube un archivo más ligero."
+                            );
+                            return;
+                        }
+                    }
 
                     // --- VALIDACIÓN DE 5MB PARA LAS FOTOGRAFÍAS ---
                     if (this.classList.contains('file-size-check')) {
@@ -1473,5 +1710,22 @@
             });
         });
     });
+    // -------------------------------------------------------------------
+    // BLOQUEO VISUAL FINAL PARA EXPEDIENTES NO EDITABLES
+    // -------------------------------------------------------------------
+    window.addEventListener("load", function () {
+        if (!isReadOnly) return;
+
+        document.querySelectorAll('#inscripcionForm input, #inscripcionForm select, #inscripcionForm textarea, #inscripcionForm button').forEach(function(el) {
+            if (el.name !== 'csrfmiddlewaretoken') {
+                el.disabled = true;
+            }
+        });
+
+        if (window.jQuery) {
+            $('.select2-buscador').prop('disabled', true).trigger('change.select2');
+        }
+    });
+
 </script>
 {% endblock %}

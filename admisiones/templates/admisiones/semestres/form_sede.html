@@ -1,0 +1,562 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo|default:"Sede" }} | Estancia Infantil UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --azul:#1d4ed8;
+            --azul-oscuro:#1e3a8a;
+            --gris-fondo:#f3f6fb;
+            --texto:#0f172a;
+            --muted:#64748b;
+            --borde:#dbe4ef;
+        }
+
+        body{
+            margin:0;
+            background:var(--gris-fondo);
+            color:var(--texto);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .topbar{
+            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
+            color:white;
+            box-shadow:0 8px 22px rgba(15,23,42,.18);
+        }
+
+        .topbar-inner{
+            max-width:1120px;
+            margin:auto;
+            padding:14px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand img{
+            height:48px;
+            width:auto;
+            object-fit:contain;
+            background:rgba(255,255,255,.12);
+            border-radius:12px;
+            padding:4px;
+        }
+
+        .brand-title{
+            font-size:1.02rem;
+            font-weight:950;
+            letter-spacing:.04em;
+            text-transform:uppercase;
+            line-height:1.1;
+        }
+
+        .brand-subtitle{
+            font-size:.82rem;
+            opacity:.9;
+            margin-top:2px;
+        }
+
+        .btn-top{
+            border-radius:12px;
+            font-weight:850;
+            padding:.55rem .9rem;
+        }
+
+        .main{
+            max-width:1120px;
+            margin:28px auto 70px;
+            padding:0 18px;
+        }
+
+        .hero{
+            background:linear-gradient(135deg, #1d4ed8, #2563eb);
+            border-radius:24px;
+            color:white;
+            padding:30px 34px;
+            box-shadow:0 22px 50px rgba(29,78,216,.22);
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:20px;
+            align-items:center;
+            margin-bottom:22px;
+        }
+
+        .hero h1{
+            font-size:1.9rem;
+            font-weight:950;
+            margin:0 0 8px;
+            letter-spacing:-.03em;
+        }
+
+        .hero p{
+            margin:0;
+            opacity:.92;
+            font-size:1rem;
+        }
+
+        .hero-icon{
+            width:88px;
+            height:88px;
+            border-radius:22px;
+            background:rgba(255,255,255,.16);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2.5rem;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:1fr 330px;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:white;
+            border:1px solid var(--borde);
+            border-radius:22px;
+            overflow:hidden;
+            box-shadow:0 18px 38px rgba(15,23,42,.07);
+        }
+
+        .panel-header{
+            padding:18px 22px;
+            background:#f8fafc;
+            border-bottom:1px solid var(--borde);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+        }
+
+        .panel-title{
+            margin:0;
+            color:#334155;
+            font-size:1rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+        }
+
+        .panel-body{
+            padding:24px;
+        }
+
+        .field-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:16px;
+            margin-bottom:16px;
+        }
+
+        .form-label{
+            font-size:.82rem;
+            font-weight:950;
+            color:#334155;
+            text-transform:uppercase;
+            letter-spacing:.04em;
+            margin-bottom:8px;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:14px;
+            border:1px solid #cbd5e1;
+            padding:.72rem .9rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#2563eb;
+            box-shadow:0 0 0 .22rem rgba(37,99,235,.15);
+        }
+
+        .form-check{
+            background:white;
+            border:1px solid #dbe4ef;
+            border-radius:16px;
+            padding:14px 16px 14px 44px;
+            margin-top:6px;
+        }
+
+        .form-check-input{
+            margin-left:-28px;
+            margin-top:.28rem;
+        }
+
+        .form-check-label{
+            font-weight:850;
+            color:#0f172a;
+        }
+
+        .field-help{
+            color:var(--muted);
+            font-size:.84rem;
+            margin-top:6px;
+        }
+
+        .error-text{
+            background:#fee2e2;
+            color:#991b1b;
+            border:1px solid #fecaca;
+            border-radius:12px;
+            padding:8px 10px;
+            font-size:.85rem;
+            font-weight:700;
+            margin-top:8px;
+        }
+
+        .actions{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            flex-wrap:wrap;
+            padding-top:10px;
+            border-top:1px solid #e5e7eb;
+            margin-top:12px;
+        }
+
+        .btn-main{
+            border-radius:14px;
+            font-weight:900;
+            padding:.72rem 1.1rem;
+        }
+
+        .side-note{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid var(--azul);
+            border-radius:18px;
+            padding:18px;
+            color:#1e3a8a;
+            margin-bottom:18px;
+        }
+
+        .side-note h6{
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .check-list{
+            list-style:none;
+            padding:0;
+            margin:0;
+        }
+
+        .check-list li{
+            display:flex;
+            gap:8px;
+            margin-bottom:10px;
+            color:#475569;
+            font-weight:650;
+        }
+
+        .check-list i{
+            color:#16a34a;
+            margin-top:2px;
+        }
+
+        .status-card{
+            background:#f8fafc;
+            border:1px solid var(--borde);
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .status-title{
+            font-weight:950;
+            color:#0f172a;
+            margin-bottom:6px;
+        }
+
+        .status-text{
+            color:#64748b;
+            font-size:.9rem;
+            margin:0;
+        }
+
+        @media(max-width:900px){
+            .hero{grid-template-columns:1fr;}
+            .hero-icon{display:none;}
+            .layout{grid-template-columns:1fr;}
+        }
+
+        @media(max-width:576px){
+            .topbar-inner{flex-direction:column;align-items:flex-start;}
+            .hero{padding:24px 20px;}
+            .hero h1{font-size:1.55rem;}
+            .panel-body{padding:18px;}
+            .actions{justify-content:stretch;}
+            .actions .btn{width:100%;}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">
+            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div>
+                <div class="brand-title">Configuración de Sedes</div>
+                <div class="brand-subtitle">Sprint 4 · Épica 3 · Administrador del sistema</div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
+                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
+                </a>
+            {% endif %}
+            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
+                <i class="bi bi-arrow-left me-1"></i> Semestres
+            </a>
+            <a href="{% url 'crear_semestre' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
+                <i class="bi bi-calendar-plus-fill me-1"></i> Crear semestre
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="main">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="hero">
+        <div>
+            <h1>{{ titulo|default:"Crear sede" }}</h1>
+            <p>
+                Registra o modifica una sede para operar semestres, salas, personal y alumnos de forma segmentada.
+            </p>
+        </div>
+        <div class="hero-icon">
+            <i class="bi bi-building-fill-gear"></i>
+        </div>
+    </section>
+
+    <div class="layout">
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="bi bi-buildings-fill me-2"></i>Datos de la sede
+                </h2>
+            </div>
+
+            <div class="panel-body">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger rounded-4">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="field-card">
+                                <label for="{{ form.clave.id_for_label }}" class="form-label">
+                                    Clave de sede <span class="text-danger">*</span>
+                                </label>
+                                {{ form.clave }}
+                                <div class="field-help">
+                                    Ejemplo: TUXTLA, TAPACHULA. Se usa para identificar la sede en el sistema.
+                                </div>
+                                {% if form.clave.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.clave.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="field-card">
+                                <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                    Nombre de la sede <span class="text-danger">*</span>
+                                </label>
+                                {{ form.nombre }}
+                                <div class="field-help">
+                                    Nombre completo que aparecerá en semestres, salas y reportes.
+                                </div>
+                                {% if form.nombre.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.nombre.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-card">
+                        <label for="{{ form.direccion.id_for_label }}" class="form-label">
+                            Dirección
+                        </label>
+                        {{ form.direccion }}
+                        <div class="field-help">
+                            Dirección física de la sede. Este dato puede usarse después en reportes o documentos.
+                        </div>
+                        {% if form.direccion.errors %}
+                            <div class="error-text">
+                                {% for error in form.direccion.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="field-card">
+                                <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                    Teléfono
+                                </label>
+                                {{ form.telefono }}
+                                <div class="field-help">
+                                    Teléfono de contacto de la sede.
+                                </div>
+                                {% if form.telefono.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.telefono.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="field-card">
+                                <label for="{{ form.correo.id_for_label }}" class="form-label">
+                                    Correo de sede
+                                </label>
+                                {{ form.correo }}
+                                <div class="field-help">
+                                    Correo institucional o genérico de la sede.
+                                </div>
+                                {% if form.correo.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.correo.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-card">
+                        <div class="form-check">
+                            {{ form.activa }}
+                            <label class="form-check-label" for="{{ form.activa.id_for_label }}">
+                                Sede activa
+                            </label>
+                            <div class="field-help">
+                                Si está activa, se podrá seleccionar al crear o modificar semestres.
+                            </div>
+                        </div>
+
+                        {% if form.activa.errors %}
+                            <div class="error-text">
+                                {% for error in form.activa.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="actions">
+                        <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </a>
+
+                        <button type="submit" class="btn btn-primary btn-main">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            {% if sede %}Guardar cambios{% else %}Crear sede{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <aside>
+            <div class="side-note">
+                <h6>
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    ¿Para qué sirve la sede?
+                </h6>
+                <p class="mb-0">
+                    La sede permite separar la operación por ubicación y visualizar la información de manera ordenada.
+                </p>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-check2-square me-2"></i>Uso en Sprint 4
+                    </h2>
+                </div>
+                <div class="panel-body">
+                    <ul class="check-list">
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Se asigna al crear un semestre.</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Permite configurar salas por sede.</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Ayuda a segmentar alumnos y personal.</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Se muestra en reportes y paneles.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="status-card mt-3">
+                <div class="status-title">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    Recomendación
+                </div>
+                <p class="status-text">
+                    Usa claves cortas sin espacios, por ejemplo:
+                    <strong>TUXTLA</strong> o <strong>TAPACHULA</strong>.
+                </p>
+            </div>
+        </aside>
+    </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

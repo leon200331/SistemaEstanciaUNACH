@@ -1,0 +1,1311 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de incidencia | EIU UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --yellow:#ca8a04;
+            --red:#dc2626;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+            --soft:#f8fafc;
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(124,58,237,.12), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        .page{
+            max-width:1380px;
+            margin:0 auto;
+            padding:24px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.94);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.9);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .brand-logo{
+            width:64px;
+            height:64px;
+            border-radius:18px;
+            background:white;
+            border:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
+            box-shadow:0 10px 24px rgba(15,23,42,.08);
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .top-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-end;
+        }
+
+        .btn-soft{
+            border-radius:999px;
+            padding:.72rem 1rem;
+            font-weight:850;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .btn-main{
+            border-radius:999px;
+            padding:.84rem 1.18rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-blue{background:linear-gradient(135deg,#2563eb,#0891b2);color:white;}
+        .btn-green{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;}
+        .btn-purple{background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;}
+        .btn-red{background:linear-gradient(135deg,#dc2626,#f97316);color:white;}
+
+        .hero{
+            color:white;
+            border-radius:30px;
+            padding:26px;
+            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero-pedagogica{background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);}
+        .hero-nutricional{background:linear-gradient(135deg,#16a34a,#0891b2,#2563eb);}
+        .hero-medica{background:linear-gradient(135deg,#dc2626,#f97316,#2563eb);}
+        .hero-psicologica{background:linear-gradient(135deg,#2563eb,#7c3aed,#db2777);}
+        .hero-default{background:linear-gradient(135deg,#2563eb,#7c3aed,#0891b2);}
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:300px;
+            height:300px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-95px;
+            top:-105px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:900;
+            margin-bottom:12px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:860px;
+            font-weight:600;
+            opacity:.94;
+        }
+
+        .hero-info{
+            min-width:320px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .hero-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .hero-value{
+            font-size:1.12rem;
+            font-weight:950;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:.82fr 1.18fr;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.96);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{padding:20px;}
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+        .badge-cyan{background:#cffafe;color:#155e75;}
+
+        .student-card{
+            background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+            border:1px solid #bfdbfe;
+            border-radius:24px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .student-top{
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+        }
+
+        .student-avatar{
+            width:68px;
+            height:68px;
+            border-radius:22px;
+            background:linear-gradient(135deg,#dbeafe,#ede9fe);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.95rem;
+            flex-shrink:0;
+        }
+
+        .student-name{
+            font-weight:950;
+            font-size:1.22rem;
+            color:#0f172a;
+            letter-spacing:-.03em;
+            margin-bottom:4px;
+        }
+
+        .student-meta{
+            color:#475569;
+            font-size:.9rem;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            margin-top:16px;
+        }
+
+        .info-item{
+            background:white;
+            border:1px solid rgba(148,163,184,.28);
+            border-radius:16px;
+            padding:12px;
+        }
+
+        .info-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .info-value{
+            font-weight:900;
+            color:#0f172a;
+        }
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .success-card{
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-left:6px solid #16a34a;
+            color:#14532d;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .danger-card{
+            background:#fef2f2;
+            border:1px solid #fecaca;
+            border-left:6px solid #dc2626;
+            color:#991b1b;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        .content-block{
+            border:1px solid var(--border);
+            background:#f8fafc;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .content-title{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:12px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.02em;
+        }
+
+        .text-box{
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:14px 16px;
+            color:#334155;
+            font-weight:650;
+            line-height:1.55;
+            white-space:pre-line;
+        }
+
+        .extra-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+        }
+
+        .extra-item{
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            padding:12px;
+        }
+
+        .extra-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .extra-value{
+            font-weight:850;
+            color:#0f172a;
+            word-break:break-word;
+        }
+
+        .timeline{
+            position:relative;
+            display:grid;
+            gap:14px;
+        }
+
+        .timeline-item{
+            display:grid;
+            grid-template-columns:42px 1fr;
+            gap:12px;
+            align-items:start;
+        }
+
+        .timeline-icon{
+            width:42px;
+            height:42px;
+            border-radius:16px;
+            background:#dbeafe;
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.15rem;
+        }
+
+        .timeline-card{
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:20px;
+            padding:14px 16px;
+        }
+
+        .timeline-title{
+            font-weight:950;
+            color:#0f172a;
+            margin-bottom:3px;
+        }
+
+        .timeline-meta{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:700;
+            margin-bottom:8px;
+        }
+
+        .timeline-text{
+            color:#334155;
+            font-weight:650;
+            line-height:1.5;
+            white-space:pre-line;
+        }
+
+        .file-list{
+            display:grid;
+            gap:10px;
+        }
+
+        .file-item{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:12px;
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:13px 14px;
+        }
+
+        .file-left{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+        }
+
+        .file-icon{
+            width:38px;
+            height:38px;
+            border-radius:14px;
+            background:#eff6ff;
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            font-size:1.1rem;
+        }
+
+        .file-name{
+            font-weight:900;
+            color:#0f172a;
+            word-break:break-word;
+        }
+
+        .file-meta{
+            color:#64748b;
+            font-size:.8rem;
+            font-weight:650;
+            margin-top:2px;
+        }
+
+        .mini-btn{
+            border-radius:999px;
+            padding:.46rem .72rem;
+            font-size:.78rem;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            transition:.15s ease;
+            white-space:nowrap;
+        }
+
+        .mini-btn:hover{
+            background:#f8fafc;
+            color:#0f172a;
+            transform:translateY(-1px);
+        }
+
+        .mini-btn.primary{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+        .mini-btn.success{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+        .mini-btn.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca;}
+        .mini-btn.warning{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+
+        .actions-card{
+            display:grid;
+            gap:10px;
+        }
+
+        .action-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            background:white;
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:13px;
+        }
+
+        .action-title{
+            font-weight:950;
+            color:#0f172a;
+        }
+
+        .action-text{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:2px;
+        }
+
+        .empty-state{
+            text-align:center;
+            padding:32px 16px;
+            color:#64748b;
+        }
+
+        .empty-state i{
+            font-size:2.4rem;
+            color:#94a3b8;
+            margin-bottom:10px;
+        }
+
+        .empty-state h5{
+            color:#334155;
+            font-weight:950;
+            margin-bottom:6px;
+        }
+
+        .empty-state p{
+            margin:0;
+            font-weight:650;
+        }
+
+        @media print{
+            body{background:white;}
+            .topbar,
+            .hero .top-actions,
+            .no-print,
+            .btn-soft,
+            .btn-main,
+            .mini-btn{
+                display:none !important;
+            }
+
+            .page{
+                max-width:none;
+                padding:0;
+            }
+
+            .hero{
+                color:#0f172a;
+                background:white !important;
+                box-shadow:none;
+                border:1px solid #e2e8f0;
+            }
+
+            .panel{
+                box-shadow:none;
+                break-inside:avoid;
+            }
+        }
+
+        @media(max-width:1080px){
+            .layout{grid-template-columns:1fr;}
+            .hero-content{grid-template-columns:1fr;}
+            .hero-info{min-width:0;}
+        }
+
+        @media(max-width:720px){
+            .page{padding:14px;}
+
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+
+            .top-actions,
+            .btn-soft,
+            .btn-main{
+                width:100%;
+                justify-content:center;
+            }
+
+            .hero{
+                padding:22px;
+                border-radius:22px;
+            }
+
+            .hero h1{font-size:1.55rem;}
+
+            .info-grid,
+            .extra-grid{
+                grid-template-columns:1fr;
+            }
+
+            .student-top{flex-direction:column;}
+            .action-row{flex-direction:column; align-items:flex-start;}
+            .file-item{flex-direction:column;}
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+
+    <header class="topbar no-print">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Detalle de incidencia</h1>
+                <p class="brand-subtitle">
+                    Consulta completa de la incidencia, seguimientos, archivos y resolución.
+                </p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <a href="{% url 'panel_incidencias' %}" class="btn-soft">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Panel de incidencias
+            </a>
+
+            <button type="button" class="btn-soft" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i>
+                Imprimir
+            </button>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3 no-print">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section
+        class="hero
+        {% if incidencia.tipo == 'PEDAGOGICA' %}hero-pedagogica
+        {% elif incidencia.tipo == 'NUTRICIONAL' %}hero-nutricional
+        {% elif incidencia.tipo == 'MEDICA' %}hero-medica
+        {% elif incidencia.tipo == 'PSICOLOGICA' %}hero-psicologica
+        {% else %}hero-default{% endif %}"
+    >
+        <div class="hero-content">
+            <div>
+                <div class="hero-kicker">
+                    {% if incidencia.tipo == "PEDAGOGICA" %}
+                        <i class="bi bi-easel2-fill"></i> Incidencia pedagógica
+                    {% elif incidencia.tipo == "NUTRICIONAL" %}
+                        <i class="bi bi-egg-fried"></i> Incidencia nutricional
+                    {% elif incidencia.tipo == "MEDICA" %}
+                        <i class="bi bi-heart-pulse-fill"></i> Incidencia médica
+                    {% elif incidencia.tipo == "PSICOLOGICA" %}
+                        <i class="bi bi-person-hearts"></i> Incidencia psicológica
+                    {% else %}
+                        <i class="bi bi-clipboard2-pulse-fill"></i> Incidencia
+                    {% endif %}
+                </div>
+
+                <h1>{{ incidencia.nombre_alumno }}</h1>
+
+                <p>
+                    Fecha y hora: <strong>{{ incidencia.fecha_reporte|date:"d/m/Y H:i" }} hrs.</strong>
+                    · Sala: <strong>{{ incidencia.nombre_sala }}</strong>
+                    · Estado:
+                    {% if incidencia.estado == "ABIERTA" %}
+                        <strong>Abierta</strong>
+                    {% else %}
+                        <strong>Cerrada</strong>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="hero-info">
+                <div class="hero-label">Estado de la incidencia</div>
+                <div class="hero-value">
+                    {% if incidencia.estado == "ABIERTA" %}
+                        Abierta
+                    {% else %}
+                        Cerrada
+                    {% endif %}
+                </div>
+                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
+                    Seguimientos: <strong>{{ incidencia.total_seguimientos }}</strong>
+                    · Archivos: <strong>{{ archivos.count }}</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+
+        <aside>
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-person-heart"></i>
+                        Datos del menor
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="student-card">
+                        <div class="student-top">
+                            <div class="student-avatar">
+                                <i class="bi bi-person-heart"></i>
+                            </div>
+                            <div>
+                                <div class="student-name">
+                                    {{ incidencia.nombre_alumno }}
+                                </div>
+                                <div class="student-meta">
+                                    Sala: <strong>{{ incidencia.nombre_sala }}</strong><br>
+                                    {% if incidencia.semestre %}
+                                        Semestre: <strong>{{ incidencia.semestre.nombre }}</strong><br>
+                                    {% endif %}
+                                    {% if incidencia.dia_operativo %}
+                                        Día operativo: <strong>{{ incidencia.dia_operativo.fecha|date:"d/m/Y" }}</strong>
+                                    {% else %}
+                                        Día operativo: <strong>No vinculado</strong>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Tipo</div>
+                                <div class="info-value">{{ incidencia.get_tipo_display }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Riesgo</div>
+                                <div class="info-value">{{ incidencia.get_nivel_display }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Categoría</div>
+                                <div class="info-value">
+                                    {{ incidencia.categoria|default:"Sin categoría" }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Subtipo</div>
+                                <div class="info-value">
+                                    {{ incidencia.subtipo|default:"Sin subtipo" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if incidencia.estado == "ABIERTA" %}
+                        <div class="warning-card">
+                            <i class="bi bi-folder2-open me-1"></i>
+                            La incidencia sigue abierta. Para cerrarla debe tener al menos un seguimiento y una resolución.
+                        </div>
+                    {% else %}
+                        <div class="success-card">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Esta incidencia fue cerrada correctamente.
+                            {% if incidencia.cerrada_en %}
+                                <br>Cierre: {{ incidencia.cerrada_en|date:"d/m/Y H:i" }} hrs.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel mb-4 no-print">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        Acciones
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="actions-card">
+                        {% if puede_agregar_seguimiento %}
+                            <div class="action-row">
+                                <div>
+                                    <div class="action-title">Registrar seguimiento</div>
+                                    <div class="action-text">
+                                        Agrega una nota abierta y archivos si es necesario.
+                                    </div>
+                                </div>
+                                <a href="{% url 'registrar_seguimiento_incidencia' incidencia.id %}" class="mini-btn success">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                    Seguimiento
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="action-row">
+                                <div>
+                                    <div class="action-title">Seguimiento</div>
+                                    <div class="action-text">
+                                        Solo quien creó la incidencia puede registrar seguimiento mientras esté abierta.
+                                    </div>
+                                </div>
+                                <span class="badge-soft badge-gray">
+                                    <i class="bi bi-lock-fill"></i>
+                                    No disponible
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        {% if puede_cerrar and incidencia.estado == "ABIERTA" %}
+                            <div class="action-row">
+                                <div>
+                                    <div class="action-title">Cerrar incidencia</div>
+                                    <div class="action-text">
+                                        Requiere al menos un seguimiento y capturar resolución.
+                                    </div>
+                                </div>
+                                <a href="{% url 'cerrar_incidencia' incidencia.id %}" class="mini-btn danger">
+                                    <i class="bi bi-lock-fill"></i>
+                                    Cerrar
+                                </a>
+                            </div>
+                        {% elif incidencia.estado == "ABIERTA" %}
+                            <div class="action-row">
+                                <div>
+                                    <div class="action-title">Cierre</div>
+                                    <div class="action-text">
+                                        Solo la persona que creó la incidencia o el Administrador pueden cerrarla.
+                                    </div>
+                                </div>
+                                <span class="badge-soft badge-gray">
+                                    <i class="bi bi-lock-fill"></i>
+                                    No disponible
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        <div class="action-row">
+                            <div>
+                                <div class="action-title">Volver al panel</div>
+                                <div class="action-text">
+                                    Regresa al listado general de incidencias.
+                                </div>
+                            </div>
+                            <a href="{% url 'panel_incidencias' %}" class="mini-btn primary">
+                                <i class="bi bi-list-check"></i>
+                                Panel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-person-check-fill"></i>
+                        Aviso al responsable
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    {% if incidencia.responsable_informado %}
+                        <div class="success-card">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Se informó al responsable.
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Responsable</div>
+                                <div class="info-value">
+                                    {{ incidencia.responsable_informado_nombre|default:"Sin nombre registrado" }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Medio</div>
+                                <div class="info-value">
+                                    {{ incidencia.get_medio_aviso_responsable_display }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Fecha de aviso</div>
+                                <div class="info-value">
+                                    {% if incidencia.responsable_informado_en %}
+                                        {{ incidencia.responsable_informado_en|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        Sin fecha
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        {% if incidencia.nivel == "ALTO" %}
+                            <div class="danger-card">
+                                <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                                La incidencia es de riesgo alto y debería tener aviso al responsable.
+                            </div>
+                        {% else %}
+                            <div class="help-card">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                No se registró aviso al responsable.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </section>
+        </aside>
+
+        <main>
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                        Información de la incidencia
+                    </h2>
+
+                    {% if incidencia.estado == "ABIERTA" %}
+                        <span class="badge-soft badge-yellow">
+                            <i class="bi bi-folder2-open"></i>
+                            Abierta
+                        </span>
+                    {% else %}
+                        <span class="badge-soft badge-green">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Cerrada
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="panel-body">
+                    <div class="content-block">
+                        <div class="content-title">
+                            <i class="bi bi-card-text"></i>
+                            Descripción de la incidencia
+                        </div>
+                        <div class="text-box">
+                            {{ incidencia.descripcion }}
+                        </div>
+                    </div>
+
+                    <div class="content-block">
+                        <div class="content-title">
+                            <i class="bi bi-person-gear"></i>
+                            Intervención del personal
+                        </div>
+                        <div class="text-box">
+                            {{ incidencia.intervencion_personal|default:"Sin intervención registrada." }}
+                        </div>
+                    </div>
+
+                    {% if incidencia.datos_extra %}
+                        <div class="content-block">
+                            <div class="content-title">
+                                <i class="bi bi-clipboard-data-fill"></i>
+                                Datos específicos del área
+                            </div>
+
+                            <div class="extra-grid">
+                                {% if incidencia.datos_extra.sintomas_medicos %}
+                                    <div class="extra-item">
+                                        <div class="extra-label">Síntomas médicos</div>
+                                        <div class="extra-value">
+                                            {{ incidencia.datos_extra.sintomas_medicos|join:", " }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if incidencia.datos_extra.consistencia_evacuacion %}
+                                    <div class="extra-item">
+                                        <div class="extra-label">Consistencia de evacuación</div>
+                                        <div class="extra-value">
+                                            {{ incidencia.datos_extra.consistencia_evacuacion }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if incidencia.datos_extra.numero_evacuaciones %}
+                                    <div class="extra-item">
+                                        <div class="extra-label">Número de evacuaciones</div>
+                                        <div class="extra-value">
+                                            {{ incidencia.datos_extra.numero_evacuaciones }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if incidencia.datos_extra.alimento_relacionado %}
+                                    <div class="extra-item">
+                                        <div class="extra-label">Alimento relacionado</div>
+                                        <div class="extra-value">
+                                            {{ incidencia.datos_extra.alimento_relacionado }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if incidencia.datos_extra.conducta_observada %}
+                                    <div class="extra-item">
+                                        <div class="extra-label">Conducta observada</div>
+                                        <div class="extra-value">
+                                            {{ incidencia.datos_extra.conducta_observada }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if incidencia.datos_extra.contexto_observacion %}
+                                    <div class="extra-item">
+                                        <div class="extra-label">Contexto de observación</div>
+                                        <div class="extra-value">
+                                            {{ incidencia.datos_extra.contexto_observacion }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if incidencia.resolucion %}
+                        <div class="content-block">
+                            <div class="content-title">
+                                <i class="bi bi-check2-circle"></i>
+                                Resolución
+                            </div>
+                            <div class="text-box">
+                                {{ incidencia.resolucion }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-paperclip"></i>
+                        Archivos adjuntos de la incidencia
+                    </h2>
+
+                    <span class="badge-soft badge-blue">
+                        <i class="bi bi-files"></i>
+                        {{ archivos.count }} archivo(s)
+                    </span>
+                </div>
+
+                <div class="panel-body">
+                    {% if archivos %}
+                        <div class="file-list">
+                            {% for archivo in archivos %}
+                                <div class="file-item">
+                                    <div class="file-left">
+                                        <div class="file-icon">
+                                            <i class="bi bi-file-earmark-text-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="file-name">
+                                                {{ archivo.nombre_original|default:"Archivo adjunto" }}
+                                            </div>
+                                            <div class="file-meta">
+                                                Subido por: {{ archivo.subido_por|default:"Sin usuario" }}
+                                                · {{ archivo.subido_en|date:"d/m/Y H:i" }}
+                                            </div>
+                                            {% if archivo.descripcion %}
+                                                <div class="file-meta">
+                                                    {{ archivo.descripcion }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if archivo.archivo %}
+                                        <a href="{{ archivo.archivo.url }}" target="_blank" class="mini-btn primary">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                            Ver archivo
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-paperclip"></i>
+                            <h5>Sin archivos adjuntos</h5>
+                            <p>Esta incidencia no tiene evidencias o documentos adjuntos.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        Seguimientos
+                    </h2>
+
+                    <span class="badge-soft {% if incidencia.total_seguimientos > 0 %}badge-green{% else %}badge-red{% endif %}">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        {{ incidencia.total_seguimientos }} seguimiento(s)
+                    </span>
+                </div>
+
+                <div class="panel-body">
+                    {% if puede_agregar_seguimiento %}
+                        <div class="mb-3 no-print">
+                            <a href="{% url 'registrar_seguimiento_incidencia' incidencia.id %}" class="btn-main btn-green">
+                                <i class="bi bi-plus-circle-fill"></i>
+                                Agregar seguimiento
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    {% if seguimientos %}
+                        <div class="timeline">
+                            {% for seguimiento in seguimientos %}
+                                <div class="timeline-item">
+                                    <div class="timeline-icon">
+                                        <i class="bi bi-chat-left-text-fill"></i>
+                                    </div>
+
+                                    <div class="timeline-card">
+                                        <div class="timeline-title">
+                                            Seguimiento registrado
+                                        </div>
+                                        <div class="timeline-meta">
+                                            Por: {{ seguimiento.creado_por|default:"Sin usuario" }}
+                                            · {{ seguimiento.creado_en|date:"d/m/Y H:i" }} hrs.
+                                        </div>
+
+                                        <div class="timeline-text">
+                                            {{ seguimiento.nota }}
+                                        </div>
+
+                                        {% if seguimiento.archivos.all %}
+                                            <div class="mt-3">
+                                                <div class="file-list">
+                                                    {% for archivo in seguimiento.archivos.all %}
+                                                        <div class="file-item">
+                                                            <div class="file-left">
+                                                                <div class="file-icon">
+                                                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="file-name">
+                                                                        {{ archivo.nombre_original|default:"Archivo de seguimiento" }}
+                                                                    </div>
+                                                                    <div class="file-meta">
+                                                                        {{ archivo.subido_en|date:"d/m/Y H:i" }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {% if archivo.archivo %}
+                                                                <a href="{{ archivo.archivo.url }}" target="_blank" class="mini-btn primary">
+                                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                                    Ver
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-chat-left"></i>
+                            <h5>Sin seguimientos registrados</h5>
+                            <p>Para cerrar la incidencia debe registrarse al menos un seguimiento.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
