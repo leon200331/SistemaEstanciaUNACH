@@ -5,6 +5,7 @@ import secrets
 from django.forms import Select, SelectMultiple, RadioSelect
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 # Se unificaron las importaciones conflictivas aquí:
 from .models import (
@@ -1051,9 +1052,49 @@ class SedeForm(forms.ModelForm):
     def clean_clave(self):
         clave = (self.cleaned_data.get("clave") or "").strip().upper()
         clave = re.sub(r"[^A-Z0-9_-]+", "_", clave)
+
         if not clave:
             raise forms.ValidationError("Captura la clave de la sede.")
+
+        # Validación clara antes de guardar.
+        # Evita depender solo del error técnico de unique=True del modelo.
+        sedes = Sede.objects.filter(clave__iexact=clave)
+
+        if self.instance and self.instance.pk:
+            sedes = sedes.exclude(pk=self.instance.pk)
+
+        if sedes.exists():
+            raise forms.ValidationError(
+                "Ya existe una sede con esta clave. Usa otra clave o edita la sede existente."
+            )
+
         return clave
+
+    def clean_nombre(self):
+        nombre = (self.cleaned_data.get("nombre") or "").strip()
+
+        if not nombre:
+            raise forms.ValidationError("Captura el nombre de la sede.")
+
+        sedes = Sede.objects.filter(nombre__iexact=nombre)
+
+        if self.instance and self.instance.pk:
+            sedes = sedes.exclude(pk=self.instance.pk)
+
+        if sedes.exists():
+            raise forms.ValidationError(
+                "Ya existe una sede con este nombre. Revisa si debes editar la sede existente."
+            )
+
+        return nombre
+
+    def clean_correo(self):
+        correo = (self.cleaned_data.get("correo") or "").strip().lower()
+
+        if correo and "@" not in correo:
+            raise forms.ValidationError("Captura un correo válido para la sede.")
+
+        return correo
 
 
 class SemestreForm(forms.ModelForm):
@@ -1191,7 +1232,8 @@ class SalaForm(forms.ModelForm):
 
         if "sede" in self.fields:
             self.fields["sede"].queryset = Sede.objects.filter(activa=True).order_by("nombre")
-            self.fields["sede"].required = False
+            self.fields["sede"].required = True
+            self.fields["sede"].empty_label = "Seleccione una sede..."
 
         aplicar_clases_bootstrap(self)
 
@@ -1245,7 +1287,6 @@ class SalaSemestreForm(forms.ModelForm):
             "actividad_pedagogica_nombre",
             "actividad_pedagogica_inicio",
             "actividad_pedagogica_fin",
-            "actividad_pedagogica_personal",
             "recreo_inicio",
             "recreo_fin",
             "colacion_inicio",
@@ -1267,7 +1308,6 @@ class SalaSemestreForm(forms.ModelForm):
             "actividad_pedagogica_nombre": forms.TextInput(attrs={"placeholder": "Nombre de actividad"}),
             "actividad_pedagogica_inicio": forms.TimeInput(attrs={"type": "time"}),
             "actividad_pedagogica_fin": forms.TimeInput(attrs={"type": "time"}),
-            "actividad_pedagogica_personal": forms.TextInput(attrs={"placeholder": "Personal asignado"}),
             "recreo_inicio": forms.TimeInput(attrs={"type": "time"}),
             "recreo_fin": forms.TimeInput(attrs={"type": "time"}),
             "colacion_inicio": forms.TimeInput(attrs={"type": "time"}),

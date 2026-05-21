@@ -589,16 +589,15 @@ def construir_resumen_semestre(semestre):
 
 def asegurar_sede_inicial():
     """
-    Crea una sede inicial si todavía no existe ninguna.
-    Esto evita que el administrador quede bloqueado en el primer uso.
-    """
-    if not Sede.objects.exists():
-        Sede.objects.create(
-            clave="TUXTLA",
-            nombre="Estancia Infantil Universitaria UNACH - Tuxtla",
-            activa=True,
-        )
+    Ya no crea sedes automáticamente.
 
+    Regla correcta:
+    - Si la base está limpia, no debe existir ninguna sede.
+    - El Administrador del Sistema debe crear la sede manualmente desde
+      Gestión de Semestres -> Crear sede.
+    - Esta función se conserva solo por compatibilidad con llamadas existentes.
+    """
+    return None
 
 def obtener_origen_sprint4(request):
     """
@@ -3453,6 +3452,8 @@ def lista_semestres(request):
         messages.error(request, "Solo el Administrador del Sistema puede configurar semestres.")
         return redirect("/")
 
+    # No se crea sede automática. Si no hay sedes, la tabla aparecerá vacía
+    # y el Administrador deberá usar el botón "Crear sede".
     asegurar_sede_inicial()
 
     semestres = (
@@ -3557,7 +3558,12 @@ def crear_semestre(request):
         messages.error(request, "Solo el Administrador del Sistema puede crear semestres.")
         return redirect("/")
 
-    asegurar_sede_inicial()
+    if not Sede.objects.exists():
+        messages.warning(
+            request,
+            "Primero debes crear una sede antes de registrar un semestre."
+        )
+        return redirect_con_origen(request, "crear_sede")
 
     if request.method == "POST":
         form = SemestreForm(request.POST)
@@ -3786,7 +3792,12 @@ def crear_sala(request):
         messages.error(request, "Solo el Administrador del Sistema puede crear salas.")
         return redirect("/")
 
-    asegurar_sede_inicial()
+    if not Sede.objects.exists():
+        messages.warning(
+            request,
+            "Primero debes crear una sede antes de registrar salas."
+        )
+        return redirect_con_origen(request, "crear_sede")
 
     if request.method == "POST":
         form = SalaForm(request.POST)
