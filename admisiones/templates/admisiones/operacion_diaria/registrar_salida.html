@@ -61,22 +61,25 @@
         }
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:98px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.28);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            transform:scale(1.12);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
 
         .brand-title{
@@ -569,6 +572,45 @@
             max-width:560px;
         }
 
+
+        .selected-preview{
+            margin-top:12px;
+            background:#ffffff;
+            border:1px dashed #bbf7d0;
+            border-radius:18px;
+            padding:13px 14px;
+            color:#14532d;
+            font-weight:750;
+            line-height:1.35;
+        }
+
+        .selected-preview strong{
+            color:#0f172a;
+            font-weight:950;
+        }
+
+        .form-control,
+        .form-select{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+        }
+
+        .brand,
+        .panel,
+        .panel-body,
+        .form-section,
+        .form-grid,
+        .form-group{
+            min-width:0;
+        }
+
+        .info-value,
+        .student-name,
+        .student-meta{
+            overflow-wrap:anywhere;
+        }
+
         .required{
             color:#dc2626;
             font-weight:950;
@@ -699,8 +741,9 @@
                 </h1>
 
                 <p>
-                    Antes de entregar al menor, verifica la credencial del adulto responsable y valida el código
-                    de seguridad de 4 dígitos. El sistema registrará automáticamente la hora y la maestra que realizó la salida.
+                    Antes de entregar al menor, selecciona al tutor o familiar autorizado que lo recoge,
+                    verifica su credencial y valida el código individual de 4 dígitos de esa persona.
+                    El sistema registrará automáticamente la hora y la maestra que realizó la salida.
                 </p>
             </div>
 
@@ -836,7 +879,8 @@
 
                     <div class="security-card">
                         <i class="bi bi-shield-lock-fill me-1"></i>
-                        Confirma la credencial y valida el código de 4 dígitos antes de entregar al menor.
+                        Confirma la credencial y valida el código de 4 dígitos de la persona autorizada seleccionada.
+                        No es un código general del alumno.
                     </div>
                 </div>
             </section>
@@ -855,9 +899,9 @@
                             <i class="bi bi-person-badge-fill"></i>
                         </div>
                         <div>
-                            <div class="flow-title">Identificar responsable</div>
+                            <div class="flow-title">Seleccionar responsable</div>
                             <p class="flow-text">
-                                Captura quién recoge al menor y su parentesco.
+                                Elige al tutor o familiar autorizado que recoge al menor.
                             </p>
                         </div>
                     </div>
@@ -869,7 +913,7 @@
                         <div>
                             <div class="flow-title">Validar seguridad</div>
                             <p class="flow-text">
-                                Verifica credencial y código de seguridad.
+                                Verifica credencial y código individual de esa persona.
                             </p>
                         </div>
                     </div>
@@ -937,38 +981,23 @@
                         <div class="form-section">
                             <div class="form-section-title">
                                 <i class="bi bi-person-badge-fill"></i>
-                                Responsable que recoge al menor
+                                Responsable autorizado que recoge al menor
                             </div>
 
                             <div class="form-grid">
                                 <div class="form-group full">
-                                    <label for="{{ form.responsable_salida_nombre.id_for_label }}" class="form-label">
-                                        Responsable que recoge al niño <span class="required">*</span>
+                                    <label for="{{ form.responsable_codigo_id.id_for_label }}" class="form-label">
+                                        Tutor o familiar autorizado <span class="required">*</span>
                                     </label>
-                                    {{ form.responsable_salida_nombre }}
-                                    {% if form.responsable_salida_nombre.errors %}
-                                        <div class="errors">{{ form.responsable_salida_nombre.errors }}</div>
+                                    {{ form.responsable_codigo_id }}
+                                    {% if form.responsable_codigo_id.errors %}
+                                        <div class="errors">{{ form.responsable_codigo_id.errors }}</div>
                                     {% endif %}
-                                </div>
 
-                                <div class="form-group">
-                                    <label for="{{ form.responsable_salida_parentesco.id_for_label }}" class="form-label">
-                                        Parentesco <span class="required">*</span>
-                                    </label>
-                                    {{ form.responsable_salida_parentesco }}
-                                    {% if form.responsable_salida_parentesco.errors %}
-                                        <div class="errors">{{ form.responsable_salida_parentesco.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="{{ form.responsable_salida_telefono.id_for_label }}" class="form-label">
-                                        Teléfono
-                                    </label>
-                                    {{ form.responsable_salida_telefono }}
-                                    {% if form.responsable_salida_telefono.errors %}
-                                        <div class="errors">{{ form.responsable_salida_telefono.errors }}</div>
-                                    {% endif %}
+                                    <div class="selected-preview" id="responsablePreview">
+                                        <i class="bi bi-info-circle-fill me-1"></i>
+                                        Selecciona la persona que recoge al menor. El nombre, parentesco y teléfono se guardarán automáticamente desde el expediente.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -982,7 +1011,7 @@
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label for="{{ form.codigo_responsable.id_for_label }}" class="form-label">
-                                        Código de seguridad de 4 dígitos <span class="required">*</span>
+                                        Código individual de 4 dígitos <span class="required">*</span>
                                     </label>
                                     <div class="password-wrap">
                                         {{ form.codigo_responsable }}
@@ -991,7 +1020,7 @@
                                         </button>
                                     </div>
                                     <div class="mini-help">
-                                        Debe coincidir con el código registrado en la inscripción.
+                                        Debe coincidir con el tutor o familiar seleccionado.
                                     </div>
                                     {% if form.codigo_responsable.errors %}
                                         <div class="errors">{{ form.codigo_responsable.errors }}</div>
@@ -1102,6 +1131,32 @@
             icon.classList.add("bi-eye-fill");
         }
     }
+
+    function actualizarResponsablePreview(){
+        const select = document.getElementById("{{ form.responsable_codigo_id.id_for_label }}");
+        const preview = document.getElementById("responsablePreview");
+
+        if(!select || !preview){
+            return;
+        }
+
+        const option = select.options[select.selectedIndex];
+        const texto = (option?.text || "").trim();
+
+        if(!select.value || !texto){
+            preview.innerHTML = '<i class="bi bi-info-circle-fill me-1"></i> Selecciona la persona que recoge al menor. El nombre, parentesco y teléfono se guardarán automáticamente desde el expediente.';
+            return;
+        }
+
+        preview.innerHTML = '<i class="bi bi-person-check-fill me-1"></i> Responsable seleccionado: <strong>' + texto + '</strong>';
+    }
+
+    const responsableSelect = document.getElementById("{{ form.responsable_codigo_id.id_for_label }}");
+    if(responsableSelect){
+        responsableSelect.addEventListener("change", actualizarResponsablePreview);
+        actualizarResponsablePreview();
+    }
+
 </script>
 
 </body>

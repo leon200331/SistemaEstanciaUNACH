@@ -307,7 +307,6 @@
         .icon-festivo{color:#f59e0b;}
         .icon-suspension{color:#dc2626;}
         .icon-consejo{color:#2563eb;}
-        .icon-otro{color:#64748b;}
 
         .semestre-card{
             background:#eff6ff;
@@ -342,6 +341,106 @@
             .actions{justify-content:stretch;}
             .actions .btn{width:100%;}
         }
+
+        /* =========================================================
+           ALERTAS PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon {
+            margin: 0 .65rem 0 0 !important;
+        }
+
+        .swal2-timer-progress-bar {
+            background: rgba(37, 99, 235, .45) !important;
+        }
+
+        .sistema-toast-success {
+            border-left: 7px solid #16a34a !important;
+            background: #f0fdf4 !important;
+        }
+
+        .sistema-toast-error {
+            border-left: 7px solid #dc2626 !important;
+            background: #fef2f2 !important;
+        }
+
+        .sistema-toast-warning {
+            border-left: 7px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+        .sistema-toast-info {
+            border-left: 7px solid #2563eb !important;
+            background: #eff6ff !important;
+        }
+
+
+        /* =========================================================
+           AJUSTE FINAL: FECHAS Y CAMPOS SIN DESBORDES
+           ========================================================= */
+        *, *::before, *::after{
+            box-sizing:border-box;
+        }
+
+        .layout{
+            grid-template-columns:minmax(0, 1fr) 340px;
+        }
+
+        .row > [class*="col-"],
+        .panel,
+        .panel-body,
+        .field-card{
+            min-width:0;
+            max-width:100%;
+        }
+
+        .field-card{
+            overflow:hidden;
+            padding:14px;
+            margin-bottom:14px;
+        }
+
+        .form-control,
+        .form-select,
+        textarea{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+        }
+
+        .form-label{
+            line-height:1.25;
+        }
+
+        .field-help,
+        .info-text,
+        .side-note p{
+            line-height:1.35;
+        }
+
+        .actions{
+            min-width:0;
+        }
+
+        @media(max-width:1100px){
+            .layout{
+                grid-template-columns:1fr;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -352,21 +451,13 @@
             <img src="{% static 'img/logo.png' %}" alt="UNACH">
             <div>
                 <div class="brand-title">Días Festivos y Suspensiones</div>
-                <div class="brand-subtitle">Sprint 4 · Épica 3 · Administrador del sistema</div>
+                <div class="brand-subtitle">Administrador del sistema</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Detalle semestre
-            </a>
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                <i class="bi bi-calendar2-week-fill me-1"></i> Semestres
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-house-door-fill me-1"></i> Panel TI
             </a>
         </div>
     </div>
@@ -374,20 +465,12 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <section class="hero">
         <div>
             <h1>{{ titulo|default:"Agregar día festivo o suspensión" }}</h1>
             <p>
-                Registra fechas no laborales, suspensiones o consejos técnicos para el calendario operativo del semestre.
+                Registra únicamente días festivos, suspensiones o consejos técnicos entre lunes y viernes. Sábados y domingos ya son inhábiles automáticos.
             </p>
         </div>
         <div class="hero-icon">
@@ -416,6 +499,13 @@
                         </div>
                     {% endif %}
 
+                    <div class="alert alert-warning rounded-4 fw-semibold mb-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        No captures sábados ni domingos. El sistema ya los marca automáticamente como días inhábiles,
+                        cerrados y sin operación diaria.
+                    </div>
+
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="field-card">
@@ -424,7 +514,7 @@
                                 </label>
                                 {{ form.fecha }}
                                 <div class="field-help">
-                                    Debe estar dentro del periodo del semestre.
+                                    Debe estar dentro del periodo del semestre y ser de lunes a viernes.
                                 </div>
                                 {% if form.fecha.errors %}
                                     <div class="error-text">
@@ -441,7 +531,7 @@
                                 </label>
                                 {{ form.tipo }}
                                 <div class="field-help">
-                                    Selecciona si es festivo, suspensión, consejo técnico u otro.
+                                    Selecciona si es día festivo, suspensión o consejo técnico.
                                 </div>
                                 {% if form.tipo.errors %}
                                     <div class="error-text">
@@ -458,7 +548,7 @@
                         </label>
                         {{ form.motivo }}
                         <div class="field-help">
-                            Ejemplo: Día del Trabajo, suspensión administrativa, consejo técnico, etc.
+                            Ejemplo: Día del Trabajo, suspensión administrativa o consejo técnico.
                         </div>
                         {% if form.motivo.errors %}
                             <div class="error-text">
@@ -486,7 +576,7 @@
                     </div>
 
                     <div class="actions">
-                        <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                        <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
                             <i class="bi bi-x-circle me-1"></i> Cancelar
                         </a>
 
@@ -517,7 +607,7 @@
                     ¿Qué controla este registro?
                 </h6>
                 <p class="mb-0">
-                    Estos días se consideran al generar el calendario operativo del semestre y pueden marcarse como días sin recepción de niños.
+                    Estos registros solo aplican para lunes a viernes. Sábados y domingos ya se consideran inhábiles automáticamente y no necesitan registrarse.
                 </p>
             </div>
 
@@ -542,8 +632,8 @@
                             <span><strong>Consejo técnico:</strong> actividad interna del personal.</span>
                         </li>
                         <li>
-                            <i class="bi bi-three-dots-circle-fill icon-otro"></i>
-                            <span><strong>Otro:</strong> cualquier evento especial del semestre.</span>
+                            <i class="bi bi-calendar-x-fill text-secondary"></i>
+                            <span><strong>Sábado y domingo:</strong> inhábiles automáticos. No se registran aquí.</span>
                         </li>
                     </ul>
                 </div>
@@ -555,7 +645,7 @@
                     Recomendación
                 </div>
                 <p class="info-text">
-                    Registra estos días antes de iniciar el semestre para que el calendario operativo se genere correctamente.
+                    Registra solo los días inhábiles especiales de lunes a viernes antes de iniciar el semestre. Los sábados y domingos no se capturan aquí.
                 </p>
             </div>
         </aside>
@@ -564,6 +654,125 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fechaInput = document.getElementById("id_fecha");
+        const form = fechaInput ? fechaInput.closest("form") : null;
+
+        function esFinDeSemana(valorFecha) {
+            if (!valorFecha) return false;
+
+            const partes = valorFecha.split("-");
+            if (partes.length !== 3) return false;
+
+            const fecha = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+            const dia = fecha.getDay(); // 0 domingo, 6 sábado
+
+            return dia === 0 || dia === 6;
+        }
+
+        function avisarFinDeSemana() {
+            if (!fechaInput || !esFinDeSemana(fechaInput.value)) {
+                return true;
+            }
+
+            Swal.fire({
+                icon: "warning",
+                title: "Día inhábil automático",
+                text: "No es necesario registrar sábados o domingos. El sistema ya los marca como días inhábiles.",
+                confirmButtonText: "Entendido",
+                confirmButtonColor: "#f59e0b"
+            });
+
+            fechaInput.value = "";
+            fechaInput.focus();
+            return false;
+        }
+
+        if (fechaInput) {
+            fechaInput.addEventListener("change", avisarFinDeSemana);
+        }
+
+        if (form) {
+            form.addEventListener("submit", function(event) {
+                if (!avisarFinDeSemana()) {
+                    event.preventDefault();
+                }
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

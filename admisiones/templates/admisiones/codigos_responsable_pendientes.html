@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Códigos de seguridad | Trabajo Social</title>
+    <title>Códigos por responsable | Trabajo Social</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -35,7 +35,7 @@
         }
 
         .page{
-            max-width:1380px;
+            max-width:1280px;
             margin:0 auto;
             padding:24px;
         }
@@ -58,25 +58,29 @@
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:98px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.28);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            transform:scale(1.12);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
 
         .brand-title{
@@ -114,6 +118,7 @@
             justify-content:center;
             gap:8px;
             transition:.18s ease;
+            white-space:nowrap;
         }
 
         .btn-soft:hover{
@@ -121,39 +126,6 @@
             color:#0f172a;
             background:#f8fafc;
             box-shadow:0 12px 25px rgba(15,23,42,.09);
-        }
-
-        .btn-main{
-            border-radius:999px;
-            padding:.78rem 1rem;
-            font-weight:950;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            text-decoration:none;
-            border:none;
-            transition:.18s ease;
-        }
-
-        .btn-main:hover{
-            transform:translateY(-1px);
-            box-shadow:0 14px 28px rgba(15,23,42,.16);
-        }
-
-        .btn-blue{
-            background:linear-gradient(135deg,#2563eb,#0891b2);
-            color:white;
-        }
-
-        .btn-green{
-            background:linear-gradient(135deg,#16a34a,#22c55e);
-            color:white;
-        }
-
-        .btn-purple{
-            background:linear-gradient(135deg,#7c3aed,#2563eb);
-            color:white;
         }
 
         .hero{
@@ -182,7 +154,7 @@
             position:relative;
             z-index:1;
             display:grid;
-            grid-template-columns:1fr auto;
+            grid-template-columns:minmax(0,1fr) auto;
             gap:18px;
             align-items:center;
         }
@@ -209,13 +181,13 @@
 
         .hero p{
             margin:8px 0 0;
-            max-width:850px;
+            max-width:890px;
             font-weight:600;
             opacity:.94;
         }
 
         .hero-info{
-            min-width:270px;
+            min-width:285px;
             background:rgba(255,255,255,.18);
             border:1px solid rgba(255,255,255,.28);
             border-radius:22px;
@@ -258,7 +230,7 @@
             border-radius:22px;
             padding:16px;
             box-shadow:0 14px 34px rgba(15,23,42,.07);
-            min-height:118px;
+            min-height:112px;
             position:relative;
             overflow:hidden;
         }
@@ -364,13 +336,14 @@
 
         .tools-row{
             display:grid;
-            grid-template-columns:1fr auto;
+            grid-template-columns:minmax(0,1fr) auto;
             gap:12px;
             margin-bottom:16px;
         }
 
         .search-box{
             position:relative;
+            min-width:0;
         }
 
         .search-box i{
@@ -423,51 +396,39 @@
             border-color:#0f172a;
         }
 
-        .table-wrap{
-            overflow:auto;
-            border-radius:18px;
+        .student-list{
+            display:grid;
+            gap:14px;
+        }
+
+        .student-card-row{
             border:1px solid var(--border);
             background:white;
+            border-radius:24px;
+            overflow:hidden;
+            box-shadow:0 10px 24px rgba(15,23,42,.06);
         }
 
-        .table{
-            margin:0;
-            min-width:1120px;
-        }
-
-        .table thead th{
+        .student-head{
+            display:grid;
+            grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;
+            gap:14px;
+            align-items:center;
+            padding:16px;
             background:#f8fafc;
-            color:#475569;
-            text-transform:uppercase;
-            font-size:.72rem;
-            letter-spacing:.06em;
             border-bottom:1px solid var(--border);
-            font-weight:950;
-            padding:13px 14px;
-            white-space:nowrap;
         }
 
-        .table tbody td{
-            padding:14px;
-            vertical-align:middle;
-            border-bottom:1px solid #eef2f7;
-            font-size:.9rem;
-        }
-
-        .table tbody tr:last-child td{
-            border-bottom:none;
-        }
-
-        .student-cell{
+        .student-main{
             display:flex;
             gap:12px;
             align-items:center;
-            min-width:260px;
+            min-width:0;
         }
 
         .avatar{
-            width:46px;
-            height:46px;
+            width:48px;
+            height:48px;
             border-radius:16px;
             background:linear-gradient(135deg,#dbeafe,#dcfce7);
             color:#1d4ed8;
@@ -478,17 +439,98 @@
             flex-shrink:0;
         }
 
-        .student-name{
+        .avatar.responsible{
+            background:linear-gradient(135deg,#ede9fe,#dbeafe);
+            color:#6d28d9;
+        }
+
+        .student-name,
+        .responsible-name{
             font-weight:950;
             color:#0f172a;
             line-height:1.2;
+            overflow-wrap:anywhere;
         }
 
-        .student-meta{
+        .student-meta,
+        .responsible-meta{
             color:#64748b;
             font-size:.8rem;
             font-weight:650;
             margin-top:2px;
+            overflow-wrap:anywhere;
+        }
+
+        .summary-mini{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+
+        .student-toggle{
+            border:none;
+            background:#0f172a;
+            color:white;
+            border-radius:999px;
+            padding:.62rem .9rem;
+            font-weight:900;
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            white-space:nowrap;
+        }
+
+        .student-toggle i{
+            transition:.18s ease;
+        }
+
+        .student-toggle[aria-expanded="true"] i{
+            transform:rotate(180deg);
+        }
+
+        .student-body{
+            padding:16px;
+            display:grid;
+            gap:12px;
+        }
+
+        .responsible-section-label{
+            color:#475569;
+            font-size:.74rem;
+            letter-spacing:.07em;
+            text-transform:uppercase;
+            font-weight:950;
+            margin:4px 0 0;
+        }
+
+        .responsible-row{
+            border:1px solid var(--border);
+            background:#fff;
+            border-radius:20px;
+            padding:14px;
+            display:grid;
+            grid-template-columns:minmax(0,1.35fr) minmax(0,.72fr) minmax(0,.72fr) minmax(0,.78fr) auto;
+            gap:12px;
+            align-items:center;
+        }
+
+        .responsible-row.principal{
+            border-color:#93c5fd;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+        }
+
+        .responsible-info{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            min-width:0;
+        }
+
+        .status-stack{
+            display:flex;
+            flex-wrap:wrap;
+            gap:7px;
         }
 
         .badge-soft{
@@ -509,41 +551,16 @@
         .badge-purple{background:#ede9fe;color:#5b21b6;}
         .badge-red{background:#fee2e2;color:#991b1b;}
 
-        .code-status{
-            display:grid;
-            gap:7px;
-            min-width:170px;
-        }
-
-        .code-line{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:8px;
-            font-weight:850;
-            font-size:.8rem;
-            color:#475569;
-        }
-
-        .code-line i{
-            font-size:.96rem;
-        }
-
-        .ok{color:#16a34a;}
-        .pending{color:#ca8a04;}
-        .missing{color:#dc2626;}
-        .muted{color:#94a3b8;}
-
         .action-group{
             display:flex;
             gap:7px;
             flex-wrap:wrap;
-            min-width:270px;
+            justify-content:flex-end;
         }
 
         .mini-btn{
             border-radius:999px;
-            padding:.46rem .72rem;
+            padding:.5rem .78rem;
             font-size:.78rem;
             font-weight:900;
             text-decoration:none;
@@ -554,6 +571,7 @@
             background:white;
             color:#334155;
             transition:.15s ease;
+            white-space:nowrap;
         }
 
         .mini-btn:hover{
@@ -574,16 +592,17 @@
             border-color:#bbf7d0;
         }
 
-        .mini-btn.warning{
-            background:#fff7ed;
-            color:#c2410c;
-            border-color:#fed7aa;
-        }
-
         .mini-btn.danger{
             background:#fef2f2;
             color:#b91c1c;
             border-color:#fecaca;
+        }
+
+        .mini-btn.disabled{
+            pointer-events:none;
+            opacity:.68;
+            background:#f8fafc;
+            color:#64748b;
         }
 
         .empty-state{
@@ -629,6 +648,24 @@
             .filter-pills{
                 justify-content:flex-start;
             }
+
+            .student-head{
+                grid-template-columns:1fr;
+            }
+
+            .student-toggle{
+                width:100%;
+                justify-content:center;
+            }
+
+            .responsible-row{
+                grid-template-columns:1fr;
+                align-items:start;
+            }
+
+            .action-group{
+                justify-content:flex-start;
+            }
         }
 
         @media(max-width:720px){
@@ -640,9 +677,17 @@
                 border-radius:20px;
             }
 
+            .brand{
+                align-items:flex-start;
+            }
+
+            .brand-logo{
+                width:90px;
+                height:62px;
+            }
+
             .top-actions,
-            .btn-soft,
-            .btn-main{
+            .btn-soft{
                 width:100%;
                 justify-content:center;
             }
@@ -677,15 +722,15 @@
             <div>
                 <h1 class="brand-title">Códigos de seguridad</h1>
                 <p class="brand-subtitle">
-                    Generación y control del código de 4 dígitos para entrada y salida del menor.
+                    Control de códigos individuales por tutor o familiar autorizado.
                 </p>
             </div>
         </div>
 
         <div class="top-actions">
-            <a href="{% url 'panel_admisiones' %}" class="btn-soft">
+            <a href="/panel-administrativo/" class="btn-soft">
                 <i class="bi bi-arrow-left-circle-fill"></i>
-                Panel admisiones
+                Panel Trabajo Social
             </a>
 
             <a href="{% url 'validacion_pagos_pendientes' %}" class="btn-soft">
@@ -713,11 +758,11 @@
                     Trabajo Social
                 </div>
 
-                <h1>Control de códigos del responsable</h1>
+                <h1>Control de códigos por alumno</h1>
 
                 <p>
-                    Aquí se muestran los alumnos con inscripción finalizada y pago validado. Trabajo Social puede generar
-                    el código de seguridad, resetearlo si se extravía y confirmar la entrega de la credencial junto con el código.
+                    Cada alumno se muestra una sola vez. Dentro de cada tarjeta aparecen sus responsables autorizados:
+                    primero el tutor principal, después tutor secundario y familiares autorizados.
                 </p>
             </div>
 
@@ -731,7 +776,7 @@
                     {% endif %}
                 </div>
                 <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
-                    Alumnos listos: <strong>{{ inscripciones.count }}</strong>
+                    Alumnos listos: <strong>{{ inscripciones|length }}</strong>
                 </div>
             </div>
         </div>
@@ -749,24 +794,24 @@
             <div class="summary-icon icon-blue">
                 <i class="bi bi-people-fill"></i>
             </div>
-            <div class="summary-number">{{ inscripciones.count }}</div>
+            <div class="summary-number">{{ inscripciones|length }}</div>
             <div class="summary-label">Alumnos finalizados</div>
         </div>
 
         <div class="summary-card">
             <div class="summary-icon icon-yellow">
-                <i class="bi bi-key-fill"></i>
+                <i class="bi bi-person-exclamation"></i>
             </div>
             <div class="summary-number" id="contadorSinCodigo">0</div>
-            <div class="summary-label">Sin código</div>
+            <div class="summary-label">Responsables sin código</div>
         </div>
 
         <div class="summary-card">
             <div class="summary-icon icon-green">
-                <i class="bi bi-shield-check"></i>
+                <i class="bi bi-key-fill"></i>
             </div>
             <div class="summary-number" id="contadorConCodigo">0</div>
-            <div class="summary-label">Con código</div>
+            <div class="summary-label">Responsables con código</div>
         </div>
 
         <div class="summary-card">
@@ -774,7 +819,7 @@
                 <i class="bi bi-person-check-fill"></i>
             </div>
             <div class="summary-number" id="contadorEntregados">0</div>
-            <div class="summary-label">Entrega confirmada</div>
+            <div class="summary-label">Códigos entregados</div>
         </div>
     </section>
 
@@ -782,26 +827,25 @@
         <div class="panel-header">
             <h2 class="panel-title">
                 <i class="bi bi-list-check"></i>
-                Alumnos listos para código
+                Alumnos y responsables autorizados
             </h2>
 
             <span class="badge-soft badge-blue">
                 <i class="bi bi-shield-lock-fill"></i>
-                Código + credencial
+                Vista agrupada
             </span>
         </div>
 
         <div class="panel-body">
             <div class="help-card">
                 <i class="bi bi-info-circle-fill me-1"></i>
-                El código visible solo debe entregarse al responsable. Después se guarda con hash y ya no se muestra como texto.
-                Si se pierde, se debe usar la opción <strong>Resetear</strong> y capturar el motivo.
+                Para evitar repetición, cada alumno aparece una sola vez. Abre la tarjeta para ver sus tutores y familiares autorizados.
             </div>
 
             <div class="tools-row">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="buscarAlumno" class="search-input" placeholder="Buscar por alumno, sala, semestre o estado...">
+                    <input type="text" id="buscarAlumno" class="search-input" placeholder="Buscar por alumno, responsable, parentesco, sala o semestre...">
                 </div>
 
                 <div class="filter-pills">
@@ -813,162 +857,130 @@
             </div>
 
             {% if inscripciones %}
-                <div class="table-wrap">
-                    <table class="table align-middle" id="tablaCodigos">
-                        <thead>
-                            <tr>
-                                <th>Alumno</th>
-                                <th>Sala</th>
-                                <th>Semestre</th>
-                                <th>Pago</th>
-                                <th>Código</th>
-                                <th>Entrega</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for inscripcion in inscripciones %}
-                                <tr
-                                    data-texto="
-                                        {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
-                                        {{ inscripcion.sala_semestre_asignada.sala.nombre }}
-                                        {{ inscripcion.semestre.nombre }}
-                                        {{ inscripcion.estado }}
-                                    "
-                                    data-codigo="{% if inscripcion.codigo_responsable_hash %}CON_CODIGO{% else %}SIN_CODIGO{% endif %}"
-                                    data-entrega="{% if inscripcion.codigo_responsable_entregado %}ENTREGADO{% else %}PENDIENTE_ENTREGA{% endif %}"
-                                >
-                                    <td>
-                                        <div class="student-cell">
-                                            <div class="avatar">
-                                                <i class="bi bi-person-heart"></i>
-                                            </div>
-                                            <div>
-                                                <div class="student-name">
-                                                    {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
-                                                </div>
-                                                <div class="student-meta">
-                                                    Estado: {{ inscripcion.estado }}
-                                                </div>
-                                            </div>
+                <div class="student-list" id="listaCodigos">
+                    {% for inscripcion in inscripciones %}
+                        <article
+                            class="student-card-row"
+                            data-texto="
+                                {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                                {% for responsable in inscripcion.responsables_codigo %}
+                                    {{ responsable.nombre_completo }}
+                                    {{ responsable.parentesco }}
+                                    {{ responsable.get_tipo_responsable_display }}
+                                {% endfor %}
+                                {{ inscripcion.sala_semestre_asignada.sala.nombre }}
+                                {{ inscripcion.semestre.nombre }}
+                                {{ inscripcion.estado }}
+                            "
+                        >
+                            <div class="student-head">
+                                <div class="student-main">
+                                    <div class="avatar">
+                                        <i class="bi bi-person-heart"></i>
+                                    </div>
+                                    <div>
+                                        <div class="student-name">
+                                            {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
                                         </div>
-                                    </td>
+                                        <div class="student-meta">
+                                            Estado: {{ inscripcion.estado }}
+                                        </div>
+                                    </div>
+                                </div>
 
-                                    <td>
+                                <div>
+                                    <div class="student-meta">Sala</div>
+                                    <div class="student-name" style="font-size:.95rem;">
                                         {% if inscripcion.sala_semestre_asignada and inscripcion.sala_semestre_asignada.sala %}
-                                            <strong>{{ inscripcion.sala_semestre_asignada.sala.nombre }}</strong>
-                                            <div class="student-meta">
+                                            {{ inscripcion.sala_semestre_asignada.sala.nombre }}
+                                            <span class="student-meta d-block">
                                                 {{ inscripcion.sala_semestre_asignada.sala.get_tipo_sala_display }}
-                                            </div>
-                                        {% else %}
-                                            <span class="badge-soft badge-red">
-                                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                                Sin sala
                                             </span>
+                                        {% else %}
+                                            Sin sala
                                         {% endif %}
-                                    </td>
+                                    </div>
+                                </div>
 
-                                    <td>
+                                <div>
+                                    <div class="student-meta">Semestre</div>
+                                    <div class="student-name" style="font-size:.95rem;">
                                         {% if inscripcion.semestre %}
-                                            <strong>{{ inscripcion.semestre.nombre }}</strong>
-                                            <div class="student-meta">
+                                            {{ inscripcion.semestre.nombre }}
+                                            <span class="student-meta d-block">
                                                 Sede: {{ inscripcion.semestre.sede_nombre }}
-                                            </div>
-                                        {% else %}
-                                            <span class="badge-soft badge-red">
-                                                <i class="bi bi-calendar-x-fill"></i>
-                                                Sin semestre
                                             </span>
+                                        {% else %}
+                                            Sin semestre
                                         {% endif %}
-                                    </td>
+                                    </div>
+                                </div>
 
-                                    <td>
+                                <button
+                                    class="student-toggle"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#responsables{{ inscripcion.id }}"
+                                    aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                                    aria-controls="responsables{{ inscripcion.id }}"
+                                >
+                                    Ver responsables
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+
+                            <div id="responsables{{ inscripcion.id }}" class="collapse {% if forloop.first %}show{% endif %}">
+                                <div class="student-body">
+
+                                    <div class="summary-mini">
                                         {% if inscripcion.pago_validado or inscripcion.estado_pago == "VALIDADO" %}
                                             <span class="badge-soft badge-green">
                                                 <i class="bi bi-check-circle-fill"></i>
-                                                Validado
+                                                Pago validado
                                             </span>
                                         {% else %}
                                             <span class="badge-soft badge-yellow">
                                                 <i class="bi bi-clock-fill"></i>
-                                                Revisar
+                                                Pago pendiente
                                             </span>
                                         {% endif %}
-                                    </td>
 
-                                    <td>
-                                        <div class="code-status">
-                                            <div class="code-line">
-                                                <span>Generado</span>
-                                                {% if inscripcion.codigo_responsable_hash %}
-                                                    <i class="bi bi-check-circle-fill ok"></i>
-                                                {% else %}
-                                                    <i class="bi bi-x-circle-fill missing"></i>
-                                                {% endif %}
-                                            </div>
+                                        <span class="badge-soft badge-blue">
+                                            <i class="bi bi-person-vcard-fill"></i>
+                                            Responsables autorizados
+                                        </span>
+                                    </div>
 
-                                            <div class="code-line">
-                                                <span>Seguro</span>
-                                                {% if inscripcion.codigo_responsable_hash %}
-                                                    <i class="bi bi-shield-lock-fill ok"></i>
-                                                {% else %}
-                                                    <i class="bi bi-shield-x missing"></i>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </td>
+                                    <div class="responsible-section-label">
+                                        Tutor principal
+                                    </div>
 
-                                    <td>
-                                        {% if inscripcion.codigo_responsable_entregado %}
-                                            <span class="badge-soft badge-green">
-                                                <i class="bi bi-person-check-fill"></i>
-                                                Entregado
-                                            </span>
-                                            {% if inscripcion.codigo_responsable_entregado_en %}
-                                                <div class="student-meta">
-                                                    {{ inscripcion.codigo_responsable_entregado_en|date:"d/m/Y H:i" }}
-                                                </div>
-                                            {% endif %}
-                                        {% elif inscripcion.codigo_responsable_hash %}
-                                            <span class="badge-soft badge-yellow">
-                                                <i class="bi bi-clock-fill"></i>
-                                                Pendiente
-                                            </span>
-                                        {% else %}
-                                            <span class="badge-soft badge-gray">
-                                                <i class="bi bi-dash-circle-fill"></i>
-                                                Sin código
-                                            </span>
+                                    {% for responsable in inscripcion.responsables_codigo %}
+                                        {% if responsable.tipo_responsable == "TUTOR_PRINCIPAL" %}
+                                            {% include "admisiones/partials/responsable_codigo_row.html" with responsable=responsable inscripcion=inscripcion principal=True %}
                                         {% endif %}
-                                    </td>
+                                    {% endfor %}
 
-                                    <td>
-                                        <div class="action-group">
-                                            {% if not inscripcion.codigo_responsable_hash %}
-                                                <a href="{% url 'generar_codigo_responsable' inscripcion.id %}" class="mini-btn primary">
-                                                    <i class="bi bi-key-fill"></i>
-                                                    Generar
-                                                </a>
-                                            {% else %}
-                                                <a href="{% url 'generar_codigo_responsable' inscripcion.id %}" class="mini-btn danger">
-                                                    <i class="bi bi-arrow-clockwise"></i>
-                                                    Resetear
-                                                </a>
+                                    <div class="responsible-section-label">
+                                        Tutor secundario y familiares autorizados
+                                    </div>
 
-                                                {% if not inscripcion.codigo_responsable_entregado %}
-                                                    <a href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}" class="mini-btn success">
-                                                        <i class="bi bi-person-check-fill"></i>
-                                                        Confirmar entrega
-                                                    </a>
-                                                {% endif %}
-                                            {% endif %}
+                                    {% for responsable in inscripcion.responsables_codigo %}
+                                        {% if responsable.tipo_responsable != "TUTOR_PRINCIPAL" %}
+                                            {% include "admisiones/partials/responsable_codigo_row.html" with responsable=responsable inscripcion=inscripcion principal=False %}
+                                        {% endif %}
+                                    {% empty %}
+                                        <div class="responsible-row">
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                                No se encontraron responsables autorizados para este alumno.
+                                            </span>
                                         </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
                 </div>
             {% else %}
                 <div class="empty-state">
@@ -984,11 +996,12 @@
 
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     const inputBuscar = document.getElementById("buscarAlumno");
-    const filas = Array.from(document.querySelectorAll("#tablaCodigos tbody tr"));
+    const tarjetas = Array.from(document.querySelectorAll(".student-card-row"));
     const filtros = document.querySelectorAll(".filter-pill");
 
     const contadorSinCodigo = document.getElementById("contadorSinCodigo");
@@ -997,23 +1010,16 @@
 
     let filtroActivo = "TODOS";
 
-    function actualizarContadores(){
+    function contarEstados(){
+        const rows = Array.from(document.querySelectorAll(".responsible-row[data-codigo]"));
         let sinCodigo = 0;
         let conCodigo = 0;
         let entregados = 0;
 
-        filas.forEach(fila => {
-            if((fila.dataset.codigo || "").trim() === "SIN_CODIGO"){
-                sinCodigo++;
-            }
-
-            if((fila.dataset.codigo || "").trim() === "CON_CODIGO"){
-                conCodigo++;
-            }
-
-            if((fila.dataset.entrega || "").trim() === "ENTREGADO"){
-                entregados++;
-            }
+        rows.forEach(row => {
+            if((row.dataset.codigo || "") === "SIN_CODIGO"){ sinCodigo++; }
+            if((row.dataset.codigo || "") === "CON_CODIGO"){ conCodigo++; }
+            if((row.dataset.entrega || "") === "ENTREGADO"){ entregados++; }
         });
 
         if(contadorSinCodigo){ contadorSinCodigo.textContent = sinCodigo; }
@@ -1021,27 +1027,37 @@
         if(contadorEntregados){ contadorEntregados.textContent = entregados; }
     }
 
+    function tarjetaCumpleFiltro(tarjeta){
+        const rows = Array.from(tarjeta.querySelectorAll(".responsible-row[data-codigo]"));
+
+        if(filtroActivo === "TODOS"){
+            return true;
+        }
+
+        if(filtroActivo === "SIN_CODIGO"){
+            return rows.some(row => row.dataset.codigo === "SIN_CODIGO");
+        }
+
+        if(filtroActivo === "CON_CODIGO"){
+            return rows.some(row => row.dataset.codigo === "CON_CODIGO");
+        }
+
+        if(filtroActivo === "ENTREGADO"){
+            return rows.some(row => row.dataset.entrega === "ENTREGADO");
+        }
+
+        return true;
+    }
+
     function aplicarFiltros(){
         const texto = (inputBuscar?.value || "").toLowerCase().trim();
 
-        filas.forEach(fila => {
-            const contenido = (fila.dataset.texto || "").toLowerCase();
-            const codigo = (fila.dataset.codigo || "").trim();
-            const entrega = (fila.dataset.entrega || "").trim();
-
+        tarjetas.forEach(tarjeta => {
+            const contenido = (tarjeta.dataset.texto || "").toLowerCase();
             const coincideTexto = !texto || contenido.includes(texto);
+            const coincideFiltro = tarjetaCumpleFiltro(tarjeta);
 
-            let coincideFiltro = true;
-
-            if(filtroActivo === "SIN_CODIGO"){
-                coincideFiltro = codigo === "SIN_CODIGO";
-            }else if(filtroActivo === "CON_CODIGO"){
-                coincideFiltro = codigo === "CON_CODIGO";
-            }else if(filtroActivo === "ENTREGADO"){
-                coincideFiltro = entrega === "ENTREGADO";
-            }
-
-            fila.style.display = coincideTexto && coincideFiltro ? "" : "none";
+            tarjeta.style.display = coincideTexto && coincideFiltro ? "" : "none";
         });
     }
 
@@ -1058,7 +1074,7 @@
         });
     });
 
-    actualizarContadores();
+    contarEstados();
 </script>
 
 </body>

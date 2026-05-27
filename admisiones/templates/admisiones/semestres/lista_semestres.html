@@ -373,6 +373,47 @@
             .table-responsive{font-size:.92rem;}
             .btn-row{justify-content:flex-start;}
         }
+
+        .management-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-bottom:22px;align-items:stretch;}
+        .action-section{padding:18px;}
+        .action-section-title{color:#334155;font-size:.9rem;font-weight:950;text-transform:uppercase;letter-spacing:.06em;margin:0;}
+        .action-section-subtitle{color:#64748b;font-size:.88rem;margin-top:4px;font-weight:650;}
+        .action-group{margin-bottom:16px;}
+        .action-group-title{font-size:.74rem;font-weight:950;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}
+        .action-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+        .action-card{border:1px solid #dbe4ef;background:#fff;border-radius:18px;padding:14px;text-decoration:none;color:#0f172a;min-height:120px;box-shadow:0 10px 20px rgba(15,23,42,.055);display:flex;flex-direction:column;gap:9px;transition:.16s ease;}
+        .action-card:hover{transform:translateY(-2px);box-shadow:0 16px 28px rgba(15,23,42,.09);border-color:#93c5fd;color:#0f172a;}
+        .action-card.primary{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#2563eb;}
+        .action-card.success{background:#f0fdf4;border-color:#bbf7d0;}
+        .action-card.info{background:#eff6ff;border-color:#bfdbfe;}
+        .action-card.warning{background:#fffbeb;border-color:#fde68a;}
+        .action-card.muted{background:#f8fafc;border-color:#e2e8f0;}
+        .action-icon{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#eff6ff;color:#1d4ed8;font-size:1.25rem;}
+        .action-card.primary .action-icon{background:rgba(255,255,255,.18);color:#fff;}
+        .action-card.success .action-icon{background:#dcfce7;color:#166534;}
+        .action-card.warning .action-icon{background:#fef3c7;color:#92400e;}
+        .action-name{font-weight:950;line-height:1.15;}
+        .action-desc{color:#64748b;font-size:.82rem;line-height:1.32;font-weight:650;}
+        .action-card.primary .action-desc{color:rgba(255,255,255,.86);}
+        .workflow-list{display:flex;flex-direction:column;gap:10px;}
+        .workflow-step{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:11px 12px;}
+        .workflow-num{width:30px;height:30px;border-radius:999px;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:.84rem;}
+        .workflow-title{font-weight:900;color:#0f172a;line-height:1.15;}
+        .workflow-desc{color:#64748b;font-size:.8rem;margin-top:2px;font-weight:650;}
+        .workflow-badge{border-radius:999px;padding:.25rem .52rem;background:#fff;border:1px solid #cbd5e1;color:#475569;font-size:.72rem;font-weight:900;white-space:nowrap;}
+        .next-action-box{background:#f0fdf4;border:1px solid #bbf7d0;border-left:6px solid #16a34a;border-radius:18px;padding:14px 15px;margin-bottom:16px;color:#14532d;font-weight:750;}
+        .next-action-box.warning{background:#fffbeb;border-color:#fde68a;border-left-color:#f59e0b;color:#92400e;}
+        .swal2-toast.sistema-toast{border-radius:18px!important;padding:14px 16px!important;box-shadow:0 16px 38px rgba(15,23,42,.18)!important;border:1px solid rgba(226,232,240,.95)!important;}
+        .swal2-toast.sistema-toast .swal2-title{font-size:.92rem!important;font-weight:800!important;line-height:1.35!important;color:#0f172a!important;}
+        .swal2-toast.sistema-toast .swal2-icon{margin:0 .65rem 0 0!important;}
+        .swal2-timer-progress-bar{background:rgba(37,99,235,.45)!important;}
+        .sistema-toast-success{border-left:7px solid #16a34a!important;background:#f0fdf4!important;}
+        .sistema-toast-error{border-left:7px solid #dc2626!important;background:#fef2f2!important;}
+        .sistema-toast-warning{border-left:7px solid #f59e0b!important;background:#fffbeb!important;}
+        .sistema-toast-info{border-left:7px solid #2563eb!important;background:#eff6ff!important;}
+        @media(max-width:992px){.management-grid{grid-template-columns:1fr;}.action-cards{grid-template-columns:repeat(2,minmax(0,1fr));}}
+        @media(max-width:576px){.action-cards{grid-template-columns:1fr;}.workflow-step{grid-template-columns:auto 1fr;}.workflow-badge{grid-column:2;}}
+
     </style>
 </head>
 <body>
@@ -384,13 +425,13 @@
 
             <div>
                 <div class="brand-title">Configuración de Semestres</div>
-                <div class="brand-subtitle">Épica 3 · Sprint 4 · Administración del sistema</div>
+                <div class="brand-subtitle">Administración del sistema</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
             {% if request.GET.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
+                <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
                     <i class="bi bi-arrow-left me-1"></i> Panel TI
                 </a>
             {% else %}
@@ -407,14 +448,6 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <section class="hero">
         <div>
@@ -446,23 +479,80 @@
         </div>
     {% endif %}
 
-    <div class="actions-row">
-        <a href="{% url 'crear_semestre' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-primary action-btn">
-            <i class="bi bi-plus-circle-fill me-2"></i>Crear semestre
-        </a>
+    <section class="management-grid">
+        <div class="panel action-section">
+            <div class="action-section-title"><i class="bi bi-grid-1x2-fill me-1"></i> Acciones principales</div>
+            <div class="action-section-subtitle mb-3">Usa primero configuración base y después opera cada semestre desde su detalle.</div>
 
-        <a href="{% url 'crear_sede' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-primary action-btn bg-white">
-            <i class="bi bi-building-add me-2"></i>Crear sede
-        </a>
+            {% if semestre_activo %}
+                <div class="next-action-box"><i class="bi bi-check-circle-fill me-1"></i> Hay un semestre activo. Puedes revisar su detalle o continuar con asignaciones.</div>
+            {% else %}
+                <div class="next-action-box warning"><i class="bi bi-info-circle-fill me-1"></i> Siguiente recomendado: crea o configura un semestre antes de iniciar operación.</div>
+            {% endif %}
 
-        <a href="{% url 'crear_sala' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-success action-btn bg-white">
-            <i class="bi bi-door-open-fill me-2"></i>Crear sala
-        </a>
+            <div class="action-group">
+                <div class="action-group-title">Semestres</div>
+                <div class="action-cards">
+                    <a href="{% url 'crear_semestre' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card primary">
+                        <div class="action-icon"><i class="bi bi-plus-circle-fill"></i></div>
+                        <div><div class="action-name">Crear semestre</div><div class="action-desc">Registra periodo, sede y personal institucional.</div></div>
+                    </a>
 
-        <a href="{% url 'lista_asignacion_salas' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-dark action-btn bg-white">
-            <i class="bi bi-person-check-fill me-2"></i>Asignar alumnos a sala
-        </a>
-    </div>
+                    {% if semestre_activo %}
+                        <a href="{% url 'detalle_semestre' semestre_activo.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card info">
+                            <div class="action-icon"><i class="bi bi-eye-fill"></i></div>
+                            <div><div class="action-name">Ver semestre activo</div><div class="action-desc">Consulta salas, calendario, alumnos y cierre.</div></div>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card muted">
+                            <div class="action-icon"><i class="bi bi-calendar2-week-fill"></i></div>
+                            <div><div class="action-name">Sin semestre activo</div><div class="action-desc">Cuando inicies uno, aparecerá aquí el acceso directo.</div></div>
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'lista_asignacion_salas' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card warning">
+                        <div class="action-icon"><i class="bi bi-person-check-fill"></i></div>
+                        <div><div class="action-name">Asignar alumnos</div><div class="action-desc">Vincula alumnos finalizados con sala y semestre.</div></div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="action-group">
+                <div class="action-group-title">Configuración base</div>
+                <div class="action-cards">
+                    <a href="{% url 'crear_sede' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card info">
+                        <div class="action-icon"><i class="bi bi-building-add"></i></div>
+                        <div><div class="action-name">Crear sede</div><div class="action-desc">Alta de ubicación para semestres y salas.</div></div>
+                    </a>
+
+                    <a href="{% url 'crear_sala' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card success">
+                        <div class="action-icon"><i class="bi bi-door-open-fill"></i></div>
+                        <div><div class="action-name">Crear sala base</div><div class="action-desc">Registra lactantes, maternales o sala mixta.</div></div>
+                    </a>
+
+                    <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card muted">
+                        <div class="action-icon"><i class="bi bi-files"></i></div>
+                        <div><div class="action-name">Clonar semestre</div><div class="action-desc">Pendiente de implementar para copiar configuración anterior.</div></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <aside class="panel action-section">
+            <div class="action-section-title"><i class="bi bi-list-ol me-1"></i> Orden recomendado</div>
+            <div class="action-section-subtitle mb-3">Sigue estos pasos para evitar configuraciones incompletas.</div>
+
+            <div class="workflow-list">
+                <div class="workflow-step"><div class="workflow-num">1</div><div><div class="workflow-title">Crear sede</div><div class="workflow-desc">Ubicación donde operará el semestre.</div></div><span class="workflow-badge">Base</span></div>
+                <div class="workflow-step"><div class="workflow-num">2</div><div><div class="workflow-title">Crear semestre</div><div class="workflow-desc">Periodo, fechas, filtros y encuesta.</div></div><span class="workflow-badge">Periodo</span></div>
+                <div class="workflow-step"><div class="workflow-num">3</div><div><div class="workflow-title">Crear salas base</div><div class="workflow-desc">Catálogo de salas disponibles por sede.</div></div><span class="workflow-badge">Salas</span></div>
+                <div class="workflow-step"><div class="workflow-num">4</div><div><div class="workflow-title">Configurar sala del semestre</div><div class="workflow-desc">Cupo y horarios desde el detalle.</div></div><span class="workflow-badge">Detalle</span></div>
+                <div class="workflow-step"><div class="workflow-num">5</div><div><div class="workflow-title">Asignar maestras</div><div class="workflow-desc">Personal por sala y horarios particulares.</div></div><span class="workflow-badge">Personal</span></div>
+                <div class="workflow-step"><div class="workflow-num">6</div><div><div class="workflow-title">Generar calendario</div><div class="workflow-desc">Días operativos, festivos y suspensiones.</div></div><span class="workflow-badge">Calendario</span></div>
+                <div class="workflow-step"><div class="workflow-num">7</div><div><div class="workflow-title">Iniciar semestre</div><div class="workflow-desc">El sistema valida requisitos antes de activar.</div></div><span class="workflow-badge">Inicio</span></div>
+            </div>
+        </aside>
+    </section>
 
     <section class="stats-grid">
         <div class="stat-card">
@@ -487,8 +577,8 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Módulo</div>
-            <div class="stat-value" style="font-size:1.25rem;">Sprint 4</div>
+            <div class="stat-label">Gestión</div>
+            <div class="stat-value" style="font-size:1.25rem;">Operativa</div>
         </div>
     </section>
 
@@ -636,6 +726,66 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+    const mensajesSistema = [
+        {% for message in messages %}
+        {texto: "{{ message|escapejs }}", tags: "{{ message.tags|default:'info'|escapejs }}"},
+        {% endfor %}
+    ];
+
+    function obtenerIcono(tags) {
+        tags = (tags || "").toLowerCase();
+        if (tags.includes("success")) return "success";
+        if (tags.includes("error") || tags.includes("danger")) return "error";
+        if (tags.includes("warning")) return "warning";
+        return "info";
+    }
+
+    function obtenerClase(icono) {
+        if (icono === "success") return "sistema-toast-success";
+        if (icono === "error") return "sistema-toast-error";
+        if (icono === "warning") return "sistema-toast-warning";
+        return "sistema-toast-info";
+    }
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4300,
+        timerProgressBar: true,
+        customClass: { popup: "sistema-toast" },
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+    });
+
+    for (const mensaje of mensajesSistema) {
+        const icono = obtenerIcono(mensaje.tags);
+        await Toast.fire({
+            icon: icono,
+            title: mensaje.texto,
+            customClass: { popup: `sistema-toast ${obtenerClase(icono)}` }
+        });
+    }
+});
+</script>
+{% endif %}
+
+
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+</script>
 
 </body>
 </html>

@@ -616,6 +616,270 @@
         @media(max-width:520px){
             .stats-grid{grid-template-columns:1fr;}
         }
+
+        /* =========================================================
+           ALERTAS Y CONFIRMACIONES PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon {
+            margin: 0 .65rem 0 0 !important;
+        }
+
+        .swal2-timer-progress-bar {
+            background: rgba(37, 99, 235, .45) !important;
+        }
+
+        .sistema-toast-success {
+            border-left: 7px solid #16a34a !important;
+            background: #f0fdf4 !important;
+        }
+
+        .sistema-toast-error {
+            border-left: 7px solid #dc2626 !important;
+            background: #fef2f2 !important;
+        }
+
+        .sistema-toast-warning {
+            border-left: 7px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+        .sistema-toast-info {
+            border-left: 7px solid #2563eb !important;
+            background: #eff6ff !important;
+        }
+
+        .sistema-modal-popup {
+            border-radius: 22px !important;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .28) !important;
+        }
+
+        .sistema-modal-title {
+            color: #0f172a !important;
+            font-weight: 900 !important;
+        }
+
+        .sistema-modal-confirm {
+            border-radius: 12px !important;
+            font-weight: 800 !important;
+            padding: .65rem 1rem !important;
+        }
+
+        .sistema-modal-cancel {
+            border-radius: 12px !important;
+            font-weight: 800 !important;
+            padding: .65rem 1rem !important;
+        }
+
+
+        /* =========================================================
+           AJUSTE FINAL: DETALLE SIN DESBORDES Y HORARIOS COMPACTOS
+           ========================================================= */
+        *, *::before, *::after{
+            box-sizing:border-box;
+        }
+
+        .layout{
+            grid-template-columns:minmax(0, 1fr) 360px;
+        }
+
+        .panel,
+        .panel-body,
+        .info-card,
+        .stat-card,
+        .timeline-item,
+        .maestra-item,
+        .quick-actions,
+        .calendar-status-card,
+        .calendar-mini{
+            min-width:0;
+            max-width:100%;
+        }
+
+        .info-value,
+        .timeline-meta,
+        .maestra-name,
+        .maestra-meta,
+        .section-note,
+        .calendar-status-text{
+            overflow-wrap:anywhere;
+            word-break:break-word;
+        }
+
+        .quick-actions{
+            overflow:hidden;
+        }
+
+        .action-btn{
+            max-width:100%;
+            white-space:normal;
+            text-align:left;
+        }
+
+        .schedule-compact-grid{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:10px;
+            margin-bottom:14px;
+        }
+
+        .schedule-compact-card{
+            min-width:0;
+            max-width:100%;
+            overflow:hidden;
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            padding:11px 12px;
+        }
+
+        .schedule-compact-label{
+            color:#475569;
+            font-size:.68rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:6px;
+            display:flex;
+            align-items:center;
+            gap:6px;
+            line-height:1.2;
+        }
+
+        .schedule-compact-value{
+            color:#0f172a;
+            font-weight:900;
+            font-size:.92rem;
+            line-height:1.25;
+        }
+
+        .schedule-compact-sub{
+            display:block;
+            color:#64748b;
+            font-size:.78rem;
+            font-weight:750;
+            margin-top:3px;
+        }
+
+        .schedule-range{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            flex-wrap:wrap;
+        }
+
+        .schedule-range i{
+            color:#64748b;
+            font-size:.85rem;
+        }
+
+        .maestra-meta{
+            display:flex;
+            flex-wrap:wrap;
+            gap:6px;
+            margin-top:5px;
+        }
+
+        .maestra-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:4px;
+            background:#fff;
+            border:1px solid #dbe4ef;
+            color:#475569;
+            border-radius:999px;
+            padding:.22rem .48rem;
+            font-size:.76rem;
+            font-weight:800;
+            line-height:1.2;
+            max-width:100%;
+        }
+
+        .maestra-chip strong{
+            color:#0f172a;
+            font-weight:950;
+        }
+
+        .table-responsive{
+            overflow-x:auto;
+        }
+
+        @media(max-width:1100px){
+            .layout{
+                grid-template-columns:1fr;
+            }
+
+            .side-panel{
+                position:static;
+            }
+        }
+
+        @media(max-width:900px){
+            .schedule-compact-grid{
+                grid-template-columns:repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media(max-width:576px){
+            .schedule-compact-grid{
+                grid-template-columns:1fr;
+            }
+
+            .maestra-item{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+
+            .btn-row{
+                justify-content:flex-start;
+            }
+        }
+
+
+
+        .timeline-weekend{
+            background:#f8fafc;
+            border-style:dashed;
+            opacity:.96;
+        }
+
+        .calendar-weekend-note{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            border-radius:16px;
+            padding:12px 14px;
+            color:#475569;
+            font-size:.88rem;
+            font-weight:750;
+            margin-bottom:14px;
+        }
+
+        .calendar-weekend-note i{
+            color:#64748b;
+        }
+
+        .error-box .section-note{
+            color:#475569;
+            border-color:#fed7aa;
+        }
+
+        .error-box .btn{
+            background:#fff;
+        }
+
     </style>
 </head>
 <body>
@@ -632,16 +896,8 @@
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Semestres
-            </a>
-            {% if request.GET.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'lista_asignacion_salas' %}?semestre={{ semestre.id }}{% if request.GET.origen == 'ti' %}&origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                <i class="bi bi-diagram-3-fill me-1"></i> Asignar salas
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-house-door-fill me-1"></i> Panel TI
             </a>
         </div>
     </div>
@@ -649,14 +905,6 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <section class="hero">
         <div>
@@ -690,12 +938,12 @@
             <a href="{% url 'agregar_dia_festivo' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-warning bg-white action-btn">
                 <i class="bi bi-calendar-event me-2"></i>Día festivo / suspensión
             </a>
-            <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-success bg-white action-btn">
-                <i class="bi bi-door-open-fill me-2"></i>Agregar sala al semestre
-            </a>
-
             <a href="{% url 'crear_sala' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-primary bg-white action-btn">
                 <i class="bi bi-building-add me-2"></i>Crear sala base
+            </a>
+
+            <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-success bg-white action-btn">
+                <i class="bi bi-door-open-fill me-2"></i>Agregar sala al semestre
             </a>
         {% endif %}
 
@@ -732,9 +980,10 @@
             ¿Qué es el calendario operativo?
         </div>
         <p>
-            Es la lista de días hábiles/laborales del semestre. Sirve para controlar la operación diaria,
-            futuras bitácoras, incidencias y la validación de cierre del semestre. Si ya está generado,
-            el botón de actualizar no duplica días; solo crea los que falten.
+            Es la lista de días del semestre para controlar la operación diaria, bitácoras,
+            incidencias y cierre. Los sábados y domingos son inhábiles automáticos:
+            no se abren, no se cierran manualmente y no bloquean el cierre del semestre.
+            Si ya está generado, el botón de actualizar no duplica días; solo recalcula lo necesario.
         </p>
     </div>
 
@@ -860,12 +1109,12 @@
                     </h2>
                     {% if semestre.estado != "CERRADO" %}
                         <div class="d-flex gap-2 flex-wrap justify-content-end">
-                            <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-success btn-mini">
-                                <i class="bi bi-plus-lg me-1"></i>Agregar al semestre
-                            </a>
-
                             <a href="{% url 'crear_sala' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-primary btn-mini">
                                 <i class="bi bi-building-add me-1"></i>Crear sala base
+                            </a>
+
+                            <a href="{% url 'agregar_sala_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-success btn-mini">
+                                <i class="bi bi-plus-lg me-1"></i>Agregar al semestre
                             </a>
                         </div>
                     {% endif %}
@@ -901,71 +1150,104 @@
                             </div>
                         </div>
 
-                        <div class="table-responsive mb-3">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Entrada maestras</th>
-                                        <th>Recepción</th>
-                                        <th>Desayuno</th>
-                                        <th>Actividad</th>
-                                        <th>Recreo</th>
-                                        <th>Colación</th>
-                                        <th>Siesta</th>
-                                        <th>Comida</th>
-                                        <th>Salida maestras</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{ sala_semestre.entrada_maestras|time:"H:i"|default:"-" }}</td>
-                                        <td>
-                                            {{ sala_semestre.recepcion_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ sala_semestre.recepcion_fin|time:"H:i"|default:"-" }}
-                                        </td>
-                                        <td>
-                                            {{ sala_semestre.desayuno_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ sala_semestre.desayuno_fin|time:"H:i"|default:"-" }}
-                                        </td>
-                                        <td>
-                                            <strong>{{ sala_semestre.actividad_pedagogica_nombre|default:"-" }}</strong><br>
-                                            <span class="text-muted">
-                                                {{ sala_semestre.actividad_pedagogica_inicio|time:"H:i"|default:"-" }}
-                                                -
-                                                {{ sala_semestre.actividad_pedagogica_fin|time:"H:i"|default:"-" }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {{ sala_semestre.recreo_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ sala_semestre.recreo_fin|time:"H:i"|default:"-" }}
-                                        </td>
-                                        <td>
-                                            {{ sala_semestre.colacion_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ sala_semestre.colacion_fin|time:"H:i"|default:"-" }}
-                                        </td>
-                                        <td>
-                                            {{ sala_semestre.siesta_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ sala_semestre.siesta_fin|time:"H:i"|default:"-" }}
-                                        </td>
-                                        <td>
-                                            {{ sala_semestre.comida_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ sala_semestre.comida_fin|time:"H:i"|default:"-" }}
-                                        </td>
-                                        <td>{{ sala_semestre.salida_maestras|time:"H:i"|default:"-" }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <div class="schedule-compact-grid">
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-person-workspace"></i> Entrada maestras
+                                </div>
+                                <div class="schedule-compact-value">
+                                    {{ sala_semestre.entrada_maestras|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
 
-                        <div class="section-note">
-                            <strong>Personal asignado actividad pedagógica:</strong>
-                            {{ sala_semestre.actividad_pedagogica_personal|default:"Sin asignar" }}
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-door-open-fill"></i> Recepción
+                                </div>
+                                <div class="schedule-compact-value schedule-range">
+                                    {{ sala_semestre.recepcion_inicio|time:"H:i"|default:"-" }}
+                                    <i class="bi bi-arrow-right"></i>
+                                    {{ sala_semestre.recepcion_fin|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-cup-hot-fill"></i> Desayuno
+                                </div>
+                                <div class="schedule-compact-value schedule-range">
+                                    {{ sala_semestre.desayuno_inicio|time:"H:i"|default:"-" }}
+                                    <i class="bi bi-arrow-right"></i>
+                                    {{ sala_semestre.desayuno_fin|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-palette-fill"></i> Actividad
+                                </div>
+                                <div class="schedule-compact-value">
+                                    {{ sala_semestre.actividad_pedagogica_nombre|default:"-" }}
+                                    <span class="schedule-compact-sub schedule-range">
+                                        {{ sala_semestre.actividad_pedagogica_inicio|time:"H:i"|default:"-" }}
+                                        <i class="bi bi-arrow-right"></i>
+                                        {{ sala_semestre.actividad_pedagogica_fin|time:"H:i"|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-balloon-fill"></i> Recreo
+                                </div>
+                                <div class="schedule-compact-value schedule-range">
+                                    {{ sala_semestre.recreo_inicio|time:"H:i"|default:"-" }}
+                                    <i class="bi bi-arrow-right"></i>
+                                    {{ sala_semestre.recreo_fin|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-apple"></i> Colación
+                                </div>
+                                <div class="schedule-compact-value schedule-range">
+                                    {{ sala_semestre.colacion_inicio|time:"H:i"|default:"-" }}
+                                    <i class="bi bi-arrow-right"></i>
+                                    {{ sala_semestre.colacion_fin|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-moon-stars-fill"></i> Siesta
+                                </div>
+                                <div class="schedule-compact-value schedule-range">
+                                    {{ sala_semestre.siesta_inicio|time:"H:i"|default:"-" }}
+                                    <i class="bi bi-arrow-right"></i>
+                                    {{ sala_semestre.siesta_fin|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-egg-fried"></i> Comida
+                                </div>
+                                <div class="schedule-compact-value schedule-range">
+                                    {{ sala_semestre.comida_inicio|time:"H:i"|default:"-" }}
+                                    <i class="bi bi-arrow-right"></i>
+                                    {{ sala_semestre.comida_fin|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
+
+                            <div class="schedule-compact-card">
+                                <div class="schedule-compact-label">
+                                    <i class="bi bi-box-arrow-right"></i> Salida maestras
+                                </div>
+                                <div class="schedule-compact-value">
+                                    {{ sala_semestre.salida_maestras|time:"H:i"|default:"-" }}
+                                </div>
+                            </div>
                         </div>
 
                         <h6 class="fw-bold mb-2">
@@ -987,19 +1269,31 @@
                                             {% endif %}
                                         </div>
                                         <div class="maestra-meta">
-                                            {{ asignacion.get_rol_display }} ·
-                                            Jornada:
-                                            {{ asignacion.horario_entrada|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ asignacion.horario_salida|time:"H:i"|default:"-" }}
-                                            · Desayuno:
-                                            {{ asignacion.desayuno_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ asignacion.desayuno_fin|time:"H:i"|default:"-" }}
-                                            · Tiempo fuera:
-                                            {{ asignacion.tiempo_fuera_inicio|time:"H:i"|default:"-" }}
-                                            -
-                                            {{ asignacion.tiempo_fuera_fin|time:"H:i"|default:"-" }}
+                                            <span class="maestra-chip">
+                                                <i class="bi bi-person-badge"></i>
+                                                <strong>Rol:</strong> {{ asignacion.get_rol_display }}
+                                            </span>
+                                            <span class="maestra-chip">
+                                                <i class="bi bi-clock"></i>
+                                                <strong>Jornada:</strong>
+                                                {{ asignacion.horario_entrada|time:"H:i"|default:"-" }}
+                                                →
+                                                {{ asignacion.horario_salida|time:"H:i"|default:"-" }}
+                                            </span>
+                                            <span class="maestra-chip">
+                                                <i class="bi bi-cup-hot"></i>
+                                                <strong>Desayuno:</strong>
+                                                {{ asignacion.desayuno_inicio|time:"H:i"|default:"-" }}
+                                                →
+                                                {{ asignacion.desayuno_fin|time:"H:i"|default:"-" }}
+                                            </span>
+                                            <span class="maestra-chip">
+                                                <i class="bi bi-hourglass-split"></i>
+                                                <strong>Tiempo fuera:</strong>
+                                                {{ asignacion.tiempo_fuera_inicio|time:"H:i"|default:"-" }}
+                                                →
+                                                {{ asignacion.tiempo_fuera_fin|time:"H:i"|default:"-" }}
+                                            </span>
                                         </div>
                                     </div>
 
@@ -1008,7 +1302,7 @@
                                             <a href="{% url 'editar_asignacion_maestra' asignacion.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-mini">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <form method="POST" action="{% url 'eliminar_asignacion_maestra' asignacion.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" onsubmit="return confirm('¿Eliminar esta asignación de maestra?');">
+                                            <form method="POST" action="{% url 'eliminar_asignacion_maestra' asignacion.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" data-confirm="¿Eliminar esta asignación de maestra?">
                                                 {% csrf_token %}
             {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
                                                 <button type="submit" class="btn btn-outline-danger btn-mini">
@@ -1060,6 +1354,15 @@
                     {% endif %}
                 </div>
 
+                <div class="panel-body border-bottom">
+                    <div class="section-note mb-0">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        Aquí solo se registran días especiales de lunes a viernes:
+                        festivos, suspensiones o consejos técnicos. Sábados y domingos
+                        ya son inhábiles automáticos y no se agregan en esta lista.
+                    </div>
+                </div>
+
                 {% if dias_festivos %}
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -1088,7 +1391,7 @@
                                         <td>
                                             <div class="btn-row">
                                                 {% if semestre.estado != "CERRADO" %}
-                                                    <form method="POST" action="{% url 'eliminar_dia_festivo' dia.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" onsubmit="return confirm('¿Eliminar este día festivo o suspensión?');">
+                                                    <form method="POST" action="{% url 'eliminar_dia_festivo' dia.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" data-confirm="¿Eliminar este día festivo o suspensión?">
                                                         {% csrf_token %}
             {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
                                                         <button type="submit" class="btn btn-outline-danger btn-mini">
@@ -1107,7 +1410,7 @@
                     <div class="empty-state">
                         <i class="bi bi-calendar-x"></i>
                         <h5>Sin días registrados</h5>
-                        <p>No hay días festivos ni suspensiones configurados.</p>
+                        <p>No hay días festivos, suspensiones o consejos técnicos configurados de lunes a viernes.</p>
                     </div>
                 {% endif %}
             </section>
@@ -1184,71 +1487,7 @@
                     </div>
                 {% endif %}
             </section>
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Incidencias abiertas
-                    </h2>
-                </div>
 
-                <div class="section-note m-3">
-                    <strong>Solo validación para cierre:</strong>
-                    el Administrador del Sistema no registra ni cierra incidencias.
-                    Las incidencias pedagógicas serán registradas y atendidas por Coordinación de Sala en otro sprint.
-                    Para cerrar el semestre, esta lista debe estar vacía.
-                </div>
-
-                {% if incidencias_abiertas %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Alumno</th>
-                                    <th>Nivel</th>
-                                    <th>Descripción</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for incidencia in incidencias_abiertas %}
-                                    <tr>
-                                        <td>{{ incidencia.fecha_reporte|date:"d/m/Y H:i" }}</td>
-                                        <td>
-                                            {% if incidencia.alumno %}
-                                                {{ incidencia.alumno.solicitud_ingreso.nombres_menor }}
-                                                {{ incidencia.alumno.solicitud_ingreso.apellido_paterno_menor }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if incidencia.nivel == "ALTO" %}
-                                                <span class="pill pill-red">{{ incidencia.get_nivel_display }}</span>
-                                            {% else %}
-                                                <span class="pill pill-yellow">{{ incidencia.get_nivel_display }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ incidencia.descripcion|truncatechars:110 }}</td>
-                                        <td>
-                                            <span class="pill pill-red">
-                                                <i class="bi bi-exclamation-circle-fill"></i>
-                                                Abierta
-                                            </span>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="empty-state">
-                        <i class="bi bi-shield-check"></i>
-                        <h5>No hay incidencias abiertas</h5>
-                        <p>Esta validación está correcta para el cierre del semestre.</p>
-                    </div>
-                {% endif %}
-            </section>
 
         </div>
 
@@ -1291,11 +1530,25 @@
                         {% if errores_cierre %}
                             <div class="error-box">
                                 <h6><i class="bi bi-lock-fill me-1"></i>No se puede cerrar todavía</h6>
-                                <ul class="mb-0 ps-3">
+                                <ul class="mb-3 ps-3">
                                     {% for error in errores_cierre %}
                                         <li>{{ error }}</li>
                                     {% endfor %}
                                 </ul>
+
+                                {% with errores_texto=errores_cierre|join:" "|lower %}
+                                    {% if "incidencia" in errores_texto %}
+                                        <div class="section-note bg-white mb-3">
+                                            <strong>Acción requerida:</strong>
+                                            revise el módulo de Incidencias para consultar o concluir las incidencias pendientes antes de cerrar el semestre.
+                                        </div>
+
+                                        <a href="{% url 'panel_incidencias' %}" class="btn btn-outline-primary w-100 fw-bold rounded-4">
+                                            <i class="bi bi-clipboard2-pulse-fill me-1"></i>
+                                            Ir al módulo de incidencias
+                                        </a>
+                                    {% endif %}
+                                {% endwith %}
                             </div>
                         {% else %}
                             <button class="btn btn-danger w-100 fw-bold rounded-4 py-2" data-bs-toggle="modal" data-bs-target="#modalCerrar">
@@ -1361,8 +1614,8 @@
                                 <div>
                                     <div class="calendar-status-title">Calendario operativo generado</div>
                                     <p class="calendar-status-text">
-                                        El calendario laboral del semestre ya existe. Puedes actualizarlo si cambiaste fechas,
-                                        festivos o suspensiones.
+                                        El calendario del semestre ya existe. Sábados y domingos quedan cerrados automáticamente.
+                                        Puedes actualizarlo si cambiaste fechas, festivos o suspensiones.
                                     </p>
                                 </div>
                             </div>
@@ -1399,8 +1652,8 @@
                                 <div>
                                     <div class="calendar-status-title">Calendario pendiente de generar</div>
                                     <p class="calendar-status-text">
-                                        Genera el calendario para crear los días laborales del semestre. Esto será necesario
-                                        para cerrar días y después cerrar el semestre.
+                                        Genera el calendario para crear los días del semestre. Lunes a viernes quedarán como
+                                        días operativos, y sábados/domingo quedarán inhábiles automáticos.
                                     </p>
                                 </div>
                             </div>
@@ -1416,26 +1669,50 @@
                     {% endif %}
 
                     {% if dias_operativos %}
+                        <div class="calendar-weekend-note">
+                            <i class="bi bi-calendar-x-fill me-1"></i>
+                            Sábados y domingos aparecen como días inhábiles automáticos. No requieren apertura,
+                            cierre, entradas, salidas ni bitácoras.
+                        </div>
+
                         <div class="timeline-list">
                             {% for dia in dias_operativos %}
-                                <div class="timeline-item">
+                                <div class="timeline-item {% if not dia.es_habil %}timeline-weekend{% endif %}">
                                     <div>
                                         <div class="timeline-date">{{ dia.fecha|date:"d/m/Y" }}</div>
                                         <div class="timeline-meta">
                                             {% if dia.es_habil %}
-                                                Día hábil
+                                                Día operativo de lunes a viernes
                                             {% else %}
-                                                No hábil
+                                                {% if dia.fecha|date:"w" == "0" or dia.fecha|date:"w" == "6" %}
+                                                    Fin de semana · inhábil automático
+                                                {% else %}
+                                                    Día inhábil configurado
+                                                {% endif %}
+                                            {% endif %}
+                                            {% if dia.observaciones %}
+                                                <br>{{ dia.observaciones }}
                                             {% endif %}
                                         </div>
                                     </div>
+
                                     <div class="text-end">
-                                        {% if dia.estado == "CERRADO" %}
+                                        {% if not dia.es_habil %}
+                                            <span class="pill pill-gray">
+                                                <i class="bi bi-calendar-x"></i>
+                                                Inhábil
+                                            </span>
+                                            {% if dia.estado == "CERRADO" %}
+                                                <div class="mt-1">
+                                                    <span class="pill pill-green">Cerrado automático</span>
+                                                </div>
+                                            {% endif %}
+                                        {% elif dia.estado == "CERRADO" %}
                                             <span class="pill pill-green">Cerrado</span>
-                                        {% else %}
+                                        {% elif dia.estado == "ABIERTO" %}
                                             <span class="pill pill-yellow">Abierto</span>
-                                            {% if dia.es_habil and semestre.estado == "ACTIVO" %}
-                                                <form method="POST" action="{% url 'cerrar_dia_operativo' dia.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="mt-2" onsubmit="return confirm('¿Cerrar este día operativo?');">
+                                            {% if semestre.estado == "ACTIVO" %}
+                                                <form method="POST" action="{% url 'cerrar_dia_operativo' dia.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="mt-2" data-confirm="¿Cerrar este día operativo?">
                                                     {% csrf_token %}
                                                     {% if request.GET.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
                                                     <input type="hidden" name="observaciones" value="Cerrado desde detalle del semestre.">
@@ -1444,6 +1721,8 @@
                                                     </button>
                                                 </form>
                                             {% endif %}
+                                        {% else %}
+                                            <span class="pill pill-blue">Programado</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -1460,7 +1739,7 @@
                         <div class="empty-state">
                             <i class="bi bi-calendar-plus"></i>
                             <h5>Sin calendario generado</h5>
-                            <p>Genera el calendario operativo para crear los días hábiles del semestre.</p>
+                            <p>Genera el calendario operativo para crear días de lunes a viernes y marcar sábados/domingo como inhábiles automáticos.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -1514,7 +1793,8 @@
             </div>
             <div class="modal-body">
                 <p>
-                    Al iniciar el semestre se activará la operación de salas y se generará/validará el calendario operativo, es decir, los días hábiles del periodo.
+                    Al iniciar el semestre se activará la operación de salas y se generará/validará el calendario operativo.
+                    Sábados y domingos quedarán como días inhábiles automáticos.
                 </p>
 
                 <div class="form-check">
@@ -1548,7 +1828,8 @@
             </div>
             <div class="modal-body">
                 <p>
-                    El semestre solo puede cerrarse si todos los días están cerrados, todas las incidencias están cerradas y la fecha fin ya venció.
+                    El semestre solo puede cerrarse si todos los días operativos de lunes a viernes están cerrados,
+                    las incidencias están concluidas y la fecha fin ya venció. Sábados y domingos no bloquean el cierre.
                 </p>
 
                 <label class="form-label fw-bold">Observaciones finales</label>
@@ -1572,6 +1853,108 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll("form[data-confirm]").forEach(function(formulario) {
+            formulario.addEventListener("submit", function(evento) {
+                evento.preventDefault();
+
+                const mensaje = formulario.getAttribute("data-confirm") || "¿Confirmas esta acción?";
+
+                Swal.fire({
+                    title: "Confirmar acción",
+                    text: mensaje,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, continuar",
+                    cancelButtonText: "Cancelar",
+                    reverseButtons: true,
+                    customClass: {
+                        popup: "sistema-modal-popup",
+                        title: "sistema-modal-title",
+                        confirmButton: "sistema-modal-confirm",
+                        cancelButton: "sistema-modal-cancel"
+                    }
+                }).then(function(resultado) {
+                    if (resultado.isConfirmed) {
+                        formulario.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+</script>
 
 </body>
 </html>

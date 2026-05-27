@@ -11,6 +11,7 @@ from django.db.models import Q
 from .models import (
     Solicitud,
     SolicitudInscripcion,
+    CodigoResponsableAutorizado,
     HistoriaClinicaMedica,
     Sede,
     Semestre,
@@ -997,6 +998,67 @@ def aplicar_clases_bootstrap(form):
             field.widget.attrs["class"] = f"{existing} form-control".strip()
 
 
+
+def fecha_es_fin_de_semana(fecha):
+    """
+    Regla operativa de la estancia:
+    sábado y domingo son inhábiles automáticos.
+    Esto NO bloquea el inicio de sesión; solo bloquea operación diaria.
+    """
+    return bool(fecha and fecha.weekday() in (5, 6))
+
+
+def dia_operativo_no_laborable(dia):
+    """
+    True cuando un día no debe permitir operación diaria:
+    sábado, domingo, festivo, suspensión, consejo técnico o día no hábil.
+    """
+    if not dia:
+        return False
+
+    try:
+        if getattr(dia, "es_fin_de_semana", False):
+            return True
+    except Exception:
+        pass
+
+    fecha = getattr(dia, "fecha", None)
+
+    return bool(
+        fecha_es_fin_de_semana(fecha)
+        or not getattr(dia, "es_habil", True)
+    )
+
+
+def mensaje_dia_no_laborable(dia):
+    """
+    Mensaje claro para maestras y formularios de operación diaria.
+    """
+    if not dia:
+        return "No existe día operativo para la fecha seleccionada."
+
+    try:
+        mensaje_modelo = getattr(dia, "mensaje_no_operativo", "")
+        if mensaje_modelo:
+            return mensaje_modelo
+    except Exception:
+        pass
+
+    fecha = getattr(dia, "fecha", None)
+
+    if fecha_es_fin_de_semana(fecha):
+        return (
+            "La estancia no opera sábados ni domingos. "
+            "Puedes iniciar sesión y consultar información, pero no abrir operación diaria, "
+            "registrar entradas, salidas ni bitácoras."
+        )
+
+    if not getattr(dia, "es_habil", True):
+        return "Este día está marcado como inhábil. No se permite operación diaria."
+
+    return "Este día no permite operación diaria."
+
+
 def usuarios_por_rol(*palabras_clave):
     """
     Devuelve usuarios activos cuyo tipo_persona o grupo coincida con alguna palabra.
@@ -1026,27 +1088,166 @@ def usuarios_por_rol(*palabras_clave):
     return qs
 
 
+
+ESTADO_SEDE_CHOICES = [
+    ("", "Seleccione estado..."),
+    ("Aguascalientes", "Aguascalientes"),
+    ("Baja California", "Baja California"),
+    ("Baja California Sur", "Baja California Sur"),
+    ("Campeche", "Campeche"),
+    ("Chiapas", "Chiapas"),
+    ("Chihuahua", "Chihuahua"),
+    ("Ciudad de México", "Ciudad de México"),
+    ("Coahuila", "Coahuila"),
+    ("Colima", "Colima"),
+    ("Durango", "Durango"),
+    ("Estado de México", "Estado de México"),
+    ("Guanajuato", "Guanajuato"),
+    ("Guerrero", "Guerrero"),
+    ("Hidalgo", "Hidalgo"),
+    ("Jalisco", "Jalisco"),
+    ("Michoacán", "Michoacán"),
+    ("Morelos", "Morelos"),
+    ("Nayarit", "Nayarit"),
+    ("Nuevo León", "Nuevo León"),
+    ("Oaxaca", "Oaxaca"),
+    ("Puebla", "Puebla"),
+    ("Querétaro", "Querétaro"),
+    ("Quintana Roo", "Quintana Roo"),
+    ("San Luis Potosí", "San Luis Potosí"),
+    ("Sinaloa", "Sinaloa"),
+    ("Sonora", "Sonora"),
+    ("Tabasco", "Tabasco"),
+    ("Tamaulipas", "Tamaulipas"),
+    ("Tlaxcala", "Tlaxcala"),
+    ("Veracruz", "Veracruz"),
+    ("Yucatán", "Yucatán"),
+    ("Zacatecas", "Zacatecas"),
+]
+
+MUNICIPIO_SELECT_CHOICES = [
+    ("", "Seleccione municipio..."),
+]
+
+
 class SedeForm(forms.ModelForm):
+    """
+    Formulario de sede con dirección estructurada.
+
+    La dirección completa no se escribe manualmente.
+    Se captura por partes y el modelo Sede la arma automáticamente
+    en el campo direccion para conservar compatibilidad con reportes.
+    """
+
     class Meta:
         model = Sede
         fields = [
             "clave",
             "nombre",
-            "direccion",
+            "estado",
+            "municipio",
+            "ciudad_localidad",
+            "colonia",
+            "codigo_postal",
+            "tipo_vialidad",
+            "calle_avenida",
+            "referencia",
             "telefono",
             "correo",
             "activa",
         ]
         widgets = {
-            "clave": forms.TextInput(attrs={"placeholder": "Ej. TUXTLA"}),
-            "nombre": forms.TextInput(attrs={"placeholder": "Ej. Estancia Infantil Universitaria Tuxtla"}),
-            "direccion": forms.TextInput(attrs={"placeholder": "Dirección de la sede"}),
-            "telefono": forms.TextInput(attrs={"placeholder": "Teléfono de contacto"}),
-            "correo": forms.EmailInput(attrs={"placeholder": "correo@unach.mx"}),
+            "clave": forms.TextInput(attrs={
+                "placeholder": "Ej. TUXTLA",
+                "autocomplete": "off",
+                "maxlength": "30",
+            }),
+            "nombre": forms.TextInput(attrs={
+                "placeholder": "Ej. Estancia Infantil Universitaria Tuxtla",
+                "autocomplete": "organization",
+            }),
+            "estado": forms.Select(choices=ESTADO_SEDE_CHOICES),
+            "municipio": forms.Select(choices=MUNICIPIO_SELECT_CHOICES, attrs={
+                "data-initial": "",
+            }),
+            "ciudad_localidad": forms.TextInput(attrs={
+                "placeholder": "Ej. Tuxtla Gutiérrez",
+                "autocomplete": "address-level2",
+            }),
+            "colonia": forms.TextInput(attrs={
+                "placeholder": "Ej. Centro",
+                "autocomplete": "address-level3",
+            }),
+            "codigo_postal": forms.TextInput(attrs={
+                "placeholder": "Ej. 29000",
+                "inputmode": "numeric",
+                "maxlength": "5",
+                "autocomplete": "postal-code",
+            }),
+            "tipo_vialidad": forms.Select(),
+            "calle_avenida": forms.TextInput(attrs={
+                "placeholder": "Ej. Avenida Central",
+                "autocomplete": "address-line1",
+            }),
+            "referencia": forms.TextInput(attrs={
+                "placeholder": "Ej. Frente a, junto a, entre calles...",
+                "maxlength": "255",
+            }),
+            "telefono": forms.TextInput(attrs={
+                "placeholder": "10 dígitos",
+                "inputmode": "numeric",
+                "maxlength": "10",
+                "autocomplete": "tel",
+            }),
+            "correo": forms.EmailInput(attrs={
+                "placeholder": "correo@unach.mx",
+                "autocomplete": "email",
+            }),
+        }
+        labels = {
+            "clave": "Clave de sede",
+            "nombre": "Nombre de la sede",
+            "estado": "Estado",
+            "municipio": "Municipio",
+            "ciudad_localidad": "Ciudad / Localidad",
+            "colonia": "Colonia",
+            "codigo_postal": "Código postal",
+            "tipo_vialidad": "Tipo de vialidad",
+            "calle_avenida": "Calle / Avenida",
+            "referencia": "Referencia",
+            "telefono": "Teléfono de sede",
+            "correo": "Correo de sede",
+            "activa": "Sede activa",
+        }
+        help_texts = {
+            "clave": "Usa una clave corta, por ejemplo TUXTLA o TAPACHULA.",
+            "telefono": "Solo 10 dígitos, sin espacios, letras ni guiones.",
+            "codigo_postal": "Debe tener exactamente 5 dígitos.",
+            "referencia": "Dato opcional para ubicar mejor la sede.",
+            "municipio": "Selecciona el municipio según el estado elegido.",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        municipio_actual = ""
+        if self.instance and getattr(self.instance, "pk", None):
+            municipio_actual = getattr(self.instance, "municipio", "") or ""
+
+        if self.data:
+            municipio_actual = self.data.get(self.add_prefix("municipio"), municipio_actual)
+
+        self.fields["estado"].initial = self.initial.get("estado") or getattr(self.instance, "estado", "") or "Chiapas"
+        self.fields["estado"].required = True
+        self.fields["municipio"].required = True
+        self.fields["municipio"].widget.attrs["data-initial"] = municipio_actual
+        self.fields["ciudad_localidad"].required = True
+        self.fields["colonia"].required = True
+        self.fields["codigo_postal"].required = True
+        self.fields["tipo_vialidad"].required = True
+        self.fields["calle_avenida"].required = True
+        self.fields["telefono"].required = True
+
         aplicar_clases_bootstrap(self)
 
     def clean_clave(self):
@@ -1056,8 +1257,6 @@ class SedeForm(forms.ModelForm):
         if not clave:
             raise forms.ValidationError("Captura la clave de la sede.")
 
-        # Validación clara antes de guardar.
-        # Evita depender solo del error técnico de unique=True del modelo.
         sedes = Sede.objects.filter(clave__iexact=clave)
 
         if self.instance and self.instance.pk:
@@ -1088,14 +1287,75 @@ class SedeForm(forms.ModelForm):
 
         return nombre
 
+    def clean_estado(self):
+        estado = (self.cleaned_data.get("estado") or "").strip()
+
+        if not estado:
+            raise forms.ValidationError("Selecciona el estado.")
+
+        return estado
+
+    def clean_municipio(self):
+        municipio = (self.cleaned_data.get("municipio") or "").strip()
+
+        if not municipio:
+            raise forms.ValidationError("Selecciona el municipio.")
+
+        return municipio
+
+    def clean_ciudad_localidad(self):
+        ciudad = (self.cleaned_data.get("ciudad_localidad") or "").strip()
+
+        if not ciudad:
+            raise forms.ValidationError("Captura la ciudad o localidad.")
+
+        if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s.\-]+", ciudad):
+            raise forms.ValidationError("La ciudad/localidad contiene caracteres no válidos.")
+
+        return ciudad.title()
+
+    def clean_colonia(self):
+        colonia = (self.cleaned_data.get("colonia") or "").strip()
+
+        if not colonia:
+            raise forms.ValidationError("Captura la colonia.")
+
+        return colonia.title()
+
+    def clean_codigo_postal(self):
+        cp = (self.cleaned_data.get("codigo_postal") or "").strip()
+
+        if not re.fullmatch(r"\d{5}", cp):
+            raise forms.ValidationError("El código postal debe tener exactamente 5 dígitos.")
+
+        return cp
+
+    def clean_calle_avenida(self):
+        calle = (self.cleaned_data.get("calle_avenida") or "").strip()
+
+        if not calle:
+            raise forms.ValidationError("Captura la calle o avenida.")
+
+        return calle.title()
+
+    def clean_telefono(self):
+        telefono = (self.cleaned_data.get("telefono") or "").strip()
+
+        if not re.fullmatch(r"\d{10}", telefono):
+            raise forms.ValidationError("El teléfono debe tener exactamente 10 dígitos y solo números.")
+
+        return telefono
+
     def clean_correo(self):
         correo = (self.cleaned_data.get("correo") or "").strip().lower()
 
         if correo and "@" not in correo:
             raise forms.ValidationError("Captura un correo válido para la sede.")
 
-        return correo
+        if correo and not correo.endswith("@unach.mx"):
+            raise forms.ValidationError("El correo de sede debe ser institucional y terminar en @unach.mx.")
 
+        return correo
 
 class SemestreForm(forms.ModelForm):
     """
@@ -1151,6 +1411,14 @@ class SemestreForm(forms.ModelForm):
 
         aplicar_clases_bootstrap(self)
 
+    def clean_correo_copia_encuesta(self):
+        correo = (self.cleaned_data.get("correo_copia_encuesta") or "").strip().lower()
+
+        if correo and not correo.endswith("@unach.mx"):
+            raise forms.ValidationError("El correo genérico de encuesta debe terminar en @unach.mx.")
+
+        return correo
+
     def clean(self):
         cleaned = super().clean()
         fecha_inicio = cleaned.get("fecha_inicio")
@@ -1167,7 +1435,164 @@ class SemestreForm(forms.ModelForm):
                     "La fecha de encuesta debe estar dentro del periodo del semestre."
                 )
 
+        nombre = (cleaned.get("nombre") or "").strip()
+        sede_configurada = cleaned.get("sede_configurada")
+
+        if nombre and sede_configurada:
+            duplicados = Semestre.objects.filter(
+                nombre__iexact=nombre,
+                sede_configurada=sede_configurada,
+            )
+
+            if self.instance and self.instance.pk:
+                duplicados = duplicados.exclude(pk=self.instance.pk)
+
+            if duplicados.exists():
+                self.add_error(
+                    "nombre",
+                    "Ya existe un semestre con ese nombre para la sede seleccionada."
+                )
+
         return cleaned
+
+
+class ClonarSemestreForm(forms.Form):
+    """
+    Formulario para crear un nuevo semestre usando como base un semestre cerrado.
+
+    Solo captura los datos que sí deben cambiar:
+    nombre del nuevo semestre, fechas, fecha de encuesta, correo de copia
+    y observaciones. La configuración operativa se copia desde el semestre origen.
+    """
+    nombre = forms.CharField(
+        max_length=100,
+        required=True,
+        label="Nombre del nuevo semestre",
+        widget=forms.TextInput(attrs={
+            "placeholder": "Ej. Agosto - Diciembre 2026",
+            "autocomplete": "off",
+        })
+    )
+    fecha_inicio = forms.DateField(
+        required=True,
+        label="Fecha de inicio",
+        widget=forms.DateInput(attrs={"type": "date"})
+    )
+    fecha_fin = forms.DateField(
+        required=True,
+        label="Fecha de fin",
+        widget=forms.DateInput(attrs={"type": "date"})
+    )
+    fecha_encuesta_satisfaccion = forms.DateField(
+        required=False,
+        label="Fecha de Encuesta B",
+        widget=forms.DateInput(attrs={"type": "date"})
+    )
+    correo_copia_encuesta = forms.EmailField(
+        required=False,
+        label="Correo genérico para copia de encuesta",
+        widget=forms.EmailInput(attrs={"placeholder": "correo.generico@unach.mx"})
+    )
+    observaciones = forms.CharField(
+        required=False,
+        label="Observaciones",
+        widget=forms.Textarea(attrs={
+            "rows": 3,
+            "placeholder": "Opcional. Ej. Semestre clonado para nuevo periodo."
+        })
+    )
+    confirmar = forms.BooleanField(
+        required=True,
+        label="Confirmo que deseo clonar la configuración del semestre cerrado"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.semestre_origen = kwargs.pop("semestre_origen", None)
+        super().__init__(*args, **kwargs)
+
+        if self.semestre_origen:
+            self.fields["correo_copia_encuesta"].initial = getattr(
+                self.semestre_origen,
+                "correo_copia_encuesta",
+                ""
+            )
+            self.fields["observaciones"].initial = f"Clonado desde {self.semestre_origen.nombre}."
+
+        aplicar_clases_bootstrap(self)
+
+    def clean_correo_copia_encuesta(self):
+        correo = (self.cleaned_data.get("correo_copia_encuesta") or "").strip().lower()
+
+        if correo and not correo.endswith("@unach.mx"):
+            raise forms.ValidationError("El correo genérico de encuesta debe terminar en @unach.mx.")
+
+        return correo
+
+    def clean(self):
+        cleaned = super().clean()
+        origen = self.semestre_origen
+
+        if not origen:
+            raise forms.ValidationError("No se encontró el semestre origen para clonar.")
+
+        if origen.estado != Semestre.EstadoSemestre.CERRADO:
+            raise forms.ValidationError("Solo se puede clonar un semestre cerrado.")
+
+        if Semestre.objects.filter(estado=Semestre.EstadoSemestre.ACTIVO).exists():
+            raise forms.ValidationError(
+                "No se puede clonar mientras exista un semestre activo. Primero cierra el semestre activo."
+            )
+
+        fecha_inicio = cleaned.get("fecha_inicio")
+        fecha_fin = cleaned.get("fecha_fin")
+        fecha_encuesta = cleaned.get("fecha_encuesta_satisfaccion")
+
+        if fecha_inicio and fecha_fin and fecha_inicio > fecha_fin:
+            self.add_error("fecha_inicio", "La fecha de inicio no puede ser posterior a la fecha fin.")
+
+        if fecha_encuesta and fecha_inicio and fecha_fin:
+            if fecha_encuesta < fecha_inicio or fecha_encuesta > fecha_fin:
+                self.add_error(
+                    "fecha_encuesta_satisfaccion",
+                    "La fecha de Encuesta B debe estar dentro del periodo del semestre."
+                )
+
+        nombre = (cleaned.get("nombre") or "").strip()
+
+        if nombre:
+            duplicados = Semestre.objects.filter(
+                nombre__iexact=nombre,
+                sede_configurada=origen.sede_configurada,
+            )
+            if duplicados.exists():
+                self.add_error(
+                    "nombre",
+                    "Ya existe un semestre con ese nombre para la misma sede."
+                )
+
+        return cleaned
+
+    def crear_semestre_clonado(self, usuario=None):
+        """
+        Ejecuta la clonación usando el método del modelo Semestre.
+        Debe llamarse después de form.is_valid().
+        """
+        if not self.is_valid():
+            raise ValueError("El formulario de clonación no es válido.")
+
+        nuevo = self.semestre_origen.clonar_configuracion(
+            nombre=self.cleaned_data["nombre"],
+            fecha_inicio=self.cleaned_data["fecha_inicio"],
+            fecha_fin=self.cleaned_data["fecha_fin"],
+            fecha_encuesta_satisfaccion=self.cleaned_data.get("fecha_encuesta_satisfaccion"),
+            usuario=usuario,
+            observaciones=self.cleaned_data.get("observaciones") or "",
+        )
+
+        nuevo.correo_copia_encuesta = self.cleaned_data.get("correo_copia_encuesta") or ""
+        nuevo.save(update_fields=["correo_copia_encuesta", "updated_at"])
+
+        return nuevo
 
 
 class DiaFestivoForm(forms.ModelForm):
@@ -1188,6 +1613,16 @@ class DiaFestivoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.semestre = kwargs.pop("semestre", None)
         super().__init__(*args, **kwargs)
+
+        # La opción "Otro" se retira para evitar confusión.
+        # Los tipos permitidos deben ser claros: festivo, suspensión o consejo técnico.
+        if "tipo" in self.fields:
+            self.fields["tipo"].choices = [
+                (value, label)
+                for value, label in self.fields["tipo"].choices
+                if str(value).upper() != "OTRO"
+            ]
+
         aplicar_clases_bootstrap(self)
 
     def clean_fecha(self):
@@ -1197,6 +1632,12 @@ class DiaFestivoForm(forms.ModelForm):
             if fecha < self.semestre.fecha_inicio or fecha > self.semestre.fecha_fin:
                 raise forms.ValidationError("La fecha debe estar dentro del periodo del semestre.")
 
+        if fecha_es_fin_de_semana(fecha):
+            raise forms.ValidationError(
+                "No es necesario registrar sábados o domingos. "
+                "El sistema los marca automáticamente como días inhábiles."
+            )
+
         return fecha
 
     def save(self, commit=True):
@@ -1205,6 +1646,14 @@ class DiaFestivoForm(forms.ModelForm):
             obj.semestre = self.semestre
         if commit:
             obj.save()
+
+            # Si el calendario ya estaba generado, se recalcula para reflejar
+            # el nuevo día inhábil sin duplicar días.
+            try:
+                obj.semestre.generar_dias_operativos()
+            except Exception:
+                pass
+
         return obj
 
 
@@ -1521,6 +1970,27 @@ class DiaOperativoSemestreForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         aplicar_clases_bootstrap(self)
 
+    def clean(self):
+        cleaned = super().clean()
+        fecha = cleaned.get("fecha")
+        es_habil = cleaned.get("es_habil")
+        estado = cleaned.get("estado")
+
+        if fecha_es_fin_de_semana(fecha):
+            if es_habil:
+                self.add_error(
+                    "es_habil",
+                    "Sábado y domingo son inhábiles automáticos; no pueden marcarse como hábiles."
+                )
+
+            if estado == DiaOperativoSemestre.EstadoDia.ABIERTO:
+                self.add_error(
+                    "estado",
+                    "No se puede abrir operación diaria en sábado o domingo."
+                )
+
+        return cleaned
+
 
 class CerrarDiaOperativoForm(forms.ModelForm):
     class Meta:
@@ -1769,6 +2239,15 @@ class IncidenciaForm(forms.ModelForm):
             alumnos = alumnos.filter(semestre=self.semestre)
             registros = registros.filter(dia_operativo__semestre=self.semestre)
 
+        # Solo se muestran registros de días hábiles reales.
+        # Sábado/domingo y días inhábiles no deben usarse para incidencias ligadas a operación diaria.
+        try:
+            registros = registros.filter(dia_operativo__es_habil=True).exclude(
+                dia_operativo__fecha__week_day__in=[1, 7]
+            )
+        except Exception:
+            pass
+
         self.fields["alumno"].queryset = alumnos.order_by(
             "solicitud_ingreso__apellido_paterno_menor",
             "solicitud_ingreso__nombres_menor"
@@ -1840,8 +2319,15 @@ class IncidenciaForm(forms.ModelForm):
         if registro_diario and alumno and registro_diario.alumno_id != alumno.id:
             self.add_error("registro_diario", "El registro diario seleccionado no pertenece al alumno.")
 
-        if registro_diario and registro_diario.dia_operativo and registro_diario.dia_operativo.semestre.estado == Semestre.EstadoSemestre.CERRADO:
-            self.add_error("registro_diario", "No se puede crear incidencia en un semestre cerrado.")
+        if registro_diario and registro_diario.dia_operativo:
+            if dia_operativo_no_laborable(registro_diario.dia_operativo):
+                self.add_error(
+                    "registro_diario",
+                    mensaje_dia_no_laborable(registro_diario.dia_operativo)
+                )
+
+            if registro_diario.dia_operativo.semestre.estado == Semestre.EstadoSemestre.CERRADO:
+                self.add_error("registro_diario", "No se puede crear incidencia en un semestre cerrado.")
 
         if alumno and alumno.semestre and alumno.semestre.estado == Semestre.EstadoSemestre.CERRADO:
             self.add_error("alumno", "No se puede crear incidencia para un alumno de semestre cerrado.")
@@ -2060,22 +2546,23 @@ class CerrarIncidenciaForm(forms.ModelForm):
 
 class EnviarEncuestaSatisfaccionForm(forms.Form):
     """
-    Formulario para envío de Encuesta de satisfacción B.
-    La lógica de envío por correo se hará en views.py.
+    Formulario para envío de Encuesta de Satisfacción B.
+
+    La fecha de envío ya no se captura aquí.
+    La fecha programada se configura desde el formulario del semestre
+    en fecha_encuesta_satisfaccion.
     """
-    fecha_envio = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
-        label="Fecha de envío"
-    )
     correo_copia = forms.EmailField(
         required=True,
         label="Correo genérico en copia",
-        widget=forms.EmailInput(attrs={"placeholder": "correo.generico@unach.mx"})
+        widget=forms.EmailInput(attrs={
+            "placeholder": "correo.generico@unach.mx",
+            "autocomplete": "email",
+        })
     )
     confirmar_envio = forms.BooleanField(
         required=True,
-        label="Confirmo que deseo enviar la encuesta de satisfacción B"
+        label="Confirmo que deseo enviar la Encuesta de Satisfacción B"
     )
 
     def __init__(self, *args, **kwargs):
@@ -2084,9 +2571,21 @@ class EnviarEncuestaSatisfaccionForm(forms.Form):
 
         if semestre:
             self.fields["correo_copia"].initial = semestre.correo_copia_encuesta
-            self.fields["fecha_envio"].initial = timezone.localdate()
 
         aplicar_clases_bootstrap(self)
+
+    def clean_correo_copia(self):
+        correo = (self.cleaned_data.get("correo_copia") or "").strip().lower()
+
+        if not correo:
+            raise forms.ValidationError("Captura el correo genérico en copia.")
+
+        if not correo.endswith("@unach.mx"):
+            raise forms.ValidationError(
+                "El correo genérico en copia debe ser institucional y terminar en @unach.mx."
+            )
+
+        return correo
 
 
 class IniciarSemestreForm(forms.Form):
@@ -2116,6 +2615,145 @@ class CerrarSemestreForm(forms.Form):
 
 
 
+
+
+
+# =========================================================
+# COMPROBANTE DE PAGO PRESENCIAL
+# Rol principal: Trabajo Social
+# =========================================================
+
+class RegistrarComprobantePresencialForm(forms.Form):
+    """
+    Formulario para registrar el comprobante de pago entregado presencialmente.
+
+    Flujo:
+    - El beneficiario entrega el comprobante físico a Trabajo Social.
+    - Trabajo Social adjunta una foto o PDF del comprobante.
+    - Se guarda la evidencia digital en doc_tutor_pago.
+    - El estado queda como ENTREGADO_PRESENCIAL.
+    - Este formulario NO valida el pago automáticamente.
+    """
+
+    comprobante_pago = forms.FileField(
+        required=True,
+        label="Comprobante de pago digitalizado",
+        widget=forms.ClearableFileInput(attrs={
+            "class": "form-control",
+            "accept": ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
+        }),
+        help_text="Adjunta foto o PDF del comprobante entregado presencialmente."
+    )
+
+    observaciones = forms.CharField(
+        required=False,
+        label="Observaciones",
+        widget=forms.Textarea(attrs={
+            "rows": 3,
+            "placeholder": "Opcional. Ej. Recibido presencialmente en ventanilla de Trabajo Social.",
+        })
+    )
+
+    confirmar = forms.BooleanField(
+        required=True,
+        label="Confirmo que recibí presencialmente el comprobante de pago"
+    )
+
+    extensiones_permitidas = {"pdf", "jpg", "jpeg", "png"}
+    limite_mb = 5
+
+    def __init__(self, *args, **kwargs):
+        self.inscripcion = kwargs.pop("inscripcion", None)
+        self.usuario = kwargs.pop("usuario", None)
+        super().__init__(*args, **kwargs)
+        aplicar_clases_bootstrap(self)
+
+        self.fields["comprobante_pago"].widget.attrs.update({
+            "class": "form-control",
+        })
+
+    def clean_comprobante_pago(self):
+        archivo = self.cleaned_data.get("comprobante_pago")
+
+        if not archivo:
+            raise forms.ValidationError("Adjunta el comprobante en foto o PDF.")
+
+        nombre = archivo.name or ""
+        extension = nombre.rsplit(".", 1)[-1].lower() if "." in nombre else ""
+
+        if extension not in self.extensiones_permitidas:
+            raise forms.ValidationError("Solo se permite PDF, JPG, JPEG o PNG.")
+
+        if archivo.size > self.limite_mb * 1024 * 1024:
+            raise forms.ValidationError(f"El comprobante no debe superar {self.limite_mb} MB.")
+
+        return archivo
+
+    def clean_observaciones(self):
+        observaciones = (self.cleaned_data.get("observaciones") or "").strip()
+        return observaciones
+
+    def clean(self):
+        cleaned = super().clean()
+
+        if not self.inscripcion:
+            raise forms.ValidationError("No se encontró la inscripción para registrar el comprobante.")
+
+        estado = getattr(self.inscripcion, "estado_pago", "")
+
+        if estado == "VALIDADO":
+            raise forms.ValidationError("Este pago ya está validado. No se puede registrar otro comprobante presencial.")
+
+        return cleaned
+
+    def registrar(self):
+        """
+        Registra el comprobante presencial en la inscripción.
+        Debe llamarse después de form.is_valid().
+        """
+        if not self.is_valid():
+            raise ValueError("El formulario de comprobante presencial no es válido.")
+
+        archivo = self.cleaned_data.get("comprobante_pago")
+        observaciones = self.cleaned_data.get("observaciones") or ""
+
+        if hasattr(self.inscripcion, "registrar_comprobante_presencial"):
+            self.inscripcion.registrar_comprobante_presencial(
+                usuario=self.usuario,
+                archivo=archivo,
+                observaciones=observaciones,
+            )
+            return self.inscripcion
+
+        # Compatibilidad si aún no se agregó el método al modelo.
+        self.inscripcion.doc_tutor_pago = archivo
+        self.inscripcion.estado_pago = "ENTREGADO_PRESENCIAL"
+        self.inscripcion.pago_entregado_presencial = True
+        self.inscripcion.pago_subido_por_beneficiario = False
+        self.inscripcion.pago_recibido_presencial_por = self.usuario
+        self.inscripcion.pago_recibido_presencial_en = timezone.now()
+        self.inscripcion.pago_observaciones = observaciones or getattr(
+            self.inscripcion,
+            "pago_observaciones",
+            ""
+        )
+
+        self.inscripcion.save(update_fields=[
+            "doc_tutor_pago",
+            "estado_pago",
+            "pago_entregado_presencial",
+            "pago_subido_por_beneficiario",
+            "pago_recibido_presencial_por",
+            "pago_recibido_presencial_en",
+            "pago_observaciones",
+            "updated_at",
+        ])
+
+        return self.inscripcion
+
+
+# Alias de compatibilidad por si alguna vista lo importa con nombre corto.
+PagoPresencialForm = RegistrarComprobantePresencialForm
 
 
 # =========================================================
@@ -2156,16 +2794,62 @@ def generar_codigo_responsable_seguro():
 
     return "7391"
 
+class ResponsableAutorizadoChoiceField(forms.ModelChoiceField):
+    """
+    Campo para seleccionar al tutor o familiar autorizado del menor.
+    Muestra el estado del código para evitar confusiones en entrada/salida.
+    """
+
+    def label_from_instance(self, obj):
+        try:
+            tipo = obj.get_tipo_responsable_display()
+        except Exception:
+            tipo = getattr(obj, "tipo_responsable", "") or "Responsable"
+
+        parentesco = getattr(obj, "parentesco", "") or tipo
+
+        if getattr(obj, "codigo_entregado", False):
+            estado = "código entregado"
+        elif getattr(obj, "tiene_codigo", False):
+            estado = "código generado, pendiente de entrega"
+        else:
+            estado = "sin código"
+
+        return f"{obj.nombre_completo} — {parentesco} ({estado})"
+
+
+def obtener_responsables_autorizados_para_form(registro_diario):
+    """
+    Devuelve los responsables autorizados activos del alumno para formularios
+    de entrada/salida. Si aún no existen, intenta sincronizarlos desde el expediente.
+    """
+    if not registro_diario or not getattr(registro_diario, "alumno_id", None):
+        return CodigoResponsableAutorizado.objects.none()
+
+    inscripcion = registro_diario.alumno
+
+    try:
+        if hasattr(inscripcion, "sincronizar_responsables_autorizados"):
+            inscripcion.sincronizar_responsables_autorizados()
+    except Exception:
+        pass
+
+    return (
+        CodigoResponsableAutorizado.objects
+        .filter(inscripcion=inscripcion, activo=True)
+        .order_by("tipo_responsable", "nombre_completo")
+    )
+
 
 class GenerarCodigoResponsableForm(forms.Form):
     """
-    Trabajo Social genera o resetea el código de seguridad del responsable.
+    Trabajo Social genera o resetea el código de seguridad de una persona autorizada.
 
-    Reglas:
-    - Solo después de inscripción finalizada.
-    - Solo después de pago validado.
-    - Recomendado cuando ya tiene semestre y sala asignados.
-    - Si ya existe código, se debe usar reset y capturar motivo.
+    Regla actual:
+    - El código NO es por alumno.
+    - Cada tutor o familiar autorizado tiene su propio código.
+    - La vista selecciona el responsable autorizado y este formulario valida
+      que el alumno esté finalizado, con pago validado, semestre y sala.
     """
     confirmar = forms.BooleanField(
         required=True,
@@ -2173,16 +2857,17 @@ class GenerarCodigoResponsableForm(forms.Form):
     )
     motivo = forms.CharField(
         required=False,
-        label="Motivo",
+        label="Motivo / observaciones",
         widget=forms.Textarea(attrs={
             "rows": 3,
-            "placeholder": "Ej. Código generado al finalizar inscripción / código extraviado por el responsable."
+            "placeholder": "Ej. Código generado para tutor autorizado / código extraviado por el responsable."
         })
     )
 
     def __init__(self, *args, **kwargs):
         self.alumno = kwargs.pop("alumno", None)
         self.es_reset = kwargs.pop("es_reset", False)
+        self.responsable_autorizado = kwargs.pop("responsable_autorizado", None)
         super().__init__(*args, **kwargs)
 
         if self.es_reset:
@@ -2193,9 +2878,9 @@ class GenerarCodigoResponsableForm(forms.Form):
                 "Describe por qué se genera un nuevo código. Ej. El responsable lo extravió."
             )
         else:
-            self.fields["motivo"].label = "Observaciones de entrega"
+            self.fields["motivo"].label = "Observaciones"
             self.fields["motivo"].widget.attrs["placeholder"] = (
-                "Opcional. Ej. Código entregado junto con credencial al responsable."
+                "Opcional. Ej. Código generado para entregar junto con credencial."
             )
 
         aplicar_clases_bootstrap(self)
@@ -2221,10 +2906,17 @@ class GenerarCodigoResponsableForm(forms.Form):
             )
 
         pago_validado = False
+
         try:
-            pago_validado = bool(alumno.pago_validado)
+            pago_validado = bool(getattr(alumno, "pago_validado", False))
         except Exception:
             pago_validado = False
+
+        if not pago_validado:
+            pago_validado = bool(getattr(alumno, "pago_validado_en", None))
+
+        if getattr(alumno, "estado_pago", "") == "VALIDADO":
+            pago_validado = True
 
         if not pago_validado:
             raise forms.ValidationError(
@@ -2241,13 +2933,8 @@ class GenerarCodigoResponsableForm(forms.Form):
                 "Antes de generar el código, el alumno debe estar asignado a una sala."
             )
 
-        codigo_existente = bool(getattr(alumno, "codigo_responsable_hash", ""))
-
-        if codigo_existente and not self.es_reset:
-            raise forms.ValidationError(
-                "Este alumno ya tiene un código generado. Si necesita otro, usa la opción de resetear código."
-            )
-
+        # La validación de si es generación o reseteo se hace por persona autorizada
+        # en la vista. Ya no se bloquea por un código general del alumno.
         return cleaned
 
     def generar_codigo(self):
@@ -2257,7 +2944,9 @@ class GenerarCodigoResponsableForm(forms.Form):
 class ConfirmarEntregaCodigoResponsableForm(forms.Form):
     """
     Confirmación documental de que Trabajo Social entregó el código y la credencial.
-    Este formulario es útil si deseas separar la generación del acto de entrega.
+
+    En el flujo nuevo, el responsable ya viene seleccionado desde la vista.
+    Por eso nombre y parentesco son opcionales de compatibilidad.
     """
     credencial_entregada = forms.BooleanField(
         required=True,
@@ -2268,15 +2957,15 @@ class ConfirmarEntregaCodigoResponsableForm(forms.Form):
         label="Confirmo que el código fue entregado al responsable"
     )
     responsable_recibe = forms.CharField(
-        required=True,
+        required=False,
         max_length=180,
         label="Nombre del responsable que recibe",
         widget=forms.TextInput(attrs={
-            "placeholder": "Nombre completo del responsable"
+            "placeholder": "Se toma del responsable autorizado seleccionado"
         })
     )
     parentesco = forms.ChoiceField(
-        required=True,
+        required=False,
         choices=RESPONSABLE_PARENTESCO_CODIGO_CHOICES,
         label="Parentesco"
     )
@@ -2296,13 +2985,13 @@ class ConfirmarEntregaCodigoResponsableForm(forms.Form):
     def clean_responsable_recibe(self):
         nombre = (self.cleaned_data.get("responsable_recibe") or "").strip()
 
-        if len(nombre) < 5:
+        if nombre and len(nombre) < 5:
             raise forms.ValidationError("Captura el nombre completo del responsable.")
 
-        if not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.]+", nombre):
+        if nombre and not re.fullmatch(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.]+", nombre):
             raise forms.ValidationError("El nombre solo debe contener letras y espacios.")
 
-        return nombre.title()
+        return nombre.title() if nombre else nombre
 
 
 
@@ -2379,15 +3068,38 @@ class AbrirDiaOperativoMaestraForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        self.dia_operativo = kwargs.pop("dia_operativo", None) or kwargs.pop("dia", None)
         super().__init__(*args, **kwargs)
         aplicar_clases_bootstrap(self)
+
+    def clean(self):
+        cleaned = super().clean()
+
+        if self.dia_operativo and dia_operativo_no_laborable(self.dia_operativo):
+            raise forms.ValidationError(mensaje_dia_no_laborable(self.dia_operativo))
+
+        if (
+            self.dia_operativo
+            and getattr(self.dia_operativo, "estado", None) == DiaOperativoSemestre.EstadoDia.CERRADO
+        ):
+            raise forms.ValidationError("Este día ya está cerrado. Solo puede consultarse.")
+
+        return cleaned
 
 
 class RegistroEntradaAlumnoForm(forms.ModelForm):
     """
     Entrada del menor.
-    Valida responsable, credencial y código de 4 dígitos.
+    Valida que el código pertenezca a la persona autorizada seleccionada.
     """
+    responsable_codigo_id = ResponsableAutorizadoChoiceField(
+        queryset=CodigoResponsableAutorizado.objects.none(),
+        required=True,
+        label="Responsable autorizado que entrega al menor",
+        empty_label="Seleccione tutor o familiar autorizado...",
+        widget=forms.Select()
+    )
+
     codigo_responsable = forms.CharField(
         required=True,
         max_length=4,
@@ -2412,12 +3124,14 @@ class RegistroEntradaAlumnoForm(forms.ModelForm):
         ]
         widgets = {
             "responsable_entrada_nombre": forms.TextInput(attrs={
-                "placeholder": "Nombre completo del adulto que entrega al menor"
+                "placeholder": "Se llenará automáticamente con el responsable seleccionado",
+                "readonly": "readonly"
             }),
             "responsable_entrada_parentesco": forms.Select(choices=RESPONSABLE_PARENTESCO_CHOICES),
             "responsable_entrada_telefono": forms.TextInput(attrs={
-                "placeholder": "Teléfono del responsable",
-                "inputmode": "numeric"
+                "placeholder": "Se llenará automáticamente",
+                "inputmode": "numeric",
+                "readonly": "readonly"
             }),
             "credencial_entrada_validada": forms.CheckboxInput(),
             "temperatura_entrada": forms.NumberInput(attrs={
@@ -2442,19 +3156,22 @@ class RegistroEntradaAlumnoForm(forms.ModelForm):
         if self.registro_diario and not self.instance.pk:
             self.instance = self.registro_diario
 
+        responsables = obtener_responsables_autorizados_para_form(self.registro_diario or self.instance)
+        self.fields["responsable_codigo_id"].queryset = responsables
+
+        # Estos datos se llenan desde el responsable autorizado seleccionado.
+        self.fields["responsable_entrada_nombre"].required = False
+        self.fields["responsable_entrada_parentesco"].required = False
+        self.fields["responsable_entrada_telefono"].required = False
+
+        if responsables.count() == 1 and not self.data:
+            responsable = responsables.first()
+            self.fields["responsable_codigo_id"].initial = responsable
+            self.fields["responsable_entrada_nombre"].initial = responsable.nombre_completo
+            self.fields["responsable_entrada_parentesco"].initial = responsable.parentesco
+            self.fields["responsable_entrada_telefono"].initial = responsable.telefono
+
         aplicar_clases_bootstrap(self)
-
-    def clean_responsable_entrada_nombre(self):
-        nombre = (self.cleaned_data.get("responsable_entrada_nombre") or "").strip()
-        if len(nombre) < 5:
-            raise forms.ValidationError("Captura el nombre completo del adulto responsable.")
-        return nombre.title()
-
-    def clean_responsable_entrada_telefono(self):
-        telefono = (self.cleaned_data.get("responsable_entrada_telefono") or "").strip()
-        if telefono and not re.fullmatch(r"\d{10}", telefono):
-            raise forms.ValidationError("El teléfono debe tener 10 dígitos.")
-        return telefono
 
     def clean_codigo_responsable(self):
         codigo = (self.cleaned_data.get("codigo_responsable") or "").strip()
@@ -2462,21 +3179,46 @@ class RegistroEntradaAlumnoForm(forms.ModelForm):
         if not re.fullmatch(r"\d{4}", codigo):
             raise forms.ValidationError("El código debe tener exactamente 4 dígitos.")
 
-        registro = self.registro_diario or self.instance
-
-        if registro and registro.alumno_id:
-            if not getattr(registro.alumno, "codigo_responsable_hash", ""):
-                raise forms.ValidationError(
-                    "Este alumno aún no tiene código de seguridad generado por Trabajo Social."
-                )
-
-            if not registro.alumno.validar_codigo_responsable(codigo):
-                raise forms.ValidationError("El código de seguridad no coincide con el registrado.")
-
         return codigo
+
+    def clean_responsable_entrada_telefono(self):
+        telefono = (self.cleaned_data.get("responsable_entrada_telefono") or "").strip()
+
+        if telefono and not re.fullmatch(r"\d{10,15}", telefono):
+            raise forms.ValidationError("El teléfono debe contener solo números.")
+
+        return telefono
 
     def clean(self):
         cleaned = super().clean()
+
+        registro = self.registro_diario or self.instance
+        dia = getattr(registro, "dia_operativo", None)
+
+        if dia_operativo_no_laborable(dia):
+            raise forms.ValidationError(mensaje_dia_no_laborable(dia))
+
+        responsable = cleaned.get("responsable_codigo_id")
+        codigo = cleaned.get("codigo_responsable")
+
+        if not responsable:
+            self.add_error("responsable_codigo_id", "Selecciona el tutor o familiar autorizado que entrega al menor.")
+        else:
+            registro = self.registro_diario or self.instance
+
+            if registro and getattr(registro, "alumno_id", None) and responsable.inscripcion_id != registro.alumno_id:
+                self.add_error("responsable_codigo_id", "El responsable seleccionado no pertenece a este alumno.")
+
+            if not responsable.tiene_codigo:
+                self.add_error("responsable_codigo_id", "Este responsable todavía no tiene código generado por Trabajo Social.")
+            elif not responsable.codigo_entregado:
+                self.add_error("responsable_codigo_id", "El código de este responsable aún no está marcado como entregado.")
+            elif codigo and not responsable.validar_codigo(codigo):
+                self.add_error("codigo_responsable", "El código no coincide con el responsable seleccionado.")
+
+            cleaned["responsable_entrada_nombre"] = responsable.nombre_completo
+            cleaned["responsable_entrada_parentesco"] = responsable.parentesco or ""
+            cleaned["responsable_entrada_telefono"] = responsable.telefono or ""
 
         if not cleaned.get("credencial_entrada_validada"):
             self.add_error("credencial_entrada_validada", "Debes confirmar que la credencial fue verificada.")
@@ -2561,6 +3303,10 @@ class BitacoraEntradaCasaForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+
+        dia = getattr(getattr(self, "registro_diario", None), "dia_operativo", None)
+        if dia_operativo_no_laborable(dia):
+            raise forms.ValidationError(mensaje_dia_no_laborable(dia))
 
         if cleaned.get("marcar_completa"):
             requeridos = [
@@ -2666,6 +3412,10 @@ class BitacoraEstanciaForm(forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
 
+        dia = getattr(getattr(self, "registro_diario", None), "dia_operativo", None)
+        if dia_operativo_no_laborable(dia):
+            raise forms.ValidationError(mensaje_dia_no_laborable(dia))
+
         if cleaned.get("marcar_completa"):
             if not (cleaned.get("estado_durante_dia_multiple") or []):
                 self.add_error("estado_durante_dia_multiple", "Selecciona cómo estuvo el menor durante el día.")
@@ -2710,8 +3460,16 @@ class BitacoraEstanciaForm(forms.ModelForm):
 class RegistroSalidaAlumnoForm(forms.ModelForm):
     """
     Salida del menor.
-    Valida responsable, credencial y código de 4 dígitos.
+    Valida que el código pertenezca a la persona autorizada seleccionada.
     """
+    responsable_codigo_id = ResponsableAutorizadoChoiceField(
+        queryset=CodigoResponsableAutorizado.objects.none(),
+        required=True,
+        label="Responsable autorizado que recoge al menor",
+        empty_label="Seleccione tutor o familiar autorizado...",
+        widget=forms.Select()
+    )
+
     codigo_responsable = forms.CharField(
         required=True,
         max_length=4,
@@ -2743,12 +3501,14 @@ class RegistroSalidaAlumnoForm(forms.ModelForm):
         ]
         widgets = {
             "responsable_salida_nombre": forms.TextInput(attrs={
-                "placeholder": "Nombre completo del adulto que recoge al menor"
+                "placeholder": "Se llenará automáticamente con el responsable seleccionado",
+                "readonly": "readonly"
             }),
             "responsable_salida_parentesco": forms.Select(choices=RESPONSABLE_PARENTESCO_CHOICES),
             "responsable_salida_telefono": forms.TextInput(attrs={
-                "placeholder": "Teléfono del responsable",
-                "inputmode": "numeric"
+                "placeholder": "Se llenará automáticamente",
+                "inputmode": "numeric",
+                "readonly": "readonly"
             }),
             "credencial_salida_validada": forms.CheckboxInput(),
             "motivo_salida": forms.TextInput(attrs={
@@ -2775,19 +3535,22 @@ class RegistroSalidaAlumnoForm(forms.ModelForm):
         if self.registro_diario and not self.instance.pk:
             self.instance = self.registro_diario
 
+        responsables = obtener_responsables_autorizados_para_form(self.registro_diario or self.instance)
+        self.fields["responsable_codigo_id"].queryset = responsables
+
+        # Estos datos se llenan desde el responsable autorizado seleccionado.
+        self.fields["responsable_salida_nombre"].required = False
+        self.fields["responsable_salida_parentesco"].required = False
+        self.fields["responsable_salida_telefono"].required = False
+
+        if responsables.count() == 1 and not self.data:
+            responsable = responsables.first()
+            self.fields["responsable_codigo_id"].initial = responsable
+            self.fields["responsable_salida_nombre"].initial = responsable.nombre_completo
+            self.fields["responsable_salida_parentesco"].initial = responsable.parentesco
+            self.fields["responsable_salida_telefono"].initial = responsable.telefono
+
         aplicar_clases_bootstrap(self)
-
-    def clean_responsable_salida_nombre(self):
-        nombre = (self.cleaned_data.get("responsable_salida_nombre") or "").strip()
-        if len(nombre) < 5:
-            raise forms.ValidationError("Captura el nombre completo del adulto responsable.")
-        return nombre.title()
-
-    def clean_responsable_salida_telefono(self):
-        telefono = (self.cleaned_data.get("responsable_salida_telefono") or "").strip()
-        if telefono and not re.fullmatch(r"\d{10}", telefono):
-            raise forms.ValidationError("El teléfono debe tener 10 dígitos.")
-        return telefono
 
     def clean_codigo_responsable(self):
         codigo = (self.cleaned_data.get("codigo_responsable") or "").strip()
@@ -2795,21 +3558,46 @@ class RegistroSalidaAlumnoForm(forms.ModelForm):
         if not re.fullmatch(r"\d{4}", codigo):
             raise forms.ValidationError("El código debe tener exactamente 4 dígitos.")
 
-        registro = self.registro_diario or self.instance
-
-        if registro and registro.alumno_id:
-            if not getattr(registro.alumno, "codigo_responsable_hash", ""):
-                raise forms.ValidationError(
-                    "Este alumno aún no tiene código de seguridad generado por Trabajo Social."
-                )
-
-            if not registro.alumno.validar_codigo_responsable(codigo):
-                raise forms.ValidationError("El código de seguridad no coincide con el registrado.")
-
         return codigo
+
+    def clean_responsable_salida_telefono(self):
+        telefono = (self.cleaned_data.get("responsable_salida_telefono") or "").strip()
+
+        if telefono and not re.fullmatch(r"\d{10,15}", telefono):
+            raise forms.ValidationError("El teléfono debe contener solo números.")
+
+        return telefono
 
     def clean(self):
         cleaned = super().clean()
+
+        registro = self.registro_diario or self.instance
+        dia = getattr(registro, "dia_operativo", None)
+
+        if dia_operativo_no_laborable(dia):
+            raise forms.ValidationError(mensaje_dia_no_laborable(dia))
+
+        responsable = cleaned.get("responsable_codigo_id")
+        codigo = cleaned.get("codigo_responsable")
+
+        if not responsable:
+            self.add_error("responsable_codigo_id", "Selecciona el tutor o familiar autorizado que recoge al menor.")
+        else:
+            registro = self.registro_diario or self.instance
+
+            if registro and getattr(registro, "alumno_id", None) and responsable.inscripcion_id != registro.alumno_id:
+                self.add_error("responsable_codigo_id", "El responsable seleccionado no pertenece a este alumno.")
+
+            if not responsable.tiene_codigo:
+                self.add_error("responsable_codigo_id", "Este responsable todavía no tiene código generado por Trabajo Social.")
+            elif not responsable.codigo_entregado:
+                self.add_error("responsable_codigo_id", "El código de este responsable aún no está marcado como entregado.")
+            elif codigo and not responsable.validar_codigo(codigo):
+                self.add_error("codigo_responsable", "El código no coincide con el responsable seleccionado.")
+
+            cleaned["responsable_salida_nombre"] = responsable.nombre_completo
+            cleaned["responsable_salida_parentesco"] = responsable.parentesco or ""
+            cleaned["responsable_salida_telefono"] = responsable.telefono or ""
 
         if not cleaned.get("credencial_salida_validada"):
             self.add_error("credencial_salida_validada", "Debes confirmar que la credencial fue verificada.")
@@ -2838,8 +3626,20 @@ class CerrarDiaOperacionMaestraForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        self.dia_operativo = kwargs.pop("dia_operativo", None) or kwargs.pop("dia", None)
         super().__init__(*args, **kwargs)
         aplicar_clases_bootstrap(self)
+
+    def clean(self):
+        cleaned = super().clean()
+
+        if self.dia_operativo and dia_operativo_no_laborable(self.dia_operativo):
+            raise forms.ValidationError(
+                "No se puede cerrar operación diaria en un día inhábil; "
+                "sábado, domingo y festivos quedan cerrados automáticamente."
+            )
+
+        return cleaned
 
 
 

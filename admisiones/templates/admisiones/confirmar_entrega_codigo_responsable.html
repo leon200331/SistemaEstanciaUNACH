@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmar entrega de código | Trabajo Social</title>
+    <title>Confirmar entrega por responsable | Trabajo Social</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -34,11 +34,7 @@
             color:var(--slate);
         }
 
-        .page{
-            max-width:1220px;
-            margin:0 auto;
-            padding:24px;
-        }
+        .page{max-width:1240px;margin:0 auto;padding:24px;}
 
         .topbar{
             background:rgba(255,255,255,.94);
@@ -54,102 +50,60 @@
             margin-bottom:22px;
         }
 
-        .brand{
-            display:flex;
-            align-items:center;
-            gap:14px;
-        }
+        .brand{display:flex;align-items:center;gap:14px;min-width:0;}
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:98px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.28);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            transform:scale(1.12);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
 
-        .brand-title{
-            margin:0;
-            font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.35rem;
-            color:#0f172a;
-        }
+        .brand-title{margin:0;font-weight:950;letter-spacing:-.04em;font-size:1.35rem;color:#0f172a;}
+        .brand-subtitle{margin:2px 0 0;color:var(--muted);font-weight:650;font-size:.92rem;}
+        .top-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;}
 
-        .brand-subtitle{
-            margin:2px 0 0;
-            color:var(--muted);
-            font-weight:650;
-            font-size:.92rem;
-        }
-
-        .top-actions{
-            display:flex;
-            flex-wrap:wrap;
-            gap:10px;
-            justify-content:flex-end;
+        .btn-soft,
+        .btn-main{
+            border-radius:999px;
+            font-weight:850;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            transition:.18s ease;
+            white-space:nowrap;
         }
 
         .btn-soft{
-            border-radius:999px;
             padding:.72rem 1rem;
-            font-weight:850;
             border:1px solid var(--border);
             background:white;
             color:#334155;
-            text-decoration:none;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            transition:.18s ease;
         }
 
-        .btn-soft:hover{
-            transform:translateY(-1px);
-            color:#0f172a;
-            background:#f8fafc;
-            box-shadow:0 12px 25px rgba(15,23,42,.09);
-        }
+        .btn-soft:hover{transform:translateY(-1px);color:#0f172a;background:#f8fafc;box-shadow:0 12px 25px rgba(15,23,42,.09);}
 
-        .btn-main{
-            border-radius:999px;
-            padding:.84rem 1.16rem;
-            font-weight:950;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            text-decoration:none;
-            border:none;
-            transition:.18s ease;
-        }
-
-        .btn-main:hover{
-            transform:translateY(-1px);
-            box-shadow:0 14px 28px rgba(15,23,42,.16);
-        }
-
-        .btn-green{
-            background:linear-gradient(135deg,#16a34a,#22c55e);
-            color:white;
-        }
-
-        .btn-blue{
-            background:linear-gradient(135deg,#2563eb,#0891b2);
-            color:white;
-        }
+        .btn-main{padding:.84rem 1.16rem;border:none;font-weight:950;}
+        .btn-main:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(15,23,42,.16);}
+        .btn-green{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;}
+        .btn-blue{background:linear-gradient(135deg,#2563eb,#0891b2);color:white;}
 
         .hero{
             background:linear-gradient(135deg,#16a34a,#2563eb,#0891b2);
@@ -162,126 +116,25 @@
             overflow:hidden;
         }
 
-        .hero:after{
-            content:"";
-            position:absolute;
-            width:270px;
-            height:270px;
-            border-radius:50%;
-            background:rgba(255,255,255,.14);
-            right:-85px;
-            top:-95px;
-        }
+        .hero:after{content:"";position:absolute;width:270px;height:270px;border-radius:50%;background:rgba(255,255,255,.14);right:-85px;top:-95px;}
+        .hero-content{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;}
+        .hero-kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:.45rem .8rem;font-size:.78rem;font-weight:900;margin-bottom:12px;}
+        .hero h1{margin:0;font-size:2rem;font-weight:950;letter-spacing:-.05em;}
+        .hero p{margin:8px 0 0;max-width:850px;font-weight:600;opacity:.94;}
+        .hero-info{min-width:285px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:22px;padding:16px;backdrop-filter:blur(12px);}
+        .hero-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.82;font-weight:950;margin-bottom:4px;}
+        .hero-value{font-size:1.08rem;font-weight:950;line-height:1.25;}
 
-        .hero-content{
-            position:relative;
-            z-index:1;
-            display:grid;
-            grid-template-columns:1fr auto;
-            gap:18px;
-            align-items:center;
-        }
+        .layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:20px;align-items:start;}
+        .panel{background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:26px;box-shadow:0 16px 38px rgba(15,23,42,.08);overflow:hidden;}
+        .panel-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:white;}
+        .panel-title{margin:0;font-size:1.08rem;font-weight:950;letter-spacing:-.03em;color:#0f172a;display:flex;align-items:center;gap:8px;}
+        .panel-body{padding:20px;}
 
-        .hero-kicker{
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.26);
-            border-radius:999px;
-            padding:.45rem .8rem;
-            font-size:.78rem;
-            font-weight:900;
-            margin-bottom:12px;
-        }
+        .alert-custom{border:none;border-radius:20px;padding:14px 16px;box-shadow:0 12px 26px rgba(15,23,42,.08);font-weight:650;}
 
-        .hero h1{
-            margin:0;
-            font-size:2rem;
-            font-weight:950;
-            letter-spacing:-.05em;
-        }
-
-        .hero p{
-            margin:8px 0 0;
-            max-width:820px;
-            font-weight:600;
-            opacity:.94;
-        }
-
-        .hero-info{
-            min-width:270px;
-            background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.28);
-            border-radius:22px;
-            padding:16px;
-            backdrop-filter:blur(12px);
-        }
-
-        .hero-label{
-            font-size:.72rem;
-            text-transform:uppercase;
-            letter-spacing:.08em;
-            opacity:.82;
-            font-weight:950;
-            margin-bottom:4px;
-        }
-
-        .hero-value{
-            font-size:1.12rem;
-            font-weight:950;
-        }
-
-        .layout{
-            display:grid;
-            grid-template-columns:.86fr 1.14fr;
-            gap:20px;
-            align-items:start;
-        }
-
-        .panel{
-            background:rgba(255,255,255,.95);
-            border:1px solid var(--border);
-            border-radius:26px;
-            box-shadow:0 16px 38px rgba(15,23,42,.08);
-            overflow:hidden;
-        }
-
-        .panel-header{
-            padding:18px 20px;
-            border-bottom:1px solid var(--border);
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:14px;
-            flex-wrap:wrap;
-            background:white;
-        }
-
-        .panel-title{
-            margin:0;
-            font-size:1.08rem;
-            font-weight:950;
-            letter-spacing:-.03em;
-            color:#0f172a;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
-
-        .panel-body{
-            padding:20px;
-        }
-
-        .alert-custom{
-            border:none;
-            border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
-        }
-
-        .student-card{
+        .student-card,
+        .responsible-card{
             background:linear-gradient(135deg,#f0fdf4,#eff6ff);
             border:1px solid #bbf7d0;
             border-radius:24px;
@@ -289,90 +142,27 @@
             margin-bottom:16px;
         }
 
-        .student-top{
-            display:flex;
-            gap:14px;
-            align-items:flex-start;
-        }
+        .responsible-card{background:linear-gradient(135deg,#f5f3ff,#eff6ff);border-color:#ddd6fe;}
+        .student-top{display:flex;gap:14px;align-items:flex-start;}
+        .student-avatar{width:66px;height:66px;border-radius:22px;background:linear-gradient(135deg,#dcfce7,#dbeafe);color:#15803d;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;}
+        .student-avatar.responsible{background:linear-gradient(135deg,#ede9fe,#dbeafe);color:#6d28d9;}
+        .student-name{font-weight:950;font-size:1.18rem;color:#0f172a;letter-spacing:-.03em;margin-bottom:4px;line-height:1.25;}
+        .student-meta{color:#475569;font-size:.9rem;font-weight:700;line-height:1.45;}
 
-        .student-avatar{
-            width:66px;
-            height:66px;
-            border-radius:22px;
-            background:linear-gradient(135deg,#dcfce7,#dbeafe);
-            color:#15803d;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:1.9rem;
-            flex-shrink:0;
-        }
+        .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;}
+        .info-item{background:white;border:1px solid rgba(148,163,184,.28);border-radius:16px;padding:12px;min-width:0;}
+        .info-label{color:#64748b;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-weight:950;margin-bottom:4px;}
+        .info-value{font-weight:900;color:#0f172a;overflow-wrap:anywhere;}
 
-        .student-name{
-            font-weight:950;
-            font-size:1.2rem;
-            color:#0f172a;
-            letter-spacing:-.03em;
-            margin-bottom:4px;
-        }
-
-        .student-meta{
-            color:#475569;
-            font-size:.9rem;
-            font-weight:700;
-            line-height:1.45;
-        }
-
-        .info-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-            margin-top:16px;
-        }
-
-        .info-item{
-            background:white;
-            border:1px solid rgba(148,163,184,.28);
-            border-radius:16px;
-            padding:12px;
-        }
-
-        .info-label{
-            color:#64748b;
-            font-size:.72rem;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-            font-weight:950;
-            margin-bottom:4px;
-        }
-
-        .info-value{
-            font-weight:900;
-            color:#0f172a;
-        }
-
-        .badge-soft{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            border-radius:999px;
-            padding:.42rem .68rem;
-            font-size:.76rem;
-            font-weight:950;
-            white-space:nowrap;
-        }
-
+        .badge-soft{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:.42rem .68rem;font-size:.76rem;font-weight:950;white-space:nowrap;}
         .badge-yellow{background:#fef3c7;color:#92400e;}
         .badge-green{background:#dcfce7;color:#166534;}
-        .badge-blue{background:#dbeafe;color:#1e40af;}
         .badge-gray{background:#e2e8f0;color:#334155;}
-        .badge-red{background:#fee2e2;color:#991b1b;}
 
-        .help-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
+        .help-card,
+        .success-card,
+        .warning-card,
+        .danger-card{
             border-radius:20px;
             padding:15px 16px;
             font-weight:650;
@@ -380,241 +170,58 @@
             line-height:1.45;
         }
 
-        .success-card{
-            background:#f0fdf4;
-            border:1px solid #bbf7d0;
-            border-left:6px solid #16a34a;
-            color:#14532d;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
+        .help-card{background:#eff6ff;border:1px solid #bfdbfe;border-left:6px solid #2563eb;color:#1e3a8a;}
+        .success-card{background:#f0fdf4;border:1px solid #bbf7d0;border-left:6px solid #16a34a;color:#14532d;}
+        .warning-card{background:#fff7ed;border:1px solid #fed7aa;border-left:6px solid #f97316;color:#9a3412;}
+        .danger-card{background:#fef2f2;border:1px solid #fecaca;border-left:6px solid #dc2626;color:#991b1b;}
 
-        .warning-card{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            color:#9a3412;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .form-section{
-            border:1px solid var(--border);
-            background:#f8fafc;
-            border-radius:22px;
-            padding:18px;
-            margin-bottom:16px;
-        }
-
-        .form-section-title{
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin-bottom:14px;
-            font-weight:950;
-            color:#0f172a;
-            letter-spacing:-.02em;
-        }
-
-        .form-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
-        }
-
-        .form-group.full{
-            grid-column:1 / -1;
-        }
-
-        .form-label{
-            font-weight:900;
-            color:#334155;
-            margin-bottom:7px;
-            font-size:.88rem;
-        }
+        .form-section{border:1px solid var(--border);background:#f8fafc;border-radius:22px;padding:18px;margin-bottom:16px;}
+        .form-section-title{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:950;color:#0f172a;letter-spacing:-.02em;}
+        .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+        .form-group.full{grid-column:1 / -1;}
+        .form-label{font-weight:900;color:#334155;margin-bottom:7px;font-size:.88rem;}
 
         .form-control,
-        .form-select{
-            border-radius:16px;
-            border:1px solid #cbd5e1;
-            padding:.78rem .9rem;
-            font-weight:650;
-            color:#0f172a;
-            background:white;
-        }
+        .form-select{width:100%;max-width:100%;min-width:0;border-radius:16px;border:1px solid #cbd5e1;padding:.78rem .9rem;font-weight:650;color:#0f172a;background:white;}
+        .form-control[readonly]{background:#f1f5f9;border-style:dashed;color:#475569;cursor:not-allowed;}
+        textarea.form-control{min-height:118px;}
+        .form-control:focus,.form-select:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12);}
 
-        textarea.form-control{
-            min-height:118px;
-        }
+        .delivery-check{display:grid;gap:10px;}
+        .delivery-item{background:white;border:1px solid #cbd5e1;border-radius:18px;padding:14px;}
+        .delivery-item .form-check{border:none;padding:0 0 0 30px;min-height:auto;}
+        .form-check-input{margin-left:-30px;width:1.15rem;height:1.15rem;}
+        .form-check-label{font-weight:850;color:#334155;}
 
-        .form-control:focus,
-        .form-select:focus{
-            border-color:#93c5fd;
-            box-shadow:0 0 0 4px rgba(59,130,246,.12);
-        }
+        .errors{margin-top:7px;color:#b91c1c;font-weight:700;font-size:.82rem;}
+        .errors ul{margin:0;padding-left:18px;}
+        .submit-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:4px;}
+        .submit-note{color:#64748b;font-weight:650;font-size:.86rem;max-width:600px;}
+        .mini-help{color:#64748b;font-size:.82rem;font-weight:650;margin-top:7px;}
 
-        .form-check{
-            background:white;
-            border:1px solid #cbd5e1;
-            border-radius:16px;
-            padding:14px 14px 14px 44px;
-            min-height:54px;
-            display:flex;
-            align-items:center;
-        }
+        .steps{display:grid;gap:12px;}
+        .step{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--border);background:white;border-radius:18px;}
+        .step-number{width:32px;height:32px;border-radius:999px;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-weight:950;flex-shrink:0;}
+        .step-title{font-weight:950;color:#0f172a;margin-bottom:2px;}
+        .step-text{color:#64748b;font-size:.86rem;margin:0;font-weight:650;line-height:1.4;}
 
-        .form-check-input{
-            margin-left:-28px;
-            width:1.15rem;
-            height:1.15rem;
-        }
+        .responsible-list{display:grid;gap:10px;}
+        .responsible-option{border:1px solid var(--border);background:white;border-radius:18px;padding:13px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
+        .responsible-option strong{color:#0f172a;}
 
-        .form-check-label{
-            font-weight:850;
-            color:#334155;
-        }
-
-        .errors{
-            margin-top:7px;
-            color:#b91c1c;
-            font-weight:700;
-            font-size:.82rem;
-        }
-
-        .errors ul{
-            margin:0;
-            padding-left:18px;
-        }
-
-        .submit-bar{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
-            gap:12px;
-            padding-top:4px;
-        }
-
-        .submit-note{
-            color:#64748b;
-            font-weight:650;
-            font-size:.86rem;
-            max-width:600px;
-        }
-
-        .mini-help{
-            color:#64748b;
-            font-size:.82rem;
-            font-weight:650;
-            margin-top:7px;
-        }
-
-        .steps{
-            display:grid;
-            gap:12px;
-        }
-
-        .step{
-            display:flex;
-            gap:12px;
-            align-items:flex-start;
-            padding:13px;
-            border:1px solid var(--border);
-            background:white;
-            border-radius:18px;
-        }
-
-        .step-number{
-            width:32px;
-            height:32px;
-            border-radius:999px;
-            background:#dcfce7;
-            color:#15803d;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:950;
-            flex-shrink:0;
-        }
-
-        .step-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:2px;
-        }
-
-        .step-text{
-            color:#64748b;
-            font-size:.86rem;
-            margin:0;
-            font-weight:650;
-            line-height:1.4;
-        }
-
-        .delivery-check{
-            display:grid;
-            gap:10px;
-        }
-
-        .delivery-item{
-            background:white;
-            border:1px solid #cbd5e1;
-            border-radius:18px;
-            padding:14px;
-        }
-
-        .delivery-item .form-check{
-            border:none;
-            padding:0 0 0 30px;
-            min-height:auto;
-        }
-
-        .delivery-item .form-check-input{
-            margin-left:-30px;
-        }
-
-        @media(max-width:1050px){
-            .layout{grid-template-columns:1fr;}
-            .hero-content{grid-template-columns:1fr;}
-            .hero-info{min-width:0;}
-        }
-
+        @media(max-width:1050px){.layout{grid-template-columns:1fr;}.hero-content{grid-template-columns:1fr;}.hero-info{min-width:0;}}
         @media(max-width:720px){
             .page{padding:14px;}
-
-            .topbar{
-                flex-direction:column;
-                align-items:flex-start;
-                border-radius:20px;
-            }
-
-            .top-actions,
-            .btn-soft,
-            .btn-main{
-                width:100%;
-                justify-content:center;
-            }
-
-            .hero{
-                padding:22px;
-                border-radius:22px;
-            }
-
+            .topbar{flex-direction:column;align-items:flex-start;border-radius:20px;}
+            .brand{align-items:flex-start;}
+            .brand-logo{width:90px;height:62px;}
+            .top-actions,.btn-soft,.btn-main{width:100%;justify-content:center;}
+            .hero{padding:22px;border-radius:22px;}
             .hero h1{font-size:1.55rem;}
-
-            .form-grid,
-            .info-grid{
-                grid-template-columns:1fr;
-            }
-
+            .form-grid,.info-grid{grid-template-columns:1fr;}
             .student-top{flex-direction:column;}
             .submit-bar{align-items:stretch;}
+            .responsible-option{flex-direction:column;align-items:flex-start;}
         }
     </style>
 </head>
@@ -630,7 +237,7 @@
             <div>
                 <h1 class="brand-title">Confirmar entrega</h1>
                 <p class="brand-subtitle">
-                    Registro de entrega de credencial y código de seguridad.
+                    Registro de entrega de credencial y código por responsable autorizado.
                 </p>
             </div>
         </div>
@@ -641,9 +248,9 @@
                 Volver a códigos
             </a>
 
-            <a href="{% url 'panel_admisiones' %}" class="btn-soft">
+            <a href="/panel-administrativo/" class="btn-soft">
                 <i class="bi bi-house-door-fill"></i>
-                Panel admisiones
+                Panel Trabajo Social
             </a>
         </div>
     </header>
@@ -666,24 +273,34 @@
                     Trabajo Social
                 </div>
 
-                <h1>Entrega de credencial y código</h1>
+                <h1>Entrega de credencial y código individual</h1>
 
                 <p>
-                    Confirma que el adulto responsable recibió la credencial y el código de seguridad.
-                    Esta evidencia servirá para validar entradas y salidas del menor durante la operación diaria.
+                    Confirma que la persona autorizada seleccionada recibió su credencial y su código de seguridad.
+                    Este código no es general del alumno; pertenece únicamente a ese tutor o familiar.
                 </p>
             </div>
 
             <div class="hero-info">
-                <div class="hero-label">Alumno</div>
+                <div class="hero-label">Responsable seleccionado</div>
                 <div class="hero-value">
-                    {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
+                    {% if responsable_codigo %}
+                        {{ responsable_codigo.nombre_completo }}
+                    {% else %}
+                        Selección pendiente
+                    {% endif %}
                 </div>
                 <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
-                    {% if inscripcion.codigo_responsable_entregado %}
-                        Entrega ya confirmada
+                    {% if responsable_codigo %}
+                        {% if responsable_codigo.codigo_entregado %}
+                            Entrega ya confirmada
+                        {% elif responsable_codigo.tiene_codigo %}
+                            Entrega pendiente
+                        {% else %}
+                            Sin código generado
+                        {% endif %}
                     {% else %}
-                        Entrega pendiente
+                        Elige una persona autorizada
                     {% endif %}
                 </div>
             </div>
@@ -713,11 +330,11 @@
                                 </div>
                                 <div class="student-meta">
                                     Estado: <strong>{{ inscripcion.estado }}</strong><br>
-                                    Código:
-                                    {% if inscripcion.codigo_responsable_hash %}
-                                        <strong>Generado</strong>
+                                    Pago:
+                                    {% if inscripcion.pago_validado or inscripcion.estado_pago == "VALIDADO" %}
+                                        <strong>Validado</strong>
                                     {% else %}
-                                        <strong>Pendiente</strong>
+                                        <strong>Pendiente de validar</strong>
                                     {% endif %}
                                 </div>
                             </div>
@@ -745,46 +362,66 @@
                                     {% endif %}
                                 </div>
                             </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Código seguro</div>
-                                <div class="info-value">
-                                    {% if inscripcion.codigo_responsable_hash %}
-                                        Sí
-                                    {% else %}
-                                        No
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Entrega</div>
-                                <div class="info-value">
-                                    {% if inscripcion.codigo_responsable_entregado %}
-                                        Confirmada
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </div>
-                            </div>
                         </div>
                     </div>
 
-                    {% if inscripcion.codigo_responsable_entregado %}
-                        <div class="success-card">
-                            <i class="bi bi-check-circle-fill me-1"></i>
-                            Este alumno ya tiene registrada la entrega de credencial y código.
+                    {% if responsable_codigo %}
+                        <div class="responsible-card">
+                            <div class="student-top">
+                                <div class="student-avatar responsible">
+                                    <i class="bi bi-person-vcard-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="student-name">
+                                        {{ responsable_codigo.nombre_completo }}
+                                    </div>
+                                    <div class="student-meta">
+                                        {{ responsable_codigo.get_tipo_responsable_display }}
+                                        {% if responsable_codigo.parentesco %}
+                                            · {{ responsable_codigo.parentesco }}
+                                        {% endif %}
+                                        {% if responsable_codigo.telefono %}
+                                            <br>Teléfono: <strong>{{ responsable_codigo.telefono }}</strong>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Código</div>
+                                    <div class="info-value">
+                                        {% if responsable_codigo.tiene_codigo %}
+                                            Generado
+                                        {% else %}
+                                            Pendiente
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Entrega</div>
+                                    <div class="info-value">
+                                        {% if responsable_codigo.codigo_entregado %}
+                                            Confirmada
+                                        {% else %}
+                                            Pendiente
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     {% else %}
-                        <div class="help-card">
-                            <i class="bi bi-info-circle-fill me-1"></i>
-                            Esta confirmación indica que el responsable ya recibió la llave de seguridad que usará en entrada y salida.
+                        <div class="warning-card">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            No se seleccionó responsable. Elige una persona autorizada para confirmar su entrega.
                         </div>
                     {% endif %}
 
                     <div class="warning-card">
                         <i class="bi bi-shield-lock-fill me-1"></i>
-                        No se debe mostrar el código nuevamente en esta pantalla. Si el responsable lo perdió, se debe resetear desde la lista de códigos.
+                        No se debe mostrar el código nuevamente en esta pantalla. Si el responsable lo perdió,
+                        se debe resetear desde la lista de códigos.
                     </div>
                 </div>
             </section>
@@ -802,10 +439,8 @@
                         <div class="step">
                             <div class="step-number">1</div>
                             <div>
-                                <div class="step-title">Generar código</div>
-                                <p class="step-text">
-                                    Trabajo Social genera el código cuando el pago e inscripción están finalizados.
-                                </p>
+                                <div class="step-title">Seleccionar responsable</div>
+                                <p class="step-text">El código se entrega a una persona autorizada específica.</p>
                             </div>
                         </div>
 
@@ -813,9 +448,7 @@
                             <div class="step-number">2</div>
                             <div>
                                 <div class="step-title">Entregar credencial</div>
-                                <p class="step-text">
-                                    Se entrega la credencial física al adulto responsable.
-                                </p>
+                                <p class="step-text">Se entrega la credencial física a esa persona autorizada.</p>
                             </div>
                         </div>
 
@@ -823,9 +456,7 @@
                             <div class="step-number">3</div>
                             <div>
                                 <div class="step-title">Entregar código</div>
-                                <p class="step-text">
-                                    Se entrega el código de 4 dígitos como llave de seguridad.
-                                </p>
+                                <p class="step-text">Se entrega el código de 4 dígitos solo a esa persona.</p>
                             </div>
                         </div>
 
@@ -833,9 +464,7 @@
                             <div class="step-number">4</div>
                             <div>
                                 <div class="step-title">Confirmar entrega</div>
-                                <p class="step-text">
-                                    Se registra quién recibió la credencial y el código.
-                                </p>
+                                <p class="step-text">La entrega queda registrada con usuario, fecha y hora.</p>
                             </div>
                         </div>
                     </div>
@@ -851,39 +480,126 @@
                         Evidencia de entrega
                     </h2>
 
-                    {% if inscripcion.codigo_responsable_entregado %}
-                        <span class="badge-soft badge-green">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Confirmada
-                        </span>
+                    {% if responsable_codigo and responsable_codigo.codigo_entregado %}
+                        <span class="badge-soft badge-green"><i class="bi bi-check-circle-fill"></i> Confirmada</span>
+                    {% elif responsable_codigo %}
+                        <span class="badge-soft badge-yellow"><i class="bi bi-clock-fill"></i> Pendiente</span>
                     {% else %}
-                        <span class="badge-soft badge-yellow">
-                            <i class="bi bi-clock-fill"></i>
-                            Pendiente
-                        </span>
+                        <span class="badge-soft badge-gray"><i class="bi bi-person-exclamation"></i> Falta seleccionar</span>
                     {% endif %}
                 </div>
 
                 <div class="panel-body">
-                    {% if not inscripcion.codigo_responsable_hash %}
+                    {% if not responsable_codigo %}
                         <div class="warning-card">
-                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                            Este alumno todavía no tiene código generado. Primero debes generar el código de seguridad.
+                            <i class="bi bi-person-exclamation me-1"></i>
+                            Selecciona a qué tutor o familiar autorizado se le confirmará la entrega.
                         </div>
 
-                        <a href="{% url 'generar_codigo_responsable' inscripcion.id %}" class="btn-main btn-blue">
+                        <div class="responsible-list">
+                            {% for responsable in responsables_codigo %}
+                                <div class="responsible-option">
+                                    <div>
+                                        <strong>{{ responsable.nombre_completo }}</strong>
+                                        <div class="student-meta">
+                                            {{ responsable.get_tipo_responsable_display }}
+                                            {% if responsable.parentesco %}
+                                                · {{ responsable.parentesco }}
+                                            {% endif %}
+                                            {% if responsable.codigo_entregado %}
+                                                · Entrega confirmada
+                                            {% elif responsable.tiene_codigo %}
+                                                · Código generado
+                                            {% else %}
+                                                · Sin código
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <a href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="btn-soft">
+                                        <i class="bi bi-arrow-right-circle-fill"></i>
+                                        Seleccionar
+                                    </a>
+                                </div>
+                            {% empty %}
+                                <div class="danger-card mb-0">
+                                    <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                                    No se encontraron responsables autorizados para este alumno.
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    {% elif not responsable_codigo.tiene_codigo %}
+                        <div class="warning-card">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            Este responsable todavía no tiene código generado. Primero debes generar su código individual.
+                        </div>
+
+                        <a href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable_codigo.id }}" class="btn-main btn-blue">
                             <i class="bi bi-key-fill"></i>
                             Generar código
                         </a>
+
+                    {% elif responsable_codigo.codigo_entregado %}
+                        <div class="success-card">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            La entrega de credencial y código ya está confirmada para
+                            <strong>{{ responsable_codigo.nombre_completo }}</strong>.
+                            {% if responsable_codigo.codigo_entregado_en %}
+                                <br>Fecha de entrega: <strong>{{ responsable_codigo.codigo_entregado_en|date:"d/m/Y H:i" }}</strong>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'codigos_responsable_pendientes' %}" class="btn-soft">
+                                <i class="bi bi-list-check"></i>
+                                Volver a lista
+                            </a>
+
+                            <a href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable_codigo.id }}" class="btn-soft">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Resetear código
+                            </a>
+                        </div>
+
                     {% else %}
                         <form method="post" novalidate>
                             {% csrf_token %}
+                            <input type="hidden" name="responsable_codigo_id" value="{{ responsable_codigo.id }}">
 
                             {% if form.non_field_errors %}
                                 <div class="alert alert-danger alert-custom">
                                     {{ form.non_field_errors }}
                                 </div>
                             {% endif %}
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-person-vcard-fill"></i>
+                                    Responsable seleccionado
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group full">
+                                        <label class="form-label">Nombre del responsable que recibe</label>
+                                        <input type="text" class="form-control" value="{{ responsable_codigo.nombre_completo }}" readonly>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Parentesco</label>
+                                        <input type="text" class="form-control" value="{% if responsable_codigo.parentesco %}{{ responsable_codigo.parentesco }}{% else %}{{ responsable_codigo.get_tipo_responsable_display }}{% endif %}" readonly>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Teléfono</label>
+                                        <input type="text" class="form-control" value="{{ responsable_codigo.telefono|default:'Sin teléfono' }}" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="mini-help">
+                                    Estos datos se toman del expediente. No se editan en esta pantalla para evitar confusión.
+                                </div>
+                            </div>
 
                             <div class="form-section">
                                 <div class="form-section-title">
@@ -924,35 +640,6 @@
 
                             <div class="form-section">
                                 <div class="form-section-title">
-                                    <i class="bi bi-person-badge-fill"></i>
-                                    Responsable que recibe
-                                </div>
-
-                                <div class="form-grid">
-                                    <div class="form-group full">
-                                        <label for="{{ form.responsable_recibe.id_for_label }}" class="form-label">
-                                            Nombre del responsable que recibe
-                                        </label>
-                                        {{ form.responsable_recibe }}
-                                        {% if form.responsable_recibe.errors %}
-                                            <div class="errors">{{ form.responsable_recibe.errors }}</div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="form-group full">
-                                        <label for="{{ form.parentesco.id_for_label }}" class="form-label">
-                                            Parentesco
-                                        </label>
-                                        {{ form.parentesco }}
-                                        {% if form.parentesco.errors %}
-                                            <div class="errors">{{ form.parentesco.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-section">
-                                <div class="form-section-title">
                                     <i class="bi bi-chat-left-text-fill"></i>
                                     Observaciones
                                 </div>
@@ -973,7 +660,7 @@
                             <div class="submit-bar">
                                 <div class="submit-note">
                                     La entrega quedará registrada con tu usuario, fecha y hora.
-                                    Después, las maestras podrán validar el código en entrada y salida.
+                                    Después, las maestras podrán validar el código de esta persona en entrada y salida.
                                 </div>
 
                                 <div class="d-flex gap-2 flex-wrap">

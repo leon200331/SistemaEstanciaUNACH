@@ -81,8 +81,18 @@ urlpatterns = [
     path("pagos/validar/<int:pk>/", views.registrar_pago_valido, name="registrar_pago_valido"),
 
     # =========================================================
-    # CÓDIGO DE SEGURIDAD DEL RESPONSABLE - TRABAJO SOCIAL
-    # Se genera después de inscripción finalizada y pago validado.
+    # =========================================================
+    # CÓDIGOS DE SEGURIDAD POR RESPONSABLE AUTORIZADO
+    # Trabajo Social
+    #
+    # Regla actual:
+    # - El código ya no es uno solo por alumno.
+    # - Cada tutor o familiar autorizado tiene su propio código.
+    # - La persona se selecciona desde la vista usando el parámetro:
+    #       ?responsable_codigo_id=<id>
+    #
+    # Se conservan los mismos nombres de rutas para no romper templates,
+    # botones existentes ni llamadas con reverse().
     # =========================================================
     path(
         "codigos-responsable/",
@@ -166,6 +176,7 @@ urlpatterns = [
 
     # Semestres
     path("semestres/nuevo/", views.crear_semestre, name="crear_semestre"),
+    path("semestres/<int:semestre_id>/clonar/", views.clonar_semestre, name="clonar_semestre"),
     path("semestres/<int:semestre_id>/", views.detalle_semestre, name="detalle_semestre"),
     path("semestres/<int:semestre_id>/editar/", views.editar_semestre, name="editar_semestre"),
     path("semestres/<int:semestre_id>/iniciar/", views.iniciar_semestre, name="iniciar_semestre"),
@@ -231,6 +242,26 @@ urlpatterns = [
         "semestres/<int:semestre_id>/encuesta/enviar/",
         views.enviar_encuesta_satisfaccion,
         name="enviar_encuesta_satisfaccion",
+    ),
+    path(
+        "semestres/<int:semestre_id>/encuesta/csv/",
+        views.descargar_csv_encuesta_satisfaccion,
+        name="descargar_csv_encuesta_satisfaccion",
+    ),
+    path(
+        "semestres/encuesta/envio/<int:envio_id>/reenviar/",
+        views.reenviar_encuesta_satisfaccion,
+        name="reenviar_encuesta_satisfaccion",
+    ),
+    path(
+        "semestres/encuesta/envio/<int:envio_id>/respuesta/",
+        views.ver_respuesta_encuesta_satisfaccion,
+        name="ver_respuesta_encuesta_satisfaccion",
+    ),
+    path(
+        "encuesta-satisfaccion/<uuid:token>/",
+        views.responder_encuesta_satisfaccion,
+        name="responder_encuesta_satisfaccion",
     ),
 
     # Incidencias de semestre

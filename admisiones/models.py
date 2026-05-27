@@ -1,13 +1,29 @@
 from django.db import models, transaction
 from django.db.models import Q
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator, FileExtensionValidator
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 import uuid
+import secrets
 from datetime import timedelta
 import re  # Para las validaciones numéricas del algoritmo y rutas de archivos
+
+
+# =========================================================
+# VALIDADORES GENERALES
+# =========================================================
+telefono_mx_10_validator = RegexValidator(
+    regex=r"^\d{10}$",
+    message="El teléfono debe contener exactamente 10 dígitos, sin espacios, letras ni guiones."
+)
+
+codigo_postal_mx_validator = RegexValidator(
+    regex=r"^\d{5}$",
+    message="El código postal debe contener exactamente 5 dígitos."
+)
 
 
 # =========================================================
@@ -51,6 +67,28 @@ def ruta_reglamento(instance, filename):
 def ruta_comprobante_pago(instance, filename):
     matricula = limpiar_matricula(instance.solicitud_ingreso.matricula if instance.solicitud_ingreso else None)
     return f"pagos/comprobantes/{matricula}/{filename}"
+
+
+def validar_tamano_archivo_pago(archivo):
+    """
+    Valida que el comprobante de pago no supere 5 MB.
+    Aplica tanto para comprobantes subidos por el beneficiario como
+    para comprobantes entregados presencialmente y digitalizados por Trabajo Social.
+    """
+    limite_mb = 5
+
+    if archivo and archivo.size > limite_mb * 1024 * 1024:
+        raise ValidationError(f"El comprobante de pago no debe superar {limite_mb} MB.")
+
+
+def es_fin_de_semana(fecha):
+    """
+    Regla operativa de la estancia:
+    sábado y domingo son días inhábiles automáticos.
+    Los usuarios pueden iniciar sesión, pero no se permite abrir operación diaria,
+    registrar entrada, salida ni bitácoras de menores.
+    """
+    return bool(fecha and fecha.weekday() in (5, 6))
 
 
 def ruta_reporte_final_ingreso(instance, filename):
@@ -769,8 +807,16 @@ class SolicitudInscripcion(models.Model):
 
     doc_tutor_domicilio = models.FileField(upload_to=ruta_doc_tutor, null=True, blank=True,
                                            verbose_name="Comprobante de Domicilio")
-    doc_tutor_pago = models.FileField(upload_to=ruta_comprobante_pago, null=True, blank=True,
-                                      verbose_name="Comprobante de Pago Inscripción")
+    doc_tutor_pago = models.FileField(
+        upload_to=ruta_comprobante_pago,
+        null=True,
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["pdf", "jpg", "jpeg", "png"]),
+            validar_tamano_archivo_pago,
+        ],
+        verbose_name="Comprobante de Pago Inscripción"
+    )
 
     # =========================================================
     # CONTROL DE COMPROBANTE DE PAGO
@@ -945,6 +991,37 @@ class SolicitudInscripcion(models.Model):
         """
         return self.estado_pago == self.EstadoPago.VALIDADO
 
+    def registrar_comprobante_presencial(self, usuario=None, archivo=None, observaciones=""):
+        """
+        Registra que Trabajo Social recibió el comprobante presencialmente.
+
+        Reglas:
+        - Si se adjunta archivo, se guarda en doc_tutor_pago como evidencia digital.
+        - El estado pasa a ENTREGADO_PRESENCIAL.
+        - Se registra quién lo recibió y cuándo.
+        - No valida el pago automáticamente; solo registra la entrega del comprobante.
+        """
+        if archivo:
+            self.doc_tutor_pago = archivo
+
+        self.estado_pago = self.EstadoPago.ENTREGADO_PRESENCIAL
+        self.pago_entregado_presencial = True
+        self.pago_subido_por_beneficiario = False
+        self.pago_recibido_presencial_por = usuario
+        self.pago_recibido_presencial_en = timezone.now()
+        self.pago_observaciones = observaciones or self.pago_observaciones
+
+        self.save(update_fields=[
+            "doc_tutor_pago",
+            "estado_pago",
+            "pago_entregado_presencial",
+            "pago_subido_por_beneficiario",
+            "pago_recibido_presencial_por",
+            "pago_recibido_presencial_en",
+            "pago_observaciones",
+            "updated_at",
+        ])
+
     # =========================================================
     # CÓDIGO DE SEGURIDAD PARA ENTREGA/RECEPCIÓN DEL MENOR
     # Segunda parte Sprint 4:
@@ -1076,6 +1153,10 @@ class SolicitudInscripcion(models.Model):
     def validar_codigo_responsable(self, codigo):
         """
         Valida el código de 4 dígitos del adulto responsable.
+
+        Se conserva por compatibilidad con vistas anteriores. Para la operación
+        nueva se recomienda usar validar_codigo_de_responsable(), porque ahora
+        cada tutor o familiar autorizado tiene su propio código.
         """
         codigo = str(codigo or "").strip()
 
@@ -1083,6 +1164,49 @@ class SolicitudInscripcion(models.Model):
             return False
 
         return check_password(codigo, self.codigo_responsable_hash)
+
+    # =========================================================
+    # RESPONSABLES AUTORIZADOS Y CÓDIGOS INDIVIDUALES
+    # Nueva regla:
+    # - El código ya no se maneja como un solo código por alumno.
+    # - Cada tutor o familiar autorizado tiene su propio código.
+    # - Los campos codigo_responsable_* quedan como compatibilidad.
+    # =========================================================
+    def sincronizar_responsables_autorizados(self):
+        """
+        Crea o actualiza los responsables autorizados usando los datos capturados
+        en la inscripción: tutor principal, segundo tutor y contactos 1-3.
+
+        Este método no genera códigos automáticamente; solo prepara la lista de
+        personas para que Trabajo Social pueda generar y entregar un código
+        individual a cada responsable.
+        """
+        return CodigoResponsableAutorizado.sincronizar_desde_inscripcion(self)
+
+    def responsables_autorizados_activos(self):
+        """
+        Devuelve los responsables autorizados activos.
+        Si todavía no existen, los crea desde los datos de la inscripción.
+        """
+        if not self.codigos_responsables_autorizados.exists():
+            self.sincronizar_responsables_autorizados()
+
+        return self.codigos_responsables_autorizados.filter(activo=True)
+
+    def validar_codigo_de_responsable(self, responsable_id, codigo):
+        """
+        Valida que el código capturado pertenezca al responsable seleccionado
+        y a este alumno.
+        """
+        responsable = self.codigos_responsables_autorizados.filter(
+            id=responsable_id,
+            activo=True
+        ).first()
+
+        if not responsable:
+            return False, None
+
+        return responsable.validar_codigo(codigo), responsable
 
     @property
     def es_lactante(self):
@@ -1195,6 +1319,403 @@ class SolicitudInscripcion(models.Model):
         return f"Expediente de Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
 
 
+class CodigoResponsableAutorizado(models.Model):
+    """
+    Código individual por persona autorizada para entregar o recoger al menor.
+
+    Regla:
+    - No existe un único código para todos los familiares del alumno.
+    - Cada tutor o familiar autorizado tiene su propio código de 4 dígitos.
+    - La maestra valida este código al registrar entrada y salida.
+    """
+
+    class TipoResponsable(models.TextChoices):
+        TUTOR_PRINCIPAL = "TUTOR_PRINCIPAL", "Tutor principal"
+        SEGUNDO_TUTOR = "SEGUNDO_TUTOR", "Segundo tutor"
+        CONTACTO_1 = "CONTACTO_1", "Familiar autorizado 1"
+        CONTACTO_2 = "CONTACTO_2", "Familiar autorizado 2"
+        CONTACTO_3 = "CONTACTO_3", "Familiar autorizado 3"
+        OTRO = "OTRO", "Otro responsable autorizado"
+
+    inscripcion = models.ForeignKey(
+        "admisiones.SolicitudInscripcion",
+        on_delete=models.CASCADE,
+        related_name="codigos_responsables_autorizados",
+        verbose_name="Alumno / inscripción"
+    )
+
+    tipo_responsable = models.CharField(
+        max_length=30,
+        choices=TipoResponsable.choices,
+        default=TipoResponsable.OTRO,
+        verbose_name="Tipo de responsable"
+    )
+
+    nombre_completo = models.CharField(
+        max_length=180,
+        verbose_name="Nombre completo del responsable"
+    )
+
+    parentesco = models.CharField(
+        max_length=80,
+        blank=True,
+        default="",
+        verbose_name="Parentesco"
+    )
+
+    telefono = models.CharField(
+        max_length=15,
+        blank=True,
+        default="",
+        verbose_name="Teléfono"
+    )
+
+    correo = models.EmailField(
+        blank=True,
+        default="",
+        verbose_name="Correo"
+    )
+
+    codigo_hash = models.CharField(
+        max_length=128,
+        blank=True,
+        default="",
+        verbose_name="Código de seguridad cifrado"
+    )
+
+    codigo_actualizado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de actualización del código"
+    )
+
+    codigo_generado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="codigos_responsable_persona_generados",
+        verbose_name="Código generado por"
+    )
+
+    codigo_generado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de generación del código"
+    )
+
+    codigo_observaciones = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de generación"
+    )
+
+    codigo_reset_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="codigos_responsable_persona_reseteados",
+        verbose_name="Código reseteado por"
+    )
+
+    codigo_reset_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de reseteo del código"
+    )
+
+    codigo_reset_motivo = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Motivo del reseteo"
+    )
+
+    codigo_entregado = models.BooleanField(
+        default=False,
+        verbose_name="¿Código entregado?"
+    )
+
+    codigo_entregado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="codigos_responsable_persona_entregados",
+        verbose_name="Código entregado por"
+    )
+
+    codigo_entregado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de entrega del código"
+    )
+
+    codigo_entrega_observaciones = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de entrega"
+    )
+
+    credencial_entregada = models.BooleanField(
+        default=False,
+        verbose_name="¿Credencial entregada?"
+    )
+
+    credencial_entregada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="credenciales_responsable_persona_entregadas",
+        verbose_name="Credencial entregada por"
+    )
+
+    credencial_entregada_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de entrega de credencial"
+    )
+
+    activo = models.BooleanField(
+        default=True,
+        verbose_name="Responsable activo"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def generar_codigo_plano():
+        """
+        Genera un código de 4 dígitos.
+        El valor plano solo debe mostrarse al momento de generarlo o resetearlo.
+        Después únicamente se conserva el hash.
+        """
+        return f"{secrets.randbelow(10000):04d}"
+
+    @staticmethod
+    def limpiar_telefono(valor):
+        return re.sub(r"\D", "", str(valor or ""))[:15]
+
+    @staticmethod
+    def limpiar_nombre(valor):
+        return re.sub(r"\s+", " ", str(valor or "").strip())
+
+    @property
+    def tiene_codigo(self):
+        return bool(self.codigo_hash)
+
+    @property
+    def puede_validarse(self):
+        return bool(self.activo and self.codigo_hash and self.codigo_entregado)
+
+    @property
+    def alumno_nombre(self):
+        try:
+            return self.inscripcion.solicitud_ingreso.nombre_menor_completo()
+        except Exception:
+            return "Sin alumno"
+
+    def set_codigo(self, codigo, usuario=None, motivo_reset="", observaciones=""):
+        """
+        Guarda el código de 4 dígitos usando hash.
+        Nunca se guarda el código en texto plano.
+        """
+        codigo = str(codigo or "").strip()
+
+        if not re.fullmatch(r"\d{4}", codigo):
+            raise ValueError("El código del responsable debe tener exactamente 4 dígitos.")
+
+        tenia_codigo = bool(self.codigo_hash)
+
+        self.codigo_hash = make_password(codigo)
+        self.codigo_actualizado_en = timezone.now()
+        self.codigo_entregado = False
+
+        if tenia_codigo:
+            self.codigo_reset_por = usuario
+            self.codigo_reset_en = timezone.now()
+            self.codigo_reset_motivo = motivo_reset or self.codigo_reset_motivo
+        else:
+            self.codigo_generado_por = usuario
+            self.codigo_generado_en = timezone.now()
+            self.codigo_observaciones = observaciones or self.codigo_observaciones
+
+    def generar_nuevo_codigo(self, usuario=None, motivo_reset="", observaciones=""):
+        """
+        Genera, asigna y devuelve el código plano para mostrarlo una sola vez.
+        """
+        codigo = self.generar_codigo_plano()
+        self.set_codigo(
+            codigo,
+            usuario=usuario,
+            motivo_reset=motivo_reset,
+            observaciones=observaciones,
+        )
+        self.save()
+        return codigo
+
+    def validar_codigo(self, codigo):
+        """
+        Valida el código de 4 dígitos de esta persona autorizada.
+        """
+        codigo = str(codigo or "").strip()
+
+        if not self.codigo_hash or not re.fullmatch(r"\d{4}", codigo):
+            return False
+
+        return check_password(codigo, self.codigo_hash)
+
+    def marcar_entregado(self, usuario=None, observaciones="", credencial=True):
+        self.codigo_entregado = True
+        self.codigo_entregado_por = usuario
+        self.codigo_entregado_en = timezone.now()
+        self.codigo_entrega_observaciones = observaciones or self.codigo_entrega_observaciones
+
+        if credencial:
+            self.credencial_entregada = True
+            self.credencial_entregada_por = usuario
+            self.credencial_entregada_en = timezone.now()
+
+        self.save(update_fields=[
+            "codigo_entregado",
+            "codigo_entregado_por",
+            "codigo_entregado_en",
+            "codigo_entrega_observaciones",
+            "credencial_entregada",
+            "credencial_entregada_por",
+            "credencial_entregada_en",
+            "updated_at",
+        ])
+
+    @classmethod
+    def datos_responsables_desde_inscripcion(cls, inscripcion):
+        """
+        Construye la lista de responsables autorizados desde los datos del expediente.
+        """
+        datos = []
+
+        def agregar(tipo, nombre, parentesco="", telefono="", correo=""):
+            nombre = cls.limpiar_nombre(nombre)
+
+            if not nombre:
+                return
+
+            datos.append({
+                "tipo_responsable": tipo,
+                "nombre_completo": nombre,
+                "parentesco": cls.limpiar_nombre(parentesco),
+                "telefono": cls.limpiar_telefono(telefono),
+                "correo": str(correo or "").strip().lower(),
+            })
+
+        solicitud = getattr(inscripcion, "solicitud_ingreso", None)
+
+        if solicitud:
+            try:
+                parentesco = solicitud.get_parentesco_display()
+            except Exception:
+                parentesco = getattr(solicitud, "parentesco", "") or "Tutor"
+
+            agregar(
+                cls.TipoResponsable.TUTOR_PRINCIPAL,
+                solicitud.nombre_tutor_completo(),
+                parentesco,
+                getattr(solicitud, "celular", ""),
+                getattr(solicitud, "correo", ""),
+            )
+
+        agregar(
+            cls.TipoResponsable.SEGUNDO_TUTOR,
+            " ".join(filter(None, [
+                getattr(inscripcion, "nombres_segundo_padre", ""),
+                getattr(inscripcion, "apellido_paterno_segundo_padre", ""),
+                getattr(inscripcion, "apellido_materno_segundo_padre", ""),
+            ])),
+            getattr(inscripcion, "parentesco_segundo_padre", "") or "Segundo tutor",
+            getattr(inscripcion, "celular_segundo_padre", ""),
+            getattr(inscripcion, "correo_segundo_padre", ""),
+        )
+
+        for numero in [1, 2, 3]:
+            agregar(
+                getattr(cls.TipoResponsable, f"CONTACTO_{numero}"),
+                " ".join(filter(None, [
+                    getattr(inscripcion, f"contacto_{numero}_nombres", ""),
+                    getattr(inscripcion, f"contacto_{numero}_apellido_paterno", ""),
+                    getattr(inscripcion, f"contacto_{numero}_apellido_materno", ""),
+                ])),
+                getattr(inscripcion, f"contacto_{numero}_parentesco", ""),
+                getattr(inscripcion, f"contacto_{numero}_telefono", ""),
+                "",
+            )
+
+        return datos
+
+    @classmethod
+    def sincronizar_desde_inscripcion(cls, inscripcion):
+        """
+        Crea o actualiza responsables autorizados desde el expediente.
+        No elimina códigos existentes; solo actualiza datos de identificación.
+        """
+        responsables = []
+
+        for dato in cls.datos_responsables_desde_inscripcion(inscripcion):
+            obj, _ = cls.objects.get_or_create(
+                inscripcion=inscripcion,
+                tipo_responsable=dato["tipo_responsable"],
+                defaults=dato
+            )
+
+            cambios = []
+            for campo in ["nombre_completo", "parentesco", "telefono", "correo"]:
+                if getattr(obj, campo) != dato[campo]:
+                    setattr(obj, campo, dato[campo])
+                    cambios.append(campo)
+
+            if not obj.activo:
+                obj.activo = True
+                cambios.append("activo")
+
+            if cambios:
+                cambios.append("updated_at")
+                obj.save(update_fields=cambios)
+
+            responsables.append(obj)
+
+        return responsables
+
+    def save(self, *args, **kwargs):
+        self.nombre_completo = self.limpiar_nombre(self.nombre_completo)
+        self.parentesco = self.limpiar_nombre(self.parentesco)
+        self.telefono = self.limpiar_telefono(self.telefono)
+
+        if self.correo:
+            self.correo = self.correo.strip().lower()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nombre_completo} - {self.parentesco} - {self.alumno_nombre}"
+
+    class Meta:
+        ordering = [
+            "inscripcion__solicitud_ingreso__apellido_paterno_menor",
+            "tipo_responsable",
+            "nombre_completo",
+        ]
+        unique_together = ("inscripcion", "tipo_responsable")
+        indexes = [
+            models.Index(fields=["tipo_responsable"]),
+            models.Index(fields=["activo"]),
+            models.Index(fields=["codigo_entregado"]),
+            models.Index(fields=["credencial_entregada"]),
+            models.Index(fields=["codigo_generado_en"]),
+            models.Index(fields=["codigo_entregado_en"]),
+        ]
+
+
 class HistoriaClinicaMedica(models.Model):
     inscripcion = models.OneToOneField(
         SolicitudInscripcion,
@@ -1280,25 +1801,138 @@ class Sede(models.Model):
     """
     Catálogo de sedes.
     Permite operar de forma segmentada por sede y ver la información centralizada.
+
+    La dirección se captura por partes para evitar errores y se sincroniza
+    automáticamente en el campo direccion para conservar compatibilidad con
+    reportes, paneles y código anterior.
     """
+
+    class TipoVialidad(models.TextChoices):
+        CALLE = "CALLE", "Calle"
+        AVENIDA = "AVENIDA", "Avenida"
+        BOULEVARD = "BOULEVARD", "Boulevard"
+        CARRETERA = "CARRETERA", "Carretera"
+        PRIVADA = "PRIVADA", "Privada"
+        ANDADOR = "ANDADOR", "Andador"
+        OTRO = "OTRO", "Otro"
+
     clave = models.CharField(
         max_length=30,
         unique=True,
         verbose_name="Clave de sede",
         help_text="Ej. TUXTLA, TAPACHULA, SANCRISTOBAL"
     )
-    nombre = models.CharField(max_length=120, unique=True, verbose_name="Nombre de sede")
-    direccion = models.CharField(max_length=255, blank=True, default="", verbose_name="Dirección")
-    telefono = models.CharField(max_length=30, blank=True, default="", verbose_name="Teléfono")
+
+    nombre = models.CharField(
+        max_length=120,
+        unique=True,
+        verbose_name="Nombre de sede"
+    )
+
+    direccion = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Dirección completa"
+    )
+
+    estado = models.CharField(max_length=100, blank=True, default="Chiapas", verbose_name="Estado")
+    municipio = models.CharField(max_length=120, blank=True, default="", verbose_name="Municipio")
+    ciudad_localidad = models.CharField(max_length=120, blank=True, default="", verbose_name="Ciudad / Localidad")
+    colonia = models.CharField(max_length=150, blank=True, default="", verbose_name="Colonia")
+    codigo_postal = models.CharField(
+        max_length=5,
+        blank=True,
+        default="",
+        validators=[codigo_postal_mx_validator],
+        verbose_name="Código postal"
+    )
+    tipo_vialidad = models.CharField(
+        max_length=20,
+        choices=TipoVialidad.choices,
+        default=TipoVialidad.CALLE,
+        verbose_name="Tipo de vialidad"
+    )
+    calle_avenida = models.CharField(max_length=180, blank=True, default="", verbose_name="Calle / Avenida")
+    numero_exterior = models.CharField(max_length=20, blank=True, default="", verbose_name="Número exterior")
+    numero_interior = models.CharField(max_length=20, blank=True, default="", verbose_name="Número interior")
+    referencia = models.CharField(max_length=255, blank=True, default="", verbose_name="Referencia")
+
+    telefono = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        validators=[telefono_mx_10_validator],
+        verbose_name="Teléfono de sede",
+        help_text="Captura 10 dígitos, sin espacios, letras ni guiones."
+    )
+
     correo = models.EmailField(blank=True, default="", verbose_name="Correo de sede")
     activa = models.BooleanField(default=True, verbose_name="Sede activa")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def construir_direccion(self):
+        partes = []
+
+        vialidad = " ".join([
+            self.get_tipo_vialidad_display() if self.tipo_vialidad else "",
+            self.calle_avenida or "",
+        ]).strip()
+
+        if vialidad:
+            numero = ""
+            if self.numero_exterior:
+                numero = f"No. {self.numero_exterior}"
+            if self.numero_interior:
+                numero = f"{numero} Int. {self.numero_interior}".strip()
+            partes.append(" ".join([vialidad, numero]).strip())
+
+        if self.colonia:
+            partes.append(f"Col. {self.colonia}")
+
+        ubicacion = ", ".join(
+            valor for valor in [
+                self.ciudad_localidad or "",
+                self.municipio or "",
+                self.estado or "",
+            ]
+            if valor
+        )
+
+        if ubicacion:
+            partes.append(ubicacion)
+
+        if self.codigo_postal:
+            partes.append(f"C.P. {self.codigo_postal}")
+
+        if self.referencia:
+            partes.append(f"Referencia: {self.referencia}")
+
+        return ", ".join(partes).strip()
+
+    @property
+    def direccion_detallada(self):
+        return self.construir_direccion() or self.direccion
+
     def save(self, *args, **kwargs):
         if self.clave:
             self.clave = limpiar_matricula(self.clave).upper()
+
+        if self.telefono:
+            self.telefono = re.sub(r"\D", "", self.telefono)
+
+        if self.codigo_postal:
+            self.codigo_postal = re.sub(r"\D", "", self.codigo_postal)
+
+        if self.correo:
+            self.correo = self.correo.strip().lower()
+
+        direccion_generada = self.construir_direccion()
+        if direccion_generada:
+            self.direccion = direccion_generada
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -1309,6 +1943,8 @@ class Sede(models.Model):
         indexes = [
             models.Index(fields=["clave"]),
             models.Index(fields=["activa"]),
+            models.Index(fields=["municipio"]),
+            models.Index(fields=["ciudad_localidad"]),
         ]
 
 
@@ -1415,6 +2051,15 @@ class Semestre(models.Model):
 
     observaciones = models.TextField(blank=True, default="", verbose_name="Observaciones del semestre")
 
+    clonado_de = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="semestres_clonados",
+        verbose_name="Semestre origen de clonación"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -1433,8 +2078,12 @@ class Semestre(models.Model):
     def generar_dias_operativos(self):
         """
         Genera el calendario operativo del semestre.
-        Crea días de fecha_inicio a fecha_fin.
-        Los festivos/suspensiones quedan marcados como no hábiles.
+
+        Reglas:
+        - Lunes a viernes quedan como días hábiles programados.
+        - Sábado y domingo son inhábiles automáticos.
+        - Días festivos/suspensiones/consejo técnico con afecta_recepcion=True son inhábiles.
+        - Los días inhábiles se guardan como cerrados automáticamente para que no bloqueen el cierre del semestre.
         """
         if not self.fecha_inicio or not self.fecha_fin:
             return 0
@@ -1446,17 +2095,55 @@ class Semestre(models.Model):
 
         fecha = self.fecha_inicio
         while fecha <= self.fecha_fin:
-            es_habil = fecha.weekday() < 5 and fecha not in fechas_no_habiles
-            _, created = DiaOperativoSemestre.objects.get_or_create(
+            es_fin_semana = es_fin_de_semana(fecha)
+            es_festivo_o_suspension = fecha in fechas_no_habiles
+            es_habil = not es_fin_semana and not es_festivo_o_suspension
+
+            estado_inicial = (
+                DiaOperativoSemestre.EstadoDia.PROGRAMADO
+                if es_habil
+                else DiaOperativoSemestre.EstadoDia.CERRADO
+            )
+
+            if es_fin_semana:
+                observacion_no_habil = "Día inhábil automático: la estancia no opera sábados ni domingos."
+            elif es_festivo_o_suspension:
+                observacion_no_habil = "Día inhábil por festivo, suspensión o consejo técnico."
+            else:
+                observacion_no_habil = ""
+
+            dia, created = DiaOperativoSemestre.objects.get_or_create(
                 semestre=self,
                 fecha=fecha,
                 defaults={
                     "es_habil": es_habil,
-                    "estado": DiaOperativoSemestre.EstadoDia.PROGRAMADO,
+                    "estado": estado_inicial,
+                    "observaciones": observacion_no_habil,
                 }
             )
+
             if created:
                 creados += 1
+            else:
+                update_fields = []
+
+                if dia.es_habil != es_habil:
+                    dia.es_habil = es_habil
+                    update_fields.append("es_habil")
+
+                # Si es sábado, domingo o día inhábil configurado, debe quedar cerrado.
+                # Así no aparece como pendiente de apertura/cierre ni bloquea el cierre del semestre.
+                if not es_habil and dia.estado != DiaOperativoSemestre.EstadoDia.CERRADO:
+                    dia.estado = DiaOperativoSemestre.EstadoDia.CERRADO
+                    update_fields.append("estado")
+
+                if observacion_no_habil and not dia.observaciones:
+                    dia.observaciones = observacion_no_habil
+                    update_fields.append("observaciones")
+
+                if update_fields:
+                    dia.save(update_fields=update_fields)
+
             fecha += timedelta(days=1)
 
         return creados
@@ -1620,6 +2307,107 @@ class Semestre(models.Model):
 
         return qs.order_by("-fecha_inicio").first()
 
+    @property
+    def puede_usarse_como_base_clonacion(self):
+        """
+        Solo los semestres cerrados pueden usarse como base para clonar.
+        """
+        return self.estado == self.EstadoSemestre.CERRADO
+
+    @classmethod
+    def existe_semestre_activo(cls):
+        """
+        Regla administrativa: no se debe clonar mientras exista un semestre activo.
+        """
+        return cls.objects.filter(estado=cls.EstadoSemestre.ACTIVO).exists()
+
+    def clonar_configuracion(
+        self,
+        nombre,
+        fecha_inicio,
+        fecha_fin,
+        fecha_encuesta_satisfaccion=None,
+        usuario=None,
+        observaciones=""
+    ):
+        """
+        Crea un nuevo semestre copiando la configuración operativa del semestre cerrado.
+
+        Se copia: sede, personal de filtros, salas, cupos, horarios y maestras.
+        No se copia: alumnos, pagos, códigos, encuestas, respuestas, bitácoras,
+        incidencias, calendario operativo ni cierre.
+        """
+        if not self.puede_usarse_como_base_clonacion:
+            raise ValueError("Solo se puede clonar un semestre cerrado.")
+
+        if Semestre.existe_semestre_activo():
+            raise ValueError("No se puede clonar mientras exista un semestre activo. Primero cierra el semestre actual.")
+
+        if fecha_inicio and fecha_fin and fecha_inicio > fecha_fin:
+            raise ValueError("La fecha de inicio no puede ser posterior a la fecha de fin.")
+
+        campos_sala_semestre = [
+            "activa", "cupo",
+            "entrada_maestras", "recepcion_inicio", "recepcion_fin",
+            "desayuno_inicio", "desayuno_fin",
+            "actividad_pedagogica_nombre", "actividad_pedagogica_inicio",
+            "actividad_pedagogica_fin", "actividad_pedagogica_personal",
+            "recreo_inicio", "recreo_fin",
+            "colacion_inicio", "colacion_fin",
+            "siesta_inicio", "siesta_fin",
+            "comida_inicio", "comida_fin",
+            "salida_maestras",
+            "inicio_recepcion", "termino_recepcion",
+            "horario_desayuno", "horario_actividades_pedagogicas",
+            "horario_recreo", "horario_colacion", "horario_siesta",
+            "horario_comida", "horario_salida",
+        ]
+
+        campos_asignacion_maestra = [
+            "rol", "activo",
+            "horario_entrada", "horario_salida",
+            "desayuno_inicio", "desayuno_fin",
+            "tiempo_fuera_inicio", "tiempo_fuera_fin",
+            "horario_desayuno_maestra", "horario_tiempo_fuera",
+        ]
+
+        with transaction.atomic():
+            nuevo_semestre = Semestre.objects.create(
+                nombre=nombre,
+                sede=self.sede,
+                sede_configurada=self.sede_configurada,
+                fecha_inicio=fecha_inicio,
+                fecha_fin=fecha_fin,
+                estado=self.EstadoSemestre.CONFIGURACION,
+                medico_asignado=self.medico_asignado,
+                nutriologa_asignada=self.nutriologa_asignada,
+                psicologa_asignada=self.psicologa_asignada,
+                fecha_encuesta_satisfaccion=fecha_encuesta_satisfaccion,
+                observaciones=observaciones or f"Clonado desde {self.nombre}.",
+                clonado_de=self,
+            )
+
+            for sala_origen in self.salas_activas.select_related("sala").prefetch_related("maestras_asignadas"):
+                datos_sala = {campo: getattr(sala_origen, campo) for campo in campos_sala_semestre}
+                sala_nueva = SalaSemestre.objects.create(
+                    semestre=nuevo_semestre,
+                    sala=sala_origen.sala,
+                    **datos_sala
+                )
+
+                for asignacion_origen in sala_origen.maestras_asignadas.select_related("maestra"):
+                    datos_asignacion = {
+                        campo: getattr(asignacion_origen, campo)
+                        for campo in campos_asignacion_maestra
+                    }
+                    AsignacionMaestra.objects.create(
+                        sala_semestre=sala_nueva,
+                        maestra=asignacion_origen.maestra,
+                        **datos_asignacion
+                    )
+
+        return nuevo_semestre
+
     class Meta:
         ordering = ["-fecha_inicio", "-created_at"]
         indexes = [
@@ -1627,6 +2415,7 @@ class Semestre(models.Model):
             models.Index(fields=["sede"]),
             models.Index(fields=["fecha_inicio"]),
             models.Index(fields=["fecha_fin"]),
+            models.Index(fields=["clonado_de"]),
         ]
 
 
@@ -1635,7 +2424,6 @@ class DiaFestivo(models.Model):
         FESTIVO = "FESTIVO", "Día festivo"
         SUSPENSION = "SUSPENSION", "Suspensión de labores"
         CONSEJO = "CONSEJO", "Consejo técnico"
-        OTRO = "OTRO", "Otro"
 
     semestre = models.ForeignKey(Semestre, on_delete=models.CASCADE, related_name="dias_festivos")
     fecha = models.DateField()
@@ -1867,6 +2655,39 @@ class DiaOperativoSemestre(models.Model):
     cerrado_en = models.DateTimeField(null=True, blank=True)
 
     @property
+    def es_fin_de_semana(self):
+        return es_fin_de_semana(self.fecha)
+
+    @property
+    def es_dia_operativo_real(self):
+        """
+        True únicamente para días hábiles donde la estancia puede operar.
+        """
+        return bool(self.es_habil and not self.es_fin_de_semana)
+
+    @property
+    def puede_abrirse(self):
+        """
+        Control central para evitar abrir operación en sábados, domingos,
+        festivos, suspensiones o días ya cerrados.
+        """
+        return (
+            self.es_dia_operativo_real
+            and self.estado == self.EstadoDia.PROGRAMADO
+            and self.semestre.estado == Semestre.EstadoSemestre.ACTIVO
+        )
+
+    @property
+    def mensaje_no_operativo(self):
+        if self.es_fin_de_semana:
+            return "Hoy es sábado o domingo. La estancia no opera y no se permite registrar entradas, salidas ni bitácoras."
+        if not self.es_habil:
+            return "Este día está marcado como inhábil. No se permite abrir operación diaria."
+        if self.estado == self.EstadoDia.CERRADO:
+            return "Este día ya está cerrado. Solo puede consultarse."
+        return ""
+
+    @property
     def sede(self):
         return self.semestre.sede_configurada
 
@@ -1888,7 +2709,10 @@ class DiaOperativoSemestre(models.Model):
         Cualquier maestra asignada a una sala de la sede podrá ejecutarlo desde views.
         """
         if not self.es_habil:
-            return False, ["No se puede abrir un día no hábil."]
+            return False, [self.mensaje_no_operativo or "No se puede abrir un día no hábil."]
+
+        if self.es_fin_de_semana:
+            return False, [self.mensaje_no_operativo]
 
         if self.estado == self.EstadoDia.CERRADO:
             return False, ["Este día ya está cerrado y solo puede consultarse."]
@@ -1920,7 +2744,12 @@ class DiaOperativoSemestre(models.Model):
         errores = []
 
         if not self.es_habil:
-            errores.append("No se puede cerrar un día no hábil.")
+            errores.append("No se puede cerrar un día no hábil; queda cerrado automáticamente y no cuenta para cierre de semestre.")
+            return errores
+
+        if self.es_fin_de_semana:
+            errores.append("No se puede cerrar sábado o domingo; son días inhábiles automáticos.")
+            return errores
 
         if self.estado != self.EstadoDia.ABIERTO:
             errores.append("Solo se puede cerrar un día abierto.")
@@ -2033,6 +2862,14 @@ class RegistroDiarioAlumno(models.Model):
     responsable_entrada_nombre = models.CharField(max_length=180, blank=True, default="")
     responsable_entrada_parentesco = models.CharField(max_length=80, blank=True, default="")
     responsable_entrada_telefono = models.CharField(max_length=30, blank=True, default="")
+    responsable_entrada_codigo = models.ForeignKey(
+        "admisiones.CodigoResponsableAutorizado",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="entradas_validadas",
+        verbose_name="Responsable autorizado que entregó"
+    )
     credencial_entrada_validada = models.BooleanField(default=False)
     codigo_entrada_validado = models.BooleanField(default=False)
     temperatura_entrada = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
@@ -2049,6 +2886,14 @@ class RegistroDiarioAlumno(models.Model):
     responsable_salida_nombre = models.CharField(max_length=180, blank=True, default="")
     responsable_salida_parentesco = models.CharField(max_length=80, blank=True, default="")
     responsable_salida_telefono = models.CharField(max_length=30, blank=True, default="")
+    responsable_salida_codigo = models.ForeignKey(
+        "admisiones.CodigoResponsableAutorizado",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="salidas_validadas",
+        verbose_name="Responsable autorizado que recogió"
+    )
     credencial_salida_validada = models.BooleanField(default=False)
     codigo_salida_validado = models.BooleanField(default=False)
     motivo_salida = models.CharField(max_length=120, blank=True, default="")
@@ -2099,6 +2944,8 @@ class RegistroDiarioAlumno(models.Model):
     def dia_esta_editable(self):
         return (
             self.dia_operativo
+            and self.dia_operativo.es_habil
+            and not self.dia_operativo.es_fin_de_semana
             and self.dia_operativo.estado == DiaOperativoSemestre.EstadoDia.ABIERTO
             and self.dia_operativo.semestre.estado == Semestre.EstadoSemestre.ACTIVO
         )
@@ -2142,6 +2989,7 @@ class RegistroDiarioAlumno(models.Model):
         responsable_nombre="",
         responsable_parentesco="",
         responsable_telefono="",
+        responsable_autorizado=None,
         credencial_validada=False,
         codigo_validado=False,
         temperatura=None,
@@ -2154,9 +3002,17 @@ class RegistroDiarioAlumno(models.Model):
 
         self.entrada_en = timezone.now()
         self.entrada_por = usuario
-        self.responsable_entrada_nombre = responsable_nombre or ""
-        self.responsable_entrada_parentesco = responsable_parentesco or ""
-        self.responsable_entrada_telefono = responsable_telefono or ""
+
+        if responsable_autorizado:
+            self.responsable_entrada_codigo = responsable_autorizado
+            self.responsable_entrada_nombre = responsable_autorizado.nombre_completo
+            self.responsable_entrada_parentesco = responsable_autorizado.parentesco
+            self.responsable_entrada_telefono = responsable_autorizado.telefono
+        else:
+            self.responsable_entrada_nombre = responsable_nombre or ""
+            self.responsable_entrada_parentesco = responsable_parentesco or ""
+            self.responsable_entrada_telefono = responsable_telefono or ""
+
         self.credencial_entrada_validada = bool(credencial_validada)
         self.codigo_entrada_validado = bool(codigo_validado)
         self.temperatura_entrada = temperatura
@@ -2171,6 +3027,7 @@ class RegistroDiarioAlumno(models.Model):
         responsable_nombre="",
         responsable_parentesco="",
         responsable_telefono="",
+        responsable_autorizado=None,
         credencial_validada=False,
         codigo_validado=False,
         tipo_salida=None,
@@ -2189,9 +3046,17 @@ class RegistroDiarioAlumno(models.Model):
 
         self.salida_en = timezone.now()
         self.salida_por = usuario
-        self.responsable_salida_nombre = responsable_nombre or ""
-        self.responsable_salida_parentesco = responsable_parentesco or ""
-        self.responsable_salida_telefono = responsable_telefono or ""
+
+        if responsable_autorizado:
+            self.responsable_salida_codigo = responsable_autorizado
+            self.responsable_salida_nombre = responsable_autorizado.nombre_completo
+            self.responsable_salida_parentesco = responsable_autorizado.parentesco
+            self.responsable_salida_telefono = responsable_autorizado.telefono
+        else:
+            self.responsable_salida_nombre = responsable_nombre or ""
+            self.responsable_salida_parentesco = responsable_parentesco or ""
+            self.responsable_salida_telefono = responsable_telefono or ""
+
         self.credencial_salida_validada = bool(credencial_validada)
         self.codigo_salida_validado = bool(codigo_validado)
         self.motivo_salida = motivo_salida or ""
@@ -2221,6 +3086,8 @@ class RegistroDiarioAlumno(models.Model):
             models.Index(fields=["estado"]),
             models.Index(fields=["entrada_en"]),
             models.Index(fields=["salida_en"]),
+            models.Index(fields=["responsable_entrada_codigo"]),
+            models.Index(fields=["responsable_salida_codigo"]),
         ]
 
 
@@ -2391,6 +3258,224 @@ class EncuestaSatisfaccion(models.Model):
 
     def __str__(self):
         return f"Encuesta de {self.tutor} - {self.semestre.nombre} (Puntaje: {self.puntaje_total})"
+
+
+class EnvioEncuestaSatisfaccion(models.Model):
+    """
+    Control individual de envío de la Encuesta de Satisfacción B.
+
+    Sirve para:
+    - Registrar a qué tutor se envió la encuesta.
+    - Validar que el correo sea institucional.
+    - Permitir reenvío.
+    - Mostrar estado por alumno/tutor en la vista del administrador.
+    - Relacionar el envío con la respuesta registrada.
+    """
+
+    class EstadoEnvio(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        ENVIADA = "ENVIADA", "Enviada"
+        REENVIADA = "REENVIADA", "Reenviada"
+        CONTESTADA = "CONTESTADA", "Contestada"
+        ERROR = "ERROR", "Error de envío"
+        BLOQUEADA = "BLOQUEADA", "Bloqueada por correo no institucional"
+
+    semestre = models.ForeignKey(
+        Semestre,
+        on_delete=models.CASCADE,
+        related_name="envios_encuesta_satisfaccion",
+        verbose_name="Semestre"
+    )
+
+    inscripcion = models.ForeignKey(
+        SolicitudInscripcion,
+        on_delete=models.CASCADE,
+        related_name="envios_encuesta_satisfaccion",
+        verbose_name="Alumno / inscripción"
+    )
+
+    tutor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="envios_encuesta_satisfaccion",
+        verbose_name="Tutor responsable"
+    )
+
+    correo_destino = models.EmailField(
+        verbose_name="Correo institucional del tutor"
+    )
+
+    correo_copia = models.EmailField(
+        blank=True,
+        default="",
+        verbose_name="Correo genérico en copia"
+    )
+
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Token de respuesta"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoEnvio.choices,
+        default=EstadoEnvio.PENDIENTE,
+        verbose_name="Estado del envío"
+    )
+
+    enviado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="encuestas_satisfaccion_enviadas",
+        verbose_name="Enviado por"
+    )
+
+    enviado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de envío"
+    )
+
+    reenviado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="encuestas_satisfaccion_reenviadas",
+        verbose_name="Reenviado por"
+    )
+
+    reenviado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de reenvío"
+    )
+
+    contestado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de respuesta"
+    )
+
+    intentos_envio = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Intentos de envío"
+    )
+
+    ultimo_error = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Último error de envío"
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones administrativas"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def correo_institucional_valido(self):
+        return bool(self.correo_destino and self.correo_destino.lower().endswith("@unach.mx"))
+
+    @property
+    def respuesta(self):
+        return EncuestaSatisfaccion.objects.filter(
+            semestre=self.semestre,
+            inscripcion=self.inscripcion
+        ).order_by("-fecha_respuesta").first()
+
+    @property
+    def tiene_respuesta(self):
+        return self.respuesta is not None
+
+    def marcar_enviada(self, usuario=None, correo_copia=""):
+        self.estado = self.EstadoEnvio.ENVIADA
+        self.enviado_por = usuario
+        self.enviado_en = timezone.now()
+        self.correo_copia = correo_copia or self.correo_copia
+        self.intentos_envio = (self.intentos_envio or 0) + 1
+        self.ultimo_error = ""
+        self.save(update_fields=[
+            "estado",
+            "enviado_por",
+            "enviado_en",
+            "correo_copia",
+            "intentos_envio",
+            "ultimo_error",
+            "updated_at",
+        ])
+
+    def marcar_reenviada(self, usuario=None, correo_copia=""):
+        self.estado = self.EstadoEnvio.REENVIADA
+        self.reenviado_por = usuario
+        self.reenviado_en = timezone.now()
+        self.correo_copia = correo_copia or self.correo_copia
+        self.intentos_envio = (self.intentos_envio or 0) + 1
+        self.ultimo_error = ""
+        self.save(update_fields=[
+            "estado",
+            "reenviado_por",
+            "reenviado_en",
+            "correo_copia",
+            "intentos_envio",
+            "ultimo_error",
+            "updated_at",
+        ])
+
+    def marcar_contestada(self):
+        self.estado = self.EstadoEnvio.CONTESTADA
+        self.contestado_en = timezone.now()
+        self.save(update_fields=["estado", "contestado_en", "updated_at"])
+
+    def marcar_error(self, error):
+        self.estado = self.EstadoEnvio.ERROR
+        self.ultimo_error = str(error or "")
+        self.intentos_envio = (self.intentos_envio or 0) + 1
+        self.save(update_fields=["estado", "ultimo_error", "intentos_envio", "updated_at"])
+
+    def marcar_bloqueada(self, motivo="Correo no institucional"):
+        self.estado = self.EstadoEnvio.BLOQUEADA
+        self.ultimo_error = motivo
+        self.save(update_fields=["estado", "ultimo_error", "updated_at"])
+
+    def save(self, *args, **kwargs):
+        if self.correo_destino:
+            self.correo_destino = self.correo_destino.strip().lower()
+
+        if self.correo_copia:
+            self.correo_copia = self.correo_copia.strip().lower()
+
+        if self.correo_destino and not self.correo_institucional_valido:
+            self.estado = self.EstadoEnvio.BLOQUEADA
+            if not self.ultimo_error:
+                self.ultimo_error = "El correo del tutor debe ser institucional y terminar en @unach.mx."
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Encuesta B - {self.inscripcion_id} - {self.semestre.nombre} - {self.get_estado_display()}"
+
+    class Meta:
+        ordering = ["semestre", "inscripcion__solicitud_ingreso__apellido_paterno_menor"]
+        unique_together = ("semestre", "inscripcion")
+        indexes = [
+            models.Index(fields=["estado"]),
+            models.Index(fields=["token"]),
+            models.Index(fields=["correo_destino"]),
+            models.Index(fields=["enviado_en"]),
+            models.Index(fields=["reenviado_en"]),
+            models.Index(fields=["contestado_en"]),
+        ]
 
 
 class MensajeDirectora(models.Model):

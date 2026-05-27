@@ -17,7 +17,12 @@
             --texto:#0f172a;
             --muted:#64748b;
             --borde:#dbe4ef;
+            --verde:#16a34a;
+            --rojo:#dc2626;
+            --amarillo:#f59e0b;
         }
+
+        *{ box-sizing:border-box; }
 
         body{
             margin:0;
@@ -33,7 +38,7 @@
         }
 
         .topbar-inner{
-            max-width:1120px;
+            max-width:1180px;
             margin:auto;
             padding:14px 18px;
             display:flex;
@@ -46,6 +51,7 @@
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
         .brand img{
@@ -78,7 +84,7 @@
         }
 
         .main{
-            max-width:1120px;
+            max-width:1180px;
             margin:28px auto 70px;
             padding:0 18px;
         }
@@ -107,6 +113,7 @@
             margin:0;
             opacity:.92;
             font-size:1rem;
+            line-height:1.45;
         }
 
         .hero-icon{
@@ -122,7 +129,7 @@
 
         .layout{
             display:grid;
-            grid-template-columns:1fr 330px;
+            grid-template-columns:1fr 300px;
             gap:20px;
             align-items:start;
         }
@@ -133,6 +140,7 @@
             border-radius:22px;
             overflow:hidden;
             box-shadow:0 18px 38px rgba(15,23,42,.07);
+            margin-bottom:18px;
         }
 
         .panel-header{
@@ -143,6 +151,7 @@
             align-items:center;
             justify-content:space-between;
             gap:12px;
+            flex-wrap:wrap;
         }
 
         .panel-title{
@@ -154,8 +163,44 @@
             letter-spacing:.06em;
         }
 
+        .panel-subtitle{
+            margin:5px 0 0;
+            color:#64748b;
+            font-size:.9rem;
+            font-weight:650;
+        }
+
         .panel-body{
             padding:24px;
+        }
+
+        .section-title{
+            display:flex;
+            align-items:center;
+            gap:9px;
+            color:#0f172a;
+            font-weight:950;
+            margin:6px 0 14px;
+        }
+
+        .section-title span{
+            width:32px;
+            height:32px;
+            border-radius:999px;
+            background:#dbeafe;
+            color:#1e40af;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:950;
+            font-size:.86rem;
+            flex-shrink:0;
+        }
+
+        .section-title small{
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:700;
         }
 
         .field-card{
@@ -164,15 +209,42 @@
             border-radius:18px;
             padding:16px;
             margin-bottom:16px;
+            height:calc(100% - 16px);
+        }
+
+        .field-card.required{
+            border-left:5px solid #2563eb;
+        }
+
+        .label-line{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            margin-bottom:8px;
         }
 
         .form-label{
-            font-size:.82rem;
+            font-size:.79rem;
             font-weight:950;
             color:#334155;
             text-transform:uppercase;
             letter-spacing:.04em;
-            margin-bottom:8px;
+            margin-bottom:0;
+        }
+
+        .info-dot{
+            width:20px;
+            height:20px;
+            border-radius:999px;
+            border:1px solid #bfdbfe;
+            background:#eff6ff;
+            color:#1d4ed8;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:.75rem;
+            cursor:help;
+            flex-shrink:0;
         }
 
         .form-control,
@@ -211,8 +283,9 @@
 
         .field-help{
             color:var(--muted);
-            font-size:.84rem;
+            font-size:.82rem;
             margin-top:6px;
+            line-height:1.35;
         }
 
         .error-text{
@@ -231,7 +304,7 @@
             justify-content:flex-end;
             gap:10px;
             flex-wrap:wrap;
-            padding-top:10px;
+            padding-top:14px;
             border-top:1px solid #e5e7eb;
             margin-top:12px;
         }
@@ -257,25 +330,6 @@
             margin-bottom:8px;
         }
 
-        .check-list{
-            list-style:none;
-            padding:0;
-            margin:0;
-        }
-
-        .check-list li{
-            display:flex;
-            gap:8px;
-            margin-bottom:10px;
-            color:#475569;
-            font-weight:650;
-        }
-
-        .check-list i{
-            color:#16a34a;
-            margin-top:2px;
-        }
-
         .status-card{
             background:#f8fafc;
             border:1px solid var(--borde);
@@ -295,6 +349,64 @@
             margin:0;
         }
 
+        .preview-card{
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-left:6px solid var(--verde);
+            border-radius:18px;
+            padding:16px;
+            margin-bottom:18px;
+            color:#14532d;
+        }
+
+        .preview-card h6{
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .preview-text{
+            margin:0;
+            color:#166534;
+            font-weight:700;
+            line-height:1.45;
+            word-break:break-word;
+        }
+
+        .input-icon-help{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:7px;
+        }
+
+        .input-icon-help i{
+            color:#2563eb;
+        }
+
+        .mini-list{
+            margin:0;
+            padding-left:0;
+            list-style:none;
+        }
+
+        .mini-list li{
+            display:flex;
+            gap:8px;
+            align-items:flex-start;
+            color:#475569;
+            font-weight:650;
+            font-size:.88rem;
+            margin-bottom:10px;
+        }
+
+        .mini-list i{
+            color:#16a34a;
+            margin-top:2px;
+        }
+
         @media(max-width:900px){
             .hero{grid-template-columns:1fr;}
             .hero-icon{display:none;}
@@ -309,6 +421,68 @@
             .actions{justify-content:stretch;}
             .actions .btn{width:100%;}
         }
+
+        /* =========================================================
+           ALERTAS PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon {
+            margin: 0 .65rem 0 0 !important;
+        }
+
+        .swal2-timer-progress-bar {
+            background: rgba(37, 99, 235, .45) !important;
+        }
+
+        .sistema-toast-success {
+            border-left: 7px solid #16a34a !important;
+            background: #f0fdf4 !important;
+        }
+
+        .sistema-toast-error {
+            border-left: 7px solid #dc2626 !important;
+            background: #fef2f2 !important;
+        }
+
+        .sistema-toast-warning {
+            border-left: 7px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+        .sistema-toast-info {
+            border-left: 7px solid #2563eb !important;
+            background: #eff6ff !important;
+        }
+
+        .sistema-modal-popup {
+            border-radius: 22px !important;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .28) !important;
+        }
+
+        .sistema-modal-title {
+            color: #0f172a !important;
+            font-weight: 900 !important;
+        }
+
+        .sistema-modal-confirm,
+        .sistema-modal-cancel {
+            border-radius: 12px !important;
+            font-weight: 800 !important;
+            padding: .65rem 1rem !important;
+        }
     </style>
 </head>
 <body>
@@ -319,21 +493,13 @@
             <img src="{% static 'img/logo.png' %}" alt="UNACH">
             <div>
                 <div class="brand-title">Configuración de Sedes</div>
-                <div class="brand-subtitle">Sprint 4 · Épica 3 · Administrador del sistema</div>
+                <div class="brand-subtitle">Administrador del sistema</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Semestres
-            </a>
-            <a href="{% url 'crear_semestre' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                <i class="bi bi-calendar-plus-fill me-1"></i> Crear semestre
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-house-door-fill me-1"></i> Panel TI
             </a>
         </div>
     </div>
@@ -341,20 +507,11 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <section class="hero">
         <div>
             <h1>{{ titulo|default:"Crear sede" }}</h1>
             <p>
-                Registra o modifica una sede para operar semestres, salas, personal y alumnos de forma segmentada.
+                Registra la sede con dirección, teléfono de 10 dígitos y correo institucional.
             </p>
         </div>
         <div class="hero-icon">
@@ -365,15 +522,22 @@
     <div class="layout">
         <section class="panel">
             <div class="panel-header">
-                <h2 class="panel-title">
-                    <i class="bi bi-buildings-fill me-2"></i>Datos de la sede
-                </h2>
+                <div>
+                    <h2 class="panel-title">
+                        <i class="bi bi-buildings-fill me-2"></i>Datos de la sede
+                    </h2>
+                    <p class="panel-subtitle">
+                        La dirección se captura por partes para evitar errores en reportes y documentos.
+                    </p>
+                </div>
             </div>
 
             <div class="panel-body">
-                <form method="POST" novalidate>
+                <form method="POST" novalidate id="formSede" onsubmit="return confirmarGuardadoSede(this);">
                     {% csrf_token %}
-                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                        <input type="hidden" name="origen" value="ti">
+                    {% endif %}
 
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger rounded-4">
@@ -383,16 +547,23 @@
                         </div>
                     {% endif %}
 
+                    <div class="section-title">
+                        <span>1</span>
+                        Identificación
+                    </div>
+
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="field-card">
-                                <label for="{{ form.clave.id_for_label }}" class="form-label">
-                                    Clave de sede <span class="text-danger">*</span>
-                                </label>
-                                {{ form.clave }}
-                                <div class="field-help">
-                                    Ejemplo: TUXTLA, TAPACHULA. Se usa para identificar la sede en el sistema.
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.clave.id_for_label }}" class="form-label">
+                                        Clave de sede <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Usa una clave corta sin espacios. Ejemplo: TUXTLA.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
                                 </div>
+                                {{ form.clave }}
                                 {% if form.clave.errors %}
                                     <div class="error-text">
                                         {% for error in form.clave.errors %}{{ error }}{% endfor %}
@@ -402,14 +573,16 @@
                         </div>
 
                         <div class="col-md-8">
-                            <div class="field-card">
-                                <label for="{{ form.nombre.id_for_label }}" class="form-label">
-                                    Nombre de la sede <span class="text-danger">*</span>
-                                </label>
-                                {{ form.nombre }}
-                                <div class="field-help">
-                                    Nombre completo que aparecerá en semestres, salas y reportes.
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                        Nombre de la sede <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre completo que aparecerá en semestres, salas y reportes.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
                                 </div>
+                                {{ form.nombre }}
                                 {% if form.nombre.errors %}
                                     <div class="error-text">
                                         {% for error in form.nombre.errors %}{{ error }}{% endfor %}
@@ -419,31 +592,193 @@
                         </div>
                     </div>
 
-                    <div class="field-card">
-                        <label for="{{ form.direccion.id_for_label }}" class="form-label">
-                            Dirección
-                        </label>
-                        {{ form.direccion }}
-                        <div class="field-help">
-                            Dirección física de la sede. Este dato puede usarse después en reportes o documentos.
-                        </div>
-                        {% if form.direccion.errors %}
-                            <div class="error-text">
-                                {% for error in form.direccion.errors %}{{ error }}{% endfor %}
+                    <div class="section-title">
+                        <span>2</span>
+                        Dirección
+                        <small>(La dirección se guarda completa automáticamente.)</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                        Estado <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Selecciona el estado donde se encuentra la sede.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.estado.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.municipio.id_for_label }}" class="form-label">
+                                        Municipio <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Selecciona el municipio según el estado elegido.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.municipio }}
+                                {% if form.municipio.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.municipio.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.ciudad_localidad.id_for_label }}" class="form-label">
+                                        Ciudad / Localidad <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Ciudad o localidad donde está ubicada la sede.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.ciudad_localidad }}
+                                {% if form.ciudad_localidad.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.ciudad_localidad.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.colonia.id_for_label }}" class="form-label">
+                                        Colonia <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Colonia, barrio o fraccionamiento.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.colonia }}
+                                {% if form.colonia.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.colonia.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.codigo_postal.id_for_label }}" class="form-label">
+                                        Código postal <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Debe contener exactamente 5 números.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.codigo_postal }}
+                                {% if form.codigo_postal.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.codigo_postal.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.tipo_vialidad.id_for_label }}" class="form-label">
+                                        Tipo de vialidad <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Calle, avenida, boulevard, carretera, privada o andador.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.tipo_vialidad }}
+                                {% if form.tipo_vialidad.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.tipo_vialidad.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.calle_avenida.id_for_label }}" class="form-label">
+                                        Calle / Avenida <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre de la vialidad sin abreviaturas confusas.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.calle_avenida }}
+                                {% if form.calle_avenida.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.calle_avenida.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="field-card">
+                                <div class="label-line">
+                                    <label for="{{ form.referencia.id_for_label }}" class="form-label">
+                                        Referencia
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Opcional. Puedes escribir referencias como frente a, junto a o entre calles.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
+                                </div>
+                                {{ form.referencia }}
+                                {% if form.referencia.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.referencia.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card">
+                        <h6>
+                            <i class="bi bi-geo-alt-fill me-1"></i>
+                            Vista previa de dirección
+                        </h6>
+                        <p class="preview-text" id="previewDireccion">
+                            Completa los campos para visualizar la dirección.
+                        </p>
+                    </div>
+
+                    <div class="section-title">
+                        <span>3</span>
+                        Contacto
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="field-card">
-                                <label for="{{ form.telefono.id_for_label }}" class="form-label">
-                                    Teléfono
-                                </label>
-                                {{ form.telefono }}
-                                <div class="field-help">
-                                    Teléfono de contacto de la sede.
+                            <div class="field-card required">
+                                <div class="label-line">
+                                    <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                        Teléfono de sede <span class="text-danger">*</span>
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="Solo números. Debe contener exactamente 10 dígitos.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
                                 </div>
+                                {{ form.telefono }}
                                 {% if form.telefono.errors %}
                                     <div class="error-text">
                                         {% for error in form.telefono.errors %}{{ error }}{% endfor %}
@@ -454,13 +789,15 @@
 
                         <div class="col-md-6">
                             <div class="field-card">
-                                <label for="{{ form.correo.id_for_label }}" class="form-label">
-                                    Correo de sede
-                                </label>
-                                {{ form.correo }}
-                                <div class="field-help">
-                                    Correo institucional o genérico de la sede.
+                                <div class="label-line">
+                                    <label for="{{ form.correo.id_for_label }}" class="form-label">
+                                        Correo de sede
+                                    </label>
+                                    <span class="info-dot" data-bs-toggle="tooltip" data-bs-placement="top" title="El correo debe terminar en @unach.mx.">
+                                        <i class="bi bi-info"></i>
+                                    </span>
                                 </div>
+                                {{ form.correo }}
                                 {% if form.correo.errors %}
                                     <div class="error-text">
                                         {% for error in form.correo.errors %}{{ error }}{% endfor %}
@@ -489,8 +826,8 @@
                     </div>
 
                     <div class="actions">
-                        <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
-                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Panel TI
                         </a>
 
                         <button type="submit" class="btn btn-primary btn-main">
@@ -513,43 +850,25 @@
                 </p>
             </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-check2-square me-2"></i>Uso en Sprint 4
-                    </h2>
-                </div>
-                <div class="panel-body">
-                    <ul class="check-list">
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Se asigna al crear un semestre.</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Permite configurar salas por sede.</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Ayuda a segmentar alumnos y personal.</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Se muestra en reportes y paneles.</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="status-card mt-3">
+            <div class="status-card">
                 <div class="status-title">
-                    <i class="bi bi-shield-check text-success me-1"></i>
-                    Recomendación
+                    <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                    Ayuda rápida
                 </div>
-                <p class="status-text">
-                    Usa claves cortas sin espacios, por ejemplo:
-                    <strong>TUXTLA</strong> o <strong>TAPACHULA</strong>.
-                </p>
+                <ul class="mini-list mt-3">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Usa una clave corta, por ejemplo TUXTLA.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>El teléfono se escribe con 10 números.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>La dirección se arma sola con los campos capturados.</span>
+                    </li>
+                </ul>
             </div>
         </aside>
     </div>
@@ -557,6 +876,348 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+
+    const MUNICIPIOS_SUGERIDOS = {
+        "Aguascalientes": ["Aguascalientes", "Asientos", "Calvillo", "Jesús María", "Pabellón de Arteaga", "Rincón de Romos", "San Francisco de los Romo"],
+        "Baja California": ["Mexicali", "Tijuana", "Ensenada", "Tecate", "Playas de Rosarito", "San Quintín", "San Felipe"],
+        "Baja California Sur": ["La Paz", "Los Cabos", "Comondú", "Mulegé", "Loreto"],
+        "Campeche": ["Campeche", "Carmen", "Champotón", "Calkiní", "Escárcega", "Hopelchén", "Hecelchakán", "Candelaria"],
+        "Chiapas": ["Tuxtla Gutiérrez", "Tapachula", "San Cristóbal de Las Casas", "Comitán de Domínguez", "Chiapa de Corzo", "Palenque", "Tonalá", "Villaflores", "Ocosingo", "Cintalapa", "Las Margaritas", "Arriaga", "Pichucalco", "Motozintla", "Berriozábal"],
+        "Chihuahua": ["Chihuahua", "Juárez", "Cuauhtémoc", "Delicias", "Hidalgo del Parral", "Nuevo Casas Grandes", "Camargo", "Jiménez"],
+        "Ciudad de México": ["Álvaro Obregón", "Azcapotzalco", "Benito Juárez", "Coyoacán", "Cuajimalpa de Morelos", "Cuauhtémoc", "Gustavo A. Madero", "Iztacalco", "Iztapalapa", "Magdalena Contreras", "Miguel Hidalgo", "Milpa Alta", "Tláhuac", "Tlalpan", "Venustiano Carranza", "Xochimilco"],
+        "Coahuila": ["Saltillo", "Torreón", "Monclova", "Piedras Negras", "Acuña", "Sabinas", "Parras", "Ramos Arizpe"],
+        "Colima": ["Colima", "Manzanillo", "Tecomán", "Villa de Álvarez", "Comala", "Armería"],
+        "Durango": ["Durango", "Gómez Palacio", "Lerdo", "Pueblo Nuevo", "Santiago Papasquiaro", "Guadalupe Victoria"],
+        "Estado de México": ["Toluca", "Ecatepec de Morelos", "Naucalpan de Juárez", "Tlalnepantla de Baz", "Nezahualcóyotl", "Metepec", "Atizapán de Zaragoza", "Chimalhuacán", "Ixtapaluca", "Valle de Chalco Solidaridad"],
+        "Guanajuato": ["León", "Irapuato", "Celaya", "Guanajuato", "Salamanca", "Silao de la Victoria", "San Miguel de Allende", "Dolores Hidalgo"],
+        "Guerrero": ["Acapulco de Juárez", "Chilpancingo de los Bravo", "Iguala de la Independencia", "Taxco de Alarcón", "Zihuatanejo de Azueta", "Tlapa de Comonfort"],
+        "Hidalgo": ["Pachuca de Soto", "Mineral de la Reforma", "Tulancingo de Bravo", "Tula de Allende", "Huejutla de Reyes", "Ixmiquilpan"],
+        "Jalisco": ["Guadalajara", "Zapopan", "Tlaquepaque", "Tonalá", "Puerto Vallarta", "Tlajomulco de Zúñiga", "Lagos de Moreno", "Tepatitlán de Morelos"],
+        "Michoacán": ["Morelia", "Uruapan", "Zamora", "Lázaro Cárdenas", "Apatzingán", "Pátzcuaro", "Zitácuaro"],
+        "Morelos": ["Cuernavaca", "Jiutepec", "Cuautla", "Temixco", "Yautepec", "Jojutla"],
+        "Nayarit": ["Tepic", "Bahía de Banderas", "Santiago Ixcuintla", "Compostela", "Xalisco", "Acaponeta"],
+        "Nuevo León": ["Monterrey", "Guadalupe", "San Nicolás de los Garza", "Apodaca", "General Escobedo", "Santa Catarina", "San Pedro Garza García"],
+        "Oaxaca": ["Oaxaca de Juárez", "San Juan Bautista Tuxtepec", "Salina Cruz", "Juchitán de Zaragoza", "Huajuapan de León", "Santa Cruz Xoxocotlán"],
+        "Puebla": ["Puebla", "Tehuacán", "San Martín Texmelucan", "Atlixco", "San Pedro Cholula", "Amozoc"],
+        "Querétaro": ["Querétaro", "San Juan del Río", "Corregidora", "El Marqués", "Pedro Escobedo", "Tequisquiapan"],
+        "Quintana Roo": ["Benito Juárez", "Solidaridad", "Othón P. Blanco", "Cozumel", "Tulum", "Isla Mujeres"],
+        "San Luis Potosí": ["San Luis Potosí", "Soledad de Graciano Sánchez", "Ciudad Valles", "Matehuala", "Rioverde", "Tamazunchale"],
+        "Sinaloa": ["Culiacán", "Mazatlán", "Ahome", "Guasave", "Navolato", "Salvador Alvarado"],
+        "Sonora": ["Hermosillo", "Cajeme", "Nogales", "San Luis Río Colorado", "Navojoa", "Guaymas"],
+        "Tabasco": ["Centro", "Cárdenas", "Comalcalco", "Huimanguillo", "Macuspana", "Paraíso"],
+        "Tamaulipas": ["Reynosa", "Matamoros", "Nuevo Laredo", "Victoria", "Tampico", "Madero", "Altamira"],
+        "Tlaxcala": ["Tlaxcala", "Apizaco", "Chiautempan", "Huamantla", "Zacatelco", "San Pablo del Monte"],
+        "Veracruz": ["Veracruz", "Xalapa", "Coatzacoalcos", "Córdoba", "Orizaba", "Poza Rica de Hidalgo", "Boca del Río", "Minatitlán"],
+        "Yucatán": ["Mérida", "Kanasín", "Valladolid", "Tizimín", "Progreso", "Umán"],
+        "Zacatecas": ["Zacatecas", "Guadalupe", "Fresnillo", "Jerez", "Río Grande", "Sombrerete"]
+    };
+
+    function soloDigitos(input, maxLength) {
+        if (!input) return;
+        input.value = (input.value || "").replace(/\D/g, "").slice(0, maxLength);
+    }
+
+    function configurarCamposNumericos() {
+        const telefono = document.getElementById("{{ form.telefono.id_for_label }}");
+        const cp = document.getElementById("{{ form.codigo_postal.id_for_label }}");
+        if (telefono) telefono.addEventListener("input", function(){ soloDigitos(this, 10); });
+        if (cp) cp.addEventListener("input", function(){ soloDigitos(this, 5); });
+    }
+
+    function configurarCorreo() {
+        const correo = document.getElementById("{{ form.correo.id_for_label }}");
+        if (!correo) return;
+
+        correo.addEventListener("input", function() {
+            this.value = this.value.trim().toLowerCase();
+        });
+    }
+
+    function configurarClave() {
+        const clave = document.getElementById("{{ form.clave.id_for_label }}");
+        if (!clave) return;
+
+        clave.addEventListener("input", function() {
+            this.value = this.value
+                .toUpperCase()
+                .replace(/[^A-Z0-9_-]/g, "_")
+                .slice(0, 30);
+        });
+    }
+
+    function cargarMunicipiosSugeridos() {
+        const estado = document.getElementById("{{ form.estado.id_for_label }}");
+        const municipio = document.getElementById("{{ form.municipio.id_for_label }}");
+
+        if (!estado || !municipio) return;
+
+        const valorActual = municipio.value || municipio.dataset.initial || "";
+        const lista = MUNICIPIOS_SUGERIDOS[estado.value] || [];
+
+        municipio.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Seleccione municipio...";
+        municipio.appendChild(placeholder);
+
+        lista.forEach(function(nombre) {
+            const option = document.createElement("option");
+            option.value = nombre;
+            option.textContent = nombre;
+
+            if (nombre === valorActual) {
+                option.selected = true;
+            }
+
+            municipio.appendChild(option);
+        });
+
+        if (valorActual && !lista.includes(valorActual)) {
+            const option = document.createElement("option");
+            option.value = valorActual;
+            option.textContent = valorActual;
+            option.selected = true;
+            municipio.appendChild(option);
+        }
+    }
+
+    function valorCampo(id) {
+        const campo = document.getElementById(id);
+        return campo ? (campo.value || "").trim() : "";
+    }
+
+    function textoSelect(id) {
+        const campo = document.getElementById(id);
+        if (!campo) return "";
+        const opcion = campo.options[campo.selectedIndex];
+        return opcion ? (opcion.text || "").trim() : "";
+    }
+
+    function actualizarPreviewDireccion() {
+        const tipoVialidad = textoSelect("{{ form.tipo_vialidad.id_for_label }}");
+        const calle = valorCampo("{{ form.calle_avenida.id_for_label }}");
+        const colonia = valorCampo("{{ form.colonia.id_for_label }}");
+        const cp = valorCampo("{{ form.codigo_postal.id_for_label }}");
+        const ciudad = valorCampo("{{ form.ciudad_localidad.id_for_label }}");
+        const municipio = valorCampo("{{ form.municipio.id_for_label }}");
+        const estado = textoSelect("{{ form.estado.id_for_label }}");
+        const referencia = valorCampo("{{ form.referencia.id_for_label }}");
+
+        const partes = [];
+
+        let vialidad = [tipoVialidad, calle].filter(Boolean).join(" ");
+        if (vialidad) {
+            partes.push(vialidad);
+        }
+
+        if (colonia) partes.push("Col. " + colonia);
+        if (cp) partes.push("C.P. " + cp);
+        if (ciudad) partes.push(ciudad);
+        if (municipio) partes.push(municipio);
+        if (estado) partes.push(estado);
+        if (referencia) partes.push("Referencia: " + referencia);
+
+        const preview = document.getElementById("previewDireccion");
+        if (!preview) return;
+
+        preview.textContent = partes.length
+            ? partes.join(", ")
+            : "Completa los campos para visualizar la dirección.";
+    }
+
+    function configurarPreviewDireccion() {
+        const ids = [
+            "{{ form.estado.id_for_label }}",
+            "{{ form.municipio.id_for_label }}",
+            "{{ form.ciudad_localidad.id_for_label }}",
+            "{{ form.colonia.id_for_label }}",
+            "{{ form.codigo_postal.id_for_label }}",
+            "{{ form.tipo_vialidad.id_for_label }}",
+            "{{ form.calle_avenida.id_for_label }}",
+            "{{ form.referencia.id_for_label }}"
+        ];
+
+        ids.forEach(function(id) {
+            const campo = document.getElementById(id);
+            if (campo) {
+                campo.addEventListener("input", actualizarPreviewDireccion);
+                campo.addEventListener("change", function() {
+                    cargarMunicipiosSugeridos();
+                    actualizarPreviewDireccion();
+                });
+            }
+        });
+
+        cargarMunicipiosSugeridos();
+        actualizarPreviewDireccion();
+    }
+
+    function configurarTooltips() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+
+    function confirmarGuardadoSede(formulario) {
+        const telefono = document.getElementById("{{ form.telefono.id_for_label }}");
+        const cp = document.getElementById("{{ form.codigo_postal.id_for_label }}");
+        const correo = document.getElementById("{{ form.correo.id_for_label }}");
+
+        if (telefono && telefono.value && !/^\d{10}$/.test(telefono.value)) {
+            Swal.fire({
+                title: "Teléfono inválido",
+                text: "El teléfono debe tener exactamente 10 dígitos y no debe incluir letras, espacios ni guiones.",
+                icon: "warning",
+                confirmButtonText: "Entendido",
+                customClass: {
+                    popup: "sistema-modal-popup",
+                    title: "sistema-modal-title",
+                    confirmButton: "sistema-modal-confirm"
+                }
+            });
+            return false;
+        }
+
+        if (cp && cp.value && !/^\d{5}$/.test(cp.value)) {
+            Swal.fire({
+                title: "Código postal inválido",
+                text: "El código postal debe tener exactamente 5 dígitos.",
+                icon: "warning",
+                confirmButtonText: "Entendido",
+                customClass: {
+                    popup: "sistema-modal-popup",
+                    title: "sistema-modal-title",
+                    confirmButton: "sistema-modal-confirm"
+                }
+            });
+            return false;
+        }
+
+        if (correo && correo.value && !correo.value.toLowerCase().endsWith("@unach.mx")) {
+            Swal.fire({
+                title: "Correo no institucional",
+                text: "El correo de la sede debe terminar en @unach.mx.",
+                icon: "warning",
+                confirmButtonText: "Entendido",
+                customClass: {
+                    popup: "sistema-modal-popup",
+                    title: "sistema-modal-title",
+                    confirmButton: "sistema-modal-confirm"
+                }
+            });
+            return false;
+        }
+
+        if (formulario.dataset.confirmado === "1") {
+            return true;
+        }
+
+        Swal.fire({
+            title: "{% if sede %}Guardar cambios{% else %}Crear sede{% endif %}",
+            text: "Se guardará la información de la sede con la dirección capturada.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, guardar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+            customClass: {
+                popup: "sistema-modal-popup",
+                title: "sistema-modal-title",
+                confirmButton: "sistema-modal-confirm",
+                cancelButton: "sistema-modal-cancel"
+            }
+        }).then(function(resultado) {
+            if (resultado.isConfirmed) {
+                formulario.dataset.confirmado = "1";
+                formulario.submit();
+            }
+        });
+
+        return false;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        configurarCamposNumericos();
+        configurarCorreo();
+        configurarClave();
+        configurarPreviewDireccion();
+        configurarTooltips();
+
+        const estado = document.getElementById("{{ form.estado.id_for_label }}");
+        if (estado) {
+            estado.addEventListener("change", cargarMunicipiosSugeridos);
+        }
+    });
+</script>
 
 </body>
 </html>

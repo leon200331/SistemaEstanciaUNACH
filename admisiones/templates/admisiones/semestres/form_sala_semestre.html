@@ -380,6 +380,349 @@
             .actions{justify-content:stretch;}
             .actions .btn{width:100%;}
         }
+
+
+
+        .compact-time-arrow{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#64748b;
+            font-size:1.05rem;
+            padding-top:26px;
+        }
+
+        .time-pair-card{
+            padding:12px !important;
+        }
+
+        .time-fields{
+            grid-template-columns:1fr auto 1fr !important;
+            gap:9px !important;
+            align-items:start;
+        }
+
+        .time-fields .form-label{
+            margin-bottom:5px;
+        }
+
+        .time-fields .form-control,
+        .time-fields .form-select{
+            padding:.62rem .75rem;
+        }
+
+        .time-section-card{
+            padding:15px !important;
+        }
+
+        .time-section-help,
+        .time-note,
+        .field-help{
+            font-size:.8rem;
+        }
+
+        @media(max-width:768px){
+            .time-fields{
+                grid-template-columns:1fr !important;
+            }
+            .compact-time-arrow{
+                display:none;
+            }
+        }
+
+        .time-section-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:20px;
+            padding:18px;
+            margin-bottom:18px;
+        }
+
+        .time-section-header{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+            flex-wrap:wrap;
+        }
+
+        .time-section-heading{
+            font-size:.82rem;
+            font-weight:950;
+            color:#0f766e;
+            text-transform:uppercase;
+            letter-spacing:.07em;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin:0;
+        }
+
+        .time-section-help{
+            color:#64748b;
+            font-size:.86rem;
+            font-weight:650;
+            margin-top:4px;
+        }
+
+        .time-pair-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+
+        .time-pair-card{
+            background:white;
+            border:1px solid #dbe4ef;
+            border-radius:18px;
+            padding:15px;
+        }
+
+        .time-pair-title{
+            color:#0f172a;
+            font-size:.8rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:12px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .time-fields{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+        }
+
+        .single-time-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+
+        .time-field{
+            background:white;
+            border:1px solid #dbe4ef;
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .time-note{
+            background:#ecfeff;
+            border:1px solid #a5f3fc;
+            border-left:5px solid #0891b2;
+            color:#155e75;
+            border-radius:15px;
+            padding:11px 13px;
+            font-size:.86rem;
+            font-weight:650;
+            margin-top:12px;
+        }
+
+        @media(max-width:768px){
+            .time-pair-grid,
+            .single-time-grid,
+            .time-fields{
+                grid-template-columns:1fr;
+            }
+        }
+
+        /* =========================================================
+           ALERTAS PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon {
+            margin: 0 .65rem 0 0 !important;
+        }
+
+        .swal2-timer-progress-bar {
+            background: rgba(37, 99, 235, .45) !important;
+        }
+
+        .sistema-toast-success {
+            border-left: 7px solid #16a34a !important;
+            background: #f0fdf4 !important;
+        }
+
+        .sistema-toast-error {
+            border-left: 7px solid #dc2626 !important;
+            background: #fef2f2 !important;
+        }
+
+        .sistema-toast-warning {
+            border-left: 7px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+        .sistema-toast-info {
+            border-left: 7px solid #2563eb !important;
+            background: #eff6ff !important;
+        }
+
+
+        /* =========================================================
+           AJUSTE FINAL: HORARIOS COMPACTOS SIN DESBORDES
+           ========================================================= */
+        *, *::before, *::after{
+            box-sizing:border-box;
+        }
+
+        .layout{
+            grid-template-columns:minmax(0, 1fr) 345px;
+        }
+
+        .row > [class*="col-"],
+        .panel,
+        .panel-body,
+        .field-card,
+        .time-section-card,
+        .time-pair-card,
+        .time-field,
+        .single-time-grid,
+        .time-pair-grid,
+        .time-fields{
+            min-width:0;
+            max-width:100%;
+        }
+
+        .field-card,
+        .time-section-card,
+        .time-pair-card,
+        .time-field{
+            overflow:hidden;
+        }
+
+        .form-control,
+        .form-select{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+        }
+
+        .time-section-card{
+            padding:14px !important;
+            margin-bottom:14px;
+        }
+
+        .time-section-header{
+            margin-bottom:10px;
+        }
+
+        .time-section-help,
+        .field-help,
+        .time-note,
+        .info-text{
+            line-height:1.35;
+        }
+
+        .single-time-grid{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:10px;
+        }
+
+        .time-pair-grid{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:10px;
+        }
+
+        .time-pair-card{
+            padding:12px !important;
+        }
+
+        .time-pair-title{
+            margin-bottom:9px;
+            font-size:.76rem;
+            line-height:1.25;
+        }
+
+        .time-fields{
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 24px minmax(0, 1fr) !important;
+            gap:6px !important;
+            align-items:end;
+        }
+
+        .time-fields > div{
+            min-width:0;
+            max-width:100%;
+        }
+
+        .compact-time-arrow{
+            width:24px;
+            min-width:24px;
+            max-width:24px;
+            height:40px;
+            padding-top:0;
+            align-self:end;
+        }
+
+        .time-fields .form-label{
+            font-size:.72rem;
+            margin-bottom:5px;
+            white-space:nowrap;
+        }
+
+        .time-fields .form-control,
+        .time-fields .form-select,
+        .time-field .form-control,
+        .time-field .form-select{
+            padding:.58rem .65rem;
+            font-size:.9rem;
+        }
+
+        .time-field{
+            padding:12px;
+        }
+
+        .time-grid-title{
+            padding:10px 12px;
+            margin:6px 0 12px;
+        }
+
+        .time-note{
+            padding:10px 12px;
+            margin-top:10px;
+        }
+
+        @media(max-width:1100px){
+            .layout{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media(max-width:768px){
+            .single-time-grid,
+            .time-pair-grid{
+                grid-template-columns:1fr;
+            }
+
+            .time-fields{
+                grid-template-columns:1fr !important;
+            }
+
+            .compact-time-arrow{
+                display:none;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -390,21 +733,13 @@
             <img src="{% static 'img/logo.png' %}" alt="UNACH">
             <div>
                 <div class="brand-title">Sala por Semestre</div>
-                <div class="brand-subtitle">Sprint 4 · Horarios por sala · Administrador del sistema</div>
+                <div class="brand-subtitle">Horarios por sala · Administrador del sistema</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Detalle semestre
-            </a>
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                <i class="bi bi-calendar2-week-fill me-1"></i> Semestres
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-house-door-fill me-1"></i> Panel TI
             </a>
         </div>
     </div>
@@ -412,20 +747,12 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <section class="hero">
         <div>
             <h1>{{ titulo|default:"Configurar sala del semestre" }}</h1>
             <p>
-                Selecciona la sala, define el cupo del semestre y registra los horarios de operación diaria.
+                Selecciona la sala, define el cupo y captura los rangos de horario en formato compacto.
             </p>
         </div>
         <div class="hero-icon">
@@ -480,7 +807,7 @@
                         <div class="col-md-5">
                             <div class="field-card">
                                 <label for="{{ form.cupo.id_for_label }}" class="form-label">
-                                    Cupo del semestre
+                                    Cupo de la sala
                                 </label>
                                 {{ form.cupo }}
                                 <div class="field-help">
@@ -517,9 +844,21 @@
                         Horarios generales
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="field-card">
+                    <div class="time-section-card">
+                        <div class="time-section-header">
+                            <div>
+                                <h3 class="time-section-heading">
+                                    <i class="bi bi-person-workspace"></i>
+                                    Personal y recepción
+                                </h3>
+                                <div class="time-section-help">
+                                    Registra primero la entrada del personal y después el rango de recepción de niñas y niños.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="single-time-grid">
+                            <div class="time-field">
                                 <label for="{{ form.entrada_maestras.id_for_label }}" class="form-label">
                                     Entrada maestras
                                 </label>
@@ -529,32 +868,44 @@
                                     <div class="error-text">{% for error in form.entrada_maestras.errors %}{{ error }}{% endfor %}</div>
                                 {% endif %}
                             </div>
-                        </div>
 
-                        <div class="col-md-4">
-                            <div class="field-card">
-                                <label for="{{ form.recepcion_inicio.id_for_label }}" class="form-label">
-                                    Recepción inicio
-                                </label>
-                                {{ form.recepcion_inicio }}
-                                <div class="field-help">Inicio de recepción de niños.</div>
-                                {% if form.recepcion_inicio.errors %}
-                                    <div class="error-text">{% for error in form.recepcion_inicio.errors %}{{ error }}{% endfor %}</div>
-                                {% endif %}
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-door-open-fill"></i>
+                                    Recepción de niños
+                                </div>
+
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.recepcion_inicio.id_for_label }}" class="form-label">
+                                            Inicio
+                                        </label>
+                                        {{ form.recepcion_inicio }}
+                                        <div class="field-help">Inicio de recepción.</div>
+                                        {% if form.recepcion_inicio.errors %}
+                                            <div class="error-text">{% for error in form.recepcion_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+
+                                    <div>
+                                        <label for="{{ form.recepcion_fin.id_for_label }}" class="form-label">
+                                            Fin
+                                        </label>
+                                        {{ form.recepcion_fin }}
+                                        <div class="field-help">Término de recepción.</div>
+                                        {% if form.recepcion_fin.errors %}
+                                            <div class="error-text">{% for error in form.recepcion_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="field-card">
-                                <label for="{{ form.recepcion_fin.id_for_label }}" class="form-label">
-                                    Recepción fin
-                                </label>
-                                {{ form.recepcion_fin }}
-                                <div class="field-help">Término de recepción de niños.</div>
-                                {% if form.recepcion_fin.errors %}
-                                    <div class="error-text">{% for error in form.recepcion_fin.errors %}{{ error }}{% endfor %}</div>
-                                {% endif %}
-                            </div>
+                        <div class="time-note">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            En los rangos de horario, la hora de fin debe ser posterior a la hora de inicio.
                         </div>
                     </div>
 
@@ -563,68 +914,98 @@
                         Alimentación y descanso
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.desayuno_inicio.id_for_label }}" class="form-label">Desayuno inicio</label>
-                                {{ form.desayuno_inicio }}
-                                {% if form.desayuno_inicio.errors %}<div class="error-text">{% for error in form.desayuno_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                    <div class="time-section-card">
+                        <div class="time-section-header">
+                            <div>
+                                <h3 class="time-section-heading">
+                                    <i class="bi bi-clock-history"></i>
+                                    Rangos de alimentación y siesta
+                                </h3>
+                                <div class="time-section-help">
+                                    Cada actividad se captura con inicio y fin en el mismo bloque.
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.desayuno_fin.id_for_label }}" class="form-label">Desayuno fin</label>
-                                {{ form.desayuno_fin }}
-                                {% if form.desayuno_fin.errors %}<div class="error-text">{% for error in form.desayuno_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        <div class="time-pair-grid">
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-cup-hot-fill"></i>
+                                    Desayuno
+                                </div>
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.desayuno_inicio.id_for_label }}" class="form-label">Inicio</label>
+                                        {{ form.desayuno_inicio }}
+                                        {% if form.desayuno_inicio.errors %}<div class="error-text">{% for error in form.desayuno_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <label for="{{ form.desayuno_fin.id_for_label }}" class="form-label">Fin</label>
+                                        {{ form.desayuno_fin }}
+                                        {% if form.desayuno_fin.errors %}<div class="error-text">{% for error in form.desayuno_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.colacion_inicio.id_for_label }}" class="form-label">Colación inicio</label>
-                                {{ form.colacion_inicio }}
-                                {% if form.colacion_inicio.errors %}<div class="error-text">{% for error in form.colacion_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-apple"></i>
+                                    Colación
+                                </div>
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.colacion_inicio.id_for_label }}" class="form-label">Inicio</label>
+                                        {{ form.colacion_inicio }}
+                                        {% if form.colacion_inicio.errors %}<div class="error-text">{% for error in form.colacion_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <label for="{{ form.colacion_fin.id_for_label }}" class="form-label">Fin</label>
+                                        {{ form.colacion_fin }}
+                                        {% if form.colacion_fin.errors %}<div class="error-text">{% for error in form.colacion_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.colacion_fin.id_for_label }}" class="form-label">Colación fin</label>
-                                {{ form.colacion_fin }}
-                                {% if form.colacion_fin.errors %}<div class="error-text">{% for error in form.colacion_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-egg-fried"></i>
+                                    Comida
+                                </div>
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.comida_inicio.id_for_label }}" class="form-label">Inicio</label>
+                                        {{ form.comida_inicio }}
+                                        {% if form.comida_inicio.errors %}<div class="error-text">{% for error in form.comida_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <label for="{{ form.comida_fin.id_for_label }}" class="form-label">Fin</label>
+                                        {{ form.comida_fin }}
+                                        {% if form.comida_fin.errors %}<div class="error-text">{% for error in form.comida_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.comida_inicio.id_for_label }}" class="form-label">Comida inicio</label>
-                                {{ form.comida_inicio }}
-                                {% if form.comida_inicio.errors %}<div class="error-text">{% for error in form.comida_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.comida_fin.id_for_label }}" class="form-label">Comida fin</label>
-                                {{ form.comida_fin }}
-                                {% if form.comida_fin.errors %}<div class="error-text">{% for error in form.comida_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.siesta_inicio.id_for_label }}" class="form-label">Siesta inicio</label>
-                                {{ form.siesta_inicio }}
-                                {% if form.siesta_inicio.errors %}<div class="error-text">{% for error in form.siesta_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.siesta_fin.id_for_label }}" class="form-label">Siesta fin</label>
-                                {{ form.siesta_fin }}
-                                {% if form.siesta_fin.errors %}<div class="error-text">{% for error in form.siesta_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-moon-stars-fill"></i>
+                                    Siesta
+                                </div>
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.siesta_inicio.id_for_label }}" class="form-label">Inicio</label>
+                                        {{ form.siesta_inicio }}
+                                        {% if form.siesta_inicio.errors %}<div class="error-text">{% for error in form.siesta_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <label for="{{ form.siesta_fin.id_for_label }}" class="form-label">Fin</label>
+                                        {{ form.siesta_fin }}
+                                        {% if form.siesta_fin.errors %}<div class="error-text">{% for error in form.siesta_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -634,74 +1015,96 @@
                         Actividad pedagógica y recreo
                     </div>
 
-                    <div class="field-card">
-                        <label for="{{ form.actividad_pedagogica_nombre.id_for_label }}" class="form-label">
-                            Nombre de actividad pedagógica
-                        </label>
-                        {{ form.actividad_pedagogica_nombre }}
-                        <div class="field-help">
-                            Ejemplo: motricidad fina, lenguaje, actividad sensorial, lectura guiada.
+                    <div class="time-section-card">
+                        <div class="time-section-header">
+                            <div>
+                                <h3 class="time-section-heading">
+                                    <i class="bi bi-palette-fill"></i>
+                                    Actividades de la sala
+                                </h3>
+                                <div class="time-section-help">
+                                    Define el nombre de la actividad pedagógica y captura los rangos de actividad y recreo.
+                                </div>
+                            </div>
                         </div>
-                        {% if form.actividad_pedagogica_nombre.errors %}
-                            <div class="error-text">{% for error in form.actividad_pedagogica_nombre.errors %}{{ error }}{% endfor %}</div>
-                        {% endif %}
+
+                        <div class="time-field mb-3">
+                            <label for="{{ form.actividad_pedagogica_nombre.id_for_label }}" class="form-label">
+                                Nombre de actividad pedagógica
+                            </label>
+                            {{ form.actividad_pedagogica_nombre }}
+                            <div class="field-help">
+                                Ejemplo: motricidad fina, lenguaje, actividad sensorial, lectura guiada.
+                            </div>
+                            {% if form.actividad_pedagogica_nombre.errors %}
+                                <div class="error-text">{% for error in form.actividad_pedagogica_nombre.errors %}{{ error }}{% endfor %}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="time-pair-grid">
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-brush-fill"></i>
+                                    Actividad pedagógica
+                                </div>
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.actividad_pedagogica_inicio.id_for_label }}" class="form-label">Inicio</label>
+                                        {{ form.actividad_pedagogica_inicio }}
+                                        {% if form.actividad_pedagogica_inicio.errors %}<div class="error-text">{% for error in form.actividad_pedagogica_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <label for="{{ form.actividad_pedagogica_fin.id_for_label }}" class="form-label">Fin</label>
+                                        {{ form.actividad_pedagogica_fin }}
+                                        {% if form.actividad_pedagogica_fin.errors %}<div class="error-text">{% for error in form.actividad_pedagogica_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="time-pair-card">
+                                <div class="time-pair-title">
+                                    <i class="bi bi-balloon-fill"></i>
+                                    Recreo
+                                </div>
+                                <div class="time-fields">
+                                    <div>
+                                        <label for="{{ form.recreo_inicio.id_for_label }}" class="form-label">Inicio</label>
+                                        {{ form.recreo_inicio }}
+                                        {% if form.recreo_inicio.errors %}<div class="error-text">{% for error in form.recreo_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                    <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <label for="{{ form.recreo_fin.id_for_label }}" class="form-label">Fin</label>
+                                        {{ form.recreo_fin }}
+                                        {% if form.recreo_fin.errors %}<div class="error-text">{% for error in form.recreo_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.actividad_pedagogica_inicio.id_for_label }}" class="form-label">Actividad inicio</label>
-                                {{ form.actividad_pedagogica_inicio }}
-                                {% if form.actividad_pedagogica_inicio.errors %}<div class="error-text">{% for error in form.actividad_pedagogica_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.actividad_pedagogica_fin.id_for_label }}" class="form-label">Actividad fin</label>
-                                {{ form.actividad_pedagogica_fin }}
-                                {% if form.actividad_pedagogica_fin.errors %}<div class="error-text">{% for error in form.actividad_pedagogica_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.recreo_inicio.id_for_label }}" class="form-label">Recreo inicio</label>
-                                {{ form.recreo_inicio }}
-                                {% if form.recreo_inicio.errors %}<div class="error-text">{% for error in form.recreo_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="field-card">
-                                <label for="{{ form.recreo_fin.id_for_label }}" class="form-label">Recreo fin</label>
-                                {{ form.recreo_fin }}
-                                {% if form.recreo_fin.errors %}<div class="error-text">{% for error in form.recreo_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field-card">
-                        <label for="{{ form.actividad_pedagogica_personal.id_for_label }}" class="form-label">
-                            Personal asignado a actividad pedagógica
-                        </label>
-                        {{ form.actividad_pedagogica_personal }}
-                        <div class="field-help">
-                            Puedes escribir nombres o roles del personal que participa.
-                        </div>
-                        {% if form.actividad_pedagogica_personal.errors %}
-                            <div class="error-text">{% for error in form.actividad_pedagogica_personal.errors %}{{ error }}{% endfor %}</div>
-                        {% endif %}
-                    </div>
 
                     <div class="section-title mt-2">
                         <i class="bi bi-box-arrow-right"></i>
                         Salida
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="field-card">
+                    <div class="time-section-card">
+                        <div class="time-section-header">
+                            <div>
+                                <h3 class="time-section-heading">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    Cierre de jornada
+                                </h3>
+                                <div class="time-section-help">
+                                    Registra el horario de salida del personal de sala.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="single-time-grid">
+                            <div class="time-field">
                                 <label for="{{ form.salida_maestras.id_for_label }}" class="form-label">
                                     Salida maestras
                                 </label>
@@ -715,7 +1118,7 @@
                     </div>
 
                     <div class="actions">
-                        <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                        <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
                             <i class="bi bi-x-circle me-1"></i> Cancelar
                         </a>
 
@@ -803,6 +1206,76 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+</script>
 
 </body>
 </html>

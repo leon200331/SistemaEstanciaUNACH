@@ -592,10 +592,91 @@ def panel_gobierno_ti(request):
             elif accion == "edit_user":
                 user_id = request.POST.get("user_id")
                 usr_edit = User.objects.get(id=user_id)
-                usr_edit.nombre = request.POST.get("nombre")
-                usr_edit.apellido_paterno = request.POST.get("apellido_paterno")
-                usr_edit.curp = request.POST.get("curp", "").upper()
-                usr_edit.save()
+
+                nombre = request.POST.get("nombre", "").strip()
+                apellido_paterno = request.POST.get("apellido_paterno", "").strip()
+                apellido_materno = request.POST.get("apellido_materno", "").strip()
+                curp = request.POST.get("curp", "").strip().upper()
+                email = request.POST.get("email", "").strip().lower()
+                tipo_persona = request.POST.get("tipo_persona") or "PERSONAL"
+                numero_empleado = request.POST.get("numero_empleado", "").strip()
+                estatus_operativo = request.POST.get("estatus_operativo", "true")
+                password = request.POST.get("password", "").strip()
+
+                errores = []
+
+                if not nombre:
+                    errores.append("El nombre es obligatorio.")
+
+                if not apellido_paterno:
+                    errores.append("El apellido paterno es obligatorio.")
+
+                if not curp:
+                    errores.append("La CURP es obligatoria.")
+
+                if not email:
+                    errores.append("El correo es obligatorio.")
+
+                if email and not email.endswith("@unach.mx"):
+                    errores.append("El correo del personal debe terminar en @unach.mx.")
+
+                if not numero_empleado and tipo_persona != "ADMIN":
+                    errores.append("El número de empleado es obligatorio.")
+
+                if email and (
+                    User.objects.filter(email__iexact=email).exclude(pk=usr_edit.pk).exists()
+                    or User.objects.filter(username__iexact=email).exclude(pk=usr_edit.pk).exists()
+                ):
+                    errores.append(f'El correo "{email}" ya existe en otro usuario.')
+
+                if curp and User.objects.filter(curp__iexact=curp).exclude(pk=usr_edit.pk).exists():
+                    errores.append(f'La CURP "{curp}" ya está registrada con otro usuario.')
+
+                if numero_empleado and User.objects.filter(numero_empleado=numero_empleado).exclude(pk=usr_edit.pk).exists():
+                    errores.append(f'El número de empleado "{numero_empleado}" ya está registrado con otro usuario.')
+
+                if errores:
+                    mensaje_error = " ".join(errores)
+
+                    if is_ajax:
+                        return JsonResponse(
+                            {
+                                "status": "error",
+                                "msg": mensaje_error,
+                            }
+                        )
+
+                    messages.error(request, mensaje_error)
+                    return redirect("panel_gobierno_ti")
+
+                with transaction.atomic():
+                    usr_edit.nombre = nombre
+                    usr_edit.apellido_paterno = apellido_paterno
+                    usr_edit.apellido_materno = apellido_materno
+                    usr_edit.curp = curp
+                    usr_edit.email = email
+                    usr_edit.username = email
+                    usr_edit.tipo_persona = tipo_persona
+                    usr_edit.numero_empleado = numero_empleado
+                    usr_edit.estatus_operativo = estatus_operativo == "true"
+                    usr_edit.is_active = estatus_operativo == "true"
+                    usr_edit.is_staff = True
+
+                    if tipo_persona == "ADMIN":
+                        usr_edit.is_superuser = True
+                    elif usr_edit.pk != request.user.pk:
+                        usr_edit.is_superuser = False
+
+                    if password:
+                        usr_edit.set_password(password)
+
+                    usr_edit.save()
+
+                    AccessLog.objects.create(
+                        usuario=request.user,
+                        accion=f"EDICIÓN: Actualizó datos de {usr_edit.nombre} ({usr_edit.email})",
+                    )
+
                 response_data["msg"] = "Información actualizada correctamente."
 
             elif accion == "delete_user":

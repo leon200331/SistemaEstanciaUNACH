@@ -68,22 +68,25 @@
         }
 
         .brand-logo{
-            width:64px;
+            width:96px;
             height:64px;
             border-radius:18px;
-            background:#fff;
-            border:1px solid var(--border);
+            background:linear-gradient(135deg, #1e3a8a, #2563eb);
+            border:1px solid rgba(255,255,255,.25);
             display:flex;
             align-items:center;
             justify-content:center;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
-            padding:8px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            padding:6px;
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            transform:scale(1.12);
         }
 
         .brand-title{
@@ -127,6 +130,27 @@
             box-shadow:0 12px 25px rgba(15,23,42,.09);
             color:#0f172a;
             background:#f8fafc;
+        }
+
+        .logout-form{
+            display:inline-flex;
+            margin:0;
+        }
+
+        .logout-form button{
+            cursor:pointer;
+        }
+
+        .btn-logout{
+            border-color:#fecaca;
+            color:#b91c1c;
+            background:#fff;
+        }
+
+        .btn-logout:hover{
+            background:#fef2f2;
+            color:#991b1b;
+            border-color:#fca5a5;
         }
 
         .btn-main{
@@ -435,6 +459,40 @@
             border-color:#fecaca;
         }
 
+
+        .state-inhabil{
+            background:#f8fafc;
+            border-color:#cbd5e1;
+            border-style:dashed;
+        }
+
+        .state-inhabil .day-icon{
+            background:#e2e8f0;
+            color:#475569;
+        }
+
+        .non-operational-note{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            border-radius:18px;
+            padding:14px 16px;
+            color:#475569;
+            font-weight:750;
+            line-height:1.45;
+            margin-bottom:16px;
+        }
+
+        .non-operational-note i{
+            color:#64748b;
+        }
+
+        .mini-btn.disabled-link{
+            pointer-events:none;
+            opacity:.6;
+            background:#f8fafc;
+            color:#64748b;
+        }
+
         .state-none .day-icon{
             background:#fee2e2;
             color:#dc2626;
@@ -681,6 +739,11 @@
                 border-radius:20px;
             }
 
+            .brand-logo{
+                width:88px;
+                height:60px;
+            }
+
             .top-actions{
                 width:100%;
                 justify-content:flex-start;
@@ -735,12 +798,19 @@
                 <i class="bi bi-house-door-fill"></i>
                 Inicio
             </a>
-            {% if dia_actual %}
+            {% if dia_actual and dia_actual.es_habil %}
                 <a href="{% url 'lista_alumnos_dia_maestra' dia_actual.id %}" class="btn-soft">
                     <i class="bi bi-people-fill"></i>
                     Alumnos del día
                 </a>
             {% endif %}
+            <form method="POST" action="{% url 'logout' %}" class="logout-form m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn-soft btn-logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Cerrar sesión
+                </button>
+            </form>
         </div>
     </header>
 
@@ -769,8 +839,9 @@
                 </h1>
 
                 <p>
-                    Desde este panel podrás abrir el día operativo, consultar tus salas asignadas,
+                    Desde este panel podrás abrir el día operativo de lunes a viernes, consultar tus salas asignadas,
                     registrar entradas, capturar bitácoras, registrar salidas y cerrar el día cuando todo esté completo.
+                    Sábados y domingos son solo de consulta, sin operación diaria.
                 </p>
             </div>
 
@@ -904,6 +975,35 @@
                             </div>
                         </div>
 
+                    {% elif not dia_actual.es_habil %}
+                        <div class="day-card state-inhabil">
+                            <div class="day-status">
+                                <div class="day-icon">
+                                    <i class="bi bi-calendar-x-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="day-title">
+                                        Día inhábil automático
+                                    </div>
+                                    <p class="day-text">
+                                        Fecha: <strong>{{ dia_actual.fecha|date:"d/m/Y" }}</strong>.
+                                        {% if dia_actual.fecha|date:"w" == "0" or dia_actual.fecha|date:"w" == "6" %}
+                                            La estancia no opera sábados ni domingos.
+                                        {% else %}
+                                            Este día está marcado como inhábil por el calendario operativo.
+                                        {% endif %}
+                                        Puedes iniciar sesión y consultar información, pero no abrir operación diaria,
+                                        registrar entradas, salidas ni bitácoras.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="non-operational-note mb-0">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                Este día no requiere apertura ni cierre manual y no cuenta como pendiente para cerrar el semestre.
+                            </div>
+                        </div>
+
                     {% elif dia_actual.estado == "PROGRAMADO" %}
                         <div class="day-card state-programado">
                             <div class="day-status">
@@ -975,12 +1075,14 @@
                                 </div>
                             </div>
 
-                            <div class="actions-row">
-                                <a href="{% url 'lista_alumnos_dia_maestra' dia_actual.id %}" class="btn-main btn-dark-custom">
-                                    <i class="bi bi-eye-fill"></i>
-                                    Consultar registros
-                                </a>
-                            </div>
+                            {% if dia_actual.es_habil %}
+                                <div class="actions-row">
+                                    <a href="{% url 'lista_alumnos_dia_maestra' dia_actual.id %}" class="btn-main btn-dark-custom">
+                                        <i class="bi bi-eye-fill"></i>
+                                        Consultar registros
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
                     {% endif %}
                 </div>
@@ -994,7 +1096,7 @@
                         Alumnos del día
                     </h2>
 
-                    {% if dia_actual %}
+                    {% if dia_actual and dia_actual.es_habil %}
                         <a href="{% url 'lista_alumnos_dia_maestra' dia_actual.id %}" class="mini-btn">
                             <i class="bi bi-arrow-right-circle-fill"></i>
                             Ver todos
@@ -1003,6 +1105,13 @@
                 </div>
 
                 <div class="panel-body">
+                    {% if dia_actual and not dia_actual.es_habil %}
+                        <div class="non-operational-note">
+                            <i class="bi bi-calendar-x-fill me-1"></i>
+                            Hoy no hay operación diaria. No se muestran acciones de entrada, salida ni bitácoras.
+                        </div>
+                    {% endif %}
+
                     {% if registros %}
                         <div class="table-wrap">
                             <table class="table align-middle">
@@ -1103,7 +1212,7 @@
 
                                             <td>
                                                 <div class="mini-actions">
-                                                    {% if dia_actual.estado == "ABIERTO" %}
+                                                    {% if dia_actual.estado == "ABIERTO" and dia_actual.es_habil %}
                                                         {% if not registro.entrada_en %}
                                                             <a href="{% url 'registrar_entrada_alumno' registro.id %}" class="mini-btn">
                                                                 <i class="bi bi-door-open-fill"></i>
@@ -1153,8 +1262,12 @@
                             <i class="bi bi-people"></i>
                             <h5>No hay alumnos cargados todavía</h5>
                             <p>
-                                Los alumnos aparecerán cuando exista un día abierto y tengas salas asignadas
-                                con alumnos finalizados.
+                                {% if dia_actual and not dia_actual.es_habil %}
+                                    Hoy es día inhábil. La estancia no recibe menores ni genera bitácoras.
+                                {% else %}
+                                    Los alumnos aparecerán cuando exista un día abierto y tengas salas asignadas
+                                    con alumnos finalizados.
+                                {% endif %}
                             </p>
                         </div>
                     {% endif %}
@@ -1217,13 +1330,18 @@
                 </div>
 
                 <div class="panel-body">
+                    <div class="non-operational-note">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        Este flujo aplica únicamente de lunes a viernes. Sábados y domingos son días inhábiles automáticos.
+                    </div>
+
                     <div class="timeline">
                         <div class="step">
                             <div class="step-number">1</div>
                             <div>
                                 <div class="step-title">Abrir día</div>
                                 <p class="step-text">
-                                    Una maestra asignada abre la operación diaria de la sede.
+                                    Una maestra asignada abre la operación diaria de la sede solo en días hábiles.
                                 </p>
                             </div>
                         </div>
@@ -1233,7 +1351,7 @@
                             <div>
                                 <div class="step-title">Registrar entrada</div>
                                 <p class="step-text">
-                                    Se valida credencial y código de seguridad del adulto responsable.
+                                    De lunes a viernes se valida credencial y código individual del adulto responsable.
                                 </p>
                             </div>
                         </div>
@@ -1263,7 +1381,7 @@
                             <div>
                                 <div class="step-title">Salida y cierre</div>
                                 <p class="step-text">
-                                    Se valida salida del menor y se cierra el día cuando todos estén completos.
+                                    Se valida salida del menor y se cierra el día cuando todos estén completos. Sábados y domingos no se abren ni se cierran manualmente.
                                 </p>
                             </div>
                         </div>

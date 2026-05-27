@@ -1,0 +1,114 @@
+<div
+    class="responsible-row {% if principal %}principal{% endif %}"
+    data-codigo="{% if responsable.tiene_codigo %}CON_CODIGO{% else %}SIN_CODIGO{% endif %}"
+    data-entrega="{% if responsable.codigo_entregado %}ENTREGADO{% else %}PENDIENTE_ENTREGA{% endif %}"
+>
+    <div class="responsible-info">
+        <div class="avatar responsible">
+            {% if principal %}
+                <i class="bi bi-person-check-fill"></i>
+            {% else %}
+                <i class="bi bi-person-vcard-fill"></i>
+            {% endif %}
+        </div>
+        <div>
+            <div class="responsible-name">
+                {{ responsable.nombre_completo }}
+            </div>
+            <div class="responsible-meta">
+                {{ responsable.get_tipo_responsable_display }}
+                {% if responsable.parentesco %}
+                    · {{ responsable.parentesco }}
+                {% endif %}
+            </div>
+            {% if responsable.telefono %}
+                <div class="responsible-meta">
+                    <i class="bi bi-telephone-fill me-1"></i>{{ responsable.telefono }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="status-stack">
+        {% if responsable.tiene_codigo %}
+            <span class="badge-soft badge-green">
+                <i class="bi bi-key-fill"></i>
+                Código generado
+            </span>
+        {% else %}
+            <span class="badge-soft badge-gray">
+                <i class="bi bi-dash-circle-fill"></i>
+                Sin código
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="status-stack">
+        {% if responsable.codigo_entregado %}
+            <span class="badge-soft badge-green">
+                <i class="bi bi-person-check-fill"></i>
+                Entregado
+            </span>
+            {% if responsable.codigo_entregado_en %}
+                <span class="student-meta">
+                    {{ responsable.codigo_entregado_en|date:"d/m/Y H:i" }}
+                </span>
+            {% endif %}
+        {% elif responsable.tiene_codigo %}
+            <span class="badge-soft badge-yellow">
+                <i class="bi bi-clock-fill"></i>
+                Pendiente de entrega
+            </span>
+        {% else %}
+            <span class="badge-soft badge-gray">
+                <i class="bi bi-dash-circle-fill"></i>
+                No entregado
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="status-stack">
+        {% if responsable.codigo_entregado and responsable.credencial_entregada %}
+            <span class="badge-soft badge-green">
+                <i class="bi bi-shield-check"></i>
+                Credencial OK
+            </span>
+        {% elif responsable.tiene_codigo %}
+            <span class="badge-soft badge-yellow">
+                <i class="bi bi-shield-exclamation"></i>
+                Credencial pendiente
+            </span>
+        {% else %}
+            <span class="badge-soft badge-gray">
+                <i class="bi bi-shield"></i>
+                Pendiente
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="action-group">
+        {% if not responsable.tiene_codigo %}
+            <a href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="mini-btn primary">
+                <i class="bi bi-key-fill"></i>
+                Generar
+            </a>
+        {% else %}
+            <a href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="mini-btn danger">
+                <i class="bi bi-arrow-clockwise"></i>
+                Resetear
+            </a>
+
+            {% if not responsable.codigo_entregado %}
+                <a href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="mini-btn success">
+                    <i class="bi bi-person-check-fill"></i>
+                    Confirmar entrega
+                </a>
+            {% else %}
+                <span class="mini-btn disabled">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Entregado
+                </span>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>

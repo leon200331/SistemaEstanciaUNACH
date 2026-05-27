@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{{ titulo|default:"Enviar Encuesta de Satisfacción B" }} | Estancia Infantil UNACH</title>
+    <title>{{ titulo|default:"Encuesta de Satisfacción B" }} | Estancia Infantil UNACH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,7 +37,7 @@
         }
 
         .topbar-inner{
-            max-width:1260px;
+            max-width:1280px;
             margin:auto;
             padding:14px 18px;
             display:flex;
@@ -83,7 +83,7 @@
         }
 
         .main{
-            max-width:1260px;
+            max-width:1280px;
             margin:28px auto 70px;
             padding:0 18px;
         }
@@ -92,7 +92,7 @@
             background:linear-gradient(135deg, #0e7490, #06b6d4);
             border-radius:24px;
             color:white;
-            padding:30px 34px;
+            padding:28px 32px;
             box-shadow:0 22px 50px rgba(6,182,212,.22);
             display:grid;
             grid-template-columns:1fr auto;
@@ -102,7 +102,7 @@
         }
 
         .hero h1{
-            font-size:1.9rem;
+            font-size:1.85rem;
             font-weight:950;
             margin:0 0 8px;
             letter-spacing:-.03em;
@@ -115,19 +115,19 @@
         }
 
         .hero-icon{
-            width:88px;
-            height:88px;
+            width:84px;
+            height:84px;
             border-radius:22px;
             background:rgba(255,255,255,.18);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:2.5rem;
+            font-size:2.45rem;
         }
 
         .layout{
             display:grid;
-            grid-template-columns:410px 1fr;
+            grid-template-columns:380px 1fr;
             gap:20px;
             align-items:start;
         }
@@ -149,6 +149,7 @@
             align-items:center;
             justify-content:space-between;
             gap:12px;
+            flex-wrap:wrap;
         }
 
         .panel-title{
@@ -161,7 +162,28 @@
         }
 
         .panel-body{
-            padding:24px;
+            padding:22px;
+        }
+
+        .semestre-card{
+            background:#ecfeff;
+            border:1px solid #a5f3fc;
+            border-left:6px solid #0891b2;
+            border-radius:18px;
+            padding:16px;
+            color:#155e75;
+            margin-bottom:18px;
+        }
+
+        .semestre-card h6{
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .semestre-card p{
+            margin:0;
+            font-size:.9rem;
+            font-weight:650;
         }
 
         .field-card{
@@ -170,6 +192,28 @@
             border-radius:18px;
             padding:16px;
             margin-bottom:16px;
+        }
+
+        .info-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:14px 16px;
+            margin-bottom:12px;
+        }
+
+        .info-label{
+            font-size:.74rem;
+            font-weight:950;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:4px;
+        }
+
+        .info-value{
+            color:#0f172a;
+            font-weight:850;
         }
 
         .form-label{
@@ -248,25 +292,115 @@
             padding:.72rem 1.1rem;
         }
 
-        .semestre-card{
-            background:#ecfeff;
-            border:1px solid #a5f3fc;
-            border-left:6px solid #0891b2;
-            border-radius:18px;
-            padding:16px;
-            color:#155e75;
+        .status-pill{
+            border-radius:999px;
+            padding:.42rem .7rem;
+            font-weight:950;
+            font-size:.76rem;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            white-space:nowrap;
+            border:1px solid transparent;
+        }
+
+        .pill-green{ background:#dcfce7; color:#166534; border-color:#86efac; }
+        .pill-yellow{ background:#fef3c7; color:#92400e; border-color:#fcd34d; }
+        .pill-blue{ background:#dbeafe; color:#1e40af; border-color:#93c5fd; }
+        .pill-red{ background:#fee2e2; color:#991b1b; border-color:#fecaca; }
+        .pill-gray{ background:#f1f5f9; color:#475569; border-color:#cbd5e1; }
+        .pill-cyan{ background:#cffafe; color:#155e75; border-color:#67e8f9; }
+
+        .summary-grid{
+            display:grid;
+            grid-template-columns:repeat(6,minmax(0,1fr));
+            gap:10px;
             margin-bottom:18px;
         }
 
-        .semestre-card h6{
-            font-weight:950;
-            margin-bottom:8px;
+        .summary-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:13px;
+            min-height:86px;
         }
 
-        .semestre-card p{
-            margin:0;
-            font-size:.9rem;
+        .summary-label{
+            font-size:.7rem;
+            font-weight:950;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:6px;
+        }
+
+        .summary-value{
+            font-size:1.55rem;
+            font-weight:950;
+            color:#0f172a;
+            line-height:1;
+        }
+
+        .summary-help{
+            font-size:.76rem;
+            color:#64748b;
             font-weight:650;
+            margin-top:5px;
+        }
+
+        .table-wrap{
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            overflow:hidden;
+        }
+
+        .table{
+            margin:0;
+            vertical-align:middle;
+        }
+
+        .table thead th{
+            background:#f8fafc;
+            color:#475569;
+            font-size:.74rem;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            font-weight:950;
+            border-bottom:1px solid #e2e8f0;
+            white-space:nowrap;
+        }
+
+        .table tbody td{
+            font-size:.88rem;
+            color:#0f172a;
+            font-weight:650;
+        }
+
+        .student-name{
+            font-weight:950;
+            color:#0f172a;
+            line-height:1.2;
+        }
+
+        .student-meta{
+            color:#64748b;
+            font-size:.78rem;
+            margin-top:3px;
+        }
+
+        .action-stack{
+            display:flex;
+            justify-content:flex-end;
+            gap:6px;
+            flex-wrap:wrap;
+        }
+
+        .btn-mini{
+            border-radius:999px;
+            font-size:.76rem;
+            font-weight:900;
+            padding:.38rem .68rem;
         }
 
         .notice{
@@ -275,9 +409,10 @@
             border-left:6px solid var(--azul);
             border-radius:18px;
             color:#1e3a8a;
-            padding:15px 16px;
+            padding:14px 15px;
             margin-bottom:18px;
             font-weight:650;
+            font-size:.9rem;
         }
 
         .warning-box{
@@ -285,7 +420,7 @@
             border:1px solid #fed7aa;
             border-left:6px solid #f97316;
             border-radius:18px;
-            padding:16px;
+            padding:15px;
             color:#9a3412;
             margin-bottom:18px;
         }
@@ -293,206 +428,6 @@
         .warning-box h6{
             font-weight:950;
             margin-bottom:8px;
-        }
-
-        .status-pill{
-            border-radius:999px;
-            padding:.45rem .72rem;
-            font-weight:950;
-            font-size:.76rem;
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            white-space:nowrap;
-        }
-
-        .pill-green{
-            background:#dcfce7;
-            color:#166534;
-            border:1px solid #86efac;
-        }
-
-        .pill-yellow{
-            background:#fef3c7;
-            color:#92400e;
-            border:1px solid #fcd34d;
-        }
-
-        .preview-wrap{
-            background:#e5e7eb;
-            border-radius:22px;
-            padding:22px;
-            box-shadow:inset 0 0 0 1px #d1d5db;
-        }
-
-        .paper{
-            background:white;
-            max-width:760px;
-            margin:0 auto;
-            min-height:980px;
-            padding:36px 44px;
-            box-shadow:0 16px 40px rgba(15,23,42,.18);
-            border:1px solid #d1d5db;
-            color:#111827;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        .paper-header{
-            display:grid;
-            grid-template-columns:110px 1fr 120px;
-            gap:10px;
-            align-items:center;
-            margin-bottom:18px;
-        }
-
-        .paper-logo{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-        }
-
-        .paper-logo img{
-            max-width:105px;
-            max-height:72px;
-            object-fit:contain;
-        }
-
-        .paper-title{
-            text-align:center;
-        }
-
-        .paper-title h2{
-            font-size:1.12rem;
-            margin:0;
-            font-weight:900;
-            color:#777;
-            text-transform:uppercase;
-            letter-spacing:.02em;
-        }
-
-        .paper-title h3{
-            font-size:.88rem;
-            margin:2px 0 0;
-            font-weight:800;
-            color:#777;
-            text-transform:uppercase;
-        }
-
-        .paper-code{
-            text-align:right;
-            font-weight:800;
-            font-size:.9rem;
-        }
-
-        .paper-main-title{
-            text-align:center;
-            font-size:1rem;
-            font-weight:900;
-            margin:18px 0 18px;
-            text-transform:uppercase;
-        }
-
-        .line-row{
-            display:flex;
-            justify-content:flex-end;
-            align-items:center;
-            gap:8px;
-            margin-bottom:12px;
-            font-size:.95rem;
-        }
-
-        .line{
-            border-bottom:1.5px solid #111;
-            min-width:245px;
-            height:18px;
-            display:inline-block;
-        }
-
-        .sede-row{
-            text-align:center;
-            margin-bottom:34px;
-            font-size:.94rem;
-        }
-
-        .sede-line{
-            border-bottom:1.5px solid #111;
-            min-width:54px;
-            height:16px;
-            display:inline-block;
-            vertical-align:bottom;
-        }
-
-        .paper-instruction{
-            margin-bottom:12px;
-            font-size:.93rem;
-        }
-
-        .survey-table{
-            width:100%;
-            border-collapse:collapse;
-            font-size:.86rem;
-            margin-bottom:28px;
-        }
-
-        .survey-table th,
-        .survey-table td{
-            border:1.4px solid #111;
-            padding:6px 7px;
-            vertical-align:middle;
-        }
-
-        .survey-table th{
-            text-align:center;
-            font-weight:700;
-        }
-
-        .survey-question{
-            width:75%;
-        }
-
-        .survey-check{
-            width:12.5%;
-            text-align:center;
-        }
-
-        .box{
-            width:22px;
-            height:22px;
-            border:2px solid #111;
-            display:inline-block;
-        }
-
-        .comments{
-            margin-top:14px;
-            font-size:.94rem;
-        }
-
-        .comments-lines{
-            border:1.4px solid #111;
-            height:126px;
-            margin-top:12px;
-            background:
-                linear-gradient(to bottom,
-                    transparent 0,
-                    transparent 25%,
-                    #111 25%,
-                    #111 calc(25% + 1px),
-                    transparent calc(25% + 1px),
-                    transparent 50%,
-                    #111 50%,
-                    #111 calc(50% + 1px),
-                    transparent calc(50% + 1px),
-                    transparent 75%,
-                    #111 75%,
-                    #111 calc(75% + 1px),
-                    transparent calc(75% + 1px)
-                );
-        }
-
-        .paper-footer{
-            margin-top:34px;
-            text-align:center;
-            font-size:.92rem;
         }
 
         .question-list{
@@ -511,332 +446,79 @@
             font-size:.9rem;
         }
 
-        .question-list li:last-child{
-            border-bottom:none;
-        }
+        .question-list li:last-child{ border-bottom:none; }
+        .question-list i{ color:#0891b2; margin-top:2px; }
 
-        .question-list i{
-            color:#0891b2;
-            margin-top:2px;
-        }
-
-
-        .form-preview-wrap{
-            background:linear-gradient(135deg, #e0f2fe, #f8fafc);
-            border-radius:22px;
-            padding:22px;
-            box-shadow:inset 0 0 0 1px #bfdbfe;
-        }
-
-        .digital-form{
-            background:#fff;
-            max-width:820px;
-            margin:0 auto;
-            border-radius:24px;
-            overflow:hidden;
-            box-shadow:0 18px 42px rgba(15,23,42,.14);
-            border:1px solid #dbeafe;
-        }
-
-        .digital-form-header{
-            background:linear-gradient(135deg, #1d4ed8, #0891b2);
-            color:white;
-            padding:26px 28px;
-            display:grid;
-            grid-template-columns:auto 1fr auto;
-            gap:16px;
-            align-items:center;
-        }
-
-        .digital-form-logo{
-            width:74px;
-            height:74px;
-            border-radius:18px;
-            background:rgba(255,255,255,.18);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            padding:8px;
-        }
-
-        .digital-form-logo img{
-            max-width:100%;
-            max-height:100%;
-            object-fit:contain;
-        }
-
-        .digital-form-title h2{
-            margin:0;
-            font-size:1.45rem;
-            font-weight:950;
-            letter-spacing:-.03em;
-        }
-
-        .digital-form-title p{
-            margin:5px 0 0;
-            opacity:.92;
-            font-size:.92rem;
-            font-weight:650;
-        }
-
-        .digital-code{
-            background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.35);
-            border-radius:999px;
-            padding:.45rem .72rem;
-            font-size:.78rem;
-            font-weight:950;
-            white-space:nowrap;
-        }
-
-        .digital-form-body{
-            padding:26px 28px 30px;
-        }
-
-        .preview-note-digital{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
-            border-radius:16px;
-            padding:13px 15px;
-            margin-bottom:18px;
-            font-size:.9rem;
-            font-weight:650;
-        }
-
-        .form-meta-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:12px;
-            margin-bottom:20px;
-        }
-
-        .meta-field{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
-            border-radius:16px;
-            padding:13px 14px;
-        }
-
-        .meta-label{
-            font-size:.72rem;
-            text-transform:uppercase;
-            letter-spacing:.06em;
+        .empty-state{
+            text-align:center;
+            padding:40px 20px;
             color:#64748b;
-            font-weight:950;
-            margin-bottom:5px;
         }
 
-        .meta-value{
-            color:#0f172a;
-            font-weight:850;
-        }
-
-        .question-card{
-            border:1px solid #e2e8f0;
-            border-radius:18px;
-            padding:16px;
-            background:#ffffff;
-            box-shadow:0 8px 18px rgba(15,23,42,.04);
-            margin-bottom:12px;
-        }
-
-        .question-title{
-            display:flex;
-            gap:10px;
-            align-items:flex-start;
-            color:#0f172a;
-            font-weight:850;
-            line-height:1.35;
-            margin-bottom:12px;
-        }
-
-        .question-number{
-            width:26px;
-            height:26px;
-            border-radius:999px;
-            background:#dbeafe;
-            color:#1d4ed8;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-shrink:0;
-            font-size:.78rem;
-            font-weight:950;
-        }
-
-        .answer-options{
-            display:flex;
-            gap:10px;
-            flex-wrap:wrap;
-            padding-left:36px;
-        }
-
-        .answer-pill{
-            min-width:108px;
-            border:1px solid #cbd5e1;
-            background:#f8fafc;
-            border-radius:999px;
-            padding:.55rem .85rem;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            color:#334155;
-            font-weight:850;
-            font-size:.9rem;
-        }
-
-        .fake-radio{
-            width:18px;
-            height:18px;
-            border-radius:999px;
-            border:2px solid #94a3b8;
-            background:white;
-            display:inline-block;
-        }
-
-        .comments-preview{
-            margin-top:18px;
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
-            border-radius:18px;
-            padding:16px;
-        }
-
-        .comments-preview label{
-            font-weight:950;
-            color:#334155;
-            margin-bottom:8px;
-            display:block;
-        }
-
-        .fake-textarea{
-            height:110px;
-            background:#fff;
-            border:1px solid #cbd5e1;
-            border-radius:14px;
-            padding:12px;
+        .empty-state i{
+            font-size:2.5rem;
             color:#94a3b8;
-            font-weight:650;
+            margin-bottom:10px;
         }
 
-        .digital-submit-preview{
-            margin-top:20px;
-            display:flex;
-            justify-content:flex-end;
-            gap:10px;
-            flex-wrap:wrap;
-            border-top:1px solid #e5e7eb;
-            padding-top:18px;
-        }
-
-        .digital-disabled-note{
-            color:#64748b;
-            font-size:.84rem;
-            margin-right:auto;
-            align-self:center;
-            font-weight:650;
-        }
-
-        .official-format-note{
-            margin-top:16px;
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            color:#9a3412;
-            border-radius:16px;
-            padding:13px 15px;
-            font-size:.9rem;
-            font-weight:650;
-        }
-
-        @media(max-width:1050px){
-            .layout{
-                grid-template-columns:1fr;
-            }
+        @media(max-width:1100px){
+            .layout{ grid-template-columns:1fr; }
+            .summary-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
         }
 
         @media(max-width:768px){
-            .digital-form-header{
-                grid-template-columns:1fr;
-                text-align:center;
-            }
-
-            .digital-form-logo{
-                margin:auto;
-            }
-
-            .digital-code{
-                justify-self:center;
-            }
-
-            .form-meta-grid{
-                grid-template-columns:1fr;
-            }
-
-            .answer-options{
-                padding-left:0;
-            }
-
-            .hero{
-                grid-template-columns:1fr;
-                padding:24px 20px;
-            }
-
-            .hero-icon{
-                display:none;
-            }
-
-            .paper{
-                padding:24px 20px;
-                min-height:auto;
-            }
-
-            .paper-header{
-                grid-template-columns:1fr;
-                text-align:center;
-            }
-
-            .paper-code{
-                text-align:center;
-            }
-
-            .line-row{
-                justify-content:center;
-            }
+            .hero{ grid-template-columns:1fr; padding:24px 20px; }
+            .hero-icon{ display:none; }
+            .summary-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+            .topbar-inner{ flex-direction:column; align-items:flex-start; }
         }
 
         @media(max-width:576px){
-            .topbar-inner{
-                flex-direction:column;
-                align-items:flex-start;
-            }
-
-            .hero h1{
-                font-size:1.55rem;
-            }
-
-            .panel-body{
-                padding:18px;
-            }
-
-            .actions{
-                justify-content:stretch;
-            }
-
-            .actions .btn{
-                width:100%;
-            }
-
-            .preview-wrap{
-                padding:10px;
-            }
-
-            .survey-table{
-                font-size:.75rem;
-            }
+            .hero h1{ font-size:1.5rem; }
+            .panel-body{ padding:18px; }
+            .actions .btn{ width:100%; }
+            .summary-grid{ grid-template-columns:1fr; }
+            .action-stack{ justify-content:flex-start; }
         }
+
+        /* =========================================================
+           ALERTAS Y CONFIRMACIONES PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon { margin: 0 .65rem 0 0 !important; }
+        .swal2-timer-progress-bar { background: rgba(37, 99, 235, .45) !important; }
+        .sistema-toast-success { border-left: 7px solid #16a34a !important; background: #f0fdf4 !important; }
+        .sistema-toast-error { border-left: 7px solid #dc2626 !important; background: #fef2f2 !important; }
+        .sistema-toast-warning { border-left: 7px solid #f59e0b !important; background: #fffbeb !important; }
+        .sistema-toast-info { border-left: 7px solid #2563eb !important; background: #eff6ff !important; }
+        .sistema-modal-popup { border-radius: 22px !important; box-shadow: 0 24px 70px rgba(15, 23, 42, .28) !important; }
+        .sistema-modal-title { color: #0f172a !important; font-weight: 900 !important; }
+        .sistema-modal-confirm,
+        .sistema-modal-cancel {
+            border-radius: 12px !important;
+            font-weight: 800 !important;
+            padding: .65rem 1rem !important;
+        }
+        .form-control[readonly]{
+            cursor:not-allowed;
+            color:#475569;
+            background:#f1f5f9 !important;
+            border-style:dashed;
+        }
+
     </style>
 </head>
 <body>
@@ -847,21 +529,13 @@
             <img src="{% static 'img/logo.png' %}" alt="UNACH">
             <div>
                 <div class="brand-title">Encuesta de Satisfacción B</div>
-                <div class="brand-subtitle">Sprint 4 · Envío a beneficiarios · Administrador del sistema</div>
+                <div class="brand-subtitle">Envío, reenvío, respuestas y CSV semestral</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Detalle semestre
-            </a>
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                <i class="bi bi-calendar2-week-fill me-1"></i> Semestres
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-house-door-fill me-1"></i> Panel TI
             </a>
         </div>
     </div>
@@ -869,20 +543,12 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <section class="hero">
         <div>
-            <h1>{{ titulo|default:"Enviar Encuesta de Satisfacción B" }}</h1>
+            <h1>{{ titulo|default:"Encuesta de Satisfacción B" }}</h1>
             <p>
-                Revisa la vista previa del formulario digital que responderán los beneficiarios y envía la encuesta con copia al correo genérico.
+                Envía la encuesta al tutor con correo institucional, reenvía si es necesario,
+                consulta respuestas por alumno y descarga el CSV semestral.
             </p>
         </div>
         <div class="hero-icon">
@@ -904,8 +570,13 @@
                 </p>
 
                 <div class="mt-3">
-                    {% if semestre.encuesta_enviada %}
+                    {% if resumen_encuesta.contestadas > 0 %}
                         <span class="status-pill pill-green">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Con respuestas
+                        </span>
+                    {% elif semestre.encuesta_enviada %}
+                        <span class="status-pill pill-blue">
                             <i class="bi bi-send-check-fill"></i>
                             Encuesta enviada
                         </span>
@@ -926,9 +597,35 @@
                 </div>
 
                 <div class="panel-body">
-                    <form method="POST" novalidate onsubmit="return confirmarEnvioEncuesta();">
+                    <div class="info-card">
+                        <div class="info-label">Fecha programada</div>
+                        <div class="info-value">
+                            {% if semestre.fecha_encuesta_satisfaccion %}
+                                {{ semestre.fecha_encuesta_satisfaccion|date:"d/m/Y" }}
+                            {% else %}
+                                No definida
+                            {% endif %}
+                        </div>
+                        <div class="field-help">
+                            Esta fecha se configura al crear o editar el semestre.
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">Regla de envío</div>
+                        <div class="info-value">
+                            Solo tutores con correo @unach.mx
+                        </div>
+                        <div class="field-help">
+                            Los correos personales quedan bloqueados hasta corregirse.
+                        </div>
+                    </div>
+
+                    <form method="POST" novalidate onsubmit="return confirmarEnvioEncuesta(this);">
                         {% csrf_token %}
-                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                        {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                            <input type="hidden" name="origen" value="ti">
+                        {% endif %}
 
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger rounded-4">
@@ -939,28 +636,28 @@
                         {% endif %}
 
                         <div class="field-card">
-                            <label for="{{ form.fecha_envio.id_for_label }}" class="form-label">
-                                Fecha de envío
-                            </label>
-                            {{ form.fecha_envio }}
-                            <div class="field-help">
-                                Fecha en que se registra el envío de la encuesta.
-                            </div>
-                            {% if form.fecha_envio.errors %}
-                                <div class="error-text">
-                                    {% for error in form.fecha_envio.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-card">
                             <label for="{{ form.correo_copia.id_for_label }}" class="form-label">
                                 Correo genérico en copia <span class="text-danger">*</span>
+                                <span class="ms-1 text-muted" title="Este correo se configura desde Crear/Editar semestre.">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
                             </label>
-                            {{ form.correo_copia }}
+
+                            <input
+                                type="email"
+                                name="{{ form.correo_copia.html_name }}"
+                                id="{{ form.correo_copia.id_for_label }}"
+                                class="form-control bg-light"
+                                value="{% if form.correo_copia.value %}{{ form.correo_copia.value }}{% else %}{{ semestre.correo_copia_encuesta }}{% endif %}"
+                                readonly
+                                aria-readonly="true"
+                            >
+
                             <div class="field-help">
-                                Este correo irá en copia cuando se envíe la encuesta a beneficiarios.
+                                Este correo se define en el punto 3 al crear o editar el semestre.
+                                Aquí solo se muestra para confirmar la copia administrativa del envío.
                             </div>
+
                             {% if form.correo_copia.errors %}
                                 <div class="error-text">
                                     {% for error in form.correo_copia.errors %}{{ error }}{% endfor %}
@@ -975,7 +672,7 @@
                                     Confirmo que deseo enviar la encuesta
                                 </label>
                                 <div class="field-help">
-                                    El sistema enviará la encuesta a los beneficiarios registrados en este semestre.
+                                    Se enviará un enlace individual a cada tutor con correo institucional válido.
                                 </div>
                             </div>
 
@@ -987,8 +684,8 @@
                         </div>
 
                         <div class="actions">
-                            <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
-                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                                <i class="bi bi-arrow-left-circle me-1"></i> Panel TI
                             </a>
 
                             <button type="submit" class="btn btn-info text-white btn-main">
@@ -1002,17 +699,7 @@
 
             <div class="notice">
                 <i class="bi bi-info-circle-fill me-2"></i>
-                En este Sprint 4 la encuesta se envía con preguntas oficiales fijas. La edición de preguntas puede quedar para un módulo posterior de plantillas.
-            </div>
-
-            <div class="warning-box">
-                <h6>
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    Antes de enviar
-                </h6>
-                <p class="mb-0 small fw-semibold">
-                    Verifica que el correo genérico sea correcto y que el semestre tenga beneficiarios con correo registrado.
-                </p>
+                Las respuestas se revisan por alumno en esta pantalla. El CSV descarga el concentrado semestral completo.
             </div>
 
             <section class="panel">
@@ -1029,181 +716,231 @@
                         <li><i class="bi bi-check-circle-fill"></i><span>Orientación médica de utilidad.</span></li>
                         <li><i class="bi bi-check-circle-fill"></i><span>Orientación pedagógica de utilidad.</span></li>
                         <li><i class="bi bi-check-circle-fill"></i><span>Orientación psicológica de utilidad.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Servicio prestado como apoyo para continuar estudios.</span></li>
+                        <li><i class="bi bi-check-circle-fill"></i><span>Servicio como apoyo para continuar estudios.</span></li>
                     </ul>
                 </div>
             </section>
         </aside>
 
-        <section class="panel">
-            <div class="panel-header">
-                <h2 class="panel-title">
-                    <i class="bi bi-ui-checks-grid me-2"></i>Vista previa del formulario digital
-                </h2>
+        <section>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-label">Total</div>
+                    <div class="summary-value">{{ resumen_encuesta.total }}</div>
+                    <div class="summary-help">Alumnos/tutores</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Pendientes</div>
+                    <div class="summary-value">{{ resumen_encuesta.pendientes }}</div>
+                    <div class="summary-help">Sin envío</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Enviadas</div>
+                    <div class="summary-value">{{ resumen_encuesta.enviadas }}</div>
+                    <div class="summary-help">Primer envío</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Reenviadas</div>
+                    <div class="summary-value">{{ resumen_encuesta.reenviadas }}</div>
+                    <div class="summary-help">Seguimiento</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Contestadas</div>
+                    <div class="summary-value">{{ resumen_encuesta.contestadas }}</div>
+                    <div class="summary-help">Con respuesta</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-label">Bloqueadas</div>
+                    <div class="summary-value">{{ resumen_encuesta.bloqueadas }}</div>
+                    <div class="summary-help">Correo no válido</div>
+                </div>
             </div>
 
-            <div class="panel-body">
-                <div class="form-preview-wrap">
-                    <div class="digital-form">
-                        <div class="digital-form-header">
-                            <div class="digital-form-logo">
-                                <img src="{% static 'img/logo.png' %}" alt="UNACH">
-                            </div>
-
-                            <div class="digital-form-title">
-                                <h2>Encuesta de Satisfacción del Usuario</h2>
-                                <p>
-                                    Formulario digital que responderán los beneficiarios del semestre.
-                                </p>
-                            </div>
-
-                            <div class="digital-code">
-                                FO-301-02-15 b
-                            </div>
-                        </div>
-
-                        <div class="digital-form-body">
-                            <div class="preview-note-digital">
-                                <i class="bi bi-info-circle-fill me-1"></i>
-                                Esta es una vista previa. El beneficiario verá las preguntas en formato de formulario,
-                                seleccionará <strong>Sí</strong> o <strong>No</strong> y podrá escribir comentarios.
-                            </div>
-
-                            <div class="form-meta-grid">
-                                <div class="meta-field">
-                                    <div class="meta-label">Fecha</div>
-                                    <div class="meta-value">
-                                        {% if form.fecha_envio.value %}
-                                            {{ form.fecha_envio.value }}
-                                        {% else %}
-                                            Se registrará al enviar
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <div class="meta-field">
-                                    <div class="meta-label">Semestre</div>
-                                    <div class="meta-value">{{ semestre.nombre }}</div>
-                                </div>
-
-                                <div class="meta-field">
-                                    <div class="meta-label">Sede</div>
-                                    <div class="meta-value">{{ semestre.sede_nombre }}</div>
-                                </div>
-
-                                <div class="meta-field">
-                                    <div class="meta-label">Periodo</div>
-                                    <div class="meta-value">
-                                        {{ semestre.fecha_inicio|date:"d/m/Y" }} al {{ semestre.fecha_fin|date:"d/m/Y" }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">1</span>
-                                    <span>¿Recibió información completa de la permanencia diaria de su hija y/o hijo?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">2</span>
-                                    <span>¿Considera que su hija y/o hijo se encuentra seguro durante su permanencia en la Estancia Infantil?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">3</span>
-                                    <span>¿Considera que la orientación sobre la alimentación adecuada de hija y/o hijo fue de utilidad?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">4</span>
-                                    <span>¿Considera que la orientación médica de hija y/o hijo fue de utilidad?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">5</span>
-                                    <span>¿Considera que la orientación pedagógica de hija y/o hijo fue de utilidad?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">6</span>
-                                    <span>¿Considera que la orientación psicológica recibida fue de utilidad?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <div class="question-title">
-                                    <span class="question-number">7</span>
-                                    <span>¿Considera que el servicio prestado durante este semestre fue de apoyo para continuar sus estudios?</span>
-                                </div>
-                                <div class="answer-options">
-                                    <span class="answer-pill"><span class="fake-radio"></span> Sí</span>
-                                    <span class="answer-pill"><span class="fake-radio"></span> No</span>
-                                </div>
-                            </div>
-
-                            <div class="comments-preview">
-                                <label>Comentarios y sugerencias</label>
-                                <div class="fake-textarea">
-                                    El beneficiario podrá escribir aquí sus comentarios...
-                                </div>
-                            </div>
-
-                            <div class="digital-submit-preview">
-                                <span class="digital-disabled-note">
-                                    Vista previa no editable para el Administrador.
-                                </span>
-                                <button type="button" class="btn btn-outline-secondary btn-main" disabled>
-                                    Limpiar respuestas
-                                </button>
-                                <button type="button" class="btn btn-info text-white btn-main" disabled>
-                                    <i class="bi bi-send-check-fill me-1"></i> Enviar respuestas
-                                </button>
-                            </div>
-                        </div>
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">
+                            <i class="bi bi-people-fill me-2"></i>Respuestas por alumno
+                        </h2>
                     </div>
 
-                    <div class="official-format-note">
-                        <i class="bi bi-file-earmark-pdf-fill me-1"></i>
-                        El formato oficial FO-301-02-15 b se conserva como referencia institucional.
-                        La respuesta del beneficiario se recomienda capturar como formulario digital.
-                    </div>
+                    <a href="{% url 'descargar_csv_encuesta_satisfaccion' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-success btn-main">
+                        <i class="bi bi-filetype-csv me-1"></i> Descargar CSV Encuesta B
+                    </a>
                 </div>
+
+                <div class="panel-body">
+                    {% if envios_encuesta %}
+                        <div class="table-wrap table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Alumno / Tutor</th>
+                                        <th>Correo institucional</th>
+                                        <th>Sala</th>
+                                        <th>Estado</th>
+                                        <th>Fechas</th>
+                                        <th class="text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for envio in envios_encuesta %}
+                                        {% with solicitud=envio.inscripcion.solicitud_ingreso %}
+                                            <tr>
+                                                <td>
+                                                    <div class="student-name">
+                                                        {{ solicitud.nombre_menor_completo }}
+                                                    </div>
+                                                    <div class="student-meta">
+                                                        Tutor: {{ solicitud.nombre_tutor_completo }}
+                                                        {% if solicitud.folio %}
+                                                            · Folio {{ solicitud.folio }}
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <div class="fw-bold">{{ envio.correo_destino|default:"Sin correo" }}</div>
+                                                    {% if envio.correo_institucional_valido %}
+                                                        <span class="status-pill pill-green mt-1">
+                                                            <i class="bi bi-check-circle-fill"></i> @unach.mx
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="status-pill pill-red mt-1">
+                                                            <i class="bi bi-x-circle-fill"></i> Corregir correo
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if envio.inscripcion.sala_semestre_asignada and envio.inscripcion.sala_semestre_asignada.sala %}
+                                                        {{ envio.inscripcion.sala_semestre_asignada.sala.nombre }}
+                                                    {% else %}
+                                                        <span class="text-muted">Sin sala</span>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if envio.estado == "CONTESTADA" %}
+                                                        <span class="status-pill pill-green">
+                                                            <i class="bi bi-check-circle-fill"></i> {{ envio.get_estado_display }}
+                                                        </span>
+                                                    {% elif envio.estado == "REENVIADA" %}
+                                                        <span class="status-pill pill-cyan">
+                                                            <i class="bi bi-arrow-repeat"></i> {{ envio.get_estado_display }}
+                                                        </span>
+                                                    {% elif envio.estado == "ENVIADA" %}
+                                                        <span class="status-pill pill-blue">
+                                                            <i class="bi bi-send-check-fill"></i> {{ envio.get_estado_display }}
+                                                        </span>
+                                                    {% elif envio.estado == "BLOQUEADA" or envio.estado == "ERROR" %}
+                                                        <span class="status-pill pill-red">
+                                                            <i class="bi bi-exclamation-triangle-fill"></i> {{ envio.get_estado_display }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="status-pill pill-yellow">
+                                                            <i class="bi bi-clock-fill"></i> {{ envio.get_estado_display }}
+                                                        </span>
+                                                    {% endif %}
+
+                                                    {% if envio.ultimo_error %}
+                                                        <div class="student-meta text-danger">
+                                                            {{ envio.ultimo_error|truncatechars:70 }}
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    <div class="student-meta">
+                                                        Envío:
+                                                        {% if envio.enviado_en %}
+                                                            {{ envio.enviado_en|date:"d/m/Y H:i" }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="student-meta">
+                                                        Reenvío:
+                                                        {% if envio.reenviado_en %}
+                                                            {{ envio.reenviado_en|date:"d/m/Y H:i" }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="student-meta">
+                                                        Respuesta:
+                                                        {% if envio.contestado_en %}
+                                                            {{ envio.contestado_en|date:"d/m/Y H:i" }}
+                                                        {% elif envio.tiene_respuesta %}
+                                                            Registrada
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <div class="action-stack">
+                                                        {% if envio.tiene_respuesta %}
+                                                            <a href="{% url 'ver_respuesta_encuesta_satisfaccion' envio.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-primary btn-mini">
+                                                                <i class="bi bi-eye-fill me-1"></i> Ver respuestas
+                                                            </a>
+                                                        {% else %}
+                                                            <button type="button" class="btn btn-outline-secondary btn-mini" disabled>
+                                                                <i class="bi bi-eye-slash me-1"></i> Sin respuesta
+                                                            </button>
+                                                        {% endif %}
+
+                                                        {% if envio.estado != "CONTESTADA" and envio.correo_institucional_valido %}
+                                                            <form method="POST" action="{% url 'reenviar_encuesta_satisfaccion' envio.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="d-inline" onsubmit="return confirmarReenvioEncuesta(this);">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-outline-info btn-mini">
+                                                                    <i class="bi bi-arrow-repeat me-1"></i> Reenviar
+                                                                </button>
+                                                            </form>
+                                                        {% elif envio.estado == "CONTESTADA" %}
+                                                            <button type="button" class="btn btn-success btn-mini" disabled>
+                                                                <i class="bi bi-check2-circle me-1"></i> Contestada
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="button" class="btn btn-outline-danger btn-mini" disabled>
+                                                                <i class="bi bi-lock-fill me-1"></i> Bloqueada
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h5 class="fw-bold">No hay alumnos para encuesta</h5>
+                            <p class="mb-0">
+                                Primero asigna alumnos finalizados a este semestre para preparar los envíos.
+                            </p>
+                        </div>
+                    {% endif %}
                 </div>
+            </section>
+
+            <div class="warning-box">
+                <h6>
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Importante
+                </h6>
+                <p class="mb-0 small fw-semibold">
+                    Si un tutor aparece bloqueado, corrige su correo institucional en el expediente.
+                    Después regresa a esta vista para reenviar la encuesta.
+                </p>
             </div>
         </section>
     </div>
@@ -1211,20 +948,146 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
 
 <script>
-function confirmarEnvioEncuesta() {
+function confirmarEnvioEncuesta(formulario) {
     const checkbox = document.getElementById("id_confirmar_envio");
 
     if (checkbox && !checkbox.checked) {
-        alert("Debes confirmar el envío de la encuesta.");
+        Swal.fire({
+            title: "Confirmación requerida",
+            text: "Debes marcar la casilla para confirmar el envío de la encuesta.",
+            icon: "warning",
+            confirmButtonText: "Entendido",
+            customClass: {
+                popup: "sistema-modal-popup",
+                title: "sistema-modal-title",
+                confirmButton: "sistema-modal-confirm"
+            }
+        });
         return false;
     }
 
-    return confirm(
-        "¿Deseas enviar la Encuesta de Satisfacción B a los beneficiarios del semestre?\n\n" +
-        "Se marcará copia al correo genérico capturado."
-    );
+    if (formulario.dataset.confirmado === "1") {
+        return true;
+    }
+
+    Swal.fire({
+        title: "Enviar Encuesta B",
+        text: "Se enviará un enlace individual a los tutores con correo institucional válido.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sí, enviar",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true,
+        customClass: {
+            popup: "sistema-modal-popup",
+            title: "sistema-modal-title",
+            confirmButton: "sistema-modal-confirm",
+            cancelButton: "sistema-modal-cancel"
+        }
+    }).then(function(resultado) {
+        if (resultado.isConfirmed) {
+            formulario.dataset.confirmado = "1";
+            formulario.submit();
+        }
+    });
+
+    return false;
+}
+
+function confirmarReenvioEncuesta(formulario) {
+    if (formulario.dataset.confirmado === "1") {
+        return true;
+    }
+
+    Swal.fire({
+        title: "Reenviar encuesta",
+        text: "Se reenviará el enlace de la Encuesta B al tutor seleccionado.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sí, reenviar",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true,
+        customClass: {
+            popup: "sistema-modal-popup",
+            title: "sistema-modal-title",
+            confirmButton: "sistema-modal-confirm",
+            cancelButton: "sistema-modal-cancel"
+        }
+    }).then(function(resultado) {
+        if (resultado.isConfirmed) {
+            formulario.dataset.confirmado = "1";
+            formulario.submit();
+        }
+    });
+
+    return false;
+}
+
+function volverPanelTI() {
+    localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+    window.location.href = "{% url 'panel_gobierno_ti' %}";
 }
 </script>
 

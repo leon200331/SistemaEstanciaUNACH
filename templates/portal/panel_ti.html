@@ -13,6 +13,7 @@
       --card: #ffffff;
       --bg: #f6f8fc;
     }
+    html { scroll-behavior: smooth; }
     body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
     .navbar-ti { background-color: #1e3a8a; padding: 0.8rem 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .ti-brand-text { font-size: 1.2rem; font-weight: 700; color: white; letter-spacing: 0.5px; }
@@ -271,6 +272,389 @@
       font-size: .86rem;
     }
 
+
+
+    /* =========================================================
+       ASISTENTE DE SEMESTRES - FLUJO 1 AL 6
+       ========================================================= */
+    .semester-state-strip {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: #475569;
+      font-size: .86rem;
+      font-weight: 750;
+    }
+
+    .semester-state-pill {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: .35rem .7rem;
+      color: #0f172a;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .semester-state-arrow {
+      color: #94a3b8;
+      font-weight: 950;
+    }
+
+    .semester-wizard {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+      margin-bottom: 18px;
+    }
+
+    .semester-wizard-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .semester-wizard-title {
+      font-weight: 950;
+      color: #0f172a;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .semester-wizard-subtitle {
+      color: #64748b;
+      font-size: .9rem;
+      font-weight: 650;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .semester-wizard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .semester-step-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #f8fafc;
+      padding: 14px;
+      min-height: 158px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: .18s ease;
+    }
+
+    .semester-step-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(15,23,42,.08);
+      border-color: #bfdbfe;
+    }
+
+    .semester-step-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .semester-step-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1e40af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 950;
+      flex-shrink: 0;
+    }
+
+    .semester-step-name {
+      font-weight: 950;
+      color: #0f172a;
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+
+    .semester-step-desc {
+      color: #64748b;
+      font-size: .82rem;
+      font-weight: 650;
+      line-height: 1.32;
+      margin: 0;
+    }
+
+    .semester-step-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .semester-step-actions .btn {
+      border-radius: 12px;
+      font-weight: 850;
+      font-size: .78rem;
+      padding: .45rem .62rem;
+    }
+
+    .semester-step-card.step-primary {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .semester-step-card.step-success {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .semester-step-card.step-warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+
+    .semester-step-card.step-danger {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .semester-tip-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 6px solid #2563eb;
+      color: #1e3a8a;
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: .88rem;
+      font-weight: 650;
+    }
+
+    @media(max-width: 992px) {
+      .semester-wizard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media(max-width: 576px) {
+      .semester-wizard-grid { grid-template-columns: 1fr; }
+      .semester-state-arrow { display: none; }
+    }
+
+    /* =========================================================
+       GESTIÓN DE SEMESTRES - PANEL TI LIMPIO
+       ========================================================= */
+    .semester-clean-layout {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .semester-clean-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.06);
+      height: 100%;
+    }
+
+    .semester-clean-title {
+      font-weight: 950;
+      color: #0f172a;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .semester-clean-text {
+      color: #64748b;
+      font-size: .9rem;
+      font-weight: 600;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .semester-action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .semester-action-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-decoration: none;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 13px;
+      color: #0f172a;
+      transition: .18s ease;
+      min-height: 92px;
+    }
+
+    .semester-action-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(15,23,42,.09);
+      border-color: #93c5fd;
+      color: #0f172a;
+    }
+
+    .semester-action-link.main {
+      background: linear-gradient(135deg, #15803d, #16a34a);
+      border-color: #16a34a;
+      color: #ffffff;
+    }
+
+    .semester-action-link.main .semester-action-desc {
+      color: rgba(255,255,255,.85);
+    }
+
+    .semester-action-link.blue {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .semester-action-link.green {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .semester-action-link.amber {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+
+    .semester-action-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #dbeafe;
+      color: #1d4ed8;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+
+    .semester-action-link.main .semester-action-icon {
+      background: rgba(255,255,255,.2);
+      color: #ffffff;
+    }
+
+    .semester-action-name {
+      font-weight: 950;
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+
+    .semester-action-desc {
+      color: #64748b;
+      font-size: .8rem;
+      font-weight: 650;
+      line-height: 1.3;
+    }
+
+    .semester-flow-compact {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .semester-flow-step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    .semester-flow-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1e40af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 950;
+      font-size: .8rem;
+      flex-shrink: 0;
+    }
+
+    .semester-flow-name {
+      color: #0f172a;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .semester-flow-desc {
+      color: #64748b;
+      font-size: .8rem;
+      font-weight: 650;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .semester-note-clean {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 6px solid #2563eb;
+      color: #1e3a8a;
+      border-radius: 16px;
+      padding: 13px 15px;
+      font-size: .9rem;
+      font-weight: 650;
+      margin-bottom: 18px;
+    }
+
+    .semester-disabled-card {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: #64748b;
+      border-radius: 16px;
+      padding: 13px;
+      min-height: 92px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    @media(max-width: 992px) {
+      .semester-clean-layout { grid-template-columns: 1fr; }
+    }
+
+    @media(max-width: 576px) {
+      .semester-action-grid { grid-template-columns: 1fr; }
+    }
+
     /* =========================================================
        SPRINT 5 - INCIDENCIAS / ADMINISTRADOR DEL SISTEMA
        ========================================================= */
@@ -352,6 +736,61 @@
     @media(max-width: 576px) {
       .incidencias-admin-grid { grid-template-columns: 1fr; }
     }
+
+    .semester-wizard {
+      margin-top: 12px;
+    }
+
+    .semester-wizard-header {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+    }
+
+    .semester-step-card {
+      min-height: 135px;
+      padding: 12px;
+    }
+
+    .semester-step-desc {
+      min-height: auto;
+    }
+
+
+    .semester-step-actions .btn:disabled {
+      opacity: 1;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+
+    .clone-help {
+      font-size: .76rem;
+      color: #64748b;
+      font-weight: 650;
+      margin-top: 6px;
+      line-height: 1.25;
+    }
+
+    .btn-clone-ready {
+      background: #16a34a;
+      border-color: #16a34a;
+      color: #fff;
+    }
+
+    .btn-clone-ready:hover {
+      background: #15803d;
+      border-color: #15803d;
+      color: #fff;
+    }
+
+    .clone-disabled {
+      opacity: 1 !important;
+      cursor: not-allowed !important;
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #64748b !important;
+    }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
@@ -419,7 +858,7 @@
                                     {% for u in lista_staff %}
                                     <tr>
                                         <td>
-                                            <div class="fw-bold text-dark">{{ u.nombre|default:"--" }} {{ u.apellido_paterno|default:"" }}</div>
+                                            <div class="fw-bold text-dark">{{ u.nombre|default:"--" }} {{ u.apellido_paterno|default:"" }} {{ u.apellido_materno|default:"" }}</div>
                                             <div class="small text-muted">{{ u.email }}</div>
                                         </td>
                                         <td>
@@ -480,14 +919,9 @@
                                 <h5 class="fw-bold m-0">
                                     <i class="bi bi-calendar2-week text-success me-2"></i>Gestión de Semestres
                                 </h5>
-                                <p class="text-muted small m-0">
-                                    Sprint 4 / Épica 3: sigue el orden de configuración para no omitir pasos.
-                                </p>
                             </div>
 
-                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-success fw-bold">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Abrir módulo completo
-                            </a>
+
                         </div>
 
                         {% if hay_semestre_activo_operativo %}
@@ -504,9 +938,13 @@
                                     pasará a modo consulta y se deberá iniciar uno nuevo para operar nuevamente.
                                 </p>
                                 <div class="status-actions">
-                                    <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-success btn-sm fw-bold rounded-pill px-3">
+                                    <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti" class="btn btn-success btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-eye-fill me-1"></i> Ver semestre activo
                                     </a>
+
+                                    <button type="button" class="btn btn-sm fw-bold rounded-pill px-3 clone-disabled" disabled title="Primero cierra el semestre activo para poder clonar uno anterior.">
+                                        <i class="bi bi-files me-1"></i> Clonar semestre
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -528,6 +966,9 @@
                                     <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-primary btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-calendar-plus me-1"></i> Crear semestre
                                     </a>
+                                    <a href="#semestres-registrados" class="btn btn-clone-ready btn-sm fw-bold rounded-pill px-3">
+                                        <i class="bi bi-files me-1"></i> Clonar semestre cerrado
+                                    </a>
                                     <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-list-check me-1"></i> Ver semestres
                                     </a>
@@ -536,141 +977,178 @@
                         </div>
                         {% endif %}
 
-                        <div class="state-help">
-                            <div class="quick-state-grid">
-                                <div class="quick-state-card">
-                                    <div class="label">Configuración</div>
-                                    <div class="value">Solo Admin prepara sede, semestre, salas, personal y horarios.</div>
+                        <div class="semester-wizard">
+                            <div class="semester-wizard-header">
+                                <div>
+                                    <div class="semester-wizard-title">
+                                        <i class="bi bi-diagram-3-fill text-success"></i>
+                                        Flujo para crear y operar un semestre
+                                    </div>
+                                    <p class="semester-wizard-subtitle">
+                                        Sigue estos pasos en orden. Si el semestre ya está activo, el paso 5 queda marcado como realizado.
+                                    </p>
                                 </div>
-                                <div class="quick-state-card">
-                                    <div class="label">Activo</div>
-                                    <div class="value">Los roles pueden operar según sus permisos.</div>
-                                </div>
-                                <div class="quick-state-card">
-                                    <div class="label">Cerrado</div>
-                                    <div class="value">Todos consultan historial; nadie modifica ese semestre.</div>
-                                </div>
+
                             </div>
-                        </div>
 
-                        <div class="sprint-alert mb-4">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            Orden recomendado: primero prepara personal y roles, después crea sede, crea semestre,
-                            entra a <strong>Ver detalle</strong> para configurar días, salas, maestras y horarios,
-                            luego inicia, envía encuesta B y al final cierra el semestre.
-                        </div>
-
-                        <div class="prep-box mb-4">
-                            <div class="step-label">Paso 0 · Preparación necesaria</div>
-                            <div class="row g-3 align-items-center">
-                                <div class="col-md-8">
-                                    <div class="fw-bold text-dark mb-1">Personal interno y roles/permisos</div>
-                                    <div class="text-muted small">
-                                        Antes de asignar médica, nutrióloga, psicóloga o maestras al semestre,
-                                        el personal debe existir y tener su rol. El rol permite iniciar sesión;
-                                        la asignación al semestre se hace después en Gestión de Semestres.
+                            <div class="semester-wizard-grid">
+                                <div class="semester-step-card step-primary">
+                                    <div class="semester-step-top">
+                                        <div class="semester-step-num">1</div>
+                                        <div>
+                                            <div class="semester-step-name">Preparar personal</div>
+                                            <p class="semester-step-desc">
+                                                Da de alta al personal y asigna roles antes de configurar el semestre.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="semester-step-actions">
+                                        <a href="#" onclick="new bootstrap.Tab(document.getElementById('tab-staff-btn')).show(); rememberTab('tab-staff-btn'); return false;" class="btn btn-outline-secondary">
+                                            Personal
+                                        </a>
+                                        <a href="#" onclick="new bootstrap.Tab(document.getElementById('tab-roles-btn')).show(); rememberTab('tab-roles-btn'); return false;" class="btn btn-outline-primary">
+                                            Roles
+                                        </a>
                                     </div>
                                 </div>
-                                <div class="col-md-4 d-flex gap-2 flex-wrap justify-content-md-end">
-                                    <a href="#" onclick="new bootstrap.Tab(document.getElementById('tab-staff-btn')).show(); rememberTab('tab-staff-btn'); return false;" class="btn btn-outline-secondary btn-sm fw-bold">
-                                        Personal
-                                    </a>
-                                    <a href="#" onclick="new bootstrap.Tab(document.getElementById('tab-roles-btn')).show(); rememberTab('tab-roles-btn'); return false;" class="btn btn-outline-primary btn-sm fw-bold">
-                                        Roles
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="flow-grid mb-4">
-                            <div class="flow-card">
-                                <div class="flow-head">
-                                    <div class="flow-num">1</div>
-                                    <div class="flow-title">Crear sede</div>
+                                <div class="semester-step-card step-success">
+                                    <div class="semester-step-top">
+                                        <div class="semester-step-num">2</div>
+                                        <div>
+                                            <div class="semester-step-name">Crear sede</div>
+                                            <p class="semester-step-desc">
+                                                Registra la ubicación donde operarán las salas del semestre.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="semester-step-actions">
+                                        <a href="{% url 'crear_sede' %}?origen=ti" class="btn btn-outline-success">
+                                            Crear sede
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="flow-desc">
-                                    Registra la sede para operar de forma segmentada y evitar que salas como L1, L2, M1 o M2 choquen entre sedes.
-                                </div>
-                                <a href="{% url 'crear_sede' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold w-100">
-                                    Crear sede
-                                </a>
-                            </div>
 
-                            <div class="flow-card">
-                                <div class="flow-head">
-                                    <div class="flow-num">2</div>
-                                    <div class="flow-title">Crear semestre</div>
-                                </div>
-                                <div class="flow-desc">
-                                    Captura nombre, sede, fechas, médica, nutrióloga, psicóloga y fecha de encuesta B.
-                                </div>
-                                <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-outline-primary btn-sm fw-bold w-100">
-                                    Crear semestre
-                                </a>
-                            </div>
+                                <div class="semester-step-card step-primary">
+                                    <div class="semester-step-top">
+                                        <div class="semester-step-num">3</div>
+                                        <div>
+                                            <div class="semester-step-name">Crear semestre</div>
+                                            <p class="semester-step-desc">
+                                                Captura un periodo nuevo o clona uno cerrado para ahorrar tiempo.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="semester-step-actions">
+                                        <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-outline-primary">
+                                            Crear semestre
+                                        </a>
 
-                            <div class="flow-card">
-                                <div class="flow-head">
-                                    <div class="flow-num">3</div>
-                                    <div class="flow-title">Ver detalle / configurar</div>
-                                </div>
-                                <div class="flow-desc">
-                                    Desde el detalle agregas días festivos, suspensiones, salas, horarios, maestras y alumnos.
-                                </div>
-                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark btn-sm fw-bold w-100">
-                                    Ver semestres
-                                </a>
-                            </div>
+                                        {% if hay_semestre_activo_operativo %}
+                                            <button type="button" class="btn clone-disabled" disabled title="Primero cierra el semestre activo para poder clonar.">
+                                                <i class="bi bi-files me-1"></i> Clonar
+                                            </button>
+                                        {% else %}
+                                            <a href="#semestres-registrados" class="btn btn-clone-ready">
+                                                <i class="bi bi-files me-1"></i> Elegir cerrado
+                                            </a>
+                                        {% endif %}
+                                    </div>
 
-                            <div class="flow-card">
-                                <div class="flow-head">
-                                    <div class="flow-num">4</div>
-                                    <div class="flow-title">Iniciar semestre</div>
+                                    {% if hay_semestre_activo_operativo %}
+                                        <div class="clone-help">
+                                            La clonación se habilita cuando el semestre activo quede cerrado.
+                                        </div>
+                                    {% else %}
+                                        <div class="clone-help">
+                                            Selecciona un semestre cerrado en la tabla inferior y usa Clonar / configurar.
+                                        </div>
+                                    {% endif %}
                                 </div>
-                                <div class="flow-desc">
-                                    Se inicia desde el detalle. Valida que cada sala activa tenga maestra asignada.
-                                </div>
-                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold w-100">
-                                    Ir al detalle
-                                </a>
-                            </div>
 
-                            <div class="flow-card">
-                                <div class="flow-head">
-                                    <div class="flow-num">5</div>
-                                    <div class="flow-title">Enviar encuesta B</div>
+                                <div class="semester-step-card">
+                                    <div class="semester-step-top">
+                                        <div class="semester-step-num">4</div>
+                                        <div>
+                                            <div class="semester-step-name">Configurar semestre</div>
+                                            <p class="semester-step-desc">
+                                                En el detalle agregas salas, maestras, horarios, calendario y alumnos.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="semester-step-actions">
+                                        {% if hay_semestre_activo_operativo %}
+                                            <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti" class="btn btn-outline-dark">
+                                                Ver detalle
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark">
+                                                Elegir semestre
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="flow-desc">
-                                    Se envía desde el detalle del semestre y se marca copia al correo genérico.
-                                </div>
-                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-info btn-sm fw-bold w-100">
-                                    Gestionar encuesta
-                                </a>
-                            </div>
 
-                            <div class="flow-card">
-                                <div class="flow-head">
-                                    <div class="flow-num">6</div>
-                                    <div class="flow-title">Cerrar semestre</div>
+                                <div class="semester-step-card step-warning">
+                                    <div class="semester-step-top">
+                                        <div class="semester-step-num">5</div>
+                                        <div>
+                                            <div class="semester-step-name">Iniciar operación</div>
+                                            <p class="semester-step-desc">
+                                                Este paso solo aplica cuando el semestre aún está en configuración.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="semester-step-actions">
+                                        {% if hay_semestre_activo_operativo %}
+                                            <button type="button" class="btn btn-success" disabled>
+                                                <i class="bi bi-check-circle-fill me-1"></i> Ya iniciado
+                                            </button>
+                                        {% else %}
+                                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success">
+                                                Elegir semestre
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="flow-desc">
-                                    Valida días cerrados, incidencias cerradas y que la fecha fin ya haya vencido.
+
+                                <div class="semester-step-card step-danger">
+                                    <div class="semester-step-top">
+                                        <div class="semester-step-num">6</div>
+                                        <div>
+                                            <div class="semester-step-name">Encuesta y cierre</div>
+                                            <p class="semester-step-desc">
+                                                Envía la encuesta B y valida el cierre al finalizar el periodo.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="semester-step-actions">
+                                        {% if hay_semestre_activo_operativo %}
+                                            <a href="{% url 'enviar_encuesta_satisfaccion' semestre_activo_operativo.id %}" class="btn btn-outline-info">
+                                                Encuesta B
+                                            </a>
+                                            <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti#cierre-semestre" class="btn btn-outline-danger">
+                                                Cierre
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-danger">
+                                                Ver semestres
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-danger btn-sm fw-bold w-100">
-                                    Validar cierre
-                                </a>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                        <div id="semestres-registrados" class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div>
                                 <h6 class="fw-bold mb-1">
                                     <i class="bi bi-calendar2-check-fill me-1"></i> Semestres registrados
                                 </h6>
                                 <p class="text-muted small mb-0">
-                                    Desde aquí entra al detalle para configurar el semestre o descarga el informe/expediente.
+                                    Desde esta tabla puedes configurar, consultar, clonar semestres cerrados o descargar el informe.
                                 </p>
                             </div>
                             <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
@@ -686,7 +1164,7 @@
                                         <th>Sede</th>
                                         <th>Periodo</th>
                                         <th>Estado</th>
-                                        <th class="text-end">Configuración / Informe</th>
+                                        <th class="text-end">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -716,6 +1194,19 @@
                                                         Configurar
                                                     {% endif %}
                                                 </a>
+
+                                                {% if ciclo.estado == 'CERRADO' %}
+                                                    {% if hay_semestre_activo_operativo %}
+                                                        <button type="button" class="btn btn-sm fw-bold rounded-pill px-3 clone-disabled" disabled title="Cierra el semestre activo antes de clonar.">
+                                                            <i class="bi bi-files me-1"></i> Clonar
+                                                        </button>
+                                                    {% else %}
+                                                        <a href="{% url 'clonar_semestre' ciclo.id %}?origen=ti" class="btn btn-sm btn-clone-ready fw-bold rounded-pill px-3">
+                                                            <i class="bi bi-files me-1"></i> Clonar / configurar
+                                                        </a>
+                                                    {% endif %}
+                                                {% endif %}
+
                                                 <a href="{% url 'descargar_reporte_ciclo_pdf' ciclo.id %}" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3">
                                                     <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF / Informe
                                                 </a>
@@ -725,7 +1216,7 @@
                                     {% empty %}
                                     <tr>
                                         <td colspan="5" class="text-center text-muted fst-italic py-4">
-                                            No hay semestres creados todavía. Inicia con Paso 1: Crear sede y después Paso 2: Crear semestre.
+                                            No hay semestres creados todavía. Inicia con preparar personal, crear sede y después crear semestre.
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -738,7 +1229,7 @@
                             la asignación de maestras a salas ya no se realiza desde “Roles y Permisos”.
                             Ahora se hace desde:
                             <strong>Gestión de Semestres → Ver detalle → Sala → Maestra</strong>.
-                            Las incidencias ya se gestionan en Sprint 5 desde el módulo de Incidencias; el Administrador puede consultar todas y cerrar administrativamente cuando corresponda.
+                            Las incidencias ya se gestionan desde el módulo de Incidencias; el Administrador puede consultar todas y cerrar administrativamente cuando corresponda.
                         </div>
                     </div>
                 </div>
@@ -893,7 +1384,7 @@
                                     <i class="bi bi-clipboard2-pulse-fill text-primary me-2"></i>Gestión de Incidencias
                                 </h5>
                                 <p class="text-muted small m-0">
-                                    Sprint 5 / Épica 3: consulta general, seguimiento y cierre administrativo de incidencias.
+                                    Consulta general, seguimiento y cierre administrativo de incidencias.
                                 </p>
                             </div>
 
@@ -1119,7 +1610,7 @@
                         </div>
 
                         <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">3. Credenciales</h6></div>
-                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" name="email" class="jira-input" required autocomplete="off" oninput="this.value=this.value.trim().toLowerCase();"></div>
+                        <div class="col-md-6"><label class="jira-label">Correo institucional *</label><input type="email" name="email" class="jira-input" required autocomplete="off" placeholder="usuario@unach.mx" oninput="this.value=this.value.trim().toLowerCase();"><small class="text-muted">Debe terminar en @unach.mx</small></div>
                         <div class="col-md-6"><label class="jira-label">Contraseña *</label><input type="password" name="password" class="jira-input" required></div>
                     </div>
                 </div>
@@ -1171,7 +1662,7 @@
                             </select>
                         </div>
                         <div class="col-12 mt-4"><h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2">3. Credenciales</h6></div>
-                        <div class="col-md-6"><label class="jira-label">Correo *</label><input type="email" id="edit_email" name="email" class="jira-input" required autocomplete="off" oninput="this.value=this.value.trim().toLowerCase();"></div>
+                        <div class="col-md-6"><label class="jira-label">Correo institucional *</label><input type="email" id="edit_email" name="email" class="jira-input" required autocomplete="off" placeholder="usuario@unach.mx" oninput="this.value=this.value.trim().toLowerCase();"><small class="text-muted">Debe terminar en @unach.mx</small></div>
                         <div class="col-md-6"><label class="jira-label">Cambiar Contraseña (Opcional)</label><input type="password" name="password" class="jira-input"></div>
                     </div>
                 </div>
@@ -1186,7 +1677,7 @@
 
 <script>
     function verificarRolMaestra(select) {
-        // Sprint 4: las maestras ya no se vinculan a salas desde este panel.
+        // Las maestras ya no se vinculan a salas desde este panel.
         // La asignación a sala y horarios se hace en Gestión de Semestres.
         return true;
     }
@@ -1283,6 +1774,15 @@
         if (emailInput) emailInput.value = email;
         if (curpInput) curpInput.value = curp;
         if (numInput) numInput.value = numero;
+
+        if (email && !email.endsWith("@unach.mx")) {
+            Swal.fire(
+                "Aviso",
+                "El correo del personal debe ser institucional y terminar en @unach.mx.",
+                "warning"
+            );
+            return false;
+        }
 
         const repetido = STAFF_EXISTENTES.find(item => {
             if (userId && item.id === userId) return false;

@@ -16,13 +16,14 @@ from django.template.loader import render_to_string
 from django.contrib.staticfiles import finders
 from xhtml2pdf import pisa
 
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.core.files import File
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 import os
 import re
+import csv
 import unicodedata
 
 from .forms import (
@@ -49,8 +50,10 @@ from .forms import (
     EnviarEncuestaSatisfaccionForm,
     IniciarSemestreForm,
     CerrarSemestreForm,
+    ClonarSemestreForm,
     GenerarCodigoResponsableForm,
     ConfirmarEntregaCodigoResponsableForm,
+    RegistrarComprobantePresencialForm,
 
     # Sprint 4 - Segunda parte / Operación diaria de maestras
     AbrirDiaOperativoMaestraForm,
@@ -94,9 +97,11 @@ from .models import (
     AsignacionMaestra,
     DiaOperativoSemestre,
     RegistroDiarioAlumno,
+    CodigoResponsableAutorizado,
     BitacoraEntradaCasa,
     BitacoraEstancia,
     EncuestaSatisfaccion,
+    EnvioEncuestaSatisfaccion,
     Incidencia,
     IncidenciaArchivo,
     SeguimientoIncidencia,
@@ -564,10 +569,222 @@ def obtener_correos_beneficiarios_semestre(semestre):
     return correos
 
 
+def correo_es_institucional_unach(correo):
+    """
+    Regla de Encuesta B:
+    el correo del tutor debe ser institucional @unach.mx.
+    """
+    correo = (correo or "").strip().lower()
+    return bool(correo and correo.endswith("@unach.mx"))
+
+
+def obtener_inscripciones_encuesta_semestre(semestre):
+    """
+    Alumnos/tutores que participan en la Encuesta B del semestre.
+    Solo se consideran inscripciones finalizadas y asignadas al semestre.
+    """
+    return (
+        SolicitudInscripcion.objects
+        .filter(semestre=semestre, estado="FINALIZADA")
+        .select_related(
+            "solicitud_ingreso",
+            "usuario_tutor",
+            "sala_semestre_asignada",
+            "sala_semestre_asignada__sala",
+        )
+        .order_by(
+            "sala_semestre_asignada__sala__nombre",
+            "solicitud_ingreso__apellido_paterno_menor",
+            "solicitud_ingreso__nombres_menor",
+        )
+    )
+
+
+def asegurar_envios_encuesta_semestre(semestre):
+    """
+    Crea/actualiza el control individual de envío por alumno/tutor.
+    No envía correos; solo prepara los registros para la vista.
+    """
+    creados = 0
+    actualizados = 0
+
+    for inscripcion in obtener_inscripciones_encuesta_semestre(semestre):
+        correo = (obtener_correo_tutor(inscripcion) or "").strip().lower()
+        tutor = getattr(inscripcion, "usuario_tutor", None)
+
+        envio, created = EnvioEncuestaSatisfaccion.objects.get_or_create(
+            semestre=semestre,
+            inscripcion=inscripcion,
+            defaults={
+                "tutor": tutor,
+                "correo_destino": correo,
+                "correo_copia": semestre.correo_copia_encuesta or "",
+            }
+        )
+
+        cambios = []
+
+        if envio.tutor_id != getattr(tutor, "id", None):
+            envio.tutor = tutor
+            cambios.append("tutor")
+
+        if correo and envio.correo_destino != correo:
+            envio.correo_destino = correo
+            cambios.append("correo_destino")
+
+        if semestre.correo_copia_encuesta and envio.correo_copia != semestre.correo_copia_encuesta:
+            envio.correo_copia = semestre.correo_copia_encuesta
+            cambios.append("correo_copia")
+
+        if created:
+            creados += 1
+        elif cambios:
+            envio.save(update_fields=cambios + ["updated_at"])
+            actualizados += 1
+
+    return creados, actualizados
+
+
+def obtener_envios_encuesta_semestre(semestre):
+    asegurar_envios_encuesta_semestre(semestre)
+
+    return (
+        EnvioEncuestaSatisfaccion.objects
+        .filter(semestre=semestre)
+        .select_related(
+            "semestre",
+            "inscripcion",
+            "inscripcion__solicitud_ingreso",
+            "inscripcion__usuario_tutor",
+            "inscripcion__sala_semestre_asignada",
+            "inscripcion__sala_semestre_asignada__sala",
+            "tutor",
+        )
+        .order_by(
+            "inscripcion__sala_semestre_asignada__sala__nombre",
+            "inscripcion__solicitud_ingreso__apellido_paterno_menor",
+            "inscripcion__solicitud_ingreso__nombres_menor",
+        )
+    )
+
+
+def construir_enlace_encuesta_satisfaccion(request, envio):
+    """
+    Construye el enlace público para que el tutor conteste la Encuesta B.
+    """
+    try:
+        url = reverse("responder_encuesta_satisfaccion", args=[str(envio.token)])
+    except Exception:
+        # Fallback temporal hasta agregar la ruta en urls.py.
+        url = f"/admisiones/encuesta-b/{envio.token}/"
+
+    return request.build_absolute_uri(url)
+
+
+def enviar_correo_encuesta_individual(request, envio, usuario=None, correo_copia="", es_reenvio=False):
+    """
+    Envía o reenvía la Encuesta B a un tutor.
+    Reglas:
+    - Debe existir cuenta de tutor vinculada.
+    - El correo debe ser institucional @unach.mx.
+    - El mensaje debe ser corto y personalizado.
+    """
+    if not envio.tutor_id:
+        envio.marcar_error("La inscripción no tiene cuenta de tutor vinculada.")
+        return False, "La inscripción no tiene cuenta de tutor vinculada."
+
+    if not envio.correo_institucional_valido:
+        envio.marcar_bloqueada("El correo del tutor debe ser institucional y terminar en @unach.mx.")
+        return False, "Correo no institucional."
+
+    solicitud = envio.inscripcion.solicitud_ingreso
+    nombre_tutor = solicitud.nombre_tutor_completo() if hasattr(solicitud, "nombre_tutor_completo") else "Tutor"
+    enlace = construir_enlace_encuesta_satisfaccion(request, envio)
+
+    asunto = f"Encuesta de Satisfacción B - {envio.semestre.nombre}"
+    cuerpo = f"""Estimado(a) {nombre_tutor}:
+
+Le invitamos a responder la Encuesta de Satisfacción B correspondiente al semestre {envio.semestre.nombre} de la Estancia Infantil UNACH.
+
+Enlace:
+{enlace}
+
+Gracias por su participación.
+
+Estancia Infantil UNACH
+"""
+
+    try:
+        correo = EmailMessage(
+            subject=asunto,
+            body=cuerpo,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[envio.correo_destino],
+            cc=[correo_copia] if correo_copia else [],
+        )
+        correo.send(fail_silently=False)
+
+        if es_reenvio:
+            envio.marcar_reenviada(usuario=usuario, correo_copia=correo_copia)
+        else:
+            envio.marcar_enviada(usuario=usuario, correo_copia=correo_copia)
+
+        return True, "Correo enviado correctamente."
+
+    except Exception as e:
+        envio.marcar_error(e)
+        return False, str(e)
+
+
+def resumen_envios_encuesta(envios):
+    return {
+        "total": envios.count(),
+        "pendientes": envios.filter(estado=EnvioEncuestaSatisfaccion.EstadoEnvio.PENDIENTE).count(),
+        "enviadas": envios.filter(estado=EnvioEncuestaSatisfaccion.EstadoEnvio.ENVIADA).count(),
+        "reenviadas": envios.filter(estado=EnvioEncuestaSatisfaccion.EstadoEnvio.REENVIADA).count(),
+        "contestadas": envios.filter(estado=EnvioEncuestaSatisfaccion.EstadoEnvio.CONTESTADA).count(),
+        "bloqueadas": envios.filter(estado=EnvioEncuestaSatisfaccion.EstadoEnvio.BLOQUEADA).count(),
+        "errores": envios.filter(estado=EnvioEncuestaSatisfaccion.EstadoEnvio.ERROR).count(),
+    }
+
+
+def valor_si_no(valor):
+    return "Sí" if bool(valor) else "No"
+
+
+def preguntas_encuesta_satisfaccion(respuesta):
+    if not respuesta:
+        return []
+
+    return [
+        ("¿Recibió información completa de la permanencia diaria?", valor_si_no(respuesta.q1_info_completa)),
+        ("¿Considera que su hija y/o hijo se encuentra seguro durante su permanencia?", valor_si_no(respuesta.q2_seguro)),
+        ("¿La orientación sobre alimentación fue de utilidad?", valor_si_no(respuesta.q3_orientacion_nutricion)),
+        ("¿La orientación médica fue de utilidad?", valor_si_no(respuesta.q4_orientacion_medica)),
+        ("¿La orientación pedagógica fue de utilidad?", valor_si_no(respuesta.q5_orientacion_pedagogica)),
+        ("¿La orientación psicológica fue de utilidad?", valor_si_no(respuesta.q6_orientacion_psicologica)),
+        ("¿El servicio apoyó la continuidad de sus estudios?", valor_si_no(respuesta.q7_apoyo_estudios)),
+    ]
+
+
+def valor_booleano_encuesta(post_data, campo):
+    valor = str(post_data.get(campo, "")).strip().lower()
+    return valor in ["1", "true", "on", "si", "sí", "yes"]
+
+
 def construir_resumen_semestre(semestre):
     """
     Resumen para panel/detalle del semestre.
+
+    Regla:
+    - dias_operativos cuenta solo días hábiles reales.
+    - Sábados, domingos, festivos y suspensiones se reportan como inhábiles
+      y no deben bloquear apertura, cierre diario ni cierre de semestre.
     """
+    dias_qs = semestre.dias_operativos.all()
+    dias_habiles_qs = dias_qs.filter(es_habil=True)
+    dias_inhabiles_qs = dias_qs.filter(es_habil=False)
+
     return {
         "total_salas": semestre.salas_activas.count(),
         "salas_activas": semestre.salas_activas.filter(activa=True).count(),
@@ -576,10 +793,14 @@ def construir_resumen_semestre(semestre):
             activo=True,
         ).values("maestra_id").distinct().count(),
         "total_alumnos": SolicitudInscripcion.objects.filter(semestre=semestre).count(),
-        "dias_operativos": semestre.dias_operativos.count(),
-        "dias_abiertos": semestre.dias_operativos.filter(
-            es_habil=True,
+        "dias_calendario": dias_qs.count(),
+        "dias_operativos": dias_habiles_qs.count(),
+        "dias_inhabiles": dias_inhabiles_qs.count(),
+        "dias_abiertos": dias_habiles_qs.filter(
             estado=DiaOperativoSemestre.EstadoDia.ABIERTO,
+        ).count(),
+        "dias_cerrados": dias_habiles_qs.filter(
+            estado=DiaOperativoSemestre.EstadoDia.CERRADO,
         ).count(),
         "incidencias_abiertas": semestre.incidencias.filter(
             estado=Incidencia.EstadoIncidencia.ABIERTA,
@@ -788,11 +1009,56 @@ def obtener_dia_operativo_actual_maestra(user, semestre=None):
     return dia
 
 
+def dia_operativo_es_fin_de_semana(dia):
+    """
+    Regla de operación:
+    sábado y domingo son días inhábiles automáticos para la estancia.
+    Los usuarios pueden iniciar sesión, pero las maestras no pueden abrir día,
+    registrar entrada, salida, bitácoras ni operación diaria de menores.
+    """
+    return bool(dia and getattr(dia, "fecha", None) and dia.fecha.weekday() in (5, 6))
+
+
+def dia_operativo_es_laborable(dia):
+    """
+    True solo cuando el día permite operación diaria real.
+    """
+    return bool(
+        dia
+        and getattr(dia, "es_habil", False)
+        and not dia_operativo_es_fin_de_semana(dia)
+    )
+
+
+def mensaje_dia_no_operativo(dia):
+    """
+    Mensaje único para vistas de operación diaria cuando el día no se trabaja.
+    """
+    if not dia:
+        return "No existe día operativo para la fecha actual."
+
+    if dia_operativo_es_fin_de_semana(dia):
+        return (
+            "Hoy es sábado o domingo. La estancia no opera estos días; "
+            "puedes iniciar sesión para consultar información, pero no se permite abrir día, "
+            "registrar entrada, salida ni bitácoras."
+        )
+
+    if not getattr(dia, "es_habil", False):
+        return (
+            "Este día está marcado como inhábil por festivo, suspensión o consejo técnico. "
+            "No se permite operación diaria de menores."
+        )
+
+    return ""
+
+
 def validar_maestra_puede_operar_dia(request, dia):
     """
     Valida:
     - semestre activo
-    - día hábil
+    - día laborable real
+    - sábado y domingo bloqueados para operación diaria
     - maestra asignada a una sala del semestre
     - semestre/día no cerrados
     """
@@ -811,8 +1077,9 @@ def validar_maestra_puede_operar_dia(request, dia):
         messages.warning(request, "El semestre no está activo. No se permite operar el día.")
         return False
 
-    if not dia.es_habil:
-        messages.warning(request, "Este día está marcado como no hábil. No se permite abrir operación.")
+    mensaje_no_operativo = mensaje_dia_no_operativo(dia)
+    if mensaje_no_operativo:
+        messages.warning(request, mensaje_no_operativo)
         return False
 
     if dia.estado == DiaOperativoSemestre.EstadoDia.CERRADO:
@@ -852,8 +1119,15 @@ def asegurar_registros_alumnos_dia(dia, user):
     """
     Crea el registro diario de cada alumno asignado a las salas de la maestra.
     No crea duplicados.
+
+    Regla:
+    - No crea registros en sábado, domingo, festivo, suspensión o día cerrado.
     """
-    if not dia or dia.estado == DiaOperativoSemestre.EstadoDia.CERRADO:
+    if (
+        not dia
+        or not dia_operativo_es_laborable(dia)
+        or dia.estado != DiaOperativoSemestre.EstadoDia.ABIERTO
+    ):
         return 0
 
     salas = obtener_salas_maestra_operativas(user, semestre=dia.semestre)
@@ -888,6 +1162,9 @@ def asegurar_registros_alumnos_dia(dia, user):
 
 
 def obtener_registros_dia_maestra(dia, user):
+    if not dia or not dia_operativo_es_laborable(dia):
+        return RegistroDiarioAlumno.objects.none()
+
     salas = obtener_salas_maestra_operativas(user, semestre=dia.semestre if dia else None)
 
     return (
@@ -907,6 +1184,7 @@ def registro_diario_es_editable(registro):
     return bool(
         registro
         and registro.dia_operativo
+        and dia_operativo_es_laborable(registro.dia_operativo)
         and registro.dia_operativo.estado == DiaOperativoSemestre.EstadoDia.ABIERTO
         and registro.dia_operativo.semestre.estado == Semestre.EstadoSemestre.ACTIVO
     )
@@ -1268,25 +1546,143 @@ def preparar_inscripcion_para_form_codigo(inscripcion):
     return inscripcion
 
 
+def sincronizar_codigos_responsables_inscripcion(inscripcion):
+    """
+    Sincroniza los responsables autorizados del expediente con la tabla de códigos.
+
+    Regla actual:
+    - El código ya no es único por alumno.
+    - Cada tutor o familiar autorizado tiene su propio código.
+    - Se crean/actualizan responsables desde los datos del expediente sin borrar códigos existentes.
+    """
+    if not inscripcion:
+        return []
+
+    try:
+        return CodigoResponsableAutorizado.sincronizar_desde_inscripcion(inscripcion)
+    except Exception:
+        return list(
+            CodigoResponsableAutorizado.objects
+            .filter(inscripcion=inscripcion, activo=True)
+            .order_by("tipo_responsable", "nombre_completo")
+        )
+
+
+def obtener_responsables_codigo_inscripcion(inscripcion, solo_activos=True):
+    """
+    Devuelve los responsables autorizados de un alumno/inscripción.
+    """
+    sincronizar_codigos_responsables_inscripcion(inscripcion)
+
+    qs = CodigoResponsableAutorizado.objects.filter(inscripcion=inscripcion)
+
+    if solo_activos:
+        qs = qs.filter(activo=True)
+
+    return qs.order_by("tipo_responsable", "nombre_completo")
+
+
+def preparar_resumen_codigos_inscripcion(inscripcion):
+    """
+    Agrega atributos temporales para que el template pueda mostrar el avance
+    de códigos por tutor/familiar autorizado.
+    """
+    responsables = list(obtener_responsables_codigo_inscripcion(inscripcion))
+
+    inscripcion.responsables_codigo = responsables
+    inscripcion.total_responsables_codigo = len(responsables)
+    inscripcion.total_codigos_generados = sum(1 for r in responsables if r.tiene_codigo)
+    inscripcion.total_codigos_entregados = sum(1 for r in responsables if r.codigo_entregado)
+    inscripcion.tiene_codigo_responsable_personal = inscripcion.total_codigos_generados > 0
+
+    return inscripcion
+
+
 def inscripcion_tiene_codigo_responsable(inscripcion):
-    return bool(getattr(inscripcion, "codigo_responsable_hash", ""))
+    """
+    Compatibilidad: ahora revisa si existe al menos un responsable autorizado
+    con código generado. Si no existe el nuevo modelo, conserva la validación anterior.
+    """
+    try:
+        return CodigoResponsableAutorizado.objects.filter(
+            inscripcion=inscripcion,
+            codigo_hash__gt="",
+        ).exists()
+    except Exception:
+        return bool(getattr(inscripcion, "codigo_responsable_hash", ""))
 
 
-def guardar_codigo_responsable_en_inscripcion(inscripcion, codigo, usuario, motivo="", es_reset=False):
+def obtener_responsable_codigo_desde_request(request, inscripcion):
     """
-    Guarda el código usando el método del modelo para no almacenar el código visible.
-    El código visible solo se devuelve a la vista para mostrarlo una vez a Trabajo Social.
+    Obtiene el responsable seleccionado para generar/resetear/entregar código.
+    Acepta varios nombres de campo para ser compatible con los HTML anteriores
+    y los nuevos diseños.
     """
+    responsable_id = (
+        request.POST.get("responsable_codigo_id")
+        or request.POST.get("responsable_autorizado_id")
+        or request.POST.get("codigo_responsable_id")
+        or request.POST.get("responsable_id")
+        or request.GET.get("responsable_codigo_id")
+        or request.GET.get("responsable_autorizado_id")
+        or request.GET.get("codigo_responsable_id")
+        or request.GET.get("responsable_id")
+    )
+
+    responsables = obtener_responsables_codigo_inscripcion(inscripcion)
+
+    if responsable_id:
+        return get_object_or_404(responsables, pk=responsable_id)
+
+    # Si solo hay una persona autorizada, se puede usar automáticamente.
+    if responsables.count() == 1:
+        return responsables.first()
+
+    return None
+
+
+def guardar_codigo_responsable_en_inscripcion(
+    inscripcion,
+    codigo,
+    usuario,
+    motivo="",
+    es_reset=False,
+    responsable_autorizado=None,
+):
+    """
+    Guarda el código sin texto plano.
+
+    Nuevo flujo:
+    - Si se recibe responsable_autorizado, el código se guarda en
+      CodigoResponsableAutorizado.
+
+    Compatibilidad:
+    - Si no se recibe responsable, conserva el guardado antiguo por alumno
+      para no romper pantallas que todavía no fueron actualizadas.
+    """
+    motivo = (motivo or "").strip()
+
+    if responsable_autorizado:
+        try:
+            responsable_autorizado.set_codigo(
+                codigo,
+                usuario=usuario,
+                motivo_reset=motivo if es_reset else "",
+                observaciones=motivo if not es_reset else "",
+            )
+            responsable_autorizado.save()
+            return True, "Código guardado correctamente para el responsable autorizado."
+        except Exception as exc:
+            return False, str(exc)
+
     if not hasattr(inscripcion, "set_codigo_responsable"):
         return False, (
-            "Falta agregar en el modelo SolicitudInscripcion el método "
-            "set_codigo_responsable(codigo) y el campo codigo_responsable_hash."
+            "Falta seleccionar el tutor o familiar autorizado para generar el código."
         )
 
     inscripcion.set_codigo_responsable(codigo)
 
     ahora = timezone.now()
-    motivo = (motivo or "").strip()
 
     campos_a_actualizar = {
         "codigo_responsable_generado_por": usuario,
@@ -1301,7 +1697,6 @@ def guardar_codigo_responsable_en_inscripcion(inscripcion, codigo, usuario, moti
             "codigo_responsable_reset_motivo": motivo,
         })
 
-    # Si el modelo tiene campos de entrega, al resetear debe marcarse como no entregado nuevamente.
     if hasattr(inscripcion, "codigo_responsable_entregado"):
         campos_a_actualizar["codigo_responsable_entregado"] = False
 
@@ -1309,17 +1704,33 @@ def guardar_codigo_responsable_en_inscripcion(inscripcion, codigo, usuario, moti
         if hasattr(inscripcion, campo):
             setattr(inscripcion, campo, valor)
 
-    # Guardado completo para incluir el hash que set_codigo_responsable haya modificado.
     inscripcion.save()
 
     return True, "Código guardado correctamente."
 
 
-def registrar_entrega_codigo_en_inscripcion(inscripcion, form, usuario):
+def registrar_entrega_codigo_en_inscripcion(inscripcion, form, usuario, responsable_autorizado=None):
     """
-    Registra evidencia de entrega de credencial/código si el modelo tiene los campos.
-    Es compatible aunque aún no existan todos los campos de auditoría.
+    Registra evidencia de entrega de credencial/código.
+
+    Nuevo flujo:
+    - Marca entregado el código de una persona autorizada específica.
+
+    Compatibilidad:
+    - Si no se recibe responsable, usa los campos antiguos de SolicitudInscripcion.
     """
+    observaciones = ""
+    if hasattr(form, "cleaned_data"):
+        observaciones = form.cleaned_data.get("observaciones", "") or form.cleaned_data.get("motivo", "") or ""
+
+    if responsable_autorizado:
+        responsable_autorizado.marcar_entregado(
+            usuario=usuario,
+            observaciones=observaciones,
+            credencial=True,
+        )
+        return True
+
     ahora = timezone.now()
 
     campos_a_actualizar = {
@@ -1346,6 +1757,155 @@ def registrar_entrega_codigo_en_inscripcion(inscripcion, form, usuario):
 
     return cambio
 
+
+def _post_bool(post_data, campo):
+    valor = str(post_data.get(campo, "")).strip().lower()
+    return valor in ["1", "true", "on", "si", "sí", "yes"]
+
+
+def _post_valor(post_data, *campos):
+    for campo in campos:
+        valor = post_data.get(campo)
+        if valor not in [None, ""]:
+            return valor
+    return ""
+
+
+def obtener_responsable_operacion_desde_post(registro, post_data, prefijo="entrada"):
+    """
+    Valida el código capturado por la maestra contra la persona autorizada.
+
+    El HTML nuevo debe enviar responsable_codigo_id y codigo_responsable.
+    Se aceptan alias para no romper nombres de campos anteriores.
+    """
+    errores = []
+
+    inscripcion = registro.alumno
+    responsables = obtener_responsables_codigo_inscripcion(inscripcion)
+
+    responsable_id = _post_valor(
+        post_data,
+        "responsable_codigo_id",
+        "responsable_autorizado_id",
+        "codigo_responsable_id",
+        f"responsable_{prefijo}_codigo_id",
+        f"responsable_{prefijo}_autorizado_id",
+        "responsable_id",
+    )
+
+    codigo = str(_post_valor(
+        post_data,
+        "codigo_responsable",
+        "codigo_seguridad",
+        f"codigo_{prefijo}",
+        f"codigo_responsable_{prefijo}",
+    ) or "").strip()
+
+    responsable = None
+
+    if responsable_id:
+        responsable = responsables.filter(pk=responsable_id).first()
+        if not responsable:
+            errores.append("El responsable seleccionado no pertenece a este alumno o no está activo.")
+    elif responsables.count() == 1:
+        responsable = responsables.first()
+    else:
+        errores.append("Selecciona el tutor o familiar autorizado que entrega/recoge al menor.")
+
+    if not codigo:
+        errores.append("Captura el código de seguridad de 4 dígitos del responsable.")
+    elif not re.fullmatch(r"\d{4}", codigo):
+        errores.append("El código de seguridad debe tener exactamente 4 dígitos.")
+
+    if responsable:
+        if not responsable.tiene_codigo:
+            errores.append("Este responsable todavía no tiene código generado por Trabajo Social.")
+        elif not responsable.codigo_entregado:
+            errores.append("El código de este responsable aún no está marcado como entregado.")
+        elif codigo and not responsable.validar_codigo(codigo):
+            errores.append("El código de seguridad no coincide con el responsable seleccionado.")
+
+    return responsable, errores
+
+
+def errores_form_sin_codigo(form):
+    """
+    Permite que la vista use la validación nueva por responsable aunque el
+    formulario anterior todavía tenga validación del código por alumno.
+    """
+    errores = dict(getattr(form, "errors", {}) or {})
+
+    for campo in [
+        "codigo_responsable",
+        "codigo_seguridad",
+        "codigo_entrada",
+        "codigo_salida",
+        "responsable_codigo_id",
+        "responsable_autorizado_id",
+        "codigo_responsable_id",
+        "responsable_id",
+    ]:
+        errores.pop(campo, None)
+
+    return errores
+
+
+def datos_entrada_desde_form_o_post(form, post_data, responsable_autorizado=None):
+    cleaned = getattr(form, "cleaned_data", {}) or {}
+
+    return {
+        "responsable_nombre": (
+            cleaned.get("responsable_entrada_nombre")
+            or _post_valor(post_data, "responsable_entrada_nombre")
+            or getattr(responsable_autorizado, "nombre_completo", "")
+        ),
+        "responsable_parentesco": (
+            cleaned.get("responsable_entrada_parentesco")
+            or _post_valor(post_data, "responsable_entrada_parentesco")
+            or getattr(responsable_autorizado, "parentesco", "")
+        ),
+        "responsable_telefono": (
+            cleaned.get("responsable_entrada_telefono")
+            or _post_valor(post_data, "responsable_entrada_telefono")
+            or getattr(responsable_autorizado, "telefono", "")
+        ),
+        "credencial_validada": (
+            cleaned.get("credencial_entrada_validada")
+            if "credencial_entrada_validada" in cleaned
+            else _post_bool(post_data, "credencial_entrada_validada")
+        ),
+        "temperatura": cleaned.get("temperatura_entrada") or _post_valor(post_data, "temperatura_entrada") or None,
+    }
+
+
+def datos_salida_desde_form_o_post(form, post_data, responsable_autorizado=None):
+    cleaned = getattr(form, "cleaned_data", {}) or {}
+
+    return {
+        "responsable_nombre": (
+            cleaned.get("responsable_salida_nombre")
+            or _post_valor(post_data, "responsable_salida_nombre")
+            or getattr(responsable_autorizado, "nombre_completo", "")
+        ),
+        "responsable_parentesco": (
+            cleaned.get("responsable_salida_parentesco")
+            or _post_valor(post_data, "responsable_salida_parentesco")
+            or getattr(responsable_autorizado, "parentesco", "")
+        ),
+        "responsable_telefono": (
+            cleaned.get("responsable_salida_telefono")
+            or _post_valor(post_data, "responsable_salida_telefono")
+            or getattr(responsable_autorizado, "telefono", "")
+        ),
+        "credencial_validada": (
+            cleaned.get("credencial_salida_validada")
+            if "credencial_salida_validada" in cleaned
+            else _post_bool(post_data, "credencial_salida_validada")
+        ),
+        "tipo_salida": cleaned.get("tipo_salida") or _post_valor(post_data, "tipo_salida"),
+        "motivo_salida": cleaned.get("motivo_salida") or _post_valor(post_data, "motivo_salida"),
+        "observacion_salida": cleaned.get("observacion_salida") or _post_valor(post_data, "observacion_salida"),
+    }
 
 
 def validar_archivo_comprobante_pago(archivo):
@@ -1383,6 +1943,42 @@ def nombre_archivo_comprobante_pago(inscripcion, archivo):
     extension = os.path.splitext(archivo.name)[1].lower()
     return f"comprobante_de_pago_{matricula}{extension}"
 
+
+
+
+def preparar_archivo_comprobante_presencial(request, inscripcion):
+    """
+    Compatibilidad para el modal de pago presencial.
+
+    Acepta el archivo con nombre nuevo comprobante_pago o con el nombre
+    anterior doc_tutor_pago. Además arma un nombre controlado para guardarlo
+    en el FileField doc_tutor_pago.
+    """
+    post_data = request.POST.copy()
+    files_data = request.FILES.copy()
+
+    observaciones = (
+        post_data.get("observaciones")
+        or post_data.get("pago_observaciones")
+        or post_data.get("motivo_rechazo")
+        or ""
+    ).strip()
+
+    if observaciones and not post_data.get("observaciones"):
+        post_data["observaciones"] = observaciones
+
+    # El botón Presencial del modal funciona como confirmación.
+    post_data.setdefault("confirmar", "on")
+
+    if "comprobante_pago" not in files_data and "doc_tutor_pago" in files_data:
+        files_data["comprobante_pago"] = files_data["doc_tutor_pago"]
+
+    archivo = files_data.get("comprobante_pago")
+
+    if archivo:
+        archivo.name = nombre_archivo_comprobante_pago(inscripcion, archivo)
+
+    return post_data, files_data
 
 def usuario_es_editor_especial_filtros(user):
     """
@@ -3072,13 +3668,16 @@ def validacion_pagos_pendientes(request):
     Muestra expedientes aceptados por Dirección y en espera de pago.
     Permite:
     - Ver comprobante subido por beneficiario.
-    - Marcar entrega presencial.
+    - Registrar comprobante presencial adjuntando foto o PDF.
     - Validar pago.
     - Rechazar comprobante.
+    - Consultar beneficiarios que ya tienen comprobante o pago validado.
     """
     if not usuario_puede_gestionar_pagos(request.user):
         messages.error(request, "No tienes permiso para validar comprobantes de pago.")
         return redirect("/")
+
+    pagos_registrados = SolicitudInscripcion.objects.none()
 
     if not hay_semestre_activo_operativo():
         messages.warning(request, "No hay semestre activo. Validación de pagos queda en modo solo consulta.")
@@ -3091,11 +3690,40 @@ def validacion_pagos_pendientes(request):
             .order_by("-updated_at")
         )
 
+        pagos_registrados = (
+            SolicitudInscripcion.objects
+            .filter(
+                Q(estado_pago="SUBIDO_BENEFICIARIO")
+                | Q(estado_pago="ENTREGADO_PRESENCIAL")
+                | Q(estado_pago="VALIDADO")
+                | Q(pago_entregado_presencial=True)
+                | Q(pago_validado_en__isnull=False)
+                | (Q(doc_tutor_pago__isnull=False) & ~Q(doc_tutor_pago=""))
+            )
+            .select_related(
+                "solicitud_ingreso",
+                "usuario_tutor",
+                "pago_recibido_presencial_por",
+                "pago_validado_por",
+            )
+            .order_by("-pago_validado_en", "-pago_recibido_presencial_en", "-updated_at")
+        )
+
+    resumen_pagos = {
+        "pendientes": inscripciones.count(),
+        "con_comprobante": pagos_registrados.exclude(estado_pago="VALIDADO").count(),
+        "validados": pagos_registrados.filter(estado_pago="VALIDADO").count(),
+        "presenciales": pagos_registrados.filter(pago_entregado_presencial=True).count(),
+    }
+
     return render(
         request,
         "admisiones/validacion_pagos_pendientes.html",
         {
             "inscripciones": inscripciones,
+            "pagos_registrados": pagos_registrados,
+            "pagos_con_comprobante": pagos_registrados,
+            "resumen_pagos": resumen_pagos,
             **contexto_semestre_operativo(),
         },
     )
@@ -3143,20 +3771,32 @@ def registrar_pago_valido(request, pk):
     ).strip()
 
     if accion == "PRESENCIAL":
-        inscripcion.pago_entregado_presencial = True
-        inscripcion.pago_subido_por_beneficiario = False
-        inscripcion.estado_pago = "ENTREGADO_PRESENCIAL"
-        inscripcion.pago_recibido_presencial_por = request.user
-        inscripcion.pago_recibido_presencial_en = timezone.now()
-        inscripcion.pago_observaciones = observaciones or "Comprobante recibido presencialmente por Trabajo Social."
-        inscripcion.pago_rechazado_por = None
-        inscripcion.pago_rechazado_en = None
-        inscripcion.save()
+        post_data, files_data = preparar_archivo_comprobante_presencial(request, inscripcion)
 
-        messages.success(
-            request,
-            "Se registró la entrega presencial del comprobante. Ahora puedes validar el pago."
+        form_presencial = RegistrarComprobantePresencialForm(
+            post_data,
+            files_data,
+            inscripcion=inscripcion,
+            usuario=request.user,
         )
+
+        if form_presencial.is_valid():
+            form_presencial.registrar()
+
+            messages.success(
+                request,
+                "Comprobante presencial registrado con archivo adjunto. Ahora puedes validar el pago."
+            )
+        else:
+            messages.error(
+                request,
+                "No se pudo registrar el comprobante presencial. Adjunta foto o PDF del comprobante."
+            )
+            for campo, errores in form_presencial.errors.items():
+                for error in errores:
+                    messages.error(request, f"{campo}: {error}")
+
+            return redirect("validacion_pagos_pendientes")
 
     elif accion == "VALIDAR":
         if not inscripcion.doc_tutor_pago and not inscripcion.pago_entregado_presencial:
@@ -3223,7 +3863,11 @@ def registrar_pago_valido(request, pk):
 def codigos_responsable_pendientes(request):
     """
     Bandeja de Trabajo Social para generar/resetear códigos de seguridad.
-    Se muestran alumnos con inscripción FINALIZADA y pago validado.
+
+    Nuevo flujo:
+    - Se muestran alumnos con inscripción FINALIZADA y pago validado.
+    - Cada alumno puede tener varios responsables autorizados.
+    - Cada responsable tiene su propio código.
     """
     if not usuario_puede_gestionar_codigo_responsable(request.user):
         messages.error(request, "No tienes permiso para generar códigos de seguridad.")
@@ -3236,9 +3880,9 @@ def codigos_responsable_pendientes(request):
             request,
             "No hay semestre activo. La generación de códigos queda bloqueada; solo se permite consulta histórica."
         )
-        inscripciones = SolicitudInscripcion.objects.none()
+        inscripciones = []
     else:
-        inscripciones = (
+        inscripciones_qs = (
             SolicitudInscripcion.objects
             .filter(
                 estado="FINALIZADA",
@@ -3251,6 +3895,7 @@ def codigos_responsable_pendientes(request):
                 "sala_semestre_asignada",
                 "sala_semestre_asignada__sala",
             )
+            .prefetch_related("codigos_responsables_autorizados")
             .order_by(
                 "sala_semestre_asignada__sala__nombre",
                 "solicitud_ingreso__apellido_paterno_menor",
@@ -3258,18 +3903,22 @@ def codigos_responsable_pendientes(request):
             )
         )
 
-        # Compatibilidad: si existen campos de pago, filtra solo pago validado.
         try:
-            inscripciones = inscripciones.filter(
+            inscripciones_qs = inscripciones_qs.filter(
                 Q(estado_pago="VALIDADO") | Q(pago_validado_en__isnull=False) | Q(pago_validado=True)
             ).distinct()
         except Exception:
             try:
-                inscripciones = inscripciones.filter(
+                inscripciones_qs = inscripciones_qs.filter(
                     Q(estado_pago="VALIDADO") | Q(pago_validado_en__isnull=False)
                 ).distinct()
             except Exception:
                 pass
+
+        inscripciones = [
+            preparar_resumen_codigos_inscripcion(inscripcion)
+            for inscripcion in inscripciones_qs
+        ]
 
     return render(
         request,
@@ -3285,7 +3934,7 @@ def codigos_responsable_pendientes(request):
 @login_required
 def generar_codigo_responsable(request, inscripcion_id):
     """
-    Trabajo Social genera o resetea el código de 4 dígitos del responsable.
+    Trabajo Social genera o resetea el código de 4 dígitos de una persona autorizada.
     El código visible solo se muestra una vez en esta pantalla.
     """
     if not usuario_puede_gestionar_codigo_responsable(request.user):
@@ -3308,60 +3957,78 @@ def generar_codigo_responsable(request, inscripcion_id):
     )
 
     preparar_inscripcion_para_form_codigo(inscripcion)
+    responsables_codigo = obtener_responsables_codigo_inscripcion(inscripcion)
+    responsable_codigo = obtener_responsable_codigo_desde_request(request, inscripcion)
 
-    es_reset = inscripcion_tiene_codigo_responsable(inscripcion)
     codigo_generado = None
+    es_reset = bool(responsable_codigo and responsable_codigo.tiene_codigo)
 
     if request.method == "POST":
-        form = GenerarCodigoResponsableForm(
-            request.POST,
-            alumno=inscripcion,
-            es_reset=es_reset,
-        )
-
-        if form.is_valid():
-            codigo_generado = form.generar_codigo()
-            ok, mensaje = guardar_codigo_responsable_en_inscripcion(
-                inscripcion=inscripcion,
-                codigo=codigo_generado,
-                usuario=request.user,
-                motivo=form.cleaned_data.get("motivo", ""),
+        if not responsable_codigo:
+            messages.error(
+                request,
+                "Selecciona el tutor o familiar autorizado al que se le generará el código."
+            )
+            form = GenerarCodigoResponsableForm(
+                request.POST,
+                alumno=inscripcion,
+                es_reset=False,
+            )
+        else:
+            form = GenerarCodigoResponsableForm(
+                request.POST,
+                alumno=inscripcion,
                 es_reset=es_reset,
             )
 
-            if ok:
-                if es_reset:
-                    messages.success(
-                        request,
-                        "Código reseteado correctamente. Entrega el nuevo código al responsable."
-                    )
+            if form.is_valid():
+                if hasattr(form, "generar_codigo"):
+                    codigo_generado = form.generar_codigo()
                 else:
-                    messages.success(
-                        request,
-                        "Código generado correctamente. Entrégalo al responsable junto con su credencial."
-                    )
+                    codigo_generado = CodigoResponsableAutorizado.generar_codigo_plano()
 
-                # Recargar para mostrar estado actualizado.
-                inscripcion.refresh_from_db()
-                preparar_inscripcion_para_form_codigo(inscripcion)
-
-                return render(
-                    request,
-                    "admisiones/generar_codigo_responsable.html",
-                    {
-                        "form": form,
-                        "inscripcion": inscripcion,
-                        "codigo_generado": codigo_generado,
-                        "es_reset": es_reset,
-                        **contexto_semestre_operativo(),
-                    },
+                ok, mensaje = guardar_codigo_responsable_en_inscripcion(
+                    inscripcion=inscripcion,
+                    codigo=codigo_generado,
+                    usuario=request.user,
+                    motivo=form.cleaned_data.get("motivo", ""),
+                    es_reset=es_reset,
+                    responsable_autorizado=responsable_codigo,
                 )
 
-            messages.error(request, mensaje)
+                if ok:
+                    if es_reset:
+                        messages.success(
+                            request,
+                            f"Código reseteado correctamente para {responsable_codigo.nombre_completo}."
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            f"Código generado correctamente para {responsable_codigo.nombre_completo}."
+                        )
 
-        else:
-            messages.error(request, "No se pudo generar el código. Revisa las validaciones.")
+                    responsable_codigo.refresh_from_db()
+                    responsables_codigo = obtener_responsables_codigo_inscripcion(inscripcion)
 
+                    return render(
+                        request,
+                        "admisiones/generar_codigo_responsable.html",
+                        {
+                            "form": form,
+                            "inscripcion": inscripcion,
+                            "responsables_codigo": responsables_codigo,
+                            "responsable_codigo": responsable_codigo,
+                            "codigo_generado": codigo_generado,
+                            "es_reset": es_reset,
+                            **contexto_semestre_operativo(),
+                        },
+                    )
+
+                messages.error(request, mensaje)
+
+            else:
+                messages.error(request, "No se pudo generar el código. Revisa las validaciones.")
     else:
         form = GenerarCodigoResponsableForm(
             alumno=inscripcion,
@@ -3374,6 +4041,8 @@ def generar_codigo_responsable(request, inscripcion_id):
         {
             "form": form,
             "inscripcion": inscripcion,
+            "responsables_codigo": responsables_codigo,
+            "responsable_codigo": responsable_codigo,
             "codigo_generado": codigo_generado,
             "es_reset": es_reset,
             **contexto_semestre_operativo(),
@@ -3384,7 +4053,7 @@ def generar_codigo_responsable(request, inscripcion_id):
 @login_required
 def confirmar_entrega_codigo_responsable(request, inscripcion_id):
     """
-    Registra que Trabajo Social entregó credencial y código al responsable.
+    Registra que Trabajo Social entregó credencial y código a una persona autorizada.
     Esta vista no muestra el código; solo confirma evidencia de entrega.
     """
     if not usuario_puede_gestionar_codigo_responsable(request.user):
@@ -3402,25 +4071,45 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
         pk=inscripcion_id,
     )
 
-    if not inscripcion_tiene_codigo_responsable(inscripcion):
+    responsables_codigo = obtener_responsables_codigo_inscripcion(inscripcion)
+    responsable_codigo = obtener_responsable_codigo_desde_request(request, inscripcion)
+
+    if not responsable_codigo:
         messages.warning(
             request,
-            "Primero debes generar el código de seguridad antes de confirmar su entrega."
+            "Selecciona el tutor o familiar autorizado al que se le entregó el código."
         )
         return redirect("generar_codigo_responsable", inscripcion_id=inscripcion.id)
+
+    if not responsable_codigo.tiene_codigo:
+        messages.warning(
+            request,
+            "Primero debes generar el código de seguridad de este responsable antes de confirmar su entrega."
+        )
+        return redirect(
+            f"{reverse('generar_codigo_responsable', kwargs={'inscripcion_id': inscripcion.id})}?responsable_codigo_id={responsable_codigo.id}"
+        )
 
     if request.method == "POST":
         form = ConfirmarEntregaCodigoResponsableForm(request.POST)
 
         if form.is_valid():
-            cambio = registrar_entrega_codigo_en_inscripcion(inscripcion, form, request.user)
+            cambio = registrar_entrega_codigo_en_inscripcion(
+                inscripcion,
+                form,
+                request.user,
+                responsable_autorizado=responsable_codigo,
+            )
 
             if cambio:
-                messages.success(request, "Entrega de código y credencial registrada correctamente.")
+                messages.success(
+                    request,
+                    f"Entrega de código y credencial registrada para {responsable_codigo.nombre_completo}."
+                )
             else:
                 messages.warning(
                     request,
-                    "El formulario es válido, pero faltan campos de auditoría en el modelo para guardar la entrega."
+                    "El formulario es válido, pero no se pudo guardar la entrega."
                 )
 
             return redirect("codigos_responsable_pendientes")
@@ -3436,10 +4125,11 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
         {
             "form": form,
             "inscripcion": inscripcion,
+            "responsables_codigo": responsables_codigo,
+            "responsable_codigo": responsable_codigo,
             **contexto_semestre_operativo(),
         },
     )
-
 
 
 @login_required
@@ -3469,6 +4159,18 @@ def lista_semestres(request):
 
     sedes = Sede.objects.order_by("nombre")
     semestre_activo = semestres.filter(estado=Semestre.EstadoSemestre.ACTIVO).first()
+    ultimo_semestre_cerrado = semestres.filter(
+        estado=Semestre.EstadoSemestre.CERRADO
+    ).first()
+
+    puede_clonar_semestre = bool(ultimo_semestre_cerrado and not semestre_activo)
+
+    if semestre_activo:
+        motivo_bloqueo_clonar = "Cierra el semestre activo para poder clonar uno anterior."
+    elif not ultimo_semestre_cerrado:
+        motivo_bloqueo_clonar = "Todavía no hay un semestre cerrado para clonar."
+    else:
+        motivo_bloqueo_clonar = ""
 
     return render(
         request,
@@ -3477,10 +4179,12 @@ def lista_semestres(request):
             "semestres": semestres,
             "sedes": sedes,
             "semestre_activo": semestre_activo,
+            "ultimo_semestre_cerrado": ultimo_semestre_cerrado,
+            "puede_clonar_semestre": puede_clonar_semestre,
+            "motivo_bloqueo_clonar": motivo_bloqueo_clonar,
             **contexto_semestre_operativo(),
         },
     )
-
 
 @login_required
 def crear_sede(request):
@@ -3510,6 +4214,7 @@ def crear_sede(request):
         {
             "form": form,
             "titulo": "Crear sede",
+            "origen": obtener_origen_sprint4(request),
         },
     )
 
@@ -3545,6 +4250,7 @@ def editar_sede(request, sede_id):
             "form": form,
             "sede": sede,
             "titulo": "Editar sede",
+            "origen": obtener_origen_sprint4(request),
         },
     )
 
@@ -3595,6 +4301,104 @@ def crear_semestre(request):
         },
     )
 
+
+@login_required
+def clonar_semestre(request, semestre_id):
+    """
+    Crea un nuevo semestre copiando la configuración operativa de un semestre cerrado.
+
+    Reglas:
+    - Solo Administrador del Sistema.
+    - Solo se puede clonar un semestre CERRADO.
+    - No se puede clonar mientras exista un semestre ACTIVO.
+    - Se copian sede, personal institucional, salas, cupos, horarios y maestras.
+    - No se copian alumnos, encuestas, respuestas, incidencias, bitácoras ni calendario operativo.
+    """
+    if not usuario_puede_configurar_semestres(request.user):
+        messages.error(request, "Solo el Administrador del Sistema puede clonar semestres.")
+        return redirect("/")
+
+    semestre_origen = get_object_or_404(
+        Semestre.objects.select_related(
+            "sede_configurada",
+            "medico_asignado",
+            "nutriologa_asignada",
+            "psicologa_asignada",
+        ),
+        pk=semestre_id,
+    )
+
+    if semestre_origen.estado != Semestre.EstadoSemestre.CERRADO:
+        messages.warning(
+            request,
+            "Solo se puede clonar un semestre cerrado. Primero cierra el semestre actual."
+        )
+        return redirect_con_origen(request, "lista_semestres")
+
+    semestre_activo = Semestre.objects.filter(
+        estado=Semestre.EstadoSemestre.ACTIVO
+    ).first()
+
+    if semestre_activo:
+        messages.warning(
+            request,
+            "No se puede clonar mientras exista un semestre activo. Primero cierra el semestre activo."
+        )
+        return redirect_con_origen(request, "lista_semestres")
+
+    if request.method == "POST":
+        post_data = request.POST.copy()
+
+        # Compatibilidad visual:
+        # si el template usado no muestra el checkbox confirmar,
+        # el botón de guardar funciona como confirmación.
+        post_data.setdefault("confirmar", "on")
+
+        form = ClonarSemestreForm(
+            post_data,
+            semestre_origen=semestre_origen,
+        )
+
+        if form.is_valid():
+            try:
+                nuevo_semestre = form.crear_semestre_clonado(usuario=request.user)
+            except Exception as exc:
+                messages.error(
+                    request,
+                    f"No se pudo clonar el semestre: {exc}"
+                )
+            else:
+                messages.success(
+                    request,
+                    "Semestre clonado correctamente. Revisa fechas, horarios y personal antes de iniciarlo."
+                )
+                return redirect_con_origen(
+                    request,
+                    "detalle_semestre",
+                    semestre_id=nuevo_semestre.id,
+                )
+
+        else:
+            messages.error(request, "No se pudo clonar el semestre. Revisa los campos.")
+            for campo, errores in form.errors.items():
+                for error in errores:
+                    messages.error(request, f"{campo}: {error}")
+
+    else:
+        form = ClonarSemestreForm(semestre_origen=semestre_origen)
+
+    return render(
+        request,
+        "admisiones/semestres/form_semestre.html",
+        {
+            "form": form,
+            "semestre": semestre_origen,
+            "semestre_origen": semestre_origen,
+            "titulo": "Clonar semestre",
+            "modo_clonar": True,
+            "origen": obtener_origen_sprint4(request),
+        },
+    )
 
 @login_required
 def editar_semestre(request, semestre_id):
@@ -3676,16 +4480,21 @@ def detalle_semestre(request, semestre_id):
         .order_by("sala__nombre")
     )
     dias_operativos_qs = semestre.dias_operativos.order_by("fecha")
-    total_dias_operativos = dias_operativos_qs.count()
-    dias_operativos_abiertos = dias_operativos_qs.filter(
-        es_habil=True,
+    dias_operativos_habiles_qs = dias_operativos_qs.filter(es_habil=True)
+    dias_inhabiles_qs = dias_operativos_qs.filter(es_habil=False)
+
+    total_dias_calendario = dias_operativos_qs.count()
+    total_dias_operativos = dias_operativos_habiles_qs.count()
+    dias_inhabiles = dias_inhabiles_qs.count()
+    dias_fin_semana = sum(1 for dia in dias_operativos_qs if dia_operativo_es_fin_de_semana(dia))
+
+    dias_operativos_abiertos = dias_operativos_habiles_qs.filter(
         estado=DiaOperativoSemestre.EstadoDia.ABIERTO,
     ).count()
-    dias_operativos_cerrados = dias_operativos_qs.filter(
-        es_habil=True,
+    dias_operativos_cerrados = dias_operativos_habiles_qs.filter(
         estado=DiaOperativoSemestre.EstadoDia.CERRADO,
     ).count()
-    calendario_operativo_generado = total_dias_operativos > 0
+    calendario_operativo_generado = total_dias_calendario > 0
     dias_operativos = dias_operativos_qs[:15]
 
     alumnos = (
@@ -3706,7 +4515,10 @@ def detalle_semestre(request, semestre_id):
             "dias_festivos": dias_festivos,
             "salas_semestre": salas_semestre,
             "dias_operativos": dias_operativos,
+            "total_dias_calendario": total_dias_calendario,
             "total_dias_operativos": total_dias_operativos,
+            "dias_inhabiles": dias_inhabiles,
+            "dias_fin_semana": dias_fin_semana,
             "dias_operativos_abiertos": dias_operativos_abiertos,
             "dias_operativos_cerrados": dias_operativos_cerrados,
             "calendario_operativo_generado": calendario_operativo_generado,
@@ -3741,6 +4553,12 @@ def agregar_dia_festivo(request, semestre_id):
 
         if form.is_valid():
             form.save()
+
+            # Si el calendario ya existe, se actualiza para que el día capturado
+            # quede como inhábil y no bloquee el cierre del semestre.
+            if semestre.dias_operativos.exists():
+                semestre.generar_dias_operativos()
+
             messages.success(request, "Día festivo/suspensión agregado correctamente.")
             return redirect_con_origen(request, "detalle_semestre", semestre_id=semestre.id)
 
@@ -3777,7 +4595,14 @@ def eliminar_dia_festivo(request, dia_id):
         return bloqueo_cerrado
 
     if request.method == "POST":
+        semestre = dia.semestre
         dia.delete()
+
+        # Recalcula el calendario si ya estaba generado.
+        # Sábados y domingos siguen siendo inhábiles automáticos.
+        if semestre.dias_operativos.exists():
+            semestre.generar_dias_operativos()
+
         messages.success(request, "Día eliminado correctamente.")
 
     return redirect_con_origen(request, "detalle_semestre", semestre_id=semestre_id)
@@ -4169,7 +4994,10 @@ def generar_dias_operativos_semestre(request, semestre_id):
     if total_nuevos > 0:
         messages.success(
             request,
-            f"Calendario operativo generado correctamente. Nuevos días creados: {total_nuevos}."
+            (
+                f"Calendario operativo generado correctamente. Nuevos días creados: {total_nuevos}. "
+                "Sábados, domingos y días inhábiles quedan cerrados automáticamente y no bloquean el cierre."
+            )
         )
     elif dias_despues > 0:
         messages.info(
@@ -4202,6 +5030,14 @@ def cerrar_dia_operativo(request, dia_id):
         return bloqueo_cerrado
 
     if request.method == "POST":
+        if not dia_operativo_es_laborable(dia):
+            messages.info(
+                request,
+                mensaje_dia_no_operativo(dia)
+                or "Este día no es laborable y queda cerrado automáticamente; no requiere cierre manual."
+            )
+            return redirect_con_origen(request, "detalle_semestre", semestre_id=dia.semestre_id)
+
         form = CerrarDiaOperativoForm(request.POST, instance=dia)
 
         if form.is_valid():
@@ -4236,83 +5072,97 @@ def cerrar_dia_operativo(request, dia_id):
 @login_required
 def enviar_encuesta_satisfaccion(request, semestre_id):
     """
-    Envía Encuesta de Satisfacción B a beneficiarios del semestre.
-    Marca copia a correo genérico.
+    Vista de Encuesta de Satisfacción B.
+
+    Funciones:
+    - Preparar envíos por alumno/tutor.
+    - Enviar encuesta al correo institucional del tutor.
+    - Mostrar estado por alumno.
+    - Permitir ver respuestas individuales.
+    - Preparar descarga CSV semestral desde otra vista.
     """
     if not usuario_puede_configurar_semestres(request.user):
-        messages.error(request, "Solo el Administrador del Sistema puede enviar encuestas.")
+        messages.error(request, "Solo el Administrador del Sistema puede gestionar encuestas.")
         return redirect("/")
 
     semestre = get_object_or_404(Semestre, pk=semestre_id)
-
-    bloqueo_cerrado = bloquear_si_semestre_no_editable(request, semestre)
-    if bloqueo_cerrado:
-        return bloqueo_cerrado
+    asegurar_envios_encuesta_semestre(semestre)
 
     if request.method == "POST":
         form = EnviarEncuestaSatisfaccionForm(request.POST, semestre=semestre)
 
         if form.is_valid():
-            correos = obtener_correos_beneficiarios_semestre(semestre)
+            correo_copia = (form.cleaned_data.get("correo_copia") or "").strip().lower()
+            envios = obtener_envios_encuesta_semestre(semestre)
 
-            if not correos:
-                messages.warning(request, "No hay beneficiarios con correo para enviar la encuesta.")
-                return redirect_con_origen(request, "detalle_semestre", semestre_id=semestre.id)
-
-            correo_copia = form.cleaned_data["correo_copia"]
-
-            asunto = f"Encuesta de Satisfacción B - {semestre.nombre}"
-            cuerpo = f"""
-Estimado(a) beneficiario(a):
-
-La Estancia Infantil Universitaria UNACH solicita tu apoyo para responder la Encuesta de Satisfacción B correspondiente al semestre {semestre.nombre}.
-
-Por favor ingresa al sistema para responderla.
-
-Sede: {semestre.sede_nombre}
-Fecha programada: {semestre.fecha_encuesta_satisfaccion or timezone.localdate()}
-
-Atentamente,
-Estancia Infantil Universitaria UNACH
-"""
+            if not envios.exists():
+                messages.warning(
+                    request,
+                    "No hay alumnos finalizados/asignados a este semestre para enviar la encuesta."
+                )
+                return redirect_con_origen(request, "enviar_encuesta_satisfaccion", semestre_id=semestre.id)
 
             enviados = 0
+            bloqueados = 0
             errores = []
 
-            for correo in correos:
-                try:
-                    send_mail(
-                        asunto,
-                        cuerpo,
-                        settings.DEFAULT_FROM_EMAIL,
-                        [correo],
-                        fail_silently=False,
-                        cc=[correo_copia] if correo_copia else None,
-                    )
-                    enviados += 1
-                except Exception as e:
-                    errores.append(f"{correo}: {e}")
+            for envio in envios:
+                if envio.estado == EnvioEncuestaSatisfaccion.EstadoEnvio.CONTESTADA:
+                    continue
 
-            semestre.encuesta_enviada = enviados > 0
-            semestre.fecha_envio_encuesta = timezone.now()
+                ok, mensaje = enviar_correo_encuesta_individual(
+                    request,
+                    envio,
+                    usuario=request.user,
+                    correo_copia=correo_copia,
+                    es_reenvio=envio.estado in [
+                        EnvioEncuestaSatisfaccion.EstadoEnvio.ENVIADA,
+                        EnvioEncuestaSatisfaccion.EstadoEnvio.REENVIADA,
+                        EnvioEncuestaSatisfaccion.EstadoEnvio.ERROR,
+                    ],
+                )
+
+                if ok:
+                    enviados += 1
+                else:
+                    if envio.estado == EnvioEncuestaSatisfaccion.EstadoEnvio.BLOQUEADA:
+                        bloqueados += 1
+                    errores.append(f"{envio.correo_destino or 'Sin correo'}: {mensaje}")
+
+            semestre.encuesta_enviada = enviados > 0 or semestre.encuesta_enviada
+            if enviados:
+                semestre.fecha_envio_encuesta = timezone.now()
             semestre.correo_copia_encuesta = correo_copia
-            semestre.save(update_fields=["encuesta_enviada", "fecha_envio_encuesta", "correo_copia_encuesta", "updated_at"])
+            semestre.save(update_fields=[
+                "encuesta_enviada",
+                "fecha_envio_encuesta",
+                "correo_copia_encuesta",
+                "updated_at",
+            ])
 
             if enviados:
-                messages.success(request, f"Encuesta enviada correctamente a {enviados} beneficiario(s).")
+                messages.success(request, f"Encuesta enviada correctamente a {enviados} tutor(es).")
+
+            if bloqueados:
+                messages.warning(
+                    request,
+                    f"{bloqueados} envío(s) quedaron bloqueados porque el correo del tutor no es @unach.mx."
+                )
 
             for error in errores[:5]:
-                messages.warning(request, f"No se pudo enviar a {error}")
+                messages.warning(request, f"No se pudo enviar: {error}")
 
             if len(errores) > 5:
-                messages.warning(request, f"Hubo {len(errores) - 5} errores adicionales de envío.")
+                messages.warning(request, f"Hubo {len(errores) - 5} errores adicionales.")
 
-            return redirect_con_origen(request, "detalle_semestre", semestre_id=semestre.id)
+            return redirect_con_origen(request, "enviar_encuesta_satisfaccion", semestre_id=semestre.id)
 
         messages.error(request, "No se pudo enviar la encuesta. Revisa los campos.")
 
     else:
         form = EnviarEncuestaSatisfaccionForm(semestre=semestre)
+
+    envios = obtener_envios_encuesta_semestre(semestre)
 
     return render(
         request,
@@ -4320,9 +5170,261 @@ Estancia Infantil Universitaria UNACH
         {
             "form": form,
             "semestre": semestre,
-            "titulo": "Enviar Encuesta de Satisfacción B",
+            "envios_encuesta": envios,
+            "resumen_encuesta": resumen_envios_encuesta(envios),
+            "titulo": "Encuesta de Satisfacción B",
         },
     )
+
+
+@login_required
+def reenviar_encuesta_satisfaccion(request, envio_id):
+    """
+    Reenvía la Encuesta B a un tutor específico.
+    """
+    if not usuario_puede_configurar_semestres(request.user):
+        messages.error(request, "Solo el Administrador del Sistema puede reenviar encuestas.")
+        return redirect("/")
+
+    envio = get_object_or_404(
+        EnvioEncuestaSatisfaccion.objects.select_related(
+            "semestre",
+            "inscripcion",
+            "inscripcion__solicitud_ingreso",
+            "tutor",
+        ),
+        pk=envio_id,
+    )
+
+    if request.method != "POST":
+        return redirect_con_origen(request, "enviar_encuesta_satisfaccion", semestre_id=envio.semestre_id)
+
+    correo_copia = envio.semestre.correo_copia_encuesta or envio.correo_copia or ""
+
+    ok, mensaje = enviar_correo_encuesta_individual(
+        request,
+        envio,
+        usuario=request.user,
+        correo_copia=correo_copia,
+        es_reenvio=True,
+    )
+
+    if ok:
+        messages.success(request, "Encuesta reenviada correctamente.")
+    else:
+        messages.error(request, f"No se pudo reenviar la encuesta: {mensaje}")
+
+    return redirect_con_origen(request, "enviar_encuesta_satisfaccion", semestre_id=envio.semestre_id)
+
+
+@login_required
+def ver_respuesta_encuesta_satisfaccion(request, envio_id):
+    """
+    Muestra las respuestas individuales de un alumno/tutor.
+    """
+    if not usuario_puede_configurar_semestres(request.user):
+        messages.error(request, "Solo el Administrador del Sistema puede consultar respuestas.")
+        return redirect("/")
+
+    envio = get_object_or_404(
+        EnvioEncuestaSatisfaccion.objects.select_related(
+            "semestre",
+            "inscripcion",
+            "inscripcion__solicitud_ingreso",
+            "tutor",
+        ),
+        pk=envio_id,
+    )
+
+    respuesta = envio.respuesta
+
+    return render(
+        request,
+        "admisiones/semestres/ver_respuesta_encuesta.html",
+        {
+            "envio": envio,
+            "semestre": envio.semestre,
+            "respuesta": respuesta,
+            "preguntas": preguntas_encuesta_satisfaccion(respuesta),
+            "titulo": "Respuestas de Encuesta B",
+        },
+    )
+
+
+def responder_encuesta_satisfaccion(request, token):
+    """
+    Formulario público para que el tutor responda la Encuesta B desde el enlace del correo.
+    """
+    envio = get_object_or_404(
+        EnvioEncuestaSatisfaccion.objects.select_related(
+            "semestre",
+            "inscripcion",
+            "inscripcion__solicitud_ingreso",
+            "tutor",
+        ),
+        token=token,
+    )
+
+    if not envio.correo_institucional_valido:
+        return render(
+            request,
+            "admisiones/semestres/responder_encuesta.html",
+            {
+                "envio": envio,
+                "semestre": envio.semestre,
+                "bloqueada": True,
+                "mensaje_error": "El correo del tutor no es institucional. Comuníquese con la Estancia Infantil UNACH.",
+            },
+        )
+
+    if not envio.tutor_id:
+        return render(
+            request,
+            "admisiones/semestres/responder_encuesta.html",
+            {
+                "envio": envio,
+                "semestre": envio.semestre,
+                "bloqueada": True,
+                "mensaje_error": "No existe una cuenta de tutor vinculada a esta inscripción.",
+            },
+        )
+
+    respuesta_existente = envio.respuesta
+
+    if request.method == "POST":
+        defaults = {
+            "tutor": envio.tutor,
+            "q1_info_completa": valor_booleano_encuesta(request.POST, "q1_info_completa"),
+            "q2_seguro": valor_booleano_encuesta(request.POST, "q2_seguro"),
+            "q3_orientacion_nutricion": valor_booleano_encuesta(request.POST, "q3_orientacion_nutricion"),
+            "q4_orientacion_medica": valor_booleano_encuesta(request.POST, "q4_orientacion_medica"),
+            "q5_orientacion_pedagogica": valor_booleano_encuesta(request.POST, "q5_orientacion_pedagogica"),
+            "q6_orientacion_psicologica": valor_booleano_encuesta(request.POST, "q6_orientacion_psicologica"),
+            "q7_apoyo_estudios": valor_booleano_encuesta(request.POST, "q7_apoyo_estudios"),
+            "comentarios": (request.POST.get("comentarios") or "").strip(),
+        }
+
+        respuesta, _ = EncuestaSatisfaccion.objects.update_or_create(
+            semestre=envio.semestre,
+            inscripcion=envio.inscripcion,
+            defaults=defaults,
+        )
+
+        envio.marcar_contestada()
+
+        return render(
+            request,
+            "admisiones/semestres/responder_encuesta.html",
+            {
+                "envio": envio,
+                "semestre": envio.semestre,
+                "respuesta": respuesta,
+                "contestada": True,
+            },
+        )
+
+    return render(
+        request,
+        "admisiones/semestres/responder_encuesta.html",
+        {
+            "envio": envio,
+            "semestre": envio.semestre,
+            "respuesta": respuesta_existente,
+        },
+    )
+
+
+@login_required
+def descargar_csv_encuesta_satisfaccion(request, semestre_id):
+    """
+    Descarga el archivo plano CSV semestral con todas las respuestas de Encuesta B.
+    """
+    if not usuario_puede_configurar_semestres(request.user):
+        messages.error(request, "Solo el Administrador del Sistema puede descargar respuestas.")
+        return redirect("/")
+
+    semestre = get_object_or_404(Semestre, pk=semestre_id)
+    envios = obtener_envios_encuesta_semestre(semestre)
+
+    nombre_archivo = f"encuesta_b_{semestre.id}_{semestre.nombre}".replace(" ", "_").replace("/", "-")
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}.csv"'
+    response.write("\ufeff")
+
+    writer = csv.writer(response)
+    writer.writerow([
+        "Semestre",
+        "Sede",
+        "Folio",
+        "Alumno",
+        "Tutor",
+        "Correo institucional",
+        "Sala",
+        "Estado envío",
+        "Fecha envío",
+        "Fecha reenvío",
+        "Fecha respuesta",
+        "Puntaje",
+        "Nivel satisfacción",
+        "Pregunta 1",
+        "Respuesta 1",
+        "Pregunta 2",
+        "Respuesta 2",
+        "Pregunta 3",
+        "Respuesta 3",
+        "Pregunta 4",
+        "Respuesta 4",
+        "Pregunta 5",
+        "Respuesta 5",
+        "Pregunta 6",
+        "Respuesta 6",
+        "Pregunta 7",
+        "Respuesta 7",
+        "Comentarios",
+        "Último error",
+    ])
+
+    for envio in envios:
+        inscripcion = envio.inscripcion
+        solicitud = inscripcion.solicitud_ingreso
+        respuesta = envio.respuesta
+        preguntas = preguntas_encuesta_satisfaccion(respuesta)
+        sala = ""
+
+        if inscripcion.sala_semestre_asignada and inscripcion.sala_semestre_asignada.sala:
+            sala = inscripcion.sala_semestre_asignada.sala.nombre
+
+        fila = [
+            semestre.nombre,
+            semestre.sede_nombre,
+            solicitud.folio or "",
+            solicitud.nombre_menor_completo() if hasattr(solicitud, "nombre_menor_completo") else "",
+            solicitud.nombre_tutor_completo() if hasattr(solicitud, "nombre_tutor_completo") else "",
+            envio.correo_destino,
+            sala,
+            envio.get_estado_display(),
+            timezone.localtime(envio.enviado_en).strftime("%d/%m/%Y %H:%M") if envio.enviado_en else "",
+            timezone.localtime(envio.reenviado_en).strftime("%d/%m/%Y %H:%M") if envio.reenviado_en else "",
+            timezone.localtime(respuesta.fecha_respuesta).strftime("%d/%m/%Y %H:%M") if respuesta else "",
+            respuesta.puntaje_total if respuesta else "",
+            respuesta.nivel_satisfaccion() if respuesta else "",
+        ]
+
+        for idx in range(7):
+            if idx < len(preguntas):
+                fila.extend([preguntas[idx][0], preguntas[idx][1]])
+            else:
+                fila.extend(["", ""])
+
+        fila.extend([
+            respuesta.comentarios if respuesta else "",
+            envio.ultimo_error or "",
+        ])
+
+        writer.writerow(fila)
+
+    return response
 
 
 @login_required
@@ -4608,6 +5710,14 @@ def crear_incidencia(request, tipo=None):
             messages.error(
                 request,
                 "Solo se pueden registrar incidencias de niñas y niños con inscripción finalizada."
+            )
+            return redirect(url_panel_incidencias_por_tipo(tipo_forzado))
+
+        if registro_diario.dia_operativo and not dia_operativo_es_laborable(registro_diario.dia_operativo):
+            messages.warning(
+                request,
+                mensaje_dia_no_operativo(registro_diario.dia_operativo)
+                or "No se pueden registrar incidencias operativas de menores en días inhábiles."
             )
             return redirect(url_panel_incidencias_por_tipo(tipo_forzado))
 
@@ -5110,10 +6220,10 @@ def dashboard_maestra(request):
         salas = obtener_salas_maestra_operativas(request.user, semestre=semestre)
         dia_actual = obtener_dia_operativo_actual_maestra(request.user, semestre=semestre)
 
-        if dia_actual and dia_actual.estado == DiaOperativoSemestre.EstadoDia.ABIERTO:
+        if dia_actual and dia_actual.estado == DiaOperativoSemestre.EstadoDia.ABIERTO and dia_operativo_es_laborable(dia_actual):
             asegurar_registros_alumnos_dia(dia_actual, request.user)
 
-        if dia_actual:
+        if dia_actual and dia_operativo_es_laborable(dia_actual):
             registros = obtener_registros_dia_maestra(dia_actual, request.user)
 
     resumen_dia = {
@@ -5134,6 +6244,8 @@ def dashboard_maestra(request):
             "dia_actual": dia_actual,
             "registros": registros,
             "resumen_dia": resumen_dia,
+            "dia_no_operativo": bool(dia_actual and not dia_operativo_es_laborable(dia_actual)),
+            "mensaje_dia_no_operativo": mensaje_dia_no_operativo(dia_actual) if dia_actual else "",
             **contexto_semestre_operativo(),
         },
     )
@@ -5208,10 +6320,18 @@ def lista_alumnos_dia_maestra(request, dia_id):
         messages.error(request, "No tienes permiso para consultar este día operativo.")
         return redirect("dashboard_maestra")
 
-    if dia.estado == DiaOperativoSemestre.EstadoDia.ABIERTO:
-        asegurar_registros_alumnos_dia(dia, request.user)
+    if not dia_operativo_es_laborable(dia):
+        messages.info(
+            request,
+            mensaje_dia_no_operativo(dia)
+            or "Este día no permite operación diaria de menores."
+        )
+        registros = RegistroDiarioAlumno.objects.none()
+    else:
+        if dia.estado == DiaOperativoSemestre.EstadoDia.ABIERTO:
+            asegurar_registros_alumnos_dia(dia, request.user)
 
-    registros = obtener_registros_dia_maestra(dia, request.user)
+        registros = obtener_registros_dia_maestra(dia, request.user)
 
     return render(
         request,
@@ -5220,7 +6340,9 @@ def lista_alumnos_dia_maestra(request, dia_id):
             "dia": dia,
             "semestre": dia.semestre,
             "registros": registros,
-            "dia_solo_lectura": dia.estado != DiaOperativoSemestre.EstadoDia.ABIERTO,
+            "dia_solo_lectura": dia.estado != DiaOperativoSemestre.EstadoDia.ABIERTO or not dia_operativo_es_laborable(dia),
+            "dia_no_operativo": not dia_operativo_es_laborable(dia),
+            "mensaje_dia_no_operativo": mensaje_dia_no_operativo(dia),
         },
     )
 
@@ -5228,9 +6350,14 @@ def lista_alumnos_dia_maestra(request, dia_id):
 @login_required
 def registrar_entrada_alumno(request, registro_id):
     registro = obtener_registro_diario_para_maestra(request, registro_id)
+    responsables_codigo = obtener_responsables_codigo_inscripcion(registro.alumno)
 
     if not registro_diario_es_editable(registro):
-        messages.warning(request, "No se puede registrar entrada porque el día no está abierto.")
+        messages.warning(
+            request,
+            mensaje_dia_no_operativo(registro.dia_operativo)
+            or "No se puede registrar entrada porque el día no está abierto."
+        )
         return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
 
     if registro.entrada_en:
@@ -5239,28 +6366,49 @@ def registrar_entrada_alumno(request, registro_id):
 
     if request.method == "POST":
         form = RegistroEntradaAlumnoForm(request.POST, instance=registro, registro_diario=registro)
+        form_valido = form.is_valid()
+        responsable_autorizado, errores_codigo = obtener_responsable_operacion_desde_post(
+            registro,
+            request.POST,
+            prefijo="entrada",
+        )
 
-        if form.is_valid():
-            ok, errores = registro.registrar_entrada(
-                usuario=request.user,
-                responsable_nombre=form.cleaned_data["responsable_entrada_nombre"],
-                responsable_parentesco=form.cleaned_data["responsable_entrada_parentesco"],
-                responsable_telefono=form.cleaned_data.get("responsable_entrada_telefono", ""),
-                credencial_validada=form.cleaned_data.get("credencial_entrada_validada"),
-                codigo_validado=True,
-                temperatura=form.cleaned_data.get("temperatura_entrada"),
-            )
+        errores_no_codigo = errores_form_sin_codigo(form)
 
-            if ok:
-                BitacoraEntradaCasa.objects.get_or_create(registro_diario=registro)
-                messages.success(request, "Entrada registrada correctamente. Ahora captura la bitácora en casa.")
-                return redirect("bitacora_entrada_casa_maestra", registro_id=registro.id)
+        if form_valido or (not errores_no_codigo and not errores_codigo):
+            if errores_codigo:
+                for error in errores_codigo:
+                    messages.error(request, error)
+            else:
+                datos = datos_entrada_desde_form_o_post(
+                    form,
+                    request.POST,
+                    responsable_autorizado=responsable_autorizado,
+                )
 
-            messages.error(request, "No se pudo registrar la entrada.")
-            for error in errores:
-                messages.error(request, error)
+                ok, errores = registro.registrar_entrada(
+                    usuario=request.user,
+                    responsable_nombre=datos["responsable_nombre"],
+                    responsable_parentesco=datos["responsable_parentesco"],
+                    responsable_telefono=datos["responsable_telefono"],
+                    responsable_autorizado=responsable_autorizado,
+                    credencial_validada=datos["credencial_validada"],
+                    codigo_validado=True,
+                    temperatura=datos["temperatura"],
+                )
+
+                if ok:
+                    BitacoraEntradaCasa.objects.get_or_create(registro_diario=registro)
+                    messages.success(request, "Entrada registrada correctamente. Ahora captura la bitácora en casa.")
+                    return redirect("bitacora_entrada_casa_maestra", registro_id=registro.id)
+
+                messages.error(request, "No se pudo registrar la entrada.")
+                for error in errores:
+                    messages.error(request, error)
         else:
             messages.error(request, "No se pudo registrar la entrada. Revisa los campos.")
+            for error in errores_codigo:
+                messages.error(request, error)
     else:
         form = RegistroEntradaAlumnoForm(instance=registro, registro_diario=registro)
 
@@ -5270,6 +6418,7 @@ def registrar_entrada_alumno(request, registro_id):
         {
             "form": form,
             "registro": registro,
+            "responsables_codigo": responsables_codigo,
             "tipo_formulario": registro.formulario_bitacora,
             "dia": registro.dia_operativo,
         },
@@ -5288,7 +6437,11 @@ def bitacora_entrada_casa_maestra(request, registro_id):
 
     if request.method == "POST":
         if not registro_diario_es_editable(registro):
-            messages.warning(request, "El día está cerrado o no está activo. Solo consulta.")
+            messages.warning(
+                request,
+                mensaje_dia_no_operativo(registro.dia_operativo)
+                or "El día está cerrado o no está activo. Solo consulta."
+            )
             return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
 
         form = BitacoraEntradaCasaForm(
@@ -5347,7 +6500,11 @@ def bitacora_estancia_maestra(request, registro_id):
 
     if request.method == "POST":
         if not registro_diario_es_editable(registro):
-            messages.warning(request, "El día está cerrado o no está activo. Solo consulta.")
+            messages.warning(
+                request,
+                mensaje_dia_no_operativo(registro.dia_operativo)
+                or "El día está cerrado o no está activo. Solo consulta."
+            )
             return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
 
         form = BitacoraEstanciaForm(
@@ -5397,9 +6554,14 @@ def bitacora_estancia_maestra(request, registro_id):
 @login_required
 def registrar_salida_alumno(request, registro_id):
     registro = obtener_registro_diario_para_maestra(request, registro_id)
+    responsables_codigo = obtener_responsables_codigo_inscripcion(registro.alumno)
 
     if not registro_diario_es_editable(registro):
-        messages.warning(request, "No se puede registrar salida porque el día no está abierto.")
+        messages.warning(
+            request,
+            mensaje_dia_no_operativo(registro.dia_operativo)
+            or "No se puede registrar salida porque el día no está abierto."
+        )
         return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
 
     if not registro.entrada_en:
@@ -5412,30 +6574,51 @@ def registrar_salida_alumno(request, registro_id):
 
     if request.method == "POST":
         form = RegistroSalidaAlumnoForm(request.POST, instance=registro, registro_diario=registro)
+        form_valido = form.is_valid()
+        responsable_autorizado, errores_codigo = obtener_responsable_operacion_desde_post(
+            registro,
+            request.POST,
+            prefijo="salida",
+        )
 
-        if form.is_valid():
-            ok, errores = registro.registrar_salida(
-                usuario=request.user,
-                responsable_nombre=form.cleaned_data["responsable_salida_nombre"],
-                responsable_parentesco=form.cleaned_data["responsable_salida_parentesco"],
-                responsable_telefono=form.cleaned_data.get("responsable_salida_telefono", ""),
-                credencial_validada=form.cleaned_data.get("credencial_salida_validada"),
-                codigo_validado=True,
-                tipo_salida=form.cleaned_data.get("tipo_salida"),
-                motivo_salida=form.cleaned_data.get("motivo_salida", ""),
-                observacion_salida=form.cleaned_data.get("observacion_salida", ""),
-            )
+        errores_no_codigo = errores_form_sin_codigo(form)
 
-            if ok:
-                registro.marcar_completo_si_corresponde()
-                messages.success(request, "Salida registrada correctamente.")
-                return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
+        if form_valido or (not errores_no_codigo and not errores_codigo):
+            if errores_codigo:
+                for error in errores_codigo:
+                    messages.error(request, error)
+            else:
+                datos = datos_salida_desde_form_o_post(
+                    form,
+                    request.POST,
+                    responsable_autorizado=responsable_autorizado,
+                )
 
-            messages.error(request, "No se pudo registrar la salida.")
-            for error in errores:
-                messages.error(request, error)
+                ok, errores = registro.registrar_salida(
+                    usuario=request.user,
+                    responsable_nombre=datos["responsable_nombre"],
+                    responsable_parentesco=datos["responsable_parentesco"],
+                    responsable_telefono=datos["responsable_telefono"],
+                    responsable_autorizado=responsable_autorizado,
+                    credencial_validada=datos["credencial_validada"],
+                    codigo_validado=True,
+                    tipo_salida=datos["tipo_salida"],
+                    motivo_salida=datos["motivo_salida"],
+                    observacion_salida=datos["observacion_salida"],
+                )
+
+                if ok:
+                    registro.marcar_completo_si_corresponde()
+                    messages.success(request, "Salida registrada correctamente.")
+                    return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
+
+                messages.error(request, "No se pudo registrar la salida.")
+                for error in errores:
+                    messages.error(request, error)
         else:
             messages.error(request, "No se pudo registrar la salida. Revisa los campos.")
+            for error in errores_codigo:
+                messages.error(request, error)
     else:
         form = RegistroSalidaAlumnoForm(instance=registro, registro_diario=registro)
 
@@ -5445,6 +6628,7 @@ def registrar_salida_alumno(request, registro_id):
         {
             "form": form,
             "registro": registro,
+            "responsables_codigo": responsables_codigo,
             "tipo_formulario": registro.formulario_bitacora,
             "dia": registro.dia_operativo,
         },

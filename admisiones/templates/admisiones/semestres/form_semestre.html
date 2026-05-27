@@ -10,6 +10,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        *, *::before, *::after{
+            box-sizing:border-box;
+        }
+
         :root{
             --azul:#1d4ed8;
             --azul-oscuro:#1e3a8a;
@@ -126,7 +130,7 @@
 
         .layout{
             display:grid;
-            grid-template-columns:1fr 345px;
+            grid-template-columns:minmax(0, 1fr) 345px;
             gap:20px;
             align-items:start;
         }
@@ -175,13 +179,19 @@
             gap:8px;
         }
 
+        .row > [class*="col-"]{
+            min-width:0;
+        }
+
         .field-card{
+            min-width:0;
+            overflow:hidden;
             background:#f8fafc;
             border:1px solid #e2e8f0;
             border-radius:18px;
-            padding:16px;
-            margin-bottom:16px;
-            height:calc(100% - 16px);
+            padding:14px;
+            margin-bottom:14px;
+            height:calc(100% - 14px);
         }
 
         .form-label{
@@ -195,6 +205,9 @@
 
         .form-control,
         .form-select{
+            width:100%;
+            max-width:100%;
+            min-width:0;
             border-radius:14px;
             border:1px solid #cbd5e1;
             padding:.72rem .9rem;
@@ -365,6 +378,205 @@
             .actions{justify-content:stretch;}
             .actions .btn{width:100%;}
         }
+
+
+
+        .compact-range-card{
+            max-width:100%;
+            min-width:0;
+            overflow:hidden;
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:14px;
+            margin-bottom:14px;
+        }
+
+        .compact-range-title{
+            font-size:.78rem;
+            font-weight:950;
+            color:#1e3a8a;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:10px;
+            min-width:0;
+        }
+
+        .compact-range-row{
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 28px minmax(0, 1fr);
+            gap:8px;
+            align-items:end;
+            max-width:100%;
+            min-width:0;
+            overflow:hidden;
+            background:white;
+            border:1px solid #dbe4ef;
+            border-radius:16px;
+            padding:12px;
+        }
+
+        .compact-range-row > div{
+            min-width:0;
+            max-width:100%;
+        }
+
+        .compact-range-arrow{
+            width:28px;
+            height:42px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#64748b;
+            font-size:1rem;
+            padding-bottom:2px;
+            flex-shrink:0;
+        }
+
+        .compact-single-row{
+            max-width:100%;
+            min-width:0;
+            overflow:hidden;
+            background:white;
+            border:1px solid #dbe4ef;
+            border-radius:16px;
+            padding:12px;
+        }
+
+        @media(max-width:768px){
+            .compact-range-row{
+                grid-template-columns:1fr;
+            }
+            .compact-range-arrow{
+                display:none;
+            }
+        }
+
+        .group-card{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:20px;
+            padding:18px;
+            margin-bottom:18px;
+        }
+
+        .group-header{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+            flex-wrap:wrap;
+        }
+
+        .group-title{
+            font-size:.82rem;
+            font-weight:950;
+            color:#1e3a8a;
+            text-transform:uppercase;
+            letter-spacing:.07em;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin:0;
+        }
+
+        .group-help{
+            color:#64748b;
+            font-size:.86rem;
+            font-weight:650;
+            margin-top:4px;
+        }
+
+        .date-pair{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+        }
+
+        .date-field{
+            background:white;
+            border:1px solid #dbe4ef;
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .date-separator{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+        }
+
+        .mini-note{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:5px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:15px;
+            padding:11px 13px;
+            font-size:.86rem;
+            font-weight:650;
+            margin-top:12px;
+        }
+
+        @media(max-width:768px){
+            .date-pair{grid-template-columns:1fr;}
+            .date-separator{display:none;}
+        }
+
+        /* =========================================================
+           ALERTAS PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon {
+            margin: 0 .65rem 0 0 !important;
+        }
+
+        .swal2-timer-progress-bar {
+            background: rgba(37, 99, 235, .45) !important;
+        }
+
+        .sistema-toast-success {
+            border-left: 7px solid #16a34a !important;
+            background: #f0fdf4 !important;
+        }
+
+        .sistema-toast-error {
+            border-left: 7px solid #dc2626 !important;
+            background: #fef2f2 !important;
+        }
+
+        .sistema-toast-warning {
+            border-left: 7px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+        .sistema-toast-info {
+            border-left: 7px solid #2563eb !important;
+            background: #eff6ff !important;
+        }
+
     </style>
 </head>
 <body>
@@ -375,39 +587,20 @@
             <img src="{% static 'img/logo.png' %}" alt="UNACH">
             <div>
                 <div class="brand-title">Configuración de Semestre</div>
-                <div class="brand-subtitle">Sprint 4 · Épica 3 · Administrador del sistema</div>
+                <div class="brand-subtitle">Administrador del sistema</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Semestres
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-house-door-fill me-1"></i> Panel TI
             </a>
-
-            {% if semestre %}
-                <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                    <i class="bi bi-eye-fill me-1"></i> Ver detalle
-                </a>
-            {% endif %}
         </div>
     </div>
 </nav>
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <section class="hero">
         <div>
@@ -419,7 +612,7 @@
             </div>
             <h1>{{ titulo|default:"Crear semestre" }}</h1>
             <p>
-                Configura el semestre, sede, fechas, personal de filtros y fecha de Encuesta de Satisfacción B.
+                Configura el semestre, sede, periodo, personal de filtros y Encuesta de Satisfacción B.
             </p>
         </div>
         <div class="hero-icon">
@@ -506,33 +699,39 @@
                         </div>
                     {% endif %}
 
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="field-card">
+                    <div class="section-title mt-2">
+                        <i class="bi bi-calendar-range-fill"></i>
+                        Fechas del semestre
+                    </div>
+
+                    <div class="compact-range-card">
+                        <div class="compact-range-title">
+                            <i class="bi bi-calendar-week-fill"></i>
+                            Periodo del semestre
+                        </div>
+
+                        <div class="compact-range-row">
+                            <div>
                                 <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
-                                    Fecha inicio <span class="text-danger">*</span>
+                                    Desde <span class="text-danger">*</span>
                                 </label>
                                 {{ form.fecha_inicio }}
-                                <div class="field-help">
-                                    Primer día del periodo del semestre.
-                                </div>
                                 {% if form.fecha_inicio.errors %}
                                     <div class="error-text">
                                         {% for error in form.fecha_inicio.errors %}{{ error }}{% endfor %}
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
 
-                        <div class="col-md-4">
-                            <div class="field-card">
+                            <div class="compact-range-arrow">
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+
+                            <div>
                                 <label for="{{ form.fecha_fin.id_for_label }}" class="form-label">
-                                    Fecha fin <span class="text-danger">*</span>
+                                    Hasta <span class="text-danger">*</span>
                                 </label>
                                 {{ form.fecha_fin }}
-                                <div class="field-help">
-                                    Último día del periodo del semestre.
-                                </div>
                                 {% if form.fecha_fin.errors %}
                                     <div class="error-text">
                                         {% for error in form.fecha_fin.errors %}{{ error }}{% endfor %}
@@ -540,22 +739,24 @@
                                 {% endif %}
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-4">
-                            <div class="field-card">
-                                <label for="{{ form.fecha_encuesta_satisfaccion.id_for_label }}" class="form-label">
-                                    Encuesta satisfacción B
-                                </label>
-                                {{ form.fecha_encuesta_satisfaccion }}
-                                <div class="field-help">
-                                    Fecha programada para generar o enviar la encuesta.
+                    <div class="compact-range-card">
+                        <div class="compact-range-title">
+                            <i class="bi bi-envelope-check-fill"></i>
+                            Encuesta de satisfacción B
+                        </div>
+
+                        <div class="compact-single-row">
+                            <label for="{{ form.fecha_encuesta_satisfaccion.id_for_label }}" class="form-label">
+                                Fecha programada
+                            </label>
+                            {{ form.fecha_encuesta_satisfaccion }}
+                            {% if form.fecha_encuesta_satisfaccion.errors %}
+                                <div class="error-text">
+                                    {% for error in form.fecha_encuesta_satisfaccion.errors %}{{ error }}{% endfor %}
                                 </div>
-                                {% if form.fecha_encuesta_satisfaccion.errors %}
-                                    <div class="error-text">
-                                        {% for error in form.fecha_encuesta_satisfaccion.errors %}{{ error }}{% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -653,7 +854,7 @@
                     </div>
 
                     <div class="actions">
-                        <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                        <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
                             <i class="bi bi-x-circle me-1"></i> Cancelar
                         </a>
 
@@ -670,7 +871,7 @@
             <div class="side-note">
                 <h6>
                     <i class="bi bi-info-circle-fill me-1"></i>
-                    Flujo correcto del Sprint 4
+                    Flujo correcto de configuración
                 </h6>
                 <p class="mb-0">
                     Primero crea el semestre. Después configura días festivos, salas, maestras, horarios y alumnos.
@@ -743,6 +944,76 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+</script>
 
 </body>
 </html>

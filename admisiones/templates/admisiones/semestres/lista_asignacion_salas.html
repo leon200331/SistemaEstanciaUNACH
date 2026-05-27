@@ -357,6 +357,52 @@
             .stats-grid{grid-template-columns:1fr;}
             .btn-row{justify-content:flex-start;}
         }
+
+        /* =========================================================
+           ALERTAS PERSONALIZADAS
+           ========================================================= */
+        .swal2-toast.sistema-toast {
+            border-radius: 18px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .18) !important;
+            border: 1px solid rgba(226, 232, 240, .95) !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-title {
+            font-size: .92rem !important;
+            font-weight: 800 !important;
+            line-height: 1.35 !important;
+            color: #0f172a !important;
+        }
+
+        .swal2-toast.sistema-toast .swal2-icon {
+            margin: 0 .65rem 0 0 !important;
+        }
+
+        .swal2-timer-progress-bar {
+            background: rgba(37, 99, 235, .45) !important;
+        }
+
+        .sistema-toast-success {
+            border-left: 7px solid #16a34a !important;
+            background: #f0fdf4 !important;
+        }
+
+        .sistema-toast-error {
+            border-left: 7px solid #dc2626 !important;
+            background: #fef2f2 !important;
+        }
+
+        .sistema-toast-warning {
+            border-left: 7px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+        .sistema-toast-info {
+            border-left: 7px solid #2563eb !important;
+            background: #eff6ff !important;
+        }
+
     </style>
 </head>
 <body>
@@ -367,13 +413,13 @@
             <img src="{% static 'img/logo.png' %}" alt="UNACH">
             <div>
                 <div class="brand-title">Asignación de Salas</div>
-                <div class="brand-subtitle">Sprint 4 · Alumnos finalizados · Administrador del sistema</div>
+                <div class="brand-subtitle">Alumnos finalizados · Administrador del sistema</div>
             </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
             {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="/gobierno-ti/" class="btn btn-outline-light btn-top">
+                <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
                     <i class="bi bi-house-door-fill me-1"></i> Panel TI
                 </a>
             {% endif %}
@@ -392,14 +438,6 @@
 
 <main class="main">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <section class="hero">
         <div>
@@ -415,7 +453,7 @@
 
     <section class="notice">
         <i class="bi bi-info-circle-fill me-2"></i>
-        <strong>Regla del Sprint 4:</strong>
+        <strong>Regla de asignación:</strong>
         solo se asignan alumnos que ya terminaron el flujo completo de inscripción y pago. La sala se toma desde la configuración del semestre.
     </section>
 
@@ -425,6 +463,9 @@
         </div>
 
         <form method="GET" class="row g-3 align-items-end">
+            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                <input type="hidden" name="origen" value="ti">
+            {% endif %}
             <div class="col-md-8">
                 <label class="form-label fw-bold text-secondary small">Semestre</label>
                 <select name="semestre" class="form-select">
@@ -600,7 +641,7 @@
                         <td>
                             <div class="btn-row">
                                 {% if semestre %}
-                                    <a href="{% url 'asignar_sala_definitiva' inscripcion.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}?semestre={{ semestre.id }}" class="btn btn-primary btn-mini">
+                                    <a href="{% url 'asignar_sala_definitiva' inscripcion.id %}?semestre={{ semestre.id }}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}&origen=ti{% endif %}" class="btn btn-primary btn-mini">
                                         <i class="bi bi-diagram-3-fill me-1"></i>
                                         Asignar
                                     </a>
@@ -638,6 +679,75 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const mensajesSistema = [
+            {% for message in messages %}
+            {
+                texto: "{{ message|escapejs }}",
+                tags: "{{ message.tags|default:'info'|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        function obtenerIcono(tags) {
+            tags = (tags || "").toLowerCase();
+
+            if (tags.includes("success")) return "success";
+            if (tags.includes("error") || tags.includes("danger")) return "error";
+            if (tags.includes("warning")) return "warning";
+
+            return "info";
+        }
+
+        function obtenerClase(icono) {
+            if (icono === "success") return "sistema-toast-success";
+            if (icono === "error") return "sistema-toast-error";
+            if (icono === "warning") return "sistema-toast-warning";
+            return "sistema-toast-info";
+        }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4300,
+            timerProgressBar: true,
+            customClass: {
+                popup: "sistema-toast"
+            },
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            }
+        });
+
+        for (const mensaje of mensajesSistema) {
+            const icono = obtenerIcono(mensaje.tags);
+
+            await Toast.fire({
+                icon: icono,
+                title: mensaje.texto,
+                customClass: {
+                    popup: `sistema-toast ${obtenerClase(icono)}`
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+    function volverPanelTI() {
+        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
+        window.location.href = "{% url 'panel_gobierno_ti' %}";
+    }
+</script>
+
 
 </body>
 </html>
