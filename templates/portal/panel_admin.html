@@ -925,6 +925,247 @@
     .dashboard-hero h2{ font-size:1.55rem; }
     .live-number{ font-size:3.4rem; }
   }
+
+
+    /* ===== Avisos de seguridad y control de acceso ===== */
+    .security-role-note{
+        border-radius:18px;
+        padding:14px 16px;
+        margin-bottom:18px;
+        display:flex;
+        align-items:flex-start;
+        gap:12px;
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left:6px solid #2563eb;
+        color:#1e3a8a;
+        font-weight:750;
+        line-height:1.45;
+    }
+    .security-role-note i{font-size:1.25rem; margin-top:2px;}
+    .security-role-note strong{display:block; color:#0f2f67; margin-bottom:2px;}
+
+
+
+/* =========================================================
+   BLOQUEO EDICIÓN TEMPORAL / COBERTURAS EN TIEMPO REAL
+   Trabajo Social: titular y suplente pueden avanzar, pero no el mismo expediente.
+   ========================================================= */
+.ts-live-coverage-panel,
+.ts-edit-lock-panel,
+.ts-review-suplencia-panel{
+  margin:0 0 20px;
+  border-radius:24px;
+  padding:18px 20px;
+  background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 55%,#ffffff 100%);
+  border:1px solid #dbeafe;
+  border-left:7px solid #2563eb;
+  box-shadow:0 16px 36px rgba(37,99,235,.11);
+  color:#0f172a;
+}
+.ts-edit-lock-panel.locked{
+  background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+  border-color:#fed7aa;
+  border-left-color:#f97316;
+}
+.ts-edit-lock-panel.mine{
+  background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 62%,#ffffff 100%);
+  border-color:#bbf7d0;
+  border-left-color:#16a34a;
+}
+.ts-live-head,
+.ts-lock-head,
+.ts-review-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:13px;
+}
+.ts-live-title,
+.ts-lock-title,
+.ts-review-title{
+  margin:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#0b2559;
+  font-size:1.08rem;
+  font-weight:950;
+  letter-spacing:-.03em;
+}
+.ts-live-title i,
+.ts-lock-title i,
+.ts-review-title i{
+  width:42px;
+  height:42px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ffffff;
+  background:linear-gradient(135deg,#2563eb,#0891b2);
+  box-shadow:0 12px 24px rgba(37,99,235,.18);
+  flex:0 0 auto;
+}
+.ts-edit-lock-panel.locked .ts-lock-title i{background:linear-gradient(135deg,#f97316,#dc2626);}
+.ts-edit-lock-panel.mine .ts-lock-title i{background:linear-gradient(135deg,#16a34a,#0891b2);}
+.ts-live-subtitle,
+.ts-lock-subtitle,
+.ts-review-subtitle{
+  margin:5px 0 0 52px;
+  color:#475569;
+  font-weight:700;
+  line-height:1.45;
+  font-size:.92rem;
+}
+.ts-live-chip,
+.ts-lock-chip,
+.ts-review-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  border-radius:999px;
+  padding:.44rem .75rem;
+  background:#dbeafe;
+  color:#1d4ed8;
+  border:1px solid #bfdbfe;
+  font-weight:950;
+  font-size:.78rem;
+  white-space:nowrap;
+}
+.ts-lock-chip.warning{background:#ffedd5;color:#9a3412;border-color:#fed7aa;}
+.ts-lock-chip.success{background:#dcfce7;color:#166534;border-color:#bbf7d0;}
+.ts-live-grid,
+.ts-lock-grid,
+.ts-review-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
+}
+.ts-live-card,
+.ts-lock-card,
+.ts-review-card{
+  background:#ffffff;
+  border:1px solid #dbeafe;
+  border-radius:20px;
+  padding:14px;
+  box-shadow:0 10px 24px rgba(15,23,42,.045);
+}
+.ts-card-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#0b2559;
+  font-weight:950;
+  margin-bottom:7px;
+}
+.ts-card-title i{
+  width:32px;
+  height:32px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eff6ff;
+  color:#2563eb;
+  flex:0 0 auto;
+}
+.ts-card-meta{
+  color:#475569;
+  font-size:.86rem;
+  font-weight:700;
+  line-height:1.46;
+}
+.ts-action-row{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.ts-action-btn{
+  min-height:40px;
+  border-radius:14px;
+  padding:0 13px;
+  border:1px solid #bfdbfe;
+  background:#fff;
+  color:#1d4ed8;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-weight:950;
+  text-decoration:none;
+  white-space:nowrap;
+  transition:.18s ease;
+}
+.ts-action-btn:hover{background:#2563eb;color:#fff;transform:translateY(-1px);box-shadow:0 12px 22px rgba(37,99,235,.18);}
+.ts-action-btn.release{border-color:#fed7aa;color:#9a3412;}
+.ts-action-btn.release:hover{background:#f97316;color:#fff;}
+.ts-action-btn.disabled,
+.ts-action-btn:disabled{opacity:.62;pointer-events:none;filter:grayscale(.2);}
+.ts-lock-note{
+  margin-top:13px;
+  border-radius:17px;
+  padding:12px 14px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  color:#334155;
+  font-weight:750;
+  line-height:1.45;
+  font-size:.9rem;
+}
+.ts-lock-note strong{color:#0b2559;}
+.ts-badge-inline{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  border-radius:999px;
+  padding:.32rem .58rem;
+  background:#ede9fe;
+  border:1px solid #ddd6fe;
+  color:#5b21b6;
+  font-size:.72rem;
+  font-weight:950;
+  white-space:nowrap;
+}
+.ts-row-locked,
+.row-bloqueo-edicion{
+  position:relative;
+  opacity:.82;
+}
+.ts-row-locked::after,
+.row-bloqueo-edicion::after{
+  content:"Expediente en atención";
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:3;
+  border-radius:999px;
+  padding:.28rem .52rem;
+  background:#ffedd5;
+  color:#9a3412;
+  border:1px solid #fed7aa;
+  font-size:.70rem;
+  font-weight:950;
+}
+.ts-form-blocked input,
+.ts-form-blocked select,
+.ts-form-blocked textarea,
+.ts-form-blocked button[type="submit"]{
+  pointer-events:none!important;
+  opacity:.65!important;
+}
+@media(max-width:760px){
+  .ts-live-subtitle,.ts-lock-subtitle,.ts-review-subtitle{margin-left:0;}
+  .ts-live-title,.ts-lock-title,.ts-review-title{align-items:flex-start;}
+  .ts-action-row{justify-content:stretch;}
+  .ts-action-btn{width:100%;}
+}
+
 </style>
 {% endblock %}
 
@@ -993,6 +1234,59 @@
   </aside>
 
   <main class="ts-main">
+
+{% if coberturas_trabajo_social_activas or bloqueos_edicion_activos or movimientos_suplencia_pendientes_trabajo_social %}
+<section class="ts-review-suplencia-panel" id="direccion-trabajo-social-coberturas">
+  <div class="ts-review-head">
+    <div>
+      <h2 class="ts-review-title"><i class="bi bi-clipboard2-pulse-fill"></i> Seguimiento de Trabajo Social</h2>
+      <p class="ts-review-subtitle">
+        Consulta de coberturas activas, expedientes en atención y registros pendientes de revisión del área titular.
+      </p>
+    </div>
+    <span class="ts-review-chip"><i class="bi bi-eye-fill"></i> Solo seguimiento</span>
+  </div>
+  <div class="ts-review-grid">
+    {% if coberturas_trabajo_social_activas %}
+      {% for cobertura in coberturas_trabajo_social_activas %}
+      <div class="ts-review-card">
+        <div class="ts-card-title"><i class="bi bi-person-check-fill"></i> Cobertura activa</div>
+        <div class="ts-card-meta">
+          <strong>Suplente:</strong> {{ cobertura.suplente.nombre_visible|default:cobertura.suplente|default:"No registrado" }}<br>
+          <strong>Titular:</strong> {{ cobertura.titular_ausente.nombre_visible|default:cobertura.titular_ausente|default:"No registrado" }}<br>
+          <strong>Horario:</strong> {{ cobertura.inicio|date:"d/m/Y H:i" }}{% if cobertura.fin %} - {{ cobertura.fin|date:"d/m/Y H:i" }}{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+    {% if bloqueos_edicion_activos %}
+      {% for bloqueo in bloqueos_edicion_activos %}
+      <div class="ts-review-card">
+        <div class="ts-card-title"><i class="bi bi-lock-fill"></i> Expediente en atención</div>
+        <div class="ts-card-meta">
+          <strong>Usuario:</strong> {{ bloqueo.usuario.nombre_visible|default:bloqueo.usuario.get_full_name|default:bloqueo.usuario.username|default:"Usuario" }}<br>
+          <strong>Motivo:</strong> {{ bloqueo.motivo|default:"Edición temporal" }}<br>
+          <strong>Última señal:</strong> {{ bloqueo.ultimo_ping|date:"d/m/Y H:i" }}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+    {% if movimientos_suplencia_pendientes_trabajo_social %}
+      {% for mov in movimientos_suplencia_pendientes_trabajo_social %}
+      <div class="ts-review-card">
+        <div class="ts-card-title"><i class="bi bi-clock-history"></i> Pendiente de titular</div>
+        <div class="ts-card-meta">
+          <strong>Acción:</strong> {{ mov.get_accion_display|default:mov.accion }}<br>
+          <strong>Realizó:</strong> {{ mov.usuario.nombre_visible|default:mov.usuario|default:"Usuario" }}<br>
+          <strong>Fecha:</strong> {{ mov.creado_en|date:"d/m/Y H:i" }}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
     <div class="ts-header">
       <div class="header-title">
         <h1>Gestión de Trabajo Social</h1>
@@ -1024,6 +1318,15 @@
           </span>
         </div>
       </div>
+    </div>
+
+
+    <div class="security-role-note">
+        <i class="bi bi-shield-lock-fill"></i>
+        <div>
+            <strong>Acceso de Trabajo Social protegido</strong>
+            El servidor valida rol, suplencia activa y modo solo consulta antes de permitir revisar, editar, pagos o códigos.
+        </div>
     </div>
 
     <section class="dashboard-hero">

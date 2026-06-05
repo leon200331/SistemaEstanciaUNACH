@@ -1132,7 +1132,27 @@
             grid-template-columns: 1fr;
         }
     }
-</style>
+
+
+    /* ===== Avisos de seguridad y control de acceso ===== */
+    .security-role-note{
+        border-radius:18px;
+        padding:14px 16px;
+        margin-bottom:18px;
+        display:flex;
+        align-items:flex-start;
+        gap:12px;
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left:6px solid #2563eb;
+        color:#1e3a8a;
+        font-weight:750;
+        line-height:1.45;
+    }
+    .security-role-note i{font-size:1.25rem; margin-top:2px;}
+    .security-role-note strong{display:block; color:#0f2f67; margin-bottom:2px;}
+
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -1222,7 +1242,16 @@
             {% endfor %}
         {% endif %}
 
-        <section class="hero-card">
+
+    <div class="security-role-note">
+        <i class="bi bi-shield-lock-fill"></i>
+        <div>
+            <strong>Portal protegido para beneficiarios</strong>
+            Este acceso es personal. El sistema valida que solo puedas consultar tu propio expediente y comprobante.
+        </div>
+    </div>
+
+    <section class="hero-card">
             <div class="hero-content">
                 <div>
                     <h1 class="hero-title">

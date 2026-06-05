@@ -946,7 +946,228 @@
       .suplencia-ts-title{align-items:flex-start;}
     }
 
-  </style>
+
+
+/* =========================================================
+   BLOQUEO EDICIÓN TEMPORAL / COBERTURAS EN TIEMPO REAL
+   Trabajo Social: titular y suplente pueden avanzar, pero no el mismo expediente.
+   ========================================================= */
+.ts-live-coverage-panel,
+.ts-edit-lock-panel,
+.ts-review-suplencia-panel{
+  margin:0 0 20px;
+  border-radius:24px;
+  padding:18px 20px;
+  background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 55%,#ffffff 100%);
+  border:1px solid #dbeafe;
+  border-left:7px solid #2563eb;
+  box-shadow:0 16px 36px rgba(37,99,235,.11);
+  color:#0f172a;
+}
+.ts-edit-lock-panel.locked{
+  background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+  border-color:#fed7aa;
+  border-left-color:#f97316;
+}
+.ts-edit-lock-panel.mine{
+  background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 62%,#ffffff 100%);
+  border-color:#bbf7d0;
+  border-left-color:#16a34a;
+}
+.ts-live-head,
+.ts-lock-head,
+.ts-review-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:13px;
+}
+.ts-live-title,
+.ts-lock-title,
+.ts-review-title{
+  margin:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#0b2559;
+  font-size:1.08rem;
+  font-weight:950;
+  letter-spacing:-.03em;
+}
+.ts-live-title i,
+.ts-lock-title i,
+.ts-review-title i{
+  width:42px;
+  height:42px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ffffff;
+  background:linear-gradient(135deg,#2563eb,#0891b2);
+  box-shadow:0 12px 24px rgba(37,99,235,.18);
+  flex:0 0 auto;
+}
+.ts-edit-lock-panel.locked .ts-lock-title i{background:linear-gradient(135deg,#f97316,#dc2626);}
+.ts-edit-lock-panel.mine .ts-lock-title i{background:linear-gradient(135deg,#16a34a,#0891b2);}
+.ts-live-subtitle,
+.ts-lock-subtitle,
+.ts-review-subtitle{
+  margin:5px 0 0 52px;
+  color:#475569;
+  font-weight:700;
+  line-height:1.45;
+  font-size:.92rem;
+}
+.ts-live-chip,
+.ts-lock-chip,
+.ts-review-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  border-radius:999px;
+  padding:.44rem .75rem;
+  background:#dbeafe;
+  color:#1d4ed8;
+  border:1px solid #bfdbfe;
+  font-weight:950;
+  font-size:.78rem;
+  white-space:nowrap;
+}
+.ts-lock-chip.warning{background:#ffedd5;color:#9a3412;border-color:#fed7aa;}
+.ts-lock-chip.success{background:#dcfce7;color:#166534;border-color:#bbf7d0;}
+.ts-live-grid,
+.ts-lock-grid,
+.ts-review-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
+}
+.ts-live-card,
+.ts-lock-card,
+.ts-review-card{
+  background:#ffffff;
+  border:1px solid #dbeafe;
+  border-radius:20px;
+  padding:14px;
+  box-shadow:0 10px 24px rgba(15,23,42,.045);
+}
+.ts-card-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#0b2559;
+  font-weight:950;
+  margin-bottom:7px;
+}
+.ts-card-title i{
+  width:32px;
+  height:32px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eff6ff;
+  color:#2563eb;
+  flex:0 0 auto;
+}
+.ts-card-meta{
+  color:#475569;
+  font-size:.86rem;
+  font-weight:700;
+  line-height:1.46;
+}
+.ts-action-row{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.ts-action-btn{
+  min-height:40px;
+  border-radius:14px;
+  padding:0 13px;
+  border:1px solid #bfdbfe;
+  background:#fff;
+  color:#1d4ed8;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-weight:950;
+  text-decoration:none;
+  white-space:nowrap;
+  transition:.18s ease;
+}
+.ts-action-btn:hover{background:#2563eb;color:#fff;transform:translateY(-1px);box-shadow:0 12px 22px rgba(37,99,235,.18);}
+.ts-action-btn.release{border-color:#fed7aa;color:#9a3412;}
+.ts-action-btn.release:hover{background:#f97316;color:#fff;}
+.ts-action-btn.disabled,
+.ts-action-btn:disabled{opacity:.62;pointer-events:none;filter:grayscale(.2);}
+.ts-lock-note{
+  margin-top:13px;
+  border-radius:17px;
+  padding:12px 14px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  color:#334155;
+  font-weight:750;
+  line-height:1.45;
+  font-size:.9rem;
+}
+.ts-lock-note strong{color:#0b2559;}
+.ts-badge-inline{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  border-radius:999px;
+  padding:.32rem .58rem;
+  background:#ede9fe;
+  border:1px solid #ddd6fe;
+  color:#5b21b6;
+  font-size:.72rem;
+  font-weight:950;
+  white-space:nowrap;
+}
+.ts-row-locked,
+.row-bloqueo-edicion{
+  position:relative;
+  opacity:.82;
+}
+.ts-row-locked::after,
+.row-bloqueo-edicion::after{
+  content:"Expediente en atención";
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:3;
+  border-radius:999px;
+  padding:.28rem .52rem;
+  background:#ffedd5;
+  color:#9a3412;
+  border:1px solid #fed7aa;
+  font-size:.70rem;
+  font-weight:950;
+}
+.ts-form-blocked input,
+.ts-form-blocked select,
+.ts-form-blocked textarea,
+.ts-form-blocked button[type="submit"]{
+  pointer-events:none!important;
+  opacity:.65!important;
+}
+@media(max-width:760px){
+  .ts-live-subtitle,.ts-lock-subtitle,.ts-review-subtitle{margin-left:0;}
+  .ts-live-title,.ts-lock-title,.ts-review-title{align-items:flex-start;}
+  .ts-action-row{justify-content:stretch;}
+  .ts-action-btn{width:100%;}
+}
+
+</style>
 </head>
 <body>
 
@@ -988,6 +1209,76 @@
 </header>
 
 <main class="page">
+
+{% if bloqueo_por_otro_usuario or expediente_bloqueado_por_otro %}
+<section class="ts-edit-lock-panel locked" id="bloqueo-edicion-trabajo-social">
+  <div class="ts-lock-head">
+    <div>
+      <h2 class="ts-lock-title"><i class="bi bi-lock-fill"></i> Expediente en atención</h2>
+      <p class="ts-lock-subtitle">
+        Este expediente está siendo atendido por otra persona. Puedes regresar y avanzar con otro expediente mientras se libera.
+      </p>
+    </div>
+    <span class="ts-lock-chip warning"><i class="bi bi-exclamation-triangle-fill"></i> Bloqueado temporalmente</span>
+  </div>
+  <div class="ts-lock-grid">
+    <div class="ts-lock-card">
+      <div class="ts-card-title"><i class="bi bi-person-workspace"></i> Usuario en atención</div>
+      <div class="ts-card-meta">
+        {{ bloqueo_por_otro_usuario.usuario.nombre_visible|default:bloqueo_por_otro_usuario.usuario.get_full_name|default:bloqueo_por_otro_usuario.usuario.username|default:"Otro usuario" }}
+        {% if bloqueo_por_otro_usuario.motivo %}<br><strong>Actividad:</strong> {{ bloqueo_por_otro_usuario.motivo }}{% endif %}
+        {% if bloqueo_por_otro_usuario.ultimo_ping %}<br><strong>Última señal:</strong> {{ bloqueo_por_otro_usuario.ultimo_ping|date:"d/m/Y H:i" }}{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="ts-action-row">
+    <a href="{{ request.META.HTTP_REFERER|default:'javascript:history.back()' }}" class="ts-action-btn release">
+      <i class="bi bi-arrow-left-circle"></i> Regresar
+    </a>
+  </div>
+</section>
+{% elif bloqueo_edicion_temporal %}
+<section class="ts-edit-lock-panel mine" id="bloqueo-edicion-trabajo-social" data-bloqueo-id="{{ bloqueo_edicion_temporal.id }}">
+  <div class="ts-lock-head">
+    <div>
+      <h2 class="ts-lock-title"><i class="bi bi-unlock-fill"></i> Expediente reservado temporalmente para ti</h2>
+      <p class="ts-lock-subtitle">
+        Mientras trabajas, este expediente no podrá ser editado por otra persona. Al guardar o salir, libera el bloqueo para que la titular o suplente pueda continuar si es necesario.
+      </p>
+    </div>
+    <span class="ts-lock-chip success"><i class="bi bi-check-circle-fill"></i> Reserva activa</span>
+  </div>
+  <div class="ts-lock-grid">
+    <div class="ts-lock-card">
+      <div class="ts-card-title"><i class="bi bi-clock-history"></i> Control temporal</div>
+      <div class="ts-card-meta">
+        <strong>Área:</strong> {{ bloqueo_edicion_temporal.area|default:"Trabajo Social" }}<br>
+        <strong>Actividad:</strong> {{ bloqueo_edicion_temporal.motivo|default:"Edición temporal" }}<br>
+        <strong>Última señal:</strong> {{ bloqueo_edicion_temporal.ultimo_ping|date:"d/m/Y H:i" }}
+      </div>
+    </div>
+    {% if bloqueo_edicion_temporal.autorizacion_suplencia %}
+    <div class="ts-lock-card">
+      <div class="ts-card-title"><i class="bi bi-person-badge-fill"></i> Cobertura relacionada</div>
+      <div class="ts-card-meta">
+        Registro vinculado a una cobertura temporal de Trabajo Social. Quedará pendiente de revisión por el área titular cuando corresponda.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="ts-action-row">
+    <form method="post" action="{% url 'liberar_bloqueo_edicion' bloqueo_edicion_temporal.id %}" class="d-inline">
+      {% csrf_token %}
+      <input type="hidden" name="observaciones" value="Bloqueo liberado manualmente desde pantalla de Trabajo Social.">
+      <input type="hidden" name="next" value="{{ request.META.HTTP_REFERER|default:'/' }}">
+      <button type="submit" class="ts-action-btn release">
+        <i class="bi bi-box-arrow-left"></i> Salir y liberar
+      </button>
+    </form>
+  </div>
+</section>
+{% endif %}
+
 
   {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
@@ -1370,6 +1661,40 @@
   });
 })();
 </script>
+
+
+
+{% if bloqueo_edicion_temporal %}
+<script>
+(function(){
+  const bloqueoId = "{{ bloqueo_edicion_temporal.id }}";
+  const pingUrl = "{% url 'ping_bloqueo_edicion' %}";
+  function getCookie(name){
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if(parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+  function pingBloqueo(){
+    if(!bloqueoId || !pingUrl) return;
+    const data = new URLSearchParams();
+    data.append('bloqueo_id', bloqueoId);
+    fetch(pingUrl, {
+      method:'POST',
+      credentials:'same-origin',
+      headers:{
+        'X-CSRFToken': getCookie('csrftoken'),
+        'X-Requested-With':'XMLHttpRequest',
+        'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body:data.toString()
+    }).catch(function(){});
+  }
+  setTimeout(pingBloqueo, 1200);
+  setInterval(pingBloqueo, 60000);
+})();
+</script>
+{% endif %}
 
 </body>
 </html>

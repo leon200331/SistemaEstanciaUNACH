@@ -34,7 +34,9 @@ from .models import (
     SeguimientoIncidenciaArchivo,
     AsistenciaPersonal,
     AutorizacionSuplencia,
+    ApoyoSalaMaestra,
     MovimientoSuplencia,
+    BloqueoEdicionTemporal,
     BitacoraLactante,
     BitacoraMaternal,
 )
@@ -2215,6 +2217,47 @@ class RevisionMovimientoSuplenciaForm(forms.ModelForm):
         if commit:
             obj.save()
         return obj
+
+
+class LiberarBloqueoEdicionTemporalForm(forms.Form):
+    """
+    Formulario pequeño para liberar manualmente un bloqueo temporal.
+    Se usa en vistas internas o botones futuros sin exponer eliminación directa.
+    """
+    confirmar = forms.BooleanField(
+        required=True,
+        label="Confirmo que deseo liberar este bloqueo temporal"
+    )
+    observaciones = forms.CharField(
+        required=False,
+        label="Observaciones",
+        widget=forms.Textarea(attrs={
+            "rows": 2,
+            "placeholder": "Opcional. Explica por qué se libera el bloqueo."
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.bloqueo = kwargs.pop("bloqueo", None)
+        self.usuario = kwargs.pop("usuario", None)
+        super().__init__(*args, **kwargs)
+        aplicar_clases_bootstrap(self)
+
+    def clean(self):
+        cleaned = super().clean()
+        if not self.bloqueo:
+            raise forms.ValidationError("No se encontró el bloqueo temporal.")
+        if self.bloqueo.estado != BloqueoEdicionTemporal.Estado.ACTIVO:
+            raise forms.ValidationError("Este bloqueo ya fue liberado o vencido.")
+        return cleaned
+
+    def liberar(self):
+        if not self.is_valid():
+            raise ValueError("El formulario de liberación no es válido.")
+        return self.bloqueo.liberar(
+            usuario=self.usuario,
+            observaciones=self.cleaned_data.get("observaciones") or "",
+        )
 
 
 class FiltroBitacoraSuplenciaForm(forms.Form):
@@ -6080,3 +6123,148 @@ class BitacoraMaternalForm(forms.ModelForm):
                 self.fields[name].widget.attrs['readonly'] = 'readonly'
                 self.fields[name].widget.attrs['style'] = 'background-color: #e9ecef; pointer-events: none;'
                 self.fields[name].widget.attrs['tabindex'] = '-1'
+
+# =========================================================
+# FORMULARIOS PARA APOYO TEMPORAL DE MAESTRAS ENTRE SALAS
+# =========================================================
+class ApoyoSalaMaestraForm(forms.ModelForm):
+    confirmar = forms.BooleanField(
+        required=True,
+        label="Confirmo que es apoyo temporal",
+        help_text="Esta opción debe usarse solo cuando una sala necesita apoyo temporal."
+    )
+
+    class Meta:
+        model = ApoyoSalaMaestra
+        fields = ["sala_apoyada", "motivo", "observaciones"]
+        widgets = {
+            "sala_apoyada": forms.Select(attrs={"class": "form-select"}),
+            "motivo": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Ej. La maestra titular no asistió, apoyo momentáneo en la sala, apoyo durante salida."
+            }),
+            "observaciones": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 2,
+                "placeholder": "Observaciones opcionales del apoyo."
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.usuario = kwargs.pop("usuario", None)
+        self.dia_operativo = kwargs.pop("dia_operativo", None)
+        self.sala_origen = kwargs.pop("sala_origen", None)
+        self.salas_disponibles = kwargs.pop("salas_disponibles", None)
+        super().__init__(*args, **kwargs)
+
+        qs = self.salas_disponibles
+        if qs is None:
+            qs = SalaSemestre.objects.all().order_by("sala__nombre", "nombre")
+
+        self.fields["sala_apoyada"].queryset = qs
+        self.fields["sala_apoyada"].empty_label = "Selecciona la sala que vas a apoyar"
+        self.fields["confirmar"].widget.attrs["class"] = "form-check-input"
+
+    def clean(self):
+        cleaned = super().clean()
+        usuario = self.usuario
+        sala_apoyada = cleaned.get("sala_apoyada")
+
+        if not usuario or not getattr(usuario, "is_authenticated", False):
+            raise forms.ValidationError("Debes iniciar sesión como maestra para apoyar una sala.")
+
+        if getattr(usuario, "area_operativa", None) != "MAESTRA":
+            raise forms.ValidationError("Solo una maestra o asistente de sala puede iniciar apoyo temporal de sala.")
+
+        if ApoyoSalaMaestra.apoyo_activo_para_maestra(usuario):
+            raise forms.ValidationError(
+                "Ya tienes un apoyo temporal activo. Finalízalo antes de apoyar otra sala."
+            )
+
+        if not sala_apoyada:
+            raise forms.ValidationError("Selecciona la sala que vas a apoyar.")
+
+        if not self.dia_operativo:
+            raise forms.ValidationError("No existe día operativo para hoy. No se puede apoyar otra sala.")
+
+        if getattr(self.dia_operativo, "fecha", None) and self.dia_operativo.fecha.weekday() in (5, 6):
+            raise forms.ValidationError("Sábado y domingo son días inhábiles. No se puede iniciar apoyo temporal.")
+
+        if not getattr(self.dia_operativo, "es_habil", False):
+            raise forms.ValidationError("Este día está marcado como inhábil. No se puede iniciar apoyo temporal.")
+
+        if getattr(self.dia_operativo, "estado", "") != DiaOperativoSemestre.EstadoDia.ABIERTO:
+            if getattr(self.dia_operativo, "estado", "") == DiaOperativoSemestre.EstadoDia.PROGRAMADO:
+                raise forms.ValidationError("Primero debes iniciar el día operativo para poder apoyar otra sala.")
+            if getattr(self.dia_operativo, "estado", "") == DiaOperativoSemestre.EstadoDia.CERRADO:
+                raise forms.ValidationError("No puedes iniciar apoyo porque el día operativo ya está cerrado.")
+            raise forms.ValidationError("El apoyo temporal solo está disponible cuando el día operativo está abierto.")
+
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.maestra_apoyo = self.usuario
+        obj.dia_operativo = self.dia_operativo
+        obj.sala_origen = self.sala_origen
+        obj.fecha = timezone.localdate()
+        obj.inicio = timezone.now()
+        obj.estado = ApoyoSalaMaestra.Estado.ACTIVO
+
+        # Si la vista conoce la titular de la sala apoyada puede asignarla después.
+        # El campo queda opcional para no bloquear la operación diaria.
+
+        if commit:
+            obj.save()
+        return obj
+
+
+class FinalizarApoyoSalaMaestraForm(forms.ModelForm):
+    confirmar_finalizacion = forms.BooleanField(
+        required=True,
+        label="Confirmo que finalizo el apoyo y regreso a mi sala original"
+    )
+
+    class Meta:
+        model = ApoyoSalaMaestra
+        fields = ["observaciones"]
+        widgets = {
+            "observaciones": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Observaciones finales del apoyo temporal."
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.usuario = kwargs.pop("usuario", None)
+        super().__init__(*args, **kwargs)
+        self.fields["confirmar_finalizacion"].widget.attrs["class"] = "form-check-input"
+
+    def clean(self):
+        cleaned = super().clean()
+        apoyo = self.instance
+
+        if not apoyo or not apoyo.pk:
+            raise forms.ValidationError("No se encontró el apoyo temporal a finalizar.")
+
+        if apoyo.estado != ApoyoSalaMaestra.Estado.ACTIVO or apoyo.fin:
+            raise forms.ValidationError("Este apoyo temporal ya fue finalizado o cancelado.")
+
+        if self.usuario and apoyo.maestra_apoyo_id != self.usuario.id:
+            raise forms.ValidationError("Solo la maestra que inició el apoyo puede finalizarlo.")
+
+        return cleaned
+
+    def save(self, commit=True):
+        apoyo = self.instance
+        apoyo.fin = timezone.now()
+        apoyo.cerrado_por = self.usuario
+        apoyo.estado = ApoyoSalaMaestra.Estado.FINALIZADO
+        apoyo.cierre_automatico = False
+        apoyo.observaciones = self.cleaned_data.get("observaciones") or apoyo.observaciones
+        if commit:
+            apoyo.save()
+        return apoyo
+

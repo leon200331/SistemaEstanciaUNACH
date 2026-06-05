@@ -112,6 +112,19 @@ urlpatterns = [
         name="revisar_trabajo_social_suplencia",
     ),
 
+    # Bloqueos temporales de edición por expediente/objeto
+    path(
+        "suplencias/bloqueos/ping/",
+        views.ping_bloqueo_edicion,
+        name="ping_bloqueo_edicion",
+    ),
+    path(
+        "suplencias/bloqueos/<int:bloqueo_id>/liberar/",
+        views.liberar_bloqueo_edicion,
+        name="liberar_bloqueo_edicion",
+    ),
+
+
     # =========================================================
     # FILTRO PSICOLOGÍA
     # =========================================================
@@ -356,6 +369,18 @@ urlpatterns = [
 
     # Panel principal de maestra
     path("dashboard-maestra/", views.dashboard_maestra, name="dashboard_maestra"),
+
+    # Apoyo temporal de sala entre maestras
+    path(
+        "operacion-diaria/apoyar-sala/",
+        views.iniciar_apoyo_sala,
+        name="iniciar_apoyo_sala",
+    ),
+    path(
+        "operacion-diaria/finalizar-apoyo-sala/",
+        views.finalizar_apoyo_sala,
+        name="finalizar_apoyo_sala",
+    ),
 
     # Día operativo por maestra
     path(

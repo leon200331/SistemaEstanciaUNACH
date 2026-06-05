@@ -1,5 +1,5 @@
 <div
-    class="responsible-row {% if principal %}principal{% endif %} {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}row-suplencia{% endif %} {% if modo_solo_consulta or solo_consulta_suplencia or registro_bloqueado_por_estado %}row-bloqueada{% endif %}"
+    class="responsible-row {% if principal %}principal{% endif %} {% if inscripcion.bloqueo_edicion_activo or inscripcion.bloqueo_por_otro_usuario or bloqueo_edicion_activo %}row-bloqueo-edicion{% endif %} {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}row-suplencia{% endif %} {% if modo_solo_consulta or solo_consulta_suplencia or registro_bloqueado_por_estado or inscripcion.bloqueo_edicion_activo or inscripcion.bloqueo_por_otro_usuario or bloqueo_edicion_activo %}row-bloqueada{% endif %}"
     data-codigo="{% if responsable.tiene_codigo %}CON_CODIGO{% else %}SIN_CODIGO{% endif %}"
     data-entrega="{% if responsable.codigo_entregado %}ENTREGADO{% else %}PENDIENTE_ENTREGA{% endif %}"
     data-origen="{% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}SUPLENCIA_TRABAJO_SOCIAL{% else %}TITULAR{% endif %}"
@@ -36,7 +36,17 @@
                     </span>
                 </div>
             {% endif %}
-        </div>
+
+
+            {% if inscripcion.bloqueo_edicion_activo or inscripcion.bloqueo_por_otro_usuario or bloqueo_edicion_activo %}
+                <div class="responsible-meta mt-1">
+                    <span class="badge-soft badge-yellow">
+                        <i class="bi bi-lock-fill"></i>
+                        Expediente en atención por otra persona
+                    </span>
+                </div>
+            {% endif %}
+</div>
     </div>
 
     <div class="status-stack">

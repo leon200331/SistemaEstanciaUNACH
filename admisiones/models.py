@@ -6677,6 +6677,320 @@ class Incidencia(models.Model):
         ]
 
 
+# =========================================================
+# BLOQUEO TEMPORAL DE EDICIÓN POR EXPEDIENTE / OBJETO
+# =========================================================
+class BloqueoEdicionTemporal(models.Model):
+    """
+    Evita que dos usuarios editen al mismo tiempo el mismo expediente o registro.
+
+    Regla operativa:
+    - Se bloquea solo el objeto abierto, no toda el área.
+    - La titular y la suplente pueden trabajar al mismo tiempo en expedientes distintos.
+    - Si una persona abandona la pantalla sin guardar, el bloqueo vence automáticamente.
+    """
+
+    class Estado(models.TextChoices):
+        ACTIVO = "ACTIVO", "Activo"
+        LIBERADO = "LIBERADO", "Liberado"
+        VENCIDO = "VENCIDO", "Vencido"
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloqueos_edicion_temporales",
+        verbose_name="Usuario que está editando"
+    )
+
+    area = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        db_index=True,
+        verbose_name="Área o módulo"
+    )
+
+    modelo = models.CharField(
+        max_length=120,
+        db_index=True,
+        verbose_name="Modelo bloqueado"
+    )
+
+    objeto_id = models.PositiveIntegerField(
+        db_index=True,
+        verbose_name="ID del objeto bloqueado"
+    )
+
+    solicitud = models.ForeignKey(
+        "admisiones.Solicitud",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloqueos_edicion_temporales",
+        verbose_name="Solicitud relacionada"
+    )
+
+    inscripcion = models.ForeignKey(
+        "admisiones.SolicitudInscripcion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloqueos_edicion_temporales",
+        verbose_name="Inscripción / expediente relacionado"
+    )
+
+    incidencia = models.ForeignKey(
+        "admisiones.Incidencia",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloqueos_edicion_temporales",
+        verbose_name="Incidencia relacionada"
+    )
+
+    autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloqueos_edicion_temporales",
+        verbose_name="Autorización de suplencia relacionada"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=Estado.choices,
+        default=Estado.ACTIVO,
+        db_index=True,
+        verbose_name="Estado del bloqueo"
+    )
+
+    iniciado_en = models.DateTimeField(default=timezone.now, verbose_name="Inicio del bloqueo")
+    ultimo_ping = models.DateTimeField(default=timezone.now, verbose_name="Última actividad")
+    liberado_en = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de liberación")
+
+    liberado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloqueos_edicion_liberados",
+        verbose_name="Liberado por"
+    )
+
+    motivo = models.CharField(
+        max_length=180,
+        blank=True,
+        default="",
+        verbose_name="Motivo del bloqueo"
+    )
+
+    observaciones = models.TextField(blank=True, default="", verbose_name="Observaciones")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    VIGENCIA_MINUTOS = 15
+
+    @staticmethod
+    def etiqueta_modelo(objeto):
+        if not objeto:
+            return ""
+        try:
+            return objeto._meta.label
+        except Exception:
+            return objeto.__class__.__name__
+
+    @staticmethod
+    def nombre_usuario(usuario):
+        if not usuario:
+            return "Sin usuario"
+        try:
+            nombre = usuario.get_full_name()
+            if nombre:
+                return nombre
+        except Exception:
+            pass
+        return getattr(usuario, "nombre_visible", None) or getattr(usuario, "email", "") or getattr(usuario, "username", "") or str(usuario)
+
+    @property
+    def usuario_nombre(self):
+        return self.nombre_usuario(self.usuario)
+
+    @property
+    def vencido(self):
+        if self.estado != self.Estado.ACTIVO:
+            return False
+        limite = timezone.now() - timedelta(minutes=self.VIGENCIA_MINUTOS)
+        return bool(self.ultimo_ping and self.ultimo_ping < limite)
+
+    @property
+    def esta_activo(self):
+        return self.estado == self.Estado.ACTIVO and not self.vencido
+
+    @property
+    def descripcion_objeto(self):
+        if self.inscripcion_id:
+            try:
+                return self.inscripcion.nombre_menor_completo
+            except Exception:
+                return f"Inscripción #{self.inscripcion_id}"
+        if self.solicitud_id:
+            try:
+                return self.solicitud.nombre_menor_completo()
+            except Exception:
+                return f"Solicitud #{self.solicitud_id}"
+        if self.incidencia_id:
+            return f"Incidencia #{self.incidencia_id}"
+        return f"{self.modelo} #{self.objeto_id}"
+
+    def tocar(self, usuario=None):
+        if usuario is not None and self.usuario_id and getattr(usuario, "id", None) != self.usuario_id:
+            return self
+        self.ultimo_ping = timezone.now()
+        self.estado = self.Estado.ACTIVO
+        self.save(update_fields=["ultimo_ping", "estado", "updated_at"])
+        return self
+
+    def liberar(self, usuario=None, observaciones=""):
+        if self.estado != self.Estado.ACTIVO:
+            return self
+        self.estado = self.Estado.LIBERADO
+        self.liberado_por = usuario
+        self.liberado_en = timezone.now()
+        if observaciones:
+            self.observaciones = observaciones
+        self.save(update_fields=["estado", "liberado_por", "liberado_en", "observaciones", "updated_at"])
+        return self
+
+    def marcar_vencido(self):
+        if self.estado == self.Estado.ACTIVO:
+            self.estado = self.Estado.VENCIDO
+            self.liberado_en = timezone.now()
+            self.save(update_fields=["estado", "liberado_en", "updated_at"])
+        return self
+
+    @classmethod
+    def limpiar_expirados(cls):
+        limite = timezone.now() - timedelta(minutes=cls.VIGENCIA_MINUTOS)
+        return cls.objects.filter(
+            estado=cls.Estado.ACTIVO,
+            ultimo_ping__lt=limite,
+        ).update(
+            estado=cls.Estado.VENCIDO,
+            liberado_en=timezone.now(),
+            updated_at=timezone.now(),
+        )
+
+    @classmethod
+    def activos(cls):
+        cls.limpiar_expirados()
+        return cls.objects.filter(estado=cls.Estado.ACTIVO)
+
+    @classmethod
+    def bloqueo_activo_para_objeto(cls, modelo, objeto_id):
+        cls.limpiar_expirados()
+        return cls.objects.filter(
+            modelo=modelo,
+            objeto_id=objeto_id,
+            estado=cls.Estado.ACTIVO,
+        ).select_related("usuario", "autorizacion_suplencia", "solicitud", "inscripcion", "incidencia").first()
+
+    @classmethod
+    def relacionar_objeto(cls, objeto):
+        datos = {"solicitud": None, "inscripcion": None, "incidencia": None}
+        try:
+            if isinstance(objeto, Solicitud):
+                datos["solicitud"] = objeto
+            elif isinstance(objeto, SolicitudInscripcion):
+                datos["inscripcion"] = objeto
+                datos["solicitud"] = getattr(objeto, "solicitud_ingreso", None)
+            elif isinstance(objeto, Incidencia):
+                datos["incidencia"] = objeto
+                datos["inscripcion"] = getattr(objeto, "alumno", None)
+                datos["solicitud"] = getattr(datos["inscripcion"], "solicitud_ingreso", None) if datos["inscripcion"] else None
+        except Exception:
+            pass
+        return datos
+
+    @classmethod
+    def intentar_bloquear(cls, usuario, objeto, area="", autorizacion_suplencia=None, motivo=""):
+        if not usuario or not getattr(usuario, "is_authenticated", False) or not objeto or not getattr(objeto, "pk", None):
+            return None, False, None
+
+        cls.limpiar_expirados()
+        modelo = cls.etiqueta_modelo(objeto)
+        objeto_id = objeto.pk
+
+        conflicto = cls.objects.filter(
+            modelo=modelo,
+            objeto_id=objeto_id,
+            estado=cls.Estado.ACTIVO,
+        ).exclude(usuario=usuario).select_related("usuario", "autorizacion_suplencia").first()
+
+        if conflicto:
+            return None, False, conflicto
+
+        propio = cls.objects.filter(
+            modelo=modelo,
+            objeto_id=objeto_id,
+            estado=cls.Estado.ACTIVO,
+            usuario=usuario,
+        ).first()
+
+        if propio:
+            propio.tocar(usuario=usuario)
+            return propio, False, None
+
+        relaciones = cls.relacionar_objeto(objeto)
+        bloqueo = cls.objects.create(
+            usuario=usuario,
+            area=str(area or "").upper(),
+            modelo=modelo,
+            objeto_id=objeto_id,
+            autorizacion_suplencia=autorizacion_suplencia,
+            motivo=motivo or "Edición temporal",
+            **relaciones,
+        )
+        return bloqueo, True, None
+
+    @classmethod
+    def liberar_para_objeto(cls, usuario, objeto, observaciones=""):
+        if not usuario or not objeto or not getattr(objeto, "pk", None):
+            return 0
+        modelo = cls.etiqueta_modelo(objeto)
+        qs = cls.objects.filter(
+            modelo=modelo,
+            objeto_id=objeto.pk,
+            usuario=usuario,
+            estado=cls.Estado.ACTIVO,
+        )
+        total = 0
+        for bloqueo in qs:
+            bloqueo.liberar(usuario=usuario, observaciones=observaciones)
+            total += 1
+        return total
+
+    def __str__(self):
+        return f"{self.usuario_nombre} editando {self.descripcion_objeto}"
+
+    class Meta:
+        ordering = ["-ultimo_ping", "-iniciado_en"]
+        verbose_name = "Bloqueo temporal de edición"
+        verbose_name_plural = "Bloqueos temporales de edición"
+        indexes = [
+            models.Index(fields=["modelo", "objeto_id", "estado"]),
+            models.Index(fields=["usuario", "estado"]),
+            models.Index(fields=["area", "estado"]),
+            models.Index(fields=["ultimo_ping"]),
+            models.Index(fields=["solicitud"]),
+            models.Index(fields=["inscripcion"]),
+            models.Index(fields=["incidencia"]),
+        ]
+
+
 class IncidenciaArchivo(models.Model):
     incidencia = models.ForeignKey(
         Incidencia,
@@ -6873,3 +7187,200 @@ class BitacoraMaternal(BitacoraBase):
 
     def __str__(self):
         return f"Bitácora Maternal - {self.alumno.solicitud_ingreso.nombres_menor} - {self.fecha}"
+
+# =========================================================
+# APOYO TEMPORAL DE MAESTRAS ENTRE SALAS
+# =========================================================
+class ApoyoSalaMaestra(models.Model):
+    """
+    Registro separado de las suplencias de filtros.
+
+    Uso operativo:
+    - Una maestra puede apoyar temporalmente otra sala sin autorización previa de Dirección.
+    - El apoyo queda registrado para consulta de Dirección y Supervisión.
+    - La responsabilidad principal sigue siendo de la sala/titular original.
+    - Los registros hechos durante el apoyo deben vincularse a este objeto desde views.py.
+    """
+
+    class Estado(models.TextChoices):
+        ACTIVO = "ACTIVO", "Activo"
+        FINALIZADO = "FINALIZADO", "Finalizado"
+        CANCELADO = "CANCELADO", "Cancelado"
+        CERRADO_AUTOMATICO = "CERRADO_AUTOMATICO", "Cerrado automáticamente"
+
+    fecha = models.DateField(
+        default=timezone.localdate,
+        db_index=True,
+        verbose_name="Fecha del apoyo"
+    )
+
+    dia_operativo = models.ForeignKey(
+        "admisiones.DiaOperativoSemestre",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="apoyos_sala_maestras",
+        verbose_name="Día operativo"
+    )
+
+    sala_origen = models.ForeignKey(
+        "admisiones.SalaSemestre",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="apoyos_salida_maestra",
+        verbose_name="Sala original de la maestra"
+    )
+
+    sala_apoyada = models.ForeignKey(
+        "admisiones.SalaSemestre",
+        on_delete=models.PROTECT,
+        related_name="apoyos_recibidos_maestras",
+        verbose_name="Sala apoyada"
+    )
+
+    maestra_apoyo = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="apoyos_sala_realizados",
+        verbose_name="Maestra que apoya"
+    )
+
+    maestra_titular_sala = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="apoyos_sala_recibidos_como_titular",
+        verbose_name="Maestra titular de la sala apoyada"
+    )
+
+    inicio = models.DateTimeField(default=timezone.now, verbose_name="Inicio del apoyo")
+    fin = models.DateTimeField(null=True, blank=True, verbose_name="Fin del apoyo")
+
+    motivo = models.TextField(
+        verbose_name="Motivo del apoyo",
+        help_text="Ej. ausencia de maestra, apoyo por saturación, apoyo temporal durante salida."
+    )
+
+    estado = models.CharField(
+        max_length=30,
+        choices=Estado.choices,
+        default=Estado.ACTIVO,
+        db_index=True,
+        verbose_name="Estado"
+    )
+
+    cerrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="apoyos_sala_cerrados",
+        verbose_name="Cerrado por"
+    )
+
+    cierre_automatico = models.BooleanField(default=False, verbose_name="Cierre automático")
+    observaciones = models.TextField(blank=True, default="", verbose_name="Observaciones")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def esta_activo(self):
+        return self.estado == self.Estado.ACTIVO and self.fin is None
+
+    @property
+    def maestra_apoyo_nombre(self):
+        usuario = self.maestra_apoyo
+        if not usuario:
+            return "--"
+        return getattr(usuario, "nombre_visible", None) or getattr(usuario, "email", "") or str(usuario)
+
+    @property
+    def maestra_titular_nombre(self):
+        usuario = self.maestra_titular_sala
+        if not usuario:
+            return "Sin titular asignada"
+        return getattr(usuario, "nombre_visible", None) or getattr(usuario, "email", "") or str(usuario)
+
+    @property
+    def duracion_minutos(self):
+        fin = self.fin or timezone.now()
+        if not self.inicio:
+            return 0
+        return max(0, int((fin - self.inicio).total_seconds() // 60))
+
+    def clean(self):
+        super().clean()
+
+        if self.maestra_apoyo_id and self.maestra_titular_sala_id and self.maestra_apoyo_id == self.maestra_titular_sala_id:
+            raise ValidationError({
+                "maestra_apoyo": "La maestra de apoyo no puede ser la misma titular de la sala."
+            })
+
+        if not str(self.motivo or "").strip():
+            raise ValidationError({"motivo": "Debes indicar el motivo del apoyo temporal."})
+
+        if self.inicio and self.fin and self.fin <= self.inicio:
+            raise ValidationError({"fin": "La hora de fin debe ser posterior al inicio."})
+
+        if self.estado == self.Estado.ACTIVO and self.maestra_apoyo_id:
+            qs = ApoyoSalaMaestra.objects.filter(
+                maestra_apoyo_id=self.maestra_apoyo_id,
+                estado=self.Estado.ACTIVO,
+                fin__isnull=True,
+            )
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError(
+                    "Esta maestra ya tiene un apoyo temporal activo. Debe finalizarlo antes de iniciar otro."
+                )
+
+    def save(self, *args, **kwargs):
+        if not self.fecha:
+            self.fecha = timezone.localdate()
+        if not self.inicio:
+            self.inicio = timezone.now()
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def finalizar(self, usuario=None, observaciones="", automatico=False):
+        self.fin = timezone.now()
+        self.cerrado_por = usuario
+        self.observaciones = observaciones or self.observaciones
+        self.cierre_automatico = bool(automatico)
+        self.estado = self.Estado.CERRADO_AUTOMATICO if automatico else self.Estado.FINALIZADO
+        self.save(update_fields=[
+            "fin", "cerrado_por", "observaciones", "cierre_automatico", "estado", "updated_at"
+        ])
+        return self
+
+    @classmethod
+    def apoyo_activo_para_maestra(cls, maestra):
+        if not maestra or not getattr(maestra, "is_authenticated", False):
+            return None
+        return cls.objects.filter(
+            maestra_apoyo=maestra,
+            estado=cls.Estado.ACTIVO,
+            fin__isnull=True,
+        ).select_related("sala_origen", "sala_apoyada", "maestra_titular_sala").order_by("-inicio").first()
+
+    @classmethod
+    def apoyos_abiertos(cls):
+        return cls.objects.filter(estado=cls.Estado.ACTIVO, fin__isnull=True)
+
+    def __str__(self):
+        return f"{self.maestra_apoyo_nombre} apoya {self.sala_apoyada} ({self.fecha})"
+
+    class Meta:
+        verbose_name = "Apoyo temporal de sala"
+        verbose_name_plural = "Apoyos temporales de sala"
+        ordering = ["-inicio"]
+        indexes = [
+            models.Index(fields=["fecha", "estado"]),
+            models.Index(fields=["maestra_apoyo", "estado"]),
+            models.Index(fields=["sala_apoyada", "estado"]),
+        ]
+

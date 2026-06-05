@@ -707,6 +707,25 @@ body{
     .donut-wrap{flex-direction:column;}
     .profile-pill{width:100%;max-width:100%;}
 }
+
+
+/* =========================================================
+   BLOQUEO TEMPORAL POR EXPEDIENTE
+   Permite trabajar expedientes diferentes sin pisar el mismo menor
+   ========================================================= */
+.bloqueos-panel{background:#fff;border:1px solid #dbeafe;border-left:7px solid var(--azul, var(--morado, #2563eb));border-radius:22px;box-shadow:0 14px 32px rgba(15,23,42,.07);padding:17px 19px;margin-bottom:20px;}
+.bloqueos-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.bloqueos-title{margin:0;color:#0b2559;font-size:1.02rem;font-weight:950;display:flex;align-items:center;gap:10px;}
+.bloqueos-title i{width:38px;height:38px;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;background:#eff6ff;color:var(--azul, var(--morado, #2563eb));}
+.bloqueos-help{margin:4px 0 0;color:#52627c;font-size:.88rem;font-weight:700;line-height:1.45;}
+.bloqueos-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.bloqueo-card{border:1px solid #e2e8f0;background:#f8fafc;border-radius:16px;padding:12px 13px;}
+.bloqueo-card strong{display:block;color:#0f172a;font-weight:950;margin-bottom:3px;}
+.bloqueo-card span{color:#64748b;font-size:.82rem;font-weight:750;}
+.bloqueo-mini{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:.32rem .55rem;font-size:.72rem;font-weight:950;margin-bottom:6px;}
+.btn-review{margin-top:4px;}
+@media(max-width:900px){.bloqueos-grid{grid-template-columns:1fr;}}
+
 </style>
 </head>
 
@@ -815,35 +834,7 @@ body{
                         Vigencia: {{ sup.inicio|date:"d/m/Y H:i" }} - {{ sup.fin|date:"d/m/Y H:i" }}
                     </div>
                     <div class="suplencia-actions">
-                        {% if sup.area_cubierta == 'NUTRICION' %}
-                        <a href="{% url 'nutricion_pendientes' %}" class="suplencia-action-btn suplencia-action-primary">
-                            <i class="bi bi-clipboard2-check"></i> Ir a pendientes de Nutrición
-                        </a>
-                        <a href="{% url 'crear_incidencia_tipo' 'NUTRICIONAL' %}?next={% url 'nutricion_pendientes' %}" class="suplencia-action-btn suplencia-action-soft">
-                            <i class="bi bi-exclamation-triangle"></i> Incidencia nutricional
-                        </a>
-                        {% elif sup.area_cubierta == 'MEDICA' %}
-                        <a href="{% url 'medico_pendientes' %}" class="suplencia-action-btn suplencia-action-primary">
-                            <i class="bi bi-clipboard2-check"></i> Ir a pendientes de Médica
-                        </a>
-                        <a href="{% url 'crear_incidencia_tipo' 'MEDICA' %}?next={% url 'medico_pendientes' %}" class="suplencia-action-btn suplencia-action-soft">
-                            <i class="bi bi-exclamation-triangle"></i> Incidencia médica
-                        </a>
-                        {% elif sup.area_cubierta == 'PSICOLOGIA' %}
-                        <a href="{% url 'psicologia_pendientes' %}" class="suplencia-action-btn suplencia-action-primary">
-                            <i class="bi bi-clipboard2-check"></i> Ir a pendientes de Psicología
-                        </a>
-                        <a href="{% url 'crear_incidencia_tipo' 'PSICOLOGICA' %}?next={% url 'psicologia_pendientes' %}" class="suplencia-action-btn suplencia-action-soft">
-                            <i class="bi bi-exclamation-triangle"></i> Incidencia psicológica
-                        </a>
-                        {% elif sup.area_cubierta == 'PEDAGOGICA' %}
-                        <a href="{% url 'dashboard_coordinadora' %}" class="suplencia-action-btn suplencia-action-primary">
-                            <i class="bi bi-box-arrow-up-right"></i> Ir a Pedagógica
-                        </a>
-                        <a href="{% url 'crear_incidencia_tipo' 'PEDAGOGICA' %}?next={% url 'dashboard_coordinadora' %}" class="suplencia-action-btn suplencia-action-soft">
-                            <i class="bi bi-exclamation-triangle"></i> Incidencia pedagógica
-                        </a>
-                        {% elif sup.dictamen_url %}
+                        {% if sup.dictamen_url %}
                         <a href="{{ sup.dictamen_url }}" class="suplencia-action-btn suplencia-action-primary">
                             <i class="bi bi-clipboard2-check"></i>
                             {{ sup.dictamen_corto|default:sup.dictamen_label|default:"Ir al área cubierta" }}
@@ -855,11 +846,29 @@ body{
                         </a>
                         {% endif %}
 
-                        {% if sup.incidencia_url and sup.area_cubierta == 'TRABAJO_SOCIAL' %}
+                        {% if sup.incidencia_url %}
                         <a href="{{ sup.incidencia_url }}" class="suplencia-action-btn suplencia-action-soft">
                             <i class="bi bi-exclamation-triangle"></i>
                             {{ sup.incidencia_label|default:"Crear incidencia" }}
                         </a>
+                        {% endif %}
+
+                        {% if sup.es_trabajo_social %}
+                            {% if sup.reporte_final_url %}
+                            <a href="{{ sup.reporte_final_url }}" class="suplencia-action-btn suplencia-action-soft">
+                                <i class="bi bi-file-earmark-text"></i> Reporte final
+                            </a>
+                            {% endif %}
+                            {% if sup.pagos_url %}
+                            <a href="{{ sup.pagos_url }}" class="suplencia-action-btn suplencia-action-soft">
+                                <i class="bi bi-cash-coin"></i> Pagos
+                            </a>
+                            {% endif %}
+                            {% if sup.codigos_url %}
+                            <a href="{{ sup.codigos_url }}" class="suplencia-action-btn suplencia-action-soft">
+                                <i class="bi bi-key-fill"></i> Códigos
+                            </a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -867,6 +876,29 @@ body{
                 <div class="suplencia-item">
                     <div class="suplencia-item-title">Suplencia activa</div>
                     <div class="suplencia-item-meta">El sistema detectó una autorización temporal, pero no hay detalle disponible para mostrar.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+
+
+        {% if bloqueos_edicion_activos %}
+        <div class="bloqueos-panel">
+            <div class="bloqueos-head">
+                <div>
+                    <h2 class="bloqueos-title"><i class="bi bi-lock-fill"></i> Expedientes en atención</h2>
+                    <p class="bloqueos-help">
+                        Se bloquea solo el expediente que otra persona está editando. Puedes avanzar con solicitudes diferentes sin afectar la cobertura activa de Psicología.
+                    </p>
+                </div>
+            </div>
+            <div class="bloqueos-grid">
+                {% for bloqueo in bloqueos_edicion_activos %}
+                <div class="bloqueo-card">
+                    <strong>{{ bloqueo.descripcion_objeto|default:"Expediente en atención" }}</strong>
+                    <span><i class="bi bi-person-badge"></i> {{ bloqueo.usuario_nombre|default:"Usuario" }} · {{ bloqueo.motivo|default:"Edición temporal" }}<br>Última actividad: {{ bloqueo.ultimo_ping|date:"H:i" }}</span>
                 </div>
                 {% endfor %}
             </div>
@@ -1033,6 +1065,14 @@ body{
                                     <td><span class="badge-soft badge-general"><i class="bi bi-check-circle"></i>{{ sol.estado }}</span></td>
                                     <td><span class="badge-soft badge-pendiente"><i class="bi bi-clock"></i>{{ sol.get_estado_psicologia_display }}</span></td>
                                     <td>
+                                        {% for bloqueo in bloqueos_edicion_activos %}
+                                            {% if bloqueo.solicitud_id == sol.id and bloqueo.usuario_id != request.user.id %}
+                                            <div class="bloqueo-mini" title="Este expediente está siendo trabajado por otra persona.">
+                                                <i class="bi bi-lock-fill"></i>
+                                                En atención por {{ bloqueo.usuario_nombre|default:"otra persona" }}
+                                            </div>
+                                            {% endif %}
+                                        {% endfor %}
                                         <a href="{% url 'psicologia_dictaminar' sol.pk %}" class="btn btn-primary btn-sm btn-review">
                                             <i class="bi bi-eye me-1"></i> Revisar
                                         </a>

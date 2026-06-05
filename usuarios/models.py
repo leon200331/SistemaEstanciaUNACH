@@ -281,6 +281,35 @@ class Usuario(AbstractUser):
     def es_trabajadora_social(self):
         return self.tipo_persona == self.TIPO_PERSONAL and self.area_operativa == self.AREA_TRABAJO_SOCIAL
 
+
+    @property
+    def es_maestra(self):
+        """
+        Identifica a maestra o asistente de sala.
+
+        Este rol NO participa en suplencias de filtros, Trabajo Social o Dirección.
+        Su apoyo se manejará con el módulo separado ApoyoSalaMaestra.
+        """
+        if self.tipo_persona != self.TIPO_PERSONAL:
+            return False
+
+        if self.area_operativa == self.AREA_MAESTRA:
+            return True
+
+        return self._pertenece_a_grupo_con_texto('maestra', 'asistente', 'sala')
+
+    @property
+    def puede_iniciar_apoyo_sala(self):
+        """
+        Define si una persona puede iniciar apoyo temporal en otra sala.
+        Solo aplica para maestras o asistentes de sala activas.
+        """
+        return (
+            self.tipo_persona == self.TIPO_PERSONAL
+            and self.estatus_operativo
+            and self.area_operativa == self.AREA_MAESTRA
+        )
+
     @property
     def puede_aparecer_en_pase_lista(self):
         """
@@ -409,6 +438,18 @@ class Usuario(AbstractUser):
             estatus_operativo=True,
             area_operativa__in=cls.AREAS_PASE_LISTA
         ).order_by('area_operativa', 'apellido_paterno', 'apellido_materno', 'nombre')
+
+
+    @classmethod
+    def maestras_para_apoyo_sala(cls):
+        """
+        Devuelve maestras/asistentes activas que pueden iniciar apoyo temporal de sala.
+        """
+        return cls.objects.filter(
+            tipo_persona=cls.TIPO_PERSONAL,
+            estatus_operativo=True,
+            area_operativa=cls.AREA_MAESTRA,
+        ).order_by('apellido_paterno', 'apellido_materno', 'nombre')
 
     # =========================================================
     # 8. VALIDACIONES ADICIONALES

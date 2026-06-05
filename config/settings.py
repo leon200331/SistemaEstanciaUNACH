@@ -278,3 +278,49 @@ QR_AUTORIZACION_ACTIVO = os.getenv("QR_AUTORIZACION_ACTIVO", "True").lower() in 
 # ======================================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ======================================================================
+# ENDURECIMIENTO DE SEGURIDAD PARA PRODUCCIÓN
+# ======================================================================
+# En local se conserva compatibilidad con DEBUG=True.
+# En servidor define las variables de entorno correspondientes.
+
+DJANGO_SECURE_COOKIES = os.getenv(
+    "DJANGO_SECURE_COOKIES",
+    "False" if DEBUG else "True",
+).lower() in ["1", "true", "yes", "si", "sí"]
+
+SESSION_COOKIE_SECURE = DJANGO_SECURE_COOKIES
+CSRF_COOKIE_SECURE = DJANGO_SECURE_COOKIES
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = os.getenv("DJANGO_CSRF_COOKIE_HTTPONLY", "False").lower() in ["1", "true", "yes", "si", "sí"]
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+SECURE_SSL_REDIRECT = os.getenv(
+    "DJANGO_SECURE_SSL_REDIRECT",
+    "False" if DEBUG else "True",
+).lower() in ["1", "true", "yes", "si", "sí"]
+
+SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "0" if DEBUG else "31536000"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv(
+    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    "False" if DEBUG else "True",
+).lower() in ["1", "true", "yes", "si", "sí"]
+SECURE_HSTS_PRELOAD = os.getenv(
+    "DJANGO_SECURE_HSTS_PRELOAD",
+    "False" if DEBUG else "True",
+).lower() in ["1", "true", "yes", "si", "sí"]
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
+
+# Límite de intentos fallidos: para activarlo de forma completa se recomienda
+# instalar django-axes y agregarlo a INSTALLED_APPS/MIDDLEWARE en producción.
+LOGIN_INTENTOS_MAXIMOS = int(os.getenv("LOGIN_INTENTOS_MAXIMOS", "5"))
+LOGIN_BLOQUEO_MINUTOS = int(os.getenv("LOGIN_BLOQUEO_MINUTOS", "15"))
+
+# Protección operativa: evita borrados masivos accidentales desde vistas internas.
+PERMITIR_BORRADO_MASIVO = os.getenv("PERMITIR_BORRADO_MASIVO", "False").lower() in ["1", "true", "yes", "si", "sí"]
+

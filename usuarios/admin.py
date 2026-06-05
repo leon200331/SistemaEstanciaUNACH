@@ -24,6 +24,7 @@ class UsuarioAdmin(UserAdmin):
         "tipo_persona",
         "area_operativa",
         "estatus_operativo",
+        "aparece_como_maestra",
         "is_staff",
     )
     list_filter = (
@@ -136,6 +137,10 @@ class UsuarioAdmin(UserAdmin):
             },
         ),
     )
+
+    @admin.display(boolean=True, description="Apoyo sala")
+    def aparece_como_maestra(self, obj):
+        return bool(getattr(obj, "puede_iniciar_apoyo_sala", False))
 
     @admin.display(boolean=True, description="Pase lista")
     def aparece_en_pase_lista(self, obj):

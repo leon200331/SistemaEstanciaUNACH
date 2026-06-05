@@ -73,6 +73,9 @@ urlpatterns = [
     ),
 
     # 7. MÓDULO ADMISIONES
+    # Ruta institucional recomendada para producción.
+    path("sistema-eiu/", include("admisiones.urls")),
+
     path("solicitud/", include("admisiones.urls")),
     path("solicitud/admisiones/", include("admisiones.urls")),
     path("admisiones/", include("admisiones.urls")),

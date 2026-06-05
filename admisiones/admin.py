@@ -9,6 +9,8 @@ from .models import (
     AsistenciaPersonal,
     AutorizacionSuplencia,
     MovimientoSuplencia,
+    ApoyoSalaMaestra,
+    BloqueoEdicionTemporal,
     Incidencia,
 )
 
@@ -346,4 +348,87 @@ class MovimientoSuplenciaAdmin(admin.ModelAdmin):
         "creado_en",
     )
     ordering = ("-creado_en",)
+    list_per_page = 30
+
+# ====================================================================
+# APOYO TEMPORAL DE MAESTRAS ENTRE SALAS
+# ====================================================================
+@admin.register(ApoyoSalaMaestra)
+class ApoyoSalaMaestraAdmin(admin.ModelAdmin):
+    list_display = (
+        "fecha",
+        "sala_apoyada",
+        "maestra_apoyo",
+        "maestra_titular_sala",
+        "estado",
+        "inicio",
+        "fin",
+        "cierre_automatico",
+    )
+    list_filter = (
+        "fecha",
+        "estado",
+        "cierre_automatico",
+        "sala_apoyada",
+    )
+    search_fields = (
+        "maestra_apoyo__username",
+        "maestra_apoyo__email",
+        "maestra_apoyo__nombre",
+        "maestra_apoyo__apellido_paterno",
+        "maestra_titular_sala__username",
+        "maestra_titular_sala__email",
+        "motivo",
+        "observaciones",
+    )
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "inicio",
+        "fin",
+    )
+    ordering = ("-inicio",)
+    list_per_page = 30
+
+
+
+# ====================================================================
+# BLOQUEOS TEMPORALES DE EDICIÓN
+# ====================================================================
+@admin.register(BloqueoEdicionTemporal)
+class BloqueoEdicionTemporalAdmin(admin.ModelAdmin):
+    list_display = (
+        "area",
+        "descripcion_objeto",
+        "usuario_nombre",
+        "estado",
+        "iniciado_en",
+        "ultimo_ping",
+        "liberado_en",
+    )
+    list_filter = (
+        "area",
+        "estado",
+        "iniciado_en",
+        "ultimo_ping",
+    )
+    search_fields = (
+        "area",
+        "modelo",
+        "motivo",
+        "observaciones",
+        "usuario__username",
+        "usuario__email",
+        "solicitud__folio",
+        "inscripcion__solicitud_ingreso__folio",
+        "incidencia__descripcion",
+    )
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "iniciado_en",
+        "ultimo_ping",
+        "liberado_en",
+    )
+    ordering = ("-ultimo_ping", "-iniciado_en")
     list_per_page = 30

@@ -25,6 +25,17 @@ except ImportError:
 from .models import AccessLog, AsignacionRolCiclo
 
 try:
+    from .decorators import ruta_por_rol as ruta_segura_por_rol, acceso_denegado_login
+except Exception:
+    ruta_segura_por_rol = None
+
+    def acceso_denegado_login(request, mensaje="Acceso denegado."):
+        logout(request)
+        messages.error(request, mensaje)
+        return redirect("login")
+
+
+try:
     # IMPORTANTE: Importamos todos los modelos necesarios de admisiones
     from admisiones.models import (
         Solicitud,
@@ -392,6 +403,11 @@ def bloquear_si_no_hay_semestre_activo(request, permitir_admin=False, sede=None)
 @login_required
 def root_redirect_view(request):
     user = request.user
+
+    if not getattr(user, "is_active", True) or not getattr(user, "estatus_operativo", True):
+        logout(request)
+        messages.error(request, "Tu cuenta está inactiva. Contacta al administrador.")
+        return redirect("login")
 
     if usuario_es_admin_sistema(user):
         return redirect("panel_gobierno_ti")

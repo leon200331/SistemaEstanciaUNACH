@@ -938,6 +938,19 @@ textarea.form-control{min-height:112px;}
 .shared-field-hint.shared-lock::after,
 .shared-field-note.locked::after{content:'Solo lectura';font-size:.66rem;}
 
+
+
+/* =========================================================
+   BLOQUEO TEMPORAL DE EDICIÓN
+   ========================================================= */
+.edit-lock-banner{background:#eff6ff;border:1px solid #bfdbfe;border-left:7px solid #2563eb;color:#1e3a8a;border-radius:20px;padding:15px 17px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 12px 28px rgba(37,99,235,.10);}
+.edit-lock-banner .lock-icon{width:42px;height:42px;border-radius:14px;background:#dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.15rem;}
+.edit-lock-banner h5{margin:0 0 4px;font-weight:950;color:#1e3a8a;}
+.edit-lock-banner p{margin:0;color:#52627c;font-weight:700;line-height:1.45;}
+.btn-release-lock{min-height:44px;border-radius:14px;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:.62rem .92rem;font-weight:950;white-space:nowrap;}
+.btn-release-lock:hover{background:#dbeafe;color:#1e40af;}
+@media(max-width:760px){.edit-lock-banner{flex-direction:column;}.btn-release-lock{width:100%;}}
+
 </style>
 </head>
 <body>
@@ -960,6 +973,15 @@ textarea.form-control{min-height:112px;}
                 <i class="bi bi-arrow-left-circle-fill"></i>
                 Regresar
             </a>
+
+            {% if bloqueo_edicion_temporal %}
+            <form method="post" action="{% url 'liberar_bloqueo_edicion' bloqueo_edicion_temporal.id %}" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'nutricion_pendientes' %}">
+                <button type="submit" class="btn-release-lock"><i class="bi bi-unlock-fill"></i> Salir y liberar</button>
+            </form>
+            {% endif %}
+
 
             <div class="profile-pill" title="Nutrióloga responsable">
                 <div class="profile-icon"><i class="bi bi-person-badge-fill"></i></div>
@@ -1767,7 +1789,18 @@ textarea.form-control{min-height:112px;}
         <div class="note-icon"><i class="bi bi-shield-check"></i></div>
         <div>
             <strong>Dictamen nutricional</strong>
-            {% if tiene_suplencia_activa %}
+
+  {% if bloqueo_edicion_temporal %}
+  <div class="edit-lock-banner">
+    <div class="lock-icon"><i class="bi bi-lock-fill"></i></div>
+    <div>
+      <h5>Expediente reservado temporalmente para ti</h5>
+      <p>Mientras esta pantalla esté abierta, otras personas verán que este menor está en atención y podrán avanzar con otros expedientes. Al guardar se libera automáticamente; también puedes usar “Salir y liberar”.</p>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if tiene_suplencia_activa %}
                 La fecha se asigna automáticamente. El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.
             {% else %}
                 La fecha se asigna automáticamente y el registro queda firmado por la nutrióloga en sesión.
@@ -2154,5 +2187,24 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 </script>
+
+
+{% if bloqueo_edicion_temporal %}
+<script>
+(function(){
+    const bloqueoId = "{{ bloqueo_edicion_temporal.id }}";
+    const pingUrl = "{% url 'ping_bloqueo_edicion' %}";
+    const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    const csrfToken = tokenInput ? tokenInput.value : "{{ csrf_token }}";
+    function pingBloqueo(){
+        if(!bloqueoId || !pingUrl){ return; }
+        fetch(pingUrl,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","X-CSRFToken":csrfToken},body:"bloqueo_id="+encodeURIComponent(bloqueoId),credentials:"same-origin"}).catch(function(){});
+    }
+    pingBloqueo();
+    window.setInterval(pingBloqueo,60000);
+})();
+</script>
+{% endif %}
+
 </body>
 </html>

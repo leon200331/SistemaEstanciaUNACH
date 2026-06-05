@@ -1229,7 +1229,459 @@
         .coverage-form-grid .full{grid-column:auto;}
     }
 
-</style>
+
+
+    /* ===== Avisos de seguridad y control de acceso ===== */
+    .security-role-note{
+        border-radius:18px;
+        padding:14px 16px;
+        margin-bottom:18px;
+        display:flex;
+        align-items:flex-start;
+        gap:12px;
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left:6px solid #2563eb;
+        color:#1e3a8a;
+        font-weight:750;
+        line-height:1.45;
+    }
+    .security-role-note i{font-size:1.25rem; margin-top:2px;}
+    .security-role-note strong{display:block; color:#0f2f67; margin-bottom:2px;}
+
+
+        /* ===== Apoyo temporal de sala ===== */
+        .apoyo-sala-card{
+            display:grid;
+            grid-template-columns:auto minmax(0,1fr) auto;
+            gap:16px;
+            align-items:center;
+            margin:0 0 20px;
+            padding:16px 18px;
+            border-radius:22px;
+            border:1px solid #bfdbfe;
+            border-left:7px solid #2563eb;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            box-shadow:0 14px 34px rgba(37,99,235,.10);
+            color:#0f172a;
+        }
+        .apoyo-sala-card.active{
+            border-color:#bbf7d0;
+            border-left-color:#16a34a;
+            background:linear-gradient(135deg,#f0fdf4,#ffffff);
+            box-shadow:0 14px 34px rgba(22,163,74,.10);
+        }
+        .apoyo-sala-card.warning{
+            border-color:#fed7aa;
+            border-left-color:#f97316;
+            background:linear-gradient(135deg,#fff7ed,#ffffff);
+            box-shadow:0 14px 34px rgba(249,115,22,.10);
+        }
+        .apoyo-sala-icon{
+            width:52px;
+            height:52px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#dbeafe;
+            color:#1d4ed8;
+            font-size:1.35rem;
+            flex-shrink:0;
+        }
+        .apoyo-sala-card.active .apoyo-sala-icon{background:#dcfce7;color:#15803d;}
+        .apoyo-sala-card.warning .apoyo-sala-icon{background:#ffedd5;color:#c2410c;}
+        .apoyo-sala-title{
+            margin:0 0 4px;
+            font-size:1.02rem;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.02em;
+        }
+        .apoyo-sala-text{
+            margin:0;
+            color:#475569;
+            font-weight:720;
+            line-height:1.45;
+        }
+        .apoyo-sala-meta{
+            margin-top:10px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+        }
+        .apoyo-sala-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:7px 10px;
+            background:#fff;
+            border:1px solid #dbeafe;
+            color:#1e40af;
+            font-size:.78rem;
+            font-weight:900;
+        }
+        .apoyo-sala-actions{
+            display:flex;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+            gap:9px;
+        }
+        .apoyo-mini-btn{
+            min-height:42px;
+            border-radius:999px;
+            padding:0 14px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            font-weight:950;
+            text-decoration:none;
+            white-space:nowrap;
+            border:1px solid #bfdbfe;
+            background:#fff;
+            color:#1d4ed8;
+            transition:.18s ease;
+        }
+        .apoyo-mini-btn:hover{
+            transform:translateY(-1px);
+            box-shadow:0 12px 24px rgba(15,23,42,.11);
+            color:#1e40af;
+        }
+        .apoyo-mini-btn.apoyo-start{
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:#fff;
+            border:0;
+        }
+        .apoyo-mini-btn.apoyo-end{
+            background:linear-gradient(135deg,#16a34a,#22c55e);
+            color:#fff;
+            border:0;
+        }
+        .apoyo-mini-btn.apoyo-danger{
+            background:linear-gradient(135deg,#dc2626,#f97316);
+            color:#fff;
+            border:0;
+        }
+        @media(max-width:760px){
+            .apoyo-sala-card{grid-template-columns:1fr;align-items:flex-start;}
+            .apoyo-sala-actions{justify-content:flex-start;}
+            .apoyo-mini-btn{width:100%;}
+        }
+
+
+
+    /* ===== Control en tiempo real: suplencias, bloqueos y expedientes en atención ===== */
+    .live-control-grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:18px;
+        margin:0 0 24px;
+    }
+    .live-control-card{
+        border:1px solid var(--ei-border);
+        border-radius:22px;
+        background:rgba(255,255,255,.96);
+        box-shadow:var(--ei-shadow-sm);
+        overflow:hidden;
+    }
+    .live-control-head{
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:14px;
+        padding:18px 20px;
+        border-bottom:1px solid #edf2fb;
+        background:linear-gradient(180deg,#ffffff,#f8fbff);
+    }
+    .live-control-title{
+        margin:0;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        color:#0b2a68;
+        font-weight:950;
+        font-size:1.05rem;
+        letter-spacing:-.02em;
+    }
+    .live-control-title i{
+        width:38px;
+        height:38px;
+        border-radius:13px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#e8f0ff;
+        color:#245bd6;
+        flex:0 0 auto;
+    }
+    .live-control-count{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        border-radius:999px;
+        padding:.46rem .75rem;
+        background:#eef4ff;
+        border:1px solid #c7d9ff;
+        color:#143b8f;
+        font-size:.8rem;
+        font-weight:950;
+        white-space:nowrap;
+    }
+    .live-control-body{padding:16px 18px 18px;display:grid;gap:12px;}
+    .live-item{
+        border:1px solid #e4ebf7;
+        border-radius:18px;
+        background:#fff;
+        padding:14px;
+        display:grid;
+        gap:7px;
+    }
+    .live-item-top{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        flex-wrap:wrap;
+    }
+    .live-item-title{color:#0b2a68;font-weight:950;line-height:1.25;}
+    .live-item-meta{color:#60749d;font-weight:700;font-size:.88rem;line-height:1.45;}
+    .live-chip{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        border-radius:999px;
+        padding:.35rem .62rem;
+        font-size:.75rem;
+        font-weight:950;
+        background:#eff6ff;
+        color:#1d4ed8;
+        border:1px solid #bfdbfe;
+        white-space:nowrap;
+    }
+    .live-chip.green{background:#effdf4;color:#15803d;border-color:#bdf3cc;}
+    .live-chip.orange{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+    .live-chip.purple{background:#f1ecff;color:#6d28d9;border-color:#ddd6fe;}
+    .live-empty{
+        border:1px dashed #cbdaf5;
+        border-radius:18px;
+        background:#f8fbff;
+        color:#60749d;
+        font-weight:750;
+        text-align:center;
+        padding:18px;
+    }
+    .lock-table-card{
+        border:1px solid var(--ei-border);
+        border-radius:20px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        overflow:hidden;
+        margin-bottom:24px;
+    }
+    .lock-table-card table{margin:0;}
+    .lock-table-card thead th{
+        background:#f6f9ff;
+        color:#173a73;
+        font-size:.84rem;
+        font-weight:950;
+        border-bottom:1px solid var(--ei-border);
+        padding:13px 14px;
+    }
+    .lock-table-card tbody td{
+        padding:13px 14px;
+        border-bottom:1px solid #edf2fb;
+        vertical-align:middle;
+        color:#263f6d;
+        font-weight:650;
+    }
+    .lock-table-card tbody tr:last-child td{border-bottom:0;}
+    @media(max-width:1100px){.live-control-grid{grid-template-columns:1fr;}}
+
+
+
+    /* ===== Incidencias integradas dentro del panel directivo ===== */
+    .incidence-hero-card{
+        border:1px solid #bfe7df;
+        background:linear-gradient(135deg,#ecfdf8,#ffffff);
+        border-radius:18px;
+        padding:16px 18px;
+        min-width:320px;
+        color:#0f766e;
+        font-weight:800;
+    }
+    .incidence-hero-card .mode-label{
+        color:#45706d;
+        font-size:.82rem;
+        font-weight:900;
+        margin-bottom:6px;
+    }
+    .incidence-hero-card .mode-title{
+        color:#0f766e;
+        font-size:1.24rem;
+        font-weight:950;
+        margin-bottom:6px;
+    }
+    .incidence-hero-card p{
+        margin:0;
+        color:#245e5a;
+        font-size:.9rem;
+        line-height:1.45;
+    }
+    .incidence-kpi-grid{
+        display:grid;
+        grid-template-columns:repeat(5,minmax(0,1fr));
+        gap:18px;
+    }
+    .incidence-kpi-card{
+        border:1px solid var(--ei-border);
+        border-radius:20px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        padding:18px;
+        min-height:150px;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+    }
+    .incidence-kpi-icon{
+        width:52px;
+        height:52px;
+        border-radius:999px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.45rem;
+        margin-bottom:14px;
+    }
+    .incidence-kpi-value{
+        color:#0a2a66;
+        font-size:2.1rem;
+        font-weight:950;
+        line-height:1;
+        margin-bottom:10px;
+    }
+    .incidence-kpi-label{
+        color:#274371;
+        font-weight:900;
+        font-size:.94rem;
+    }
+    .incidence-blue .incidence-kpi-icon{background:#e8f0ff;color:#245bd6;}
+    .incidence-orange .incidence-kpi-icon{background:#fff4df;color:#f59e0b;}
+    .incidence-green .incidence-kpi-icon{background:#e7f8eb;color:#16a34a;}
+    .incidence-red .incidence-kpi-icon{background:#ffe8eb;color:#ef4444;}
+    .incidence-purple .incidence-kpi-icon{background:#f0e9ff;color:#8b5cf6;}
+    .incidence-area-grid{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:18px;
+    }
+    .incidence-area-card{
+        border:1px solid var(--ei-border);
+        border-radius:20px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+        min-height:278px;
+    }
+    .incidence-area-body{
+        padding:18px;
+        display:grid;
+        grid-template-columns:auto minmax(0,1fr);
+        gap:14px;
+        flex:1;
+    }
+    .incidence-area-icon{
+        width:62px;
+        height:62px;
+        border-radius:999px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.75rem;
+        flex-shrink:0;
+    }
+    .incidence-area-card h3{
+        margin:0 0 6px;
+        color:#0b2a68;
+        font-size:1.16rem;
+        font-weight:950;
+    }
+    .incidence-area-card p{
+        margin:0 0 14px;
+        color:#526b9a;
+        font-weight:650;
+        line-height:1.42;
+        font-size:.9rem;
+    }
+    .incidence-count-list{
+        display:flex;
+        flex-direction:column;
+        gap:9px;
+    }
+    .incidence-count-row{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        color:#18396f;
+        font-weight:900;
+        font-size:.9rem;
+    }
+    .incidence-count-name{
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+    .incidence-dot{
+        width:10px;
+        height:10px;
+        border-radius:999px;
+        display:inline-block;
+        flex:0 0 auto;
+    }
+    .incidence-area-footer{
+        border-top:1px solid #edf2fb;
+        padding:12px 18px;
+        display:flex;
+        justify-content:flex-end;
+        background:#fbfdff;
+    }
+    .incidence-area-link{
+        border:0;
+        background:transparent;
+        font-weight:950;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+    }
+    .incidence-table-status{
+        border-radius:999px;
+        padding:.4rem .68rem;
+        font-size:.78rem;
+        font-weight:950;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        background:#eef4ff;
+        color:#143b8f;
+    }
+    @media(max-width:1400px){
+        .incidence-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+        .incidence-area-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media(max-width:768px){
+        .incidence-kpi-grid,.incidence-area-grid{grid-template-columns:1fr;}
+        .incidence-hero-card{min-width:0;}
+        .incidence-area-body{grid-template-columns:1fr;}
+    }
+
+
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -1258,13 +1710,17 @@
                 <i class="bi bi-people"></i>
                 <span>Niños</span>
             </a>
-            <a href="{% url 'panel_incidencias' %}" class="director-nav-link">
+            <a href="?seccion=incidencias" class="director-nav-link" data-view-link="incidencias">
                 <i class="bi bi-exclamation-triangle"></i>
                 <span>Incidencias</span>
             </a>
             <a href="?seccion=suplencias" class="director-nav-link" data-view-link="suplencias">
                 <i class="bi bi-person-check"></i>
                 <span>Suplencias</span>
+            </a>
+            <a href="?seccion=apoyos-sala" class="director-nav-link" data-view-link="apoyos-sala">
+                <i class="bi bi-door-open-fill"></i>
+                <span>Apoyos de sala</span>
             </a>
             <a href="?seccion=actividades" class="director-nav-link" data-view-link="actividades">
                 <i class="bi bi-calendar2-check"></i>
@@ -1333,7 +1789,7 @@
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item rounded-3 fw-bold" href="{% url 'panel_incidencias' %}">
+                            <a class="dropdown-item rounded-3 fw-bold" href="?seccion=incidencias">
                                 <i class="bi bi-clipboard2-pulse me-2"></i> Incidencias
                             </a>
                         </li>
@@ -1351,6 +1807,67 @@
         </div>
 
         <section class="view-section active" data-view-section="inicio">
+
+        <div class="security-role-note">
+            <i class="bi bi-shield-lock-fill"></i>
+            <div>
+                <strong>Acceso directivo protegido</strong>
+                Las acciones de Dirección se validan por rol en el servidor. Las rutas visibles no otorgan permisos por sí solas.
+            </div>
+        </div>
+
+
+        <div class="live-control-grid">
+            <article class="live-control-card">
+                <div class="live-control-head">
+                    <h3 class="live-control-title"><i class="bi bi-shield-check"></i> Coberturas activas</h3>
+                    <span class="live-control-count"><i class="bi bi-arrow-left-right"></i>{{ suplencias_activas_dia|length }}</span>
+                </div>
+                <div class="live-control-body">
+                    {% for sup in suplencias_activas_dia|slice:":4" %}
+                    <div class="live-item">
+                        <div class="live-item-top">
+                            <div class="live-item-title">{{ sup.get_area_cubierta_display|default:sup.area_cubierta }}</div>
+                            <span class="live-chip green"><i class="bi bi-person-check-fill"></i> Activa</span>
+                        </div>
+                        <div class="live-item-meta">
+                            <strong>Cubre:</strong> {{ sup.suplente_nombre|default:sup.suplente }} ·
+                            <strong>Titular:</strong> {{ sup.titular_nombre|default:sup.titular_ausente }}<br>
+                            <strong>Autorizó:</strong> {{ sup.autorizada_por_nombre|default:sup.autorizada_por|default:"Dirección" }}
+                            {% if sup.fin %} · <strong>Fin:</strong> {{ sup.fin|date:"d/m/Y H:i" }}{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="live-empty"><i class="bi bi-check-circle me-1"></i>No hay coberturas activas en este momento.</div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="live-control-card">
+                <div class="live-control-head">
+                    <h3 class="live-control-title"><i class="bi bi-person-lock"></i> Expedientes en atención</h3>
+                    <span class="live-control-count"><i class="bi bi-clock-history"></i>{{ bloqueos_edicion_activos|length }}</span>
+                </div>
+                <div class="live-control-body">
+                    {% for bloqueo in bloqueos_edicion_activos|slice:":4" %}
+                    <div class="live-item">
+                        <div class="live-item-top">
+                            <div class="live-item-title">{% firstof bloqueo.objeto_label bloqueo.alumno_nombre bloqueo.expediente_nombre bloqueo.modelo "Expediente" %}</div>
+                            <span class="live-chip orange"><i class="bi bi-lock-fill"></i> En uso</span>
+                        </div>
+                        <div class="live-item-meta">
+                            <strong>Área:</strong> {% firstof bloqueo.get_area_display bloqueo.get_area_cubierta_display bloqueo.area_display bloqueo.area bloqueo.area_cubierta "Área" %}<br>
+                            <strong>Usuario:</strong> {% firstof bloqueo.usuario_nombre bloqueo.usuario.nombre_completo bloqueo.usuario.email bloqueo.usuario "Usuario" %}
+                            {% if bloqueo.ultimo_ping %} · <strong>Actividad:</strong> {{ bloqueo.ultimo_ping|timesince }}{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="live-empty"><i class="bi bi-unlock me-1"></i>No hay expedientes bloqueados temporalmente.</div>
+                    {% endfor %}
+                </div>
+            </article>
+        </div>
+
         <div class="director-select-row">
             <div class="sede-selector flex-grow-1">
                 <label>Seleccionar sede</label>
@@ -1790,6 +2307,193 @@
 
         </section>
 
+        <section class="view-section" data-view-section="incidencias">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Panel de incidencias</h2>
+                        <p>Control directivo de incidencias pedagógicas, nutricionales, médicas y psicológicas. Esta vista queda integrada dentro del panel de Dirección, por eso conserva la misma viñeta lateral con todas las opciones.</p>
+                    </div>
+                    <div class="incidence-hero-card">
+                        <div class="mode-label">Modo de acceso</div>
+                        <div class="mode-title">Vista directiva</div>
+                        <p>Puedes consultar incidencias, seguimiento, evidencias, historial y resolución final sin salir del panel.</p>
+                    </div>
+                </div>
+
+                <div class="incidence-kpi-grid">
+                    <article class="incidence-kpi-card incidence-blue">
+                        <div>
+                            <div class="incidence-kpi-icon"><i class="bi bi-window-stack"></i></div>
+                            <div class="incidence-kpi-value">{% firstof total_incidencias_visibles total_incidencias_panel "0" %}</div>
+                            <div class="incidence-kpi-label">Total visibles</div>
+                        </div>
+                    </article>
+                    <article class="incidence-kpi-card incidence-orange">
+                        <div>
+                            <div class="incidence-kpi-icon"><i class="bi bi-folder2-open"></i></div>
+                            <div class="incidence-kpi-value">{% firstof total_incidencias_abiertas incidencias_abiertas "0" %}</div>
+                            <div class="incidence-kpi-label">Abiertas</div>
+                        </div>
+                    </article>
+                    <article class="incidence-kpi-card incidence-green">
+                        <div>
+                            <div class="incidence-kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
+                            <div class="incidence-kpi-value">{% firstof total_incidencias_cerradas incidencias_cerradas "0" %}</div>
+                            <div class="incidence-kpi-label">Cerradas</div>
+                        </div>
+                    </article>
+                    <article class="incidence-kpi-card incidence-red">
+                        <div>
+                            <div class="incidence-kpi-icon"><i class="bi bi-exclamation-octagon-fill"></i></div>
+                            <div class="incidence-kpi-value">{% firstof total_incidencias_riesgo_alto incidencias_riesgo_alto "0" %}</div>
+                            <div class="incidence-kpi-label">Riesgo alto</div>
+                        </div>
+                    </article>
+                    <article class="incidence-kpi-card incidence-purple">
+                        <div>
+                            <div class="incidence-kpi-icon"><i class="bi bi-chat-left-text-fill"></i></div>
+                            <div class="incidence-kpi-value">{% firstof total_incidencias_sin_seguimiento incidencias_sin_seguimiento "0" %}</div>
+                            <div class="incidence-kpi-label">Sin seguimiento</div>
+                        </div>
+                    </article>
+                </div>
+
+                <div>
+                    <h2 class="mb-1" style="color:#0b2a68;font-weight:950;">Incidencias por área</h2>
+                    <p class="section-subtitle mb-3">Selecciona visualmente un área y revisa sus conteos sin abandonar el panel directivo.</p>
+                </div>
+
+                <div class="incidence-area-grid">
+                    <article class="incidence-area-card">
+                        <div class="incidence-area-body">
+                            <div class="incidence-area-icon" style="background:#ffe8eb;color:#ef4444;"><i class="bi bi-heart-pulse-fill"></i></div>
+                            <div>
+                                <h3>Médica</h3>
+                                <p>Para Médico: síntomas, caídas, diarrea, vómito, fiebre o alergias.</p>
+                                <div class="incidence-count-list">
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#f59e0b;"></span>Abiertas</span><span>{% firstof incidencias_medicas_abiertas medicas_abiertas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#8b5cf6;"></span>En seguimiento</span><span>{% firstof incidencias_medicas_seguimiento medicas_seguimiento "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#16a34a;"></span>Cerradas</span><span>{% firstof incidencias_medicas_cerradas medicas_cerradas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#ef4444;"></span>Riesgo alto</span><span>{% firstof incidencias_medicas_riesgo medicas_riesgo "0" %}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="incidence-area-footer"><a href="#tabla-incidencias-directiva" class="incidence-area-link" style="color:#ef4444;">Ver incidencias <i class="bi bi-chevron-right"></i></a></div>
+                    </article>
+
+                    <article class="incidence-area-card">
+                        <div class="incidence-area-body">
+                            <div class="incidence-area-icon" style="background:#e7f8eb;color:#16a34a;"><i class="bi bi-apple"></i></div>
+                            <div>
+                                <h3>Nutricional</h3>
+                                <p>Para Nutriólogo: alimentación, alergias, ingesta y peso.</p>
+                                <div class="incidence-count-list">
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#f59e0b;"></span>Abiertas</span><span>{% firstof incidencias_nutricionales_abiertas nutricionales_abiertas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#8b5cf6;"></span>En seguimiento</span><span>{% firstof incidencias_nutricionales_seguimiento nutricionales_seguimiento "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#16a34a;"></span>Cerradas</span><span>{% firstof incidencias_nutricionales_cerradas nutricionales_cerradas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#ef4444;"></span>Riesgo alto</span><span>{% firstof incidencias_nutricionales_riesgo nutricionales_riesgo "0" %}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="incidence-area-footer"><a href="#tabla-incidencias-directiva" class="incidence-area-link" style="color:#16a34a;">Ver incidencias <i class="bi bi-chevron-right"></i></a></div>
+                    </article>
+
+                    <article class="incidence-area-card">
+                        <div class="incidence-area-body">
+                            <div class="incidence-area-icon" style="background:#e8f0ff;color:#245bd6;"><i class="bi bi-braces-asterisk"></i></div>
+                            <div>
+                                <h3>Psicológica</h3>
+                                <p>Para Psicólogo: comportamiento, emociones y adaptación.</p>
+                                <div class="incidence-count-list">
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#f59e0b;"></span>Abiertas</span><span>{% firstof incidencias_psicologicas_abiertas psicologicas_abiertas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#8b5cf6;"></span>En seguimiento</span><span>{% firstof incidencias_psicologicas_seguimiento psicologicas_seguimiento "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#16a34a;"></span>Cerradas</span><span>{% firstof incidencias_psicologicas_cerradas psicologicas_cerradas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#ef4444;"></span>Riesgo alto</span><span>{% firstof incidencias_psicologicas_riesgo psicologicas_riesgo "0" %}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="incidence-area-footer"><a href="#tabla-incidencias-directiva" class="incidence-area-link" style="color:#245bd6;">Ver incidencias <i class="bi bi-chevron-right"></i></a></div>
+                    </article>
+
+                    <article class="incidence-area-card">
+                        <div class="incidence-area-body">
+                            <div class="incidence-area-icon" style="background:#fff4df;color:#d97706;"><i class="bi bi-mortarboard-fill"></i></div>
+                            <div>
+                                <h3>Pedagógica</h3>
+                                <p>Para Educador: aprendizaje, conducta y participación.</p>
+                                <div class="incidence-count-list">
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#f59e0b;"></span>Abiertas</span><span>{% firstof incidencias_pedagogicas_abiertas pedagogicas_abiertas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#8b5cf6;"></span>En seguimiento</span><span>{% firstof incidencias_pedagogicas_seguimiento pedagogicas_seguimiento "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#16a34a;"></span>Cerradas</span><span>{% firstof incidencias_pedagogicas_cerradas pedagogicas_cerradas "0" %}</span></div>
+                                    <div class="incidence-count-row"><span class="incidence-count-name"><span class="incidence-dot" style="background:#ef4444;"></span>Riesgo alto</span><span>{% firstof incidencias_pedagogicas_riesgo pedagogicas_riesgo "0" %}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="incidence-area-footer"><a href="#tabla-incidencias-directiva" class="incidence-area-link" style="color:#d97706;">Ver incidencias <i class="bi bi-chevron-right"></i></a></div>
+                    </article>
+                </div>
+
+                <div class="director-card" id="tabla-incidencias-directiva">
+                    <div class="director-card-header">
+                        <h2 class="director-card-title">
+                            <span class="title-icon"><i class="bi bi-list-ul"></i></span>
+                            Lista directiva de incidencias
+                        </h2>
+                    </div>
+                    <div class="director-card-body">
+                        <div class="module-toolbar">
+                            <input type="search" class="module-search" placeholder="Buscar por menor, área, estado o responsable..." data-table-search="tabla-incidencias-panel">
+                            <a href="?seccion=incidencias" class="module-soft-btn"><i class="bi bi-arrow-repeat"></i> Actualizar</a>
+                        </div>
+                        <div class="module-table-card shadow-none">
+                            <div class="table-responsive">
+                                <table class="table align-middle" id="tabla-incidencias-panel">
+                                    <thead>
+                                        <tr>
+                                            <th>Menor / folio</th>
+                                            <th>Área</th>
+                                            <th>Tipo</th>
+                                            <th>Estado</th>
+                                            <th>Riesgo</th>
+                                            <th>Responsable</th>
+                                            <th>Última actualización</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for inc in incidencias_panel %}
+                                        <tr>
+                                            <td>
+                                                <strong>{% firstof inc.alumno_nombre inc.alumno.nombre_completo inc.menor_nombre inc.solicitud_ingreso.nombre_menor_completo "Menor sin nombre" %}</strong><br>
+                                                <small class="text-muted">Folio {% firstof inc.folio inc.alumno.folio inc.solicitud_ingreso.folio "--" %}</small>
+                                            </td>
+                                            <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2">{% firstof inc.area_display inc.get_area_display inc.area "Área" %}</span></td>
+                                            <td>{% firstof inc.tipo_display inc.get_tipo_display inc.tipo "Incidencia" %}</td>
+                                            <td><span class="incidence-table-status"><i class="bi bi-circle-fill"></i>{% firstof inc.estado_display inc.get_estado_display inc.estado "Consulta" %}</span></td>
+                                            <td>{% firstof inc.riesgo_display inc.get_riesgo_display inc.riesgo "--" %}</td>
+                                            <td>{% firstof inc.responsable_nombre inc.responsable.nombre_completo inc.responsable.email inc.creado_por.nombre_completo "--" %}</td>
+                                            <td>{% firstof inc.actualizado_en inc.fecha_actualizacion inc.creado_en inc.fecha "--" %}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="empty-state">
+                                                    <i class="bi bi-check-circle d-block fs-3 opacity-50 mb-1"></i>
+                                                    No hay incidencias registradas para mostrar en la vista directiva.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
 
 
         <section class="view-section" data-view-section="suplencias">
@@ -2111,6 +2815,66 @@
                     </div>
                 </div>
 
+
+
+                <div class="director-card">
+                    <div class="director-card-header">
+                        <h2 class="director-card-title">
+                            <span class="title-icon"><i class="bi bi-person-lock"></i></span>
+                            Expedientes en atención ahora
+                        </h2>
+                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2">
+                            {{ bloqueos_edicion_activos|length }} activos
+                        </span>
+                    </div>
+                    <div class="director-card-body">
+                        <div class="substitution-alert">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <div>
+                                El sistema bloquea solo el expediente que una persona está editando. La titular y la suplente pueden avanzar expedientes diferentes sin bloquear todo el panel.
+                            </div>
+                        </div>
+                        <div class="lock-table-card">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Área</th>
+                                            <th>Expediente</th>
+                                            <th>Usuario que atiende</th>
+                                            <th>Origen</th>
+                                            <th>Última actividad</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for bloqueo in bloqueos_edicion_activos %}
+                                        <tr>
+                                            <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2">{% firstof bloqueo.get_area_display bloqueo.get_area_cubierta_display bloqueo.area_display bloqueo.area bloqueo.area_cubierta "Área" %}</span></td>
+                                            <td>
+                                                <strong>{% firstof bloqueo.objeto_label bloqueo.alumno_nombre bloqueo.expediente_nombre bloqueo.modelo "Expediente" %}</strong><br>
+                                                <small class="text-muted">{% firstof bloqueo.modelo bloqueo.tipo_objeto "Registro" %} #{{ bloqueo.objeto_id|default:bloqueo.pk }}</small>
+                                            </td>
+                                            <td>{% firstof bloqueo.usuario_nombre bloqueo.usuario.nombre_completo bloqueo.usuario.email bloqueo.usuario "Usuario" %}</td>
+                                            <td>
+                                                {% if bloqueo.autorizacion_suplencia or bloqueo.autorizacion %}
+                                                    <span class="live-chip purple"><i class="bi bi-arrow-left-right"></i> Suplencia</span>
+                                                {% else %}
+                                                    <span class="live-chip green"><i class="bi bi-person-check"></i> Titular</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{% if bloqueo.ultimo_ping %}{{ bloqueo.ultimo_ping|timesince }}{% else %}--{% endif %}</td>
+                                            <td><span class="live-chip orange"><i class="bi bi-lock-fill"></i> Reservado</span></td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="6"><div class="empty-state">No hay expedientes en edición temporal.</div></td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="director-card">
                     <div class="director-card-header">
                         <h2 class="director-card-title">
@@ -2168,6 +2932,84 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="view-section" data-view-section="apoyos-sala">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Apoyos temporales de sala</h2>
+                        <p>Consulta de los apoyos realizados por maestras cuando una sala necesita apoyo temporal. La maestra inicia y finaliza el apoyo; Dirección solo consulta y audita.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-door-open-fill"></i></div>
+                </div>
+
+                <div class="dashboard-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                    <article class="director-card">
+                        <div class="director-card-header">
+                            <h3 class="director-card-title"><span class="title-icon"><i class="bi bi-activity"></i></span>Activos ahora</h3>
+                        </div>
+                        <div class="director-card-body">
+                            <div class="summary-total">
+                                <div class="small-label">Apoyos abiertos</div>
+                                <div class="big-number">{{ total_apoyos_sala_activos|default:0 }}</div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="director-card">
+                        <div class="director-card-header">
+                            <h3 class="director-card-title"><span class="title-icon"><i class="bi bi-calendar-check"></i></span>Del día</h3>
+                        </div>
+                        <div class="director-card-body">
+                            <div class="summary-total">
+                                <div class="small-label">Apoyos registrados hoy</div>
+                                <div class="big-number">{{ total_apoyos_sala_hoy|default:0 }}</div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="director-card">
+                    <div class="director-card-header">
+                        <h3 class="director-card-title"><span class="title-icon"><i class="bi bi-list-check"></i></span>Bitácora de apoyos de sala</h3>
+                    </div>
+                    <div class="director-card-body">
+                        <div class="director-table">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Maestra apoyo</th>
+                                        <th>Sala apoyada</th>
+                                        <th>Titular</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Estado</th>
+                                        <th>Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for apoyo in apoyos_sala_maestras %}
+                                        <tr>
+                                            <td>{{ apoyo.fecha|date:"d/m/Y" }}</td>
+                                            <td>{{ apoyo.maestra_apoyo_nombre }}</td>
+                                            <td>{{ apoyo.sala_apoyada.sala.nombre|default:apoyo.sala_apoyada }}</td>
+                                            <td>{{ apoyo.maestra_titular_nombre }}</td>
+                                            <td>{{ apoyo.inicio|date:"H:i" }}</td>
+                                            <td>{% if apoyo.fin %}{{ apoyo.fin|date:"H:i" }}{% else %}Activo{% endif %}</td>
+                                            <td><span class="status-badge"><i class="bi bi-circle-fill"></i>{{ apoyo.get_estado_display|default:apoyo.estado }}</span></td>
+                                            <td>{{ apoyo.motivo|default:"Sin motivo" }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr><td colspan="8"><div class="empty-state">No hay apoyos temporales de sala registrados.</div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -2441,9 +3283,11 @@
             inicio: ['Inicio', 'Resumen general por sede'],
             sedes: ['Sedes', 'Consulta operativa por sede'],
             ninos: ['Niños', 'Consulta y búsqueda de niñas y niños'],
+            incidencias: ['Panel de incidencias', 'Control interno de incidencias por área'],
             actividades: ['Actividades', 'Seguimiento de actividades por sala'],
             reportes: ['Reportes', 'Indicadores, porcentajes y descargas'],
             suplencias: ['Suplencias', 'Pase de lista, autorizaciones y bitácora'],
+                'apoyos-sala': ['Apoyos de sala', 'Consulta y auditoría de apoyos temporales entre maestras'],
             calendario: ['Calendario', 'Eventos, días festivos y actividades'],
             configuracion: ['Configuración', 'Datos institucionales y de Dirección']
         };

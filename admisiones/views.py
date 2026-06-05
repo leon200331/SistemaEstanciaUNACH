@@ -20,7 +20,7 @@ from xhtml2pdf import pisa
 from django.core.mail import send_mail, EmailMessage
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.db import transaction
 from django.db.models import Q, Count
 
@@ -86,6 +86,8 @@ from .forms import (
     BitacoraEstanciaForm,
     RegistroSalidaAlumnoForm,
     CerrarDiaOperacionMaestraForm,
+    ApoyoSalaMaestraForm,
+    FinalizarApoyoSalaMaestraForm,
 )
 
 from .services import (
@@ -138,6 +140,8 @@ from .models import (
     AsistenciaPersonal,
     AutorizacionSuplencia,
     MovimientoSuplencia,
+    ApoyoSalaMaestra,
+    BloqueoEdicionTemporal,
 )
 
 
@@ -166,6 +170,28 @@ def verificacion_staff(user):
     return user.is_authenticated and (
         user.is_staff or getattr(user, "tipo_persona", "") == "ADMIN"
     )
+
+
+def acceso_denegado_login(request, mensaje="No tienes permiso para entrar a este módulo. Se cerró la sesión por seguridad."):
+    """
+    Política de seguridad solicitada:
+    - Si un usuario autenticado intenta entrar a un panel ajeno, no se muestra información.
+    - Se cierra su sesión y se redirige al login.
+
+    Nota: las suplencias autorizadas por Dirección y el apoyo temporal de sala
+    se validan antes de llamar a este helper.
+    """
+    try:
+        messages.error(request, mensaje)
+    except Exception:
+        pass
+
+    try:
+        logout(request)
+    except Exception:
+        pass
+
+    return redirect("login")
 
 
 def modulo_desactivado(request, mensaje=None):
@@ -1787,6 +1813,120 @@ def bloquear_si_semestre_no_editable(request, semestre, destino_view="detalle_se
 # OPERACIÓN DIARIA DE MAESTRAS
 # =========================================================
 
+def obtener_apoyo_sala_activo_usuario(user):
+    """
+    Devuelve el apoyo temporal activo de una maestra, si existe.
+
+    Este flujo es independiente de las suplencias de filtros. No requiere
+    autorización de Dirección; se registra como apoyo temporal de sala para
+    auditoría y consulta de Supervisora/Dirección.
+    """
+    try:
+        return ApoyoSalaMaestra.apoyo_activo_para_maestra(user)
+    except Exception:
+        return None
+
+
+def usuario_es_maestra_o_asistente(user):
+    """Identifica maestras/asistentes usando area_operativa y grupos antiguos."""
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if str(getattr(user, "area_operativa", "") or "").upper() == "MAESTRA":
+        return True
+
+    roles = obtener_roles_usuario(user)
+    return any("maestra" in rol or "asistente" in rol or "sala" in rol for rol in roles)
+
+
+def obtener_sala_origen_maestra(user, semestre=None):
+    """
+    Devuelve la primera sala asignada a la maestra.
+    Se usa como sala original cuando inicia apoyo temporal en otra sala.
+    """
+    asignacion = obtener_asignaciones_maestra_operativas(user, semestre=semestre).first()
+    return asignacion.sala_semestre if asignacion else None
+
+
+def obtener_maestra_titular_sala(sala_semestre, excluir_usuario=None):
+    """
+    Devuelve la maestra titular/asignada de una sala.
+
+    Sirve para conservar la responsabilidad principal de la sala apoyada:
+    la persona que apoya puede capturar, pero la sala sigue perteneciendo
+    a su titular/asignación original.
+    """
+    if not sala_semestre:
+        return None
+
+    qs = (
+        AsignacionMaestra.objects
+        .filter(sala_semestre=sala_semestre, activo=True)
+        .select_related("maestra")
+        .order_by("rol", "id")
+    )
+
+    if excluir_usuario is not None:
+        qs = qs.exclude(maestra_id=getattr(excluir_usuario, "id", None))
+
+    asignacion = qs.first()
+    return asignacion.maestra if asignacion else None
+
+
+def obtener_salas_disponibles_para_apoyo(user, dia=None, semestre=None):
+    """Salas activas que una maestra puede seleccionar para apoyo temporal."""
+    if semestre is None:
+        semestre = getattr(dia, "semestre", None) or obtener_semestre_activo_operativo()
+
+    if not semestre:
+        return SalaSemestre.objects.none()
+
+    return (
+        SalaSemestre.objects
+        .filter(semestre=semestre, activa=True)
+        .select_related("semestre", "sala", "sala__sede")
+        .order_by("sala__nombre")
+    )
+
+
+def contexto_apoyo_sala_maestra(user, dia=None):
+    """
+    Contexto común para mostrar en los HTML de maestra:
+    - botón Apoyar otra sala,
+    - aviso de apoyo activo,
+    - botón Finalizar apoyo,
+    - bloqueo del botón cuando el día aún no está abierto.
+
+    Regla:
+    El apoyo temporal de sala solo puede iniciarse con día operativo ABIERTO.
+    """
+    apoyo = obtener_apoyo_sala_activo_usuario(user)
+    sala_apoyada = getattr(apoyo, "sala_apoyada", None) if apoyo else None
+    titular = getattr(apoyo, "maestra_titular_sala", None) if apoyo else None
+
+    dia_abierto_para_apoyo = dia_operativo_permite_apoyo_sala(dia)
+    puede_iniciar_apoyo = bool(not apoyo and dia_abierto_para_apoyo)
+    mensaje_bloqueo = ""
+
+    if not apoyo and not puede_iniciar_apoyo:
+        mensaje_bloqueo = mensaje_apoyo_sala_no_disponible(dia)
+
+    return {
+        "apoyo_sala_activo": apoyo,
+        "apoyo_temporal_sala_activo": apoyo,
+        "tiene_apoyo_sala_activo": bool(apoyo),
+        "sala_apoyada_actual": sala_apoyada,
+        "maestra_titular_sala_apoyada": titular,
+        "puede_iniciar_apoyo_sala": puede_iniciar_apoyo,
+        "dia_abierto_para_apoyo_sala": dia_abierto_para_apoyo,
+        "apoyo_sala_bloqueado_mensaje": mensaje_bloqueo,
+        "mensaje_apoyo_sala_activo": (
+            f"Estás apoyando temporalmente {sala_apoyada}. No olvides finalizar el apoyo y regresar a tu sala original."
+            if apoyo and sala_apoyada else ""
+        ),
+    }
+
+
 def usuario_tiene_asignacion_maestra_activa(user, semestre=None):
     """
     Una maestra puede operar solo si está asignada a una sala activa
@@ -1838,8 +1978,35 @@ def obtener_asignaciones_maestra_operativas(user, semestre=None):
 
 
 def obtener_salas_maestra_operativas(user, semestre=None):
+    """
+    Salas que la maestra puede operar.
+
+    Incluye:
+    - sus salas asignadas de forma normal;
+    - la sala apoyada temporalmente, si inició un ApoyoSalaMaestra activo.
+
+    La maestra de apoyo puede capturar en la sala apoyada, pero los registros
+    conservan la sala y la responsabilidad principal de la maestra titular.
+    """
+    if semestre is None:
+        semestre = obtener_semestre_activo_operativo()
+
+    if not semestre:
+        return SalaSemestre.objects.none()
+
     asignaciones = obtener_asignaciones_maestra_operativas(user, semestre=semestre)
-    ids = asignaciones.values_list("sala_semestre_id", flat=True)
+    ids = set(asignaciones.values_list("sala_semestre_id", flat=True))
+
+    apoyo = obtener_apoyo_sala_activo_usuario(user)
+    if apoyo and getattr(apoyo, "sala_apoyada_id", None):
+        try:
+            if apoyo.sala_apoyada.semestre_id == semestre.id:
+                ids.add(apoyo.sala_apoyada_id)
+        except Exception:
+            ids.add(apoyo.sala_apoyada_id)
+
+    if not ids:
+        return SalaSemestre.objects.none()
 
     return (
         SalaSemestre.objects
@@ -1942,6 +2109,50 @@ def mensaje_dia_no_operativo(dia):
     return ""
 
 
+
+def dia_operativo_permite_apoyo_sala(dia):
+    """
+    Regla específica para el botón "Apoyar otra sala".
+
+    El apoyo temporal de maestras solo puede iniciar cuando:
+    - existe día operativo,
+    - el día es laborable,
+    - el día ya fue abierto.
+
+    Esto evita que una maestra seleccione otra sala antes de iniciar la jornada.
+    """
+    return bool(
+        dia
+        and dia_operativo_es_laborable(dia)
+        and getattr(dia, "estado", "") == DiaOperativoSemestre.EstadoDia.ABIERTO
+    )
+
+
+def mensaje_apoyo_sala_no_disponible(dia):
+    """
+    Mensaje seguro para explicar por qué no se permite iniciar apoyo de sala.
+    """
+    mensaje_no_operativo = mensaje_dia_no_operativo(dia)
+    if mensaje_no_operativo:
+        return mensaje_no_operativo
+
+    if not dia:
+        return "No existe día operativo para hoy. No se puede apoyar otra sala."
+
+    estado = getattr(dia, "estado", "")
+
+    if estado == DiaOperativoSemestre.EstadoDia.PROGRAMADO:
+        return "Primero debes iniciar el día operativo para poder apoyar otra sala."
+
+    if estado == DiaOperativoSemestre.EstadoDia.CERRADO:
+        return "El día operativo ya está cerrado. No se puede iniciar apoyo temporal."
+
+    if estado != DiaOperativoSemestre.EstadoDia.ABIERTO:
+        return "El apoyo temporal solo está disponible cuando el día operativo está abierto."
+
+    return ""
+
+
 def validar_maestra_puede_operar_dia(request, dia):
     """
     Valida:
@@ -2006,11 +2217,12 @@ def obtener_registro_diario_para_maestra(request, registro_id):
 
 def asegurar_registros_alumnos_dia(dia, user):
     """
-    Crea el registro diario de cada alumno asignado a las salas de la maestra.
-    No crea duplicados.
+    Crea el registro diario de cada alumno de las salas que puede operar la maestra.
 
-    Regla:
-    - No crea registros en sábado, domingo, festivo, suspensión o día cerrado.
+    Si la maestra está apoyando otra sala, también prepara los alumnos de esa sala.
+    En ese caso, el registro conserva como creador preferente a la titular/asignada
+    de la sala apoyada; la persona que apoya queda identificada en las acciones
+    específicas como entrada_por, salida_por o capturada_por.
     """
     if (
         not dia
@@ -2020,6 +2232,7 @@ def asegurar_registros_alumnos_dia(dia, user):
         return 0
 
     salas = obtener_salas_maestra_operativas(user, semestre=dia.semestre)
+    apoyo = obtener_apoyo_sala_activo_usuario(user)
 
     inscripciones = (
         SolicitudInscripcion.objects
@@ -2035,12 +2248,22 @@ def asegurar_registros_alumnos_dia(dia, user):
     creados = 0
 
     for inscripcion in inscripciones:
+        sala = inscripcion.sala_semestre_asignada
+        creador = user
+
+        if apoyo and sala and sala.id == getattr(apoyo, "sala_apoyada_id", None):
+            creador = (
+                getattr(apoyo, "maestra_titular_sala", None)
+                or obtener_maestra_titular_sala(sala, excluir_usuario=user)
+                or user
+            )
+
         _, created = RegistroDiarioAlumno.objects.get_or_create(
             dia_operativo=dia,
             alumno=inscripcion,
             defaults={
-                "sala_semestre": inscripcion.sala_semestre_asignada,
-                "creado_por": user,
+                "sala_semestre": sala,
+                "creado_por": creador,
             },
         )
 
@@ -2795,6 +3018,132 @@ def registrar_movimiento_suplencia(
         return None
 
 
+# =========================================================
+# AUXILIARES - BLOQUEO TEMPORAL DE EDICIÓN POR EXPEDIENTE
+# =========================================================
+def contexto_bloqueos_edicion_area(area=None, limite=50):
+    """
+    Contexto ligero para que los paneles puedan mostrar quién está editando
+    un expediente o registro en ese momento.
+    """
+    try:
+        qs = BloqueoEdicionTemporal.activos().select_related(
+            "usuario",
+            "solicitud",
+            "inscripcion",
+            "incidencia",
+            "autorizacion_suplencia",
+        )
+        if area:
+            qs = qs.filter(area=str(area or "").upper())
+        bloqueos = list(qs[:limite])
+    except Exception:
+        bloqueos = []
+
+    por_solicitud = {}
+    por_inscripcion = {}
+    por_incidencia = {}
+    por_objeto = {}
+
+    for bloqueo in bloqueos:
+        if getattr(bloqueo, "solicitud_id", None):
+            por_solicitud[bloqueo.solicitud_id] = bloqueo
+        if getattr(bloqueo, "inscripcion_id", None):
+            por_inscripcion[bloqueo.inscripcion_id] = bloqueo
+        if getattr(bloqueo, "incidencia_id", None):
+            por_incidencia[bloqueo.incidencia_id] = bloqueo
+        try:
+            por_objeto[(bloqueo.modelo, bloqueo.objeto_id)] = bloqueo
+        except Exception:
+            pass
+
+    return {
+        "bloqueos_edicion_activos": bloqueos,
+        "bloqueos_edicion_por_solicitud": por_solicitud,
+        "bloqueos_edicion_por_inscripcion": por_inscripcion,
+        "bloqueos_edicion_por_incidencia": por_incidencia,
+        "bloqueos_edicion_por_objeto": por_objeto,
+    }
+
+
+def mensaje_bloqueo_edicion(conflicto):
+    if not conflicto:
+        return "Este expediente está siendo atendido por otra persona."
+    usuario = getattr(conflicto, "usuario_nombre", "Otra persona")
+    area = getattr(conflicto, "area", "") or "este módulo"
+    objeto = getattr(conflicto, "descripcion_objeto", "este expediente")
+    return (
+        f"{objeto} está siendo atendido por {usuario} en {area}. "
+        "Puedes avanzar con otros expedientes; este queda bloqueado temporalmente para evitar duplicidad."
+    )
+
+
+def iniciar_bloqueo_edicion_temporal(request, objeto, area="", autorizacion_suplencia=None, retorno="/", motivo=""):
+    """
+    Crea o refresca el bloqueo del objeto actual.
+    Devuelve (bloqueo, respuesta_redirect). Si hay conflicto, respuesta_redirect
+    contiene la redirección segura al panel indicado.
+    """
+    try:
+        bloqueo, creado, conflicto = BloqueoEdicionTemporal.intentar_bloquear(
+            usuario=request.user,
+            objeto=objeto,
+            area=area,
+            autorizacion_suplencia=autorizacion_suplencia,
+            motivo=motivo,
+        )
+    except Exception:
+        return None, None
+
+    if conflicto:
+        messages.warning(request, mensaje_bloqueo_edicion(conflicto))
+        try:
+            return None, redirect(retorno)
+        except Exception:
+            return None, redirect("/")
+
+    return bloqueo, None
+
+
+def liberar_bloqueo_edicion_temporal(request, objeto, observaciones=""):
+    try:
+        return BloqueoEdicionTemporal.liberar_para_objeto(
+            usuario=request.user,
+            objeto=objeto,
+            observaciones=observaciones,
+        )
+    except Exception:
+        return 0
+
+
+@login_required
+@require_http_methods(["POST"])
+def ping_bloqueo_edicion(request):
+    """Refresca un bloqueo desde AJAX si luego se agrega JS en los HTML."""
+    bloqueo_id = request.POST.get("bloqueo_id")
+    bloqueo = get_object_or_404(BloqueoEdicionTemporal, pk=bloqueo_id, usuario=request.user)
+    bloqueo.tocar(usuario=request.user)
+    return JsonResponse({"ok": True, "ultimo_ping": bloqueo.ultimo_ping.isoformat()})
+
+
+@login_required
+@require_http_methods(["POST"])
+def liberar_bloqueo_edicion(request, bloqueo_id):
+    """Libera un bloqueo temporal propio; Dirección/Admin también puede liberarlo."""
+    bloqueo = get_object_or_404(BloqueoEdicionTemporal, pk=bloqueo_id)
+    es_duenio = bloqueo.usuario_id == request.user.id
+    es_autorizado = usuario_es_directora(request.user) or usuario_es_admin(request.user) or getattr(request.user, "is_superuser", False)
+    if not (es_duenio or es_autorizado):
+        return acceso_denegado_login(request, "No tienes permiso para liberar este bloqueo.")
+
+    observaciones = request.POST.get("observaciones") or "Bloqueo liberado manualmente."
+    bloqueo.liberar(usuario=request.user, observaciones=observaciones)
+    siguiente = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
+    if siguiente.startswith("/") and not siguiente.startswith("//"):
+        return redirect(siguiente)
+    return redirect("/")
+
+
 def aplicar_dictamen_suplencia(sol, area_filtro, autorizacion, usuario=None):
     """
     Marca un dictamen como preliminar por suplencia.
@@ -3212,6 +3561,39 @@ def contexto_suplencias_supervisor(request, limite=100):
         # Si necesitas consultar solo acciones reales, quedan disponibles aparte.
         "movimientos_suplencia_reales": movimientos_filtrados_qs[:limite],
         "total_movimientos_suplencia_reales": movimientos_qs.count(),
+    }
+
+
+def contexto_apoyos_sala_supervisor(request=None, limite=100):
+    """
+    Apoyos temporales de maestras visibles para Supervisora y Dirección.
+    La Supervisora solo observa; no crea, edita ni cancela apoyos.
+    """
+    qs = (
+        ApoyoSalaMaestra.objects
+        .select_related(
+            "dia_operativo",
+            "sala_origen",
+            "sala_origen__sala",
+            "sala_apoyada",
+            "sala_apoyada__sala",
+            "maestra_apoyo",
+            "maestra_titular_sala",
+            "cerrado_por",
+        )
+        .order_by("-inicio", "-id")
+    )
+
+    hoy = timezone.localdate()
+    apoyos_hoy = qs.filter(fecha=hoy)
+    apoyos_activos = qs.filter(estado=ApoyoSalaMaestra.Estado.ACTIVO, fin__isnull=True)
+
+    return {
+        "apoyos_sala_maestras": qs[:limite],
+        "apoyos_sala_hoy": apoyos_hoy,
+        "apoyos_sala_activos": apoyos_activos,
+        "total_apoyos_sala_hoy": apoyos_hoy.count(),
+        "total_apoyos_sala_activos": apoyos_activos.count(),
     }
 
 
@@ -4480,6 +4862,7 @@ def panel_admisiones(request):
     context = {
         "solicitudes": solicitudes,
         "form_crear": form_crear,
+        **contexto_bloqueos_edicion_area("TRABAJO_SOCIAL"),
         **contexto_suplencias_usuario(request.user),
         **contexto_semestre_operativo(),
     }
@@ -4765,6 +5148,21 @@ def descargar_archivo_expediente(request, inscripcion_id, campo):
 def revisar_solicitud(request, pk):
     s = get_object_or_404(Solicitud, pk=pk)
     inscripcion = SolicitudInscripcion.objects.filter(solicitud_ingreso=s).first()
+    autorizacion_suplencia_actual = obtener_suplencia_activa_usuario_area(
+        request.user,
+        AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+        accion="PROCESO_SOCIAL",
+    )
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        inscripcion or s,
+        area="TRABAJO_SOCIAL",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="panel_admisiones",
+        motivo="Revisión documental de Trabajo Social",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     if request.method == "POST" and "accion_inscripcion" in request.POST:
         bloqueo = bloquear_si_no_hay_semestre_activo(request, "/")
@@ -4866,6 +5264,11 @@ def revisar_solicitud(request, pk):
         else:
             messages.error(request, "Acción de revisión no válida.")
 
+        liberar_bloqueo_edicion_temporal(
+            request,
+            inscripcion or s,
+            observaciones="Revisión documental de Trabajo Social finalizada.",
+        )
         return redirect("revisar_solicitud", pk=pk)
 
     return render(
@@ -4874,6 +5277,7 @@ def revisar_solicitud(request, pk):
         {
             "s": s,
             "inscripcion": inscripcion,
+            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
             **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
@@ -5249,8 +5653,7 @@ def portal_inscripcion(request):
 @login_required
 def psicologia_pendientes(request):
     if not usuario_tiene_permiso_area_filtro(request.user, "psicologia"):
-        messages.error(request, "No tienes permiso para entrar al filtro de Psicología.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para entrar al filtro de Psicología.")
 
     if not hay_semestre_activo_operativo():
         messages.warning(request, "No hay semestre activo. Psicología queda en modo solo consulta; no hay dictámenes pendientes para operar.")
@@ -5269,7 +5672,12 @@ def psicologia_pendientes(request):
     return render(
         request,
         "admisiones/psicologia_pendientes.html",
-        {"solicitudes": qs, **contexto_suplencias_usuario(request.user), **contexto_semestre_operativo()},
+        {
+            "solicitudes": qs,
+            **contexto_bloqueos_edicion_area("PSICOLOGIA"),
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
+        },
     )
 
 
@@ -5283,10 +5691,20 @@ def psicologia_dictaminar(request, pk):
     initial_compartido = obtener_initial_datos_compartidos_para_area(sol, area_filtro_actual)
 
     if not usuario_tiene_permiso_area_filtro(request.user, "psicologia"):
-        messages.error(request, "No tienes permiso para dictaminar Psicología.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para dictaminar Psicología.")
 
     bloqueado = not puede_editar_filtro(request.user, sol, "psicologia")
+    autorizacion_suplencia_actual = obtener_suplencia_activa_para_filtro(request.user, "psicologia")
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        sol,
+        area="PSICOLOGIA",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="psicologia_pendientes",
+        motivo="Dictamen de Psicología",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     if request.method == "POST":
         bloqueo_semestre = bloquear_si_no_hay_semestre_activo(request, "psicologia_pendientes")
@@ -5319,7 +5737,7 @@ def psicologia_dictaminar(request, pk):
                 sol.psicologia_por = request.user
                 sol.psicologia_en = timezone.now()
 
-                autorizacion_suplencia = obtener_suplencia_activa_para_filtro(request.user, "psicologia")
+                autorizacion_suplencia = autorizacion_suplencia_actual
                 if autorizacion_suplencia:
                     sol = aplicar_dictamen_suplencia(sol, "psicologia", autorizacion_suplencia, request.user)
 
@@ -5351,6 +5769,11 @@ def psicologia_dictaminar(request, pk):
                 if cierre_realizado:
                     messages.info(request, mensaje_cierre)
 
+                liberar_bloqueo_edicion_temporal(
+                    request,
+                    sol,
+                    observaciones="Dictamen de Psicología guardado correctamente.",
+                )
                 return redirect("psicologia_pendientes")
 
         for field, errors in form.errors.items():
@@ -5373,6 +5796,7 @@ def psicologia_dictaminar(request, pk):
             "insc": insc,
             "form": form,
             "bloqueado": bloqueado,
+            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
             **datos_menor,
             **contexto_datos_compartidos_filtro(sol, area_filtro_actual),
             **contexto_suplencias_usuario(request.user),
@@ -5408,8 +5832,7 @@ def psicologia_registro(request):
 @login_required
 def nutricion_pendientes(request):
     if not usuario_tiene_permiso_area_filtro(request.user, "nutricion"):
-        messages.error(request, "No tienes permiso para entrar al filtro de Nutrición.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para entrar al filtro de Nutrición.")
 
     if not hay_semestre_activo_operativo():
         messages.warning(request, "No hay semestre activo. Nutrición queda en modo solo consulta; no hay dictámenes pendientes para operar.")
@@ -5428,7 +5851,12 @@ def nutricion_pendientes(request):
     return render(
         request,
         "admisiones/nutricion_pendientes.html",
-        {"solicitudes": qs, **contexto_suplencias_usuario(request.user), **contexto_semestre_operativo()},
+        {
+            "solicitudes": qs,
+            **contexto_bloqueos_edicion_area("NUTRICION"),
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
+        },
     )
 
 
@@ -5442,10 +5870,20 @@ def nutricion_dictaminar(request, pk):
     initial_compartido = obtener_initial_datos_compartidos_para_area(sol, area_filtro_actual)
 
     if not usuario_tiene_permiso_area_filtro(request.user, "nutricion"):
-        messages.error(request, "No tienes permiso para dictaminar Nutrición.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para dictaminar Nutrición.")
 
     bloqueado = not puede_editar_filtro(request.user, sol, "nutricion")
+    autorizacion_suplencia_actual = obtener_suplencia_activa_para_filtro(request.user, "nutricion")
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        sol,
+        area="NUTRICION",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="nutricion_pendientes",
+        motivo="Dictamen de Nutrición",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     n_menor = datos_menor["nombre_nino"]
     ap_menor = datos_menor["paterno_nino"]
@@ -5482,7 +5920,7 @@ def nutricion_dictaminar(request, pk):
                 sol.nutricion_por = request.user
                 sol.nutricion_en = timezone.now()
 
-                autorizacion_suplencia = obtener_suplencia_activa_para_filtro(request.user, "nutricion")
+                autorizacion_suplencia = autorizacion_suplencia_actual
                 if autorizacion_suplencia:
                     sol = aplicar_dictamen_suplencia(sol, "nutricion", autorizacion_suplencia, request.user)
 
@@ -5514,6 +5952,11 @@ def nutricion_dictaminar(request, pk):
                 if cierre_realizado:
                     messages.info(request, mensaje_cierre)
 
+                liberar_bloqueo_edicion_temporal(
+                    request,
+                    sol,
+                    observaciones="Dictamen de Nutrición guardado correctamente.",
+                )
                 return redirect("nutricion_pendientes")
 
         for field, errors in form.errors.items():
@@ -5545,6 +5988,7 @@ def nutricion_dictaminar(request, pk):
         "insc": insc,
         "form": form,
         "bloqueado": bloqueado,
+        "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
         **datos_menor,
         **contexto_datos_compartidos_filtro(sol, area_filtro_actual),
         **contexto_suplencias_usuario(request.user),
@@ -5773,8 +6217,7 @@ def aplicar_revision_nutricion_medica(sol, historia, revision, comentario):
 @login_required
 def medico_pendientes(request):
     if not usuario_tiene_permiso_area_filtro(request.user, "medico"):
-        messages.error(request, "No tienes permiso para entrar al filtro Médico.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para entrar al filtro Médico.")
 
     if not hay_semestre_activo_operativo():
         messages.warning(request, "No hay semestre activo. Médico queda en modo solo consulta; no hay dictámenes pendientes para operar.")
@@ -5793,7 +6236,12 @@ def medico_pendientes(request):
     return render(
         request,
         "admisiones/medico_pendientes.html",
-        {"solicitudes": qs, **contexto_suplencias_usuario(request.user), **contexto_semestre_operativo()},
+        {
+            "solicitudes": qs,
+            **contexto_bloqueos_edicion_area("MEDICA"),
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
+        },
     )
 
 
@@ -5803,10 +6251,20 @@ def medico_dictaminar(request, pk):
     insc = get_object_or_404(SolicitudInscripcion, solicitud_ingreso=sol)
 
     if not usuario_tiene_permiso_area_filtro(request.user, "medico"):
-        messages.error(request, "No tienes permiso para dictaminar Médico.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para dictaminar Médico.")
 
     bloqueado = not puede_editar_filtro(request.user, sol, "medico")
+    autorizacion_suplencia_actual = obtener_suplencia_activa_para_filtro(request.user, "medico")
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        sol,
+        area="MEDICA",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="medico_pendientes",
+        motivo="Dictamen Médico",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     historia, created = HistoriaClinicaMedica.objects.get_or_create(inscripcion=insc)
     datos_menor = obtener_datos_menor_para_filtro(sol, insc)
@@ -6075,7 +6533,7 @@ def medico_dictaminar(request, pk):
                 sol.medico_por = request.user
                 sol.medico_en = timezone.now()
 
-                autorizacion_suplencia = obtener_suplencia_activa_para_filtro(request.user, "medico")
+                autorizacion_suplencia = autorizacion_suplencia_actual
                 if autorizacion_suplencia:
                     sol = aplicar_dictamen_suplencia(sol, "medico", autorizacion_suplencia, request.user)
 
@@ -6120,6 +6578,11 @@ def medico_dictaminar(request, pk):
                 if cierre_realizado:
                     messages.info(request, mensaje_cierre)
 
+                liberar_bloqueo_edicion_temporal(
+                    request,
+                    sol,
+                    observaciones="Dictamen Médico guardado correctamente.",
+                )
                 return redirect("medico_pendientes")
 
             if not form.is_valid():
@@ -6161,6 +6624,7 @@ def medico_dictaminar(request, pk):
             "revision_nutricion_medica": revision_nutricion_medica,
             "comentario_nutricion_medica": comentario_nutricion_medica,
             "bloqueado": bloqueado,
+            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
             "mama_previo": bool(h_initial["nombres_madre"]),
             "papa_previo": bool(h_initial["nombres_padre"]),
             **datos_menor,
@@ -6406,6 +6870,21 @@ def registrar_pago_valido(request, pk):
         SolicitudInscripcion.objects.select_related("solicitud_ingreso", "usuario_tutor"),
         pk=pk,
     )
+    autorizacion_suplencia_actual = obtener_suplencia_activa_usuario_area(
+        request.user,
+        AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+        accion="PROCESO_SOCIAL",
+    )
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        inscripcion,
+        area="TRABAJO_SOCIAL",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="validacion_pagos_pendientes",
+        motivo="Validación de pago por Trabajo Social",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     if inscripcion.estado != "ACEPTADO_ESPERANDO_PAGO":
         messages.warning(
@@ -6534,6 +7013,11 @@ def registrar_pago_valido(request, pk):
     else:
         messages.error(request, "Acción de pago no válida.")
 
+    liberar_bloqueo_edicion_temporal(
+        request,
+        inscripcion,
+        observaciones="Proceso de pago de Trabajo Social finalizado.",
+    )
     return redirect("validacion_pagos_pendientes")
 
 
@@ -6639,6 +7123,21 @@ def generar_codigo_responsable(request, inscripcion_id):
     preparar_inscripcion_para_form_codigo(inscripcion)
     responsables_codigo = obtener_responsables_codigo_inscripcion(inscripcion)
     responsable_codigo = obtener_responsable_codigo_desde_request(request, inscripcion)
+    autorizacion_suplencia_actual = obtener_suplencia_activa_usuario_area(
+        request.user,
+        AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+        accion="PROCESO_SOCIAL",
+    )
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        inscripcion,
+        area="TRABAJO_SOCIAL",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="codigos_responsable_pendientes",
+        motivo="Código de responsable autorizado",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     codigo_generado = None
     es_reset = bool(responsable_codigo and responsable_codigo.tiene_codigo)
@@ -6709,6 +7208,7 @@ def generar_codigo_responsable(request, inscripcion_id):
                             "responsable_codigo": responsable_codigo,
                             "codigo_generado": codigo_generado,
                             "es_reset": es_reset,
+                            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
                             **contexto_suplencias_usuario(request.user),
                             **contexto_semestre_operativo(),
                         },
@@ -6734,6 +7234,7 @@ def generar_codigo_responsable(request, inscripcion_id):
             "responsable_codigo": responsable_codigo,
             "codigo_generado": codigo_generado,
             "es_reset": es_reset,
+            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
             **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
@@ -6780,6 +7281,22 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
             f"{reverse('generar_codigo_responsable', kwargs={'inscripcion_id': inscripcion.id})}?responsable_codigo_id={responsable_codigo.id}"
         )
 
+    autorizacion_suplencia_actual = obtener_suplencia_activa_usuario_area(
+        request.user,
+        AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+        accion="PROCESO_SOCIAL",
+    )
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        inscripcion,
+        area="TRABAJO_SOCIAL",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="codigos_responsable_pendientes",
+        motivo="Entrega de código de responsable autorizado",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
+
     if request.method == "POST":
         form = ConfirmarEntregaCodigoResponsableForm(request.POST)
 
@@ -6810,6 +7327,11 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
                     "El formulario es válido, pero no se pudo guardar la entrega."
                 )
 
+            liberar_bloqueo_edicion_temporal(
+                request,
+                inscripcion,
+                observaciones="Entrega de código y credencial registrada.",
+            )
             return redirect("codigos_responsable_pendientes")
 
         messages.error(request, "No se pudo confirmar la entrega. Revisa los campos.")
@@ -6825,6 +7347,7 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
             "inscripcion": inscripcion,
             "responsables_codigo": responsables_codigo,
             "responsable_codigo": responsable_codigo,
+            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
             **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
@@ -10143,6 +10666,7 @@ def reporte_final_pendientes(request):
         "admisiones/reporte_final_pendientes.html",
         {
             "inscripciones": inscripciones,
+            **contexto_bloqueos_edicion_area("TRABAJO_SOCIAL"),
             **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
@@ -10164,6 +10688,21 @@ def dictaminar_reporte_final(request, pk):
         pk=pk,
     )
     solicitud = inscripcion.solicitud_ingreso
+    autorizacion_suplencia_actual = obtener_suplencia_activa_usuario_area(
+        request.user,
+        AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+        accion="PROCESO_SOCIAL",
+    )
+    bloqueo_edicion_temporal, respuesta_bloqueo = iniciar_bloqueo_edicion_temporal(
+        request,
+        inscripcion,
+        area="TRABAJO_SOCIAL",
+        autorizacion_suplencia=autorizacion_suplencia_actual,
+        retorno="reporte_final_pendientes",
+        motivo="Reporte Final de Ingreso",
+    )
+    if respuesta_bloqueo:
+        return respuesta_bloqueo
 
     if inscripcion.estado != "REVISION_FINAL_TS":
         messages.warning(
@@ -10219,6 +10758,11 @@ def dictaminar_reporte_final(request, pk):
                     f"Reporte Final registrado como ACEPTADO y pasó a Dirección, pero ocurrió un problema con el PDF: {mensaje_pdf}"
                 )
 
+            liberar_bloqueo_edicion_temporal(
+                request,
+                inscripcion,
+                observaciones="Reporte Final de Ingreso aceptado.",
+            )
             return redirect("reporte_final_pendientes")
 
         elif accion in ["RECHAZAR", "RECHAZADO"]:
@@ -10260,6 +10804,11 @@ def dictaminar_reporte_final(request, pk):
                     f"Reporte Final registrado como RECHAZADO, pero ocurrió un problema con el PDF: {mensaje_pdf}"
                 )
 
+            liberar_bloqueo_edicion_temporal(
+                request,
+                inscripcion,
+                observaciones="Reporte Final de Ingreso rechazado.",
+            )
             return redirect("reporte_final_pendientes")
 
         messages.error(request, "Acción no válida para el Reporte Final.")
@@ -10270,6 +10819,7 @@ def dictaminar_reporte_final(request, pk):
         {
             "inscripcion": inscripcion,
             "solicitud": solicitud,
+            "bloqueo_edicion_temporal": bloqueo_edicion_temporal,
             **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
@@ -10289,6 +10839,142 @@ def asignar_sala_definitiva_legacy_desactivada(request, inscripcion_id):
     return modulo_desactivado(
         request,
         "La asignación definitiva de sala está desactivada en esta versión.",
+    )
+
+
+@login_required
+def iniciar_apoyo_sala(request):
+    """
+    Inicia apoyo temporal de una maestra en otra sala.
+
+    No requiere autorización de Dirección porque es un movimiento operativo rápido,
+    pero queda registrado y visible para Supervisora/Dirección.
+    """
+    semestre = obtener_semestre_activo_operativo()
+
+    if not usuario_es_maestra_o_asistente(request.user):
+        return acceso_denegado_login(request, "Solo una maestra o asistente de sala puede apoyar otra sala.")
+
+    if not semestre:
+        messages.warning(request, "No hay semestre activo. No se puede iniciar apoyo temporal de sala.")
+        return redirect("dashboard_maestra")
+
+    if not usuario_tiene_asignacion_maestra_activa(request.user, semestre=semestre):
+        messages.error(request, "Para apoyar otra sala primero debes tener una sala original asignada.")
+        return redirect("dashboard_maestra")
+
+    dia = obtener_dia_operativo_actual_maestra(request.user, semestre=semestre)
+
+    if not dia or not dia_operativo_es_laborable(dia):
+        messages.warning(request, mensaje_dia_no_operativo(dia) or "Hoy no permite operación diaria de menores.")
+        return redirect("dashboard_maestra")
+
+    if not dia_operativo_permite_apoyo_sala(dia):
+        messages.warning(
+            request,
+            mensaje_apoyo_sala_no_disponible(dia)
+            or "Primero debes iniciar el día operativo para poder apoyar otra sala."
+        )
+        return redirect("dashboard_maestra")
+
+    apoyo_actual = obtener_apoyo_sala_activo_usuario(request.user)
+    if apoyo_actual:
+        messages.info(request, "Ya tienes un apoyo temporal activo. Finalízalo antes de iniciar otro.")
+        return redirect("lista_alumnos_dia_maestra", dia_id=dia.id)
+
+    sala_origen = obtener_sala_origen_maestra(request.user, semestre=semestre)
+    salas_disponibles = obtener_salas_disponibles_para_apoyo(request.user, dia=dia, semestre=semestre)
+
+    if request.method == "POST":
+        form = ApoyoSalaMaestraForm(
+            request.POST,
+            usuario=request.user,
+            dia_operativo=dia,
+            sala_origen=sala_origen,
+            salas_disponibles=salas_disponibles,
+        )
+
+        if form.is_valid():
+            apoyo = form.save(commit=False)
+            apoyo.maestra_titular_sala = obtener_maestra_titular_sala(
+                apoyo.sala_apoyada,
+                excluir_usuario=request.user,
+            )
+            apoyo.save()
+
+            if apoyo.maestra_titular_sala:
+                messages.warning(
+                    request,
+                    "La sala seleccionada tiene maestra titular asignada. "
+                    "Tus registros quedarán como apoyo temporal; la sala conserva a su titular."
+                )
+
+            if dia.estado == DiaOperativoSemestre.EstadoDia.ABIERTO:
+                asegurar_registros_alumnos_dia(dia, request.user)
+
+            messages.success(
+                request,
+                "Apoyo temporal iniciado. No olvides finalizar el apoyo cuando regreses a tu sala original."
+            )
+            return redirect("lista_alumnos_dia_maestra", dia_id=dia.id)
+
+        messages.error(request, "No se pudo iniciar el apoyo temporal. Revisa los campos.")
+    else:
+        form = ApoyoSalaMaestraForm(
+            usuario=request.user,
+            dia_operativo=dia,
+            sala_origen=sala_origen,
+            salas_disponibles=salas_disponibles,
+        )
+
+    return render(
+        request,
+        "admisiones/operacion_diaria/apoyar_sala.html",
+        {
+            "form": form,
+            "semestre": semestre,
+            "dia": dia,
+            "sala_origen": sala_origen,
+            "salas_disponibles": salas_disponibles,
+            **contexto_apoyo_sala_maestra(request.user, dia),
+            **contexto_semestre_operativo(),
+        },
+    )
+
+
+@login_required
+def finalizar_apoyo_sala(request):
+    """Finaliza el apoyo temporal de sala iniciado por la maestra."""
+    apoyo = obtener_apoyo_sala_activo_usuario(request.user)
+
+    if not apoyo:
+        messages.info(request, "No tienes apoyo temporal activo para finalizar.")
+        return redirect("dashboard_maestra")
+
+    dia = getattr(apoyo, "dia_operativo", None) or obtener_dia_operativo_actual_maestra(request.user)
+
+    if request.method == "POST":
+        form = FinalizarApoyoSalaMaestraForm(request.POST, instance=apoyo, usuario=request.user)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Apoyo temporal finalizado. Ya puedes regresar a tu sala original.")
+            return redirect("dashboard_maestra")
+
+        messages.error(request, "No se pudo finalizar el apoyo temporal. Confirma la finalización.")
+    else:
+        form = FinalizarApoyoSalaMaestraForm(instance=apoyo, usuario=request.user)
+
+    return render(
+        request,
+        "admisiones/operacion_diaria/finalizar_apoyo_sala.html",
+        {
+            "form": form,
+            "apoyo": apoyo,
+            "dia": dia,
+            **contexto_apoyo_sala_maestra(request.user, dia),
+            **contexto_semestre_operativo(),
+        },
     )
 
 
@@ -10350,6 +11036,7 @@ def dashboard_maestra(request):
             "resumen_dia": resumen_dia,
             "dia_no_operativo": bool(dia_actual and not dia_operativo_es_laborable(dia_actual)),
             "mensaje_dia_no_operativo": mensaje_dia_no_operativo(dia_actual) if dia_actual else "",
+            **contexto_apoyo_sala_maestra(request.user, dia_actual),
             **contexto_semestre_operativo(),
         },
     )
@@ -10515,6 +11202,7 @@ def lista_alumnos_dia_maestra(request, dia_id):
             "dia_solo_lectura": dia.estado != DiaOperativoSemestre.EstadoDia.ABIERTO or not dia_operativo_es_laborable(dia),
             "dia_no_operativo": not dia_operativo_es_laborable(dia),
             "mensaje_dia_no_operativo": mensaje_dia_no_operativo(dia),
+            **contexto_apoyo_sala_maestra(request.user, dia),
         },
     )
 
@@ -10863,6 +11551,7 @@ def registrar_entrada_alumno(request, registro_id):
             "autorizacion_pendiente_url": enlace_autorizacion,
             "qr_data_uri": qr_data_uri,
             "autorizaciones_entrada": autorizaciones_entrada,
+            **contexto_apoyo_sala_maestra(request.user, registro.dia_operativo),
         },
     )
 
@@ -11114,6 +11803,7 @@ def bitacora_entrada_casa_maestra(request, registro_id):
             "dia": registro.dia_operativo,
             "solo_lectura": not registro_diario_es_editable(registro),
             "incidencias_dia": registro.incidencias.select_related("registrada_por").order_by("-fecha_reporte"),
+            **contexto_apoyo_sala_maestra(request.user, registro.dia_operativo),
         },
     )
 
@@ -11177,6 +11867,7 @@ def bitacora_estancia_maestra(request, registro_id):
             "dia": registro.dia_operativo,
             "solo_lectura": not registro_diario_es_editable(registro),
             "incidencias_dia": registro.incidencias.select_related("registrada_por").order_by("-fecha_reporte"),
+            **contexto_apoyo_sala_maestra(request.user, registro.dia_operativo),
         },
     )
 
@@ -11667,6 +12358,7 @@ def registrar_salida_alumno(request, registro_id):
             "autorizacion_pendiente_url": enlace_autorizacion,
             "qr_data_uri": qr_data_uri,
             "autorizaciones_salida": autorizaciones_salida,
+            **contexto_apoyo_sala_maestra(request.user, registro.dia_operativo),
         },
     )
 
@@ -11685,6 +12377,15 @@ def cerrar_dia_maestra(request, dia_id):
     if not usuario_tiene_asignacion_maestra_activa(request.user, semestre=dia.semestre):
         messages.error(request, "No tienes permiso para cerrar este día.")
         return redirect("dashboard_maestra")
+
+    apoyo_activo = obtener_apoyo_sala_activo_usuario(request.user)
+    if apoyo_activo:
+        messages.warning(
+            request,
+            "No puedes cerrar el día porque tienes un apoyo temporal abierto. "
+            "Finaliza el apoyo y regresa a tu sala original."
+        )
+        return redirect("lista_alumnos_dia_maestra", dia_id=dia.id)
 
     registros = obtener_registros_dia_maestra(dia, request.user)
     errores_cierre = dia.puede_cerrarse() if dia.estado == DiaOperativoSemestre.EstadoDia.ABIERTO else []
@@ -11723,6 +12424,7 @@ def cerrar_dia_maestra(request, dia_id):
                 dia_operativo=dia,
                 estado=Incidencia.EstadoIncidencia.ABIERTA,
             ).select_related("alumno", "alumno__solicitud_ingreso", "registrada_por"),
+            **contexto_apoyo_sala_maestra(request.user, dia),
         },
     )
 
@@ -13039,6 +13741,7 @@ def construir_contexto_panel_supervisor(request):
     # autorizaciones de suplencia sin movimiento todavía.
     context.update(contexto_bitacora_suplencias(request, limite=100))
     context.update(contexto_suplencias_supervisor(request, limite=100))
+    context.update(contexto_apoyos_sala_supervisor(request, limite=100))
 
     # El panel supervisor siempre es de consulta, aunque exista semestre activo.
     context["modo_solo_consulta"] = True
@@ -13062,8 +13765,7 @@ def panel_supervisor(request):
     - Calendario.
     """
     if not usuario_es_supervisora_general(request.user):
-        messages.error(request, "No tienes permiso para entrar al panel de Supervisión General.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para entrar al panel de Supervisión General.")
 
     if request.method == "POST":
         messages.warning(
@@ -13086,8 +13788,7 @@ def panel_supervisor(request):
 def descargar_reporte_supervisor(request, tipo_reporte="general"):
     """Descarga reportes CSV de solo consulta para Supervisora General."""
     if not usuario_es_supervisora_general(request.user):
-        messages.error(request, "No tienes permiso para descargar reportes de Supervisión General.")
-        return redirect("/")
+        return acceso_denegado_login(request, "No tienes permiso para descargar reportes de Supervisión General.")
 
     contexto = construir_contexto_panel_supervisor(request)
     filas = filas_reporte_supervisor(tipo_reporte, contexto)
@@ -13138,6 +13839,8 @@ def panel_supervisor_datos(request):
         "suplencias_pendientes_revision": contexto.get("suplencias_pendientes_revision", 0),
         "suplencias_validadas": contexto.get("suplencias_validadas", 0),
         "total_movimientos_suplencia": contexto.get("total_movimientos_suplencia", 0),
+        "total_apoyos_sala_hoy": contexto.get("total_apoyos_sala_hoy", 0),
+        "total_apoyos_sala_activos": contexto.get("total_apoyos_sala_activos", 0),
         "porcentaje_ninos_estancia": contexto["porcentaje_ninos_estancia"],
         "porcentaje_ninos_ausentes": contexto["porcentaje_ninos_ausentes"],
         "porcentaje_ninos_fuera": contexto["porcentaje_ninos_fuera"],
