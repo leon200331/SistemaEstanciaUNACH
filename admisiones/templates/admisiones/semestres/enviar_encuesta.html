@@ -11,39 +11,58 @@
 
     <style>
         :root{
-            --azul:#1d4ed8;
-            --azul-oscuro:#1e3a8a;
-            --gris-fondo:#f3f6fb;
-            --texto:#0f172a;
+            --azul:#2563eb;
+            --azul-oscuro:#0b2d68;
+            --cyan:#06b6d4;
+            --cyan-oscuro:#0e7490;
+            --cyan-profundo:#155e75;
+            --cyan-claro:#ecfeff;
+            --cyan-borde:#a5f3fc;
+            --texto:#0b1f44;
             --muted:#64748b;
             --borde:#dbe4ef;
+            --fondo:#f4f7fb;
+            --card:#ffffff;
             --verde:#16a34a;
             --rojo:#dc2626;
             --amarillo:#f59e0b;
-            --cyan:#0891b2;
+            --naranja:#f97316;
+        }
+
+        *{
+            box-sizing:border-box;
         }
 
         body{
             margin:0;
-            background:var(--gris-fondo);
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(6,182,212,.10), transparent 30%),
+                linear-gradient(180deg, #ffffff 0%, var(--fondo) 48%, #eef3f9 100%);
             color:var(--texto);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
+        /* =========================
+           BARRA SUPERIOR
+        ========================= */
         .topbar{
-            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
-            color:white;
-            box-shadow:0 8px 22px rgba(15,23,42,.18);
+            background:#ffffff;
+            border-bottom:1px solid #dfe8f5;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            position:sticky;
+            top:0;
+            z-index:100;
         }
 
         .topbar-inner{
-            max-width:1280px;
-            margin:auto;
-            padding:14px 18px;
+            max-width:1320px;
+            margin:0 auto;
+            padding:18px 28px;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:16px;
+            gap:18px;
         }
 
         .brand{
@@ -53,112 +72,400 @@
             min-width:0;
         }
 
-        .brand img{
-            height:48px;
-            width:auto;
+        .brand-logo{
+            width:96px;
+            height:64px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--cyan-oscuro), var(--cyan));
+            padding:8px;
+            box-shadow:0 12px 26px rgba(6,182,212,.26);
+            flex:0 0 auto;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
             object-fit:contain;
-            background:rgba(255,255,255,.12);
-            border-radius:12px;
-            padding:4px;
+            display:block;
+            background:transparent !important;
+            border:none !important;
+            padding:0 !important;
+            box-shadow:none !important;
         }
 
         .brand-title{
-            font-size:1.02rem;
+            margin:0;
+            color:#0b1f44;
+            font-size:1.42rem;
             font-weight:950;
-            letter-spacing:.04em;
-            text-transform:uppercase;
-            line-height:1.1;
+            line-height:1.05;
+            letter-spacing:-.04em;
         }
 
         .brand-subtitle{
-            font-size:.82rem;
-            opacity:.9;
-            margin-top:2px;
+            margin-top:4px;
+            color:#50678f;
+            font-weight:650;
+            font-size:.92rem;
         }
 
-        .btn-top{
-            border-radius:12px;
+        .top-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .btn-return{
+            border:1px solid #d8e5f7;
+            background:#ffffff;
+            color:#0b1f44;
+            border-radius:14px;
+            padding:10px 16px;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            box-shadow:0 8px 18px rgba(15,23,42,.04);
+            transition:.2s ease;
+            white-space:nowrap;
+        }
+
+        .btn-return:hover{
+            transform:translateY(-1px);
+            color:var(--cyan-oscuro);
+            border-color:var(--cyan-borde);
+            background:#f8fffe;
+        }
+
+        .admin-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0b1f44;
             font-weight:850;
-            padding:.55rem .9rem;
+            white-space:nowrap;
         }
 
-        .main{
-            max-width:1280px;
+        .admin-icon{
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background:linear-gradient(135deg, #cffafe, #a5f3fc);
+            color:var(--cyan-oscuro);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.35rem;
+        }
+
+        /* =========================
+           CONTENIDO GENERAL
+        ========================= */
+        .page{
+            max-width:1320px;
             margin:28px auto 70px;
-            padding:0 18px;
+            padding:0 28px;
         }
 
         .hero{
-            background:linear-gradient(135deg, #0e7490, #06b6d4);
-            border-radius:24px;
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--cyan-profundo), var(--cyan));
+            border-radius:28px;
             color:white;
-            padding:28px 32px;
-            box-shadow:0 22px 50px rgba(6,182,212,.22);
+            padding:28px;
+            box-shadow:0 24px 48px rgba(6,182,212,.24);
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:20px;
-            align-items:center;
-            margin-bottom:22px;
+            grid-template-columns:minmax(0,1fr) 385px;
+            gap:22px;
+            align-items:stretch;
+            margin-bottom:18px;
         }
 
-        .hero h1{
-            font-size:1.85rem;
-            font-weight:950;
-            margin:0 0 8px;
-            letter-spacing:-.03em;
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:280px;
+            height:280px;
+            border-radius:50%;
+            right:-100px;
+            top:-110px;
+            background:rgba(255,255,255,.14);
         }
 
-        .hero p{
-            margin:0;
-            opacity:.94;
-            font-size:1rem;
+        .hero-main{
+            position:relative;
+            z-index:1;
+            display:flex;
+            align-items:flex-start;
+            gap:18px;
         }
 
         .hero-icon{
-            width:84px;
-            height:84px;
-            border-radius:22px;
+            width:72px;
+            height:72px;
+            border-radius:21px;
             background:rgba(255,255,255,.18);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:2.45rem;
+            font-size:2rem;
+            flex:0 0 auto;
+        }
+
+        .hero h1{
+            margin:0 0 8px;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:0;
+            max-width:760px;
+            font-size:1rem;
+            line-height:1.55;
+            opacity:.95;
+            font-weight:650;
+        }
+
+        .hero-note{
+            position:relative;
+            z-index:1;
+            background:rgba(255,255,255,.16);
+            border:1px solid rgba(255,255,255,.34);
+            border-radius:22px;
+            padding:20px;
+            backdrop-filter:blur(4px);
+        }
+
+        .hero-note h6{
+            margin:0 0 8px;
+            font-size:1rem;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .hero-note p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.5;
+            font-weight:700;
+            color:white;
+            opacity:.96;
+        }
+
+        .preview-shell{
+            margin-bottom:24px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:#ffffff;
+            border:1px solid var(--borde);
+            border-radius:22px;
+            padding:14px 16px;
+            box-shadow:0 14px 28px rgba(15,23,42,.05);
+        }
+
+        .preview-copy{
+            color:#155e75;
+            font-weight:800;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .btn-preview{
+            border:none;
+            background:linear-gradient(135deg, var(--cyan-oscuro), var(--cyan));
+            color:white;
+            border-radius:14px;
+            padding:.78rem 1.1rem;
+            font-weight:950;
+            box-shadow:0 12px 24px rgba(6,182,212,.20);
+        }
+
+        .btn-preview:hover{
+            color:white;
+            filter:brightness(.98);
+            transform:translateY(-1px);
+        }
+
+        .survey-preview{
+            background:#ffffff;
+            border:1px solid var(--borde);
+            border-radius:22px;
+            box-shadow:0 16px 34px rgba(15,23,42,.06);
+            overflow:hidden;
+            margin-top:-10px;
+            margin-bottom:24px;
+        }
+
+        .survey-preview-header{
+            padding:16px 20px;
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
+            border-bottom:1px solid var(--borde);
+            font-weight:950;
+            color:#0b1f44;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .survey-preview-body{
+            padding:18px 22px;
+        }
+
+        .survey-preview-intro{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid var(--azul);
+            color:#1e3a8a;
+            border-radius:16px;
+            padding:12px 14px;
+            font-size:.88rem;
+            font-weight:800;
+            line-height:1.4;
+            margin-bottom:16px;
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+        }
+
+        .survey-form-preview{
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+
+        .survey-question-card{
+            background:#ffffff;
+            border:1px solid #dfe8f5;
+            border-radius:18px;
+            padding:15px;
+            box-shadow:0 10px 22px rgba(15,23,42,.035);
+        }
+
+        .survey-question-head{
+            display:grid;
+            grid-template-columns:28px 1fr;
+            gap:10px;
+            align-items:start;
+            margin-bottom:13px;
+        }
+
+        .survey-number{
+            width:24px;
+            height:24px;
+            border-radius:999px;
+            background:#dbeafe;
+            color:#1d4ed8;
+            font-size:.78rem;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin-top:-1px;
+        }
+
+        .survey-question-text{
+            margin:0;
+            color:#0b1f44;
+            font-weight:950;
+            font-size:.9rem;
+            line-height:1.35;
+        }
+
+        .survey-options{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            padding-left:38px;
+        }
+
+        .survey-option{
+            border:1px solid #cbd8e8;
+            background:#f8fbff;
+            color:#0b1f44;
+            border-radius:14px;
+            padding:.68rem .85rem;
+            font-size:.86rem;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:7px;
+            opacity:1;
+            cursor:default;
+        }
+
+        .survey-option i{
+            color:#18396f;
         }
 
         .layout{
             display:grid;
-            grid-template-columns:380px 1fr;
-            gap:20px;
+            grid-template-columns:380px minmax(0, 1fr);
+            gap:22px;
             align-items:start;
         }
 
+        .aside-stack{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+
         .panel{
-            background:white;
+            background:rgba(255,255,255,.95);
             border:1px solid var(--borde);
-            border-radius:22px;
-            overflow:hidden;
+            border-radius:24px;
             box-shadow:0 18px 38px rgba(15,23,42,.07);
-            margin-bottom:18px;
+            overflow:hidden;
         }
 
         .panel-header{
             padding:18px 22px;
-            background:#f8fafc;
             border-bottom:1px solid var(--borde);
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:12px;
+            gap:14px;
             flex-wrap:wrap;
         }
 
         .panel-title{
             margin:0;
-            color:#334155;
-            font-size:1rem;
+            font-size:1.05rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
+            color:#0b1f44;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .title-icon{
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            background:#cffafe;
+            color:var(--cyan-oscuro);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.1rem;
         }
 
         .panel-body{
@@ -168,38 +475,35 @@
         .semestre-card{
             background:#ecfeff;
             border:1px solid #a5f3fc;
-            border-left:6px solid #0891b2;
-            border-radius:18px;
-            padding:16px;
+            border-left:7px solid var(--cyan);
+            border-radius:22px;
+            padding:18px;
             color:#155e75;
-            margin-bottom:18px;
+            box-shadow:0 14px 28px rgba(6,182,212,.06);
         }
 
         .semestre-card h6{
+            margin:0 0 10px;
             font-weight:950;
-            margin-bottom:8px;
+            display:flex;
+            align-items:center;
+            gap:8px;
         }
 
         .semestre-card p{
             margin:0;
-            font-size:.9rem;
-            font-weight:650;
+            font-size:.92rem;
+            line-height:1.45;
+            font-weight:800;
         }
 
-        .field-card{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
+        .field-card,
+        .info-card{
+            background:#f8fbff;
+            border:1px solid #dfe8f5;
             border-radius:18px;
             padding:16px;
             margin-bottom:16px;
-        }
-
-        .info-card{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
-            border-radius:18px;
-            padding:14px 16px;
-            margin-bottom:12px;
         }
 
         .info-label{
@@ -213,83 +517,110 @@
 
         .info-value{
             color:#0f172a;
-            font-weight:850;
+            font-weight:900;
+            line-height:1.35;
         }
 
         .form-label{
-            font-size:.8rem;
-            font-weight:950;
-            color:#334155;
-            text-transform:uppercase;
-            letter-spacing:.04em;
             margin-bottom:8px;
+            color:#0b1f44;
+            font-size:.76rem;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            font-weight:950;
+            line-height:1.25;
         }
 
         .form-control,
         .form-select{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+            border:1px solid #cbd8e8;
             border-radius:14px;
-            border:1px solid #cbd5e1;
-            padding:.72rem .9rem;
-            font-weight:650;
-            color:#0f172a;
-            background:white;
+            padding:.72rem .85rem;
+            color:#0b1f44;
+            font-weight:750;
+            background:#ffffff;
         }
 
         .form-control:focus,
         .form-select:focus{
-            border-color:#06b6d4;
-            box-shadow:0 0 0 .22rem rgba(6,182,212,.16);
+            border-color:var(--cyan);
+            box-shadow:0 0 0 .22rem rgba(6,182,212,.18);
+        }
+
+        .form-control[readonly]{
+            cursor:not-allowed;
+            color:#475569;
+            background:#f1f5f9 !important;
+            border-style:dashed;
         }
 
         .form-check{
-            background:white;
+            background:#ffffff;
             border:1px solid #dbe4ef;
-            border-radius:16px;
-            padding:14px 16px 14px 44px;
-            margin-top:6px;
+            border-radius:18px;
+            padding:16px 18px 16px 48px;
+            margin:0;
         }
 
         .form-check-input{
-            margin-left:-28px;
-            margin-top:.28rem;
+            margin-left:-30px;
+            margin-top:.3rem;
         }
 
         .form-check-label{
-            font-weight:850;
-            color:#0f172a;
+            color:#0b1f44;
+            font-weight:900;
         }
 
         .field-help{
-            color:var(--muted);
-            font-size:.84rem;
-            margin-top:6px;
+            margin-top:8px;
+            color:#64748b;
+            font-size:.82rem;
+            line-height:1.35;
+            font-weight:550;
         }
 
         .error-text{
             background:#fee2e2;
-            color:#991b1b;
             border:1px solid #fecaca;
+            color:#991b1b;
             border-radius:12px;
-            padding:8px 10px;
-            font-size:.85rem;
-            font-weight:700;
-            margin-top:8px;
+            padding:9px 11px;
+            margin-top:9px;
+            font-size:.84rem;
+            font-weight:750;
         }
 
         .actions{
             display:flex;
             justify-content:flex-end;
-            gap:10px;
+            gap:12px;
             flex-wrap:wrap;
-            padding-top:16px;
-            border-top:1px solid #e5e7eb;
-            margin-top:12px;
+            border-top:1px solid #e6edf7;
+            padding-top:18px;
+            margin-top:4px;
         }
 
         .btn-main{
             border-radius:14px;
-            font-weight:900;
-            padding:.72rem 1.1rem;
+            padding:.78rem 1.15rem;
+            font-weight:950;
+        }
+
+        .btn-send{
+            background:linear-gradient(135deg, var(--cyan-oscuro), var(--cyan));
+            border:none;
+            color:white;
+            box-shadow:0 12px 24px rgba(6,182,212,.24);
+        }
+
+        .btn-send:hover{
+            color:white;
+            transform:translateY(-1px);
+            filter:brightness(.98);
         }
 
         .status-pill{
@@ -319,11 +650,12 @@
         }
 
         .summary-card{
-            background:#f8fafc;
+            background:#ffffff;
             border:1px solid #e2e8f0;
             border-radius:18px;
-            padding:13px;
-            min-height:86px;
+            padding:14px;
+            min-height:88px;
+            box-shadow:0 10px 20px rgba(15,23,42,.04);
         }
 
         .summary-label{
@@ -332,11 +664,11 @@
             color:#64748b;
             text-transform:uppercase;
             letter-spacing:.06em;
-            margin-bottom:6px;
+            margin-bottom:7px;
         }
 
         .summary-value{
-            font-size:1.55rem;
+            font-size:1.6rem;
             font-weight:950;
             color:#0f172a;
             line-height:1;
@@ -346,7 +678,7 @@
             font-size:.76rem;
             color:#64748b;
             font-weight:650;
-            margin-top:5px;
+            margin-top:6px;
         }
 
         .table-wrap{
@@ -387,6 +719,7 @@
             color:#64748b;
             font-size:.78rem;
             margin-top:3px;
+            font-weight:650;
         }
 
         .action-stack{
@@ -403,55 +736,34 @@
             padding:.38rem .68rem;
         }
 
-        .notice{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid var(--azul);
-            border-radius:18px;
-            color:#1e3a8a;
-            padding:14px 15px;
-            margin-bottom:18px;
-            font-weight:650;
-            font-size:.9rem;
-        }
-
         .warning-box{
             background:#fff7ed;
             border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            border-radius:18px;
-            padding:15px;
+            border-left:7px solid #f97316;
+            border-radius:22px;
+            padding:18px;
             color:#9a3412;
-            margin-bottom:18px;
+            margin-top:18px;
         }
 
         .warning-box h6{
+            margin:0 0 8px;
             font-weight:950;
-            margin-bottom:8px;
-        }
-
-        .question-list{
-            list-style:none;
-            padding:0;
-            margin:0;
-        }
-
-        .question-list li{
             display:flex;
-            gap:10px;
-            padding:9px 0;
-            border-bottom:1px solid #edf2f7;
-            color:#475569;
-            font-weight:650;
-            font-size:.9rem;
+            align-items:center;
+            gap:8px;
         }
 
-        .question-list li:last-child{ border-bottom:none; }
-        .question-list i{ color:#0891b2; margin-top:2px; }
+        .warning-box p{
+            margin:0;
+            font-size:.9rem;
+            font-weight:650;
+            line-height:1.45;
+        }
 
         .empty-state{
             text-align:center;
-            padding:40px 20px;
+            padding:44px 20px;
             color:#64748b;
         }
 
@@ -461,29 +773,9 @@
             margin-bottom:10px;
         }
 
-        @media(max-width:1100px){
-            .layout{ grid-template-columns:1fr; }
-            .summary-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
-        }
-
-        @media(max-width:768px){
-            .hero{ grid-template-columns:1fr; padding:24px 20px; }
-            .hero-icon{ display:none; }
-            .summary-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-            .topbar-inner{ flex-direction:column; align-items:flex-start; }
-        }
-
-        @media(max-width:576px){
-            .hero h1{ font-size:1.5rem; }
-            .panel-body{ padding:18px; }
-            .actions .btn{ width:100%; }
-            .summary-grid{ grid-template-columns:1fr; }
-            .action-stack{ justify-content:flex-start; }
-        }
-
-        /* =========================================================
+        /* =========================
            ALERTAS Y CONFIRMACIONES PERSONALIZADAS
-           ========================================================= */
+        ========================= */
         .swal2-toast.sistema-toast {
             border-radius: 18px !important;
             padding: 14px 16px !important;
@@ -512,13 +804,96 @@
             font-weight: 800 !important;
             padding: .65rem 1rem !important;
         }
-        .form-control[readonly]{
-            cursor:not-allowed;
-            color:#475569;
-            background:#f1f5f9 !important;
-            border-style:dashed;
+
+        @media(max-width:1120px){
+            .hero{
+                grid-template-columns:1fr;
+            }
+
+            .layout{
+                grid-template-columns:1fr;
+            }
+
+            .summary-grid{
+                grid-template-columns:repeat(3,minmax(0,1fr));
+            }
         }
 
+        @media(max-width:768px){
+            .topbar-inner{
+                align-items:flex-start;
+                flex-direction:column;
+                padding:16px 18px;
+            }
+
+            .top-actions{
+                width:100%;
+                justify-content:space-between;
+            }
+
+            .page{
+                padding:0 18px;
+                margin-top:20px;
+            }
+
+            .hero{
+                padding:22px;
+            }
+
+            .hero-main{
+                flex-direction:column;
+            }
+
+            .hero h1{
+                font-size:1.55rem;
+            }
+
+            .summary-grid{
+                grid-template-columns:repeat(2,minmax(0,1fr));
+            }
+
+            .survey-options{
+                grid-template-columns:1fr;
+                padding-left:0;
+            }
+
+            .survey-question-head{
+                grid-template-columns:26px 1fr;
+            }
+        }
+
+        @media(max-width:576px){
+            .top-actions{
+                flex-direction:column;
+                align-items:stretch;
+            }
+
+            .btn-return,
+            .admin-chip{
+                width:100%;
+                justify-content:center;
+            }
+
+            .panel-body{
+                padding:18px;
+            }
+
+            .actions{
+                justify-content:stretch;
+            }
+
+            .actions .btn{
+                width:100%;
+            }
+
+            .summary-grid{
+                grid-template-columns:1fr;
+            }
+
+            .action-stack{
+                justify-content:flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -526,41 +901,170 @@
 <nav class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
             <div>
-                <div class="brand-title">Encuesta de Satisfacción B</div>
+                <h1 class="brand-title">Encuesta de Satisfacción B</h1>
                 <div class="brand-subtitle">Envío, reenvío, respuestas y CSV semestral</div>
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                <i class="bi bi-house-door-fill me-1"></i> Panel TI
+        <div class="top-actions">
+            <a href="../../?origen=ti" class="btn-return">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
             </a>
+
+            <div class="admin-chip">
+                <span class="admin-icon">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+                <span>Administrador(a)</span>
+            </div>
         </div>
     </div>
 </nav>
 
-<main class="main">
+<main class="page">
 
     <section class="hero">
-        <div>
-            <h1>{{ titulo|default:"Encuesta de Satisfacción B" }}</h1>
-            <p>
-                Envía la encuesta al tutor con correo institucional, reenvía si es necesario,
-                consulta respuestas por alumno y descarga el CSV semestral.
-            </p>
+        <div class="hero-main">
+            <div class="hero-icon">
+                <i class="bi bi-envelope-check-fill"></i>
+            </div>
+            <div>
+                <h1>{{ titulo|default:"Encuesta de Satisfacción B" }}</h1>
+                <p>
+                    Envía la encuesta al tutor con correo institucional, reenvía si es necesario,
+                    consulta respuestas por alumno y descarga el CSV semestral.
+                </p>
+            </div>
         </div>
-        <div class="hero-icon">
-            <i class="bi bi-envelope-check-fill"></i>
+
+        <div class="hero-note">
+            <h6>
+                <i class="bi bi-info-circle-fill"></i>
+                Revisión de respuestas
+            </h6>
+            <p>
+                Las respuestas se revisan por alumno en esta pantalla. El CSV descarga el concentrado semestral completo.
+            </p>
         </div>
     </section>
 
+    <div class="preview-shell">
+        <div class="preview-copy">
+            <i class="bi bi-eye-fill"></i>
+            <span>Consulta la vista previa de las preguntas únicamente cuando necesites revisar el contenido de la encuesta.</span>
+        </div>
+        <button class="btn btn-preview" type="button" data-bs-toggle="collapse" data-bs-target="#vistaEncuesta" aria-expanded="false" aria-controls="vistaEncuesta">
+            <i class="bi bi-list-check me-1"></i>
+            Visualizar encuesta
+        </button>
+    </div>
+
+    <div class="collapse" id="vistaEncuesta">
+        <section class="survey-preview">
+            <div class="survey-preview-header">
+                <span class="title-icon">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                </span>
+                Vista previa de la encuesta
+            </div>
+            <div class="survey-preview-body">
+                <div class="survey-preview-intro">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>Seleccione <strong>Sí</strong> o <strong>No</strong> en cada pregunta. Sus respuestas ayudan a mejorar el servicio.</span>
+                </div>
+
+                <div class="survey-form-preview">
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">1</span>
+                            <p class="survey-question-text">¿Recibió información completa de la permanencia diaria de su hija y/o hijo?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">2</span>
+                            <p class="survey-question-text">¿Considera que su hija y/o hijo se encuentra seguro durante su permanencia en la Estancia Infantil?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">3</span>
+                            <p class="survey-question-text">¿Considera que la orientación sobre la alimentación adecuada de su hija y/o hijo fue de utilidad?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">4</span>
+                            <p class="survey-question-text">¿Considera que la orientación médica de su hija y/o hijo fue de utilidad?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">5</span>
+                            <p class="survey-question-text">¿Considera que la orientación pedagógica de su hija y/o hijo fue de utilidad?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">6</span>
+                            <p class="survey-question-text">¿Considera que la orientación psicológica recibida fue de utilidad?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+
+                    <div class="survey-question-card">
+                        <div class="survey-question-head">
+                            <span class="survey-number">7</span>
+                            <p class="survey-question-text">¿Considera que el servicio prestado durante este semestre fue de apoyo para continuar sus estudios?</p>
+                        </div>
+                        <div class="survey-options">
+                            <button type="button" class="survey-option" disabled><i class="bi bi-check-circle-fill"></i> Sí</button>
+                            <button type="button" class="survey-option" disabled><i class="bi bi-x-circle-fill"></i> No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <div class="layout">
-        <aside>
+        <aside class="aside-stack">
             <div class="semestre-card">
                 <h6>
-                    <i class="bi bi-calendar2-week-fill me-1"></i>
+                    <i class="bi bi-calendar2-week-fill"></i>
                     Semestre
                 </h6>
                 <p>
@@ -592,7 +1096,10 @@
             <section class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-send-fill me-2"></i>Datos de envío
+                        <span class="title-icon">
+                            <i class="bi bi-send-fill"></i>
+                        </span>
+                        Datos de envío
                     </h2>
                 </div>
 
@@ -684,40 +1191,17 @@
                         </div>
 
                         <div class="actions">
-                            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                                <i class="bi bi-arrow-left-circle me-1"></i> Panel TI
+                            <a href="../../?origen=ti" class="btn btn-outline-secondary btn-main">
+                                <i class="bi bi-arrow-left-circle me-1"></i>
+                                Regresar
                             </a>
 
-                            <button type="submit" class="btn btn-info text-white btn-main">
+                            <button type="submit" class="btn btn-send btn-main">
                                 <i class="bi bi-send-check-fill me-1"></i>
                                 Enviar encuesta
                             </button>
                         </div>
                     </form>
-                </div>
-            </section>
-
-            <div class="notice">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                Las respuestas se revisan por alumno en esta pantalla. El CSV descarga el concentrado semestral completo.
-            </div>
-
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-list-check me-2"></i>Preguntas oficiales
-                    </h2>
-                </div>
-                <div class="panel-body">
-                    <ul class="question-list">
-                        <li><i class="bi bi-check-circle-fill"></i><span>Información completa de permanencia diaria.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Seguridad durante la permanencia.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Orientación de alimentación adecuada.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Orientación médica de utilidad.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Orientación pedagógica de utilidad.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Orientación psicológica de utilidad.</span></li>
-                        <li><i class="bi bi-check-circle-fill"></i><span>Servicio como apoyo para continuar estudios.</span></li>
-                    </ul>
                 </div>
             </section>
         </aside>
@@ -763,14 +1247,16 @@
 
             <section class="panel">
                 <div class="panel-header">
-                    <div>
-                        <h2 class="panel-title">
-                            <i class="bi bi-people-fill me-2"></i>Respuestas por alumno
-                        </h2>
-                    </div>
+                    <h2 class="panel-title">
+                        <span class="title-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </span>
+                        Respuestas por alumno
+                    </h2>
 
                     <a href="{% url 'descargar_csv_encuesta_satisfaccion' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-success btn-main">
-                        <i class="bi bi-filetype-csv me-1"></i> Descargar CSV Encuesta B
+                        <i class="bi bi-filetype-csv me-1"></i>
+                        Descargar CSV Encuesta B
                     </a>
                 </div>
 
@@ -934,10 +1420,10 @@
 
             <div class="warning-box">
                 <h6>
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <i class="bi bi-exclamation-triangle-fill"></i>
                     Importante
                 </h6>
-                <p class="mb-0 small fw-semibold">
+                <p>
                     Si un tutor aparece bloqueado, corrige su correo institucional en el expediente.
                     Después regresa a esta vista para reenviar la encuesta.
                 </p>
@@ -1083,11 +1569,6 @@ function confirmarReenvioEncuesta(formulario) {
     });
 
     return false;
-}
-
-function volverPanelTI() {
-    localStorage.setItem('activeTabID', 'tab-ciclos-btn');
-    window.location.href = "{% url 'panel_gobierno_ti' %}";
 }
 </script>
 

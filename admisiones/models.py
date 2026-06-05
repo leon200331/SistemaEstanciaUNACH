@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 import uuid
 import secrets
+import os
+import unicodedata
 from datetime import timedelta
 import re  # Para las validaciones numéricas del algoritmo y rutas de archivos
 
@@ -27,8 +29,231 @@ codigo_postal_mx_validator = RegexValidator(
 
 
 # =========================================================
+# AUTORIZACIÓN POR CORREO INSTITUCIONAL O QR
+# Regla UNACH solicitada: solo los correos que terminan en @unach.mx
+# se consideran institucionales. Cualquier otro correo usa QR presencial.
+# =========================================================
+DOMINIOS_CORREO_INSTITUCIONAL = (
+    "@unach.mx",
+)
+
+
+def normalizar_correo(valor):
+    """
+    Normaliza correos para comparaciones y envío.
+    """
+    return str(valor or "").strip().lower()
+
+
+def es_correo_institucional(valor):
+    """
+    True si el correo pertenece a un dominio institucional autorizado.
+
+    Regla operativa:
+    - Con correo institucional: se envía enlace por correo.
+    - Sin correo institucional: se muestra QR presencial en la pantalla de la maestra.
+    """
+    correo = normalizar_correo(valor)
+    return bool(correo and any(correo.endswith(dominio) for dominio in DOMINIOS_CORREO_INSTITUCIONAL))
+
+
+# =========================================================
 # FUNCIONES PARA ORGANIZAR ARCHIVOS DENTRO DE MEDIA
 # =========================================================
+
+
+# =========================================================
+# AUXILIARES DE ROLES Y ÁREAS OPERATIVAS
+# =========================================================
+AREAS_OPERATIVAS_RECONOCIDAS = {
+    "DIRECCION",
+    "MEDICA",
+    "NUTRICION",
+    "PSICOLOGIA",
+    "PEDAGOGICA",
+    "TRABAJO_SOCIAL",
+}
+
+AREAS_OPERATIVAS_PASE_LISTA_RECONOCIDAS = {
+    "MEDICA",
+    "NUTRICION",
+    "PSICOLOGIA",
+    "PEDAGOGICA",
+    "TRABAJO_SOCIAL",
+}
+
+
+def normalizar_texto_rol(valor):
+    """
+    Normaliza textos para comparar roles, grupos, correos y nombres.
+    Ejemplo: Dirección -> direccion, Psicóloga -> psicologa.
+    """
+    valor = str(valor or "").strip().lower()
+    valor = unicodedata.normalize("NFD", valor)
+    valor = "".join(c for c in valor if unicodedata.category(c) != "Mn")
+    valor = re.sub(r"[^a-z0-9]+", " ", valor)
+    return re.sub(r"\s+", " ", valor).strip()
+
+
+def obtener_texto_roles_usuario(usuario):
+    """
+    Junta todos los datos posibles del usuario para reconocer su rol:
+    area_operativa, tipo_persona, grupos de Django, nombre, username y correo.
+    Esto evita que el módulo de suplencias dependa únicamente de area_operativa.
+    """
+    if not usuario:
+        return ""
+
+    textos = []
+
+    for campo in [
+        "area_operativa",
+        "tipo_persona",
+        "rol",
+        "role",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "nombre",
+        "nombres",
+        "apellido_paterno",
+        "apellido_materno",
+    ]:
+        try:
+            valor = getattr(usuario, campo, "")
+            if valor:
+                textos.append(str(valor))
+        except Exception:
+            pass
+
+    try:
+        nombre = usuario.get_full_name()
+        if nombre:
+            textos.append(nombre)
+    except Exception:
+        pass
+
+    try:
+        textos.extend([g.name for g in usuario.groups.all()])
+    except Exception:
+        pass
+
+    return normalizar_texto_rol(" ".join(textos))
+
+
+def inferir_area_operativa_desde_usuario(usuario):
+    """
+    Devuelve el área operativa del usuario respetando primero el campo real
+    area_operativa. Si todavía está vacío, intenta reconocer el área por roles,
+    grupos, correo o nombre.
+    """
+    if not usuario:
+        return ""
+
+    area = str(getattr(usuario, "area_operativa", "") or "").strip().upper()
+    if area in AREAS_OPERATIVAS_RECONOCIDAS:
+        return area
+
+    texto = obtener_texto_roles_usuario(usuario)
+
+    # Trabajo Social debe evaluarse antes de términos genéricos.
+    if (
+        "trabajo social" in texto
+        or "trabajadora social" in texto
+        or "trabajador social" in texto
+        or "trabajadorasocial" in texto
+        or "trabajadorsocial" in texto
+    ):
+        return "TRABAJO_SOCIAL"
+
+    if "nutri" in texto:
+        return "NUTRICION"
+
+    if "psicolog" in texto or "psicologa" in texto or "psicologo" in texto:
+        return "PSICOLOGIA"
+
+    if "medic" in texto or "medica" in texto or "medico" in texto:
+        return "MEDICA"
+
+    if "pedagog" in texto or "coordinadora" in texto or "coordinador" in texto:
+        return "PEDAGOGICA"
+
+    if (
+        "directora" in texto
+        or "director" in texto
+        or "direccion" in texto
+        or "directiva" in texto
+        or "panel directivo" in texto
+    ):
+        return "DIRECCION"
+
+    return ""
+
+
+def usuario_es_direccion_o_admin(usuario):
+    """
+    True si el usuario puede autorizar suplencias.
+    Respeta area_operativa, grupos/roles antiguos y superusuario.
+    """
+    if not usuario:
+        return False
+
+    if bool(getattr(usuario, "is_superuser", False)):
+        return True
+
+    tipo = normalizar_texto_rol(getattr(usuario, "tipo_persona", ""))
+    texto = obtener_texto_roles_usuario(usuario)
+    area = inferir_area_operativa_desde_usuario(usuario)
+
+    if area == "DIRECCION":
+        return True
+
+    if tipo in {"admin", "administrador", "administrador del sistema"}:
+        return True
+
+    return bool(
+        "directora" in texto
+        or "director" in texto
+        or "direccion" in texto
+        or "directiva" in texto
+        or "administrador" in texto
+    )
+
+
+def guardar_area_operativa_usuario_si_falta(usuario, area=None):
+    """
+    Guarda area_operativa en el usuario cuando el campo existe y está vacío.
+    No cambia roles ni grupos; solo completa el dato operativo que usa suplencias.
+    """
+    if not usuario:
+        return
+
+    area = area or inferir_area_operativa_desde_usuario(usuario)
+    if area not in AREAS_OPERATIVAS_RECONOCIDAS:
+        return
+
+    try:
+        campos = {campo.name for campo in usuario._meta.fields}
+    except Exception:
+        campos = set()
+
+    if "area_operativa" not in campos:
+        return
+
+    area_actual = str(getattr(usuario, "area_operativa", "") or "").strip().upper()
+    if area_actual == area:
+        return
+
+    # Solo se autocompleta si estaba vacío. No sobreescribe una asignación manual.
+    if not area_actual:
+        try:
+            usuario.area_operativa = area
+            usuario.save(update_fields=["area_operativa"])
+        except Exception:
+            pass
+
+
 def limpiar_matricula(valor):
     valor = str(valor or "SIN_MATRICULA").strip()
     valor = re.sub(r"[^A-Za-z0-9_-]+", "_", valor)
@@ -79,6 +304,50 @@ def validar_tamano_archivo_pago(archivo):
 
     if archivo and archivo.size > limite_mb * 1024 * 1024:
         raise ValidationError(f"El comprobante de pago no debe superar {limite_mb} MB.")
+
+
+# =========================================================
+# VALIDADORES PARA ARCHIVOS DE INCIDENCIAS
+# =========================================================
+MAX_TAMANO_ARCHIVO_INCIDENCIA_MB = 10
+MAX_TAMANO_ARCHIVO_INCIDENCIA_BYTES = MAX_TAMANO_ARCHIVO_INCIDENCIA_MB * 1024 * 1024
+EXTENSIONES_INCIDENCIA_PERMITIDAS = {".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"}
+
+
+def validar_archivo_incidencia_adjunto(archivo):
+    """
+    Validación central para archivos adjuntos de incidencias y seguimientos.
+
+    Reglas:
+    - PDF, JPG, JPEG, PNG, DOC o DOCX.
+    - Máximo 10 MB por archivo.
+    - Archivo no vacío.
+
+    El límite total de 20 MB por captura se valida en forms.py/views.py,
+    porque ahí se recibe la lista completa de archivos.
+    """
+    if not archivo:
+        return
+
+    nombre = getattr(archivo, "name", "") or "archivo"
+    extension = os.path.splitext(nombre)[1].lower()
+
+    if extension not in EXTENSIONES_INCIDENCIA_PERMITIDAS:
+        raise ValidationError(
+            "Formato no permitido. Solo se aceptan PDF, JPG, JPEG, PNG, DOC o DOCX."
+        )
+
+    size = getattr(archivo, "size", 0) or 0
+
+    if size <= 0:
+        raise ValidationError("El archivo adjunto está vacío.")
+
+    if size > MAX_TAMANO_ARCHIVO_INCIDENCIA_BYTES:
+        peso_mb = round(size / (1024 * 1024), 2)
+        raise ValidationError(
+            f"El archivo '{nombre}' pesa {peso_mb} MB y supera el límite de "
+            f"{MAX_TAMANO_ARCHIVO_INCIDENCIA_MB} MB por archivo."
+        )
 
 
 def es_fin_de_semana(fecha):
@@ -329,6 +598,44 @@ class Solicitud(models.Model):
     )
     psicologia_en = models.DateTimeField(null=True, blank=True)
 
+    # =========================================================
+    # CONTROL DE SUPLENCIA - DICTAMEN / VALORACIÓN PSICOLÓGICA
+    # =========================================================
+    psicologia_es_suplencia = models.BooleanField(
+        default=False,
+        verbose_name="¿Psicología fue capturada por suplencia?"
+    )
+    psicologia_autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="dictamenes_psicologia",
+        verbose_name="Autorización de suplencia en Psicología"
+    )
+    psicologia_pendiente_revision_titular = models.BooleanField(
+        default=False,
+        verbose_name="Pendiente de revisión por Psicología titular"
+    )
+    psicologia_revisado_por_titular = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="dictamenes_psicologia_revisados_titular",
+        verbose_name="Revisado por Psicología titular"
+    )
+    psicologia_revisado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de revisión por Psicología titular"
+    )
+    psicologia_observacion_revision_titular = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de revisión por Psicología titular"
+    )
+
     estado_nutricion = models.CharField(
         max_length=20,
         choices=EstadoEvaluacion.choices,
@@ -469,6 +776,44 @@ class Solicitud(models.Model):
 
     nutricion_en = models.DateTimeField(null=True, blank=True)
 
+    # =========================================================
+    # CONTROL DE SUPLENCIA - DICTAMEN / VALORACIÓN NUTRICIONAL
+    # =========================================================
+    nutricion_es_suplencia = models.BooleanField(
+        default=False,
+        verbose_name="¿Nutrición fue capturada por suplencia?"
+    )
+    nutricion_autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="dictamenes_nutricion",
+        verbose_name="Autorización de suplencia en Nutrición"
+    )
+    nutricion_pendiente_revision_titular = models.BooleanField(
+        default=False,
+        verbose_name="Pendiente de revisión por Nutrición titular"
+    )
+    nutricion_revisado_por_titular = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="dictamenes_nutricion_revisados_titular",
+        verbose_name="Revisado por Nutrición titular"
+    )
+    nutricion_revisado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de revisión por Nutrición titular"
+    )
+    nutricion_observacion_revision_titular = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de revisión por Nutrición titular"
+    )
+
     estado_medico = models.CharField(
         max_length=20,
         choices=EstadoEvaluacion.choices,
@@ -485,6 +830,44 @@ class Solicitud(models.Model):
         related_name="solicitudes_medico"
     )
     medico_en = models.DateTimeField(null=True, blank=True)
+
+    # =========================================================
+    # CONTROL DE SUPLENCIA - DICTAMEN / VALORACIÓN MÉDICA
+    # =========================================================
+    medico_es_suplencia = models.BooleanField(
+        default=False,
+        verbose_name="¿Médica fue capturada por suplencia?"
+    )
+    medico_autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="dictamenes_medicos",
+        verbose_name="Autorización de suplencia médica"
+    )
+    medico_pendiente_revision_titular = models.BooleanField(
+        default=False,
+        verbose_name="Pendiente de revisión por Médica titular"
+    )
+    medico_revisado_por_titular = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="dictamenes_medicos_revisados_titular",
+        verbose_name="Revisado por Médica titular"
+    )
+    medico_revisado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de revisión por Médica titular"
+    )
+    medico_observacion_revision_titular = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de revisión por Médica titular"
+    )
 
     # =========================
     # DATOS DEL TUTOR
@@ -554,6 +937,75 @@ class Solicitud(models.Model):
             self.estado_medico == self.EstadoEvaluacion.APROBADO,
         ])
 
+    def datos_compartidos_por_clave(self):
+        """
+        Devuelve los datos compartidos entre filtros en un diccionario:
+        {
+            "peso_actual": <DatoCompartidoFiltro>,
+            "talla_actual": <DatoCompartidoFiltro>,
+            ...
+        }
+
+        Uso recomendado en views/templates:
+        - Si el dato ya tiene valor, se muestra como solo lectura y se indica
+          qué área lo capturó.
+        - Si el dato está vacío, el área que está atendiendo al menor puede
+          capturarlo.
+        """
+        try:
+            return {
+                dato.clave: dato
+                for dato in self.datos_compartidos_filtros.all()
+            }
+        except Exception:
+            return {}
+
+    def obtener_o_crear_dato_compartido(self, clave, etiqueta=""):
+        """
+        Obtiene o crea un dato compartido para esta solicitud.
+
+        Este método permite que Psicología, Nutrición o Médica trabajen sin un
+        orden fijo. Si un área todavía no capturó un dato compartido, otra área
+        podrá registrarlo y quedará identificado el origen.
+        """
+        clave = DatoCompartidoFiltro.normalizar_clave(clave)
+        etiqueta = etiqueta or DatoCompartidoFiltro.etiqueta_sugerida(clave)
+
+        dato, _ = DatoCompartidoFiltro.objects.get_or_create(
+            solicitud=self,
+            clave=clave,
+            defaults={
+                "etiqueta": etiqueta,
+            }
+        )
+
+        if etiqueta and dato.etiqueta != etiqueta:
+            dato.etiqueta = etiqueta
+            dato.save(update_fields=["etiqueta", "updated_at"])
+
+        return dato
+
+    def registrar_dato_compartido(self, clave, valor, area, usuario=None, etiqueta="", observacion="", fuente="manual"):
+        """
+        Registra un dato compartido respetando la regla de bloqueo:
+
+        - Si está vacío: cualquier filtro autorizado puede capturarlo.
+        - Si ya fue capturado por otra área: se conserva como solo lectura para
+          evitar que se sobrescriba sin control.
+        - Si fue capturado por la misma área o está desbloqueado: puede corregirse.
+
+        La vista debe capturar ValidationError para mostrar el mensaje al usuario.
+        """
+        dato = self.obtener_o_crear_dato_compartido(clave, etiqueta=etiqueta)
+        dato.registrar_valor(
+            valor=valor,
+            area=area,
+            usuario=usuario,
+            observacion=observacion,
+            fuente=fuente,
+        )
+        return dato
+
     def __str__(self):
         return f"Solicitud Folio {self.folio}" if self.folio else f"Solicitud #{self.id}"
 
@@ -578,6 +1030,374 @@ class Solicitud(models.Model):
             models.Index(fields=["estado_nutricion"]),
             models.Index(fields=["estado_medico"]),
             models.Index(fields=["folio"]),
+        ]
+
+
+class DatoCompartidoFiltro(models.Model):
+    """
+    Dato reutilizable entre los filtros de admisión.
+
+    Problema que resuelve:
+    - Psicología, Nutrición y Médica no siempre atienden al menor en un orden fijo.
+    - Hay datos que se repiten entre formularios.
+    - Si el primer filtro todavía no capturó un dato, el siguiente filtro debe
+      poder registrarlo.
+    - Cuando otro filtro llegue después, debe ver el dato como referencia, junto
+      con la nota de quién lo capturó, sin sobrescribirlo accidentalmente.
+
+    Regla operativa:
+    - Dato vacío: el área en turno puede capturarlo.
+    - Dato con valor: queda bloqueado como solo lectura para las demás áreas.
+    - La misma área que lo originó puede corregirlo.
+    - Si se requiere corrección institucional por otra área, se puede desbloquear
+      cambiando bloqueado=False desde una vista administrativa o desde admin.
+    """
+
+    class AreaFiltro(models.TextChoices):
+        PSICOLOGIA = "PSICOLOGIA", "Psicología"
+        NUTRICION = "NUTRICION", "Nutrición"
+        MEDICO = "MEDICO", "Médica"
+        PEDAGOGIA = "PEDAGOGIA", "Pedagogía"
+        TRABAJO_SOCIAL = "TRABAJO_SOCIAL", "Trabajo social"
+        SISTEMA = "SISTEMA", "Sistema"
+
+    class EstadoDato(models.TextChoices):
+        VACIO = "VACIO", "Vacío"
+        CAPTURADO = "CAPTURADO", "Capturado"
+        CORREGIDO = "CORREGIDO", "Corregido"
+        VALIDADO = "VALIDADO", "Validado"
+
+    # Catálogo sugerido. No se usa como choices para permitir agregar nuevas
+    # claves desde views/forms sin tener que modificar el modelo cada vez.
+    CATALOGO_SUGERIDO = {
+        "edad_menor": "Edad del menor",
+        "sexo_menor": "Sexo del menor",
+        "fecha_nacimiento_menor": "Fecha de nacimiento del menor",
+        "peso_nacer": "Peso al nacer",
+        "talla_nacer": "Talla al nacer",
+        "peso_actual": "Peso actual",
+        "talla_actual": "Talla actual",
+        "semanas_gestacion": "Semanas de gestación",
+        "tipo_nacimiento": "Tipo de nacimiento / parto",
+        "numero_gestas": "Número de gestas",
+        "complicaciones_embarazo": "Complicaciones durante el embarazo",
+        "medicamentos_embarazo": "Medicamentos durante el embarazo",
+        "sufrimiento_fetal": "Sufrimiento fetal",
+        "tipo_alimentacion_inicio": "Tipo de alimentación inicial",
+        "seno_materno": "Seno materno",
+        "tiempo_seno_materno": "Tiempo con seno materno",
+        "motivo_no_seno": "Motivo por el que no recibió seno materno",
+        "formula_infantil": "Fórmula infantil",
+        "alergia_alimentos": "Alergia a alimentos",
+        "alergia_medicamentos": "Alergia a medicamentos",
+        "enfermedades_actuales": "Enfermedades actuales",
+        "observacion_general_salud": "Observación general de salud",
+    }
+
+    solicitud = models.ForeignKey(
+        "admisiones.Solicitud",
+        on_delete=models.CASCADE,
+        related_name="datos_compartidos_filtros",
+        verbose_name="Solicitud de ingreso"
+    )
+
+    clave = models.CharField(
+        max_length=80,
+        verbose_name="Clave del dato compartido",
+        help_text="Ej. peso_actual, talla_actual, semanas_gestacion."
+    )
+
+    etiqueta = models.CharField(
+        max_length=180,
+        blank=True,
+        default="",
+        verbose_name="Etiqueta visible"
+    )
+
+    valor = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Valor capturado"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoDato.choices,
+        default=EstadoDato.VACIO,
+        verbose_name="Estado del dato"
+    )
+
+    area_origen = models.CharField(
+        max_length=30,
+        choices=AreaFiltro.choices,
+        blank=True,
+        default="",
+        verbose_name="Área que capturó el dato"
+    )
+
+    capturado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="datos_compartidos_capturados",
+        verbose_name="Capturado por"
+    )
+
+    capturado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha y hora de captura"
+    )
+
+    actualizado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="datos_compartidos_actualizados",
+        verbose_name="Actualizado por"
+    )
+
+    actualizado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha y hora de actualización"
+    )
+
+    fuente = models.CharField(
+        max_length=120,
+        blank=True,
+        default="manual",
+        verbose_name="Fuente del dato",
+        help_text="Ej. formulario_psicologia, formulario_nutricion, formulario_medico."
+    )
+
+    observacion_origen = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Nota del área que capturó"
+    )
+
+    bloqueado = models.BooleanField(
+        default=True,
+        verbose_name="Bloqueado para otras áreas",
+        help_text="Si está activo, solo el área que lo capturó puede corregirlo."
+    )
+
+    historial = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Historial de cambios"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def normalizar_clave(clave):
+        clave = str(clave or "").strip().lower()
+        clave = re.sub(r"[^a-z0-9_]+", "_", clave)
+        clave = re.sub(r"_+", "_", clave).strip("_")
+        return clave
+
+    @classmethod
+    def etiqueta_sugerida(cls, clave):
+        clave = cls.normalizar_clave(clave)
+        return cls.CATALOGO_SUGERIDO.get(
+            clave,
+            clave.replace("_", " ").strip().capitalize() or "Dato compartido"
+        )
+
+    @property
+    def tiene_valor(self):
+        return bool(str(self.valor or "").strip())
+
+    @property
+    def esta_vacio(self):
+        return not self.tiene_valor
+
+    @property
+    def area_origen_etiqueta(self):
+        if not self.area_origen:
+            return "Sin área"
+        try:
+            return self.get_area_origen_display()
+        except Exception:
+            return self.area_origen
+
+    @property
+    def capturado_por_nombre(self):
+        usuario = self.capturado_por
+        if not usuario:
+            return "Sin usuario"
+
+        try:
+            nombre = usuario.get_full_name()
+            if nombre:
+                return nombre
+        except Exception:
+            pass
+
+        return getattr(usuario, "email", "") or getattr(usuario, "username", "") or str(usuario)
+
+    @property
+    def nota_origen(self):
+        if not self.tiene_valor:
+            return "Dato pendiente de captura."
+
+        partes = [f"Capturado por {self.area_origen_etiqueta}"]
+
+        if self.capturado_por:
+            partes.append(f"por {self.capturado_por_nombre}")
+
+        if self.capturado_en:
+            partes.append(f"el {timezone.localtime(self.capturado_en).strftime('%d/%m/%Y %H:%M')}")
+
+        if self.observacion_origen:
+            partes.append(f"Nota: {self.observacion_origen}")
+
+        return " ".join(partes).strip()
+
+    def puede_ser_editado_por_area(self, area):
+        """
+        True si la vista debe mostrar el campo desbloqueado para el área actual.
+        """
+        area = str(area or "").strip().upper()
+
+        if not self.tiene_valor:
+            return True
+
+        if not self.bloqueado:
+            return True
+
+        return bool(area and area == self.area_origen)
+
+    def registrar_valor(self, valor, area, usuario=None, observacion="", fuente="manual", forzar=False):
+        """
+        Guarda o actualiza el dato compartido.
+
+        Si el dato ya tiene valor y pertenece a otra área, no se permite
+        sobrescribirlo cuando está bloqueado, salvo que forzar=True.
+        """
+        valor = str(valor or "").strip()
+        area = str(area or "").strip().upper()
+        observacion = str(observacion or "").strip()
+        fuente = str(fuente or "manual").strip() or "manual"
+
+        if not area:
+            raise ValidationError("Debe indicarse el área que captura el dato compartido.")
+
+        if not valor:
+            # No se guarda vacío como captura real.
+            return self
+
+        if self.tiene_valor and self.bloqueado and self.area_origen and self.area_origen != area and not forzar:
+            raise ValidationError(
+                f"Este dato ya fue capturado por {self.area_origen_etiqueta}. "
+                "Para evitar duplicidad, se muestra como solo lectura en las demás áreas."
+            )
+
+        valor_anterior = self.valor or ""
+        area_anterior = self.area_origen or ""
+
+        if not self.etiqueta:
+            self.etiqueta = self.etiqueta_sugerida(self.clave)
+
+        self.valor = valor
+        self.area_origen = area
+        self.actualizado_por = usuario
+        self.actualizado_en = timezone.now()
+        self.fuente = fuente
+        self.observacion_origen = observacion or self.observacion_origen
+
+        if not self.capturado_en:
+            self.capturado_en = timezone.now()
+            self.capturado_por = usuario
+            self.estado = self.EstadoDato.CAPTURADO
+        elif valor_anterior != valor or area_anterior != area:
+            self.estado = self.EstadoDato.CORREGIDO
+
+        self.historial = list(self.historial or [])
+        self.historial.append({
+            "valor_anterior": valor_anterior,
+            "valor_nuevo": valor,
+            "area_anterior": area_anterior,
+            "area_nueva": area,
+            "usuario_id": getattr(usuario, "id", None),
+            "usuario": (
+                getattr(usuario, "email", None)
+                or getattr(usuario, "username", None)
+                or str(usuario)
+                if usuario else ""
+            ),
+            "fuente": fuente,
+            "observacion": observacion,
+            "fecha": timezone.now().isoformat(),
+        })
+
+        self.save()
+        return self
+
+    def validar_por_area(self, area, usuario=None):
+        """
+        Marca el dato como validado sin cambiar el valor.
+        Sirve cuando otra área revisa el dato y está de acuerdo.
+        """
+        area = str(area or "").strip().upper()
+
+        if not self.tiene_valor:
+            raise ValidationError("No se puede validar un dato vacío.")
+
+        self.estado = self.EstadoDato.VALIDADO
+        self.actualizado_por = usuario
+        self.actualizado_en = timezone.now()
+
+        self.historial = list(self.historial or [])
+        self.historial.append({
+            "accion": "VALIDADO",
+            "area": area,
+            "usuario_id": getattr(usuario, "id", None),
+            "fecha": timezone.now().isoformat(),
+        })
+
+        self.save(update_fields=[
+            "estado",
+            "actualizado_por",
+            "actualizado_en",
+            "historial",
+            "updated_at",
+        ])
+
+        return self
+
+    def save(self, *args, **kwargs):
+        self.clave = self.normalizar_clave(self.clave)
+
+        if not self.etiqueta:
+            self.etiqueta = self.etiqueta_sugerida(self.clave)
+
+        if self.tiene_valor and self.estado == self.EstadoDato.VACIO:
+            self.estado = self.EstadoDato.CAPTURADO
+
+        if not self.tiene_valor:
+            self.estado = self.EstadoDato.VACIO
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        folio = getattr(self.solicitud, "folio", None) or self.solicitud_id
+        return f"Solicitud {folio} - {self.etiqueta or self.clave}: {self.valor or 'Sin dato'}"
+
+    class Meta:
+        ordering = ["solicitud", "clave"]
+        unique_together = ("solicitud", "clave")
+        indexes = [
+            models.Index(fields=["clave"]),
+            models.Index(fields=["estado"]),
+            models.Index(fields=["area_origen"]),
+            models.Index(fields=["capturado_en"]),
+            models.Index(fields=["solicitud", "clave"]),
         ]
 
 
@@ -943,6 +1763,47 @@ class SolicitudInscripcion(models.Model):
                                           related_name='reportes_ts')
     reporte_final_en = models.DateTimeField(null=True, blank=True)
 
+    # =========================================================
+    # CONTROL DE SUPLENCIA - TRABAJO SOCIAL
+    # =========================================================
+    # Trabajo Social se maneja como cobertura especial del proceso completo
+    # porque solicitud, revisión documental, responsables, pagos, códigos y
+    # reporte final están conectados.
+    trabajo_social_es_suplencia = models.BooleanField(
+        default=False,
+        verbose_name="¿Proceso social modificado por suplencia?"
+    )
+    trabajo_social_autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="procesos_trabajo_social",
+        verbose_name="Autorización de suplencia de Trabajo Social"
+    )
+    trabajo_social_pendiente_revision_titular = models.BooleanField(
+        default=False,
+        verbose_name="Pendiente de revisión por Trabajo Social titular"
+    )
+    trabajo_social_revisado_por_titular = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="procesos_trabajo_social_revisados_titular",
+        verbose_name="Revisado por Trabajo Social titular"
+    )
+    trabajo_social_revisado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de revisión por Trabajo Social titular"
+    )
+    trabajo_social_observacion_revision_titular = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de revisión de Trabajo Social"
+    )
+
     directora_aprobado = models.BooleanField(
         null=True,
         blank=True,
@@ -964,6 +1825,43 @@ class SolicitudInscripcion(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def marcar_trabajo_social_por_suplencia(self, autorizacion=None, usuario=None):
+        """
+        Marca el expediente como modificado por cobertura temporal de Trabajo Social.
+        La vista debe llamarlo cuando se creen/editen solicitudes, pagos, códigos,
+        documentos o reporte final bajo suplencia.
+        """
+        self.trabajo_social_es_suplencia = True
+        self.trabajo_social_autorizacion_suplencia = autorizacion
+        self.trabajo_social_pendiente_revision_titular = True
+        self.save(update_fields=[
+            "trabajo_social_es_suplencia",
+            "trabajo_social_autorizacion_suplencia",
+            "trabajo_social_pendiente_revision_titular",
+            "updated_at",
+        ])
+        return self
+
+    def revisar_trabajo_social_suplencia(self, usuario=None, observacion=""):
+        """
+        La titular de Trabajo Social revisa y valida lo que se modificó durante su ausencia.
+        """
+        if not self.trabajo_social_es_suplencia:
+            return False, ["Este expediente no tiene movimientos de Trabajo Social por suplencia."]
+
+        self.trabajo_social_pendiente_revision_titular = False
+        self.trabajo_social_revisado_por_titular = usuario
+        self.trabajo_social_revisado_en = timezone.now()
+        self.trabajo_social_observacion_revision_titular = observacion or self.trabajo_social_observacion_revision_titular
+        self.save(update_fields=[
+            "trabajo_social_pendiente_revision_titular",
+            "trabajo_social_revisado_por_titular",
+            "trabajo_social_revisado_en",
+            "trabajo_social_observacion_revision_titular",
+            "updated_at",
+        ])
+        return True, []
 
     @property
     def tiene_comprobante_pago(self):
@@ -1209,15 +2107,63 @@ class SolicitudInscripcion(models.Model):
         return responsable.validar_codigo(codigo), responsable
 
     @property
+    def nombre_menor_completo(self):
+        """
+        Nombre visible del alumno para selects, dashboards e incidencias.
+        Evita que Django muestre textos técnicos como
+        "Expediente de Inscripción ..." cuando se selecciona al niño/a.
+        """
+        try:
+            nombre = self.solicitud_ingreso.nombre_menor_completo()
+        except Exception:
+            nombre = ""
+
+        return (nombre or "").strip() or f"Alumno sin nombre #{self.pk or ''}".strip()
+
+    @property
+    def folio_solicitud(self):
+        try:
+            return self.solicitud_ingreso.folio or self.solicitud_ingreso_id
+        except Exception:
+            return self.solicitud_ingreso_id or self.pk
+
+    @property
+    def sala_nombre(self):
+        try:
+            if self.sala_semestre_asignada and self.sala_semestre_asignada.sala:
+                return self.sala_semestre_asignada.sala.nombre
+        except Exception:
+            pass
+
+        try:
+            if self.sala_asignada:
+                return self.sala_asignada.nombre
+        except Exception:
+            pass
+
+        return "Sin sala"
+
+    @property
+    def semestre_nombre(self):
+        try:
+            return self.semestre.nombre if self.semestre else "Sin semestre"
+        except Exception:
+            return "Sin semestre"
+
+    @property
     def es_lactante(self):
         if self.sala_asignada and self.sala_asignada.nombre:
             return self.sala_asignada.nombre.strip().upper().startswith('L')
+        if self.sala_semestre_asignada and self.sala_semestre_asignada.sala:
+            return self.sala_semestre_asignada.sala.nombre.strip().upper().startswith('L')
         return False
 
     @property
     def es_maternal(self):
         if self.sala_asignada and self.sala_asignada.nombre:
             return self.sala_asignada.nombre.strip().upper().startswith('M')
+        if self.sala_semestre_asignada and self.sala_semestre_asignada.sala:
+            return self.sala_semestre_asignada.sala.nombre.strip().upper().startswith('M')
         return False
 
     def evaluar_y_recomendar_sala(self):
@@ -1310,13 +2256,27 @@ class SolicitudInscripcion(models.Model):
         indexes = [
             models.Index(fields=["estado"]),
             models.Index(fields=["estado_pago"]),
+            models.Index(fields=["trabajo_social_es_suplencia"]),
+            models.Index(fields=["trabajo_social_pendiente_revision_titular"]),
             models.Index(fields=["codigo_responsable_entregado"]),
             models.Index(fields=["semestre"]),
             models.Index(fields=["sala_semestre_asignada"]),
         ]
 
     def __str__(self):
-        return f"Expediente de Inscripción {self.id} - Solicitud {self.solicitud_ingreso_id}"
+        nombre = self.nombre_menor_completo
+        sala = self.sala_nombre
+        folio = self.folio_solicitud
+
+        partes = [nombre]
+
+        if sala and sala != "Sin sala":
+            partes.append(sala)
+
+        if folio:
+            partes.append(f"Folio {folio}")
+
+        return " - ".join(str(p) for p in partes if p) or f"Alumno #{self.pk}"
 
 
 class CodigoResponsableAutorizado(models.Model):
@@ -1509,6 +2469,22 @@ class CodigoResponsableAutorizado(models.Model):
     @property
     def puede_validarse(self):
         return bool(self.activo and self.codigo_hash and self.codigo_entregado)
+
+
+    @property
+    def tiene_correo_institucional(self):
+        """
+        Indica si este responsable puede recibir autorización por correo institucional.
+        Si es False, la autorización se resolverá mediante QR presencial.
+        """
+        return es_correo_institucional(self.correo)
+
+    @property
+    def metodo_autorizacion_recomendado(self):
+        """
+        Devuelve CORREO si tiene correo institucional; de lo contrario QR.
+        """
+        return "CORREO" if self.tiene_correo_institucional else "QR"
 
     @property
     def alumno_nombre(self):
@@ -1782,6 +2758,24 @@ class HistoriaClinicaMedica(models.Model):
     frecuencia_respiratoria = models.CharField(max_length=20, blank=True)
     tension_arterial = models.CharField(max_length=20, blank=True)
     estado_nutricional = models.CharField(max_length=100, blank=True)
+
+    class RevisionNutricionMedica(models.TextChoices):
+        SIN_REVISION = "SIN_REVISION", "Sin revisión"
+        ADECUADO = "ADECUADO", "Adecuado"
+        REQUIERE_SEGUIMIENTO = "REQUIERE_SEGUIMIENTO", "Requiere seguimiento"
+        ALERTA = "ALERTA", "Alerta médica"
+
+    revision_nutricion_medica = models.CharField(
+        max_length=30,
+        choices=RevisionNutricionMedica.choices,
+        default=RevisionNutricionMedica.SIN_REVISION,
+        verbose_name="Revisión médica de valoración nutricional"
+    )
+    comentario_revision_nutricion = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Comentario médico sobre valoración nutricional"
+    )
 
     diagnostico = models.TextField(blank=True)
     pronostico = models.TextField(blank=True)
@@ -3091,6 +4085,820 @@ class RegistroDiarioAlumno(models.Model):
         ]
 
 
+class AutorizacionEntrada(models.Model):
+    """
+    Solicitud de autorización remota para registrar la entrada del menor.
+
+    Flujo:
+    1. La maestra captura los datos de entrada y selecciona al responsable autorizado.
+    2. El sistema decide automáticamente el método:
+       - CORREO: si el responsable tiene correo institucional UNACH.
+       - QR: si no tiene correo institucional o no tiene correo registrado.
+    3. El responsable abre el enlace desde su celular, por correo o QR, revisa la información
+       e ingresa su código de 4 dígitos.
+    4. Si el código es correcto y la solicitud sigue vigente, se registra la entrada del menor.
+
+    Importante:
+    - El código NO lo captura la maestra en su tableta.
+    - El responsable autoriza desde su propio dispositivo.
+    - No se guarda el código en texto plano; se valida contra CodigoResponsableAutorizado.codigo_hash.
+    """
+
+    class EstadoAutorizacion(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente de autorización"
+        ENVIADA = "ENVIADA", "Enviada por correo"
+        QR_GENERADO = "QR_GENERADO", "QR generado"
+        AUTORIZADA = "AUTORIZADA", "Autorizada"
+        RECHAZADA = "RECHAZADA", "Rechazada"
+        EXPIRADA = "EXPIRADA", "Expirada"
+        CANCELADA = "CANCELADA", "Cancelada"
+        ERROR = "ERROR", "Error"
+
+    class MetodoAutorizacion(models.TextChoices):
+        CORREO = "CORREO", "Correo institucional"
+        QR = "QR", "Código QR presencial"
+
+    registro_diario = models.ForeignKey(
+        "admisiones.RegistroDiarioAlumno",
+        on_delete=models.CASCADE,
+        related_name="autorizaciones_entrada",
+        verbose_name="Registro diario del menor"
+    )
+
+    responsable_autorizado = models.ForeignKey(
+        "admisiones.CodigoResponsableAutorizado",
+        on_delete=models.PROTECT,
+        related_name="autorizaciones_entrada",
+        verbose_name="Responsable autorizado"
+    )
+
+    solicitada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="autorizaciones_entrada_solicitadas",
+        verbose_name="Maestra que solicitó autorización"
+    )
+
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Token seguro de autorización"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoAutorizacion.choices,
+        default=EstadoAutorizacion.PENDIENTE,
+        verbose_name="Estado de autorización"
+    )
+
+    metodo_autorizacion = models.CharField(
+        max_length=20,
+        choices=MetodoAutorizacion.choices,
+        default=MetodoAutorizacion.QR,
+        verbose_name="Método de autorización"
+    )
+
+    # Datos capturados por la maestra antes de enviar o mostrar la autorización.
+    responsable_nombre = models.CharField(max_length=180, blank=True, default="")
+    responsable_parentesco = models.CharField(max_length=80, blank=True, default="")
+    responsable_telefono = models.CharField(max_length=30, blank=True, default="")
+    correo_destino = models.EmailField(blank=True, default="", verbose_name="Correo destino")
+
+    credencial_entrada_validada = models.BooleanField(
+        default=False,
+        verbose_name="¿La maestra verificó la credencial del adulto?"
+    )
+    temperatura_entrada = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        verbose_name="Temperatura de entrada"
+    )
+    observaciones_maestra = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones capturadas por la maestra"
+    )
+
+    # Control de envío, QR y vigencia.
+    creada_en = models.DateTimeField(auto_now_add=True)
+    enviada_en = models.DateTimeField(null=True, blank=True)
+    qr_generado_en = models.DateTimeField(null=True, blank=True)
+    expira_en = models.DateTimeField(null=True, blank=True)
+    vigencia_minutos = models.PositiveIntegerField(
+        default=30,
+        verbose_name="Vigencia del enlace o QR en minutos"
+    )
+
+    # Auditoría de autorización desde el celular del responsable.
+    autorizada_en = models.DateTimeField(null=True, blank=True)
+    rechazada_en = models.DateTimeField(null=True, blank=True)
+    cancelada_en = models.DateTimeField(null=True, blank=True)
+    expirada_en = models.DateTimeField(null=True, blank=True)
+
+    ip_autorizacion = models.GenericIPAddressField(null=True, blank=True)
+    user_agent_autorizacion = models.TextField(blank=True, default="")
+    intentos_codigo = models.PositiveIntegerField(default=0)
+    ultimo_error = models.TextField(blank=True, default="")
+
+    # Mensaje opcional escrito por el responsable al autorizar o rechazar.
+    comentario_responsable = models.TextField(blank=True, default="")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def alumno(self):
+        try:
+            return self.registro_diario.alumno
+        except Exception:
+            return None
+
+    @property
+    def alumno_nombre(self):
+        try:
+            return self.registro_diario.alumno.nombre_menor_completo
+        except Exception:
+            try:
+                return self.registro_diario.alumno.solicitud_ingreso.nombre_menor_completo()
+            except Exception:
+                return "Sin alumno"
+
+    @property
+    def sala_nombre(self):
+        try:
+            return self.registro_diario.sala_semestre.sala.nombre
+        except Exception:
+            try:
+                return self.registro_diario.alumno.sala_nombre
+            except Exception:
+                return "Sin sala"
+
+    @property
+    def fecha_operativa(self):
+        try:
+            return self.registro_diario.dia_operativo.fecha
+        except Exception:
+            return None
+
+    @property
+    def usa_correo(self):
+        return self.metodo_autorizacion == self.MetodoAutorizacion.CORREO
+
+    @property
+    def usa_qr(self):
+        return self.metodo_autorizacion == self.MetodoAutorizacion.QR
+
+    @property
+    def correo_institucional_valido(self):
+        return es_correo_institucional(self.correo_destino)
+
+    @property
+    def esta_pendiente(self):
+        return self.estado in [
+            self.EstadoAutorizacion.PENDIENTE,
+            self.EstadoAutorizacion.ENVIADA,
+            self.EstadoAutorizacion.QR_GENERADO,
+        ]
+
+    @property
+    def esta_autorizada(self):
+        return self.estado == self.EstadoAutorizacion.AUTORIZADA
+
+    @property
+    def esta_expirada(self):
+        if self.estado == self.EstadoAutorizacion.EXPIRADA:
+            return True
+        return bool(self.expira_en and timezone.now() > self.expira_en)
+
+    @property
+    def esta_vigente(self):
+        return bool(self.esta_pendiente and not self.esta_expirada)
+
+    def preparar_datos_responsable(self):
+        """
+        Copia los datos actuales del responsable autorizado a la solicitud.
+        Así el correo o QR conserva una fotografía del dato enviado aunque después se edite el expediente.
+        """
+        responsable = self.responsable_autorizado
+        if responsable:
+            self.responsable_nombre = responsable.nombre_completo or self.responsable_nombre
+            self.responsable_parentesco = responsable.parentesco or self.responsable_parentesco
+            self.responsable_telefono = responsable.telefono or self.responsable_telefono
+            self.correo_destino = responsable.correo or self.correo_destino
+
+    def definir_metodo_autorizacion(self):
+        """
+        Decide el método automáticamente:
+        - Si el responsable tiene correo institucional, se usa CORREO.
+        - Si no, se usa QR presencial.
+        """
+        self.metodo_autorizacion = (
+            self.MetodoAutorizacion.CORREO
+            if es_correo_institucional(self.correo_destino)
+            else self.MetodoAutorizacion.QR
+        )
+
+    def marcar_enviada(self):
+        self.estado = self.EstadoAutorizacion.ENVIADA
+        self.enviada_en = timezone.now()
+        self.ultimo_error = ""
+        self.save(update_fields=["estado", "enviada_en", "ultimo_error", "updated_at"])
+
+    def marcar_qr_generado(self):
+        self.estado = self.EstadoAutorizacion.QR_GENERADO
+        self.qr_generado_en = timezone.now()
+        self.ultimo_error = ""
+        self.save(update_fields=["estado", "qr_generado_en", "ultimo_error", "updated_at"])
+
+    def marcar_error(self, error):
+        self.estado = self.EstadoAutorizacion.ERROR
+        self.ultimo_error = str(error or "")
+        self.save(update_fields=["estado", "ultimo_error", "updated_at"])
+
+    def expirar_si_corresponde(self):
+        if self.esta_pendiente and self.esta_expirada:
+            self.estado = self.EstadoAutorizacion.EXPIRADA
+            self.expirada_en = timezone.now()
+            self.save(update_fields=["estado", "expirada_en", "updated_at"])
+            return True
+        return False
+
+    def cancelar(self, usuario=None, motivo=""):
+        if not self.esta_pendiente:
+            return False, ["La solicitud ya no está pendiente y no puede cancelarse."]
+
+        self.estado = self.EstadoAutorizacion.CANCELADA
+        self.cancelada_en = timezone.now()
+        if motivo:
+            self.ultimo_error = motivo
+        self.save(update_fields=["estado", "cancelada_en", "ultimo_error", "updated_at"])
+        return True, []
+
+    def rechazar(self, comentario="", ip=None, user_agent=""):
+        if not self.esta_vigente:
+            self.expirar_si_corresponde()
+            return False, ["La solicitud ya expiró o ya no está disponible."]
+
+        self.estado = self.EstadoAutorizacion.RECHAZADA
+        self.rechazada_en = timezone.now()
+        self.comentario_responsable = comentario or self.comentario_responsable
+        self.ip_autorizacion = ip or self.ip_autorizacion
+        self.user_agent_autorizacion = user_agent or self.user_agent_autorizacion
+        self.save(update_fields=[
+            "estado",
+            "rechazada_en",
+            "comentario_responsable",
+            "ip_autorizacion",
+            "user_agent_autorizacion",
+            "updated_at",
+        ])
+        return True, []
+
+    def autorizar(self, codigo, ip=None, user_agent="", comentario=""):
+        """
+        Valida el código del responsable y registra la entrada del menor.
+        Esta operación es transaccional para evitar dobles autorizaciones.
+        """
+        codigo = str(codigo or "").strip()
+
+        with transaction.atomic():
+            solicitud = AutorizacionEntrada.objects.select_for_update().select_related(
+                "registro_diario",
+                "responsable_autorizado",
+            ).get(pk=self.pk)
+
+            if not solicitud.esta_vigente:
+                solicitud.expirar_si_corresponde()
+                return False, ["La solicitud ya expiró o ya no está disponible."]
+
+            registro = RegistroDiarioAlumno.objects.select_for_update().get(pk=solicitud.registro_diario_id)
+
+            if registro.entrada_en:
+                solicitud.estado = solicitud.EstadoAutorizacion.CANCELADA
+                solicitud.cancelada_en = timezone.now()
+                solicitud.ultimo_error = "El alumno ya tenía entrada registrada."
+                solicitud.save(update_fields=["estado", "cancelada_en", "ultimo_error", "updated_at"])
+                return False, ["El alumno ya tiene entrada registrada."]
+
+            solicitud.intentos_codigo = (solicitud.intentos_codigo or 0) + 1
+
+            if not solicitud.responsable_autorizado.validar_codigo(codigo):
+                solicitud.ultimo_error = "Código incorrecto."
+                solicitud.save(update_fields=["intentos_codigo", "ultimo_error", "updated_at"])
+                return False, ["El código ingresado no es correcto."]
+
+            ok, errores = registro.registrar_entrada(
+                usuario=solicitud.solicitada_por,
+                responsable_autorizado=solicitud.responsable_autorizado,
+                credencial_validada=solicitud.credencial_entrada_validada,
+                codigo_validado=True,
+                temperatura=solicitud.temperatura_entrada,
+            )
+
+            if not ok:
+                solicitud.ultimo_error = " | ".join(errores)
+                solicitud.save(update_fields=["intentos_codigo", "ultimo_error", "updated_at"])
+                return False, errores
+
+            solicitud.estado = solicitud.EstadoAutorizacion.AUTORIZADA
+            solicitud.autorizada_en = timezone.now()
+            solicitud.ip_autorizacion = ip or solicitud.ip_autorizacion
+            solicitud.user_agent_autorizacion = user_agent or solicitud.user_agent_autorizacion
+            solicitud.comentario_responsable = comentario or solicitud.comentario_responsable
+            solicitud.ultimo_error = ""
+            solicitud.save(update_fields=[
+                "estado",
+                "autorizada_en",
+                "ip_autorizacion",
+                "user_agent_autorizacion",
+                "comentario_responsable",
+                "intentos_codigo",
+                "ultimo_error",
+                "updated_at",
+            ])
+
+            return True, []
+
+    def clean(self):
+        errores = {}
+
+        if self.registro_diario_id and self.responsable_autorizado_id:
+            try:
+                if self.responsable_autorizado.inscripcion_id != self.registro_diario.alumno_id:
+                    errores["responsable_autorizado"] = "El responsable autorizado no pertenece al alumno seleccionado."
+            except Exception:
+                pass
+
+        if self.responsable_autorizado_id:
+            if not self.responsable_autorizado.activo:
+                errores["responsable_autorizado"] = "El responsable autorizado está inactivo."
+
+            if not self.responsable_autorizado.codigo_hash:
+                errores["responsable_autorizado"] = "El responsable no tiene código de autorización generado."
+
+            if not self.responsable_autorizado.codigo_entregado:
+                errores["responsable_autorizado"] = "El código del responsable aún no está marcado como entregado."
+
+        if self.usa_correo and not es_correo_institucional(self.correo_destino):
+            errores["correo_destino"] = "Para enviar por correo, el responsable debe tener correo institucional UNACH. Si no tiene, usa QR."
+
+        if self.registro_diario_id:
+            if self.registro_diario.entrada_en:
+                errores["registro_diario"] = "El alumno ya tiene entrada registrada."
+
+            if not self.registro_diario.dia_esta_editable:
+                errores["registro_diario"] = "El día no está abierto o no permite capturar entradas."
+
+        if errores:
+            raise ValidationError(errores)
+
+    def save(self, *args, **kwargs):
+        if not self.expira_en:
+            minutos = self.vigencia_minutos or 30
+            self.expira_en = timezone.now() + timedelta(minutes=minutos)
+
+        self.preparar_datos_responsable()
+
+        if self.correo_destino:
+            self.correo_destino = normalizar_correo(self.correo_destino)
+
+        self.definir_metodo_autorizacion()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Autorización entrada - {self.alumno_nombre} - {self.get_estado_display()}"
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["token"]),
+            models.Index(fields=["estado"]),
+            models.Index(fields=["metodo_autorizacion"]),
+            models.Index(fields=["correo_destino"]),
+            models.Index(fields=["creada_en"]),
+            models.Index(fields=["expira_en"]),
+            models.Index(fields=["autorizada_en"]),
+            models.Index(fields=["registro_diario"]),
+            models.Index(fields=["responsable_autorizado"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["registro_diario"],
+                condition=Q(estado__in=["PENDIENTE", "ENVIADA", "QR_GENERADO"]),
+                name="uniq_autorizacion_entrada_pendiente_por_registro",
+            )
+        ]
+
+
+class AutorizacionSalida(models.Model):
+    """
+    Solicitud de autorización remota para registrar la salida del menor.
+
+    Usa el mismo criterio que entrada:
+    - Si el responsable tiene correo institucional UNACH, se envía enlace por correo.
+    - Si no tiene correo institucional, se muestra QR presencial para escanear.
+
+    El responsable valida desde su celular con su código individual de 4 dígitos.
+    """
+
+    class EstadoAutorizacion(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente de autorización"
+        ENVIADA = "ENVIADA", "Enviada por correo"
+        QR_GENERADO = "QR_GENERADO", "QR generado"
+        AUTORIZADA = "AUTORIZADA", "Autorizada"
+        RECHAZADA = "RECHAZADA", "Rechazada"
+        EXPIRADA = "EXPIRADA", "Expirada"
+        CANCELADA = "CANCELADA", "Cancelada"
+        ERROR = "ERROR", "Error"
+
+    class MetodoAutorizacion(models.TextChoices):
+        CORREO = "CORREO", "Correo institucional"
+        QR = "QR", "Código QR presencial"
+
+    registro_diario = models.ForeignKey(
+        "admisiones.RegistroDiarioAlumno",
+        on_delete=models.CASCADE,
+        related_name="autorizaciones_salida",
+        verbose_name="Registro diario del menor"
+    )
+
+    responsable_autorizado = models.ForeignKey(
+        "admisiones.CodigoResponsableAutorizado",
+        on_delete=models.PROTECT,
+        related_name="autorizaciones_salida",
+        verbose_name="Responsable autorizado"
+    )
+
+    solicitada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="autorizaciones_salida_solicitadas",
+        verbose_name="Maestra que solicitó autorización"
+    )
+
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Token seguro de autorización"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoAutorizacion.choices,
+        default=EstadoAutorizacion.PENDIENTE,
+        verbose_name="Estado de autorización"
+    )
+
+    metodo_autorizacion = models.CharField(
+        max_length=20,
+        choices=MetodoAutorizacion.choices,
+        default=MetodoAutorizacion.QR,
+        verbose_name="Método de autorización"
+    )
+
+    responsable_nombre = models.CharField(max_length=180, blank=True, default="")
+    responsable_parentesco = models.CharField(max_length=80, blank=True, default="")
+    responsable_telefono = models.CharField(max_length=30, blank=True, default="")
+    correo_destino = models.EmailField(blank=True, default="", verbose_name="Correo destino")
+
+    credencial_salida_validada = models.BooleanField(
+        default=False,
+        verbose_name="¿La maestra verificó la credencial del adulto?"
+    )
+    tipo_salida = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        verbose_name="Tipo de salida"
+    )
+    motivo_salida = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        verbose_name="Motivo de salida"
+    )
+    observacion_salida = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observación de salida"
+    )
+
+    creada_en = models.DateTimeField(auto_now_add=True)
+    enviada_en = models.DateTimeField(null=True, blank=True)
+    qr_generado_en = models.DateTimeField(null=True, blank=True)
+    expira_en = models.DateTimeField(null=True, blank=True)
+    vigencia_minutos = models.PositiveIntegerField(
+        default=30,
+        verbose_name="Vigencia del enlace o QR en minutos"
+    )
+
+    autorizada_en = models.DateTimeField(null=True, blank=True)
+    rechazada_en = models.DateTimeField(null=True, blank=True)
+    cancelada_en = models.DateTimeField(null=True, blank=True)
+    expirada_en = models.DateTimeField(null=True, blank=True)
+
+    ip_autorizacion = models.GenericIPAddressField(null=True, blank=True)
+    user_agent_autorizacion = models.TextField(blank=True, default="")
+    intentos_codigo = models.PositiveIntegerField(default=0)
+    ultimo_error = models.TextField(blank=True, default="")
+    comentario_responsable = models.TextField(blank=True, default="")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def alumno(self):
+        try:
+            return self.registro_diario.alumno
+        except Exception:
+            return None
+
+    @property
+    def alumno_nombre(self):
+        try:
+            return self.registro_diario.alumno.nombre_menor_completo
+        except Exception:
+            try:
+                return self.registro_diario.alumno.solicitud_ingreso.nombre_menor_completo()
+            except Exception:
+                return "Sin alumno"
+
+    @property
+    def sala_nombre(self):
+        try:
+            return self.registro_diario.sala_semestre.sala.nombre
+        except Exception:
+            try:
+                return self.registro_diario.alumno.sala_nombre
+            except Exception:
+                return "Sin sala"
+
+    @property
+    def fecha_operativa(self):
+        try:
+            return self.registro_diario.dia_operativo.fecha
+        except Exception:
+            return None
+
+    @property
+    def usa_correo(self):
+        return self.metodo_autorizacion == self.MetodoAutorizacion.CORREO
+
+    @property
+    def usa_qr(self):
+        return self.metodo_autorizacion == self.MetodoAutorizacion.QR
+
+    @property
+    def correo_institucional_valido(self):
+        return es_correo_institucional(self.correo_destino)
+
+    @property
+    def esta_pendiente(self):
+        return self.estado in [
+            self.EstadoAutorizacion.PENDIENTE,
+            self.EstadoAutorizacion.ENVIADA,
+            self.EstadoAutorizacion.QR_GENERADO,
+        ]
+
+    @property
+    def esta_autorizada(self):
+        return self.estado == self.EstadoAutorizacion.AUTORIZADA
+
+    @property
+    def esta_expirada(self):
+        if self.estado == self.EstadoAutorizacion.EXPIRADA:
+            return True
+        return bool(self.expira_en and timezone.now() > self.expira_en)
+
+    @property
+    def esta_vigente(self):
+        return bool(self.esta_pendiente and not self.esta_expirada)
+
+    def preparar_datos_responsable(self):
+        responsable = self.responsable_autorizado
+        if responsable:
+            self.responsable_nombre = responsable.nombre_completo or self.responsable_nombre
+            self.responsable_parentesco = responsable.parentesco or self.responsable_parentesco
+            self.responsable_telefono = responsable.telefono or self.responsable_telefono
+            self.correo_destino = responsable.correo or self.correo_destino
+
+    def definir_metodo_autorizacion(self):
+        self.metodo_autorizacion = (
+            self.MetodoAutorizacion.CORREO
+            if es_correo_institucional(self.correo_destino)
+            else self.MetodoAutorizacion.QR
+        )
+
+    def marcar_enviada(self):
+        self.estado = self.EstadoAutorizacion.ENVIADA
+        self.enviada_en = timezone.now()
+        self.ultimo_error = ""
+        self.save(update_fields=["estado", "enviada_en", "ultimo_error", "updated_at"])
+
+    def marcar_qr_generado(self):
+        self.estado = self.EstadoAutorizacion.QR_GENERADO
+        self.qr_generado_en = timezone.now()
+        self.ultimo_error = ""
+        self.save(update_fields=["estado", "qr_generado_en", "ultimo_error", "updated_at"])
+
+    def marcar_error(self, error):
+        self.estado = self.EstadoAutorizacion.ERROR
+        self.ultimo_error = str(error or "")
+        self.save(update_fields=["estado", "ultimo_error", "updated_at"])
+
+    def expirar_si_corresponde(self):
+        if self.esta_pendiente and self.esta_expirada:
+            self.estado = self.EstadoAutorizacion.EXPIRADA
+            self.expirada_en = timezone.now()
+            self.save(update_fields=["estado", "expirada_en", "updated_at"])
+            return True
+        return False
+
+    def cancelar(self, usuario=None, motivo=""):
+        if not self.esta_pendiente:
+            return False, ["La solicitud ya no está pendiente y no puede cancelarse."]
+
+        self.estado = self.EstadoAutorizacion.CANCELADA
+        self.cancelada_en = timezone.now()
+        if motivo:
+            self.ultimo_error = motivo
+        self.save(update_fields=["estado", "cancelada_en", "ultimo_error", "updated_at"])
+        return True, []
+
+    def rechazar(self, comentario="", ip=None, user_agent=""):
+        if not self.esta_vigente:
+            self.expirar_si_corresponde()
+            return False, ["La solicitud ya expiró o ya no está disponible."]
+
+        self.estado = self.EstadoAutorizacion.RECHAZADA
+        self.rechazada_en = timezone.now()
+        self.comentario_responsable = comentario or self.comentario_responsable
+        self.ip_autorizacion = ip or self.ip_autorizacion
+        self.user_agent_autorizacion = user_agent or self.user_agent_autorizacion
+        self.save(update_fields=[
+            "estado",
+            "rechazada_en",
+            "comentario_responsable",
+            "ip_autorizacion",
+            "user_agent_autorizacion",
+            "updated_at",
+        ])
+        return True, []
+
+    def autorizar(self, codigo, ip=None, user_agent="", comentario=""):
+        """
+        Valida el código del responsable y registra la salida del menor.
+        Esta operación es transaccional para evitar dobles autorizaciones.
+        """
+        codigo = str(codigo or "").strip()
+
+        with transaction.atomic():
+            solicitud = AutorizacionSalida.objects.select_for_update().select_related(
+                "registro_diario",
+                "responsable_autorizado",
+            ).get(pk=self.pk)
+
+            if not solicitud.esta_vigente:
+                solicitud.expirar_si_corresponde()
+                return False, ["La solicitud ya expiró o ya no está disponible."]
+
+            registro = RegistroDiarioAlumno.objects.select_for_update().get(pk=solicitud.registro_diario_id)
+
+            if registro.salida_en:
+                solicitud.estado = solicitud.EstadoAutorizacion.CANCELADA
+                solicitud.cancelada_en = timezone.now()
+                solicitud.ultimo_error = "El alumno ya tenía salida registrada."
+                solicitud.save(update_fields=["estado", "cancelada_en", "ultimo_error", "updated_at"])
+                return False, ["El alumno ya tiene salida registrada."]
+
+            solicitud.intentos_codigo = (solicitud.intentos_codigo or 0) + 1
+
+            if not solicitud.responsable_autorizado.validar_codigo(codigo):
+                solicitud.ultimo_error = "Código incorrecto."
+                solicitud.save(update_fields=["intentos_codigo", "ultimo_error", "updated_at"])
+                return False, ["El código ingresado no es correcto."]
+
+            ok, errores = registro.registrar_salida(
+                usuario=solicitud.solicitada_por,
+                responsable_autorizado=solicitud.responsable_autorizado,
+                credencial_validada=solicitud.credencial_salida_validada,
+                codigo_validado=True,
+                tipo_salida=solicitud.tipo_salida or RegistroDiarioAlumno.EstadoRegistro.SALIDA_NORMAL,
+                motivo_salida=solicitud.motivo_salida,
+                observacion_salida=solicitud.observacion_salida,
+            )
+
+            if not ok:
+                solicitud.ultimo_error = " | ".join(errores)
+                solicitud.save(update_fields=["intentos_codigo", "ultimo_error", "updated_at"])
+                return False, errores
+
+            solicitud.estado = solicitud.EstadoAutorizacion.AUTORIZADA
+            solicitud.autorizada_en = timezone.now()
+            solicitud.ip_autorizacion = ip or solicitud.ip_autorizacion
+            solicitud.user_agent_autorizacion = user_agent or solicitud.user_agent_autorizacion
+            solicitud.comentario_responsable = comentario or solicitud.comentario_responsable
+            solicitud.ultimo_error = ""
+            solicitud.save(update_fields=[
+                "estado",
+                "autorizada_en",
+                "ip_autorizacion",
+                "user_agent_autorizacion",
+                "comentario_responsable",
+                "intentos_codigo",
+                "ultimo_error",
+                "updated_at",
+            ])
+
+            registro.marcar_completo_si_corresponde()
+
+            return True, []
+
+    def clean(self):
+        errores = {}
+
+        if self.registro_diario_id and self.responsable_autorizado_id:
+            try:
+                if self.responsable_autorizado.inscripcion_id != self.registro_diario.alumno_id:
+                    errores["responsable_autorizado"] = "El responsable autorizado no pertenece al alumno seleccionado."
+            except Exception:
+                pass
+
+        if self.responsable_autorizado_id:
+            if not self.responsable_autorizado.activo:
+                errores["responsable_autorizado"] = "El responsable autorizado está inactivo."
+
+            if not self.responsable_autorizado.codigo_hash:
+                errores["responsable_autorizado"] = "El responsable no tiene código de autorización generado."
+
+            if not self.responsable_autorizado.codigo_entregado:
+                errores["responsable_autorizado"] = "El código del responsable aún no está marcado como entregado."
+
+        if self.usa_correo and not es_correo_institucional(self.correo_destino):
+            errores["correo_destino"] = "Para enviar por correo, el responsable debe tener correo institucional UNACH. Si no tiene, usa QR."
+
+        if self.registro_diario_id:
+            if not self.registro_diario.entrada_en:
+                errores["registro_diario"] = "No se puede solicitar salida si el alumno no tiene entrada registrada."
+
+            if self.registro_diario.salida_en:
+                errores["registro_diario"] = "El alumno ya tiene salida registrada."
+
+            if not self.registro_diario.dia_esta_editable:
+                errores["registro_diario"] = "El día no está abierto o no permite capturar salidas."
+
+        if errores:
+            raise ValidationError(errores)
+
+    def save(self, *args, **kwargs):
+        if not self.expira_en:
+            minutos = self.vigencia_minutos or 30
+            self.expira_en = timezone.now() + timedelta(minutes=minutos)
+
+        self.preparar_datos_responsable()
+
+        if self.correo_destino:
+            self.correo_destino = normalizar_correo(self.correo_destino)
+
+        self.definir_metodo_autorizacion()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Autorización salida - {self.alumno_nombre} - {self.get_estado_display()}"
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["token"]),
+            models.Index(fields=["estado"]),
+            models.Index(fields=["metodo_autorizacion"]),
+            models.Index(fields=["correo_destino"]),
+            models.Index(fields=["creada_en"]),
+            models.Index(fields=["expira_en"]),
+            models.Index(fields=["autorizada_en"]),
+            models.Index(fields=["registro_diario"]),
+            models.Index(fields=["responsable_autorizado"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["registro_diario"],
+                condition=Q(estado__in=["PENDIENTE", "ENVIADA", "QR_GENERADO"]),
+                name="uniq_autorizacion_salida_pendiente_por_registro",
+            )
+        ]
+
+
 class BitacoraEntradaCasa(models.Model):
     """
     Primera parte de la bitácora:
@@ -3491,6 +5299,824 @@ class MensajeDirectora(models.Model):
         return f"{self.asunto} - {self.remitente.email}"
 
 
+
+# =========================================================
+# SUPLENCIAS OPERATIVAS
+# Pase de lista, autorizaciones temporales y bitácora de movimientos.
+# =========================================================
+class AsistenciaPersonal(models.Model):
+    """
+    Pase de lista diario del personal operativo.
+
+    La Directora registra quién llegó y quién no. Con base en este registro
+    el sistema permite o bloquea las suplencias.
+
+    Personal que debe aparecer en el pase de lista:
+    - Médica
+    - Nutrióloga
+    - Psicóloga
+    - Pedagógica
+    - Trabajadora Social
+
+    No deben aparecer:
+    - Supervisora / Secretaria de Dirección
+    - Administrador del sistema
+    - Beneficiarios
+    - Alumnos
+    """
+
+    class AreaOperativa(models.TextChoices):
+        MEDICA = "MEDICA", "Médica"
+        NUTRICION = "NUTRICION", "Nutrición"
+        PSICOLOGIA = "PSICOLOGIA", "Psicología"
+        PEDAGOGICA = "PEDAGOGICA", "Pedagógica"
+        TRABAJO_SOCIAL = "TRABAJO_SOCIAL", "Trabajo Social"
+
+    class EstadoAsistencia(models.TextChoices):
+        PRESENTE = "PRESENTE", "Presente"
+        AUSENTE = "AUSENTE", "Ausente"
+        PERMISO = "PERMISO", "Permiso"
+        INCAPACIDAD = "INCAPACIDAD", "Incapacidad"
+        RETARDO = "RETARDO", "Retardo"
+        NO_REGISTRADO = "NO_REGISTRADO", "No registrado"
+
+    fecha = models.DateField(
+        default=timezone.localdate,
+        verbose_name="Fecha del pase de lista"
+    )
+
+    semestre = models.ForeignKey(
+        "admisiones.Semestre",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="asistencias_personal",
+        verbose_name="Semestre operativo"
+    )
+
+    trabajador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="asistencias_personal",
+        verbose_name="Trabajadora"
+    )
+
+    area_operativa = models.CharField(
+        max_length=30,
+        choices=AreaOperativa.choices,
+        verbose_name="Área operativa"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoAsistencia.choices,
+        default=EstadoAsistencia.NO_REGISTRADO,
+        verbose_name="Estado de asistencia"
+    )
+
+    registrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="asistencias_personal_registradas",
+        verbose_name="Registrado por"
+    )
+
+    registrado_en = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha y hora de registro"
+    )
+
+    actualizado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="asistencias_personal_actualizadas",
+        verbose_name="Actualizado por"
+    )
+
+    actualizado_en = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Fecha y hora de actualización"
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones"
+    )
+
+    @property
+    def trabajador_nombre(self):
+        usuario = self.trabajador
+        if not usuario:
+            return "Sin personal"
+
+        nombre = ""
+        try:
+            nombre = usuario.nombre_completo
+        except Exception:
+            pass
+
+        if not nombre:
+            try:
+                nombre = usuario.get_full_name()
+            except Exception:
+                nombre = ""
+
+        return nombre or getattr(usuario, "email", "") or getattr(usuario, "username", "") or str(usuario)
+
+    @property
+    def esta_presente(self):
+        return self.estado == self.EstadoAsistencia.PRESENTE
+
+    @property
+    def permite_suplencia(self):
+        return self.estado in [
+            self.EstadoAsistencia.AUSENTE,
+            self.EstadoAsistencia.PERMISO,
+            self.EstadoAsistencia.INCAPACIDAD,
+        ]
+
+    @property
+    def esta_sin_registrar(self):
+        return self.estado == self.EstadoAsistencia.NO_REGISTRADO
+
+    def clean(self):
+        errores = {}
+
+        if self.trabajador_id:
+            tipo_persona = str(getattr(self.trabajador, "tipo_persona", "") or "").upper()
+            estatus_operativo = bool(getattr(self.trabajador, "estatus_operativo", True))
+            area_usuario = inferir_area_operativa_desde_usuario(self.trabajador)
+            areas_validas = [opcion[0] for opcion in self.AreaOperativa.choices]
+
+            # Se respeta el rol/grupo existente. Si area_operativa está vacío,
+            # se permite continuar cuando el rol, grupo, correo o nombre permite inferir el área.
+            if area_usuario in areas_validas and not self.area_operativa:
+                self.area_operativa = area_usuario
+
+            es_personal_reconocido = tipo_persona == "PERSONAL" or area_usuario in areas_validas
+
+            if not es_personal_reconocido:
+                errores["trabajador"] = (
+                    "Solo el personal de la estancia puede registrarse en el pase de lista. "
+                    "No se permiten supervisora, administrador, beneficiarios ni alumnos."
+                )
+
+            if not estatus_operativo:
+                errores["trabajador"] = "El personal seleccionado no está activo."
+
+            if area_usuario and area_usuario not in areas_validas:
+                errores["trabajador"] = "El área de este usuario no participa en el pase de lista de suplencias."
+
+            if area_usuario and self.area_operativa and area_usuario != self.area_operativa:
+                errores["area_operativa"] = "El área del pase de lista no coincide con el área operativa del usuario."
+
+        if errores:
+            raise ValidationError(errores)
+
+    def save(self, *args, **kwargs):
+        if self.trabajador_id and not self.area_operativa:
+            self.area_operativa = inferir_area_operativa_desde_usuario(self.trabajador)
+
+        if self.trabajador_id:
+            guardar_area_operativa_usuario_si_falta(self.trabajador, self.area_operativa)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.fecha} - {self.trabajador_nombre} - {self.get_estado_display()}"
+
+    class Meta:
+        ordering = ["-fecha", "area_operativa", "trabajador__apellido_paterno", "trabajador__nombre"]
+        unique_together = ("fecha", "trabajador")
+        verbose_name = "Asistencia del personal"
+        verbose_name_plural = "Asistencias del personal"
+        indexes = [
+            models.Index(fields=["fecha"]),
+            models.Index(fields=["estado"]),
+            models.Index(fields=["area_operativa"]),
+            models.Index(fields=["semestre"]),
+            models.Index(fields=["trabajador"]),
+        ]
+
+
+class AutorizacionSuplencia(models.Model):
+    """
+    Autorización temporal creada por Dirección cuando una titular está ausente.
+
+    El rol real del usuario NO cambia. La suplente entra con su propio usuario
+    y el sistema le muestra una viñeta de "Cubriendo temporalmente" en su panel.
+    """
+
+    class AreaCubierta(models.TextChoices):
+        MEDICA = "MEDICA", "Médica"
+        NUTRICION = "NUTRICION", "Nutrición"
+        PSICOLOGIA = "PSICOLOGIA", "Psicología"
+        PEDAGOGICA = "PEDAGOGICA", "Pedagógica"
+        TRABAJO_SOCIAL = "TRABAJO_SOCIAL", "Trabajo Social"
+
+    class TipoCobertura(models.TextChoices):
+        INCIDENCIA = "INCIDENCIA", "Crear incidencia"
+        DICTAMEN = "DICTAMEN", "Crear dictamen preliminar"
+        INCIDENCIA_DICTAMEN = "INCIDENCIA_DICTAMEN", "Incidencia y dictamen preliminar"
+        PROCESO_SOCIAL_COMPLETO = "PROCESO_SOCIAL_COMPLETO", "Cobertura completa de Trabajo Social"
+
+    class EstadoAutorizacion(models.TextChoices):
+        ACTIVA = "ACTIVA", "Activa"
+        CANCELADA = "CANCELADA", "Cancelada"
+        VENCIDA = "VENCIDA", "Vencida"
+        FINALIZADA = "FINALIZADA", "Finalizada"
+
+    fecha = models.DateField(
+        default=timezone.localdate,
+        verbose_name="Fecha de autorización"
+    )
+
+    asistencia_personal = models.ForeignKey(
+        "admisiones.AsistenciaPersonal",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="suplencias_generadas",
+        verbose_name="Pase de lista relacionado"
+    )
+
+    titular_ausente = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="suplencias_como_titular_ausente",
+        verbose_name="Personal titular ausente"
+    )
+
+    suplente = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="suplencias_asignadas",
+        verbose_name="Personal autorizado para cubrir"
+    )
+
+    autorizada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="suplencias_autorizadas",
+        verbose_name="Autorizada por Dirección"
+    )
+
+    area_cubierta = models.CharField(
+        max_length=30,
+        choices=AreaCubierta.choices,
+        verbose_name="Área cubierta"
+    )
+
+    tipo_cobertura = models.CharField(
+        max_length=40,
+        choices=TipoCobertura.choices,
+        default=TipoCobertura.INCIDENCIA,
+        verbose_name="Tipo de cobertura"
+    )
+
+    inicio = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Inicio de vigencia"
+    )
+
+    fin = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fin de vigencia"
+    )
+
+    motivo = models.TextField(
+        verbose_name="Motivo de la suplencia"
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoAutorizacion.choices,
+        default=EstadoAutorizacion.ACTIVA,
+        verbose_name="Estado"
+    )
+
+    cancelada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="suplencias_canceladas",
+        verbose_name="Cancelada por"
+    )
+
+    cancelada_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de cancelación"
+    )
+
+    motivo_cancelacion = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Motivo de cancelación"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    AREAS_USUARIO_A_CUBIERTA = {
+        "MEDICA": AreaCubierta.MEDICA,
+        "NUTRICION": AreaCubierta.NUTRICION,
+        "PSICOLOGIA": AreaCubierta.PSICOLOGIA,
+        "PEDAGOGICA": AreaCubierta.PEDAGOGICA,
+        "TRABAJO_SOCIAL": AreaCubierta.TRABAJO_SOCIAL,
+    }
+
+    @property
+    def titular_nombre(self):
+        return self._nombre_usuario(self.titular_ausente)
+
+    @property
+    def suplente_nombre(self):
+        return self._nombre_usuario(self.suplente)
+
+    @property
+    def autorizada_por_nombre(self):
+        return self._nombre_usuario(self.autorizada_por)
+
+    @property
+    def esta_vigente_por_fecha(self):
+        ahora = timezone.now()
+        if self.inicio and ahora < self.inicio:
+            return False
+        if self.fin and ahora > self.fin:
+            return False
+        return True
+
+    @property
+    def esta_activa(self):
+        return self.estado == self.EstadoAutorizacion.ACTIVA and self.esta_vigente_por_fecha
+
+    @property
+    def es_trabajo_social(self):
+        return self.area_cubierta == self.AreaCubierta.TRABAJO_SOCIAL
+
+    @property
+    def requiere_revision_titular(self):
+        return True
+
+    @property
+    def etiqueta_panel(self):
+        return f"Cubriendo temporalmente: {self.get_area_cubierta_display()}"
+
+    @staticmethod
+    def _nombre_usuario(usuario):
+        if not usuario:
+            return "Sin usuario"
+
+        nombre = ""
+        try:
+            nombre = usuario.nombre_completo
+        except Exception:
+            pass
+
+        if not nombre:
+            try:
+                nombre = usuario.get_full_name()
+            except Exception:
+                nombre = ""
+
+        return nombre or getattr(usuario, "email", "") or getattr(usuario, "username", "") or str(usuario)
+
+    @classmethod
+    def activas_para_usuario(cls, usuario, fecha=None):
+        """
+        Suplencias activas para mostrar la viñeta en el panel del usuario.
+        """
+        if not usuario or not getattr(usuario, "is_authenticated", False):
+            return cls.objects.none()
+
+        fecha = fecha or timezone.localdate()
+        ahora = timezone.now()
+
+        return cls.objects.filter(
+            suplente=usuario,
+            fecha=fecha,
+            estado=cls.EstadoAutorizacion.ACTIVA,
+        ).filter(
+            Q(fin__isnull=True) | Q(fin__gte=ahora),
+            inicio__lte=ahora,
+        )
+
+    @classmethod
+    def activas_por_area(cls, area, fecha=None):
+        fecha = fecha or timezone.localdate()
+        ahora = timezone.now()
+
+        return cls.objects.filter(
+            area_cubierta=area,
+            fecha=fecha,
+            estado=cls.EstadoAutorizacion.ACTIVA,
+        ).filter(
+            Q(fin__isnull=True) | Q(fin__gte=ahora),
+            inicio__lte=ahora,
+        )
+
+    def permite_accion(self, accion):
+        """
+        Validación simple para que las vistas muestren solo lo autorizado.
+        """
+        accion = str(accion or "").strip().upper()
+
+        if not self.esta_activa:
+            return False
+
+        if self.tipo_cobertura == self.TipoCobertura.PROCESO_SOCIAL_COMPLETO:
+            return self.area_cubierta == self.AreaCubierta.TRABAJO_SOCIAL
+
+        if accion == "INCIDENCIA":
+            return self.tipo_cobertura in [
+                self.TipoCobertura.INCIDENCIA,
+                self.TipoCobertura.INCIDENCIA_DICTAMEN,
+            ]
+
+        if accion == "DICTAMEN":
+            return self.tipo_cobertura in [
+                self.TipoCobertura.DICTAMEN,
+                self.TipoCobertura.INCIDENCIA_DICTAMEN,
+            ]
+
+        return False
+
+    def cancelar(self, usuario=None, motivo=""):
+        if self.estado != self.EstadoAutorizacion.ACTIVA:
+            return False, ["La autorización ya no está activa."]
+
+        self.estado = self.EstadoAutorizacion.CANCELADA
+        self.cancelada_por = usuario
+        self.cancelada_en = timezone.now()
+        self.motivo_cancelacion = motivo or self.motivo_cancelacion
+        self.save(update_fields=[
+            "estado",
+            "cancelada_por",
+            "cancelada_en",
+            "motivo_cancelacion",
+            "updated_at",
+        ])
+        return True, []
+
+    def finalizar(self, usuario=None):
+        if self.estado != self.EstadoAutorizacion.ACTIVA:
+            return False, ["La autorización ya no está activa."]
+
+        self.estado = self.EstadoAutorizacion.FINALIZADA
+        if not self.fin:
+            self.fin = timezone.now()
+        self.save(update_fields=["estado", "fin", "updated_at"])
+        return True, []
+
+    def clean(self):
+        errores = {}
+
+        if self.titular_ausente_id and self.suplente_id and self.titular_ausente_id == self.suplente_id:
+            errores["suplente"] = "La persona suplente no puede ser la misma que la titular ausente."
+
+        if self.autorizada_por_id:
+            if not usuario_es_direccion_o_admin(self.autorizada_por):
+                errores["autorizada_por"] = "Solo Dirección puede autorizar suplencias."
+            else:
+                guardar_area_operativa_usuario_si_falta(
+                    self.autorizada_por,
+                    inferir_area_operativa_desde_usuario(self.autorizada_por)
+                )
+
+        for campo, usuario in [
+            ("titular_ausente", self.titular_ausente if self.titular_ausente_id else None),
+            ("suplente", self.suplente if self.suplente_id else None),
+        ]:
+            if not usuario:
+                continue
+
+            tipo_persona = str(getattr(usuario, "tipo_persona", "") or "").upper()
+            area_usuario = inferir_area_operativa_desde_usuario(usuario)
+            estatus_operativo = bool(getattr(usuario, "estatus_operativo", True))
+            areas_suplente_validas = list(self.AREAS_USUARIO_A_CUBIERTA.keys()) + ["DIRECCION"]
+
+            # Se respeta el sistema de roles/grupos existente. Si area_operativa
+            # aún no fue capturada en admin, se infiere por grupo, correo o nombre.
+            es_personal_reconocido = tipo_persona == "PERSONAL" or area_usuario in areas_suplente_validas
+
+            if not es_personal_reconocido:
+                errores[campo] = (
+                    "Solo el personal operativo puede participar en una suplencia. "
+                    "No se permiten supervisora, administrador, beneficiarios ni alumnos."
+                )
+
+            if not estatus_operativo:
+                errores[campo] = "El usuario seleccionado no está activo."
+
+            if campo == "titular_ausente" and area_usuario not in self.AREAS_USUARIO_A_CUBIERTA:
+                errores[campo] = "La titular ausente debe pertenecer a Médica, Nutrición, Psicología, Pedagógica o Trabajo Social."
+
+            if campo == "suplente" and area_usuario not in areas_suplente_validas:
+                errores[campo] = "La suplente debe ser Dirección o personal operativo autorizado."
+
+            guardar_area_operativa_usuario_si_falta(usuario, area_usuario)
+
+        if self.titular_ausente_id and self.area_cubierta:
+            area_titular = inferir_area_operativa_desde_usuario(self.titular_ausente)
+            area_esperada = self.AREAS_USUARIO_A_CUBIERTA.get(area_titular)
+
+            if area_esperada and self.area_cubierta != area_esperada:
+                errores["area_cubierta"] = "El área cubierta debe coincidir con el área de la titular ausente."
+
+        if self.asistencia_personal_id:
+            if self.asistencia_personal.estado == AsistenciaPersonal.EstadoAsistencia.PRESENTE:
+                errores["asistencia_personal"] = "No se puede autorizar suplencia porque la titular está marcada como presente."
+
+            if self.asistencia_personal.estado == AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO:
+                errores["asistencia_personal"] = "Primero debe registrarse el pase de lista del personal."
+
+        if self.area_cubierta == self.AreaCubierta.TRABAJO_SOCIAL:
+            if self.tipo_cobertura != self.TipoCobertura.PROCESO_SOCIAL_COMPLETO:
+                errores["tipo_cobertura"] = (
+                    "Trabajo Social debe manejarse como cobertura completa del proceso social."
+                )
+        elif self.tipo_cobertura == self.TipoCobertura.PROCESO_SOCIAL_COMPLETO:
+            errores["tipo_cobertura"] = (
+                "La cobertura completa solo aplica para Trabajo Social."
+            )
+
+        if self.fin and self.inicio and self.fin <= self.inicio:
+            errores["fin"] = "La fecha/hora final debe ser posterior al inicio de la autorización."
+
+        if errores:
+            raise ValidationError(errores)
+
+    def save(self, *args, **kwargs):
+        if self.autorizada_por_id:
+            guardar_area_operativa_usuario_si_falta(
+                self.autorizada_por,
+                inferir_area_operativa_desde_usuario(self.autorizada_por)
+            )
+
+        if self.titular_ausente_id:
+            area_titular = inferir_area_operativa_desde_usuario(self.titular_ausente)
+            guardar_area_operativa_usuario_si_falta(self.titular_ausente, area_titular)
+            if not self.area_cubierta:
+                self.area_cubierta = self.AREAS_USUARIO_A_CUBIERTA.get(area_titular, self.area_cubierta)
+
+        if self.suplente_id:
+            guardar_area_operativa_usuario_si_falta(
+                self.suplente,
+                inferir_area_operativa_desde_usuario(self.suplente)
+            )
+
+        if self.area_cubierta == self.AreaCubierta.TRABAJO_SOCIAL:
+            self.tipo_cobertura = self.TipoCobertura.PROCESO_SOCIAL_COMPLETO
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.get_area_cubierta_display()} - {self.suplente_nombre} cubre a {self.titular_nombre}"
+
+    class Meta:
+        ordering = ["-fecha", "-created_at"]
+        verbose_name = "Autorización de suplencia"
+        verbose_name_plural = "Autorizaciones de suplencia"
+        indexes = [
+            models.Index(fields=["fecha"]),
+            models.Index(fields=["estado"]),
+            models.Index(fields=["area_cubierta"]),
+            models.Index(fields=["tipo_cobertura"]),
+            models.Index(fields=["suplente"]),
+            models.Index(fields=["titular_ausente"]),
+            models.Index(fields=["autorizada_por"]),
+            models.Index(fields=["inicio"]),
+            models.Index(fields=["fin"]),
+        ]
+
+
+class MovimientoSuplencia(models.Model):
+    """
+    Bitácora de todo lo que se hizo mediante una autorización de suplencia.
+
+    La supervisora / secretaria consulta esta información para sus reportes.
+    """
+
+    class TipoAccion(models.TextChoices):
+        CREACION_INCIDENCIA = "CREACION_INCIDENCIA", "Creación de incidencia"
+        SEGUIMIENTO_INCIDENCIA = "SEGUIMIENTO_INCIDENCIA", "Seguimiento de incidencia"
+        CIERRE_INCIDENCIA = "CIERRE_INCIDENCIA", "Cierre de incidencia"
+        DICTAMEN_PRELIMINAR = "DICTAMEN_PRELIMINAR", "Dictamen preliminar"
+        PROCESO_TRABAJO_SOCIAL = "PROCESO_TRABAJO_SOCIAL", "Proceso de Trabajo Social"
+        REVISION_DOCUMENTOS = "REVISION_DOCUMENTOS", "Revisión de documentos"
+        PAGO = "PAGO", "Registro o validación de pago"
+        CODIGO_RESPONSABLE = "CODIGO_RESPONSABLE", "Código o credencial de responsable"
+        REPORTE_FINAL = "REPORTE_FINAL", "Reporte final de ingreso"
+        VALIDACION_TITULAR = "VALIDACION_TITULAR", "Validación por titular"
+        OTRO = "OTRO", "Otro movimiento"
+
+    class EstadoMovimiento(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente de revisión"
+        REVISADO = "REVISADO", "Revisado"
+        AJUSTADO = "AJUSTADO", "Ajustado"
+        VALIDADO = "VALIDADO", "Validado"
+
+    autorizacion = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        on_delete=models.CASCADE,
+        related_name="movimientos",
+        verbose_name="Autorización de suplencia"
+    )
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_suplencia_realizados",
+        verbose_name="Usuario que realizó el movimiento"
+    )
+
+    titular_area = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_suplencia_como_titular",
+        verbose_name="Titular del área"
+    )
+
+    area_cubierta = models.CharField(
+        max_length=30,
+        choices=AutorizacionSuplencia.AreaCubierta.choices,
+        verbose_name="Área cubierta"
+    )
+
+    accion = models.CharField(
+        max_length=40,
+        choices=TipoAccion.choices,
+        default=TipoAccion.OTRO,
+        verbose_name="Acción realizada"
+    )
+
+    descripcion = models.TextField(
+        verbose_name="Descripción del movimiento"
+    )
+
+    solicitud = models.ForeignKey(
+        "admisiones.Solicitud",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_suplencia",
+        verbose_name="Solicitud relacionada"
+    )
+
+    inscripcion = models.ForeignKey(
+        "admisiones.SolicitudInscripcion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_suplencia",
+        verbose_name="Expediente / alumno relacionado"
+    )
+
+    incidencia = models.ForeignKey(
+        "admisiones.Incidencia",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_suplencia",
+        verbose_name="Incidencia relacionada"
+    )
+
+    objeto_modelo = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        verbose_name="Modelo afectado"
+    )
+
+    objeto_id = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="ID del objeto afectado"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoMovimiento.choices,
+        default=EstadoMovimiento.PENDIENTE,
+        verbose_name="Estado de revisión"
+    )
+
+    revisado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_suplencia_revisados",
+        verbose_name="Revisado por"
+    )
+
+    revisado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de revisión"
+    )
+
+    observaciones_revision = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de revisión"
+    )
+
+    creado_en = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha y hora del movimiento"
+    )
+
+    @property
+    def usuario_nombre(self):
+        return AutorizacionSuplencia._nombre_usuario(self.usuario)
+
+    @property
+    def titular_nombre(self):
+        return AutorizacionSuplencia._nombre_usuario(self.titular_area)
+
+    @property
+    def alumno_nombre(self):
+        if self.inscripcion:
+            try:
+                return self.inscripcion.nombre_menor_completo
+            except Exception:
+                pass
+        if self.solicitud:
+            try:
+                return self.solicitud.nombre_menor_completo()
+            except Exception:
+                pass
+        return "Sin alumno"
+
+    def marcar_revisado(self, usuario=None, observaciones="", estado=None):
+        self.estado = estado or self.EstadoMovimiento.REVISADO
+        self.revisado_por = usuario
+        self.revisado_en = timezone.now()
+        self.observaciones_revision = observaciones or self.observaciones_revision
+        self.save(update_fields=[
+            "estado",
+            "revisado_por",
+            "revisado_en",
+            "observaciones_revision",
+        ])
+        return self
+
+    def marcar_validado(self, usuario=None, observaciones=""):
+        return self.marcar_revisado(
+            usuario=usuario,
+            observaciones=observaciones,
+            estado=self.EstadoMovimiento.VALIDADO,
+        )
+
+    def save(self, *args, **kwargs):
+        if self.autorizacion_id:
+            if not self.area_cubierta:
+                self.area_cubierta = self.autorizacion.area_cubierta
+            if not self.titular_area_id:
+                self.titular_area = self.autorizacion.titular_ausente
+            if not self.usuario_id:
+                self.usuario = self.autorizacion.suplente
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.get_accion_display()} - {self.usuario_nombre} - {self.get_estado_display()}"
+
+    class Meta:
+        ordering = ["-creado_en"]
+        verbose_name = "Movimiento por suplencia"
+        verbose_name_plural = "Movimientos por suplencia"
+        indexes = [
+            models.Index(fields=["creado_en"]),
+            models.Index(fields=["area_cubierta"]),
+            models.Index(fields=["accion"]),
+            models.Index(fields=["estado"]),
+            models.Index(fields=["usuario"]),
+            models.Index(fields=["titular_area"]),
+            models.Index(fields=["inscripcion"]),
+            models.Index(fields=["incidencia"]),
+        ]
+
+
 # =========================================================
 # SPRINT 5 - ÉPICA 3: INCIDENCIAS
 # Pedagógica, Nutricional, Médica y Psicológica.
@@ -3638,6 +6264,50 @@ class Incidencia(models.Model):
         related_name="incidencias_registradas",
         verbose_name="Registrada por"
     )
+    # =========================================================
+    # CONTROL DE SUPLENCIA EN INCIDENCIAS
+    # =========================================================
+    es_suplencia = models.BooleanField(
+        default=False,
+        verbose_name="¿Fue registrada por suplencia?"
+    )
+    autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="incidencias_generadas",
+        verbose_name="Autorización de suplencia"
+    )
+    area_original_suplencia = models.CharField(
+        max_length=20,
+        choices=TipoIncidencia.choices,
+        blank=True,
+        default="",
+        verbose_name="Área original cubierta"
+    )
+    pendiente_revision_titular = models.BooleanField(
+        default=False,
+        verbose_name="Pendiente de revisión por titular"
+    )
+    revisada_por_titular = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="incidencias_suplencia_revisadas_titular",
+        verbose_name="Revisada por titular"
+    )
+    revisada_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de revisión por titular"
+    )
+    observacion_revision_titular = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Observaciones de revisión por titular"
+    )
     cerrada_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -3679,9 +6349,68 @@ class Incidencia(models.Model):
     @property
     def nombre_alumno(self):
         try:
-            return self.alumno.solicitud_ingreso.nombre_menor_completo()
+            return self.alumno.nombre_menor_completo
         except Exception:
-            return "Sin alumno"
+            try:
+                return self.alumno.solicitud_ingreso.nombre_menor_completo()
+            except Exception:
+                return "Sin alumno"
+
+    @property
+    def registrada_por_nombre(self):
+        usuario = self.registrada_por
+        if not usuario:
+            return "Sin usuario"
+
+        try:
+            nombre = usuario.get_full_name()
+            if nombre:
+                return nombre
+        except Exception:
+            pass
+
+        return getattr(usuario, "email", "") or getattr(usuario, "username", "") or str(usuario)
+
+    @property
+    def creada_por_suplencia(self):
+        return bool(self.es_suplencia or self.autorizacion_suplencia_id)
+
+    @property
+    def estado_revision_suplencia(self):
+        if not self.creada_por_suplencia:
+            return "No aplica"
+        if self.pendiente_revision_titular:
+            return "Pendiente de revisión por titular"
+        if self.revisada_por_titular_id:
+            return "Revisada por titular"
+        return "Creada por suplencia"
+
+    @property
+    def suplencia_resumen(self):
+        if not self.creada_por_suplencia:
+            return ""
+
+        partes = ["Registrada por suplencia"]
+
+        if self.autorizacion_suplencia_id:
+            partes.append(f"autorizada por {self.autorizacion_suplencia.autorizada_por_nombre}")
+
+        if self.area_original_suplencia:
+            partes.append(f"para el área {self.get_area_original_suplencia_display()}")
+
+        return " ".join(partes)
+
+    @property
+    def etiqueta_estado(self):
+        return self.get_estado_display()
+
+    @property
+    def etiqueta_tipo(self):
+        return self.get_tipo_display()
+
+    @property
+    def etiqueta_nivel(self):
+        return self.get_nivel_display()
 
     @property
     def nombre_sala(self):
@@ -3708,6 +6437,46 @@ class Incidencia(models.Model):
     @property
     def esta_cerrada(self):
         return self.estado == self.EstadoIncidencia.CERRADA
+
+    def marcar_revisada_por_titular(self, usuario=None, observacion=""):
+        """
+        Marca una incidencia creada por suplencia como revisada por el área titular.
+        """
+        if not self.creada_por_suplencia:
+            return False, ["Esta incidencia no fue creada por suplencia."]
+
+        self.pendiente_revision_titular = False
+        self.revisada_por_titular = usuario
+        self.revisada_en = timezone.now()
+        self.observacion_revision_titular = observacion or self.observacion_revision_titular
+        self.save(update_fields=[
+            "pendiente_revision_titular",
+            "revisada_por_titular",
+            "revisada_en",
+            "observacion_revision_titular",
+            "updated_at",
+        ])
+
+        try:
+            MovimientoSuplencia.objects.create(
+                autorizacion=self.autorizacion_suplencia,
+                usuario=usuario,
+                titular_area=usuario,
+                area_cubierta=self.autorizacion_suplencia.area_cubierta,
+                accion=MovimientoSuplencia.TipoAccion.VALIDACION_TITULAR,
+                descripcion=observacion or "Incidencia revisada por el área titular.",
+                inscripcion=self.alumno,
+                incidencia=self,
+                objeto_modelo=self.__class__.__name__,
+                objeto_id=self.pk,
+                estado=MovimientoSuplencia.EstadoMovimiento.VALIDADO,
+                revisado_por=usuario,
+                revisado_en=timezone.now(),
+            )
+        except Exception:
+            pass
+
+        return True, []
 
     def puede_agregar_seguimiento(self, usuario):
         return bool(usuario and self.registrada_por_id == usuario.id and self.esta_abierta)
@@ -3768,18 +6537,93 @@ class Incidencia(models.Model):
 
         return True, []
 
+    def clean(self):
+        """
+        Validaciones centrales para incidencias.
+        Las vistas y forms.py también validan, pero esto protege capturas desde admin
+        o desde cualquier otro flujo que use directamente el modelo.
+        """
+        errores = {}
+
+        if self.registro_diario_id and self.alumno_id:
+            if self.registro_diario.alumno_id != self.alumno_id:
+                errores["registro_diario"] = "El registro diario seleccionado no pertenece al alumno."
+
+        categoria = (self.categoria or "").strip().upper()
+        subtipo = (self.subtipo or "").strip()
+
+        if categoria in {"OTRO", "OTRA", "OTROS", "OTRAS"} and not subtipo:
+            errores["subtipo"] = "Cuando la categoría es Otro, debes capturar el detalle."
+
+        if self.nivel == self.NivelChoices.ALTO and not self.responsable_informado:
+            errores["responsable_informado"] = (
+                "Para una incidencia de riesgo alto debes marcar que se informó al responsable."
+            )
+
+        if self.responsable_informado:
+            if not self.medio_aviso_responsable or self.medio_aviso_responsable == self.MedioAviso.NO_APLICA:
+                errores["medio_aviso_responsable"] = "Selecciona el medio por el que se informó al responsable."
+
+            if not (self.responsable_informado_nombre or "").strip():
+                errores["responsable_informado_nombre"] = "Captura el nombre del responsable informado."
+
+        semestre = self.semestre or getattr(self.alumno, "semestre", None)
+
+        if semestre and semestre.estado == Semestre.EstadoSemestre.CERRADO:
+            errores["semestre"] = "No se puede crear o modificar una incidencia de un semestre cerrado."
+
+        if self.es_suplencia or self.autorizacion_suplencia_id:
+            if not self.autorizacion_suplencia_id:
+                errores["autorizacion_suplencia"] = "Debe indicarse la autorización de suplencia."
+
+            if self.autorizacion_suplencia_id and self.autorizacion_suplencia.suplente_id:
+                if self.registrada_por_id and self.registrada_por_id != self.autorizacion_suplencia.suplente_id:
+                    errores["registrada_por"] = "La incidencia debe registrarse con el usuario autorizado como suplente."
+
+            if self.autorizacion_suplencia_id:
+                area_a_tipo = {
+                    AutorizacionSuplencia.AreaCubierta.MEDICA: self.TipoIncidencia.MEDICA,
+                    AutorizacionSuplencia.AreaCubierta.NUTRICION: self.TipoIncidencia.NUTRICIONAL,
+                    AutorizacionSuplencia.AreaCubierta.PSICOLOGIA: self.TipoIncidencia.PSICOLOGICA,
+                    AutorizacionSuplencia.AreaCubierta.PEDAGOGICA: self.TipoIncidencia.PEDAGOGICA,
+                }
+                tipo_esperado = area_a_tipo.get(self.autorizacion_suplencia.area_cubierta)
+
+                if tipo_esperado and self.tipo != tipo_esperado:
+                    errores["tipo"] = "El tipo de incidencia no coincide con el área cubierta por la suplencia."
+
+                if not self.autorizacion_suplencia.permite_accion("INCIDENCIA"):
+                    errores["autorizacion_suplencia"] = "La autorización de suplencia no permite crear incidencias."
+
+
+        if errores:
+            raise ValidationError(errores)
+
     def save(self, *args, **kwargs):
-        if not self.semestre_id and self.alumno_id:
-            self.semestre = getattr(self.alumno, "semestre", None)
+        # Si se eligió registro diario, se sincronizan alumno, día, sala y semestre
+        # antes de guardar para que las gráficas y contadores del dashboard sean reales.
+        if self.registro_diario_id:
+            if not self.alumno_id:
+                self.alumno = self.registro_diario.alumno
 
-        if not self.sala_semestre_id and self.alumno_id:
-            self.sala_semestre = getattr(self.alumno, "sala_semestre_asignada", None)
+            if not self.dia_operativo_id:
+                self.dia_operativo = self.registro_diario.dia_operativo
 
-        if not self.dia_operativo_id and self.registro_diario_id:
-            self.dia_operativo = self.registro_diario.dia_operativo
+            if not self.sala_semestre_id:
+                self.sala_semestre = self.registro_diario.sala_semestre
 
-        if not self.alumno_id and self.registro_diario_id:
-            self.alumno = self.registro_diario.alumno
+            if not self.semestre_id and self.registro_diario.dia_operativo_id:
+                self.semestre = self.registro_diario.dia_operativo.semestre
+
+        # Si no hubo registro diario, se usa la asignación actual del alumno.
+        # Esto permite crear incidencias pedagógicas, médicas, nutricionales o psicológicas
+        # aunque no exista registro de operación diaria para ese menor en la fecha actual.
+        if self.alumno_id:
+            if not self.semestre_id:
+                self.semestre = getattr(self.alumno, "semestre", None)
+
+            if not self.sala_semestre_id:
+                self.sala_semestre = getattr(self.alumno, "sala_semestre_asignada", None)
 
         if self.estado == self.EstadoIncidencia.CERRADA:
             self.resuelta = True
@@ -3792,6 +6636,25 @@ class Incidencia(models.Model):
 
         if self.responsable_informado and not self.responsable_informado_en:
             self.responsable_informado_en = timezone.now()
+
+        if self.autorizacion_suplencia_id:
+            self.es_suplencia = True
+            self.pendiente_revision_titular = True
+
+            if not self.registrada_por_id:
+                self.registrada_por = self.autorizacion_suplencia.suplente
+
+            if not self.area_original_suplencia:
+                area_a_tipo = {
+                    AutorizacionSuplencia.AreaCubierta.MEDICA: self.TipoIncidencia.MEDICA,
+                    AutorizacionSuplencia.AreaCubierta.NUTRICION: self.TipoIncidencia.NUTRICIONAL,
+                    AutorizacionSuplencia.AreaCubierta.PSICOLOGIA: self.TipoIncidencia.PSICOLOGICA,
+                    AutorizacionSuplencia.AreaCubierta.PEDAGOGICA: self.TipoIncidencia.PEDAGOGICA,
+                }
+                self.area_original_suplencia = area_a_tipo.get(
+                    self.autorizacion_suplencia.area_cubierta,
+                    self.tipo,
+                )
 
         super().save(*args, **kwargs)
 
@@ -3808,6 +6671,9 @@ class Incidencia(models.Model):
             models.Index(fields=["semestre"]),
             models.Index(fields=["dia_operativo"]),
             models.Index(fields=["registrada_por"]),
+            models.Index(fields=["es_suplencia"]),
+            models.Index(fields=["autorizacion_suplencia"]),
+            models.Index(fields=["pendiente_revision_titular"]),
         ]
 
 
@@ -3847,7 +6713,12 @@ class IncidenciaArchivo(models.Model):
         verbose_name="Fecha y hora de carga"
     )
 
+    def clean(self):
+        super().clean()
+        validar_archivo_incidencia_adjunto(self.archivo)
+
     def save(self, *args, **kwargs):
+        validar_archivo_incidencia_adjunto(self.archivo)
         if self.archivo and not self.nombre_original:
             self.nombre_original = self.archivo.name.split("/")[-1]
         super().save(*args, **kwargs)
@@ -3878,6 +6749,22 @@ class SeguimientoIncidencia(models.Model):
         null=True,
         related_name="seguimientos_incidencia_creados",
         verbose_name="Creado por"
+    )
+    es_suplencia = models.BooleanField(
+        default=False,
+        verbose_name="¿Seguimiento creado por suplencia?"
+    )
+    autorizacion_suplencia = models.ForeignKey(
+        "admisiones.AutorizacionSuplencia",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="seguimientos_incidencia",
+        verbose_name="Autorización de suplencia"
+    )
+    pendiente_revision_titular = models.BooleanField(
+        default=False,
+        verbose_name="Pendiente de revisión por titular"
     )
     creado_en = models.DateTimeField(
         auto_now_add=True,
@@ -3931,7 +6818,12 @@ class SeguimientoIncidenciaArchivo(models.Model):
         verbose_name="Fecha y hora de carga"
     )
 
+    def clean(self):
+        super().clean()
+        validar_archivo_incidencia_adjunto(self.archivo)
+
     def save(self, *args, **kwargs):
+        validar_archivo_incidencia_adjunto(self.archivo)
         if self.archivo and not self.nombre_original:
             self.nombre_original = self.archivo.name.split("/")[-1]
         super().save(*args, **kwargs)

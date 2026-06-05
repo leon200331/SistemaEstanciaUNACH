@@ -7,6 +7,7 @@ from django.http import (
     HttpResponseForbidden,
 )
 from django.utils import timezone
+from django.utils.html import escape
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_http_methods
@@ -17,14 +18,17 @@ from django.contrib.staticfiles import finders
 from xhtml2pdf import pisa
 
 from django.core.mail import send_mail, EmailMessage
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Q, Count
 
 import os
 import re
 import csv
 import unicodedata
+from urllib.parse import urlencode
 
 from .forms import (
     CapturaSolicitudForm,
@@ -55,9 +59,29 @@ from .forms import (
     ConfirmarEntregaCodigoResponsableForm,
     RegistrarComprobantePresencialForm,
 
+    # Suplencias / pase de lista del personal operativo
+    PaseListaPersonalForm,
+    AsistenciaPersonalForm,
+    AutorizacionSuplenciaForm,
+    CancelarSuplenciaForm,
+    RevisionMovimientoSuplenciaForm,
+    FiltroBitacoraSuplenciaForm,
+    RevisarIncidenciaSuplenciaForm,
+    RevisarTrabajoSocialSuplenciaForm,
+    personal_operativo_pase_lista_queryset,
+    personal_suplente_queryset,
+    inferir_area_operativa_usuario,
+    nombre_area_operativa_usuario,
+
     # Sprint 4 - Segunda parte / Operación diaria de maestras
     AbrirDiaOperativoMaestraForm,
     RegistroEntradaAlumnoForm,
+    SolicitarAutorizacionEntradaForm,
+    AutorizarEntradaResponsableForm,
+    RechazarAutorizacionEntradaForm,
+    SolicitarAutorizacionSalidaForm,
+    AutorizarSalidaResponsableForm,
+    RechazarAutorizacionSalidaForm,
     BitacoraEntradaCasaForm,
     BitacoraEstanciaForm,
     RegistroSalidaAlumnoForm,
@@ -68,7 +92,6 @@ from .services import (
     generar_pdf_fo301,
     generar_pdf_dictamen,
     generar_pdf_inscripcion_lleno,
-    enviar_correo_dictamen_ingreso,
     generar_pdf_reporte_final_ingreso,
     enviar_correo_reporte_final_ingreso,
 
@@ -86,6 +109,7 @@ from .models import (
     LinkCaptura,
     SolicitudInscripcion,
     HistoriaClinicaMedica,
+    DatoCompartidoFiltro,
     Carrera,
 
     # Sprint 4 - Configuración de Semestre
@@ -98,6 +122,9 @@ from .models import (
     DiaOperativoSemestre,
     RegistroDiarioAlumno,
     CodigoResponsableAutorizado,
+    AutorizacionEntrada,
+    AutorizacionSalida,
+    es_correo_institucional,
     BitacoraEntradaCasa,
     BitacoraEstancia,
     EncuestaSatisfaccion,
@@ -106,6 +133,11 @@ from .models import (
     IncidenciaArchivo,
     SeguimientoIncidencia,
     SeguimientoIncidenciaArchivo,
+
+    # Suplencias / pase de lista del personal operativo
+    AsistenciaPersonal,
+    AutorizacionSuplencia,
+    MovimientoSuplencia,
 )
 
 
@@ -211,6 +243,82 @@ CAMPOS_DATOS_OBLIGATORIOS_INSCRIPCION = {
     "contacto_1_telefono": "Teléfono del familiar autorizado 1",
 }
 
+# Límite de carga para expedientes de inscripción.
+# Este límite se aplica en backend para evitar archivos demasiado pesados
+# aunque el usuario modifique o desactive la validación del navegador.
+MAX_TAMANO_ARCHIVO_EXPEDIENTE_MB = 5
+MAX_TAMANO_ARCHIVO_EXPEDIENTE_BYTES = MAX_TAMANO_ARCHIVO_EXPEDIENTE_MB * 1024 * 1024
+
+EXTENSIONES_EXPEDIENTE_PERMITIDAS = {".pdf", ".jpg", ".jpeg", ".png"}
+EXTENSIONES_IMAGEN_PERMITIDAS = {".jpg", ".jpeg", ".png"}
+
+CAMPOS_SOLO_IMAGEN_EXPEDIENTE = {
+    "doc_menor_fotos",
+    "doc_tutor_fotos",
+    "doc_segundo_padre_fotos",
+    "doc_contacto_1_fotos",
+    "doc_contacto_2_fotos",
+    "doc_contacto_3_fotos",
+}
+
+CAMPOS_SOLO_PDF_EXPEDIENTE = {
+    "reglamento_firmado",
+}
+
+
+def validar_archivo_expediente_inscripcion(campo, archivo, nombre_legible="archivo"):
+    """
+    Valida archivos del portal de inscripción antes de guardarlos.
+
+    Reglas:
+    - Documentos generales: PDF, JPG, JPEG o PNG.
+    - Fotografías: solo JPG, JPEG o PNG.
+    - Reglamento firmado: solo PDF.
+    - Tamaño máximo por archivo: 5 MB.
+    """
+    nombre_legible = nombre_legible or campo or "archivo"
+
+    if not archivo:
+        return False, f"Debes seleccionar el archivo de '{nombre_legible}'."
+
+    extension = os.path.splitext(archivo.name)[1].lower()
+
+    if campo in CAMPOS_SOLO_PDF_EXPEDIENTE:
+        extensiones_permitidas = {".pdf"}
+        mensaje_formato = f"El campo '{nombre_legible}' solo acepta PDF."
+    elif campo in CAMPOS_SOLO_IMAGEN_EXPEDIENTE:
+        extensiones_permitidas = EXTENSIONES_IMAGEN_PERMITIDAS
+        mensaje_formato = (
+            f"El campo '{nombre_legible}' no acepta PDF. "
+            "Sube una imagen JPG, JPEG o PNG."
+        )
+    else:
+        extensiones_permitidas = EXTENSIONES_EXPEDIENTE_PERMITIDAS
+        mensaje_formato = (
+            f"Formato no permitido en '{nombre_legible}'. "
+            "Sube un archivo PDF, JPG, JPEG o PNG."
+        )
+
+    if extension not in extensiones_permitidas:
+        return False, mensaje_formato
+
+    if archivo.size > MAX_TAMANO_ARCHIVO_EXPEDIENTE_BYTES:
+        peso_mb = round(archivo.size / (1024 * 1024), 2)
+        return (
+            False,
+            (
+                f"El archivo de '{nombre_legible}' pesa {peso_mb} MB y supera "
+                f"el límite permitido de {MAX_TAMANO_ARCHIVO_EXPEDIENTE_MB} MB. "
+                "Comprime el archivo o sube una versión más ligera."
+            ),
+        )
+
+    if archivo.size <= 0:
+        return False, f"El archivo de '{nombre_legible}' está vacío. Selecciona un archivo válido."
+
+    return True, "Archivo válido."
+
+
 
 def puede_editar_inscripcion(inscripcion):
     """
@@ -231,16 +339,374 @@ def obtener_correo_tutor(inscripcion):
 
     return None
 
+def obtener_dominio_correos_institucionales():
+    """
+    Devuelve los dominios institucionales permitidos para envío de correos.
+    Regla solicitada: solo se consideran válidos los correos que terminan en @unach.mx,
+    salvo que en settings.py se agreguen dominios adicionales en
+    UNACH_CORREOS_INSTITUCIONALES.
+    """
+    dominios = getattr(settings, "UNACH_CORREOS_INSTITUCIONALES", ["@unach.mx"])
 
-def enviar_correo_estado_inscripcion(inscripcion, tipo):
+    if isinstance(dominios, str):
+        dominios = [dominios]
+
+    dominios_limpios = []
+    for dominio in dominios or ["@unach.mx"]:
+        dominio = str(dominio or "").strip().lower()
+        if dominio:
+            dominios_limpios.append(dominio)
+
+    return dominios_limpios or ["@unach.mx"]
+
+
+def es_correo_institucional_unach_views(correo):
+    """
+    Valida correos institucionales para las vistas de admisiones.
+    Se usa en los envíos para impedir correos que no sean @unach.mx.
+    """
+    correo = (correo or "").strip().lower()
+
+    if not correo:
+        return False
+
+    return any(
+        correo.endswith(dominio)
+        for dominio in obtener_dominio_correos_institucionales()
+    )
+
+
+def extraer_correo_desde_cabecera(cabecera):
+    """
+    Obtiene el correo real desde textos como:
+    Estancia Infantil UNACH <correo@unach.mx>
+    """
+    cabecera = (cabecera or "").strip()
+
+    if not cabecera:
+        return ""
+
+    coincidencia = re.search(r"<([^>]+)>", cabecera)
+
+    if coincidencia:
+        return coincidencia.group(1).strip().lower()
+
+    return cabecera.strip().lower()
+
+
+def limpiar_nombre_para_correo(nombre):
+    """
+    Evita saltos de línea o caracteres inválidos en el nombre visible del remitente.
+    """
+    nombre = str(nombre or "").strip()
+    nombre = re.sub(r"[\r\n<>]+", " ", nombre)
+    nombre = re.sub(r"\s+", " ", nombre).strip()
+    return nombre or "Estancia Infantil UNACH"
+
+
+def obtener_correo_institucional_usuario(user):
+    """
+    Toma dinámicamente el correo del usuario que inició sesión.
+    No se deja fijo ningún correo de trabajadora social.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return ""
+
+    correo = (getattr(user, "email", "") or "").strip().lower()
+
+    if es_correo_institucional_unach_views(correo):
+        return correo
+
+    return ""
+
+
+def construir_from_email_usuario(user):
+    """
+    Construye el remitente visible usando el correo institucional del usuario actual.
+    Ejemplo:
+    Nombre Trabajadora Social <nombre@unach.mx>
+    """
+    correo = obtener_correo_institucional_usuario(user)
+
+    if not correo:
+        return ""
+
+    nombre = limpiar_nombre_para_correo(usuario_nombre_legible(user))
+    return f"{nombre} <{correo}>"
+
+
+def normalizar_lista_correos(correos):
+    """
+    Acepta un correo o lista/tupla de correos y devuelve lista limpia.
+    """
+    if not correos:
+        return []
+
+    if isinstance(correos, str):
+        correos = [correos]
+
+    lista = []
+    for correo in correos:
+        correo = (correo or "").strip().lower()
+        if correo and correo not in lista:
+            lista.append(correo)
+
+    return lista
+
+
+def validar_correos_destino_institucionales(correos):
+    """
+    Valida que todos los destinatarios terminen en @unach.mx.
+    """
+    correos = normalizar_lista_correos(correos)
+
+    if not correos:
+        return False, "No hay correo destino registrado.", []
+
+    invalidos = [
+        correo
+        for correo in correos
+        if not es_correo_institucional_unach_views(correo)
+    ]
+
+    if invalidos:
+        return (
+            False,
+            "Solo se permite enviar a correos institucionales @unach.mx. "
+            f"Correo no válido: {', '.join(invalidos)}",
+            correos,
+        )
+
+    return True, "Correos válidos.", correos
+
+
+def adjuntar_archivos_a_correo(correo, adjuntos):
+    """
+    Adjunta archivos de forma segura.
+    Acepta:
+    - rutas de archivo,
+    - FileField con .path,
+    - tuplas compatibles con EmailMessage.attach().
+    """
+    for adjunto in adjuntos or []:
+        if not adjunto:
+            continue
+
+        try:
+            if isinstance(adjunto, tuple):
+                correo.attach(*adjunto)
+                continue
+
+            ruta = None
+
+            if isinstance(adjunto, str):
+                ruta = adjunto
+            elif hasattr(adjunto, "path"):
+                ruta = adjunto.path
+
+            if ruta and os.path.exists(ruta):
+                correo.attach_file(ruta)
+
+        except Exception:
+            # Si un adjunto falla, no rompemos la aprobación;
+            # el error real se controlará al enviar o se omitirá ese adjunto.
+            continue
+
+
+def enviar_correo_institucional_unach(
+    asunto,
+    cuerpo,
+    destinatarios,
+    usuario_emisor=None,
+    adjuntos=None,
+    cc=None,
+    bcc=None,
+):
+    """
+    Envío centralizado de correos institucionales.
+
+    Reglas:
+    - El destinatario debe ser @unach.mx.
+    - Si se indica usuario_emisor, ese usuario debe tener correo @unach.mx.
+    - No se deja fijo el correo de la trabajadora social.
+    - El remitente visible se toma del usuario que inició sesión.
+    """
+    ok_destinos, mensaje_destinos, destinatarios = validar_correos_destino_institucionales(destinatarios)
+
+    if not ok_destinos:
+        return False, mensaje_destinos
+
+    cc = normalizar_lista_correos(cc)
+    bcc = normalizar_lista_correos(bcc)
+
+    ok_cc, mensaje_cc, cc = validar_correos_destino_institucionales(cc) if cc else (True, "", [])
+    if not ok_cc:
+        return False, f"CC inválido. {mensaje_cc}"
+
+    ok_bcc, mensaje_bcc, bcc = validar_correos_destino_institucionales(bcc) if bcc else (True, "", [])
+    if not ok_bcc:
+        return False, f"BCC inválido. {mensaje_bcc}"
+
+    correo_emisor_usuario = ""
+
+    if usuario_emisor is not None:
+        correo_emisor_usuario = obtener_correo_institucional_usuario(usuario_emisor)
+
+        if not correo_emisor_usuario:
+            return (
+                False,
+                "El usuario que envía debe tener registrado un correo institucional @unach.mx."
+            )
+
+    from_email = construir_from_email_usuario(usuario_emisor) if usuario_emisor is not None else ""
+    if not from_email:
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "") or getattr(settings, "EMAIL_HOST_USER", "")
+
+    correo_from_real = extraer_correo_desde_cabecera(from_email)
+
+    if not es_correo_institucional_unach_views(correo_from_real):
+        return (
+            False,
+            "El correo emisor configurado debe ser institucional @unach.mx. "
+            f"Correo actual: {correo_from_real or 'sin configurar'}"
+        )
+
+    try:
+        correo = EmailMessage(
+            subject=asunto,
+            body=cuerpo,
+            from_email=from_email,
+            to=destinatarios,
+            cc=cc,
+            bcc=bcc,
+            reply_to=[correo_emisor_usuario] if correo_emisor_usuario else None,
+        )
+
+        adjuntar_archivos_a_correo(correo, adjuntos)
+        correo.send(fail_silently=False)
+
+        return True, "Correo enviado correctamente."
+
+    except Exception as e:
+        return False, f"No se pudo enviar el correo: {e}"
+
+
+def enviar_correo_dictamen_ingreso(solicitud, pdf_path=None, usuario_emisor=None):
+    """
+    Envía el dictamen de ingreso al correo destino de la solicitud.
+
+    Cambio solicitado:
+    - No usa correo fijo de Gmail.
+    - El remitente visible se toma de la trabajadora social que inició sesión,
+      siempre que su correo sea @unach.mx.
+    - El destinatario también debe ser @unach.mx.
+    """
+    correo_destino = (getattr(solicitud, "correo", "") or "").strip().lower()
+
+    if not correo_destino:
+        return False, "La solicitud no tiene correo destino registrado."
+
+    if not es_correo_institucional_unach_views(correo_destino):
+        return (
+            False,
+            "No se envió el correo porque el destinatario no tiene correo institucional @unach.mx."
+        )
+
+    folio = getattr(solicitud, "folio", "") or solicitud.id
+    nombre_tutor = (
+        solicitud.nombre_tutor_completo()
+        if hasattr(solicitud, "nombre_tutor_completo")
+        else (
+            f"{getattr(solicitud, 'nombres_tutor', '')} "
+            f"{getattr(solicitud, 'apellido_paterno_tutor', '')} "
+            f"{getattr(solicitud, 'apellido_materno_tutor', '')}"
+        ).strip() or "Beneficiario"
+    )
+
+    estado_aprobada = getattr(Solicitud.Estado, "APROBADA", "APROBADA")
+    estado_rechazada = getattr(Solicitud.Estado, "RECHAZADA", "RECHAZADA")
+    estado_actual = getattr(solicitud, "estado", "")
+
+    if estado_actual == estado_aprobada:
+        asunto = f"Solicitud aprobada - Folio {folio}"
+        cuerpo = f"""Estimado(a) {nombre_tutor}:
+
+Tu solicitud de ingreso a la Estancia Infantil UNACH con folio {folio} fue APROBADA.
+
+Puedes continuar con el proceso de inscripción en el sistema.
+
+Datos de acceso temporal:
+Usuario: {correo_destino}
+Contraseña temporal: Unach2026
+
+Por seguridad, cambia tu contraseña después de ingresar.
+
+Se adjunta el PDF de dictamen correspondiente.
+
+Atentamente,
+Estancia Infantil UNACH
+"""
+    elif estado_actual == estado_rechazada:
+        motivo = (
+            getattr(solicitud, "comentario_respuesta", "")
+            or "No se especificó un motivo adicional."
+        )
+        asunto = f"Solicitud rechazada - Folio {folio}"
+        cuerpo = f"""Estimado(a) {nombre_tutor}:
+
+Tu solicitud de ingreso a la Estancia Infantil UNACH con folio {folio} fue RECHAZADA.
+
+Motivo:
+{motivo}
+
+Se adjunta el PDF de dictamen correspondiente.
+
+Atentamente,
+Estancia Infantil UNACH
+"""
+    else:
+        asunto = f"Dictamen de solicitud - Folio {folio}"
+        cuerpo = f"""Estimado(a) {nombre_tutor}:
+
+Se generó el dictamen de tu solicitud de ingreso con folio {folio}.
+
+Se adjunta el PDF correspondiente.
+
+Atentamente,
+Estancia Infantil UNACH
+"""
+
+    adjuntos = []
+    if pdf_path and os.path.exists(pdf_path):
+        adjuntos.append(pdf_path)
+
+    return enviar_correo_institucional_unach(
+        asunto=asunto,
+        cuerpo=cuerpo,
+        destinatarios=[correo_destino],
+        usuario_emisor=usuario_emisor,
+        adjuntos=adjuntos,
+    )
+
+
+def enviar_correo_estado_inscripcion(inscripcion, tipo, usuario_emisor=None):
     """
     Envía correo al tutor cuando Trabajo Social devuelve o valida expediente.
-    En local se imprimirá en consola si usas console.EmailBackend.
+
+    Cambio solicitado:
+    - Solo envía a correos @unach.mx.
+    - El remitente visible se toma dinámicamente del usuario de Trabajo Social
+      que inició sesión, sin dejar fijo un correo como trabajadora@unach.mx.
     """
     correo = obtener_correo_tutor(inscripcion)
 
     if not correo:
         return False, "No hay correo registrado para el beneficiario."
+
+    correo = correo.strip().lower()
+
+    if not es_correo_institucional_unach_views(correo):
+        return False, "El correo destino del beneficiario debe ser institucional @unach.mx."
 
     solicitud = inscripcion.solicitud_ingreso
     nombre_tutor = solicitud.nombre_tutor_completo() if hasattr(solicitud, "nombre_tutor_completo") else "Beneficiario"
@@ -313,17 +779,12 @@ Universidad Autónoma de Chiapas
     else:
         return False, "Tipo de correo no válido."
 
-    try:
-        send_mail(
-            asunto,
-            cuerpo,
-            settings.DEFAULT_FROM_EMAIL,
-            [correo],
-            fail_silently=False,
-        )
-        return True, "Correo enviado correctamente."
-    except Exception as e:
-        return False, str(e)
+    return enviar_correo_institucional_unach(
+        asunto=asunto,
+        cuerpo=cuerpo,
+        destinatarios=[correo],
+        usuario_emisor=usuario_emisor,
+    )
 
 
 def obtener_documentos_obligatorios(inscripcion):
@@ -475,6 +936,436 @@ def aplicar_datos_identidad_menor_a_solicitud(sol, datos_menor):
         sol.curp_menor = datos_menor.get("curp_menor")
 
     return sol
+
+
+
+
+# =========================================================
+# AUXILIARES - DATOS COMPARTIDOS ENTRE FILTROS
+# Psicología, Nutrición y Médico pueden atender en cualquier orden.
+# Si un dato compartido ya existe, se muestra como referencia y se protege;
+# si todavía no existe, el área actual puede capturarlo.
+# =========================================================
+AREA_FILTRO_PSICOLOGIA = "PSICOLOGIA"
+AREA_FILTRO_NUTRICION = "NUTRICION"
+AREA_FILTRO_MEDICO = "MEDICO"
+
+DATOS_COMPARTIDOS_FILTROS = {
+    "edad_menor": {
+        "etiqueta": "Edad del menor",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["edad_psicologia"],
+            AREA_FILTRO_NUTRICION: ["edad_nutricion"],
+            AREA_FILTRO_MEDICO: ["edad"],
+        },
+    },
+    "sexo_menor": {
+        "etiqueta": "Sexo del menor",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["sexo_nutricion"],
+            AREA_FILTRO_MEDICO: ["sexo"],
+        },
+    },
+    "fecha_nacimiento_menor": {
+        "etiqueta": "Fecha de nacimiento del menor",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["fecha_nacimiento_nutricion"],
+            AREA_FILTRO_MEDICO: ["fecha_nacimiento"],
+        },
+    },
+    "peso_nacer": {
+        "etiqueta": "Peso al nacer",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["peso_al_nacer_psicologia"],
+            AREA_FILTRO_NUTRICION: ["peso_nacer"],
+        },
+    },
+    "talla_nacer": {
+        "etiqueta": "Talla al nacer",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["talla_al_nacer_psicologia"],
+            AREA_FILTRO_NUTRICION: ["talla_nacer"],
+        },
+    },
+    "peso_actual": {
+        "etiqueta": "Peso actual",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["peso_actual"],
+            AREA_FILTRO_MEDICO: ["peso_actual"],
+        },
+    },
+    "talla_actual": {
+        "etiqueta": "Talla actual",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["talla_actual"],
+            AREA_FILTRO_MEDICO: ["talla"],
+        },
+    },
+    "semanas_gestacion": {
+        "etiqueta": "Semanas de gestación",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["semanas_gestacion_psicologia"],
+            AREA_FILTRO_MEDICO: ["semanas_gestacion"],
+        },
+    },
+    "tipo_nacimiento": {
+        "etiqueta": "Tipo de nacimiento / parto",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["tipo_nacimiento_psicologia"],
+            AREA_FILTRO_MEDICO: ["tipo_parto"],
+        },
+    },
+    "numero_gestas": {
+        "etiqueta": "Número de gestas",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["numero_gesta_psicologia"],
+            AREA_FILTRO_MEDICO: ["numero_gestas"],
+        },
+    },
+    "complicaciones_embarazo": {
+        "etiqueta": "Complicaciones durante el embarazo",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["dificultad_embarazo_psicologia"],
+            AREA_FILTRO_MEDICO: ["complicaciones_embarazo"],
+        },
+    },
+    "tipo_alimentacion_inicio": {
+        "etiqueta": "Tipo de alimentación inicial",
+        "campos": {
+            AREA_FILTRO_PSICOLOGIA: ["metodo_alimentacion_inicio_psicologia"],
+            AREA_FILTRO_NUTRICION: ["tipo_alimentacion_lactante"],
+        },
+    },
+    "seno_materno": {
+        "etiqueta": "Seno materno",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["seno_materno"],
+        },
+    },
+    "tiempo_seno_materno": {
+        "etiqueta": "Tiempo con seno materno",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["tiempo_seno_materno"],
+        },
+    },
+    "formula_infantil": {
+        "etiqueta": "Fórmula infantil",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["formula_infantil", "cual_formula"],
+        },
+    },
+    "alergia_alimentos": {
+        "etiqueta": "Alergia a alimentos",
+        "campos": {
+            AREA_FILTRO_NUTRICION: ["alergia_alimentos", "cual_alergia"],
+            AREA_FILTRO_MEDICO: ["alergia_alimentos"],
+        },
+    },
+    "alergia_medicamentos": {
+        "etiqueta": "Alergia a medicamentos",
+        "campos": {
+            AREA_FILTRO_MEDICO: ["alergia_medicamentos"],
+        },
+    },
+    "enfermedades_actuales": {
+        "etiqueta": "Enfermedades actuales",
+        "campos": {
+            AREA_FILTRO_MEDICO: ["enfermedades_actuales"],
+        },
+    },
+    "estado_nutricional": {
+        "etiqueta": "Estado nutricional",
+        "campos": {
+            AREA_FILTRO_MEDICO: ["estado_nutricional"],
+        },
+    },
+}
+
+
+def area_filtro_valor(area):
+    """Devuelve el valor compatible con DatoCompartidoFiltro.AreaFiltro."""
+    return str(area or "").strip().upper()
+
+
+def normalizar_valor_compartido(valor):
+    if valor is None:
+        return ""
+
+    if isinstance(valor, (list, tuple, set)):
+        return ", ".join(str(v).strip() for v in valor if str(v or "").strip())
+
+    if hasattr(valor, "strftime"):
+        try:
+            return valor.strftime("%Y-%m-%d")
+        except Exception:
+            return str(valor or "").strip()
+
+    return str(valor or "").strip()
+
+
+def obtener_campos_compartidos_area(clave, area):
+    config = DATOS_COMPARTIDOS_FILTROS.get(clave, {})
+    campos = config.get("campos", {})
+    return list(campos.get(area_filtro_valor(area), []))
+
+
+def obtener_datos_compartidos_bd(sol):
+    if not sol:
+        return {}
+
+    try:
+        return sol.datos_compartidos_por_clave()
+    except Exception:
+        try:
+            return {
+                dato.clave: dato
+                for dato in sol.datos_compartidos_filtros.all()
+            }
+        except Exception:
+            return {}
+
+
+def obtener_valor_post_compartido(post_data, clave, area):
+    if not post_data:
+        return ""
+
+    nombres_posibles = [
+        f"dato_compartido_{clave}",
+        f"dc_{clave}",
+        f"shared_{clave}",
+    ] + obtener_campos_compartidos_area(clave, area)
+
+    for nombre in nombres_posibles:
+        if not nombre:
+            continue
+
+        if hasattr(post_data, "getlist"):
+            valores = [
+                normalizar_valor_compartido(v)
+                for v in post_data.getlist(nombre)
+                if normalizar_valor_compartido(v)
+            ]
+            if len(valores) > 1:
+                return ", ".join(valores)
+
+        valor = normalizar_valor_compartido(post_data.get(nombre, ""))
+        if valor:
+            return valor
+
+    return ""
+
+
+def obtener_valor_objetos_compartido(clave, area, sol=None, historia=None, insc=None):
+    campos = obtener_campos_compartidos_area(clave, area)
+
+    # En Médico, varios campos viven en HistoriaClinicaMedica.
+    objetos = []
+    if historia is not None:
+        objetos.append(historia)
+    if sol is not None:
+        objetos.append(sol)
+    if insc is not None:
+        objetos.append(insc)
+
+    for campo in campos:
+        for obj in objetos:
+            if hasattr(obj, campo):
+                valor = normalizar_valor_compartido(getattr(obj, campo, ""))
+                if valor:
+                    return valor
+
+    return ""
+
+
+def preparar_post_con_datos_compartidos(post_data, sol, area):
+    """
+    Protege datos compartidos antes de construir los formularios:
+    - Si otro filtro ya capturó el dato, se inyecta el valor correcto en el POST.
+    - Si el dato existe y el campo viene vacío, se rellena para evitar "Sin datos".
+    - Si el dato no existe, el área actual puede capturarlo normalmente.
+    """
+    data = post_data.copy()
+    area = area_filtro_valor(area)
+    datos_bd = obtener_datos_compartidos_bd(sol)
+
+    for clave, config in DATOS_COMPARTIDOS_FILTROS.items():
+        dato = datos_bd.get(clave)
+        if not dato or not getattr(dato, "tiene_valor", False):
+            continue
+
+        valor = normalizar_valor_compartido(getattr(dato, "valor", ""))
+        if not valor:
+            continue
+
+        editable = False
+        try:
+            editable = dato.puede_ser_editado_por_area(area)
+        except Exception:
+            editable = False
+
+        for campo in obtener_campos_compartidos_area(clave, area):
+            if not campo:
+                continue
+
+            valor_actual = normalizar_valor_compartido(data.get(campo, ""))
+
+            if not editable:
+                data[campo] = valor
+            elif not valor_actual:
+                data[campo] = valor
+
+    return data
+
+
+def obtener_initial_datos_compartidos_para_area(sol, area):
+    area = area_filtro_valor(area)
+    initial = {}
+    datos_bd = obtener_datos_compartidos_bd(sol)
+
+    for clave, dato in datos_bd.items():
+        if clave not in DATOS_COMPARTIDOS_FILTROS:
+            continue
+
+        valor = normalizar_valor_compartido(getattr(dato, "valor", ""))
+        if not valor:
+            continue
+
+        for campo in obtener_campos_compartidos_area(clave, area):
+            initial[campo] = valor
+
+    return initial
+
+
+def aplicar_initial_datos_compartidos(initial, sol, area, sobrescribir_vacios=True):
+    initial = dict(initial or {})
+    extra = obtener_initial_datos_compartidos_para_area(sol, area)
+
+    for campo, valor in extra.items():
+        if sobrescribir_vacios:
+            if not normalizar_valor_compartido(initial.get(campo, "")):
+                initial[campo] = valor
+        else:
+            initial[campo] = valor
+
+    return initial
+
+
+def guardar_datos_compartidos_desde_fuentes(sol, area, usuario=None, post_data=None, historia=None, insc=None):
+    """
+    Guarda datos compartidos después de validar el formulario del área.
+    No sobrescribe información de otra área si ya está bloqueada.
+    """
+    if not sol:
+        return []
+
+    area = area_filtro_valor(area)
+    errores = []
+    datos_bd = obtener_datos_compartidos_bd(sol)
+
+    for clave, config in DATOS_COMPARTIDOS_FILTROS.items():
+        valor = obtener_valor_post_compartido(post_data, clave, area)
+
+        if not valor:
+            valor = obtener_valor_objetos_compartido(
+                clave,
+                area,
+                sol=sol,
+                historia=historia,
+                insc=insc,
+            )
+
+        valor = normalizar_valor_compartido(valor)
+        if not valor:
+            continue
+
+        dato_actual = datos_bd.get(clave)
+        if dato_actual and getattr(dato_actual, "tiene_valor", False):
+            try:
+                if not dato_actual.puede_ser_editado_por_area(area):
+                    continue
+            except Exception:
+                continue
+
+        observacion = ""
+        if post_data:
+            observacion = normalizar_valor_compartido(
+                post_data.get(f"dato_compartido_observacion_{clave}", "")
+                or post_data.get(f"dc_observacion_{clave}", "")
+            )
+
+        try:
+            sol.registrar_dato_compartido(
+                clave=clave,
+                valor=valor,
+                area=area,
+                usuario=usuario,
+                etiqueta=config.get("etiqueta", ""),
+                observacion=observacion,
+                fuente=f"formulario_{area.lower()}",
+            )
+        except ValidationError as exc:
+            errores.append(str(exc))
+        except Exception as exc:
+            errores.append(f"No se pudo guardar el dato compartido '{config.get('etiqueta', clave)}': {exc}")
+
+    return errores
+
+
+def contexto_datos_compartidos_filtro(sol, area):
+    area = area_filtro_valor(area)
+    datos_bd = obtener_datos_compartidos_bd(sol)
+    lista = []
+    por_clave = {}
+
+    for clave, config in DATOS_COMPARTIDOS_FILTROS.items():
+        dato = datos_bd.get(clave)
+        valor = normalizar_valor_compartido(getattr(dato, "valor", "")) if dato else ""
+
+        editable = True
+        nota = "Dato no capturado todavía. Este filtro puede registrarlo si lo necesita."
+        area_origen = ""
+        capturado_por = ""
+        capturado_en = None
+        bloqueado_por_otra_area = False
+
+        if dato:
+            try:
+                editable = dato.puede_ser_editado_por_area(area)
+            except Exception:
+                editable = not valor
+
+            nota = getattr(dato, "nota_origen", "") or nota
+            area_origen = getattr(dato, "area_origen", "") or ""
+            capturado_por = getattr(dato, "capturado_por_nombre", "") or ""
+            capturado_en = getattr(dato, "capturado_en", None)
+            bloqueado_por_otra_area = bool(valor and not editable)
+
+        item = {
+            "clave": clave,
+            "etiqueta": config.get("etiqueta", clave.replace("_", " ").capitalize()),
+            "valor": valor,
+            "tiene_valor": bool(valor),
+            "editable": editable,
+            "solo_lectura": not editable,
+            "bloqueado_por_otra_area": bloqueado_por_otra_area,
+            "area_origen": area_origen,
+            "capturado_por": capturado_por,
+            "capturado_en": capturado_en,
+            "nota": nota,
+            "input_name": f"dato_compartido_{clave}",
+            "observacion_name": f"dato_compartido_observacion_{clave}",
+            "campos_area": obtener_campos_compartidos_area(clave, area),
+            "obj": dato,
+        }
+        lista.append(item)
+        por_clave[clave] = item
+
+    return {
+        "datos_compartidos_lista": lista,
+        "datos_compartidos_por_clave": por_clave,
+        "datos_compartidos_config": DATOS_COMPARTIDOS_FILTROS,
+        "area_filtro_actual": area,
+    }
 
 
 # =========================================================
@@ -687,7 +1578,7 @@ def enviar_correo_encuesta_individual(request, envio, usuario=None, correo_copia
     Reglas:
     - Debe existir cuenta de tutor vinculada.
     - El correo debe ser institucional @unach.mx.
-    - El mensaje debe ser corto y personalizado.
+    - El emisor visible se toma del usuario que envía la encuesta.
     """
     if not envio.tutor_id:
         envio.marcar_error("La inscripción no tiene cuenta de tutor vinculada.")
@@ -714,16 +1605,15 @@ Gracias por su participación.
 Estancia Infantil UNACH
 """
 
-    try:
-        correo = EmailMessage(
-            subject=asunto,
-            body=cuerpo,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[envio.correo_destino],
-            cc=[correo_copia] if correo_copia else [],
-        )
-        correo.send(fail_silently=False)
+    enviado, mensaje = enviar_correo_institucional_unach(
+        asunto=asunto,
+        cuerpo=cuerpo,
+        destinatarios=[envio.correo_destino],
+        usuario_emisor=usuario,
+        cc=[correo_copia] if correo_copia else [],
+    )
 
+    if enviado:
         if es_reenvio:
             envio.marcar_reenviada(usuario=usuario, correo_copia=correo_copia)
         else:
@@ -731,9 +1621,8 @@ Estancia Infantil UNACH
 
         return True, "Correo enviado correctamente."
 
-    except Exception as e:
-        envio.marcar_error(e)
-        return False, str(e)
+    envio.marcar_error(mensaje)
+    return False, mensaje
 
 
 def resumen_envios_encuesta(envios):
@@ -1192,24 +2081,49 @@ def registro_diario_es_editable(registro):
 
 
 def usuario_es_directora(user):
-    if not user.is_authenticated:
+    """
+    Dirección se identifica por area_operativa=DIRECCION y, por compatibilidad,
+    también por grupos antiguos que contengan directora/dirección.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
         return False
 
+    area = str(getattr(user, "area_operativa", "") or "").upper()
+    if area == "DIRECCION":
+        return True
+
     roles = obtener_roles_usuario(user)
-    return "directora" in roles or normalizar_texto(getattr(user, "tipo_persona", "")) == "directora"
+    tipo = normalizar_texto(getattr(user, "tipo_persona", ""))
+
+    return (
+        "directora" in roles
+        or "direccion" in roles
+        or "dirección" in roles
+        or tipo in ["directora", "direccion", "dirección"]
+    )
 
 
 def usuario_es_trabajadora_social(user):
-    if not user.is_authenticated:
+    """
+    Trabajo Social se identifica por area_operativa=TRABAJO_SOCIAL y por grupos
+    anteriores. La cobertura por suplencia se valida aparte para no cambiar
+    el rol real de la persona.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
         return False
 
+    area = str(getattr(user, "area_operativa", "") or "").upper()
+    if area == "TRABAJO_SOCIAL":
+        return True
+
     roles = obtener_roles_usuario(user)
+    tipo = normalizar_texto(getattr(user, "tipo_persona", ""))
 
     return (
         "trabajadora social" in roles
         or "trabajador social" in roles
         or "trabajo social" in roles
-        or normalizar_texto(getattr(user, "tipo_persona", "")) in ["trabajadora_social", "trabajo_social"]
+        or tipo in ["trabajadora_social", "trabajo_social"]
     )
 
 
@@ -1218,8 +2132,13 @@ def usuario_puede_reporte_final_ts(user):
     Puede registrar el reporte final de ingreso:
     - Trabajadora Social
     - Administrador del sistema
+    - Persona con cobertura temporal autorizada para Trabajo Social
     """
-    return usuario_es_admin(user) or usuario_es_trabajadora_social(user)
+    return (
+        usuario_es_admin(user)
+        or usuario_es_trabajadora_social(user)
+        or usuario_tiene_cobertura_trabajo_social(user)
+    )
 
 
 def usuario_puede_ver_reporte_final_ts(user):
@@ -1237,8 +2156,13 @@ def usuario_puede_gestionar_pagos(user):
     Puede gestionar comprobantes de pago:
     - Trabajadora Social
     - Administrador del sistema
+    - Persona con cobertura temporal autorizada para Trabajo Social
     """
-    return usuario_es_admin(user) or usuario_es_trabajadora_social(user)
+    return (
+        usuario_es_admin(user)
+        or usuario_es_trabajadora_social(user)
+        or usuario_tiene_cobertura_trabajo_social(user)
+    )
 
 
 
@@ -1247,8 +2171,1048 @@ def usuario_puede_gestionar_codigo_responsable(user):
     Puede generar/resetear el código de seguridad:
     - Trabajadora Social
     - Administrador del sistema
+    - Persona con cobertura temporal autorizada para Trabajo Social
     """
     return usuario_puede_gestionar_pagos(user)
+
+
+
+# =========================================================
+# AUXILIARES - SUPLENCIAS Y AUTORIZACIONES TEMPORALES
+# Dirección registra pase de lista, autoriza suplencias y cada suplente
+# conserva su panel normal. La viñeta "Cubriendo temporalmente" se muestra
+# por contexto, sin cambiar el rol real del usuario.
+# =========================================================
+
+AREA_CUBIERTA_A_TIPO_INCIDENCIA = {
+    "MEDICA": lambda: Incidencia.TipoIncidencia.MEDICA,
+    "NUTRICION": lambda: Incidencia.TipoIncidencia.NUTRICIONAL,
+    "PSICOLOGIA": lambda: Incidencia.TipoIncidencia.PSICOLOGICA,
+    "PEDAGOGICA": lambda: Incidencia.TipoIncidencia.PEDAGOGICA,
+}
+
+AREA_FILTRO_A_AREA_CUBIERTA = {
+    "psicologia": "PSICOLOGIA",
+    "nutricion": "NUTRICION",
+    "medico": "MEDICA",
+}
+
+PREFIJO_DICTAMEN_SUPLENCIA = {
+    "psicologia": "psicologia",
+    "nutricion": "nutricion",
+    "medico": "medico",
+}
+
+
+def area_operativa_usuario(user):
+    """
+    Área operativa del usuario.
+    Usa area_operativa si ya está capturada y, como respaldo, la infiere
+    desde grupos/correo/nombre para usuarios existentes.
+    """
+    try:
+        return inferir_area_operativa_usuario(user)
+    except Exception:
+        return str(getattr(user, "area_operativa", "") or "").upper()
+
+
+def usuario_tiene_area_operativa(user, *areas):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+    areas = [str(area or "").upper() for area in areas]
+    return area_operativa_usuario(user) in areas
+
+
+def tipo_incidencia_para_area_cubierta(area_cubierta):
+    factory = AREA_CUBIERTA_A_TIPO_INCIDENCIA.get(str(area_cubierta or "").upper())
+    return factory() if factory else None
+
+
+def area_cubierta_para_tipo_incidencia(tipo):
+    tipo = str(tipo or "").upper()
+    for area, factory in AREA_CUBIERTA_A_TIPO_INCIDENCIA.items():
+        try:
+            if factory() == tipo:
+                return area
+        except Exception:
+            continue
+    return ""
+
+
+def obtener_suplencias_activas_usuario(user, fecha=None):
+    if not user or not getattr(user, "is_authenticated", False):
+        return AutorizacionSuplencia.objects.none()
+
+    fecha = fecha or timezone.localdate()
+
+    try:
+        return (
+            AutorizacionSuplencia.activas_para_usuario(user, fecha=fecha)
+            .select_related("titular_ausente", "suplente", "autorizada_por", "asistencia_personal")
+            .order_by("area_cubierta", "-created_at")
+        )
+    except Exception:
+        return AutorizacionSuplencia.objects.none()
+
+
+def obtener_suplencia_activa_usuario_area(user, area_cubierta, accion=None):
+    area_cubierta = str(area_cubierta or "").upper()
+
+    if not area_cubierta:
+        return None
+
+    qs = obtener_suplencias_activas_usuario(user).filter(area_cubierta=area_cubierta)
+
+    for autorizacion in qs:
+        try:
+            if accion is None or autorizacion.permite_accion(accion):
+                return autorizacion
+        except Exception:
+            if accion is None:
+                return autorizacion
+
+    return None
+
+
+def obtener_suplencia_activa_para_filtro(user, area_filtro):
+    area_cubierta = AREA_FILTRO_A_AREA_CUBIERTA.get(str(area_filtro or "").lower())
+    return obtener_suplencia_activa_usuario_area(user, area_cubierta, accion="DICTAMEN")
+
+
+def obtener_suplencia_activa_para_tipo_incidencia(user, tipo_incidencia):
+    area_cubierta = area_cubierta_para_tipo_incidencia(tipo_incidencia)
+    return obtener_suplencia_activa_usuario_area(user, area_cubierta, accion="INCIDENCIA")
+
+
+def usuario_tiene_suplencia_para_filtro(user, area_filtro):
+    return bool(obtener_suplencia_activa_para_filtro(user, area_filtro))
+
+
+def usuario_tiene_suplencia_para_tipo_incidencia(user, tipo_incidencia):
+    return bool(obtener_suplencia_activa_para_tipo_incidencia(user, tipo_incidencia))
+
+
+def usuario_tiene_cobertura_trabajo_social(user):
+    """
+    Cobertura especial para Trabajo Social.
+
+    No cambia el rol real de la persona. Solo permite continuar el proceso social
+    cuando Dirección autorizó suplencia porque la titular está ausente.
+    """
+    return bool(
+        obtener_suplencia_activa_usuario_area(
+            user,
+            AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+            accion="PROCESO_SOCIAL",
+        )
+    )
+
+
+def descripcion_autorizacion_suplencia(autorizacion):
+    if not autorizacion:
+        return ""
+
+    try:
+        area = autorizacion.get_area_cubierta_display()
+    except Exception:
+        area = getattr(autorizacion, "area_cubierta", "")
+
+    try:
+        tipo = autorizacion.get_tipo_cobertura_display()
+    except Exception:
+        tipo = getattr(autorizacion, "tipo_cobertura", "")
+
+    return f"Cubriendo temporalmente: {area} — {tipo}"
+
+
+def reverse_seguro_suplencia(nombre_url, *args, fallback="/"):
+    """
+    Resuelve una URL de forma segura para las acciones de suplencia.
+
+    No rompe el sistema si en urls.py todavía existe un nombre anterior o si
+    una ruta se renombró durante el desarrollo.
+    """
+    if not nombre_url:
+        return fallback
+
+    try:
+        return reverse(nombre_url, args=args)
+    except Exception:
+        return fallback
+
+
+def agregar_query_suplencia(url, **params):
+    """
+    Agrega parámetros a una URL conservando anchors como #vista-pendientes.
+    """
+    url = url or "/"
+    anchor = ""
+
+    if "#" in url:
+        url, anchor = url.split("#", 1)
+        anchor = f"#{anchor}"
+
+    params_limpios = {
+        key: value
+        for key, value in params.items()
+        if value not in [None, "", False]
+    }
+
+    if params_limpios:
+        separador = "&" if "?" in url else "?"
+        url = f"{url}{separador}{urlencode(params_limpios)}"
+
+    return f"{url}{anchor}"
+
+
+def construir_accion_suplencia(autorizacion):
+    """
+    Construye las acciones reales de una suplencia según el área cubierta.
+
+    Regla clave:
+    - El panel real del usuario NO cambia.
+    - La viñeta de "Cubriendo temporalmente" debe mandar al área cubierta,
+      no al panel donde el usuario inició sesión.
+
+    Ejemplo:
+    Si una psicóloga cubre Nutrición, la acción principal debe ir a
+    nutricion_pendientes y la incidencia debe ser tipo NUTRICIONAL.
+    """
+    if not autorizacion:
+        return None
+
+    area = str(getattr(autorizacion, "area_cubierta", "") or "").upper()
+    autorizacion_id = getattr(autorizacion, "pk", None) or getattr(autorizacion, "id", None)
+
+    meta_por_area = {
+        "MEDICA": {
+            "area_display": "Médica",
+            "panel_view": "medico_pendientes",
+            "panel_fallback": "/admisiones/medico/",
+            "dictamen_label": "Ir a dictámenes médicos",
+            "dictamen_corto": "Dictaminar médica",
+            "incidencia_tipo": "MEDICA",
+            "incidencia_label": "Incidencia médica",
+            "icono": "bi-heart-pulse-fill",
+            "es_filtro": True,
+        },
+        "NUTRICION": {
+            "area_display": "Nutrición",
+            "panel_view": "nutricion_pendientes",
+            "panel_fallback": "/admisiones/nutricion/",
+            "dictamen_label": "Ir a dictámenes de Nutrición",
+            "dictamen_corto": "Dictaminar nutrición",
+            "incidencia_tipo": "NUTRICIONAL",
+            "incidencia_label": "Incidencia nutricional",
+            "icono": "bi-egg-fried",
+            "es_filtro": True,
+        },
+        "PSICOLOGIA": {
+            "area_display": "Psicología",
+            "panel_view": "psicologia_pendientes",
+            "panel_fallback": "/admisiones/psicologia/",
+            "dictamen_label": "Ir a dictámenes de Psicología",
+            "dictamen_corto": "Dictaminar psicología",
+            "incidencia_tipo": "PSICOLOGICA",
+            "incidencia_label": "Incidencia psicológica",
+            "icono": "bi-person-heart",
+            "es_filtro": True,
+        },
+        "PEDAGOGICA": {
+            "area_display": "Pedagógica",
+            "panel_view": "dashboard_coordinadora",
+            "panel_fallback": "/admisiones/coordinadora/",
+            "dictamen_label": "Ir al panel pedagógico",
+            "dictamen_corto": "Panel pedagógico",
+            "incidencia_tipo": "PEDAGOGICA",
+            "incidencia_label": "Incidencia pedagógica",
+            "icono": "bi-journal-check",
+            "es_filtro": False,
+        },
+        "TRABAJO_SOCIAL": {
+            "area_display": "Trabajo Social",
+            "panel_view": "panel_admisiones",
+            "panel_fallback": "/admisiones/",
+            "dictamen_label": "Ir a Trabajo Social",
+            "dictamen_corto": "Trabajo Social",
+            "incidencia_tipo": "",
+            "incidencia_label": "",
+            "icono": "bi-person-check-fill",
+            "es_filtro": False,
+        },
+    }
+
+    meta = meta_por_area.get(area, {
+        "area_display": area or "Área no definida",
+        "panel_view": "",
+        "panel_fallback": "/",
+        "dictamen_label": "Ir al módulo correspondiente",
+        "dictamen_corto": "Ir al módulo",
+        "incidencia_tipo": "",
+        "incidencia_label": "",
+        "icono": "bi-person-badge-fill",
+        "es_filtro": False,
+    })
+
+    panel_base_url = reverse_seguro_suplencia(
+        meta.get("panel_view"),
+        fallback=meta.get("panel_fallback", "/"),
+    )
+
+    panel_url = agregar_query_suplencia(
+        panel_base_url,
+        suplencia=autorizacion_id,
+        area_suplencia=area,
+    )
+
+    if area in ["MEDICA", "NUTRICION", "PSICOLOGIA"]:
+        dictamen_url = agregar_query_suplencia(
+            f"{panel_base_url}#vista-pendientes",
+            suplencia=autorizacion_id,
+            area_suplencia=area,
+        )
+    else:
+        dictamen_url = panel_url
+
+    incidencia_tipo = meta.get("incidencia_tipo") or ""
+    incidencia_url = ""
+
+    if incidencia_tipo:
+        incidencia_base_url = reverse_seguro_suplencia(
+            "crear_incidencia_tipo",
+            incidencia_tipo,
+            fallback="/admisiones/incidencias/crear/",
+        )
+        incidencia_url = agregar_query_suplencia(
+            incidencia_base_url,
+            tipo=incidencia_tipo,
+            suplencia=autorizacion_id,
+            area_suplencia=area,
+            next=panel_base_url,
+        )
+
+    # Acciones especiales de Trabajo Social, porque no es un solo dictamen.
+    trabajo_social_urls = {}
+    if area == "TRABAJO_SOCIAL":
+        trabajo_social_urls = {
+            "solicitudes_url": agregar_query_suplencia(
+                reverse_seguro_suplencia("panel_admisiones", fallback="/admisiones/"),
+                suplencia=autorizacion_id,
+                area_suplencia=area,
+            ),
+            "reporte_final_url": agregar_query_suplencia(
+                reverse_seguro_suplencia("reporte_final_pendientes", fallback="/admisiones/reporte-final/"),
+                suplencia=autorizacion_id,
+                area_suplencia=area,
+            ),
+            "pagos_url": agregar_query_suplencia(
+                reverse_seguro_suplencia("validacion_pagos_pendientes", fallback="/admisiones/pagos/"),
+                suplencia=autorizacion_id,
+                area_suplencia=area,
+            ),
+            "codigos_url": agregar_query_suplencia(
+                reverse_seguro_suplencia("codigos_responsable_pendientes", fallback="/admisiones/codigos-responsable/"),
+                suplencia=autorizacion_id,
+                area_suplencia=area,
+            ),
+        }
+
+    accion = {
+        "id": autorizacion_id,
+        "autorizacion": autorizacion,
+        "area": area,
+        "area_cubierta": area,
+        "area_display": meta.get("area_display"),
+        "icono": meta.get("icono"),
+        "panel_url": panel_url,
+        "panel_base_url": panel_base_url,
+        "dictamen_url": dictamen_url,
+        "dictamen_label": meta.get("dictamen_label"),
+        "dictamen_corto": meta.get("dictamen_corto"),
+        "incidencia_url": incidencia_url,
+        "incidencia_tipo": incidencia_tipo,
+        "incidencia_label": meta.get("incidencia_label"),
+        "tiene_incidencia": bool(incidencia_url),
+        "es_filtro": bool(meta.get("es_filtro")),
+        "es_trabajo_social": area == "TRABAJO_SOCIAL",
+        **trabajo_social_urls,
+    }
+
+    # Atributos temporales para que los HTML puedan usar sup.panel_url,
+    # sup.dictamen_url, sup.incidencia_url, etc., sin crear modelos nuevos.
+    for clave, valor in accion.items():
+        if clave != "autorizacion":
+            try:
+                setattr(autorizacion, clave, valor)
+            except Exception:
+                pass
+
+    try:
+        autorizacion.accion_suplencia = accion
+        autorizacion.acciones_suplencia = accion
+        autorizacion.url_panel_area = panel_url
+        autorizacion.url_dictaminar_suplencia = dictamen_url
+        autorizacion.url_incidencia_suplencia = incidencia_url
+        autorizacion.label_dictaminar_suplencia = meta.get("dictamen_label")
+        autorizacion.label_incidencia_suplencia = meta.get("incidencia_label")
+    except Exception:
+        pass
+
+    return accion
+
+
+def contexto_suplencias_usuario(user):
+    """
+    Contexto genérico para mostrar la viñeta "Cubriendo temporalmente" en
+    los paneles existentes sin crear nuevos HTML.
+
+    Ahora las acciones salen según el área cubierta:
+    - Si cubre Nutrición, manda a Nutrición.
+    - Si cubre Médica, manda a Médica.
+    - Si cubre Psicología, manda a Psicología.
+    - Si cubre Pedagógica, manda al panel pedagógico.
+    - Si cubre Trabajo Social, manda al proceso social.
+    """
+    suplencias = list(obtener_suplencias_activas_usuario(user))
+    acciones = []
+
+    for suplencia in suplencias:
+        accion = construir_accion_suplencia(suplencia)
+        if accion:
+            acciones.append(accion)
+
+    suplencias_por_area = {}
+    for suplencia in suplencias:
+        area = str(getattr(suplencia, "area_cubierta", "") or "").upper()
+        if area:
+            suplencias_por_area.setdefault(area, []).append(suplencia)
+
+    acciones_por_area = {}
+    for accion in acciones:
+        area = accion.get("area")
+        if area:
+            acciones_por_area.setdefault(area, []).append(accion)
+
+    return {
+        "suplencias_activas_usuario": suplencias,
+        "suplencias_activas": suplencias,
+        "suplencias_usuario": suplencias,
+        "suplencias_acciones_usuario": acciones,
+        "acciones_suplencia_usuario": acciones,
+        "suplencias_por_area_usuario": suplencias_por_area,
+        "acciones_suplencia_por_area": acciones_por_area,
+        "tiene_suplencia_activa": bool(suplencias),
+        "texto_suplencia_activa": "; ".join(descripcion_autorizacion_suplencia(s) for s in suplencias),
+        "tiene_suplencia_medica": bool(suplencias_por_area.get("MEDICA")),
+        "tiene_suplencia_nutricion": bool(suplencias_por_area.get("NUTRICION")),
+        "tiene_suplencia_psicologia": bool(suplencias_por_area.get("PSICOLOGIA")),
+        "tiene_suplencia_pedagogica": bool(suplencias_por_area.get("PEDAGOGICA")),
+        "tiene_suplencia_trabajo_social": bool(suplencias_por_area.get("TRABAJO_SOCIAL")),
+    }
+
+
+def estado_pase_lista_dia(fecha=None):
+    """
+    Devuelve estado de asistencia del personal operativo para Dirección.
+    Si no hay registros, se devuelve como NO_REGISTRADO para que el sistema
+    no autorice suplencias sin pase de lista.
+    """
+    fecha = fecha or timezone.localdate()
+    personal = list(personal_operativo_pase_lista_queryset())
+    registros = {
+        asistencia.trabajador_id: asistencia
+        for asistencia in AsistenciaPersonal.objects.filter(fecha=fecha).select_related(
+            "trabajador",
+            "registrado_por",
+            "actualizado_por",
+        )
+    }
+
+    filas = []
+    total_presentes = 0
+    total_ausentes = 0
+    total_no_registrado = 0
+
+    for trabajador in personal:
+        asistencia = registros.get(trabajador.id)
+        estado = getattr(asistencia, "estado", AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO)
+        area_operativa = inferir_area_operativa_usuario(trabajador)
+        area_display = nombre_area_operativa_usuario(trabajador)
+        area_pendiente = not bool(area_operativa)
+
+        if asistencia and not getattr(asistencia, "area_operativa", "") and area_operativa:
+            asistencia.area_operativa = area_operativa
+            try:
+                asistencia.save(update_fields=["area_operativa"])
+            except Exception:
+                pass
+
+        if estado == AsistenciaPersonal.EstadoAsistencia.PRESENTE:
+            total_presentes += 1
+        elif estado in [
+            AsistenciaPersonal.EstadoAsistencia.AUSENTE,
+            AsistenciaPersonal.EstadoAsistencia.PERMISO,
+            AsistenciaPersonal.EstadoAsistencia.INCAPACIDAD,
+        ]:
+            total_ausentes += 1
+        elif estado == AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO:
+            total_no_registrado += 1
+
+        filas.append({
+            "trabajador": trabajador,
+            "asistencia": asistencia,
+            "estado": estado,
+            "estado_display": asistencia.get_estado_display() if asistencia else "No registrado",
+            "permite_suplencia": bool(asistencia and asistencia.permite_suplencia),
+            "esta_presente": estado == AsistenciaPersonal.EstadoAsistencia.PRESENTE,
+            "sin_registrar": estado == AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO,
+            "area_operativa": area_operativa,
+            "area_display": area_display,
+            "area_pendiente": area_pendiente,
+        })
+
+    total_personal = len(personal)
+    pase_lista_completo = bool(total_personal and total_no_registrado == 0)
+    todo_personal_presente = bool(pase_lista_completo and total_ausentes == 0)
+
+    return {
+        "fecha_pase_lista": fecha,
+        "personal_pase_lista": personal,
+        "asistencias_pase_lista": filas,
+        "pase_lista_completo": pase_lista_completo,
+        "todo_personal_presente": todo_personal_presente,
+        "total_personal_pase_lista": total_personal,
+        "total_personal_presente": total_presentes,
+        "total_personal_ausente": total_ausentes,
+        "total_personal_no_registrado": total_no_registrado,
+        "ausencias_para_suplencia": [fila for fila in filas if fila["permite_suplencia"]],
+    }
+
+
+def contexto_suplencias_direccion(user=None, fecha=None, request=None):
+    fecha = fecha or timezone.localdate()
+    semestre = obtener_semestre_activo_operativo()
+    estado = estado_pase_lista_dia(fecha=fecha)
+    personal = estado["personal_pase_lista"]
+
+    post_data = None
+    if request is not None and request.method == "POST":
+        post_data = request.POST
+
+    pase_lista_form = PaseListaPersonalForm(
+        post_data if post_data and post_data.get("accion_directiva") == "guardar_pase_lista" else None,
+        usuario=user,
+        semestre=semestre,
+        fecha=fecha,
+        personal=personal,
+    )
+
+    suplencia_form = AutorizacionSuplenciaForm(
+        post_data if post_data and post_data.get("accion_directiva") == "crear_suplencia" else None,
+        usuario=user,
+        semestre=semestre,
+        fecha=fecha,
+    )
+
+    suplencias_activas = (
+        AutorizacionSuplencia.objects
+        .filter(fecha=fecha, estado=AutorizacionSuplencia.EstadoAutorizacion.ACTIVA)
+        .select_related("titular_ausente", "suplente", "autorizada_por", "asistencia_personal")
+        .order_by("area_cubierta", "-created_at")
+    )
+
+    movimientos = (
+        MovimientoSuplencia.objects
+        .select_related(
+            "autorizacion",
+            "usuario",
+            "titular_area",
+            "solicitud",
+            "inscripcion",
+            "incidencia",
+            "revisado_por",
+        )
+        .order_by("-creado_en")[:50]
+    )
+
+    contexto = {
+        **estado,
+        "pase_lista_form": pase_lista_form,
+        "suplencia_form": suplencia_form,
+        "suplencias_activas_dia": suplencias_activas,
+        "movimientos_suplencia_recientes": movimientos,
+        "bitacora_suplencias": movimientos,
+    }
+
+    return contexto
+
+
+def registrar_movimiento_suplencia(
+    autorizacion,
+    usuario,
+    accion,
+    descripcion,
+    solicitud=None,
+    inscripcion=None,
+    incidencia=None,
+    objeto=None,
+    estado=None,
+):
+    """
+    Crea una bitácora visible para Dirección y Supervisora.
+
+    Se usa desde incidencias, dictámenes y procesos de Trabajo Social.
+    """
+    if not autorizacion:
+        return None
+
+    try:
+        objeto_modelo = ""
+        objeto_id = None
+
+        if objeto is not None:
+            try:
+                objeto_modelo = objeto._meta.label
+            except Exception:
+                objeto_modelo = objeto.__class__.__name__
+            objeto_id = getattr(objeto, "pk", None)
+
+        return MovimientoSuplencia.objects.create(
+            autorizacion=autorizacion,
+            usuario=usuario,
+            titular_area=autorizacion.titular_ausente,
+            area_cubierta=autorizacion.area_cubierta,
+            accion=accion,
+            descripcion=descripcion,
+            solicitud=solicitud,
+            inscripcion=inscripcion,
+            incidencia=incidencia,
+            objeto_modelo=objeto_modelo,
+            objeto_id=objeto_id,
+            estado=estado or MovimientoSuplencia.EstadoMovimiento.PENDIENTE,
+        )
+    except Exception:
+        return None
+
+
+def aplicar_dictamen_suplencia(sol, area_filtro, autorizacion, usuario=None):
+    """
+    Marca un dictamen como preliminar por suplencia.
+    El área titular lo revisa después en su panel.
+    """
+    prefijo = PREFIJO_DICTAMEN_SUPLENCIA.get(str(area_filtro or "").lower())
+
+    if not sol or not prefijo or not autorizacion:
+        return sol
+
+    campos = {
+        f"{prefijo}_es_suplencia": True,
+        f"{prefijo}_autorizacion_suplencia": autorizacion,
+        f"{prefijo}_pendiente_revision_titular": True,
+    }
+
+    for campo, valor in campos.items():
+        if hasattr(sol, campo):
+            setattr(sol, campo, valor)
+
+    return sol
+
+
+def registrar_movimiento_dictamen_suplencia(sol, insc, area_filtro, autorizacion, usuario):
+    if not autorizacion:
+        return None
+
+    area_legible = {
+        "psicologia": "Psicología",
+        "nutricion": "Nutrición",
+        "medico": "Médica",
+    }.get(str(area_filtro or "").lower(), area_filtro)
+
+    return registrar_movimiento_suplencia(
+        autorizacion=autorizacion,
+        usuario=usuario,
+        accion=MovimientoSuplencia.TipoAccion.DICTAMEN_PRELIMINAR,
+        descripcion=f"Dictamen preliminar de {area_legible} registrado por suplencia.",
+        solicitud=sol,
+        inscripcion=insc,
+        objeto=sol,
+    )
+
+
+def aplicar_suplencia_a_incidencia(incidencia, autorizacion):
+    if not incidencia or not autorizacion:
+        return incidencia
+
+    if hasattr(incidencia, "es_suplencia"):
+        incidencia.es_suplencia = True
+
+    if hasattr(incidencia, "autorizacion_suplencia"):
+        incidencia.autorizacion_suplencia = autorizacion
+
+    if hasattr(incidencia, "area_original_suplencia"):
+        incidencia.area_original_suplencia = incidencia.tipo
+
+    if hasattr(incidencia, "pendiente_revision_titular"):
+        incidencia.pendiente_revision_titular = True
+
+    return incidencia
+
+
+def registrar_movimiento_incidencia_suplencia(incidencia, autorizacion, usuario, accion=None, descripcion=None):
+    if not incidencia or not autorizacion:
+        return None
+
+    inscripcion = getattr(incidencia, "alumno", None)
+    solicitud = getattr(inscripcion, "solicitud_ingreso", None) if inscripcion else None
+
+    return registrar_movimiento_suplencia(
+        autorizacion=autorizacion,
+        usuario=usuario,
+        accion=accion or MovimientoSuplencia.TipoAccion.CREACION_INCIDENCIA,
+        descripcion=descripcion or f"Incidencia {getattr(incidencia, 'tipo', '')} registrada por suplencia.",
+        solicitud=solicitud,
+        inscripcion=inscripcion,
+        incidencia=incidencia,
+        objeto=incidencia,
+    )
+
+
+def marcar_trabajo_social_por_suplencia(inscripcion=None, solicitud=None, usuario=None, accion=None, descripcion=""):
+    """
+    Marca expediente o solicitud cuando una persona autorizada cubre el proceso
+    especial de Trabajo Social.
+    """
+    autorizacion = obtener_suplencia_activa_usuario_area(
+        usuario,
+        AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+        accion="PROCESO_SOCIAL",
+    )
+
+    if not autorizacion:
+        return None
+
+    if inscripcion is not None:
+        campos_update = []
+
+        if hasattr(inscripcion, "trabajo_social_es_suplencia"):
+            inscripcion.trabajo_social_es_suplencia = True
+            campos_update.append("trabajo_social_es_suplencia")
+
+        if hasattr(inscripcion, "trabajo_social_autorizacion_suplencia"):
+            inscripcion.trabajo_social_autorizacion_suplencia = autorizacion
+            campos_update.append("trabajo_social_autorizacion_suplencia")
+
+        if hasattr(inscripcion, "trabajo_social_pendiente_revision_titular"):
+            inscripcion.trabajo_social_pendiente_revision_titular = True
+            campos_update.append("trabajo_social_pendiente_revision_titular")
+
+        if campos_update:
+            campos_update.append("updated_at") if hasattr(inscripcion, "updated_at") else None
+            try:
+                inscripcion.save(update_fields=list(dict.fromkeys(campos_update)))
+            except Exception:
+                inscripcion.save()
+
+    return registrar_movimiento_suplencia(
+        autorizacion=autorizacion,
+        usuario=usuario,
+        accion=accion or MovimientoSuplencia.TipoAccion.PROCESO_TRABAJO_SOCIAL,
+        descripcion=descripcion or "Movimiento de Trabajo Social realizado por suplencia.",
+        solicitud=solicitud,
+        inscripcion=inscripcion,
+        objeto=inscripcion or solicitud,
+    )
+
+
+def movimientos_suplencia_queryset():
+    return (
+        MovimientoSuplencia.objects
+        .select_related(
+            "autorizacion",
+            "autorizacion__titular_ausente",
+            "autorizacion__suplente",
+            "autorizacion__autorizada_por",
+            "usuario",
+            "titular_area",
+            "solicitud",
+            "inscripcion",
+            "incidencia",
+            "revisado_por",
+        )
+        .order_by("-creado_en")
+    )
+
+
+def filtrar_movimientos_suplencia(request, qs=None):
+    qs = qs or movimientos_suplencia_queryset()
+    form = FiltroBitacoraSuplenciaForm(request.GET or None)
+
+    if form.is_valid():
+        fecha_inicio = form.cleaned_data.get("fecha_inicio")
+        fecha_fin = form.cleaned_data.get("fecha_fin")
+        area_cubierta = form.cleaned_data.get("area_cubierta")
+        estado = form.cleaned_data.get("estado")
+        usuario = form.cleaned_data.get("usuario")
+
+        if fecha_inicio:
+            qs = qs.filter(creado_en__date__gte=fecha_inicio)
+        if fecha_fin:
+            qs = qs.filter(creado_en__date__lte=fecha_fin)
+        if area_cubierta:
+            qs = qs.filter(area_cubierta=area_cubierta)
+        if estado:
+            qs = qs.filter(estado=estado)
+        if usuario:
+            qs = qs.filter(usuario=usuario)
+
+    return form, qs
+
+
+def contexto_bitacora_suplencias(request, limite=100):
+    form, qs = filtrar_movimientos_suplencia(request)
+    return {
+        "filtro_bitacora_suplencia_form": form,
+        "movimientos_suplencia": qs[:limite],
+        "total_movimientos_suplencia": qs.count(),
+    }
+
+
+def _valor_estado_autorizacion_suplencia(nombre, fallback):
+    """
+    Obtiene un valor de estado de AutorizacionSuplencia sin romper si el modelo
+    cambia el nombre interno del enum.
+    """
+    try:
+        return getattr(AutorizacionSuplencia.EstadoAutorizacion, nombre)
+    except Exception:
+        return fallback
+
+
+def _valor_estado_movimiento_suplencia(nombre, fallback):
+    """
+    Obtiene un valor de estado de MovimientoSuplencia sin romper si el modelo
+    cambia el nombre interno del enum.
+    """
+    try:
+        return getattr(MovimientoSuplencia.EstadoMovimiento, nombre)
+    except Exception:
+        return fallback
+
+
+def autorizaciones_suplencia_supervisor_queryset(request=None, fecha=None, limite=None):
+    """
+    Autorizaciones visibles para Supervisora.
+
+    Importante:
+    - Una autorización de suplencia debe mostrarse aunque todavía no exista
+      MovimientoSuplencia.
+    - Por eso esta consulta lee directamente AutorizacionSuplencia y no depende
+      de que la suplente ya haya dictaminado, registrado incidencia o hecho un
+      proceso de Trabajo Social.
+    """
+    qs = (
+        AutorizacionSuplencia.objects
+        .select_related(
+            "titular_ausente",
+            "suplente",
+            "autorizada_por",
+            "asistencia_personal",
+        )
+        .order_by("-fecha", "-inicio", "-created_at", "-id")
+    )
+
+    if fecha:
+        qs = qs.filter(fecha=fecha)
+
+    if request is not None:
+        fecha_inicio = request.GET.get("fecha_inicio") or request.GET.get("desde")
+        fecha_fin = request.GET.get("fecha_fin") or request.GET.get("hasta")
+        area_cubierta = request.GET.get("area_cubierta") or request.GET.get("area")
+        estado = request.GET.get("estado")
+
+        if fecha_inicio:
+            qs = qs.filter(fecha__gte=fecha_inicio)
+        if fecha_fin:
+            qs = qs.filter(fecha__lte=fecha_fin)
+        if area_cubierta:
+            qs = qs.filter(area_cubierta=area_cubierta)
+        if estado:
+            qs = qs.filter(estado=estado)
+
+    if limite:
+        return qs[:limite]
+
+    return qs
+
+
+def preparar_autorizacion_suplencia_para_supervisor(autorizacion):
+    """
+    Prepara una AutorizacionSuplencia para que el HTML de Supervisora pueda
+    pintarla en la misma tabla donde se muestran los movimientos.
+
+    El template ya espera campos como fecha_hora, accion, usuario,
+    autorizado_por, alumno y descripcion. Se agregan solo como atributos en
+    memoria; no se modifica la base de datos.
+    """
+    if not autorizacion:
+        return autorizacion
+
+    try:
+        estado_display = autorizacion.get_estado_display()
+    except Exception:
+        estado_display = getattr(autorizacion, "estado", "Autorizada") or "Autorizada"
+
+    try:
+        tipo_display = autorizacion.get_tipo_cobertura_display()
+    except Exception:
+        tipo_display = getattr(autorizacion, "tipo_cobertura", "Cobertura temporal") or "Cobertura temporal"
+
+    try:
+        area_display = autorizacion.get_area_cubierta_display()
+    except Exception:
+        area_display = getattr(autorizacion, "area_cubierta", "Área cubierta") or "Área cubierta"
+
+    motivo = (getattr(autorizacion, "motivo", "") or "").strip()
+    inicio = getattr(autorizacion, "inicio", None)
+    fin = getattr(autorizacion, "fin", None)
+
+    vigencia = ""
+    if inicio and fin:
+        try:
+            vigencia = f"Vigencia: {timezone.localtime(inicio).strftime('%d/%m/%Y %H:%M')} - {timezone.localtime(fin).strftime('%d/%m/%Y %H:%M')}"
+        except Exception:
+            vigencia = f"Vigencia: {inicio} - {fin}"
+    elif inicio:
+        try:
+            vigencia = f"Inicio: {timezone.localtime(inicio).strftime('%d/%m/%Y %H:%M')}"
+        except Exception:
+            vigencia = f"Inicio: {inicio}"
+
+    descripcion = f"Autorización de suplencia {estado_display.lower()} para cubrir {area_display}."
+    if motivo:
+        descripcion = f"{descripcion} Motivo: {motivo}."
+    if vigencia:
+        descripcion = f"{descripcion} {vigencia}."
+
+    atributos = {
+        "fecha_hora": inicio or getattr(autorizacion, "created_at", None) or getattr(autorizacion, "fecha", None),
+        "accion": f"Autorización de suplencia - {tipo_display}",
+        "tipo_accion": "AUTORIZACION_SUPLENCIA",
+        "proceso": "Autorización de suplencia",
+        "usuario": getattr(autorizacion, "suplente", None),
+        "usuario_movimiento": getattr(autorizacion, "suplente", None),
+        "realizado_por": getattr(autorizacion, "suplente", None),
+        "suplente": getattr(autorizacion, "suplente", None),
+        "autorizado_por": getattr(autorizacion, "autorizada_por", None),
+        "autorizada_por": getattr(autorizacion, "autorizada_por", None),
+        "titular_area": getattr(autorizacion, "titular_ausente", None),
+        "alumno": "Autorización sin movimiento todavía",
+        "expediente": "Pendiente de acción",
+        "descripcion": descripcion,
+        "observaciones": descripcion,
+        "es_autorizacion_suplencia": True,
+    }
+
+    for campo, valor in atributos.items():
+        try:
+            setattr(autorizacion, campo, valor)
+        except Exception:
+            pass
+
+    return autorizacion
+
+
+def contexto_suplencias_supervisor(request, limite=100):
+    """
+    Contexto completo para la sección de suplencias del panel supervisor.
+
+    Soluciona el caso detectado: Dirección crea una suplencia activa, pero la
+    Supervisora no la ve porque aún no existe MovimientoSuplencia. Ahora se
+    muestran tanto las autorizaciones como los movimientos reales.
+    """
+    hoy = timezone.localdate()
+    estado_activa = _valor_estado_autorizacion_suplencia("ACTIVA", "ACTIVA")
+    estado_cancelada = _valor_estado_autorizacion_suplencia("CANCELADA", "CANCELADA")
+    estado_finalizada = _valor_estado_autorizacion_suplencia("FINALIZADA", "FINALIZADA")
+
+    autorizaciones_qs = autorizaciones_suplencia_supervisor_queryset(request=request)
+    autorizaciones_hoy_qs = autorizaciones_suplencia_supervisor_queryset(fecha=hoy)
+    autorizaciones_activas_qs = autorizaciones_qs.filter(estado=estado_activa)
+
+    movimientos_qs = movimientos_suplencia_queryset()
+    filtro_form, movimientos_filtrados_qs = filtrar_movimientos_suplencia(request, movimientos_qs)
+
+    estado_pendiente = _valor_estado_movimiento_suplencia("PENDIENTE", "PENDIENTE")
+    estado_pendiente_revision = _valor_estado_movimiento_suplencia("PENDIENTE_REVISION", "PENDIENTE_REVISION")
+    estado_validado = _valor_estado_movimiento_suplencia("VALIDADO", "VALIDADO")
+    estado_revisado = _valor_estado_movimiento_suplencia("REVISADO", "REVISADO")
+    estado_ajustado = _valor_estado_movimiento_suplencia("AJUSTADO", "AJUSTADO")
+
+    movimientos_pendientes_qs = movimientos_qs.filter(
+        estado__in=[estado_pendiente, estado_pendiente_revision]
+    )
+    movimientos_validados_qs = movimientos_qs.filter(
+        estado__in=[estado_validado, estado_revisado, estado_ajustado]
+    )
+
+    autorizaciones_rows = [
+        preparar_autorizacion_suplencia_para_supervisor(autorizacion)
+        for autorizacion in autorizaciones_qs[:limite]
+    ]
+    movimientos_rows = list(movimientos_filtrados_qs[:limite])
+
+    # La tabla del HTML se llama "movimientos_suplencia", pero para Supervisora
+    # debe incluir también autorizaciones sin movimiento. Se ordena por la fecha
+    # más representativa para que lo más reciente quede arriba.
+    bitacora_completa = list(autorizaciones_rows) + movimientos_rows
+
+    def fecha_orden(item):
+        valor = (
+            getattr(item, "fecha_hora", None)
+            or getattr(item, "creado_en", None)
+            or getattr(item, "inicio", None)
+            or getattr(item, "fecha", None)
+            or ""
+        )
+        try:
+            return valor.isoformat()
+        except Exception:
+            return str(valor or "")
+
+    try:
+        bitacora_completa = sorted(bitacora_completa, key=fecha_orden, reverse=True)[:limite]
+    except Exception:
+        bitacora_completa = bitacora_completa[:limite]
+
+    return {
+        "filtro_bitacora_suplencia_form": filtro_form,
+
+        # Autorizaciones de suplencia, aunque todavía no tengan acciones.
+        "autorizaciones_suplencia": autorizaciones_qs[:limite],
+        "autorizaciones_suplencia_hoy": autorizaciones_hoy_qs,
+        "autorizaciones_suplencia_activas": autorizaciones_activas_qs,
+        "suplencias_activas": autorizaciones_activas_qs,
+        "suplencias_activas_dia": autorizaciones_activas_qs.filter(fecha=hoy),
+        "suplencias_canceladas_dia": autorizaciones_hoy_qs.filter(estado=estado_cancelada),
+        "suplencias_finalizadas_dia": autorizaciones_hoy_qs.filter(estado=estado_finalizada),
+
+        # KPIs esperados por el HTML de Supervisora.
+        "suplencias_hoy": autorizaciones_hoy_qs.count(),
+        "total_suplencias_hoy": autorizaciones_hoy_qs.count(),
+        "total_suplencias_activas": autorizaciones_activas_qs.count(),
+        "suplencias_pendientes_revision": movimientos_pendientes_qs.count(),
+        "suplencias_validadas": movimientos_validados_qs.count(),
+        "total_movimientos_suplencia": movimientos_qs.count(),
+
+        # Tabla principal del HTML: autorizaciones + movimientos.
+        "movimientos_suplencia": bitacora_completa,
+        "movimientos_suplencia_recientes": bitacora_completa,
+        "bitacora_suplencias": bitacora_completa,
+
+        # Si necesitas consultar solo acciones reales, quedan disponibles aparte.
+        "movimientos_suplencia_reales": movimientos_filtrados_qs[:limite],
+        "total_movimientos_suplencia_reales": movimientos_qs.count(),
+    }
 
 
 # =========================================================
@@ -1286,8 +3250,11 @@ def normalizar_tipo_incidencia_param(valor):
 
 
 def usuario_es_coordinadora_sala(user):
-    if not user or not user.is_authenticated:
+    if not user or not getattr(user, "is_authenticated", False):
         return False
+
+    if usuario_tiene_area_operativa(user, "PEDAGOGICA"):
+        return True
 
     roles = obtener_roles_usuario(user)
     tipo_persona = normalizar_texto(getattr(user, "tipo_persona", ""))
@@ -1295,34 +3262,45 @@ def usuario_es_coordinadora_sala(user):
     return (
         any("coordinador" in rol and "sala" in rol for rol in roles)
         or any("coordinadora" in rol and "sala" in rol for rol in roles)
+        or any("pedagog" in rol for rol in roles)
+        or any("pedagóg" in rol for rol in roles)
         or "coordinacion de sala" in roles
         or "coordinacion de salas" in roles
-        or tipo_persona in ["coordinadora_sala", "coordinador_sala", "coordinacion_sala"]
+        or tipo_persona in ["coordinadora_sala", "coordinador_sala", "coordinacion_sala", "pedagogica"]
     )
 
 
 def usuario_es_area_nutricion(user):
-    if not user or not user.is_authenticated:
+    if not user or not getattr(user, "is_authenticated", False):
         return False
+
+    if usuario_tiene_area_operativa(user, "NUTRICION"):
+        return True
 
     roles = obtener_roles_usuario(user)
     return any("nutri" in rol for rol in roles)
 
 
 def usuario_es_area_medica(user):
-    if not user or not user.is_authenticated:
+    if not user or not getattr(user, "is_authenticated", False):
         return False
 
+    if usuario_tiene_area_operativa(user, "MEDICA"):
+        return True
+
     roles = obtener_roles_usuario(user)
-    return any("medic" in rol for rol in roles)
+    return any("medic" in rol or "médic" in rol for rol in roles)
 
 
 def usuario_es_area_psicologia(user):
-    if not user or not user.is_authenticated:
+    if not user or not getattr(user, "is_authenticated", False):
         return False
 
+    if usuario_tiene_area_operativa(user, "PSICOLOGIA"):
+        return True
+
     roles = obtener_roles_usuario(user)
-    return any("psicolog" in rol for rol in roles)
+    return any("psicolog" in rol or "psicólog" in rol for rol in roles)
 
 
 def tipos_incidencia_usuario(user, para_crear=False):
@@ -1330,13 +3308,15 @@ def tipos_incidencia_usuario(user, para_crear=False):
     Define qué tipo de incidencias puede operar el usuario.
 
     Para crear:
-    - Coordinadora de Sala -> Pedagógica
+    - Pedagógica -> Pedagógica
     - Nutrióloga -> Nutricional
     - Médica -> Médica
     - Psicóloga -> Psicológica
+    - Suplente autorizado -> solo el tipo cubierto temporalmente
 
     Para consultar:
     - Directora y Administrador ven todas.
+    - Personal operativo ve su área y, si tiene suplencia activa, el área cubierta.
     """
     tipos = []
 
@@ -1351,6 +3331,16 @@ def tipos_incidencia_usuario(user, para_crear=False):
 
     if usuario_es_area_psicologia(user):
         tipos.append(Incidencia.TipoIncidencia.PSICOLOGICA)
+
+    # Suplencias activas: no cambian el rol real; solo agregan el tipo cubierto.
+    for autorizacion in obtener_suplencias_activas_usuario(user):
+        try:
+            if autorizacion.permite_accion("INCIDENCIA"):
+                tipo_suplencia = tipo_incidencia_para_area_cubierta(autorizacion.area_cubierta)
+                if tipo_suplencia:
+                    tipos.append(tipo_suplencia)
+        except Exception:
+            continue
 
     if not para_crear and (usuario_es_admin(user) or usuario_es_directora(user)):
         return [
@@ -1425,25 +3415,56 @@ def usuario_puede_cerrar_incidencia_sprint5(user, incidencia):
     return usuario_es_admin(user) or usuario_es_admin_sistema(user)
 
 
+
+# Límites de adjuntos para incidencias. Se validan también en backend para evitar
+# archivos pesados aunque el usuario modifique el HTML o desactive JavaScript.
+MAX_ARCHIVO_INCIDENCIA_MB = 10
+MAX_TOTAL_ARCHIVOS_INCIDENCIA_MB = 20
+MAX_ARCHIVO_INCIDENCIA_BYTES = MAX_ARCHIVO_INCIDENCIA_MB * 1024 * 1024
+MAX_TOTAL_ARCHIVOS_INCIDENCIA_BYTES = MAX_TOTAL_ARCHIVOS_INCIDENCIA_MB * 1024 * 1024
+EXTENSIONES_INCIDENCIA_PERMITIDAS = {".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"}
+
+
 def validar_archivo_incidencia_general(archivo):
     if not archivo:
         return False, "No se recibió archivo."
 
-    extension = os.path.splitext(archivo.name)[1].lower()
-    extensiones_permitidas = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"]
+    extension = os.path.splitext(getattr(archivo, "name", ""))[1].lower()
 
-    if extension not in extensiones_permitidas:
+    if extension not in EXTENSIONES_INCIDENCIA_PERMITIDAS:
         return False, "Formato no permitido. Usa PDF, imagen JPG/PNG o documento Word."
 
-    if archivo.size > 10 * 1024 * 1024:
-        return False, "El archivo supera el tamaño máximo permitido de 10 MB."
+    if getattr(archivo, "size", 0) <= 0:
+        return False, "El archivo está vacío. Selecciona un archivo válido."
+
+    if archivo.size > MAX_ARCHIVO_INCIDENCIA_BYTES:
+        return False, f"El archivo supera el tamaño máximo permitido de {MAX_ARCHIVO_INCIDENCIA_MB} MB."
 
     return True, "Archivo válido."
+
+
+def validar_total_archivos_incidencia(archivos):
+    archivos = list(archivos or [])
+    total = sum(getattr(archivo, "size", 0) or 0 for archivo in archivos)
+
+    if total > MAX_TOTAL_ARCHIVOS_INCIDENCIA_BYTES:
+        peso_mb = round(total / (1024 * 1024), 2)
+        return False, (
+            f"El total de archivos adjuntos pesa {peso_mb} MB y supera "
+            f"el límite permitido de {MAX_TOTAL_ARCHIVOS_INCIDENCIA_MB} MB."
+        )
+
+    return True, "Total válido."
 
 
 def guardar_archivos_incidencia(incidencia, archivos, usuario):
     guardados = 0
     errores = []
+    archivos = list(archivos or [])
+
+    total_valido, mensaje_total = validar_total_archivos_incidencia(archivos)
+    if not total_valido:
+        return 0, [mensaje_total]
 
     for archivo in archivos:
         valido, mensaje = validar_archivo_incidencia_general(archivo)
@@ -1466,6 +3487,11 @@ def guardar_archivos_incidencia(incidencia, archivos, usuario):
 def guardar_archivos_seguimiento_incidencia(seguimiento, archivos, usuario):
     guardados = 0
     errores = []
+    archivos = list(archivos or [])
+
+    total_valido, mensaje_total = validar_total_archivos_incidencia(archivos)
+    if not total_valido:
+        return 0, [mensaje_total]
 
     for archivo in archivos:
         valido, mensaje = validar_archivo_incidencia_general(archivo)
@@ -1483,6 +3509,157 @@ def guardar_archivos_seguimiento_incidencia(seguimiento, archivos, usuario):
         guardados += 1
 
     return guardados, errores
+
+
+def nombre_menor_desde_inscripcion(inscripcion):
+    """
+    Devuelve el nombre real del menor para vistas y respuestas AJAX.
+    Evita mostrar textos genéricos del modelo SolicitudInscripcion.
+    """
+    solicitud = getattr(inscripcion, "solicitud_ingreso", None)
+
+    if solicitud:
+        for attr in ("nombre_menor_completo", "nombre_completo_menor", "menor_nombre_completo"):
+            valor = getattr(solicitud, attr, None)
+            if callable(valor):
+                try:
+                    valor = valor()
+                except Exception:
+                    valor = ""
+            if valor:
+                return str(valor).strip().title()
+
+        partes = [
+            getattr(solicitud, "nombres_menor", "") or "",
+            getattr(solicitud, "apellido_paterno_menor", "") or "",
+            getattr(solicitud, "apellido_materno_menor", "") or "",
+        ]
+        nombre = " ".join(p.strip() for p in partes if p and str(p).strip()).strip()
+        if nombre:
+            return nombre.title()
+
+    return str(inscripcion)
+
+
+def obtener_dia_operativo_actual_incidencias(semestre=None):
+    """
+    Día operativo usado por incidencias al crear registros desde coordinación o áreas.
+    Devuelve None si no hay semestre activo o si hoy no existe en calendario.
+    """
+    if semestre is None:
+        semestre = obtener_semestre_activo_operativo()
+
+    if not semestre:
+        return None
+
+    hoy = timezone.localdate()
+
+    try:
+        return DiaOperativoSemestre.objects.select_related("semestre").filter(
+            semestre=semestre,
+            fecha=hoy,
+        ).first()
+    except Exception:
+        return None
+
+
+def obtener_registro_diario_actual_para_alumno(alumno, semestre=None):
+    """
+    Busca automáticamente el registro diario del alumno para la fecha actual.
+    Si no existe, la incidencia se puede guardar con alumno, semestre y sala.
+    """
+    if not alumno:
+        return None
+
+    if semestre is None:
+        semestre = getattr(alumno, "semestre", None) or obtener_semestre_activo_operativo()
+
+    qs = RegistroDiarioAlumno.objects.select_related(
+        "alumno",
+        "alumno__solicitud_ingreso",
+        "dia_operativo",
+        "dia_operativo__semestre",
+        "sala_semestre",
+        "sala_semestre__sala",
+    ).filter(
+        alumno=alumno,
+        dia_operativo__fecha=timezone.localdate(),
+    )
+
+    if semestre:
+        qs = qs.filter(dia_operativo__semestre=semestre)
+
+    try:
+        qs = qs.filter(dia_operativo__es_habil=True).exclude(dia_operativo__fecha__week_day__in=[1, 7])
+    except Exception:
+        pass
+
+    return qs.order_by("-id").first()
+
+
+def serializar_registro_diario_incidencia(registro):
+    if not registro:
+        return None
+
+    dia = getattr(registro, "dia_operativo", None)
+    sala_semestre = getattr(registro, "sala_semestre", None)
+    sala = getattr(sala_semestre, "sala", None)
+
+    return {
+        "id": registro.id,
+        "fecha": dia.fecha.isoformat() if dia and getattr(dia, "fecha", None) else "",
+        "fecha_display": dia.fecha.strftime("%d/%m/%Y") if dia and getattr(dia, "fecha", None) else "",
+        "estado_dia": getattr(dia, "estado", "") if dia else "",
+        "es_habil": bool(getattr(dia, "es_habil", False)) if dia else False,
+        "sala": getattr(sala, "nombre", "") or "",
+        "alumno_id": getattr(registro, "alumno_id", None),
+        "alumno": nombre_menor_desde_inscripcion(registro.alumno) if getattr(registro, "alumno", None) else "",
+    }
+
+
+def incidencias_pedagogicas_base_coordinadora(semestre=None):
+    qs = (
+        Incidencia.objects
+        .filter(tipo=Incidencia.TipoIncidencia.PEDAGOGICA)
+        .select_related(
+            "alumno",
+            "alumno__solicitud_ingreso",
+            "semestre",
+            "dia_operativo",
+            "registro_diario",
+            "sala_semestre",
+            "sala_semestre__sala",
+            "registrada_por",
+            "cerrada_por",
+        )
+        .prefetch_related("seguimientos", "archivos")
+    )
+
+    if semestre:
+        qs = qs.filter(semestre=semestre)
+
+    return qs
+
+
+def resumen_incidencias_pedagogicas(qs):
+    total = qs.count()
+    abiertas = qs.filter(estado=Incidencia.EstadoIncidencia.ABIERTA).count()
+    cerradas = qs.filter(estado=Incidencia.EstadoIncidencia.CERRADA).count()
+    riesgo_alto = qs.filter(nivel=Incidencia.NivelChoices.ALTO).count()
+    sin_seguimiento = qs.filter(seguimientos__isnull=True).distinct().count()
+
+    return {
+        "total": total,
+        "abiertas": abiertas,
+        "cerradas": cerradas,
+        "alto": riesgo_alto,
+        "riesgo_alto": riesgo_alto,
+        "sin_seguimiento": sin_seguimiento,
+        "porcentaje_abiertas": porcentaje_panel(abiertas, total),
+        "porcentaje_cerradas": porcentaje_panel(cerradas, total),
+        "porcentaje_riesgo_alto": porcentaje_panel(riesgo_alto, total),
+        "porcentaje_sin_seguimiento": porcentaje_panel(sin_seguimiento, total),
+    }
 
 
 def obtener_incidencias_visibles_para_usuario(user):
@@ -1923,8 +4100,8 @@ def validar_archivo_comprobante_pago(archivo):
     if extension not in extensiones_permitidas:
         return False, "Formato no permitido. Sube un archivo PDF, JPG o PNG."
 
-    if archivo.size > 5 * 1024 * 1024:
-        return False, "El comprobante supera el tamaño máximo permitido de 5 MB."
+    if archivo.size > MAX_TAMANO_ARCHIVO_EXPEDIENTE_BYTES:
+        return False, f"El comprobante supera el tamaño máximo permitido de {MAX_TAMANO_ARCHIVO_EXPEDIENTE_MB} MB."
 
     return True, "Archivo válido."
 
@@ -1990,22 +4167,38 @@ def usuario_es_editor_especial_filtros(user):
 
 def usuario_tiene_permiso_area_filtro(user, area):
     """
-    Permisos normales por área.
+    Permisos normales por área más suplencia temporal para dictámenes.
+
     Admin y Directora pueden acceder a todas las áreas.
+    La suplente solo entra al área cubierta y la captura queda marcada como
+    preliminar por suplencia.
     """
     if usuario_es_editor_especial_filtros(user):
         return True
 
+    area = str(area or "").lower()
     roles = obtener_roles_usuario(user)
 
     if area == "psicologia":
-        return any("psicolog" in rol for rol in roles)
+        return (
+            usuario_es_area_psicologia(user)
+            or any("psicolog" in rol for rol in roles)
+            or usuario_tiene_suplencia_para_filtro(user, "psicologia")
+        )
 
     if area == "nutricion":
-        return any("nutriolog" in rol or "nutricion" in rol for rol in roles)
+        return (
+            usuario_es_area_nutricion(user)
+            or any("nutriolog" in rol or "nutricion" in rol for rol in roles)
+            or usuario_tiene_suplencia_para_filtro(user, "nutricion")
+        )
 
     if area == "medico":
-        return any("medic" in rol for rol in roles)
+        return (
+            usuario_es_area_medica(user)
+            or any("medic" in rol for rol in roles)
+            or usuario_tiene_suplencia_para_filtro(user, "medico")
+        )
 
     return False
 
@@ -2287,6 +4480,7 @@ def panel_admisiones(request):
     context = {
         "solicitudes": solicitudes,
         "form_crear": form_crear,
+        **contexto_suplencias_usuario(request.user),
         **contexto_semestre_operativo(),
     }
 
@@ -2323,6 +4517,12 @@ def crear_solicitud_y_link(request):
         )
 
         LinkCaptura.objects.create(solicitud=solicitud)
+        marcar_trabajo_social_por_suplencia(
+            solicitud=solicitud,
+            usuario=request.user,
+            accion=MovimientoSuplencia.TipoAccion.PROCESO_TRABAJO_SOCIAL,
+            descripcion="Solicitud inicial creada durante cobertura temporal de Trabajo Social.",
+        )
         messages.success(request, f"Solicitud creada. Folio: {solicitud.folio}")
 
     return redirect("panel_admisiones")
@@ -2330,6 +4530,12 @@ def crear_solicitud_y_link(request):
 
 @login_required
 def editar_solicitud(request, solicitud_id):
+    """
+    Edita solo los datos básicos de la solicitud desde Trabajo Social.
+
+    No edita PDFs, documentos cargados, CURP, fecha de nacimiento ni datos
+    clínicos/filtros. Esos datos se conservan intactos.
+    """
     s = get_object_or_404(Solicitud, id=solicitud_id)
 
     if request.method == "POST":
@@ -2337,16 +4543,121 @@ def editar_solicitud(request, solicitud_id):
         if bloqueo:
             return bloqueo
 
-        s.nombres_tutor = (request.POST.get("nombres_tutor") or "").strip()
-        s.apellido_paterno_tutor = (
-            request.POST.get("apellido_paterno_tutor") or ""
-        ).strip()
+        correo_anterior = (getattr(s, "correo", "") or "").strip().lower()
+
+        def post_limpio(nombre_campo, default=""):
+            return (request.POST.get(nombre_campo, default) or "").strip()
+
+        # Datos básicos del beneficiario/tutor.
+        datos_texto_persona = {
+            "nombres_tutor": limpiar_texto_persona(post_limpio("nombres_tutor")),
+            "apellido_paterno_tutor": limpiar_texto_persona(post_limpio("apellido_paterno_tutor")),
+            "apellido_materno_tutor": limpiar_texto_persona(post_limpio("apellido_materno_tutor")),
+            "estado_domicilio": limpiar_texto_persona(post_limpio("estado_domicilio")),
+            "ciudad": limpiar_texto_persona(post_limpio("ciudad")),
+        }
+
+        for campo, valor in datos_texto_persona.items():
+            if hasattr(s, campo):
+                setattr(s, campo, valor)
+
+        if hasattr(s, "parentesco"):
+            s.parentesco = post_limpio("parentesco").upper()
+
+        if hasattr(s, "parentesco_otro"):
+            parentesco = getattr(s, "parentesco", "")
+            if parentesco == "OTRO":
+                s.parentesco_otro = limpiar_texto_persona(post_limpio("parentesco_otro"))
+            else:
+                s.parentesco_otro = ""
+
+        if hasattr(s, "matricula"):
+            s.matricula = post_limpio("matricula").upper()
+
+        if hasattr(s, "correo"):
+            s.correo = post_limpio("correo").lower()
+
+        if hasattr(s, "celular"):
+            s.celular = re.sub(r"\D", "", post_limpio("celular"))[:10]
+
+        # Datos académicos y domicilio básico.
+        campos_basicos = [
+            "programa_educativo",
+            "unidad_academica",
+            "calle",
+            "numero_exterior",
+            "domicilio",
+        ]
+
+        for campo in campos_basicos:
+            if hasattr(s, campo):
+                setattr(s, campo, post_limpio(campo))
+
         s.save()
 
-        messages.success(request, f"Datos de {s.folio} actualizados.")
+        marcar_trabajo_social_por_suplencia(
+            solicitud=s,
+            usuario=request.user,
+            accion=MovimientoSuplencia.TipoAccion.PROCESO_TRABAJO_SOCIAL,
+            descripcion=f"Datos básicos de la solicitud {getattr(s, 'folio', s.id)} editados durante cobertura temporal de Trabajo Social.",
+        )
+
+        # Si la solicitud ya tiene cuenta de tutor creada, sincroniza el correo
+        # para que el beneficiario pueda seguir entrando con el correo actualizado.
+        correo_nuevo = (getattr(s, "correo", "") or "").strip().lower()
+
+        if correo_nuevo and correo_nuevo != correo_anterior:
+            inscripcion = (
+                SolicitudInscripcion.objects
+                .filter(solicitud_ingreso=s)
+                .select_related("usuario_tutor")
+                .first()
+            )
+
+            if inscripcion and getattr(inscripcion, "usuario_tutor", None):
+                User = get_user_model()
+                tutor = inscripcion.usuario_tutor
+
+                correo_ocupado = (
+                    User.objects
+                    .filter(Q(email__iexact=correo_nuevo) | Q(username__iexact=correo_nuevo))
+                    .exclude(pk=tutor.pk)
+                    .exists()
+                )
+
+                if correo_ocupado:
+                    messages.warning(
+                        request,
+                        "La solicitud se actualizó, pero no se cambió el correo de acceso "
+                        "porque ese correo ya pertenece a otro usuario."
+                    )
+                else:
+                    tutor.email = correo_nuevo
+                    tutor.username = correo_nuevo
+
+                    try:
+                        tutor.save(update_fields=["email", "username"])
+                    except Exception:
+                        tutor.save()
+
+        messages.success(request, f"Datos básicos del folio {s.folio} actualizados correctamente.")
+
+        siguiente = post_limpio("next")
+
+        if siguiente and siguiente.startswith("/") and not siguiente.startswith("//"):
+            return redirect(siguiente)
+
         return redirect("panel_admisiones")
 
-    return render(request, "admisiones/editar.html", {"solicitud": s})
+    return render(
+        request,
+        "admisiones/editar.html",
+        {
+            "solicitud": s,
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
+        },
+    )
 
 
 @login_required
@@ -2359,11 +4670,17 @@ def enviar_link_por_correo(request, solicitud_id):
         asunto = f"Link de Captura - Folio {solicitud.folio}"
         cuerpo = f"Hola {solicitud.nombres_tutor},\n\nCompleta tu solicitud aquí: {url}"
 
-        try:
-            send_mail(asunto, cuerpo, settings.DEFAULT_FROM_EMAIL, [solicitud.correo])
+        enviado, mensaje_correo = enviar_correo_institucional_unach(
+            asunto=asunto,
+            cuerpo=cuerpo,
+            destinatarios=[solicitud.correo],
+            usuario_emisor=request.user,
+        )
+
+        if enviado:
             messages.success(request, "Correo enviado.")
-        except Exception as e:
-            messages.error(request, f"Fallo al enviar: {e}")
+        else:
+            messages.error(request, f"Fallo al enviar: {mensaje_correo}")
 
     return redirect("panel_admisiones")
 
@@ -2486,9 +4803,18 @@ def revisar_solicitud(request, pk):
             inscripcion.comentario_tutor = ""
             inscripcion.save()
 
+            marcar_trabajo_social_por_suplencia(
+                inscripcion=inscripcion,
+                solicitud=s,
+                usuario=request.user,
+                accion=MovimientoSuplencia.TipoAccion.REVISION_DOCUMENTOS,
+                descripcion="Expediente devuelto por cobertura temporal de Trabajo Social.",
+            )
+
             enviado, mensaje_correo = enviar_correo_estado_inscripcion(
                 inscripcion,
                 "DEVUELTA",
+                usuario_emisor=request.user,
             )
 
             if enviado:
@@ -2508,9 +4834,18 @@ def revisar_solicitud(request, pk):
             inscripcion.comentario_tutor = ""
             inscripcion.save()
 
+            marcar_trabajo_social_por_suplencia(
+                inscripcion=inscripcion,
+                solicitud=s,
+                usuario=request.user,
+                accion=MovimientoSuplencia.TipoAccion.REVISION_DOCUMENTOS,
+                descripcion="Expediente validado y enviado a filtros por cobertura temporal de Trabajo Social.",
+            )
+
             enviado, mensaje_correo = enviar_correo_estado_inscripcion(
                 inscripcion,
                 "FILTROS",
+                usuario_emisor=request.user,
             )
 
             if enviado:
@@ -2539,6 +4874,8 @@ def revisar_solicitud(request, pk):
         {
             "s": s,
             "inscripcion": inscripcion,
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
         },
     )
 
@@ -2614,7 +4951,7 @@ def dictaminar_solicitud(request, pk):
                 )
 
             try:
-                enviado, mensaje_correo = enviar_correo_dictamen_ingreso(s, pdf_path)
+                enviado, mensaje_correo = enviar_correo_dictamen_ingreso(s, pdf_path, usuario_emisor=request.user)
 
                 if enviado:
                     messages.success(
@@ -2667,7 +5004,7 @@ def dictaminar_solicitud(request, pk):
                 )
 
             try:
-                enviado, mensaje_correo = enviar_correo_dictamen_ingreso(s, pdf_path)
+                enviado, mensaje_correo = enviar_correo_dictamen_ingreso(s, pdf_path, usuario_emisor=request.user)
 
                 if enviado:
                     messages.warning(
@@ -2786,28 +5123,24 @@ def portal_inscripcion(request):
 
         matricula = inscripcion.solicitud_ingreso.matricula or "SIN_MATRICULA"
 
-        # Guardar archivos
+        # Guardar archivos con validación fuerte en backend.
+        # Esto evita que un archivo demasiado pesado llegue a guardarse aunque
+        # el usuario modifique el HTML o desactive el JavaScript.
         for campo, nombre_legible in mapeo_nombres.items():
             if campo in request.FILES:
                 archivo = request.FILES[campo]
+
+                es_valido, mensaje_validacion = validar_archivo_expediente_inscripcion(
+                    campo,
+                    archivo,
+                    nombre_legible,
+                )
+
+                if not es_valido:
+                    messages.error(request, mensaje_validacion)
+                    return redirect("portal_inscripcion")
+
                 ext = os.path.splitext(archivo.name)[1].lower()
-
-                if campo in campos_fotos:
-                    if ext == ".pdf":
-                        messages.error(
-                            request,
-                            f"Error: El campo '{nombre_legible}' no acepta PDFs. "
-                            "Por favor sube una imagen .jpg o .png.",
-                        )
-                        return redirect("portal_inscripcion")
-
-                    if archivo.size > 5 * 1024 * 1024:
-                        messages.error(
-                            request,
-                            f"Error: El archivo de '{nombre_legible}' supera el tamaño máximo de 5MB."
-                        )
-                        return redirect("portal_inscripcion")
-
                 archivo.name = f"{nombre_legible}_{matricula}{ext}"
                 setattr(inscripcion, campo, archivo)
 
@@ -2872,6 +5205,7 @@ def portal_inscripcion(request):
             enviado, mensaje_correo = enviar_correo_estado_inscripcion(
                 inscripcion,
                 "EN_REVISION",
+                usuario_emisor=request.user,
             )
 
             if enviado:
@@ -2935,7 +5269,7 @@ def psicologia_pendientes(request):
     return render(
         request,
         "admisiones/psicologia_pendientes.html",
-        {"solicitudes": qs, **contexto_semestre_operativo()},
+        {"solicitudes": qs, **contexto_suplencias_usuario(request.user), **contexto_semestre_operativo()},
     )
 
 
@@ -2945,6 +5279,8 @@ def psicologia_dictaminar(request, pk):
     insc = SolicitudInscripcion.objects.filter(solicitud_ingreso=sol).first()
     datos_menor = obtener_datos_menor_para_filtro(sol, insc)
     sol = aplicar_datos_identidad_menor_a_solicitud(sol, datos_menor)
+    area_filtro_actual = AREA_FILTRO_PSICOLOGIA
+    initial_compartido = obtener_initial_datos_compartidos_para_area(sol, area_filtro_actual)
 
     if not usuario_tiene_permiso_area_filtro(request.user, "psicologia"):
         messages.error(request, "No tienes permiso para dictaminar Psicología.")
@@ -2964,13 +5300,14 @@ def psicologia_dictaminar(request, pk):
             )
             return redirect("psicologia_pendientes")
 
-        estado_decision = request.POST.get("estado_psicologia")
+        post_data = preparar_post_con_datos_compartidos(request.POST, sol, area_filtro_actual)
+        estado_decision = post_data.get("estado_psicologia")
 
         if not estado_decision or estado_decision == "PENDIENTE":
-            form = DictamenPsicologiaForm(request.POST, instance=sol)
+            form = DictamenPsicologiaForm(post_data, instance=sol)
             messages.error(request, "Debes seleccionar un dictamen final de Psicología: Aprobado o Rechazado.")
         else:
-            form = DictamenPsicologiaForm(request.POST, instance=sol)
+            form = DictamenPsicologiaForm(post_data, instance=sol)
 
             if form.is_valid():
                 sol = form.save(commit=False)
@@ -2981,7 +5318,32 @@ def psicologia_dictaminar(request, pk):
                 sol.estado_psicologia = estado_decision
                 sol.psicologia_por = request.user
                 sol.psicologia_en = timezone.now()
+
+                autorizacion_suplencia = obtener_suplencia_activa_para_filtro(request.user, "psicologia")
+                if autorizacion_suplencia:
+                    sol = aplicar_dictamen_suplencia(sol, "psicologia", autorizacion_suplencia, request.user)
+
                 sol.save()
+
+                if autorizacion_suplencia:
+                    registrar_movimiento_dictamen_suplencia(
+                        sol,
+                        insc,
+                        "psicologia",
+                        autorizacion_suplencia,
+                        request.user,
+                    )
+
+                errores_compartidos = guardar_datos_compartidos_desde_fuentes(
+                    sol,
+                    area_filtro_actual,
+                    usuario=request.user,
+                    post_data=post_data,
+                    insc=insc,
+                )
+
+                for error in errores_compartidos[:3]:
+                    messages.warning(request, error)
 
                 messages.success(request, "Dictamen de psicología guardado exitosamente.")
 
@@ -3001,7 +5363,7 @@ def psicologia_dictaminar(request, pk):
         )
 
     else:
-        form = DictamenPsicologiaForm(instance=sol)
+        form = DictamenPsicologiaForm(instance=sol, initial=initial_compartido)
 
     return render(
         request,
@@ -3012,9 +5374,12 @@ def psicologia_dictaminar(request, pk):
             "form": form,
             "bloqueado": bloqueado,
             **datos_menor,
+            **contexto_datos_compartidos_filtro(sol, area_filtro_actual),
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
+
 
 
 @login_required
@@ -3033,6 +5398,8 @@ def psicologia_registro(request):
         {
             "aprobados": aprobados,
             "rechazados": rechazados,
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
         },
     )
 
@@ -3061,7 +5428,7 @@ def nutricion_pendientes(request):
     return render(
         request,
         "admisiones/nutricion_pendientes.html",
-        {"solicitudes": qs, **contexto_semestre_operativo()},
+        {"solicitudes": qs, **contexto_suplencias_usuario(request.user), **contexto_semestre_operativo()},
     )
 
 
@@ -3071,6 +5438,8 @@ def nutricion_dictaminar(request, pk):
     insc = SolicitudInscripcion.objects.filter(solicitud_ingreso=sol).first()
     datos_menor = obtener_datos_menor_para_filtro(sol, insc)
     sol = aplicar_datos_identidad_menor_a_solicitud(sol, datos_menor)
+    area_filtro_actual = AREA_FILTRO_NUTRICION
+    initial_compartido = obtener_initial_datos_compartidos_para_area(sol, area_filtro_actual)
 
     if not usuario_tiene_permiso_area_filtro(request.user, "nutricion"):
         messages.error(request, "No tienes permiso para dictaminar Nutrición.")
@@ -3094,13 +5463,14 @@ def nutricion_dictaminar(request, pk):
             )
             return redirect("nutricion_pendientes")
 
-        estado_decision = request.POST.get("estado_nutricion")
+        post_data = preparar_post_con_datos_compartidos(request.POST, sol, area_filtro_actual)
+        estado_decision = post_data.get("estado_nutricion")
 
         if not estado_decision or estado_decision == "PENDIENTE":
-            form = DictamenNutricionForm(request.POST, instance=sol)
+            form = DictamenNutricionForm(post_data, instance=sol)
             messages.error(request, "Debes seleccionar un dictamen final de Nutrición: Aprobado o Rechazado.")
         else:
-            form = DictamenNutricionForm(request.POST, instance=sol)
+            form = DictamenNutricionForm(post_data, instance=sol)
 
             if form.is_valid():
                 sol = form.save(commit=False)
@@ -3111,7 +5481,32 @@ def nutricion_dictaminar(request, pk):
                 sol.estado_nutricion = estado_decision
                 sol.nutricion_por = request.user
                 sol.nutricion_en = timezone.now()
+
+                autorizacion_suplencia = obtener_suplencia_activa_para_filtro(request.user, "nutricion")
+                if autorizacion_suplencia:
+                    sol = aplicar_dictamen_suplencia(sol, "nutricion", autorizacion_suplencia, request.user)
+
                 sol.save()
+
+                if autorizacion_suplencia:
+                    registrar_movimiento_dictamen_suplencia(
+                        sol,
+                        insc,
+                        "nutricion",
+                        autorizacion_suplencia,
+                        request.user,
+                    )
+
+                errores_compartidos = guardar_datos_compartidos_desde_fuentes(
+                    sol,
+                    area_filtro_actual,
+                    usuario=request.user,
+                    post_data=post_data,
+                    insc=insc,
+                )
+
+                for error in errores_compartidos[:3]:
+                    messages.warning(request, error)
 
                 messages.success(request, "Dictamen de nutrición guardado exitosamente.")
 
@@ -3131,15 +5526,18 @@ def nutricion_dictaminar(request, pk):
         )
 
     else:
+        initial_nutricion = {
+            "nombres_menor": n_menor,
+            "apellido_paterno_menor": ap_menor,
+            "apellido_materno_menor": am_menor,
+            "fecha_nacimiento_menor": datos_menor.get("fecha_nacimiento_menor"),
+            "curp_menor": datos_menor.get("curp_menor"),
+        }
+        initial_nutricion.update(initial_compartido)
+
         form = DictamenNutricionForm(
             instance=sol,
-            initial={
-                "nombres_menor": n_menor,
-                "apellido_paterno_menor": ap_menor,
-                "apellido_materno_menor": am_menor,
-                "fecha_nacimiento_menor": datos_menor.get("fecha_nacimiento_menor"),
-                "curp_menor": datos_menor.get("curp_menor"),
-            },
+            initial=initial_nutricion,
         )
 
     contexto = {
@@ -3148,10 +5546,13 @@ def nutricion_dictaminar(request, pk):
         "form": form,
         "bloqueado": bloqueado,
         **datos_menor,
+        **contexto_datos_compartidos_filtro(sol, area_filtro_actual),
+        **contexto_suplencias_usuario(request.user),
         **contexto_semestre_operativo(),
     }
 
     return render(request, "admisiones/nutricion_dictaminar.html", contexto)
+
 
 
 @login_required
@@ -3170,8 +5571,202 @@ def nutricion_registro(request):
         {
             "aprobados": aprobados,
             "rechazados": rechazados,
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
         },
     )
+
+
+
+
+def preparar_formulario_nutricion_solo_lectura(sol, datos_menor=None):
+    """
+    Prepara el formulario de Nutrición para que Médico pueda consultarlo
+    dentro del dictamen médico sin permitir modificaciones.
+
+    No se guarda nada de Nutrición desde Médico; solo se muestra la valoración
+    ya capturada por el área de Nutrición.
+    """
+    datos_menor = datos_menor or {}
+
+    initial = {
+        "nombres_menor": datos_menor.get("nombre_nino") or datos_menor.get("nombres_menor"),
+        "apellido_paterno_menor": datos_menor.get("paterno_nino") or datos_menor.get("apellido_paterno_menor"),
+        "apellido_materno_menor": datos_menor.get("materno_nino") or datos_menor.get("apellido_materno_menor"),
+        "fecha_nacimiento_menor": datos_menor.get("fecha_nacimiento_menor"),
+        "curp_menor": datos_menor.get("curp_menor"),
+    }
+
+    try:
+        form = DictamenNutricionForm(instance=sol, initial=initial)
+    except Exception:
+        return None
+
+    for field in form.fields.values():
+        field.required = False
+        field.disabled = True
+
+        clases_actuales = field.widget.attrs.get("class", "")
+        if "form-control" not in clases_actuales and "form-select" not in clases_actuales:
+            clases_actuales = f"{clases_actuales} form-control".strip()
+
+        field.widget.attrs.update({
+            "class": clases_actuales,
+            "disabled": "disabled",
+            "readonly": "readonly",
+            "tabindex": "-1",
+        })
+
+    return form
+
+
+def obtener_revision_nutricion_medica(sol, historia=None):
+    """
+    Recupera la revisión médica sobre Nutrición para repintar el formulario.
+    Soporta dos formas:
+    - Campos dedicados en Solicitud o HistoriaClinicaMedica, si existen.
+    - Bloque guardado dentro de observaciones_medico, si el modelo aún no tiene campos dedicados.
+    """
+    revision = ""
+    comentario = ""
+
+    for obj in [historia, sol]:
+        if not obj:
+            continue
+
+        if not revision and hasattr(obj, "revision_nutricion_medica"):
+            revision = getattr(obj, "revision_nutricion_medica", "") or ""
+            revision = {
+                "ADECUADO": "BIEN",
+                "REQUIERE_SEGUIMIENTO": "SEGUIMIENTO",
+                "ALERTA": "OBSERVACION",
+                "SIN_REVISION": "",
+            }.get(revision, revision)
+
+        if not comentario and hasattr(obj, "comentario_nutricion_medica"):
+            comentario = getattr(obj, "comentario_nutricion_medica", "") or ""
+
+        if not comentario and hasattr(obj, "comentario_revision_nutricion"):
+            comentario = getattr(obj, "comentario_revision_nutricion", "") or ""
+
+    if not revision or not comentario:
+        observaciones = getattr(sol, "observaciones_medico", "") or ""
+
+        if not revision:
+            m_revision = re.search(
+                r"Revisión médica de Nutrición:\s*(.+)",
+                observaciones,
+                flags=re.IGNORECASE,
+            )
+            if m_revision:
+                texto_revision = m_revision.group(1).strip().splitlines()[0].strip().lower()
+                if "seguimiento" in texto_revision:
+                    revision = "SEGUIMIENTO"
+                elif "observ" in texto_revision:
+                    revision = "OBSERVACION"
+                elif "bien" in texto_revision or "sin" in texto_revision:
+                    revision = "BIEN"
+
+        if not comentario:
+            m_comentario = re.search(
+                r"Comentario médico sobre Nutrición:\s*(.*)",
+                observaciones,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if m_comentario:
+                comentario = m_comentario.group(1).strip()
+
+    return revision, comentario
+
+
+def aplicar_revision_nutricion_medica(sol, historia, revision, comentario):
+    """
+    Guarda la conclusión médica sobre el formulario de Nutrición.
+
+    Si tus modelos ya tienen campos:
+    - revision_nutricion_medica
+    - comentario_nutricion_medica
+
+    se guardan ahí. Si todavía no existen, se conserva la información dentro
+    de observaciones_medico para no romper el sistema ni requerir migración.
+    """
+    revision = (revision or "").strip().upper()
+    comentario = (comentario or "").strip()
+
+    revision_modelo = {
+        "BIEN": "ADECUADO",
+        "ADECUADO": "ADECUADO",
+        "OBSERVACION": "ALERTA",
+        "OBSERVACIÓN": "ALERTA",
+        "ALERTA": "ALERTA",
+        "SEGUIMIENTO": "REQUIERE_SEGUIMIENTO",
+        "REQUIERE_SEGUIMIENTO": "REQUIERE_SEGUIMIENTO",
+        "SIN_REVISION": "SIN_REVISION",
+    }.get(revision, revision)
+
+    etiquetas_revision = {
+        "BIEN": "Bien / sin observaciones",
+        "ADECUADO": "Bien / sin observaciones",
+        "OBSERVACION": "Con observaciones",
+        "ALERTA": "Con observaciones",
+        "SEGUIMIENTO": "Requiere seguimiento",
+        "REQUIERE_SEGUIMIENTO": "Requiere seguimiento",
+    }
+
+    sol_tiene_campos = False
+    historia_tiene_campos = False
+
+    if sol is not None:
+        if hasattr(sol, "revision_nutricion_medica"):
+            sol.revision_nutricion_medica = revision_modelo
+            sol_tiene_campos = True
+
+        if hasattr(sol, "comentario_nutricion_medica"):
+            sol.comentario_nutricion_medica = comentario
+            sol_tiene_campos = True
+
+        if hasattr(sol, "comentario_revision_nutricion"):
+            sol.comentario_revision_nutricion = comentario
+            sol_tiene_campos = True
+
+    if historia is not None:
+        if hasattr(historia, "revision_nutricion_medica"):
+            historia.revision_nutricion_medica = revision_modelo
+            historia_tiene_campos = True
+
+        if hasattr(historia, "comentario_nutricion_medica"):
+            historia.comentario_nutricion_medica = comentario
+            historia_tiene_campos = True
+
+        if hasattr(historia, "comentario_revision_nutricion"):
+            historia.comentario_revision_nutricion = comentario
+            historia_tiene_campos = True
+
+    if sol is not None and (revision or comentario) and not sol_tiene_campos:
+        if hasattr(sol, "observaciones_medico"):
+            observaciones_base = getattr(sol, "observaciones_medico", "") or ""
+            observaciones_base = re.split(
+                r"\n\s*---\s*Revisión médica de Nutrición\s*---",
+                observaciones_base,
+                maxsplit=1,
+                flags=re.IGNORECASE,
+            )[0].rstrip()
+
+            bloque = ["--- Revisión médica de Nutrición ---"]
+
+            if revision:
+                bloque.append(
+                    f"Revisión médica de Nutrición: {etiquetas_revision.get(revision, revision)}"
+                )
+
+            if comentario:
+                bloque.append(f"Comentario médico sobre Nutrición: {comentario}")
+
+            sol.observaciones_medico = (
+                f"{observaciones_base}\n\n" + "\n".join(bloque)
+            ).strip()
+
+    return sol, historia, sol_tiene_campos, historia_tiene_campos
 
 
 # ===================== MÉDICO =====================
@@ -3198,7 +5793,7 @@ def medico_pendientes(request):
     return render(
         request,
         "admisiones/medico_pendientes.html",
-        {"solicitudes": qs, **contexto_semestre_operativo()},
+        {"solicitudes": qs, **contexto_suplencias_usuario(request.user), **contexto_semestre_operativo()},
     )
 
 
@@ -3216,6 +5811,7 @@ def medico_dictaminar(request, pk):
     historia, created = HistoriaClinicaMedica.objects.get_or_create(inscripcion=insc)
     datos_menor = obtener_datos_menor_para_filtro(sol, insc)
     sol = aplicar_datos_identidad_menor_a_solicitud(sol, datos_menor)
+    area_filtro_actual = AREA_FILTRO_MEDICO
 
     n_menor = datos_menor["nombre_nino"]
     ap_menor = datos_menor["paterno_nino"]
@@ -3391,6 +5987,15 @@ def medico_dictaminar(request, pk):
         else:
             h_initial["nombres_madre"] = historia.nombre_madre
 
+    h_initial = aplicar_initial_datos_compartidos(h_initial, sol, area_filtro_actual)
+
+    nutricion_form = preparar_formulario_nutricion_solo_lectura(sol, datos_menor)
+    valoracion_nutricion = sol
+    revision_nutricion_medica, comentario_nutricion_medica = obtener_revision_nutricion_medica(
+        sol,
+        historia,
+    )
+
     if request.method == "POST":
         bloqueo_semestre = bloquear_si_no_hay_semestre_activo(request, "medico_pendientes")
         if bloqueo_semestre:
@@ -3403,7 +6008,9 @@ def medico_dictaminar(request, pk):
             )
             return redirect("medico_pendientes")
 
-        post_data = request.POST.copy()
+        post_data = preparar_post_con_datos_compartidos(request.POST, sol, area_filtro_actual)
+        revision_nutricion_medica = (post_data.get("revision_nutricion_medica") or "").strip()
+        comentario_nutricion_medica = (post_data.get("comentario_nutricion_medica") or "").strip()
 
         if "numero_gestas" in post_data:
             g_val = post_data["numero_gestas"]
@@ -3467,9 +6074,45 @@ def medico_dictaminar(request, pk):
                 sol.estado_medico = estado_decision
                 sol.medico_por = request.user
                 sol.medico_en = timezone.now()
-                sol.save()
 
-                h_form.save()
+                autorizacion_suplencia = obtener_suplencia_activa_para_filtro(request.user, "medico")
+                if autorizacion_suplencia:
+                    sol = aplicar_dictamen_suplencia(sol, "medico", autorizacion_suplencia, request.user)
+
+                historia_obj = h_form.save(commit=False)
+                sol, historia_obj, _, _ = aplicar_revision_nutricion_medica(
+                    sol,
+                    historia_obj,
+                    revision_nutricion_medica,
+                    comentario_nutricion_medica,
+                )
+
+                sol.save()
+                historia_obj.save()
+
+                if autorizacion_suplencia:
+                    registrar_movimiento_dictamen_suplencia(
+                        sol,
+                        insc,
+                        "medico",
+                        autorizacion_suplencia,
+                        request.user,
+                    )
+
+                errores_compartidos = guardar_datos_compartidos_desde_fuentes(
+                    sol,
+                    area_filtro_actual,
+                    usuario=request.user,
+                    post_data=post_data,
+                    historia=historia_obj,
+                    insc=insc,
+                )
+
+                for error in errores_compartidos[:3]:
+                    messages.warning(request, error)
+
+                if hasattr(h_form, "save_m2m"):
+                    h_form.save_m2m()
 
                 messages.success(request, "Dictamen médico guardado.")
 
@@ -3495,7 +6138,10 @@ def medico_dictaminar(request, pk):
             )
 
     else:
-        form = DictamenMedicoForm(instance=sol)
+        form = DictamenMedicoForm(
+            instance=sol,
+            initial=obtener_initial_datos_compartidos_para_area(sol, area_filtro_actual),
+        )
         h_form = HistoriaClinicaMedicaForm(
             instance=historia,
             initial=h_initial,
@@ -3510,10 +6156,16 @@ def medico_dictaminar(request, pk):
             "insc": insc,
             "form": form,
             "historia_form": h_form,
+            "nutricion_form": nutricion_form,
+            "valoracion_nutricion": valoracion_nutricion,
+            "revision_nutricion_medica": revision_nutricion_medica,
+            "comentario_nutricion_medica": comentario_nutricion_medica,
             "bloqueado": bloqueado,
             "mama_previo": bool(h_initial["nombres_madre"]),
             "papa_previo": bool(h_initial["nombres_padre"]),
             **datos_menor,
+            **contexto_datos_compartidos_filtro(sol, area_filtro_actual),
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -3535,6 +6187,8 @@ def medico_registro(request):
         {
             "aprobados": aprobados,
             "rechazados": rechazados,
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
         },
     )
 
@@ -3724,6 +6378,7 @@ def validacion_pagos_pendientes(request):
             "pagos_registrados": pagos_registrados,
             "pagos_con_comprobante": pagos_registrados,
             "resumen_pagos": resumen_pagos,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -3783,6 +6438,14 @@ def registrar_pago_valido(request, pk):
         if form_presencial.is_valid():
             form_presencial.registrar()
 
+            marcar_trabajo_social_por_suplencia(
+                inscripcion=inscripcion,
+                solicitud=inscripcion.solicitud_ingreso,
+                usuario=request.user,
+                accion=MovimientoSuplencia.TipoAccion.PAGO,
+                descripcion="Comprobante presencial registrado durante cobertura temporal de Trabajo Social.",
+            )
+
             messages.success(
                 request,
                 "Comprobante presencial registrado con archivo adjunto. Ahora puedes validar el pago."
@@ -3812,6 +6475,14 @@ def registrar_pago_valido(request, pk):
         inscripcion.pago_observaciones = observaciones or inscripcion.pago_observaciones
         inscripcion.estado = "FINALIZADA"
         inscripcion.save()
+
+        marcar_trabajo_social_por_suplencia(
+            inscripcion=inscripcion,
+            solicitud=inscripcion.solicitud_ingreso,
+            usuario=request.user,
+            accion=MovimientoSuplencia.TipoAccion.PAGO,
+            descripcion="Pago validado durante cobertura temporal de Trabajo Social.",
+        )
 
         messages.success(
             request,
@@ -3846,6 +6517,14 @@ def registrar_pago_valido(request, pk):
         # porque el expediente permanece en ACEPTADO_ESPERANDO_PAGO.
         inscripcion.estado = "ACEPTADO_ESPERANDO_PAGO"
         inscripcion.save()
+
+        marcar_trabajo_social_por_suplencia(
+            inscripcion=inscripcion,
+            solicitud=inscripcion.solicitud_ingreso,
+            usuario=request.user,
+            accion=MovimientoSuplencia.TipoAccion.PAGO,
+            descripcion="Comprobante de pago rechazado durante cobertura temporal de Trabajo Social.",
+        )
 
         messages.warning(
             request,
@@ -3926,6 +6605,7 @@ def codigos_responsable_pendientes(request):
         {
             "inscripciones": inscripciones,
             "semestre": semestre,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -3997,6 +6677,14 @@ def generar_codigo_responsable(request, inscripcion_id):
                 )
 
                 if ok:
+                    marcar_trabajo_social_por_suplencia(
+                        inscripcion=inscripcion,
+                        solicitud=inscripcion.solicitud_ingreso,
+                        usuario=request.user,
+                        accion=MovimientoSuplencia.TipoAccion.CODIGO_RESPONSABLE,
+                        descripcion="Código de responsable generado o reseteado durante cobertura temporal de Trabajo Social.",
+                    )
+
                     if es_reset:
                         messages.success(
                             request,
@@ -4021,6 +6709,7 @@ def generar_codigo_responsable(request, inscripcion_id):
                             "responsable_codigo": responsable_codigo,
                             "codigo_generado": codigo_generado,
                             "es_reset": es_reset,
+                            **contexto_suplencias_usuario(request.user),
                             **contexto_semestre_operativo(),
                         },
                     )
@@ -4045,6 +6734,7 @@ def generar_codigo_responsable(request, inscripcion_id):
             "responsable_codigo": responsable_codigo,
             "codigo_generado": codigo_generado,
             "es_reset": es_reset,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -4102,6 +6792,14 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
             )
 
             if cambio:
+                marcar_trabajo_social_por_suplencia(
+                    inscripcion=inscripcion,
+                    solicitud=inscripcion.solicitud_ingreso,
+                    usuario=request.user,
+                    accion=MovimientoSuplencia.TipoAccion.CODIGO_RESPONSABLE,
+                    descripcion="Entrega de código y credencial registrada durante cobertura temporal de Trabajo Social.",
+                )
+
                 messages.success(
                     request,
                     f"Entrega de código y credencial registrada para {responsable_codigo.nombre_completo}."
@@ -4127,6 +6825,7 @@ def confirmar_entrega_codigo_responsable(request, inscripcion_id):
             "inscripcion": inscripcion,
             "responsables_codigo": responsables_codigo,
             "responsable_codigo": responsable_codigo,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -5536,6 +8235,1274 @@ def asignar_sala_definitiva(request, inscripcion_id):
     )
 
 
+
+
+# =========================================================
+# PANEL DIRECTIVO - DATOS REALES PARA DASHBOARD POR PESTAÑAS
+# =========================================================
+def porcentaje_panel(parte, total):
+    try:
+        parte = int(parte or 0)
+        total = int(total or 0)
+    except Exception:
+        return 0
+
+    if total <= 0:
+        return 0
+
+    return round((parte * 100) / total)
+
+
+def nombre_usuario_panel(user):
+    if not user:
+        return "Sin usuario"
+
+    try:
+        nombre = user.get_full_name()
+        if nombre:
+            return nombre
+    except Exception:
+        pass
+
+    return (
+        getattr(user, "nombre", "")
+        or getattr(user, "email", "")
+        or getattr(user, "username", "")
+        or str(user)
+    )
+
+
+def qs_por_semestre_y_sede(qs, semestre=None, sede=None):
+    if semestre:
+        qs = qs.filter(semestre=semestre)
+    if sede:
+        qs = qs.filter(semestre__sede_configurada=sede)
+    return qs
+
+
+def preparar_sedes_panel(semestre=None):
+    sedes = []
+
+    for sede in Sede.objects.order_by("nombre"):
+        semestres_sede = Semestre.objects.filter(sede_configurada=sede)
+        if semestre and getattr(semestre, "sede_configurada_id", None) == sede.id:
+            semestres_sede = semestres_sede.filter(id=semestre.id)
+
+        alumnos = SolicitudInscripcion.objects.filter(
+            semestre__in=semestres_sede,
+            estado="FINALIZADA",
+        ).count()
+
+        salas_base = Sala.objects.filter(sede=sede).count()
+        salas_configuradas = SalaSemestre.objects.filter(
+            semestre__in=semestres_sede,
+            activa=True,
+        ).count()
+
+        maestras = AsignacionMaestra.objects.filter(
+            sala_semestre__semestre__in=semestres_sede,
+            activo=True,
+        ).values("maestra_id").distinct().count()
+
+        sedes.append({
+            "id": sede.id,
+            "nombre": getattr(sede, "nombre", "Sede"),
+            "clave": getattr(sede, "clave", ""),
+            "direccion": getattr(sede, "direccion", ""),
+            "total_salas": salas_configuradas or salas_base,
+            "total_alumnos": alumnos,
+            "total_maestras": maestras,
+            "estado": "Operativa" if semestres_sede.exists() else "Sin semestre",
+        })
+
+    return sedes
+
+
+def preparar_alumnos_panel(alumnos_qs, dia_actual=None):
+    alumnos = []
+    registros_por_alumno = {}
+
+    if dia_actual:
+        registros = (
+            RegistroDiarioAlumno.objects
+            .filter(dia_operativo=dia_actual)
+            .select_related("alumno", "sala_semestre", "sala_semestre__sala")
+        )
+        registros_por_alumno = {r.alumno_id: r for r in registros}
+
+    incidencias_por_alumno = {}
+    if alumnos_qs.exists():
+        conteos = (
+            Incidencia.objects
+            .filter(alumno__in=alumnos_qs)
+            .values("alumno_id")
+            .annotate(total=Count("id"))
+        )
+        incidencias_por_alumno = {item["alumno_id"]: item["total"] for item in conteos}
+
+    for inscripcion in alumnos_qs[:250]:
+        solicitud = inscripcion.solicitud_ingreso
+        registro = registros_por_alumno.get(inscripcion.id)
+
+        estado_dia = "Sin registro"
+        hora_entrada = "--"
+        hora_salida = "--"
+
+        if registro:
+            if getattr(registro, "entrada_en", None) and not getattr(registro, "salida_en", None):
+                estado_dia = "En estancia"
+            elif getattr(registro, "salida_en", None):
+                estado_dia = "Fuera de estancia"
+            else:
+                estado_dia = "Ausente"
+
+            if getattr(registro, "entrada_en", None):
+                hora_entrada = timezone.localtime(registro.entrada_en).strftime("%H:%M")
+            if getattr(registro, "salida_en", None):
+                hora_salida = timezone.localtime(registro.salida_en).strftime("%H:%M")
+
+        sala_nombre = "Sin sala"
+        if getattr(inscripcion, "sala_semestre_asignada", None) and inscripcion.sala_semestre_asignada.sala:
+            sala_nombre = inscripcion.sala_semestre_asignada.sala.nombre
+        elif getattr(inscripcion, "sala_asignada", None):
+            sala_nombre = inscripcion.sala_asignada.nombre
+
+        alumnos.append({
+            "id": inscripcion.id,
+            "nombre": solicitud.nombre_menor_completo() if hasattr(solicitud, "nombre_menor_completo") else str(solicitud),
+            "folio": getattr(solicitud, "folio", ""),
+            "sala": sala_nombre,
+            "tutor": solicitud.nombre_tutor_completo() if hasattr(solicitud, "nombre_tutor_completo") else "Sin tutor",
+            "estado_dia": estado_dia,
+            "hora_entrada": hora_entrada,
+            "hora_salida": hora_salida,
+            "total_incidencias": incidencias_por_alumno.get(inscripcion.id, 0),
+        })
+
+    return alumnos
+
+
+def preparar_calendario_panel(semestre=None, limite=35):
+    calendario = []
+
+    if not semestre:
+        return calendario
+
+    festivos = {
+        f.fecha: f
+        for f in DiaFestivo.objects.filter(semestre=semestre).order_by("fecha")
+    }
+
+    dias_qs = DiaOperativoSemestre.objects.filter(semestre=semestre).order_by("fecha")[:limite]
+
+    for dia in dias_qs:
+        festivo = festivos.get(dia.fecha)
+        titulo = ""
+
+        if festivo:
+            titulo = (
+                getattr(festivo, "titulo", "")
+                or getattr(festivo, "nombre", "")
+                or getattr(festivo, "motivo", "")
+                or getattr(festivo, "descripcion", "")
+                or "Fecha especial"
+            )
+        elif not getattr(dia, "es_habil", True):
+            titulo = "Inhábil"
+        elif getattr(dia, "estado", "") == DiaOperativoSemestre.EstadoDia.ABIERTO:
+            titulo = "Día abierto"
+        elif getattr(dia, "estado", "") == DiaOperativoSemestre.EstadoDia.CERRADO:
+            titulo = "Día cerrado"
+
+        calendario.append({
+            "fecha": dia.fecha,
+            "es_habil": getattr(dia, "es_habil", True),
+            "titulo": titulo,
+            "estado": getattr(dia, "estado", ""),
+        })
+
+    if not calendario:
+        for festivo in festivos.values():
+            calendario.append({
+                "fecha": festivo.fecha,
+                "es_habil": False,
+                "titulo": (
+                    getattr(festivo, "titulo", "")
+                    or getattr(festivo, "nombre", "")
+                    or getattr(festivo, "motivo", "")
+                    or getattr(festivo, "descripcion", "")
+                    or "Fecha especial"
+                ),
+                "estado": "INHABIL",
+            })
+
+    return calendario
+
+
+def preparar_actividades_panel(semestre=None):
+    actividades = []
+
+    if not semestre:
+        return actividades
+
+    for dia in DiaOperativoSemestre.objects.filter(semestre=semestre).order_by("-fecha")[:8]:
+        titulo = "Día operativo"
+        descripcion = "Seguimiento general del día operativo de la estancia."
+
+        if getattr(dia, "estado", "") == DiaOperativoSemestre.EstadoDia.ABIERTO:
+            titulo = "Día abierto"
+            descripcion = "Las áreas pueden registrar entradas, salidas, bitácoras e incidencias."
+        elif getattr(dia, "estado", "") == DiaOperativoSemestre.EstadoDia.CERRADO:
+            titulo = "Día cerrado"
+            descripcion = "El día operativo ya fue cerrado y queda disponible para consulta."
+        elif not getattr(dia, "es_habil", True):
+            titulo = "Día inhábil"
+            descripcion = mensaje_dia_no_operativo(dia) or "Día sin operación diaria."
+
+        actividades.append({
+            "titulo": titulo,
+            "descripcion": descripcion,
+            "fecha": dia.fecha,
+            "sala": getattr(getattr(semestre, "sede_configurada", None), "nombre", ""),
+        })
+
+    return actividades
+
+
+def preparar_personal_panel(semestre=None):
+    User = get_user_model()
+    personal = []
+
+    usuarios = (
+        User.objects
+        .filter(is_active=True)
+        .exclude(tipo_persona__iexact="BENEFICIARIO")
+        .exclude(tipo_persona__iexact="BENEFICIARIA")
+        .order_by("email", "username")[:250]
+    )
+    asignaciones = {}
+
+    if semestre:
+        for asignacion in (
+            AsignacionMaestra.objects
+            .filter(sala_semestre__semestre=semestre, activo=True)
+            .select_related("maestra", "sala_semestre", "sala_semestre__sala", "sala_semestre__sala__sede")
+        ):
+            asignaciones[asignacion.maestra_id] = asignacion
+
+    dia_actual = None
+    if semestre:
+        dia_actual = DiaOperativoSemestre.objects.filter(
+            semestre=semestre,
+            fecha=timezone.localdate(),
+        ).select_related("abierto_por", "cerrado_por").first()
+
+    for user in usuarios:
+        asignacion = asignaciones.get(user.id)
+        sede_nombre = "General"
+        area = getattr(user, "tipo_persona", "") or "Personal"
+
+        if asignacion and asignacion.sala_semestre and asignacion.sala_semestre.sala:
+            area = f"Sala {asignacion.sala_semestre.sala.nombre}"
+            if asignacion.sala_semestre.sala.sede:
+                sede_nombre = asignacion.sala_semestre.sala.sede.nombre
+
+        hora_entrada = "--"
+        hora_salida = "--"
+        if dia_actual and getattr(dia_actual, "abierto_por_id", None) == user.id and getattr(dia_actual, "abierto_en", None):
+            hora_entrada = timezone.localtime(dia_actual.abierto_en).strftime("%H:%M")
+        if dia_actual and getattr(dia_actual, "cerrado_por_id", None) == user.id and getattr(dia_actual, "cerrado_en", None):
+            hora_salida = timezone.localtime(dia_actual.cerrado_en).strftime("%H:%M")
+
+        personal.append({
+            "id": user.id,
+            "nombre": nombre_usuario_panel(user),
+            "rol": getattr(user, "tipo_persona", "") or "Personal",
+            "area": area,
+            "email": getattr(user, "email", ""),
+            "sede": sede_nombre,
+            "estado": "Activo" if user.is_active else "Inactivo",
+            "hora_entrada": hora_entrada,
+            "hora_salida": hora_salida,
+        })
+
+    return personal
+
+
+
+def datos_reporte_directiva(reporte, contexto):
+    """
+    Construye los datos del reporte para usar la misma informacion en:
+    - Vista previa dentro del dashboard.
+    - PDF.
+    - Excel/CSV.
+    """
+    reporte = (reporte or "general").strip().lower()
+
+    total_ninos = contexto.get("total_ninos", 0) or 0
+    ninos_en_estancia = contexto.get("ninos_en_estancia", 0) or 0
+    ninos_ausentes = contexto.get("ninos_ausentes", 0) or 0
+    ninos_fuera = contexto.get("ninos_fuera_estancia", 0) or 0
+
+    incidencias_total = contexto.get("incidencias_total", 0) or 0
+    incidencias_abiertas = contexto.get("incidencias_abiertas", 0) or 0
+    incidencias_cerradas = contexto.get("incidencias_cerradas", 0) or 0
+    kpi_riesgo = contexto.get("kpi_riesgo", 0) or 0
+    incidencias_sin_seguimiento = contexto.get("incidencias_sin_seguimiento", 0) or 0
+
+    total_dias = contexto.get("total_dias_operativos", 0) or 0
+    dias_cerrados = contexto.get("dias_cerrados_operativos", 0) or 0
+    dias_pendientes = max(total_dias - dias_cerrados, 0)
+
+    total_expedientes = contexto.get("total_expedientes", 0) or 0
+    expedientes_finalizados = contexto.get("kpi_alumnos", 0) or 0
+    expedientes_pendientes = max(total_expedientes - expedientes_finalizados, 0)
+
+    porcentaje_estancia = contexto.get("porcentaje_ninos_estancia", 0) or 0
+    porcentaje_ausentes = contexto.get("porcentaje_ninos_ausentes", 0) or 0
+    porcentaje_fuera = contexto.get("porcentaje_ninos_fuera", 0) or 0
+    porcentaje_incidencias = contexto.get("porcentaje_incidencias_cerradas", 0) or 0
+    porcentaje_finalizados = contexto.get("porcentaje_finalizados", 0) or 0
+    porcentaje_calendario = contexto.get("porcentaje_calendario", 0) or 0
+
+    if reporte == "asistencia":
+        return {
+            "slug": "asistencia",
+            "titulo": "Reporte de asistencia",
+            "descripcion": "Resumen de niñas y niños presentes, ausentes y fuera de estancia durante el día operativo consultado.",
+            "porcentaje": porcentaje_estancia,
+            "metricas": [
+                {"label": "Total de niños", "value": total_ninos, "hint": "Alumnos finalizados y activos del semestre."},
+                {"label": "En estancia", "value": ninos_en_estancia, "hint": f"{porcentaje_estancia}% del total."},
+                {"label": "Ausentes", "value": ninos_ausentes, "hint": f"{porcentaje_ausentes}% del total."},
+                {"label": "Fuera de estancia", "value": ninos_fuera, "hint": f"{porcentaje_fuera}% del total."},
+            ],
+            "columnas": ["Estatus", "Cantidad", "Porcentaje", "Observacion"],
+            "filas": [
+                ["En estancia", ninos_en_estancia, f"{porcentaje_estancia}%", "Niños con entrada registrada y sin salida."],
+                ["Ausentes", ninos_ausentes, f"{porcentaje_ausentes}%", "Niños sin registro de entrada en el día."],
+                ["Fuera de estancia", ninos_fuera, f"{porcentaje_fuera}%", "Niños que ya registraron salida."],
+                ["Total", total_ninos, "100%" if total_ninos else "0%", "Total de niños considerados en el reporte."],
+            ],
+        }
+
+    if reporte == "incidencias":
+        return {
+            "slug": "incidencias",
+            "titulo": "Reporte de incidencias",
+            "descripcion": "Resumen de incidencias por estado, riesgo y seguimiento para consulta directiva.",
+            "porcentaje": porcentaje_incidencias,
+            "metricas": [
+                {"label": "Total", "value": incidencias_total, "hint": "Incidencias visibles para Dirección."},
+                {"label": "Abiertas", "value": incidencias_abiertas, "hint": "Pendientes de cierre."},
+                {"label": "Cerradas", "value": incidencias_cerradas, "hint": f"{porcentaje_incidencias}% cerradas."},
+                {"label": "Riesgo alto", "value": kpi_riesgo, "hint": "Casos que requieren mayor atención."},
+            ],
+            "columnas": ["Indicador", "Cantidad", "Porcentaje", "Observacion"],
+            "filas": [
+                ["Abiertas", incidencias_abiertas, f"{porcentaje_panel(incidencias_abiertas, incidencias_total)}%", "Incidencias que siguen activas."],
+                ["Cerradas", incidencias_cerradas, f"{porcentaje_incidencias}%", "Incidencias con resolución final."],
+                ["Riesgo alto", kpi_riesgo, f"{porcentaje_panel(kpi_riesgo, incidencias_total)}%", "Incidencias críticas o prioritarias."],
+                ["Sin seguimiento", incidencias_sin_seguimiento, f"{porcentaje_panel(incidencias_sin_seguimiento, incidencias_total)}%", "Casos sin seguimiento registrado."],
+                ["Médicas", (contexto.get("inc_medica_abiertas", 0) or 0) + (contexto.get("inc_medica_cerradas", 0) or 0), "-", "Incidencias del área médica."],
+                ["Nutricionales", (contexto.get("inc_nutricional_abiertas", 0) or 0) + (contexto.get("inc_nutricional_cerradas", 0) or 0), "-", "Incidencias del área nutricional."],
+                ["Psicológicas", (contexto.get("inc_psicologica_abiertas", 0) or 0) + (contexto.get("inc_psicologica_cerradas", 0) or 0), "-", "Incidencias del área psicológica."],
+                ["Pedagógicas", (contexto.get("inc_pedagogica_abiertas", 0) or 0) + (contexto.get("inc_pedagogica_cerradas", 0) or 0), "-", "Incidencias del área pedagógica."],
+            ],
+        }
+
+    if reporte == "expedientes":
+        return {
+            "slug": "expedientes",
+            "titulo": "Reporte de expedientes",
+            "descripcion": "Avance de expedientes finalizados respecto al total del semestre consultado.",
+            "porcentaje": porcentaje_finalizados,
+            "metricas": [
+                {"label": "Total expedientes", "value": total_expedientes, "hint": "Expedientes del semestre."},
+                {"label": "Finalizados", "value": expedientes_finalizados, "hint": f"{porcentaje_finalizados}% finalizados."},
+                {"label": "Pendientes", "value": expedientes_pendientes, "hint": "Expedientes que siguen en proceso."},
+                {"label": "Pendientes veredicto", "value": contexto.get("kpi_pendientes", 0) or 0, "hint": "Requieren resolución de Dirección."},
+            ],
+            "columnas": ["Estatus", "Cantidad", "Porcentaje", "Observacion"],
+            "filas": [
+                ["Finalizados", expedientes_finalizados, f"{porcentaje_finalizados}%", "Inscripciones concluidas."],
+                ["Pendientes", expedientes_pendientes, f"{porcentaje_panel(expedientes_pendientes, total_expedientes)}%", "Expedientes en proceso."],
+                ["Pendientes de veredicto", contexto.get("kpi_pendientes", 0) or 0, "-", "Expedientes que requieren revisión directiva."],
+                ["Total", total_expedientes, "100%" if total_expedientes else "0%", "Total de expedientes considerados."],
+            ],
+        }
+
+    if reporte == "calendario":
+        return {
+            "slug": "calendario",
+            "titulo": "Reporte de calendario operativo",
+            "descripcion": "Avance de días operativos del semestre: días cerrados, pendientes y porcentaje concluido.",
+            "porcentaje": porcentaje_calendario,
+            "metricas": [
+                {"label": "Días operativos", "value": total_dias, "hint": "Total de días configurados."},
+                {"label": "Días cerrados", "value": dias_cerrados, "hint": f"{porcentaje_calendario}% concluido."},
+                {"label": "Días pendientes", "value": dias_pendientes, "hint": "Días por operar o cerrar."},
+                {"label": "Salas configuradas", "value": contexto.get("kpi_salas", 0) or 0, "hint": "Salas activas del semestre."},
+            ],
+            "columnas": ["Indicador", "Cantidad", "Porcentaje", "Observacion"],
+            "filas": [
+                ["Días cerrados", dias_cerrados, f"{porcentaje_calendario}%", "Días operativos concluidos."],
+                ["Días pendientes", dias_pendientes, f"{porcentaje_panel(dias_pendientes, total_dias)}%", "Días todavía abiertos o pendientes."],
+                ["Total de días", total_dias, "100%" if total_dias else "0%", "Total del calendario operativo."],
+            ],
+        }
+
+    return {
+        "slug": "general",
+        "titulo": "Reporte general directivo",
+        "descripcion": "Resumen general de operación directiva.",
+        "porcentaje": 0,
+        "metricas": [
+            {"label": "Total de niños", "value": total_ninos, "hint": "Niños registrados."},
+            {"label": "Incidencias", "value": incidencias_total, "hint": "Incidencias visibles."},
+            {"label": "Salas", "value": contexto.get("kpi_salas", 0) or 0, "hint": "Salas configuradas."},
+            {"label": "Expedientes", "value": total_expedientes, "hint": "Expedientes del semestre."},
+        ],
+        "columnas": ["Indicador", "Valor", "Observacion"],
+        "filas": [
+            ["Total de niños", total_ninos, "Niños registrados."],
+            ["Incidencias abiertas", incidencias_abiertas, "Casos pendientes."],
+            ["Incidencias cerradas", incidencias_cerradas, "Casos concluidos."],
+            ["Salas configuradas", contexto.get("kpi_salas", 0) or 0, "Salas activas."],
+        ],
+    }
+
+
+def generar_reporte_directiva(request, reporte, formato, contexto):
+    reporte = (reporte or "general").strip().lower()
+    formato = (formato or "").strip().lower()
+
+    if not formato:
+        return None
+
+    datos = datos_reporte_directiva(reporte, contexto)
+    columnas = datos.get("columnas", [])
+    filas = datos.get("filas", [])
+
+    if formato in ["csv", "xlsx", "excel"]:
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="reporte_directiva_{datos.get("slug", reporte)}.csv"'
+        response.write("\ufeff")
+        writer = csv.writer(response)
+        writer.writerow(columnas)
+        writer.writerows(filas)
+        return response
+
+    if formato == "pdf":
+        titulo = escape(datos.get("titulo", "Reporte directivo"))
+        descripcion = escape(datos.get("descripcion", "Resumen directivo."))
+        semestre = escape(getattr(contexto.get("semestre_seleccionado"), "nombre", "Sin semestre") or "Sin semestre")
+        sede = escape(getattr(contexto.get("sede_seleccionada"), "nombre", "Todas las sedes") or "Todas las sedes")
+        fecha = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %H:%M")
+
+        metricas_html = ""
+        for metrica in datos.get("metricas", []):
+            metricas_html += f"""
+                <td class="metric-card">
+                    <div class="metric-label">{escape(str(metrica.get('label', 'Indicador')))}</div>
+                    <div class="metric-value">{escape(str(metrica.get('value', '0')))}</div>
+                    <div class="metric-hint">{escape(str(metrica.get('hint', '')))}</div>
+                </td>
+            """
+
+        encabezados_html = "".join(f"<th>{escape(str(col))}</th>" for col in columnas)
+        filas_html = ""
+        for fila in filas:
+            filas_html += "<tr>" + "".join(f"<td>{escape(str(celda))}</td>" for celda in fila) + "</tr>"
+
+        html = f"""
+        <!doctype html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                @page {{
+                    size: letter;
+                    margin: 1.5cm 1.35cm 1.5cm 1.35cm;
+                    @frame footer_frame {{
+                        -pdf-frame-content: footer_content;
+                        left: 1.35cm;
+                        right: 1.35cm;
+                        bottom: .65cm;
+                        height: .5cm;
+                    }}
+                }}
+                body {{
+                    font-family: Helvetica, Arial, sans-serif;
+                    color: #102b6b;
+                    font-size: 10.5pt;
+                }}
+                .topbar {{
+                    background-color: #245bd6;
+                    color: #ffffff;
+                    padding: 18px 20px;
+                    border-radius: 8px;
+                }}
+                .brand {{
+                    font-size: 10pt;
+                    font-weight: bold;
+                    letter-spacing: .5px;
+                }}
+                h1 {{
+                    font-size: 22pt;
+                    margin: 10px 0 4px 0;
+                    color: #ffffff;
+                }}
+                .subtitle {{
+                    font-size: 10.5pt;
+                    color: #eef4ff;
+                    margin: 0;
+                }}
+                .info-table {{
+                    width: 100%;
+                    margin-top: 14px;
+                    border-collapse: collapse;
+                }}
+                .info-table td {{
+                    border: 1px solid #dbe5f6;
+                    padding: 8px 10px;
+                    background-color: #f7faff;
+                    font-size: 9.5pt;
+                }}
+                .info-label {{
+                    color: #60749d;
+                    font-weight: bold;
+                }}
+                .section-title {{
+                    font-size: 14pt;
+                    color: #0b2a68;
+                    margin: 18px 0 8px 0;
+                    font-weight: bold;
+                }}
+                .metric-table {{
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 6px;
+                    margin-top: 10px;
+                }}
+                .metric-card {{
+                    border: 1px solid #dbe5f6;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    padding: 12px;
+                    vertical-align: top;
+                }}
+                .metric-label {{
+                    color: #60749d;
+                    font-size: 9pt;
+                    font-weight: bold;
+                }}
+                .metric-value {{
+                    color: #0a2a66;
+                    font-size: 22pt;
+                    font-weight: bold;
+                    margin-top: 4px;
+                }}
+                .metric-hint {{
+                    color: #526b9a;
+                    font-size: 8.5pt;
+                    margin-top: 4px;
+                }}
+                .data-table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 8px;
+                }}
+                .data-table th {{
+                    background-color: #e8f0ff;
+                    color: #0b2a68;
+                    padding: 9px;
+                    border: 1px solid #cbdaf5;
+                    font-size: 9.5pt;
+                    text-align: left;
+                }}
+                .data-table td {{
+                    padding: 8px 9px;
+                    border: 1px solid #dbe5f6;
+                    color: #263f6d;
+                    font-size: 9.2pt;
+                    vertical-align: top;
+                }}
+                .note {{
+                    margin-top: 14px;
+                    padding: 10px;
+                    border-left: 4px solid #245bd6;
+                    background-color: #f7faff;
+                    color: #526b9a;
+                    font-size: 9pt;
+                }}
+                #footer_content {{
+                    color: #60749d;
+                    font-size: 8pt;
+                    text-align: right;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="topbar">
+                <div class="brand">ESTANCIA INFANTIL UNACH</div>
+                <h1>{titulo}</h1>
+                <p class="subtitle">{descripcion}</p>
+            </div>
+
+            <table class="info-table">
+                <tr>
+                    <td><span class="info-label">Semestre:</span><br>{semestre}</td>
+                    <td><span class="info-label">Sede:</span><br>{sede}</td>
+                    <td><span class="info-label">Generado:</span><br>{fecha}</td>
+                </tr>
+            </table>
+
+            <div class="section-title">Indicadores principales</div>
+            <table class="metric-table"><tr>{metricas_html}</tr></table>
+
+            <div class="section-title">Detalle del reporte</div>
+            <table class="data-table">
+                <thead><tr>{encabezados_html}</tr></thead>
+                <tbody>{filas_html}</tbody>
+            </table>
+
+            <div class="note">
+                Documento generado automáticamente desde el Panel Directivo. La información corresponde a los registros visibles para Dirección en el semestre y sede consultados.
+            </div>
+            <div id="footer_content">Estancia Infantil UNACH - Panel Directivo</div>
+        </body>
+        </html>
+        """
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="reporte_directiva_{datos.get("slug", reporte)}.pdf"'
+        pisa.CreatePDF(html, dest=response, link_callback=link_callback)
+        return response
+
+    return None
+
+def construir_contexto_panel_directiva(request):
+    semestres = Semestre.objects.order_by("-fecha_inicio")
+    sedes = Sede.objects.order_by("nombre")
+
+    semestre_activo = obtener_semestre_activo_operativo()
+    semestre_id = request.GET.get("semestre_id") or request.GET.get("semestre")
+    sede_id = request.GET.get("sede_id") or request.GET.get("sede")
+
+    semestre_seleccionado = semestre_activo or semestres.first()
+    if semestre_id:
+        semestre_seleccionado = Semestre.objects.filter(pk=semestre_id).first() or semestre_seleccionado
+
+    sede_seleccionada = None
+    if sede_id:
+        sede_seleccionada = Sede.objects.filter(pk=sede_id).first()
+    elif semestre_seleccionado and getattr(semestre_seleccionado, "sede_configurada", None):
+        sede_seleccionada = semestre_seleccionado.sede_configurada
+    else:
+        sede_seleccionada = sedes.first()
+
+    modo_solo_consulta = not bool(
+        semestre_activo
+        and semestre_seleccionado
+        and semestre_seleccionado.id == semestre_activo.id
+    )
+
+    alumnos_qs = (
+        SolicitudInscripcion.objects
+        .filter(estado="FINALIZADA")
+        .select_related(
+            "solicitud_ingreso",
+            "semestre",
+            "sala_semestre_asignada",
+            "sala_semestre_asignada__sala",
+        )
+        .order_by("sala_semestre_asignada__sala__nombre", "solicitud_ingreso__apellido_paterno_menor", "solicitud_ingreso__nombres_menor")
+    )
+    alumnos_qs = qs_por_semestre_y_sede(alumnos_qs, semestre_seleccionado, sede_seleccionada)
+
+    total_ninos = alumnos_qs.count()
+    kpi_alumnos = total_ninos
+
+    dia_actual = None
+    if semestre_seleccionado:
+        dia_actual = DiaOperativoSemestre.objects.filter(
+            semestre=semestre_seleccionado,
+            fecha=timezone.localdate(),
+        ).select_related("abierto_por", "cerrado_por").first()
+
+    registros_hoy = RegistroDiarioAlumno.objects.none()
+    if dia_actual:
+        registros_hoy = RegistroDiarioAlumno.objects.filter(dia_operativo=dia_actual, alumno__in=alumnos_qs)
+
+    ninos_en_estancia = registros_hoy.filter(entrada_en__isnull=False, salida_en__isnull=True).count() if dia_actual else 0
+    ninos_fuera_estancia = registros_hoy.filter(salida_en__isnull=False).count() if dia_actual else 0
+    ninos_ausentes = max(total_ninos - ninos_en_estancia - ninos_fuera_estancia, 0)
+
+    porcentaje_ninos_estancia = porcentaje_panel(ninos_en_estancia, total_ninos)
+    porcentaje_ninos_ausentes = porcentaje_panel(ninos_ausentes, total_ninos)
+    porcentaje_ninos_fuera = porcentaje_panel(ninos_fuera_estancia, total_ninos)
+
+    salas_qs = SalaSemestre.objects.filter(activa=True)
+    if semestre_seleccionado:
+        salas_qs = salas_qs.filter(semestre=semestre_seleccionado)
+    if sede_seleccionada:
+        salas_qs = salas_qs.filter(sala__sede=sede_seleccionada)
+    kpi_salas = salas_qs.count()
+
+    dictamenes_pendientes = (
+        SolicitudInscripcion.objects
+        .filter(estado="ESPERANDO_DIRECTORA")
+        .select_related("solicitud_ingreso", "usuario_tutor", "semestre")
+        .order_by("-updated_at")
+    )
+    dictamenes_pendientes = qs_por_semestre_y_sede(dictamenes_pendientes, semestre_seleccionado, sede_seleccionada)
+
+    expedientes_en_filtros = (
+        SolicitudInscripcion.objects
+        .filter(estado__in=["FILTROS", "REVISION_FINAL_TS"])
+        .select_related("solicitud_ingreso", "semestre")
+        .order_by("-updated_at")
+    )
+    expedientes_en_filtros = qs_por_semestre_y_sede(expedientes_en_filtros, semestre_seleccionado, sede_seleccionada)
+
+    salas_en_revision = (
+        SolicitudInscripcion.objects
+        .filter(estado__in=["SALA_EN_REVISION", "SALA_RECHAZADA", "SALA_APROBADA", "FINALIZADA"])
+        .select_related(
+            "solicitud_ingreso",
+            "semestre",
+            "sala_semestre_asignada",
+            "sala_semestre_asignada__sala",
+        )
+        .order_by("sala_semestre_asignada__sala__nombre", "solicitud_ingreso__apellido_paterno_menor")
+    )
+    salas_en_revision = qs_por_semestre_y_sede(salas_en_revision, semestre_seleccionado, sede_seleccionada)[:80]
+
+    incidencias_base = obtener_incidencias_visibles_para_usuario(request.user)
+    if semestre_seleccionado:
+        incidencias_base = incidencias_base.filter(semestre=semestre_seleccionado)
+    if sede_seleccionada:
+        incidencias_base = incidencias_base.filter(semestre__sede_configurada=sede_seleccionada)
+
+    incidencias_total = incidencias_base.count()
+    incidencias_abiertas = incidencias_base.filter(estado=Incidencia.EstadoIncidencia.ABIERTA).count()
+    incidencias_cerradas = incidencias_base.filter(estado=Incidencia.EstadoIncidencia.CERRADA).count()
+    kpi_riesgo = incidencias_base.filter(nivel=Incidencia.NivelChoices.ALTO).count()
+    incidencias_sin_seguimiento = incidencias_base.filter(seguimientos__isnull=True).distinct().count()
+
+    def c(tipo, estado=None, nivel=None, con_seguimiento=False):
+        qs = incidencias_base.filter(tipo=tipo)
+        if estado:
+            qs = qs.filter(estado=estado)
+        if nivel:
+            qs = qs.filter(nivel=nivel)
+        if con_seguimiento:
+            qs = qs.filter(seguimientos__isnull=False).distinct()
+        return qs.count()
+
+    total_dias = DiaOperativoSemestre.objects.filter(semestre=semestre_seleccionado).count() if semestre_seleccionado else 0
+    dias_cerrados = DiaOperativoSemestre.objects.filter(semestre=semestre_seleccionado, estado=DiaOperativoSemestre.EstadoDia.CERRADO).count() if semestre_seleccionado else 0
+    porcentaje_calendario = porcentaje_panel(dias_cerrados, total_dias)
+    porcentaje_incidencias_cerradas = porcentaje_panel(incidencias_cerradas, incidencias_total)
+    total_expedientes = SolicitudInscripcion.objects.filter(semestre=semestre_seleccionado).count() if semestre_seleccionado else SolicitudInscripcion.objects.count()
+    porcentaje_finalizados = porcentaje_panel(total_ninos, total_expedientes)
+    dias_pendientes = max(total_dias - dias_cerrados, 0)
+
+    reportes_panel = [
+        {
+            "nombre": "Asistencia",
+            "slug": "asistencia",
+            "descripcion": "Porcentaje de niñas y niños presentes, ausentes y fuera de estancia.",
+            "porcentaje": porcentaje_ninos_estancia,
+        },
+        {
+            "nombre": "Incidencias cerradas",
+            "slug": "incidencias",
+            "descripcion": "Avance de incidencias cerradas contra el total registrado.",
+            "porcentaje": porcentaje_incidencias_cerradas,
+        },
+        {
+            "nombre": "Expedientes finalizados",
+            "slug": "expedientes",
+            "descripcion": "Inscripciones finalizadas respecto al total de expedientes del semestre.",
+            "porcentaje": porcentaje_finalizados,
+        },
+        {
+            "nombre": "Calendario operativo",
+            "slug": "calendario",
+            "descripcion": "Días cerrados o concluidos dentro del calendario operativo.",
+            "porcentaje": porcentaje_calendario,
+        },
+    ]
+
+    contexto = {
+        "semestres": semestres,
+        "sedes": sedes,
+        "semestre_seleccionado": semestre_seleccionado,
+        "semestre_activo_operativo": semestre_activo,
+        "sede_seleccionada": sede_seleccionada,
+        "modo_solo_consulta": modo_solo_consulta,
+        "kpi_alumnos": kpi_alumnos,
+        "kpi_pendientes": dictamenes_pendientes.count(),
+        "kpi_riesgo": kpi_riesgo,
+        "kpi_salas": kpi_salas,
+        "total_ninos": total_ninos,
+        "ninos_en_estancia": ninos_en_estancia,
+        "ninos_ausentes": ninos_ausentes,
+        "ninos_fuera_estancia": ninos_fuera_estancia,
+        "porcentaje_ninos_estancia": porcentaje_ninos_estancia,
+        "porcentaje_ninos_ausentes": porcentaje_ninos_ausentes,
+        "porcentaje_ninos_fuera": porcentaje_ninos_fuera,
+        "porcentaje_calendario": porcentaje_calendario,
+        "porcentaje_incidencias_cerradas": porcentaje_incidencias_cerradas,
+        "porcentaje_finalizados": porcentaje_finalizados,
+        "total_dias_operativos": total_dias,
+        "dias_cerrados_operativos": dias_cerrados,
+        "dias_pendientes_operativos": dias_pendientes,
+        "total_expedientes": total_expedientes,
+        "dictamenes_pendientes": dictamenes_pendientes,
+        "salas_en_revision": salas_en_revision,
+        "expedientes_en_filtros": expedientes_en_filtros,
+        "mensajes_aspirantes": [],
+        "mensajes_alumnos": [],
+        "incidencias_total": incidencias_total,
+        "incidencias_abiertas": incidencias_abiertas,
+        "incidencias_cerradas": incidencias_cerradas,
+        "incidencias_sin_seguimiento": incidencias_sin_seguimiento,
+        "inc_medica_abiertas": c(Incidencia.TipoIncidencia.MEDICA, Incidencia.EstadoIncidencia.ABIERTA),
+        "inc_medica_seguimiento": c(Incidencia.TipoIncidencia.MEDICA, con_seguimiento=True),
+        "inc_medica_cerradas": c(Incidencia.TipoIncidencia.MEDICA, Incidencia.EstadoIncidencia.CERRADA),
+        "inc_medica_alto": c(Incidencia.TipoIncidencia.MEDICA, nivel=Incidencia.NivelChoices.ALTO),
+        "inc_nutricional_abiertas": c(Incidencia.TipoIncidencia.NUTRICIONAL, Incidencia.EstadoIncidencia.ABIERTA),
+        "inc_nutricional_seguimiento": c(Incidencia.TipoIncidencia.NUTRICIONAL, con_seguimiento=True),
+        "inc_nutricional_cerradas": c(Incidencia.TipoIncidencia.NUTRICIONAL, Incidencia.EstadoIncidencia.CERRADA),
+        "inc_nutricional_alto": c(Incidencia.TipoIncidencia.NUTRICIONAL, nivel=Incidencia.NivelChoices.ALTO),
+        "inc_psicologica_abiertas": c(Incidencia.TipoIncidencia.PSICOLOGICA, Incidencia.EstadoIncidencia.ABIERTA),
+        "inc_psicologica_seguimiento": c(Incidencia.TipoIncidencia.PSICOLOGICA, con_seguimiento=True),
+        "inc_psicologica_cerradas": c(Incidencia.TipoIncidencia.PSICOLOGICA, Incidencia.EstadoIncidencia.CERRADA),
+        "inc_psicologica_alto": c(Incidencia.TipoIncidencia.PSICOLOGICA, nivel=Incidencia.NivelChoices.ALTO),
+        "inc_pedagogica_abiertas": c(Incidencia.TipoIncidencia.PEDAGOGICA, Incidencia.EstadoIncidencia.ABIERTA),
+        "inc_pedagogica_seguimiento": c(Incidencia.TipoIncidencia.PEDAGOGICA, con_seguimiento=True),
+        "inc_pedagogica_cerradas": c(Incidencia.TipoIncidencia.PEDAGOGICA, Incidencia.EstadoIncidencia.CERRADA),
+        "inc_pedagogica_alto": c(Incidencia.TipoIncidencia.PEDAGOGICA, nivel=Incidencia.NivelChoices.ALTO),
+        "sedes_panel": preparar_sedes_panel(semestre_seleccionado),
+        "alumnos_panel": preparar_alumnos_panel(alumnos_qs, dia_actual),
+        "actividades_panel": preparar_actividades_panel(semestre_seleccionado),
+        "reportes_panel": reportes_panel,
+        "calendario_dias_panel": preparar_calendario_panel(semestre_seleccionado),
+        "calendario_panel": preparar_calendario_panel(semestre_seleccionado),
+        "personal_panel": preparar_personal_panel(semestre_seleccionado),
+    }
+
+    reporte_solicitado = request.GET.get("reporte")
+    if reporte_solicitado:
+        contexto["reporte_actual"] = datos_reporte_directiva(reporte_solicitado, contexto)
+
+    contexto.update(contexto_semestre_operativo())
+    contexto.update(contexto_suplencias_direccion(request.user, request=request))
+    contexto["modo_solo_consulta"] = modo_solo_consulta
+    contexto["semestre_activo_operativo"] = semestre_activo
+    return contexto
+
+
+@login_required
+def panel_directiva(request):
+    """
+    Dashboard de Dirección con datos reales.
+    Esta vista alimenta templates/portal/home_directiva.html.
+
+    También procesa, sin crear HTML nuevo:
+    - Pase de lista del personal.
+    - Autorizaciones de suplencia.
+    - Cancelación de suplencias.
+    - Validación de movimientos por suplencia.
+    """
+    if not (usuario_es_directora(request.user) or usuario_es_admin(request.user)):
+        messages.error(request, "No tienes permiso para entrar al panel directivo.")
+        return redirect("/")
+
+    if request.method == "POST":
+        accion_directiva = (request.POST.get("accion_directiva") or "").strip()
+
+        if accion_directiva == "guardar_pase_lista":
+            semestre = obtener_semestre_activo_operativo()
+            personal = list(personal_operativo_pase_lista_queryset())
+            form = PaseListaPersonalForm(
+                request.POST,
+                usuario=request.user,
+                semestre=semestre,
+                fecha=timezone.localdate(),
+                personal=personal,
+            )
+
+            if form.is_valid():
+                form.guardar()
+                messages.success(request, "Pase de lista del personal guardado correctamente.")
+            else:
+                messages.error(request, "No se pudo guardar el pase de lista. Revisa los estados del personal.")
+                for campo, errores in form.errors.items():
+                    for error in errores:
+                        messages.error(request, f"{campo}: {error}")
+
+            return redirect(f"{request.path}?seccion=suplencias")
+
+        if accion_directiva == "crear_suplencia":
+            semestre = obtener_semestre_activo_operativo()
+            asistencia_id = request.POST.get("asistencia_personal_id") or request.POST.get("asistencia_id")
+            asistencia = None
+
+            if asistencia_id:
+                asistencia = AsistenciaPersonal.objects.filter(pk=asistencia_id).select_related("trabajador").first()
+
+            form = AutorizacionSuplenciaForm(
+                request.POST,
+                usuario=request.user,
+                semestre=semestre,
+                fecha=timezone.localdate(),
+                asistencia_personal=asistencia,
+            )
+
+            if form.is_valid():
+                try:
+                    autorizacion = form.save()
+                    messages.success(
+                        request,
+                        f"Suplencia autorizada correctamente: {autorizacion.suplente_nombre} cubrirá {autorizacion.get_area_cubierta_display()}."
+                    )
+                except ValidationError as exc:
+                    messages.error(request, exc)
+                except Exception as exc:
+                    messages.error(request, f"No se pudo crear la suplencia: {exc}")
+            else:
+                messages.error(request, "No se pudo crear la suplencia. Revisa los datos.")
+                for campo, errores in form.errors.items():
+                    for error in errores:
+                        messages.error(request, f"{campo}: {error}")
+
+            return redirect(f"{request.path}?seccion=suplencias")
+
+        if accion_directiva == "cancelar_suplencia":
+            autorizacion_id = request.POST.get("autorizacion_id") or request.POST.get("suplencia_id")
+            autorizacion = get_object_or_404(AutorizacionSuplencia, pk=autorizacion_id)
+            form = CancelarSuplenciaForm(
+                request.POST,
+                autorizacion=autorizacion,
+                usuario=request.user,
+            )
+
+            if form.is_valid():
+                ok, errores = form.cancelar()
+                if ok:
+                    messages.success(request, "Suplencia cancelada correctamente.")
+                else:
+                    for error in errores:
+                        messages.error(request, error)
+            else:
+                messages.error(request, "No se pudo cancelar la suplencia.")
+                for campo, errores in form.errors.items():
+                    for error in errores:
+                        messages.error(request, f"{campo}: {error}")
+
+            return redirect(f"{request.path}?seccion=suplencias")
+
+        if accion_directiva == "validar_movimiento_suplencia":
+            movimiento_id = request.POST.get("movimiento_id")
+            movimiento = get_object_or_404(MovimientoSuplencia, pk=movimiento_id)
+            form = RevisionMovimientoSuplenciaForm(
+                request.POST,
+                instance=movimiento,
+                usuario=request.user,
+            )
+
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Movimiento de suplencia actualizado correctamente.")
+            else:
+                messages.error(request, "No se pudo actualizar el movimiento.")
+                for campo, errores in form.errors.items():
+                    for error in errores:
+                        messages.error(request, f"{campo}: {error}")
+
+            return redirect(f"{request.path}?seccion=suplencias")
+
+        if accion_directiva == "crear_evento_calendario":
+            contexto_temporal = construir_contexto_panel_directiva(request)
+            semestre = contexto_temporal.get("semestre_seleccionado") or obtener_semestre_activo_operativo()
+
+            if contexto_temporal.get("modo_solo_consulta"):
+                messages.warning(request, "No se pueden agregar fechas cuando el semestre está en modo solo consulta.")
+                return redirect(f"{request.path}?seccion=calendario")
+
+            if not semestre:
+                messages.error(request, "No hay semestre activo para registrar la fecha.")
+                return redirect(f"{request.path}?seccion=calendario")
+
+            post_data = request.POST.copy()
+            titulo = (post_data.get("titulo") or "").strip()
+            descripcion = (post_data.get("descripcion") or "").strip()
+            tipo = (post_data.get("tipo") or "Evento").strip()
+
+            # Compatibilidad con distintos nombres de campos del DiaFestivoForm.
+            post_data.setdefault("motivo", titulo)
+            post_data.setdefault("nombre", titulo)
+            post_data.setdefault("descripcion", f"{titulo}. {descripcion}".strip())
+            post_data.setdefault("tipo", tipo)
+
+            form = DiaFestivoForm(post_data, semestre=semestre)
+            if form.is_valid():
+                form.save()
+                if semestre.dias_operativos.exists():
+                    semestre.generar_dias_operativos()
+                messages.success(request, "Fecha agregada correctamente al calendario.")
+            else:
+                messages.error(request, "No se pudo guardar la fecha. Revisa los datos capturados.")
+                for campo, errores in form.errors.items():
+                    for error in errores:
+                        messages.error(request, f"{campo}: {error}")
+
+            return redirect(f"{request.path}?seccion=calendario")
+
+    contexto = construir_contexto_panel_directiva(request)
+
+    descarga = generar_reporte_directiva(
+        request,
+        request.GET.get("reporte"),
+        request.GET.get("formato"),
+        contexto,
+    )
+    if descarga:
+        return descarga
+
+    return render(request, "portal/home_directiva.html", contexto)
+
+
+@login_required
+@require_http_methods(["POST"])
+def registrar_asistencia_personal(request):
+    """
+    Vista opcional para urls.py. Guarda el pase de lista y regresa al panel
+    directivo. No requiere HTML nuevo.
+    """
+    if not (usuario_es_directora(request.user) or usuario_es_admin(request.user)):
+        messages.error(request, "Solo Dirección puede registrar el pase de lista del personal.")
+        return redirect("/")
+
+    semestre = obtener_semestre_activo_operativo()
+    personal = list(personal_operativo_pase_lista_queryset())
+    form = PaseListaPersonalForm(
+        request.POST,
+        usuario=request.user,
+        semestre=semestre,
+        fecha=timezone.localdate(),
+        personal=personal,
+    )
+
+    if form.is_valid():
+        form.guardar()
+        messages.success(request, "Pase de lista del personal guardado correctamente.")
+    else:
+        messages.error(request, "No se pudo guardar el pase de lista. Revisa los estados capturados.")
+        for campo, errores in form.errors.items():
+            for error in errores:
+                messages.error(request, f"{campo}: {error}")
+
+    return redirect(f"{reverse('panel_directiva')}?seccion=suplencias")
+
+
+@login_required
+@require_http_methods(["POST"])
+def crear_suplencia(request):
+    """
+    Vista opcional para urls.py. Dirección crea la autorización de suplencia
+    desde el mismo panel directivo.
+    """
+    if not (usuario_es_directora(request.user) or usuario_es_admin(request.user)):
+        messages.error(request, "Solo Dirección puede autorizar suplencias.")
+        return redirect("/")
+
+    semestre = obtener_semestre_activo_operativo()
+    asistencia_id = request.POST.get("asistencia_personal_id") or request.POST.get("asistencia_id")
+    asistencia = None
+
+    if asistencia_id:
+        asistencia = AsistenciaPersonal.objects.filter(pk=asistencia_id).select_related("trabajador").first()
+
+    form = AutorizacionSuplenciaForm(
+        request.POST,
+        usuario=request.user,
+        semestre=semestre,
+        fecha=timezone.localdate(),
+        asistencia_personal=asistencia,
+    )
+
+    if form.is_valid():
+        try:
+            autorizacion = form.save()
+            messages.success(
+                request,
+                f"Suplencia autorizada correctamente: {autorizacion.suplente_nombre} cubrirá {autorizacion.get_area_cubierta_display()}."
+            )
+        except Exception as exc:
+            messages.error(request, f"No se pudo crear la suplencia: {exc}")
+    else:
+        messages.error(request, "No se pudo crear la suplencia. Revisa los datos.")
+        for campo, errores in form.errors.items():
+            for error in errores:
+                messages.error(request, f"{campo}: {error}")
+
+    return redirect(f"{reverse('panel_directiva')}?seccion=suplencias")
+
+
+@login_required
+@require_http_methods(["POST"])
+def cancelar_suplencia(request, autorizacion_id):
+    if not (usuario_es_directora(request.user) or usuario_es_admin(request.user)):
+        messages.error(request, "Solo Dirección puede cancelar suplencias.")
+        return redirect("/")
+
+    autorizacion = get_object_or_404(AutorizacionSuplencia, pk=autorizacion_id)
+    form = CancelarSuplenciaForm(
+        request.POST,
+        autorizacion=autorizacion,
+        usuario=request.user,
+    )
+
+    if form.is_valid():
+        ok, errores = form.cancelar()
+        if ok:
+            messages.success(request, "Suplencia cancelada correctamente.")
+        else:
+            for error in errores:
+                messages.error(request, error)
+    else:
+        messages.error(request, "No se pudo cancelar la suplencia.")
+        for campo, errores in form.errors.items():
+            for error in errores:
+                messages.error(request, f"{campo}: {error}")
+
+    return redirect(f"{reverse('panel_directiva')}?seccion=suplencias")
+
+
+@login_required
+def bitacora_suplencias(request):
+    """
+    Consulta de movimientos por suplencia.
+
+    Dirección y Supervisora pueden consultar. Supervisora solo ve y reporta.
+    """
+    if not (usuario_es_directora(request.user) or usuario_es_admin(request.user) or usuario_es_supervisora_general(request.user)):
+        messages.error(request, "No tienes permiso para consultar la bitácora de suplencias.")
+        return redirect("/")
+
+    if usuario_es_supervisora_general(request.user):
+        contexto = construir_contexto_panel_supervisor(request)
+        contexto.update(contexto_bitacora_suplencias(request, limite=200))
+        return render(request, "admisiones/supervisor/panel_supervisor.html", contexto)
+
+    contexto = construir_contexto_panel_directiva(request)
+    contexto.update(contexto_bitacora_suplencias(request, limite=200))
+    contexto["reporte_actual"] = {
+        "titulo": "Bitácora de suplencias",
+        "descripcion": "Movimientos realizados mediante autorizaciones temporales.",
+    }
+    return render(request, "portal/home_directiva.html", contexto)
+
+
+@login_required
+@require_http_methods(["POST"])
+def validar_movimiento_suplencia(request, movimiento_id):
+    movimiento = get_object_or_404(MovimientoSuplencia, pk=movimiento_id)
+    form = RevisionMovimientoSuplenciaForm(
+        request.POST,
+        instance=movimiento,
+        usuario=request.user,
+    )
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Movimiento de suplencia revisado correctamente.")
+    else:
+        messages.error(request, "No se pudo revisar el movimiento de suplencia.")
+        for campo, errores in form.errors.items():
+            for error in errores:
+                messages.error(request, f"{campo}: {error}")
+
+    siguiente = request.POST.get("next") or request.META.get("HTTP_REFERER") or reverse("panel_directiva")
+    return redirect(siguiente)
+
+
+@login_required
+@require_http_methods(["POST"])
+def revisar_incidencia_suplencia(request, incidencia_id):
+    incidencia = get_object_or_404(Incidencia, pk=incidencia_id)
+    form = RevisarIncidenciaSuplenciaForm(
+        request.POST,
+        incidencia=incidencia,
+        usuario=request.user,
+    )
+
+    if form.is_valid():
+        ok, errores = form.revisar()
+        if ok:
+            registrar_movimiento_incidencia_suplencia(
+                incidencia,
+                incidencia.autorizacion_suplencia,
+                request.user,
+                accion=MovimientoSuplencia.TipoAccion.VALIDACION_TITULAR,
+                descripcion="Incidencia registrada por suplencia revisada por el área titular.",
+            )
+            messages.success(request, "Incidencia revisada correctamente por el área titular.")
+        else:
+            for error in errores:
+                messages.error(request, error)
+    else:
+        messages.error(request, "No se pudo revisar la incidencia.")
+        for campo, errores in form.errors.items():
+            for error in errores:
+                messages.error(request, f"{campo}: {error}")
+
+    return redirect("detalle_incidencia", incidencia_id=incidencia.id)
+
+
+@login_required
+@require_http_methods(["POST"])
+def revisar_trabajo_social_suplencia(request, inscripcion_id):
+    inscripcion = get_object_or_404(SolicitudInscripcion, pk=inscripcion_id)
+    autorizacion = getattr(inscripcion, "trabajo_social_autorizacion_suplencia", None)
+
+    form = RevisarTrabajoSocialSuplenciaForm(
+        request.POST,
+        inscripcion=inscripcion,
+        usuario=request.user,
+        autorizacion_suplencia=autorizacion,
+    )
+
+    if form.is_valid():
+        ok, errores = form.revisar()
+        if ok:
+            registrar_movimiento_suplencia(
+                autorizacion=autorizacion,
+                usuario=request.user,
+                accion=MovimientoSuplencia.TipoAccion.VALIDACION_TITULAR,
+                descripcion="Proceso de Trabajo Social realizado por suplencia revisado por titular.",
+                solicitud=inscripcion.solicitud_ingreso,
+                inscripcion=inscripcion,
+                objeto=inscripcion,
+                estado=MovimientoSuplencia.EstadoMovimiento.VALIDADO,
+            )
+            messages.success(request, "Proceso de Trabajo Social revisado correctamente.")
+        else:
+            for error in errores:
+                messages.error(request, error)
+    else:
+        messages.error(request, "No se pudo revisar el proceso de Trabajo Social.")
+        for campo, errores in form.errors.items():
+            for error in errores:
+                messages.error(request, f"{campo}: {error}")
+
+    siguiente = request.POST.get("next") or request.META.get("HTTP_REFERER") or reverse("panel_admisiones")
+    return redirect(siguiente)
+
 @login_required
 def panel_incidencias(request):
     """
@@ -5555,13 +9522,25 @@ def panel_incidencias(request):
         messages.error(request, "No tienes permiso para consultar incidencias.")
         return redirect("/")
 
+    # Coordinadora de Sala no debe caer al panel general tipo Admin/Directora.
+    # Si entra desde un enlace a panel_incidencias con tipo pedagógico, se le
+    # muestra su dashboard operativo con filtros reales de sus incidencias.
+    if (
+        usuario_es_coordinadora_sala(request.user)
+        and not usuario_es_admin(request.user)
+        and not usuario_es_directora(request.user)
+    ):
+        tipo_get = normalizar_tipo_incidencia_param(request.GET.get("tipo"))
+        if not tipo_get or tipo_get == Incidencia.TipoIncidencia.PEDAGOGICA:
+            return dashboard_coordinadora(request)
+
     tipos_visibles = tipos_incidencia_usuario(request.user, para_crear=False)
     tipos_creables = tipos_incidencia_usuario(request.user, para_crear=True)
     es_admin_actual = usuario_es_admin(request.user)
     es_directora_actual = usuario_es_directora(request.user)
     tipo_unico_operativo = tipo_incidencia_unico_usuario(request.user)
 
-    incidencias = obtener_incidencias_visibles_para_usuario(request.user)
+    incidencias_base = obtener_incidencias_visibles_para_usuario(request.user)
 
     estado = (request.GET.get("estado") or "").strip().upper()
     tipo_solicitado = normalizar_tipo_incidencia_param(request.GET.get("tipo"))
@@ -5583,20 +9562,21 @@ def panel_incidencias(request):
             )
             tipo = None
 
-    if estado in ["ABIERTA", "CERRADA"]:
-        incidencias = incidencias.filter(estado=estado)
+    # Base para tarjetas por área: respeta estado, riesgo, semestre y búsqueda,
+    # pero NO aplica tipo para que cada tarjeta pueda contar su categoría real.
+    incidencias_para_tarjetas = incidencias_base
 
-    if tipo:
-        incidencias = incidencias.filter(tipo=tipo)
+    if estado in ["ABIERTA", "CERRADA"]:
+        incidencias_para_tarjetas = incidencias_para_tarjetas.filter(estado=estado)
 
     if nivel in ["LEVE", "MEDIO", "ALTO", "BAJO"]:
-        incidencias = incidencias.filter(nivel=nivel)
+        incidencias_para_tarjetas = incidencias_para_tarjetas.filter(nivel=nivel)
 
     if semestre_id:
-        incidencias = incidencias.filter(semestre_id=semestre_id)
+        incidencias_para_tarjetas = incidencias_para_tarjetas.filter(semestre_id=semestre_id)
 
     if q:
-        incidencias = incidencias.filter(
+        incidencias_para_tarjetas = incidencias_para_tarjetas.filter(
             Q(descripcion__icontains=q)
             | Q(intervencion_personal__icontains=q)
             | Q(resolucion__icontains=q)
@@ -5606,6 +9586,10 @@ def panel_incidencias(request):
             | Q(sala_semestre__sala__nombre__icontains=q)
         )
 
+    incidencias = incidencias_para_tarjetas
+    if tipo:
+        incidencias = incidencias.filter(tipo=tipo)
+
     resumen = {
         "total": incidencias.count(),
         "abiertas": incidencias.filter(estado=Incidencia.EstadoIncidencia.ABIERTA).count(),
@@ -5613,6 +9597,20 @@ def panel_incidencias(request):
         "alto": incidencias.filter(nivel=Incidencia.NivelChoices.ALTO).count(),
         "sin_seguimiento": incidencias.filter(seguimientos__isnull=True).distinct().count(),
     }
+
+    def contar_area(tipo_area, estado_area=None, nivel_area=None, con_seguimiento=False):
+        qs = incidencias_para_tarjetas.filter(tipo=tipo_area)
+        if estado_area:
+            qs = qs.filter(estado=estado_area)
+        if nivel_area:
+            qs = qs.filter(nivel=nivel_area)
+        if con_seguimiento:
+            qs = qs.filter(seguimientos__isnull=False).distinct()
+        return qs.count()
+
+    incidencias = incidencias.annotate(
+        total_seguimientos=Count("seguimientos", distinct=True)
+    )
 
     return render(
         request,
@@ -5631,23 +9629,42 @@ def panel_incidencias(request):
                 "q": q,
                 "semestre": semestre_id or "",
             },
+            "inc_medica_abiertas": contar_area(Incidencia.TipoIncidencia.MEDICA, Incidencia.EstadoIncidencia.ABIERTA),
+            "inc_medica_seguimiento": contar_area(Incidencia.TipoIncidencia.MEDICA, con_seguimiento=True),
+            "inc_medica_cerradas": contar_area(Incidencia.TipoIncidencia.MEDICA, Incidencia.EstadoIncidencia.CERRADA),
+            "inc_medica_alto": contar_area(Incidencia.TipoIncidencia.MEDICA, nivel_area=Incidencia.NivelChoices.ALTO),
+            "inc_nutricional_abiertas": contar_area(Incidencia.TipoIncidencia.NUTRICIONAL, Incidencia.EstadoIncidencia.ABIERTA),
+            "inc_nutricional_seguimiento": contar_area(Incidencia.TipoIncidencia.NUTRICIONAL, con_seguimiento=True),
+            "inc_nutricional_cerradas": contar_area(Incidencia.TipoIncidencia.NUTRICIONAL, Incidencia.EstadoIncidencia.CERRADA),
+            "inc_nutricional_alto": contar_area(Incidencia.TipoIncidencia.NUTRICIONAL, nivel_area=Incidencia.NivelChoices.ALTO),
+            "inc_psicologica_abiertas": contar_area(Incidencia.TipoIncidencia.PSICOLOGICA, Incidencia.EstadoIncidencia.ABIERTA),
+            "inc_psicologica_seguimiento": contar_area(Incidencia.TipoIncidencia.PSICOLOGICA, con_seguimiento=True),
+            "inc_psicologica_cerradas": contar_area(Incidencia.TipoIncidencia.PSICOLOGICA, Incidencia.EstadoIncidencia.CERRADA),
+            "inc_psicologica_alto": contar_area(Incidencia.TipoIncidencia.PSICOLOGICA, nivel_area=Incidencia.NivelChoices.ALTO),
+            "inc_pedagogica_abiertas": contar_area(Incidencia.TipoIncidencia.PEDAGOGICA, Incidencia.EstadoIncidencia.ABIERTA),
+            "inc_pedagogica_seguimiento": contar_area(Incidencia.TipoIncidencia.PEDAGOGICA, con_seguimiento=True),
+            "inc_pedagogica_cerradas": contar_area(Incidencia.TipoIncidencia.PEDAGOGICA, Incidencia.EstadoIncidencia.CERRADA),
+            "inc_pedagogica_alto": contar_area(Incidencia.TipoIncidencia.PEDAGOGICA, nivel_area=Incidencia.NivelChoices.ALTO),
             "puede_crear_alguna": bool(tipos_creables),
             "es_directora": es_directora_actual,
             "es_admin": es_admin_actual,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
-
 
 @login_required
 def crear_incidencia(request, tipo=None):
     """
     Crea incidencia por tipo.
 
-    Seguridad:
+    Cambios principales:
     - El tipo se fija por el rol/área del usuario.
-    - Si alguien intenta cambiar el tipo por URL o manipulando el HTML,
-      el backend lo rechaza o lo vuelve a fijar antes de guardar.
+    - Para Coordinadora de Sala queda forzado a Pedagógica.
+    - El registro diario se vincula automáticamente por alumno y fecha actual.
+    - Si no existe registro diario del día, la incidencia se guarda con alumno,
+      semestre y sala asignada, sin mostrar fijo el nombre de otro menor.
+    - Los adjuntos se validan también en backend.
     """
     tipos_creables = tipos_incidencia_usuario(request.user, para_crear=True)
 
@@ -5683,6 +9700,9 @@ def crear_incidencia(request, tipo=None):
         return bloqueo
 
     semestre = obtener_semestre_activo_operativo()
+    dia_operativo_actual = obtener_dia_operativo_actual_incidencias(semestre)
+    fecha_operativa_actual = getattr(dia_operativo_actual, "fecha", None) or timezone.localdate()
+
     registro_diario = None
     registro_id = request.GET.get("registro_id") or request.POST.get("registro_diario_inicial")
 
@@ -5730,6 +9750,20 @@ def crear_incidencia(request, tipo=None):
         if registro_diario:
             post_data["alumno"] = str(registro_diario.alumno_id)
             post_data["registro_diario"] = str(registro_diario.id)
+        else:
+            # Si el usuario seleccionó un alumno y no seleccionó registro diario,
+            # se intenta vincular el registro del día actual automáticamente.
+            alumno_id = post_data.get("alumno")
+            if alumno_id and not post_data.get("registro_diario"):
+                alumno_post = (
+                    SolicitudInscripcion.objects
+                    .filter(pk=alumno_id, estado="FINALIZADA")
+                    .select_related("solicitud_ingreso", "semestre", "sala_semestre_asignada", "sala_semestre_asignada__sala")
+                    .first()
+                )
+                registro_auto = obtener_registro_diario_actual_para_alumno(alumno_post, semestre=semestre)
+                if registro_auto:
+                    post_data["registro_diario"] = str(registro_auto.id)
 
         form = IncidenciaForm(
             post_data,
@@ -5748,32 +9782,36 @@ def crear_incidencia(request, tipo=None):
             incidencia.registrada_por = request.user
             incidencia.estado = Incidencia.EstadoIncidencia.ABIERTA
 
-            if semestre and not getattr(incidencia, "semestre_id", None):
+            autorizacion_suplencia = obtener_suplencia_activa_para_tipo_incidencia(request.user, tipo_forzado)
+            if autorizacion_suplencia:
+                incidencia = aplicar_suplencia_a_incidencia(incidencia, autorizacion_suplencia)
+
+            registro_limpio = form.cleaned_data.get("registro_diario")
+            alumno_limpio = form.cleaned_data.get("alumno")
+
+            if registro_limpio:
+                incidencia.registro_diario = registro_limpio
+                incidencia.alumno = registro_limpio.alumno
+                incidencia.dia_operativo = registro_limpio.dia_operativo
+                incidencia.sala_semestre = registro_limpio.sala_semestre
+                incidencia.semestre = registro_limpio.dia_operativo.semestre if registro_limpio.dia_operativo else semestre
+            elif alumno_limpio:
+                incidencia.alumno = alumno_limpio
+                incidencia.semestre = getattr(alumno_limpio, "semestre", None) or semestre
+                incidencia.sala_semestre = getattr(alumno_limpio, "sala_semestre_asignada", None)
+            elif semestre and not getattr(incidencia, "semestre_id", None):
                 incidencia.semestre = semestre
 
-            if registro_diario:
-                incidencia.registro_diario = registro_diario
-                incidencia.alumno = registro_diario.alumno
-                incidencia.dia_operativo = registro_diario.dia_operativo
-                incidencia.sala_semestre = registro_diario.sala_semestre
-                incidencia.semestre = registro_diario.dia_operativo.semestre if registro_diario.dia_operativo else semestre
-
-            elif getattr(incidencia, "registro_diario_id", None):
-                # Si el formulario trae registro diario, sincroniza datos relacionados.
-                try:
-                    incidencia.registro_diario.refresh_from_db()
-                    incidencia.alumno = incidencia.registro_diario.alumno
-                    incidencia.dia_operativo = incidencia.registro_diario.dia_operativo
-                    incidencia.sala_semestre = incidencia.registro_diario.sala_semestre
-                    incidencia.semestre = (
-                        incidencia.registro_diario.dia_operativo.semestre
-                        if incidencia.registro_diario.dia_operativo
-                        else semestre
-                    )
-                except Exception:
-                    pass
-
             incidencia.save()
+
+            if autorizacion_suplencia:
+                registrar_movimiento_incidencia_suplencia(
+                    incidencia,
+                    autorizacion_suplencia,
+                    request.user,
+                    accion=MovimientoSuplencia.TipoAccion.CREACION_INCIDENCIA,
+                    descripcion="Incidencia registrada durante cobertura temporal autorizada por Dirección.",
+                )
 
             if hasattr(form, "save_m2m"):
                 form.save_m2m()
@@ -5808,6 +9846,25 @@ def crear_incidencia(request, tipo=None):
             registro_diario=registro_diario,
         )
 
+    registro_diario_auto = None
+    alumno_inicial = None
+
+    if registro_diario:
+        registro_diario_auto = registro_diario
+        alumno_inicial = registro_diario.alumno
+    else:
+        alumno_id_inicial = request.GET.get("alumno") or request.POST.get("alumno")
+        if alumno_id_inicial:
+            alumno_inicial = (
+                SolicitudInscripcion.objects
+                .filter(pk=alumno_id_inicial, estado="FINALIZADA")
+                .select_related("solicitud_ingreso", "semestre", "sala_semestre_asignada", "sala_semestre_asignada__sala")
+                .first()
+            )
+            registro_diario_auto = obtener_registro_diario_actual_para_alumno(alumno_inicial, semestre=semestre)
+
+    total_alumnos_disponibles = form.fields["alumno"].queryset.count() if "alumno" in form.fields else 0
+
     return render(
         request,
         "admisiones/incidencias/crear_incidencia.html",
@@ -5815,8 +9872,16 @@ def crear_incidencia(request, tipo=None):
             "form": form,
             "tipo_forzado": tipo_forzado,
             "registro_diario": registro_diario,
+            "registro_diario_auto": registro_diario_auto,
+            "registro_diario_auto_json": serializar_registro_diario_incidencia(registro_diario_auto),
+            "alumno_inicial": alumno_inicial,
             "semestre": semestre,
+            "dia_operativo_actual": dia_operativo_actual,
+            "fecha_operativa_actual": fecha_operativa_actual,
+            "fecha_registro_automatica": fecha_operativa_actual,
+            "total_alumnos_disponibles": total_alumnos_disponibles,
             "titulo": f"Crear incidencia {dict(Incidencia.TipoIncidencia.choices).get(tipo_forzado, '')}",
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -5858,6 +9923,7 @@ def detalle_incidencia(request, incidencia_id):
             "archivos": incidencia.archivos.select_related("subido_por"),
             "puede_agregar_seguimiento": incidencia.puede_agregar_seguimiento(request.user),
             "puede_cerrar": usuario_puede_cerrar_incidencia_sprint5(request.user, incidencia),
+            "form_revision_suplencia": RevisarIncidenciaSuplenciaForm(incidencia=incidencia, usuario=request.user) if getattr(incidencia, "creada_por_suplencia", False) else None,
             "es_directora": usuario_es_directora(request.user),
             "es_admin": usuario_es_admin(request.user),
             **contexto_semestre_operativo(),
@@ -5900,6 +9966,15 @@ def registrar_seguimiento_incidencia(request, incidencia_id):
         if form.is_valid():
             seguimiento = form.save()
 
+            if getattr(incidencia, "autorizacion_suplencia_id", None):
+                registrar_movimiento_incidencia_suplencia(
+                    incidencia,
+                    incidencia.autorizacion_suplencia,
+                    request.user,
+                    accion=MovimientoSuplencia.TipoAccion.SEGUIMIENTO_INCIDENCIA,
+                    descripcion="Seguimiento registrado sobre incidencia creada por suplencia.",
+                )
+
             archivos = request.FILES.getlist("archivos")
             guardados, errores_archivos = guardar_archivos_seguimiento_incidencia(
                 seguimiento,
@@ -5934,6 +10009,7 @@ def registrar_seguimiento_incidencia(request, incidencia_id):
         {
             "form": form,
             "incidencia": incidencia,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -5990,6 +10066,15 @@ def cerrar_incidencia(request, incidencia_id):
             incidencia.resuelta = True
             incidencia.comentario_cierre = incidencia.resolucion
             incidencia.save()
+
+            if getattr(incidencia, "autorizacion_suplencia_id", None):
+                registrar_movimiento_incidencia_suplencia(
+                    incidencia,
+                    incidencia.autorizacion_suplencia,
+                    request.user,
+                    accion=MovimientoSuplencia.TipoAccion.CIERRE_INCIDENCIA,
+                    descripcion="Cierre registrado sobre incidencia creada por suplencia.",
+                )
 
             messages.success(request, "Incidencia cerrada correctamente.")
             return redirect("detalle_incidencia", incidencia_id=incidencia.id)
@@ -6058,6 +10143,7 @@ def reporte_final_pendientes(request):
         "admisiones/reporte_final_pendientes.html",
         {
             "inscripciones": inscripciones,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
@@ -6112,6 +10198,14 @@ def dictaminar_reporte_final(request, pk):
             )
             inscripcion.save()
 
+            marcar_trabajo_social_por_suplencia(
+                inscripcion=inscripcion,
+                solicitud=solicitud,
+                usuario=request.user,
+                accion=MovimientoSuplencia.TipoAccion.REPORTE_FINAL,
+                descripcion="Reporte Final de Ingreso aceptado durante cobertura temporal de Trabajo Social.",
+            )
+
             pdf_generado, mensaje_pdf = guardar_pdf_reporte_final_en_inscripcion(inscripcion)
 
             if pdf_generado:
@@ -6145,6 +10239,14 @@ def dictaminar_reporte_final(request, pk):
             )
             inscripcion.save()
 
+            marcar_trabajo_social_por_suplencia(
+                inscripcion=inscripcion,
+                solicitud=solicitud,
+                usuario=request.user,
+                accion=MovimientoSuplencia.TipoAccion.REPORTE_FINAL,
+                descripcion="Reporte Final de Ingreso rechazado durante cobertura temporal de Trabajo Social.",
+            )
+
             pdf_generado, mensaje_pdf = guardar_pdf_reporte_final_en_inscripcion(inscripcion)
 
             if pdf_generado:
@@ -6168,6 +10270,8 @@ def dictaminar_reporte_final(request, pk):
         {
             "inscripcion": inscripcion,
             "solicitud": solicitud,
+            **contexto_suplencias_usuario(request.user),
+            **contexto_semestre_operativo(),
         },
     )
 
@@ -6253,8 +10357,16 @@ def dashboard_maestra(request):
 
 @login_required
 def abrir_dia_maestra(request, dia_id):
+
     """
     Cualquier maestra asignada a sala puede abrir la operación del día de la sede.
+
+    Protección de concurrencia:
+    - Si dos maestras intentan abrir el mismo día al mismo tiempo, la base de datos
+      bloquea el registro del día mientras se procesa la apertura.
+    - Gana la primera petición que confirme correctamente.
+    - La segunda petición, al entrar después del bloqueo, detecta que el día ya está
+      ABIERTO y solo redirige a la lista de alumnos.
     """
     dia = get_object_or_404(
         DiaOperativoSemestre.objects.select_related("semestre", "semestre__sede_configurada"),
@@ -6269,27 +10381,87 @@ def abrir_dia_maestra(request, dia_id):
 
         if form.is_valid():
             observaciones = form.cleaned_data.get("observaciones", "")
-            ok, errores = dia.abrir(usuario=request.user, observaciones=observaciones)
 
-            if ok:
-                creados = asegurar_registros_alumnos_dia(dia, request.user)
-
-                if dia.abierto_por_id == request.user.id:
-                    messages.success(
-                        request,
-                        f"Día abierto correctamente. Registros de alumnos preparados: {creados}."
-                    )
-                else:
-                    messages.info(
-                        request,
-                        "El día ya estaba abierto. Puedes continuar con la operación diaria."
+            try:
+                with transaction.atomic():
+                    # Se vuelve a leer el día dentro de la transacción y con bloqueo.
+                    # En MariaDB/PostgreSQL select_for_update bloquea la fila hasta terminar.
+                    dia_bloqueado = (
+                        DiaOperativoSemestre.objects
+                        .select_for_update()
+                        .select_related("semestre", "semestre__sede_configurada")
+                        .get(pk=dia.id)
                     )
 
-                return redirect("lista_alumnos_dia_maestra", dia_id=dia.id)
+                    # Validación extra por seguridad dentro del bloqueo.
+                    if not dia_operativo_es_laborable(dia_bloqueado):
+                        messages.warning(
+                            request,
+                            mensaje_dia_no_operativo(dia_bloqueado)
+                            or "Este día no permite operación diaria de menores."
+                        )
+                        return redirect("dashboard_maestra")
 
-            messages.error(request, "No se pudo abrir el día.")
-            for error in errores:
-                messages.error(request, error)
+                    if dia_bloqueado.estado == DiaOperativoSemestre.EstadoDia.CERRADO:
+                        messages.warning(
+                            request,
+                            "Este día ya está cerrado. Solo puede consultarse."
+                        )
+                        return redirect("dashboard_maestra")
+
+                    if dia_bloqueado.estado == DiaOperativoSemestre.EstadoDia.ABIERTO:
+                        # Otra maestra pudo haberlo abierto milisegundos antes.
+                        creados = asegurar_registros_alumnos_dia(dia_bloqueado, request.user)
+
+                        if dia_bloqueado.abierto_por_id == request.user.id:
+                            messages.info(
+                                request,
+                                "El día ya estaba abierto por tu usuario. Puedes continuar con la operación diaria."
+                            )
+                        elif dia_bloqueado.abierto_por:
+                            messages.info(
+                                request,
+                                "El día ya fue abierto por "
+                                f"{usuario_nombre_legible(dia_bloqueado.abierto_por)}. "
+                                "Puedes continuar con la operación diaria."
+                            )
+                        else:
+                            messages.info(
+                                request,
+                                "El día ya estaba abierto. Puedes continuar con la operación diaria."
+                            )
+
+                        return redirect("lista_alumnos_dia_maestra", dia_id=dia_bloqueado.id)
+
+                    ok, errores = dia_bloqueado.abrir(
+                        usuario=request.user,
+                        observaciones=observaciones,
+                    )
+
+                    if ok:
+                        creados = asegurar_registros_alumnos_dia(dia_bloqueado, request.user)
+
+                        messages.success(
+                            request,
+                            f"Día abierto correctamente. Registros de alumnos preparados: {creados}."
+                        )
+
+                        return redirect("lista_alumnos_dia_maestra", dia_id=dia_bloqueado.id)
+
+                    messages.error(request, "No se pudo abrir el día.")
+                    for error in errores:
+                        messages.error(request, error)
+
+            except DiaOperativoSemestre.DoesNotExist:
+                messages.error(request, "No se encontró el día operativo solicitado.")
+                return redirect("dashboard_maestra")
+
+            except Exception as exc:
+                messages.error(
+                    request,
+                    f"No se pudo abrir el día por un error de concurrencia o base de datos: {exc}"
+                )
+                return redirect("dashboard_maestra")
         else:
             messages.error(request, "Debes confirmar la apertura del día.")
     else:
@@ -6347,8 +10519,225 @@ def lista_alumnos_dia_maestra(request, dia_id):
     )
 
 
+
+def obtener_ip_cliente(request):
+    """
+    Obtiene la IP del responsable/usuario para auditoría.
+    Si el proyecto está detrás de proxy, toma X-Forwarded-For y usa la primera IP.
+    """
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "") or None
+
+
+def generar_qr_data_uri(texto):
+    """
+    Genera un QR como imagen base64 si la librería qrcode está instalada.
+    Si no está instalada, devuelve cadena vacía y el HTML puede mostrar el enlace.
+
+    Para activar QR real en pantalla instala:
+        pip install qrcode[pil]
+    """
+    texto = str(texto or "").strip()
+    if not texto:
+        return ""
+
+    try:
+        import base64
+        from io import BytesIO
+        import qrcode
+
+        imagen = qrcode.make(texto)
+        buffer = BytesIO()
+        imagen.save(buffer, format="PNG")
+        encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+        return f"data:image/png;base64,{encoded}"
+    except Exception:
+        return ""
+
+
+def construir_enlace_autorizacion_entrada(request, autorizacion):
+    """
+    Construye el enlace público de entrada usando únicamente el token.
+    La URL no contiene nombre del menor, CURP, matrícula ni código de seguridad.
+    """
+    try:
+        url = reverse("autorizar_entrada_responsable", args=[str(autorizacion.token)])
+    except Exception:
+        url = f"/admisiones/a/e/{autorizacion.token}/"
+
+    return request.build_absolute_uri(url)
+
+
+def nombre_menor_autorizacion_entrada(autorizacion):
+    """
+    Devuelve el nombre del menor para correos y pantallas de autorización.
+    """
+    try:
+        alumno = autorizacion.registro_diario.alumno
+        solicitud = alumno.solicitud_ingreso
+        if hasattr(solicitud, "nombre_menor_completo"):
+            return solicitud.nombre_menor_completo()
+    except Exception:
+        pass
+
+    try:
+        return autorizacion.alumno_nombre
+    except Exception:
+        return "el menor"
+
+
+def enviar_correo_autorizacion_entrada(request, autorizacion):
+    """
+    Envía el correo al responsable autorizado para que valide la entrada desde su celular.
+
+    Importante:
+    - La maestra ya no escribe el código en su tableta.
+    - El responsable abre el enlace, revisa la información y escribe su propio código.
+    - Solo se envía por correo si el destino es @unach.mx.
+    """
+    autorizacion.preparar_datos_responsable()
+    correo_destino = (autorizacion.correo_destino or "").strip().lower()
+
+    if not correo_destino:
+        return False, "El responsable autorizado no tiene correo registrado. Debe usarse QR presencial."
+
+    if not es_correo_institucional_unach_views(correo_destino):
+        return False, "El responsable no tiene correo institucional UNACH. Debe usarse QR presencial."
+
+    enlace = construir_enlace_autorizacion_entrada(request, autorizacion)
+    nombre_menor = nombre_menor_autorizacion_entrada(autorizacion)
+    responsable = autorizacion.responsable_nombre or "Responsable autorizado"
+    maestra = usuario_nombre_legible(autorizacion.solicitada_por)
+
+    fecha_txt = ""
+    try:
+        if autorizacion.fecha_operativa:
+            fecha_txt = autorizacion.fecha_operativa.strftime("%d/%m/%Y")
+    except Exception:
+        fecha_txt = ""
+
+    expira_txt = ""
+    try:
+        if autorizacion.expira_en:
+            expira_txt = timezone.localtime(autorizacion.expira_en).strftime("%d/%m/%Y %H:%M")
+    except Exception:
+        expira_txt = ""
+
+    temperatura_txt = "No capturada"
+    if autorizacion.temperatura_entrada is not None:
+        temperatura_txt = f"{autorizacion.temperatura_entrada} °C"
+
+    asunto = f"Autorización de entrada - {nombre_menor}"
+    cuerpo = f"""Hola {responsable}:
+
+La maestra {maestra} capturó una solicitud de entrada para {nombre_menor} en la Estancia Infantil UNACH.
+
+Resumen de la solicitud:
+- Menor: {nombre_menor}
+- Sala: {autorizacion.sala_nombre}
+- Fecha: {fecha_txt or 'Hoy'}
+- Responsable seleccionado: {autorizacion.responsable_nombre or responsable}
+- Parentesco: {autorizacion.responsable_parentesco or 'No especificado'}
+- Credencial verificada por maestra: {'Sí' if autorizacion.credencial_entrada_validada else 'No'}
+- Temperatura de entrada: {temperatura_txt}
+- Observaciones de maestra: {autorizacion.observaciones_maestra or 'Sin observaciones'}
+
+Para autorizar la entrada, abre este enlace desde tu celular y escribe tu código de seguridad de 4 dígitos:
+{enlace}
+
+Este enlace tiene vigencia limitada{f' hasta {expira_txt}' if expira_txt else ''}. Si no reconoces esta solicitud, no autorices la entrada y comunícate con la estancia.
+
+Atentamente,
+Estancia Infantil UNACH
+"""
+
+    enviado, mensaje = enviar_correo_institucional_unach(
+        asunto=asunto,
+        cuerpo=cuerpo,
+        destinatarios=[correo_destino],
+        usuario_emisor=request.user,
+    )
+
+    if enviado:
+        autorizacion.marcar_enviada()
+        return True, "Correo de autorización enviado correctamente."
+
+    autorizacion.marcar_error(mensaje)
+    return False, mensaje
+
+
+def procesar_metodo_autorizacion_entrada(request, autorizacion):
+    """
+    Decide qué hacer con la autorización de entrada ya creada:
+    - correo institucional UNACH: envía enlace por correo;
+    - sin correo institucional: marca QR generado para mostrarlo en pantalla.
+    """
+    autorizacion.refresh_from_db()
+
+    enlace = construir_enlace_autorizacion_entrada(request, autorizacion)
+
+    usa_correo = bool(
+        getattr(autorizacion, "usa_correo", False)
+        and es_correo_institucional(getattr(autorizacion, "correo_destino", ""))
+    )
+
+    if usa_correo:
+        enviado, mensaje = enviar_correo_autorizacion_entrada(request, autorizacion)
+        return enviado, mensaje, enlace
+
+    try:
+        autorizacion.marcar_qr_generado()
+        return True, "QR generado correctamente para autorización presencial.", enlace
+    except Exception as exc:
+        autorizacion.marcar_error(exc)
+        return False, f"No se pudo generar la autorización por QR: {exc}", enlace
+
+
+def obtener_autorizacion_entrada_pendiente(registro):
+    """
+    Devuelve la solicitud pendiente o enviada más reciente para un registro diario.
+    """
+    if not registro:
+        return None
+
+    qs = (
+        AutorizacionEntrada.objects
+        .filter(
+            registro_diario=registro,
+            estado__in=[
+                AutorizacionEntrada.EstadoAutorizacion.PENDIENTE,
+                AutorizacionEntrada.EstadoAutorizacion.ENVIADA,
+                AutorizacionEntrada.EstadoAutorizacion.QR_GENERADO,
+            ],
+        )
+        .select_related("responsable_autorizado", "solicitada_por")
+        .order_by("-created_at")
+    )
+
+    autorizacion = qs.first()
+    if autorizacion:
+        try:
+            autorizacion.expirar_si_corresponde()
+        except Exception:
+            pass
+        if not autorizacion.esta_vigente:
+            return None
+
+    return autorizacion
+
 @login_required
 def registrar_entrada_alumno(request, registro_id):
+    """
+    Flujo de entrada con autorización por correo institucional o QR.
+
+    La maestra captura la información de entrada y selecciona al responsable.
+    El código de 4 dígitos ya NO se captura en la tableta de la maestra.
+    El responsable autoriza desde su celular:
+    - Si tiene correo institucional UNACH, recibe enlace por correo.
+    - Si no tiene correo institucional, escanea QR presencial desde la pantalla de la maestra.
+    """
     registro = obtener_registro_diario_para_maestra(request, registro_id)
     responsables_codigo = obtener_responsables_codigo_inscripcion(registro.alumno)
 
@@ -6358,59 +10747,106 @@ def registrar_entrada_alumno(request, registro_id):
             mensaje_dia_no_operativo(registro.dia_operativo)
             or "No se puede registrar entrada porque el día no está abierto."
         )
-        return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
+        return redirect("dashboard_maestra")
 
     if registro.entrada_en:
         messages.info(request, "Este alumno ya tiene entrada registrada.")
-        return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
+        return redirect("dashboard_maestra")
+
+    autorizacion_pendiente = obtener_autorizacion_entrada_pendiente(registro)
 
     if request.method == "POST":
-        form = RegistroEntradaAlumnoForm(request.POST, instance=registro, registro_diario=registro)
-        form_valido = form.is_valid()
-        responsable_autorizado, errores_codigo = obtener_responsable_operacion_desde_post(
-            registro,
+        form = SolicitarAutorizacionEntradaForm(
             request.POST,
-            prefijo="entrada",
+            registro_diario=registro,
+            usuario=request.user,
         )
 
-        errores_no_codigo = errores_form_sin_codigo(form)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Bloqueo corto del registro para evitar solicitudes duplicadas
+                    # o una entrada registrada al mismo tiempo desde otra pestaña.
+                    registro_bloqueado = (
+                        RegistroDiarioAlumno.objects
+                        .select_for_update()
+                        .select_related("dia_operativo", "alumno", "sala_semestre")
+                        .get(pk=registro.pk)
+                    )
 
-        if form_valido or (not errores_no_codigo and not errores_codigo):
-            if errores_codigo:
-                for error in errores_codigo:
-                    messages.error(request, error)
-            else:
-                datos = datos_entrada_desde_form_o_post(
-                    form,
-                    request.POST,
-                    responsable_autorizado=responsable_autorizado,
+                    if registro_bloqueado.entrada_en:
+                        messages.info(request, "Este alumno ya tiene entrada registrada.")
+                        return redirect("dashboard_maestra")
+
+                    autorizacion_pendiente = obtener_autorizacion_entrada_pendiente(registro_bloqueado)
+
+                    if autorizacion_pendiente:
+                        messages.warning(
+                            request,
+                            "Ya existe una solicitud de autorización pendiente para este alumno. "
+                            "Espera la respuesta del responsable o cancélala antes de enviar otra."
+                        )
+                        return redirect("registrar_entrada_alumno", registro_id=registro.id)
+
+                    autorizacion = form.save(commit=False)
+                    autorizacion.registro_diario = registro_bloqueado
+                    autorizacion.solicitada_por = request.user
+                    autorizacion.estado = AutorizacionEntrada.EstadoAutorizacion.PENDIENTE
+                    autorizacion.save()
+
+                procesado, mensaje_envio, enlace_autorizacion = procesar_metodo_autorizacion_entrada(
+                    request,
+                    autorizacion,
                 )
 
-                ok, errores = registro.registrar_entrada(
-                    usuario=request.user,
-                    responsable_nombre=datos["responsable_nombre"],
-                    responsable_parentesco=datos["responsable_parentesco"],
-                    responsable_telefono=datos["responsable_telefono"],
-                    responsable_autorizado=responsable_autorizado,
-                    credencial_validada=datos["credencial_validada"],
-                    codigo_validado=True,
-                    temperatura=datos["temperatura"],
-                )
+                autorizacion.refresh_from_db()
 
-                if ok:
-                    BitacoraEntradaCasa.objects.get_or_create(registro_diario=registro)
-                    messages.success(request, "Entrada registrada correctamente. Ahora captura la bitácora en casa.")
-                    return redirect("bitacora_entrada_casa_maestra", registro_id=registro.id)
+                if procesado:
+                    if getattr(autorizacion, "usa_correo", False):
+                        messages.success(
+                            request,
+                            "Solicitud enviada al correo institucional del responsable. "
+                            "Cuando autorice con su código, la entrada quedará registrada automáticamente."
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "Solicitud generada por QR. El responsable debe escanear el QR desde su celular "
+                            "y escribir su código de seguridad para autorizar la entrada."
+                        )
+                else:
+                    messages.error(request, mensaje_envio)
 
-                messages.error(request, "No se pudo registrar la entrada.")
-                for error in errores:
-                    messages.error(request, error)
+                return redirect("registrar_entrada_alumno", registro_id=registro.id)
+
+            except Exception as exc:
+                messages.error(request, f"No se pudo crear la solicitud de autorización: {exc}")
         else:
-            messages.error(request, "No se pudo registrar la entrada. Revisa los campos.")
-            for error in errores_codigo:
-                messages.error(request, error)
+            messages.error(request, "No se pudo solicitar la autorización. Revisa los campos.")
+            for campo, errores in form.errors.items():
+                for error in errores:
+                    messages.error(request, f"{campo}: {error}")
     else:
-        form = RegistroEntradaAlumnoForm(instance=registro, registro_diario=registro)
+        form = SolicitarAutorizacionEntradaForm(
+            registro_diario=registro,
+            usuario=request.user,
+        )
+
+    autorizacion_pendiente = obtener_autorizacion_entrada_pendiente(registro)
+    enlace_autorizacion = ""
+    qr_data_uri = ""
+
+    if autorizacion_pendiente:
+        enlace_autorizacion = construir_enlace_autorizacion_entrada(request, autorizacion_pendiente)
+        if getattr(autorizacion_pendiente, "usa_qr", False):
+            qr_data_uri = generar_qr_data_uri(enlace_autorizacion)
+
+    autorizaciones_entrada = (
+        AutorizacionEntrada.objects
+        .filter(registro_diario=registro)
+        .select_related("responsable_autorizado", "solicitada_por")
+        .order_by("-created_at")[:5]
+    )
 
     return render(
         request,
@@ -6421,8 +10857,202 @@ def registrar_entrada_alumno(request, registro_id):
             "responsables_codigo": responsables_codigo,
             "tipo_formulario": registro.formulario_bitacora,
             "dia": registro.dia_operativo,
+            "flujo_autorizacion_por_correo": True,
+            "flujo_autorizacion_por_qr": True,
+            "autorizacion_pendiente": autorizacion_pendiente,
+            "autorizacion_pendiente_url": enlace_autorizacion,
+            "qr_data_uri": qr_data_uri,
+            "autorizaciones_entrada": autorizaciones_entrada,
         },
     )
+
+
+@login_required
+@require_http_methods(["POST"])
+def cancelar_autorizacion_entrada_maestra(request, autorizacion_id):
+    """
+    Permite a la maestra cancelar una solicitud pendiente para volver a enviarla.
+    """
+    autorizacion = get_object_or_404(
+        AutorizacionEntrada.objects.select_related(
+            "registro_diario",
+            "registro_diario__dia_operativo",
+            "registro_diario__alumno",
+            "registro_diario__sala_semestre",
+            "responsable_autorizado",
+        ),
+        pk=autorizacion_id,
+    )
+
+    registro = obtener_registro_diario_para_maestra(request, autorizacion.registro_diario_id)
+
+    if autorizacion.solicitada_por_id and autorizacion.solicitada_por_id != request.user.id:
+        messages.warning(
+            request,
+            "La solicitud fue creada por otra maestra. Solo puedes cancelarla si tienes permiso operativo sobre la sala."
+        )
+
+    motivo = (request.POST.get("motivo") or "Cancelada por la maestra desde el panel de entrada.").strip()
+    ok, errores = autorizacion.cancelar(usuario=request.user, motivo=motivo)
+
+    if ok:
+        messages.success(request, "Solicitud de autorización cancelada correctamente.")
+    else:
+        for error in errores:
+            messages.error(request, error)
+
+    return redirect("registrar_entrada_alumno", registro_id=registro.id)
+
+
+def autorizar_entrada_responsable(request, token):
+    """
+    Pantalla pública que abre el responsable desde su celular.
+    Aquí revisa la información y autoriza/rechaza la entrada con su código.
+    """
+    autorizacion = get_object_or_404(
+        AutorizacionEntrada.objects.select_related(
+            "registro_diario",
+            "registro_diario__dia_operativo",
+            "registro_diario__alumno",
+            "registro_diario__alumno__solicitud_ingreso",
+            "registro_diario__sala_semestre",
+            "registro_diario__sala_semestre__sala",
+            "responsable_autorizado",
+            "solicitada_por",
+        ),
+        token=token,
+    )
+
+    try:
+        autorizacion.expirar_si_corresponde()
+    except Exception:
+        pass
+
+    form = AutorizarEntradaResponsableForm(autorizacion=autorizacion)
+    rechazo_form = RechazarAutorizacionEntradaForm(autorizacion=autorizacion)
+    autorizada = False
+    rechazada = False
+    errores_operacion = []
+
+    if request.method == "POST":
+        accion = (request.POST.get("accion") or "AUTORIZAR").strip().upper()
+        ip = obtener_ip_cliente(request)
+        user_agent = request.META.get("HTTP_USER_AGENT", "")[:1000]
+
+        if accion == "RECHAZAR":
+            rechazo_form = RechazarAutorizacionEntradaForm(
+                request.POST,
+                autorizacion=autorizacion,
+            )
+
+            if rechazo_form.is_valid():
+                rechazada, errores_operacion = rechazo_form.rechazar(
+                    ip=ip,
+                    user_agent=user_agent,
+                )
+                autorizacion.refresh_from_db()
+            else:
+                errores_operacion = [
+                    str(error)
+                    for errores in rechazo_form.errors.values()
+                    for error in errores
+                ]
+        else:
+            form = AutorizarEntradaResponsableForm(
+                request.POST,
+                autorizacion=autorizacion,
+            )
+
+            if form.is_valid():
+                autorizada, errores_operacion = form.autorizar(
+                    ip=ip,
+                    user_agent=user_agent,
+                )
+                autorizacion.refresh_from_db()
+
+                if autorizada:
+                    BitacoraEntradaCasa.objects.get_or_create(
+                        registro_diario=autorizacion.registro_diario
+                    )
+            else:
+                errores_operacion = [
+                    str(error)
+                    for errores in form.errors.values()
+                    for error in errores
+                ]
+
+    return render(
+        request,
+        "admisiones/operacion_diaria/autorizar_entrada.html",
+        {
+            "autorizacion": autorizacion,
+            "form": form,
+            "rechazo_form": rechazo_form,
+            "autorizada": autorizada,
+            "rechazada": rechazada,
+            "errores_operacion": errores_operacion,
+            "alumno_nombre": nombre_menor_autorizacion_entrada(autorizacion),
+        },
+    )
+
+
+@login_required
+def estado_autorizacion_entrada_maestra(request, registro_id):
+    """
+    Respuesta JSON para que la pantalla de la maestra consulte si el responsable ya autorizó.
+    """
+    registro = obtener_registro_diario_para_maestra(request, registro_id)
+    autorizacion = (
+        AutorizacionEntrada.objects
+        .filter(registro_diario=registro)
+        .select_related("responsable_autorizado")
+        .order_by("-created_at")
+        .first()
+    )
+
+    if autorizacion:
+        try:
+            autorizacion.expirar_si_corresponde()
+        except Exception:
+            pass
+        autorizacion.refresh_from_db()
+
+    try:
+        registro.refresh_from_db()
+    except Exception:
+        pass
+
+    enlace_autorizacion = ""
+    qr_data_uri = ""
+
+    if autorizacion and getattr(autorizacion, "esta_vigente", False):
+        enlace_autorizacion = construir_enlace_autorizacion_entrada(request, autorizacion)
+        if getattr(autorizacion, "usa_qr", False):
+            qr_data_uri = generar_qr_data_uri(enlace_autorizacion)
+
+    data = {
+        "registro_id": registro.id,
+        "entrada_registrada": bool(registro.entrada_en),
+        "entrada_en": timezone.localtime(registro.entrada_en).strftime("%H:%M") if registro.entrada_en else "",
+        "estado": getattr(autorizacion, "estado", "SIN_SOLICITUD") if autorizacion else "SIN_SOLICITUD",
+        "estado_display": autorizacion.get_estado_display() if autorizacion else "Sin solicitud",
+        "metodo_autorizacion": getattr(autorizacion, "metodo_autorizacion", "") if autorizacion else "",
+        "usa_qr": bool(getattr(autorizacion, "usa_qr", False)) if autorizacion else False,
+        "usa_correo": bool(getattr(autorizacion, "usa_correo", False)) if autorizacion else False,
+        "responsable": getattr(autorizacion, "responsable_nombre", "") if autorizacion else "",
+        "ultimo_error": getattr(autorizacion, "ultimo_error", "") if autorizacion else "",
+        "enlace_autorizacion": enlace_autorizacion,
+        "qr_data_uri": qr_data_uri,
+        "redirect_url": "",
+    }
+
+    if registro.entrada_en:
+        try:
+            data["redirect_url"] = reverse("bitacora_entrada_casa_maestra", args=[registro.id])
+        except Exception:
+            data["redirect_url"] = ""
+
+    return JsonResponse(data)
 
 
 @login_required
@@ -6551,8 +11181,364 @@ def bitacora_estancia_maestra(request, registro_id):
     )
 
 
+def construir_enlace_autorizacion_salida(request, autorizacion):
+    """
+    Construye el enlace público de salida usando únicamente el token.
+    La URL no contiene nombre del menor, CURP, matrícula ni código de seguridad.
+    """
+    try:
+        url = reverse("autorizar_salida_responsable", args=[str(autorizacion.token)])
+    except Exception:
+        url = f"/admisiones/a/s/{autorizacion.token}/"
+
+    return request.build_absolute_uri(url)
+
+
+def nombre_menor_autorizacion_salida(autorizacion):
+    """
+    Devuelve el nombre del menor para correos y pantallas de autorización de salida.
+    """
+    try:
+        alumno = autorizacion.registro_diario.alumno
+        solicitud = alumno.solicitud_ingreso
+        if hasattr(solicitud, "nombre_menor_completo"):
+            return solicitud.nombre_menor_completo()
+    except Exception:
+        pass
+
+    try:
+        return autorizacion.alumno_nombre
+    except Exception:
+        return "el menor"
+
+
+def enviar_correo_autorizacion_salida(request, autorizacion):
+    """
+    Envía correo institucional al responsable autorizado para validar la salida.
+    Si el responsable no tiene correo institucional, debe usarse QR presencial.
+    """
+    autorizacion.preparar_datos_responsable()
+    correo_destino = (autorizacion.correo_destino or "").strip().lower()
+
+    if not correo_destino:
+        return False, "El responsable autorizado no tiene correo registrado. Debe usarse QR presencial."
+
+    if not es_correo_institucional_unach_views(correo_destino):
+        return False, "El responsable no tiene correo institucional UNACH. Debe usarse QR presencial."
+
+    enlace = construir_enlace_autorizacion_salida(request, autorizacion)
+    nombre_menor = nombre_menor_autorizacion_salida(autorizacion)
+    responsable = autorizacion.responsable_nombre or "Responsable autorizado"
+    maestra = usuario_nombre_legible(autorizacion.solicitada_por)
+
+    fecha_txt = ""
+    try:
+        if autorizacion.fecha_operativa:
+            fecha_txt = autorizacion.fecha_operativa.strftime("%d/%m/%Y")
+    except Exception:
+        fecha_txt = ""
+
+    expira_txt = ""
+    try:
+        if autorizacion.expira_en:
+            expira_txt = timezone.localtime(autorizacion.expira_en).strftime("%d/%m/%Y %H:%M")
+    except Exception:
+        expira_txt = ""
+
+    asunto = f"Autorización de salida - {nombre_menor}"
+    cuerpo = f"""Hola {responsable}:
+
+La maestra {maestra} capturó una solicitud de salida para {nombre_menor} en la Estancia Infantil UNACH.
+
+Resumen de la solicitud:
+- Menor: {nombre_menor}
+- Sala: {autorizacion.sala_nombre}
+- Fecha: {fecha_txt or 'Hoy'}
+- Responsable seleccionado: {autorizacion.responsable_nombre or responsable}
+- Parentesco: {autorizacion.responsable_parentesco or 'No especificado'}
+- Credencial verificada por maestra: {'Sí' if autorizacion.credencial_salida_validada else 'No'}
+- Tipo de salida: {autorizacion.tipo_salida or 'Salida normal'}
+- Motivo de salida: {autorizacion.motivo_salida or 'Sin motivo especial'}
+- Observación de salida: {autorizacion.observacion_salida or 'Sin observaciones'}
+
+Para autorizar la salida, abre este enlace desde tu celular y escribe tu código de seguridad de 4 dígitos:
+{enlace}
+
+Este enlace tiene vigencia limitada{f' hasta {expira_txt}' if expira_txt else ''}. Si no reconoces esta solicitud, no autorices la salida y comunícate con la estancia.
+
+Atentamente,
+Estancia Infantil UNACH
+"""
+
+    enviado, mensaje = enviar_correo_institucional_unach(
+        asunto=asunto,
+        cuerpo=cuerpo,
+        destinatarios=[correo_destino],
+        usuario_emisor=request.user,
+    )
+
+    if enviado:
+        autorizacion.marcar_enviada()
+        return True, "Correo de autorización de salida enviado correctamente."
+
+    autorizacion.marcar_error(mensaje)
+    return False, mensaje
+
+
+def procesar_metodo_autorizacion_salida(request, autorizacion):
+    """
+    Decide qué hacer con la autorización de salida ya creada:
+    - correo institucional UNACH: envía enlace por correo;
+    - sin correo institucional: marca QR generado para mostrarlo en pantalla.
+    """
+    autorizacion.refresh_from_db()
+
+    enlace = construir_enlace_autorizacion_salida(request, autorizacion)
+
+    usa_correo = bool(
+        getattr(autorizacion, "usa_correo", False)
+        and es_correo_institucional(getattr(autorizacion, "correo_destino", ""))
+    )
+
+    if usa_correo:
+        enviado, mensaje = enviar_correo_autorizacion_salida(request, autorizacion)
+        return enviado, mensaje, enlace
+
+    try:
+        autorizacion.marcar_qr_generado()
+        return True, "QR generado correctamente para autorización presencial de salida.", enlace
+    except Exception as exc:
+        autorizacion.marcar_error(exc)
+        return False, f"No se pudo generar la autorización de salida por QR: {exc}", enlace
+
+
+def obtener_autorizacion_salida_pendiente(registro):
+    """
+    Devuelve la solicitud de salida pendiente, enviada o con QR más reciente.
+    """
+    if not registro:
+        return None
+
+    qs = (
+        AutorizacionSalida.objects
+        .filter(
+            registro_diario=registro,
+            estado__in=[
+                AutorizacionSalida.EstadoAutorizacion.PENDIENTE,
+                AutorizacionSalida.EstadoAutorizacion.ENVIADA,
+                AutorizacionSalida.EstadoAutorizacion.QR_GENERADO,
+            ],
+        )
+        .select_related("responsable_autorizado", "solicitada_por")
+        .order_by("-created_at")
+    )
+
+    autorizacion = qs.first()
+    if autorizacion:
+        try:
+            autorizacion.expirar_si_corresponde()
+        except Exception:
+            pass
+        if not autorizacion.esta_vigente:
+            return None
+
+    return autorizacion
+
+
+@login_required
+@require_http_methods(["POST"])
+def cancelar_autorizacion_salida_maestra(request, autorizacion_id):
+    """
+    Permite a la maestra cancelar una solicitud pendiente de salida.
+    """
+    autorizacion = get_object_or_404(
+        AutorizacionSalida.objects.select_related(
+            "registro_diario",
+            "registro_diario__dia_operativo",
+            "registro_diario__alumno",
+            "registro_diario__sala_semestre",
+            "responsable_autorizado",
+        ),
+        pk=autorizacion_id,
+    )
+
+    registro = obtener_registro_diario_para_maestra(request, autorizacion.registro_diario_id)
+
+    if autorizacion.solicitada_por_id and autorizacion.solicitada_por_id != request.user.id:
+        messages.warning(
+            request,
+            "La solicitud fue creada por otra maestra. Solo puedes cancelarla si tienes permiso operativo sobre la sala."
+        )
+
+    motivo = (request.POST.get("motivo") or "Cancelada por la maestra desde el panel de salida.").strip()
+    ok, errores = autorizacion.cancelar(usuario=request.user, motivo=motivo)
+
+    if ok:
+        messages.success(request, "Solicitud de autorización de salida cancelada correctamente.")
+    else:
+        for error in errores:
+            messages.error(request, error)
+
+    return redirect("registrar_salida_alumno", registro_id=registro.id)
+
+
+def autorizar_salida_responsable(request, token):
+    """
+    Pantalla pública que abre el responsable desde correo o QR.
+    Aquí revisa la información y autoriza/rechaza la salida con su código.
+    """
+    autorizacion = get_object_or_404(
+        AutorizacionSalida.objects.select_related(
+            "registro_diario",
+            "registro_diario__dia_operativo",
+            "registro_diario__alumno",
+            "registro_diario__alumno__solicitud_ingreso",
+            "registro_diario__sala_semestre",
+            "registro_diario__sala_semestre__sala",
+            "responsable_autorizado",
+            "solicitada_por",
+        ),
+        token=token,
+    )
+
+    try:
+        autorizacion.expirar_si_corresponde()
+    except Exception:
+        pass
+
+    form = AutorizarSalidaResponsableForm(autorizacion=autorizacion)
+    rechazo_form = RechazarAutorizacionSalidaForm(autorizacion=autorizacion)
+    autorizada = False
+    rechazada = False
+    errores_operacion = []
+
+    if request.method == "POST":
+        accion = (request.POST.get("accion") or "AUTORIZAR").strip().upper()
+        ip = obtener_ip_cliente(request)
+        user_agent = request.META.get("HTTP_USER_AGENT", "")[:1000]
+
+        if accion == "RECHAZAR":
+            rechazo_form = RechazarAutorizacionSalidaForm(
+                request.POST,
+                autorizacion=autorizacion,
+            )
+
+            if rechazo_form.is_valid():
+                rechazada, errores_operacion = rechazo_form.rechazar(
+                    ip=ip,
+                    user_agent=user_agent,
+                )
+                autorizacion.refresh_from_db()
+            else:
+                errores_operacion = [
+                    str(error)
+                    for errores in rechazo_form.errors.values()
+                    for error in errores
+                ]
+        else:
+            form = AutorizarSalidaResponsableForm(
+                request.POST,
+                autorizacion=autorizacion,
+            )
+
+            if form.is_valid():
+                autorizada, errores_operacion = form.autorizar(
+                    ip=ip,
+                    user_agent=user_agent,
+                )
+                autorizacion.refresh_from_db()
+            else:
+                errores_operacion = [
+                    str(error)
+                    for errores in form.errors.values()
+                    for error in errores
+                ]
+
+    return render(
+        request,
+        "admisiones/operacion_diaria/autorizar_salida.html",
+        {
+            "autorizacion": autorizacion,
+            "form": form,
+            "rechazo_form": rechazo_form,
+            "autorizada": autorizada,
+            "rechazada": rechazada,
+            "errores_operacion": errores_operacion,
+            "alumno_nombre": nombre_menor_autorizacion_salida(autorizacion),
+        },
+    )
+
+
+@login_required
+def estado_autorizacion_salida_maestra(request, registro_id):
+    """
+    Respuesta JSON para que la pantalla de la maestra consulte si el responsable ya autorizó salida.
+    """
+    registro = obtener_registro_diario_para_maestra(request, registro_id)
+    autorizacion = (
+        AutorizacionSalida.objects
+        .filter(registro_diario=registro)
+        .select_related("responsable_autorizado")
+        .order_by("-created_at")
+        .first()
+    )
+
+    if autorizacion:
+        try:
+            autorizacion.expirar_si_corresponde()
+        except Exception:
+            pass
+        autorizacion.refresh_from_db()
+
+    try:
+        registro.refresh_from_db()
+    except Exception:
+        pass
+
+    enlace_autorizacion = ""
+    qr_data_uri = ""
+
+    if autorizacion and getattr(autorizacion, "esta_vigente", False):
+        enlace_autorizacion = construir_enlace_autorizacion_salida(request, autorizacion)
+        if getattr(autorizacion, "usa_qr", False):
+            qr_data_uri = generar_qr_data_uri(enlace_autorizacion)
+
+    data = {
+        "registro_id": registro.id,
+        "salida_registrada": bool(registro.salida_en),
+        "salida_en": timezone.localtime(registro.salida_en).strftime("%H:%M") if registro.salida_en else "",
+        "estado": getattr(autorizacion, "estado", "SIN_SOLICITUD") if autorizacion else "SIN_SOLICITUD",
+        "estado_display": autorizacion.get_estado_display() if autorizacion else "Sin solicitud",
+        "metodo_autorizacion": getattr(autorizacion, "metodo_autorizacion", "") if autorizacion else "",
+        "usa_qr": bool(getattr(autorizacion, "usa_qr", False)) if autorizacion else False,
+        "usa_correo": bool(getattr(autorizacion, "usa_correo", False)) if autorizacion else False,
+        "responsable": getattr(autorizacion, "responsable_nombre", "") if autorizacion else "",
+        "ultimo_error": getattr(autorizacion, "ultimo_error", "") if autorizacion else "",
+        "enlace_autorizacion": enlace_autorizacion,
+        "qr_data_uri": qr_data_uri,
+        "redirect_url": "",
+    }
+
+    if registro.salida_en:
+        try:
+            data["redirect_url"] = reverse("lista_alumnos_dia_maestra", args=[registro.dia_operativo_id])
+        except Exception:
+            data["redirect_url"] = ""
+
+    return JsonResponse(data)
+
+
 @login_required
 def registrar_salida_alumno(request, registro_id):
+    """
+    Flujo de salida con autorización por correo institucional o QR.
+
+    La maestra captura la información de salida y selecciona al responsable.
+    El código de 4 dígitos ya NO se captura en la tableta de la maestra.
+    El responsable autoriza desde su celular:
+    - Si tiene correo institucional UNACH, recibe enlace por correo.
+    - Si no tiene correo institucional, escanea QR presencial desde la pantalla de la maestra.
+    """
     registro = obtener_registro_diario_para_maestra(request, registro_id)
     responsables_codigo = obtener_responsables_codigo_inscripcion(registro.alumno)
 
@@ -6572,55 +11558,98 @@ def registrar_salida_alumno(request, registro_id):
         messages.info(request, "Este alumno ya tiene salida registrada.")
         return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
 
+    autorizacion_pendiente = obtener_autorizacion_salida_pendiente(registro)
+
     if request.method == "POST":
-        form = RegistroSalidaAlumnoForm(request.POST, instance=registro, registro_diario=registro)
-        form_valido = form.is_valid()
-        responsable_autorizado, errores_codigo = obtener_responsable_operacion_desde_post(
-            registro,
+        form = SolicitarAutorizacionSalidaForm(
             request.POST,
-            prefijo="salida",
+            registro_diario=registro,
+            usuario=request.user,
         )
 
-        errores_no_codigo = errores_form_sin_codigo(form)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    registro_bloqueado = (
+                        RegistroDiarioAlumno.objects
+                        .select_for_update()
+                        .select_related("dia_operativo", "alumno", "sala_semestre")
+                        .get(pk=registro.pk)
+                    )
 
-        if form_valido or (not errores_no_codigo and not errores_codigo):
-            if errores_codigo:
-                for error in errores_codigo:
-                    messages.error(request, error)
-            else:
-                datos = datos_salida_desde_form_o_post(
-                    form,
-                    request.POST,
-                    responsable_autorizado=responsable_autorizado,
+                    if registro_bloqueado.salida_en:
+                        messages.info(request, "Este alumno ya tiene salida registrada.")
+                        return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
+
+                    autorizacion_pendiente = obtener_autorizacion_salida_pendiente(registro_bloqueado)
+
+                    if autorizacion_pendiente:
+                        messages.warning(
+                            request,
+                            "Ya existe una solicitud de autorización de salida pendiente para este alumno. "
+                            "Espera la respuesta del responsable o cancélala antes de enviar otra."
+                        )
+                        return redirect("registrar_salida_alumno", registro_id=registro.id)
+
+                    autorizacion = form.save(commit=False)
+                    autorizacion.registro_diario = registro_bloqueado
+                    autorizacion.solicitada_por = request.user
+                    autorizacion.estado = AutorizacionSalida.EstadoAutorizacion.PENDIENTE
+                    autorizacion.save()
+
+                procesado, mensaje_envio, enlace_autorizacion = procesar_metodo_autorizacion_salida(
+                    request,
+                    autorizacion,
                 )
 
-                ok, errores = registro.registrar_salida(
-                    usuario=request.user,
-                    responsable_nombre=datos["responsable_nombre"],
-                    responsable_parentesco=datos["responsable_parentesco"],
-                    responsable_telefono=datos["responsable_telefono"],
-                    responsable_autorizado=responsable_autorizado,
-                    credencial_validada=datos["credencial_validada"],
-                    codigo_validado=True,
-                    tipo_salida=datos["tipo_salida"],
-                    motivo_salida=datos["motivo_salida"],
-                    observacion_salida=datos["observacion_salida"],
-                )
+                autorizacion.refresh_from_db()
 
-                if ok:
-                    registro.marcar_completo_si_corresponde()
-                    messages.success(request, "Salida registrada correctamente.")
-                    return redirect("lista_alumnos_dia_maestra", dia_id=registro.dia_operativo_id)
+                if procesado:
+                    if getattr(autorizacion, "usa_correo", False):
+                        messages.success(
+                            request,
+                            "Solicitud enviada al correo institucional del responsable. "
+                            "Cuando autorice con su código, la salida quedará registrada automáticamente."
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "Solicitud generada por QR. El responsable debe escanear el QR desde su celular "
+                            "y escribir su código de seguridad para autorizar la salida."
+                        )
+                else:
+                    messages.error(request, mensaje_envio)
 
-                messages.error(request, "No se pudo registrar la salida.")
-                for error in errores:
-                    messages.error(request, error)
+                return redirect("registrar_salida_alumno", registro_id=registro.id)
+
+            except Exception as exc:
+                messages.error(request, f"No se pudo crear la solicitud de autorización de salida: {exc}")
         else:
-            messages.error(request, "No se pudo registrar la salida. Revisa los campos.")
-            for error in errores_codigo:
-                messages.error(request, error)
+            messages.error(request, "No se pudo solicitar la autorización de salida. Revisa los campos.")
+            for campo, errores in form.errors.items():
+                for error in errores:
+                    messages.error(request, f"{campo}: {error}")
     else:
-        form = RegistroSalidaAlumnoForm(instance=registro, registro_diario=registro)
+        form = SolicitarAutorizacionSalidaForm(
+            registro_diario=registro,
+            usuario=request.user,
+        )
+
+    autorizacion_pendiente = obtener_autorizacion_salida_pendiente(registro)
+    enlace_autorizacion = ""
+    qr_data_uri = ""
+
+    if autorizacion_pendiente:
+        enlace_autorizacion = construir_enlace_autorizacion_salida(request, autorizacion_pendiente)
+        if getattr(autorizacion_pendiente, "usa_qr", False):
+            qr_data_uri = generar_qr_data_uri(enlace_autorizacion)
+
+    autorizaciones_salida = (
+        AutorizacionSalida.objects
+        .filter(registro_diario=registro)
+        .select_related("responsable_autorizado", "solicitada_por")
+        .order_by("-created_at")[:5]
+    )
 
     return render(
         request,
@@ -6631,6 +11660,13 @@ def registrar_salida_alumno(request, registro_id):
             "responsables_codigo": responsables_codigo,
             "tipo_formulario": registro.formulario_bitacora,
             "dia": registro.dia_operativo,
+            "flujo_autorizacion_salida": True,
+            "flujo_autorizacion_por_correo": True,
+            "flujo_autorizacion_por_qr": True,
+            "autorizacion_pendiente": autorizacion_pendiente,
+            "autorizacion_pendiente_url": enlace_autorizacion,
+            "qr_data_uri": qr_data_uri,
+            "autorizaciones_salida": autorizaciones_salida,
         },
     )
 
@@ -6935,13 +11971,12 @@ def usuario_puede_descargar_bitacora_diaria(user, registro):
 @login_required
 def dashboard_coordinadora(request):
     """
-    Panel de Coordinadora de Sala.
+    Panel de Coordinadora de Sala con datos reales.
 
-    Función:
-    - Crear incidencias pedagógicas.
-    - Ver incidencias pedagógicas abiertas/cerradas.
-    - Supervisar incidencias de alto riesgo.
-    - Consultar estado del semestre.
+    - Muestra únicamente incidencias pedagógicas para Coordinadora de Sala.
+    - Calcula totales reales del semestre activo.
+    - Permite filtrar por mis incidencias, abiertas, cerradas y riesgo alto
+      desde el mismo dashboard, sin enviar a la pantalla general de Admin/Directora.
     """
     if not (
         usuario_es_coordinadora_sala(request.user)
@@ -6953,33 +11988,76 @@ def dashboard_coordinadora(request):
 
     semestre = obtener_semestre_activo_operativo()
     modo_solo_consulta = not hay_semestre_activo_operativo()
+    seccion = (request.GET.get("seccion") or request.GET.get("vista") or "dashboard").strip().lower()
+    estado = (request.GET.get("estado") or "").strip().upper()
+    nivel = (request.GET.get("nivel") or "").strip().upper()
+    q = (request.GET.get("q") or "").strip()
 
-    incidencias_pedagogicas = (
-        Incidencia.objects
-        .filter(tipo=Incidencia.TipoIncidencia.PEDAGOGICA)
-        .select_related(
-            "alumno",
-            "alumno__solicitud_ingreso",
-            "semestre",
-            "dia_operativo",
-            "sala_semestre",
-            "sala_semestre__sala",
-            "registrada_por",
+    incidencias_base = incidencias_pedagogicas_base_coordinadora(semestre=semestre)
+    incidencias_propias_qs = incidencias_base.filter(registrada_por=request.user)
+
+    # Filtros de navegación del dashboard.
+    incidencias_filtradas = incidencias_base
+
+    if seccion in ["mis", "mis_incidencias", "propias"]:
+        incidencias_filtradas = incidencias_propias_qs
+    elif seccion in ["abiertas", "pendientes"]:
+        incidencias_filtradas = incidencias_filtradas.filter(estado=Incidencia.EstadoIncidencia.ABIERTA)
+    elif seccion in ["cerradas", "historial"]:
+        incidencias_filtradas = incidencias_filtradas.filter(estado=Incidencia.EstadoIncidencia.CERRADA)
+    elif seccion in ["alto", "riesgo_alto", "riesgo"]:
+        incidencias_filtradas = incidencias_filtradas.filter(nivel=Incidencia.NivelChoices.ALTO)
+
+    # Compatibilidad con botones que mandan estado=ABIERTA/CERRADA desde panel_incidencias.
+    if estado in ["ABIERTA", "CERRADA"]:
+        incidencias_filtradas = incidencias_filtradas.filter(estado=estado)
+        seccion = "abiertas" if estado == "ABIERTA" else "cerradas"
+
+    if nivel in ["ALTO", "MEDIO", "BAJO", "LEVE"]:
+        incidencias_filtradas = incidencias_filtradas.filter(nivel=nivel)
+        if nivel == "ALTO":
+            seccion = "riesgo_alto"
+
+    if q:
+        incidencias_filtradas = incidencias_filtradas.filter(
+            Q(descripcion__icontains=q)
+            | Q(intervencion_personal__icontains=q)
+            | Q(resolucion__icontains=q)
+            | Q(subtipo__icontains=q)
+            | Q(alumno__solicitud_ingreso__nombres_menor__icontains=q)
+            | Q(alumno__solicitud_ingreso__apellido_paterno_menor__icontains=q)
+            | Q(alumno__solicitud_ingreso__apellido_materno_menor__icontains=q)
+            | Q(sala_semestre__sala__nombre__icontains=q)
         )
-        .order_by("-fecha_reporte")
-    )
+
+    resumen_incidencias = resumen_incidencias_pedagogicas(incidencias_base)
+    resumen_propias = resumen_incidencias_pedagogicas(incidencias_propias_qs)
+
+    total_alumnos = 0
+    total_salas = 0
+    dia_operativo_actual = obtener_dia_operativo_actual_incidencias(semestre)
 
     if semestre:
-        incidencias_semestre = incidencias_pedagogicas.filter(semestre=semestre)
-    else:
-        incidencias_semestre = incidencias_pedagogicas
+        total_alumnos = SolicitudInscripcion.objects.filter(
+            semestre=semestre,
+            estado="FINALIZADA",
+        ).count()
+        total_salas = SalaSemestre.objects.filter(
+            semestre=semestre,
+            activa=True,
+        ).count()
 
-    resumen_incidencias = {
-        "total": incidencias_semestre.count(),
-        "abiertas": incidencias_semestre.filter(estado=Incidencia.EstadoIncidencia.ABIERTA).count(),
-        "cerradas": incidencias_semestre.filter(estado=Incidencia.EstadoIncidencia.CERRADA).count(),
-        "alto": incidencias_semestre.filter(nivel=Incidencia.NivelChoices.ALTO).count(),
-    }
+    # Datos sencillos para gráficas del HTML.
+    grafica_incidencias_pedagogicas = [
+        {"label": "Abiertas", "valor": resumen_incidencias["abiertas"], "porcentaje": resumen_incidencias["porcentaje_abiertas"]},
+        {"label": "Cerradas", "valor": resumen_incidencias["cerradas"], "porcentaje": resumen_incidencias["porcentaje_cerradas"]},
+        {"label": "Riesgo alto", "valor": resumen_incidencias["riesgo_alto"], "porcentaje": resumen_incidencias["porcentaje_riesgo_alto"]},
+        {"label": "Sin seguimiento", "valor": resumen_incidencias["sin_seguimiento"], "porcentaje": resumen_incidencias["porcentaje_sin_seguimiento"]},
+    ]
+
+    incidencias_filtradas = incidencias_filtradas.annotate(
+        total_seguimientos=Count("seguimientos", distinct=True)
+    ).order_by("-fecha_reporte")
 
     return render(
         request,
@@ -6988,17 +12066,146 @@ def dashboard_coordinadora(request):
             "semestre": semestre,
             "semestre_activo_operativo": semestre,
             "modo_solo_consulta": modo_solo_consulta,
-            "incidencias_pedagogicas": incidencias_semestre[:10],
-            "incidencias_abiertas": incidencias_semestre.filter(
+            "dia_operativo_actual": dia_operativo_actual,
+            "fecha_operativa_actual": getattr(dia_operativo_actual, "fecha", None) or timezone.localdate(),
+            "seccion_actual": seccion,
+            "filtros": {
+                "seccion": seccion,
+                "estado": estado,
+                "nivel": nivel,
+                "q": q,
+                "tipo": Incidencia.TipoIncidencia.PEDAGOGICA,
+            },
+
+            # Listados para el dashboard y para el apartado Mis incidencias.
+            "incidencias_pedagogicas": incidencias_filtradas[:50],
+            "incidencias_tabla": incidencias_filtradas[:100],
+            "mis_incidencias": incidencias_propias_qs.order_by("-fecha_reporte")[:50],
+            "incidencias_propias": incidencias_propias_qs.order_by("-fecha_reporte")[:50],
+            "ultimas_incidencias": incidencias_base.order_by("-fecha_reporte")[:8],
+            "incidencias_abiertas": incidencias_base.filter(
                 estado=Incidencia.EstadoIncidencia.ABIERTA
-            )[:10],
-            "incidencias_alto": incidencias_semestre.filter(
+            ).order_by("-fecha_reporte")[:20],
+            "incidencias_cerradas": incidencias_base.filter(
+                estado=Incidencia.EstadoIncidencia.CERRADA
+            ).order_by("-fecha_reporte")[:20],
+            "incidencias_alto": incidencias_base.filter(
                 nivel=Incidencia.NivelChoices.ALTO
-            )[:10],
+            ).order_by("-fecha_reporte")[:20],
+
+            # Totales directos para el HTML rediseñado.
             "resumen_incidencias": resumen_incidencias,
+            "resumen_propias": resumen_propias,
+            "total_pedagogicas": resumen_incidencias["total"],
+            "total_abiertas": resumen_incidencias["abiertas"],
+            "total_cerradas": resumen_incidencias["cerradas"],
+            "total_riesgo_alto": resumen_incidencias["riesgo_alto"],
+            "total_sin_seguimiento": resumen_incidencias["sin_seguimiento"],
+            "total_mis_incidencias": resumen_propias["total"],
+            "total_mis_abiertas": resumen_propias["abiertas"],
+            "total_mis_cerradas": resumen_propias["cerradas"],
+            "porcentaje_abiertas": resumen_incidencias["porcentaje_abiertas"],
+            "porcentaje_cerradas": resumen_incidencias["porcentaje_cerradas"],
+            "porcentaje_riesgo_alto": resumen_incidencias["porcentaje_riesgo_alto"],
+            "porcentaje_sin_seguimiento": resumen_incidencias["porcentaje_sin_seguimiento"],
+            "grafica_incidencias_pedagogicas": grafica_incidencias_pedagogicas,
+            "total_alumnos": total_alumnos,
+            "total_salas": total_salas,
+            **contexto_suplencias_usuario(request.user),
             **contexto_semestre_operativo(),
         },
     )
+
+
+@login_required
+def ajax_registro_diario_incidencia(request):
+    """
+    Devuelve por AJAX el registro diario del alumno para la fecha actual.
+    Útil para que crear_incidencia.html muestre solo la fecha automática,
+    sin dejar fijo el nombre de otro menor.
+    """
+    if not usuario_puede_ver_incidencias(request.user):
+        return JsonResponse({"ok": False, "error": "Sin permiso."}, status=403)
+
+    semestre = obtener_semestre_activo_operativo()
+    alumno_id = request.GET.get("alumno") or request.GET.get("alumno_id")
+
+    alumno = (
+        SolicitudInscripcion.objects
+        .filter(pk=alumno_id, estado="FINALIZADA")
+        .select_related("solicitud_ingreso", "semestre", "sala_semestre_asignada", "sala_semestre_asignada__sala")
+        .first()
+    )
+
+    if not alumno:
+        return JsonResponse({"ok": False, "error": "No se encontró el alumno."}, status=404)
+
+    if semestre and getattr(alumno, "semestre_id", None) != semestre.id:
+        return JsonResponse({"ok": False, "error": "El alumno no pertenece al semestre activo."}, status=400)
+
+    registro = obtener_registro_diario_actual_para_alumno(alumno, semestre=semestre)
+    fecha = timezone.localdate()
+
+    return JsonResponse({
+        "ok": True,
+        "alumno": {
+            "id": alumno.id,
+            "nombre": nombre_menor_desde_inscripcion(alumno),
+        },
+        "fecha": fecha.isoformat(),
+        "fecha_display": fecha.strftime("%d/%m/%Y"),
+        "registro": serializar_registro_diario_incidencia(registro),
+        "mensaje": "Registro diario encontrado." if registro else "No hay registro diario abierto para este alumno en la fecha actual.",
+    })
+
+
+@login_required
+def ajax_alumnos_incidencia(request):
+    """
+    Búsqueda liviana de alumnos finalizados para Select2.
+    Si el HTML no usa AJAX, el select normal de IncidenciaForm sigue funcionando.
+    """
+    if not usuario_puede_ver_incidencias(request.user):
+        return JsonResponse({"results": []}, status=403)
+
+    semestre = obtener_semestre_activo_operativo()
+    q = (request.GET.get("q") or "").strip()
+
+    alumnos = (
+        SolicitudInscripcion.objects
+        .filter(estado="FINALIZADA")
+        .select_related("solicitud_ingreso", "semestre", "sala_semestre_asignada", "sala_semestre_asignada__sala")
+    )
+
+    if semestre:
+        alumnos = alumnos.filter(semestre=semestre)
+
+    if q:
+        alumnos = alumnos.filter(
+            Q(solicitud_ingreso__nombres_menor__icontains=q)
+            | Q(solicitud_ingreso__apellido_paterno_menor__icontains=q)
+            | Q(solicitud_ingreso__apellido_materno_menor__icontains=q)
+            | Q(solicitud_ingreso__folio__icontains=q)
+        )
+
+    results = []
+    for alumno in alumnos.order_by(
+        "solicitud_ingreso__apellido_paterno_menor",
+        "solicitud_ingreso__apellido_materno_menor",
+        "solicitud_ingreso__nombres_menor",
+    )[:30]:
+        sala = ""
+        if getattr(alumno, "sala_semestre_asignada", None) and alumno.sala_semestre_asignada.sala:
+            sala = alumno.sala_semestre_asignada.sala.nombre
+
+        results.append({
+            "id": alumno.id,
+            "text": nombre_menor_desde_inscripcion(alumno),
+            "sala": sala,
+        })
+
+    return JsonResponse({"results": results})
+
 
 @login_required
 def expediente_bitacoras(request, alumno_id):
@@ -7143,3 +12350,804 @@ def descargar_pdf_bitacora(request, bitacora_id, tipo):
         )
 
     return response
+
+# =========================================================
+# PANEL SUPERVISORA GENERAL / SECRETARÍA DE DIRECCIÓN
+# Solo consulta: no crea, no edita, no elimina información.
+# Este panel usa un único HTML:
+# admisiones/templates/admisiones/panel_supervisor.html
+# =========================================================
+
+def usuario_es_supervisora_general(user):
+    """
+    Valida el acceso al panel de Supervisora General / Secretaría de Dirección.
+
+    Reglas:
+    - Administrador del Sistema puede entrar para pruebas y soporte.
+    - Usuario con tipo_persona SUPERVISOR puede entrar.
+    - Grupos con nombres relacionados a supervisión o secretaría de dirección pueden entrar.
+    - La vista es únicamente de consulta.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if usuario_es_admin(user) or usuario_es_admin_sistema(user):
+        return True
+
+    tipo_persona = normalizar_texto(getattr(user, "tipo_persona", ""))
+
+    if tipo_persona in [
+        "supervisor",
+        "supervisora",
+        "supervisora general",
+        "supervisor general",
+        "secretaria direccion",
+        "secretaria de direccion",
+        "secretario direccion",
+        "secretario de direccion",
+    ]:
+        return True
+
+    roles = obtener_roles_usuario(user)
+
+    palabras_validas = [
+        "supervisor",
+        "supervisora",
+        "supervision",
+        "supervision general",
+        "supervisora general",
+        "supervisor general",
+        "secretaria direccion",
+        "secretaria de direccion",
+        "secretario direccion",
+        "secretario de direccion",
+    ]
+
+    for rol in roles:
+        if any(palabra in rol for palabra in palabras_validas):
+            return True
+
+    return False
+
+
+def obtener_estado_incidencia_supervisor():
+    """
+    Devuelve los valores de estado disponibles en el modelo Incidencia.
+    Se deja protegido para evitar errores si cambian los choices del modelo.
+    """
+    abierta = "ABIERTA"
+    cerrada = "CERRADA"
+
+    try:
+        abierta = Incidencia.EstadoIncidencia.ABIERTA
+        cerrada = Incidencia.EstadoIncidencia.CERRADA
+    except Exception:
+        pass
+
+    return abierta, cerrada
+
+
+def obtener_nivel_alto_incidencia_supervisor():
+    """
+    Devuelve el valor de riesgo alto disponible en el modelo Incidencia.
+    """
+    try:
+        return Incidencia.NivelChoices.ALTO
+    except Exception:
+        return "ALTO"
+
+
+def actividad_actual_sala_supervisor(sala_semestre):
+    """
+    Calcula una descripción corta de la actividad actual de una sala
+    usando los horarios configurados en SalaSemestre.
+    """
+    if not sala_semestre:
+        return "Sin configuración"
+
+    ahora = timezone.localtime(timezone.now()).time()
+
+    actividades = [
+        ("Recepción", "recepcion_inicio", "recepcion_fin"),
+        ("Desayuno", "desayuno_inicio", "desayuno_fin"),
+        ("Actividad pedagógica", "actividad_pedagogica_inicio", "actividad_pedagogica_fin"),
+        ("Recreo", "recreo_inicio", "recreo_fin"),
+        ("Colación", "colacion_inicio", "colacion_fin"),
+        ("Siesta", "siesta_inicio", "siesta_fin"),
+        ("Comida", "comida_inicio", "comida_fin"),
+    ]
+
+    for nombre, campo_inicio, campo_fin in actividades:
+        inicio = getattr(sala_semestre, campo_inicio, None)
+        fin = getattr(sala_semestre, campo_fin, None)
+
+        if inicio and fin and inicio <= ahora <= fin:
+            if nombre == "Actividad pedagógica":
+                actividad_nombre = (getattr(sala_semestre, "actividad_pedagogica_nombre", "") or "").strip()
+                return actividad_nombre or nombre
+            return nombre
+
+    entrada_maestras = getattr(sala_semestre, "entrada_maestras", None)
+    salida_maestras = getattr(sala_semestre, "salida_maestras", None)
+
+    if entrada_maestras and salida_maestras and entrada_maestras <= ahora <= salida_maestras:
+        return "Operación normal"
+
+    return "Fuera de horario"
+
+
+def preparar_salas_supervisor(salas_qs, alumnos_qs, registros_hoy):
+    """
+    Construye el resumen por sala para el panel de supervisión.
+    """
+    salas = []
+
+    for sala_semestre in salas_qs.select_related("sala", "semestre", "sala__sede"):
+        alumnos_sala = alumnos_qs.filter(sala_semestre_asignada=sala_semestre)
+        total = alumnos_sala.count()
+
+        registros_sala = registros_hoy.filter(sala_semestre=sala_semestre)
+        presentes = registros_sala.filter(entrada_en__isnull=False, salida_en__isnull=True).count()
+        salieron = registros_sala.filter(salida_en__isnull=False).count()
+        ausentes = max(total - presentes - salieron, 0)
+
+        maestras = (
+            AsignacionMaestra.objects
+            .filter(sala_semestre=sala_semestre, activo=True)
+            .select_related("maestra")
+            .order_by("maestra__nombre", "maestra__apellido_paterno")
+        )
+
+        responsables = [nombre_usuario_panel(asignacion.maestra) for asignacion in maestras[:3]]
+        responsable_txt = ", ".join(responsables) if responsables else "Sin maestra asignada"
+
+        capacidad = getattr(sala_semestre, "cupo", None) or getattr(sala_semestre, "cupo_real", None) or 0
+        ocupacion = porcentaje_panel(total, capacidad) if capacidad else 0
+
+        if presentes > 0:
+            estado = "Activa"
+        elif total > 0:
+            estado = "Pendiente"
+        else:
+            estado = "Sin alumnos"
+
+        salas.append({
+            "id": sala_semestre.id,
+            "nombre": getattr(getattr(sala_semestre, "sala", None), "nombre", "Sala"),
+            "sede": getattr(getattr(getattr(sala_semestre, "sala", None), "sede", None), "nombre", ""),
+            "responsable": responsable_txt,
+            "total_alumnos": total,
+            "presentes": presentes,
+            "ausentes": ausentes,
+            "salieron": salieron,
+            "capacidad": capacidad,
+            "ocupacion": ocupacion,
+            "actividad_actual": actividad_actual_sala_supervisor(sala_semestre),
+            "estado": estado,
+        })
+
+    return salas
+
+
+def preparar_incidencias_supervisor(incidencias_qs):
+    """
+    Prepara filas resumidas de incidencias para consulta.
+    """
+    filas = []
+
+    for incidencia in incidencias_qs[:100]:
+        alumno = getattr(incidencia, "alumno", None)
+        sala_semestre = getattr(incidencia, "sala_semestre", None)
+        sala = getattr(sala_semestre, "sala", None)
+
+        fecha = (
+            getattr(incidencia, "fecha_reporte", None)
+            or getattr(incidencia, "created_at", None)
+            or getattr(incidencia, "fecha_registro", None)
+        )
+
+        if fecha:
+            try:
+                fecha_txt = timezone.localtime(fecha).strftime("%d/%m/%Y %H:%M")
+            except Exception:
+                fecha_txt = str(fecha)
+        else:
+            fecha_txt = "--"
+
+        filas.append({
+            "id": incidencia.id,
+            "folio": getattr(incidencia, "folio", "") or f"INC-{incidencia.id}",
+            "tipo": getattr(incidencia, "tipo", "") or "--",
+            "categoria": getattr(incidencia, "categoria", "") or getattr(incidencia, "subtipo", "") or "--",
+            "nivel": getattr(incidencia, "nivel", "") or "--",
+            "estado": getattr(incidencia, "estado", "") or "--",
+            "fecha": fecha_txt,
+            "alumno": nombre_menor_desde_inscripcion(alumno) if alumno else "Sin alumno",
+            "sala": getattr(sala, "nombre", "") or "Sin sala",
+            "registrada_por": nombre_usuario_panel(getattr(incidencia, "registrada_por", None)),
+            "descripcion": getattr(incidencia, "descripcion", "") or "",
+        })
+
+    return filas
+
+
+
+
+def obtener_mejor_semestre_supervisor():
+    """Devuelve el semestre con más niñas y niños finalizados usando datos reales."""
+    mejor = {
+        "id": "",
+        "nombre": "Sin datos",
+        "total_ninos": 0,
+        "fecha_inicio": "",
+        "fecha_fin": "",
+    }
+
+    for semestre in Semestre.objects.order_by("-fecha_inicio", "-id"):
+        total = SolicitudInscripcion.objects.filter(
+            semestre=semestre,
+            estado="FINALIZADA",
+        ).count()
+
+        if total > mejor["total_ninos"]:
+            mejor = {
+                "id": semestre.id,
+                "nombre": getattr(semestre, "nombre", "Semestre"),
+                "total_ninos": total,
+                "fecha_inicio": getattr(semestre, "fecha_inicio", None),
+                "fecha_fin": getattr(semestre, "fecha_fin", None),
+            }
+
+    return mejor
+
+
+def filas_reporte_supervisor(tipo_reporte, contexto):
+    """Construye filas CSV para los reportes descargables del panel supervisor."""
+    tipo_reporte = (tipo_reporte or "general").strip().lower()
+    filas = []
+
+    semestre = contexto.get("semestre_seleccionado")
+    sede = contexto.get("sede_seleccionada")
+    mejor = contexto.get("mejor_semestre") or {}
+
+    encabezado = [
+        ["Reporte", tipo_reporte.title()],
+        ["Semestre consultado", getattr(semestre, "nombre", "") if semestre else ""],
+        ["Sede consultada", getattr(sede, "nombre", "") if sede else "Todas / General"],
+        ["Fecha de descarga", timezone.localtime(timezone.now()).strftime("%d/%m/%Y %H:%M:%S")],
+        [],
+    ]
+
+    if tipo_reporte == "asistencia":
+        filas = encabezado + [
+            ["Indicador", "Total", "Porcentaje"],
+            ["Niños en estancia", contexto.get("ninos_en_estancia", 0), contexto.get("porcentaje_ninos_estancia", 0)],
+            ["Niños ausentes", contexto.get("ninos_ausentes", 0), contexto.get("porcentaje_ninos_ausentes", 0)],
+            ["Niños entregados", contexto.get("ninos_entregados", 0), contexto.get("porcentaje_ninos_fuera", 0)],
+            ["Total de niños", contexto.get("total_ninos", 0), 100 if contexto.get("total_ninos", 0) else 0],
+            [],
+            ["Nombre", "Sala", "Estado", "Entrada", "Salida", "Responsable"],
+        ]
+        for alumno in contexto.get("alumnos_panel", []):
+            filas.append([
+                alumno.get("nombre", ""),
+                alumno.get("sala", ""),
+                alumno.get("estado", ""),
+                alumno.get("hora_entrada", ""),
+                alumno.get("hora_salida", ""),
+                alumno.get("responsable", ""),
+            ])
+        return filas
+
+    if tipo_reporte == "incidencias":
+        filas = encabezado + [
+            ["Indicador", "Total"],
+            ["Incidencias totales", contexto.get("incidencias_total", 0)],
+            ["Incidencias abiertas", contexto.get("incidencias_abiertas", 0)],
+            ["Incidencias cerradas", contexto.get("incidencias_cerradas", 0)],
+            ["Riesgo alto", contexto.get("incidencias_alto", 0)],
+            [],
+            ["Folio", "Fecha", "Menor", "Sala", "Tipo", "Categoría", "Nivel", "Estado", "Registró", "Descripción"],
+        ]
+        for inc in contexto.get("incidencias_rows", []):
+            filas.append([
+                inc.get("folio", ""), inc.get("fecha", ""), inc.get("alumno", ""), inc.get("sala", ""),
+                inc.get("tipo", ""), inc.get("categoria", ""), inc.get("nivel", ""), inc.get("estado", ""),
+                inc.get("registrada_por", ""), inc.get("descripcion", ""),
+            ])
+        return filas
+
+    if tipo_reporte == "salas":
+        filas = encabezado + [["Sala", "Capacidad", "Presentes", "Ausentes", "Entregados", "Porcentaje", "Actividad actual", "Responsable"]]
+        for sala in contexto.get("salas_resumen", []):
+            filas.append([
+                sala.get("nombre", ""), sala.get("capacidad", ""), sala.get("presentes", 0),
+                sala.get("ausentes", 0), sala.get("entregados", 0), sala.get("porcentaje", 0),
+                sala.get("actividad", ""), sala.get("responsable", ""),
+            ])
+        return filas
+
+    if tipo_reporte == "suplencias":
+        filas = encabezado + [
+            ["Fecha/hora", "Área cubierta", "Acción", "Realizó", "Titular", "Estado", "Descripción"],
+        ]
+        for mov in contexto.get("movimientos_suplencia", []) or contexto.get("bitacora_suplencias", []):
+            try:
+                fecha_txt = timezone.localtime(mov.creado_en).strftime("%d/%m/%Y %H:%M")
+            except Exception:
+                fecha_txt = ""
+            try:
+                area_txt = mov.get_area_cubierta_display()
+            except Exception:
+                area_txt = getattr(mov, "area_cubierta", "")
+            try:
+                accion_txt = mov.get_accion_display()
+            except Exception:
+                accion_txt = getattr(mov, "accion", "")
+            filas.append([
+                fecha_txt,
+                area_txt,
+                accion_txt,
+                getattr(mov, "usuario_nombre", ""),
+                getattr(mov, "titular_nombre", ""),
+                mov.get_estado_display() if hasattr(mov, "get_estado_display") else getattr(mov, "estado", ""),
+                getattr(mov, "descripcion", ""),
+            ])
+        return filas
+
+    if tipo_reporte == "personal":
+        filas = encabezado + [["Nombre", "Rol", "Área", "Correo", "Sede", "Estado", "Entrada", "Salida"]]
+        for persona in contexto.get("personal_panel", []):
+            filas.append([
+                persona.get("nombre", ""), persona.get("rol", ""), persona.get("area", ""),
+                persona.get("email", ""), persona.get("sede", ""), persona.get("estado", ""),
+                persona.get("hora_entrada", ""), persona.get("hora_salida", ""),
+            ])
+        return filas
+
+    if tipo_reporte == "calendario":
+        filas = encabezado + [
+            ["Indicador", "Valor"],
+            ["Días operativos", contexto.get("total_dias_operativos", 0)],
+            ["Días abiertos", contexto.get("dias_abiertos_operativos", 0)],
+            ["Días cerrados", contexto.get("dias_cerrados_operativos", 0)],
+            ["Avance", f"{contexto.get('porcentaje_calendario', 0)}%"],
+            [],
+            ["Fecha", "Estado", "Tipo", "Descripción"],
+        ]
+        for dia in contexto.get("calendario_panel", []):
+            filas.append([
+                dia.get("fecha", ""), dia.get("estado", ""), dia.get("tipo", ""), dia.get("descripcion", ""),
+            ])
+        return filas
+
+    # General
+    filas = encabezado + [
+        ["Resumen general de la estancia", ""],
+        ["Semestre con mayor número de niñas y niños", mejor.get("nombre", "Sin datos")],
+        ["Total de niñas y niños en ese semestre", mejor.get("total_ninos", 0)],
+        ["Total de niñas y niños del semestre consultado", contexto.get("total_ninos", 0)],
+        ["Niños en estancia", contexto.get("ninos_en_estancia", 0)],
+        ["Niños ausentes", contexto.get("ninos_ausentes", 0)],
+        ["Niños entregados", contexto.get("ninos_entregados", 0)],
+        ["Salas activas", contexto.get("kpi_salas", 0)],
+        ["Personal activo", contexto.get("kpi_personal", 0)],
+        ["Incidencias totales", contexto.get("incidencias_total", 0)],
+        ["Incidencias abiertas", contexto.get("incidencias_abiertas", 0)],
+        ["Incidencias cerradas", contexto.get("incidencias_cerradas", 0)],
+        ["Incidencias de riesgo alto", contexto.get("incidencias_alto", 0)],
+        ["Avance del calendario", f"{contexto.get('porcentaje_calendario', 0)}%"],
+        [],
+        ["Detalle por sala", ""],
+        ["Sala", "Capacidad", "Presentes", "Ausentes", "Entregados", "Porcentaje", "Actividad actual", "Responsable"],
+    ]
+    for sala in contexto.get("salas_resumen", []):
+        filas.append([
+            sala.get("nombre", ""), sala.get("capacidad", ""), sala.get("presentes", 0),
+            sala.get("ausentes", 0), sala.get("entregados", 0), sala.get("porcentaje", 0),
+            sala.get("actividad", ""), sala.get("responsable", ""),
+        ])
+    return filas
+
+def construir_contexto_panel_supervisor(request):
+    """
+    Construye todos los datos del panel de Supervisora General.
+
+    El HTML mostrará secciones internas:
+    Inicio, Asistencia, Salas, Incidencias, Personal, Reportes y Calendario.
+    Todas las secciones son solo lectura.
+    """
+    semestres = Semestre.objects.order_by("-fecha_inicio", "-id")
+    sedes = Sede.objects.order_by("nombre")
+
+    semestre_activo = obtener_semestre_activo_operativo()
+    semestre_id = request.GET.get("semestre_id") or request.GET.get("semestre")
+    sede_id = request.GET.get("sede_id") or request.GET.get("sede")
+
+    semestre_seleccionado = semestre_activo or semestres.first()
+
+    if semestre_id:
+        semestre_seleccionado = Semestre.objects.filter(pk=semestre_id).first() or semestre_seleccionado
+
+    sede_seleccionada = None
+
+    if sede_id:
+        sede_seleccionada = Sede.objects.filter(pk=sede_id).first()
+    elif semestre_seleccionado and getattr(semestre_seleccionado, "sede_configurada", None):
+        sede_seleccionada = semestre_seleccionado.sede_configurada
+    else:
+        sede_seleccionada = sedes.first()
+
+    modo_solo_consulta = True
+
+    dia_actual = None
+    if semestre_seleccionado:
+        dia_actual = (
+            DiaOperativoSemestre.objects
+            .filter(
+                semestre=semestre_seleccionado,
+                fecha=timezone.localdate(),
+            )
+            .select_related("semestre", "abierto_por", "cerrado_por")
+            .first()
+        )
+
+    alumnos_qs = (
+        SolicitudInscripcion.objects
+        .filter(estado="FINALIZADA")
+        .select_related(
+            "solicitud_ingreso",
+            "semestre",
+            "sala_semestre_asignada",
+            "sala_semestre_asignada__sala",
+            "sala_semestre_asignada__sala__sede",
+            "usuario_tutor",
+        )
+        .order_by(
+            "sala_semestre_asignada__sala__nombre",
+            "solicitud_ingreso__apellido_paterno_menor",
+            "solicitud_ingreso__apellido_materno_menor",
+            "solicitud_ingreso__nombres_menor",
+        )
+    )
+    alumnos_qs = qs_por_semestre_y_sede(alumnos_qs, semestre_seleccionado, sede_seleccionada)
+
+    total_ninos = alumnos_qs.count()
+
+    registros_hoy = RegistroDiarioAlumno.objects.none()
+
+    if dia_actual:
+        registros_hoy = (
+            RegistroDiarioAlumno.objects
+            .filter(dia_operativo=dia_actual, alumno__in=alumnos_qs)
+            .select_related(
+                "alumno",
+                "alumno__solicitud_ingreso",
+                "sala_semestre",
+                "sala_semestre__sala",
+            )
+        )
+
+    ninos_en_estancia = registros_hoy.filter(entrada_en__isnull=False, salida_en__isnull=True).count() if dia_actual else 0
+    ninos_fuera_estancia = registros_hoy.filter(salida_en__isnull=False).count() if dia_actual else 0
+    ninos_ausentes = max(total_ninos - ninos_en_estancia - ninos_fuera_estancia, 0)
+
+    salas_qs = SalaSemestre.objects.filter(activa=True).select_related("sala", "semestre", "sala__sede")
+
+    if semestre_seleccionado:
+        salas_qs = salas_qs.filter(semestre=semestre_seleccionado)
+
+    if sede_seleccionada:
+        salas_qs = salas_qs.filter(Q(sala__sede=sede_seleccionada) | Q(sala__sede__isnull=True))
+
+    salas_resumen = preparar_salas_supervisor(
+        salas_qs=salas_qs.order_by("sala__nombre"),
+        alumnos_qs=alumnos_qs,
+        registros_hoy=registros_hoy,
+    )
+
+    incidencias_qs = (
+        Incidencia.objects
+        .select_related(
+            "alumno",
+            "alumno__solicitud_ingreso",
+            "semestre",
+            "dia_operativo",
+            "registro_diario",
+            "sala_semestre",
+            "sala_semestre__sala",
+            "registrada_por",
+            "cerrada_por",
+        )
+        .prefetch_related("seguimientos", "archivos")
+    )
+
+    if semestre_seleccionado:
+        incidencias_qs = incidencias_qs.filter(semestre=semestre_seleccionado)
+
+    if sede_seleccionada:
+        incidencias_qs = incidencias_qs.filter(semestre__sede_configurada=sede_seleccionada)
+
+    try:
+        incidencias_qs = incidencias_qs.order_by("-fecha_reporte", "-id")
+    except Exception:
+        incidencias_qs = incidencias_qs.order_by("-id")
+
+    estado_abierta, estado_cerrada = obtener_estado_incidencia_supervisor()
+    nivel_alto = obtener_nivel_alto_incidencia_supervisor()
+
+    incidencias_total = incidencias_qs.count()
+    incidencias_abiertas = incidencias_qs.filter(estado=estado_abierta).count()
+    incidencias_cerradas = incidencias_qs.filter(estado=estado_cerrada).count()
+    incidencias_alto = incidencias_qs.filter(nivel=nivel_alto).count()
+
+    inc_pedagogica = incidencias_qs.filter(tipo=Incidencia.TipoIncidencia.PEDAGOGICA).count()
+    inc_nutricional = incidencias_qs.filter(tipo=Incidencia.TipoIncidencia.NUTRICIONAL).count()
+    inc_medica = incidencias_qs.filter(tipo=Incidencia.TipoIncidencia.MEDICA).count()
+    inc_psicologica = incidencias_qs.filter(tipo=Incidencia.TipoIncidencia.PSICOLOGICA).count()
+
+    total_personal_activo = get_user_model().objects.filter(is_active=True).exclude(tipo_persona="BENEFICIARIO").count()
+    total_maestras_activas = (
+        AsignacionMaestra.objects
+        .filter(sala_semestre__semestre=semestre_seleccionado, activo=True)
+        .values("maestra_id")
+        .distinct()
+        .count()
+        if semestre_seleccionado else 0
+    )
+
+    dias_operativos = DiaOperativoSemestre.objects.none()
+    total_dias_operativos = 0
+    dias_abiertos_operativos = 0
+    dias_cerrados_operativos = 0
+    porcentaje_calendario = 0
+
+    if semestre_seleccionado:
+        dias_operativos = DiaOperativoSemestre.objects.filter(semestre=semestre_seleccionado, es_habil=True)
+        total_dias_operativos = dias_operativos.count()
+        dias_abiertos_operativos = dias_operativos.filter(estado=DiaOperativoSemestre.EstadoDia.ABIERTO).count()
+        dias_cerrados_operativos = dias_operativos.filter(estado=DiaOperativoSemestre.EstadoDia.CERRADO).count()
+        porcentaje_calendario = porcentaje_panel(dias_cerrados_operativos, total_dias_operativos)
+
+    porcentaje_ninos_estancia = porcentaje_panel(ninos_en_estancia, total_ninos)
+    porcentaje_ninos_ausentes = porcentaje_panel(ninos_ausentes, total_ninos)
+    porcentaje_ninos_fuera = porcentaje_panel(ninos_fuera_estancia, total_ninos)
+    porcentaje_incidencias_cerradas = porcentaje_panel(incidencias_cerradas, incidencias_total)
+
+    alumnos_panel = preparar_alumnos_panel(alumnos_qs, dia_actual=dia_actual)
+    personal_panel = preparar_personal_panel(semestre=semestre_seleccionado)
+    calendario_panel = preparar_calendario_panel(semestre=semestre_seleccionado, limite=60)
+    actividades_panel = preparar_actividades_panel(semestre=semestre_seleccionado)
+    sedes_panel = preparar_sedes_panel(semestre=semestre_seleccionado)
+
+    mejor_semestre = obtener_mejor_semestre_supervisor()
+
+    reportes_supervisor = [
+        {
+            "slug": "asistencia",
+            "titulo": "Resumen de asistencia",
+            "descripcion": "Niños en estancia, ausentes y entregados.",
+            "porcentaje": porcentaje_ninos_estancia,
+        },
+        {
+            "slug": "incidencias",
+            "titulo": "Resumen de incidencias",
+            "descripcion": "Incidencias abiertas, cerradas y de riesgo alto.",
+            "porcentaje": porcentaje_incidencias_cerradas,
+        },
+        {
+            "slug": "salas",
+            "titulo": "Reporte por sala",
+            "descripcion": "Ocupación, responsables y actividad actual.",
+            "porcentaje": porcentaje_panel(sum(s["presentes"] for s in salas_resumen), total_ninos),
+        },
+        {
+            "slug": "calendario",
+            "titulo": "Avance del calendario",
+            "descripcion": "Días operativos abiertos y cerrados.",
+            "porcentaje": porcentaje_calendario,
+        },
+        {
+            "slug": "personal",
+            "titulo": "Reporte de personal",
+            "descripcion": "Trabajadores activos, roles, áreas y sedes asignadas.",
+            "porcentaje": 100 if total_personal_activo else 0,
+        },
+        {
+            "slug": "suplencias",
+            "titulo": "Bitácora de suplencias",
+            "descripcion": "Movimientos realizados por cobertura temporal autorizada por Dirección.",
+            "porcentaje": 100 if (MovimientoSuplencia.objects.exists() or AutorizacionSuplencia.objects.exists()) else 0,
+        },
+    ]
+
+    context = {
+        "titulo_panel": "Panel de Supervisión General",
+        "subtitulo_panel": "Vista general en tiempo real de la Estancia Infantil UNACH",
+        "rol_panel": "Supervisora General",
+        "semestres": semestres,
+        "sedes": sedes,
+        "semestre_activo": semestre_activo,
+        "semestre_seleccionado": semestre_seleccionado,
+        "sede_seleccionada": sede_seleccionada,
+        "dia_actual": dia_actual,
+        "modo_solo_consulta": modo_solo_consulta,
+        "solo_lectura": True,
+        "fecha_actualizacion": timezone.localtime(timezone.now()),
+
+        # KPIs principales
+        "total_ninos": total_ninos,
+        "ninos_en_estancia": ninos_en_estancia,
+        "ninos_ausentes": ninos_ausentes,
+        "ninos_fuera_estancia": ninos_fuera_estancia,
+        "ninos_entregados": ninos_fuera_estancia,
+        "kpi_alumnos": total_ninos,
+        "kpi_salas": salas_qs.count(),
+        "kpi_personal": total_personal_activo,
+        "kpi_maestras": total_maestras_activas,
+        "kpi_riesgo": incidencias_alto,
+
+        # Porcentajes
+        "porcentaje_ninos_estancia": porcentaje_ninos_estancia,
+        "porcentaje_ninos_ausentes": porcentaje_ninos_ausentes,
+        "porcentaje_ninos_fuera": porcentaje_ninos_fuera,
+        "porcentaje_incidencias_cerradas": porcentaje_incidencias_cerradas,
+        "porcentaje_calendario": porcentaje_calendario,
+
+        # Incidencias
+        "incidencias_total": incidencias_total,
+        "incidencias_abiertas": incidencias_abiertas,
+        "incidencias_cerradas": incidencias_cerradas,
+        "incidencias_alto": incidencias_alto,
+        "incidencias_rows": preparar_incidencias_supervisor(incidencias_qs),
+        "inc_pedagogica": inc_pedagogica,
+        "inc_nutricional": inc_nutricional,
+        "inc_medica": inc_medica,
+        "inc_psicologica": inc_psicologica,
+
+        # Secciones del HTML único
+        "alumnos_panel": alumnos_panel,
+        "salas_resumen": salas_resumen,
+        "personal_panel": personal_panel,
+        "calendario_panel": calendario_panel,
+        "actividades_panel": actividades_panel,
+        "sedes_panel": sedes_panel,
+        "reportes_supervisor": reportes_supervisor,
+        "mejor_semestre": mejor_semestre,
+
+        # Bitácora de suplencias para reporte de Supervisora
+        # Se completa más abajo con contexto_suplencias_supervisor(), para incluir
+        # autorizaciones activas aunque todavía no existan movimientos.
+        "movimientos_suplencia_recientes": [],
+        "bitacora_suplencias": [],
+        "movimientos_suplencia": [],
+        "total_movimientos_suplencia": 0,
+
+        # Datos para Chart.js en el template
+        "grafica_asistencia_labels": ["En estancia", "Ausentes", "Entregados"],
+        "grafica_asistencia_data": [ninos_en_estancia, ninos_ausentes, ninos_fuera_estancia],
+        "grafica_incidencias_labels": ["Pedagógicas", "Nutricionales", "Médicas", "Psicológicas"],
+        "grafica_incidencias_data": [inc_pedagogica, inc_nutricional, inc_medica, inc_psicologica],
+        "grafica_salas_labels": [s["nombre"] for s in salas_resumen],
+        "grafica_salas_presentes": [s["presentes"] for s in salas_resumen],
+        "grafica_salas_ausentes": [s["ausentes"] for s in salas_resumen],
+    }
+
+    context.update(contexto_semestre_operativo())
+    # Primero se conserva el filtro general de movimientos y después se sobreescribe
+    # con el contexto específico del panel supervisor, que también incluye
+    # autorizaciones de suplencia sin movimiento todavía.
+    context.update(contexto_bitacora_suplencias(request, limite=100))
+    context.update(contexto_suplencias_supervisor(request, limite=100))
+
+    # El panel supervisor siempre es de consulta, aunque exista semestre activo.
+    context["modo_solo_consulta"] = True
+    context["solo_lectura"] = True
+
+    return context
+
+
+@login_required
+def panel_supervisor(request):
+    """
+    Panel único para Supervisora General / Secretaría de Dirección.
+
+    Es un dashboard de solo lectura:
+    - Inicio con KPIs, porcentajes y gráficas.
+    - Asistencia detallada.
+    - Salas y actividades.
+    - Incidencias.
+    - Personal.
+    - Reportes.
+    - Calendario.
+    """
+    if not usuario_es_supervisora_general(request.user):
+        messages.error(request, "No tienes permiso para entrar al panel de Supervisión General.")
+        return redirect("/")
+
+    if request.method == "POST":
+        messages.warning(
+            request,
+            "El panel de Supervisión General es únicamente de consulta. No permite crear, editar ni eliminar información."
+        )
+        return redirect("panel_supervisor")
+
+    contexto = construir_contexto_panel_supervisor(request)
+
+    return render(
+        request,
+        "admisiones/supervisor/panel_supervisor.html",
+        contexto,
+    )
+
+
+
+@login_required
+def descargar_reporte_supervisor(request, tipo_reporte="general"):
+    """Descarga reportes CSV de solo consulta para Supervisora General."""
+    if not usuario_es_supervisora_general(request.user):
+        messages.error(request, "No tienes permiso para descargar reportes de Supervisión General.")
+        return redirect("/")
+
+    contexto = construir_contexto_panel_supervisor(request)
+    filas = filas_reporte_supervisor(tipo_reporte, contexto)
+
+    nombre = (tipo_reporte or "general").strip().lower().replace(" ", "_")
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="reporte_supervisor_{nombre}.csv"'
+    response.write("\ufeff")
+
+    writer = csv.writer(response)
+    for fila in filas:
+        writer.writerow(fila)
+
+    return response
+
+
+@login_required
+def panel_supervisor_datos(request):
+    """
+    Respuesta JSON opcional para actualizar el panel con JavaScript.
+    Si no deseas usar AJAX, puedes omitir esta ruta en urls.py y usar solo panel_supervisor.
+    """
+    if not usuario_es_supervisora_general(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "mensaje": "No tienes permiso para consultar estos datos.",
+            },
+            status=403,
+        )
+
+    contexto = construir_contexto_panel_supervisor(request)
+
+    return JsonResponse({
+        "ok": True,
+        "fecha_actualizacion": contexto["fecha_actualizacion"].strftime("%d/%m/%Y %H:%M:%S"),
+        "total_ninos": contexto["total_ninos"],
+        "ninos_en_estancia": contexto["ninos_en_estancia"],
+        "ninos_ausentes": contexto["ninos_ausentes"],
+        "ninos_entregados": contexto["ninos_entregados"],
+        "incidencias_abiertas": contexto["incidencias_abiertas"],
+        "incidencias_cerradas": contexto["incidencias_cerradas"],
+        "incidencias_alto": contexto["incidencias_alto"],
+        "kpi_salas": contexto["kpi_salas"],
+        "kpi_personal": contexto["kpi_personal"],
+        "suplencias_hoy": contexto.get("suplencias_hoy", 0),
+        "total_suplencias_activas": contexto.get("total_suplencias_activas", 0),
+        "suplencias_pendientes_revision": contexto.get("suplencias_pendientes_revision", 0),
+        "suplencias_validadas": contexto.get("suplencias_validadas", 0),
+        "total_movimientos_suplencia": contexto.get("total_movimientos_suplencia", 0),
+        "porcentaje_ninos_estancia": contexto["porcentaje_ninos_estancia"],
+        "porcentaje_ninos_ausentes": contexto["porcentaje_ninos_ausentes"],
+        "porcentaje_ninos_fuera": contexto["porcentaje_ninos_fuera"],
+        "porcentaje_incidencias_cerradas": contexto["porcentaje_incidencias_cerradas"],
+        "grafica_asistencia_labels": contexto["grafica_asistencia_labels"],
+        "grafica_asistencia_data": contexto["grafica_asistencia_data"],
+        "grafica_incidencias_labels": contexto["grafica_incidencias_labels"],
+        "grafica_incidencias_data": contexto["grafica_incidencias_data"],
+        "grafica_salas_labels": contexto["grafica_salas_labels"],
+        "grafica_salas_presentes": contexto["grafica_salas_presentes"],
+        "grafica_salas_ausentes": contexto["grafica_salas_ausentes"],
+        "salas_resumen": contexto["salas_resumen"],
+    })

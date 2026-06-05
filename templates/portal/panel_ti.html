@@ -791,52 +791,860 @@
       color: #64748b !important;
     }
 
+
+    /* =========================================================
+       NUEVO DISEÑO PANEL TI - ESTRUCTURA TIPO DASHBOARD
+       Solo cambia la estructura lateral, viñetas e icono de cerrar sesión
+       ========================================================= */
+    body {
+      background: #f6f9ff;
+      color: #0b1b44;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .admin-shell {
+      min-height: 100vh;
+      display: flex;
+      background: linear-gradient(90deg, #f8fbff 0%, #f8fbff 270px, #f6f9ff 270px, #f6f9ff 100%);
+    }
+
+    .admin-sidebar {
+      width: 270px;
+      min-height: 100vh;
+      background: rgba(255,255,255,.95);
+      border-right: 1px solid #dbe7fb;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1020;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 18px 18px;
+      box-shadow: 8px 0 30px rgba(37,99,235,.06);
+    }
+
+    .sidebar-brand-modern {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 10px 24px;
+      border-bottom: 1px solid #e5eefb;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-logo-modern {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      box-shadow: 0 12px 22px rgba(37,99,235,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-modern img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 5px;
+    }
+
+    .sidebar-title-modern {
+      font-size: 1.24rem;
+      line-height: 1.05;
+      font-weight: 950;
+      color: #10285f;
+      margin: 0;
+    }
+
+    .sidebar-subtitle-modern {
+      font-size: .73rem;
+      color: #64748b;
+      font-weight: 750;
+      margin-top: 4px;
+    }
+
+    .sidebar-menu-title {
+      padding: 0 12px 10px;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #94a3b8;
+      font-weight: 950;
+    }
+
+    .sidebar-nav-modern {
+      gap: 8px;
+    }
+
+    .sidebar-nav-modern.nav-pills .nav-link {
+      border: 0 !important;
+      border-radius: 14px !important;
+      color: #28436e;
+      padding: 13px 14px;
+      font-weight: 800;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      transition: .18s ease;
+      box-shadow: none;
+    }
+
+    .sidebar-nav-modern.nav-pills .nav-link i {
+      width: 24px;
+      font-size: 1.22rem;
+      text-align: center;
+      color: #4b6695;
+      margin-right: 0 !important;
+    }
+
+    .sidebar-nav-modern.nav-pills .nav-link:hover {
+      background: #f1f6ff;
+      color: #1d4ed8;
+      transform: translateX(2px);
+    }
+
+    .sidebar-nav-modern.nav-pills .nav-link.active {
+      background: linear-gradient(90deg, #e8f0ff, #eef4ff) !important;
+      color: #1455e7 !important;
+      box-shadow: 0 8px 18px rgba(37,99,235,.10);
+      font-weight: 900;
+    }
+
+    .sidebar-nav-modern.nav-pills .nav-link.active i {
+      color: #1455e7 !important;
+    }
+
+    .sidebar-divider-modern {
+      flex: 1 1 auto;
+      border-bottom: 1px solid #e5eefb;
+      margin: 18px 0 14px;
+    }
+
+    .logout-form-modern {
+      margin: 0;
+    }
+
+    .logout-btn-modern {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #ef4444;
+      font-weight: 850;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      transition: .18s ease;
+      text-align: left;
+    }
+
+    .logout-btn-modern i {
+      width: 24px;
+      font-size: 1.28rem;
+      text-align: center;
+    }
+
+    .logout-btn-modern:hover {
+      background: #fff1f2;
+      color: #dc2626;
+      transform: translateX(2px);
+    }
+
+    .admin-main-modern {
+      margin-left: 270px;
+      width: calc(100% - 270px);
+      min-height: 100vh;
+      padding: 28px 34px 38px;
+    }
+
+    .admin-topbar-modern {
+      background: rgba(255,255,255,.88);
+      border: 1px solid #dbe7fb;
+      border-radius: 22px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      box-shadow: 0 10px 28px rgba(30,64,175,.06);
+    }
+
+    .admin-topbar-modern h3 {
+      margin: 0;
+      color: #0b1b44;
+      font-weight: 950;
+      letter-spacing: -.02em;
+    }
+
+    .admin-topbar-modern p {
+      margin: 3px 0 0;
+      color: #64748b;
+      font-weight: 650;
+    }
+
+    .admin-user-pill-modern {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #0b1b44;
+      white-space: nowrap;
+    }
+
+    .user-avatar-modern {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #dbeafe, #eef2ff);
+      color: #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      flex-shrink: 0;
+    }
+
+    .content-card {
+      border: 1px solid #dbe7fb;
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(30,64,175,.07);
+    }
+
+    @media(max-width: 992px) {
+      .admin-shell {
+        display: block;
+        background: #f6f9ff;
+      }
+
+      .admin-sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+        border-right: 0;
+        border-bottom: 1px solid #dbe7fb;
+      }
+
+      .sidebar-nav-modern.nav-pills .nav-link {
+        width: 100%;
+      }
+
+      .sidebar-divider-modern {
+        flex: unset;
+        margin: 14px 0;
+      }
+
+      .admin-main-modern {
+        margin-left: 0;
+        width: 100%;
+        padding: 22px 16px 30px;
+      }
+    }
+
+    @media(max-width: 576px) {
+      .sidebar-brand-modern {
+        align-items: flex-start;
+      }
+
+      .admin-topbar-modern {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+
+
+    /* =========================================================
+       VISTA UNIFICADA DE INCIDENCIAS DENTRO DEL PANEL TI
+       Mismo estilo visual que portal/panel_incidencias_ti.html
+       ========================================================= */
+    .inc-ti-page {
+      --inc-blue: #1e3a8a;
+      --inc-blue-2: #2563eb;
+      --inc-bg: #f3f6fb;
+      --inc-card: #ffffff;
+      --inc-text: #0f172a;
+      --inc-muted: #64748b;
+      --inc-border: #e2e8f0;
+      --inc-green: #16a34a;
+      --inc-red: #dc2626;
+      --inc-amber: #d97706;
+      --inc-purple: #7c3aed;
+      color: var(--inc-text);
+    }
+
+    .inc-ti-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .inc-ti-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: .38rem .75rem;
+      font-size: .76rem;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+
+    .inc-ti-title {
+      font-size: clamp(1.55rem, 2vw, 2rem);
+      font-weight: 950;
+      color: var(--inc-text);
+      margin: 0;
+      letter-spacing: -.03em;
+    }
+
+    .inc-ti-desc {
+      color: var(--inc-muted);
+      font-weight: 650;
+      margin: 7px 0 0;
+      max-width: 820px;
+      line-height: 1.45;
+    }
+
+    .inc-ti-action-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .inc-ti-btn {
+      border-radius: 999px;
+      padding: .62rem 1rem;
+      font-weight: 900;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: .18s ease;
+    }
+
+    .inc-ti-btn-primary {
+      background: var(--inc-blue);
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(30, 58, 138, .16);
+    }
+
+    .inc-ti-btn-primary:hover { color: #ffffff; background: #1d4ed8; transform: translateY(-1px); }
+
+    .inc-ti-btn-refresh {
+      padding: .48rem .82rem;
+      font-size: .82rem;
+      min-height: 34px;
+      box-shadow: 0 8px 16px rgba(30, 58, 138, .14);
+    }
+
+    .inc-ti-btn-light {
+      background: #ffffff;
+      color: #334155;
+      border-color: var(--inc-border);
+    }
+
+    .inc-ti-btn-light:hover { color: var(--inc-blue); border-color: #bfdbfe; transform: translateY(-1px); }
+
+    .inc-ti-alert {
+      background: linear-gradient(135deg, #eff6ff, #f8fafc);
+      border: 1px solid #bfdbfe;
+      border-left: 7px solid var(--inc-blue-2);
+      border-radius: 20px;
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.05);
+    }
+
+    .inc-ti-alert-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.25rem;
+    }
+
+    .inc-ti-alert h6 {
+      font-weight: 950;
+      margin: 0 0 4px;
+      color: var(--inc-blue);
+    }
+
+    .inc-ti-alert p {
+      margin: 0;
+      color: #475569;
+      font-size: .92rem;
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    .inc-ti-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .inc-ti-kpi-card {
+      background: var(--inc-card);
+      border: 1px solid var(--inc-border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.05);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .inc-ti-kpi-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .inc-kpi-blue { background: #dbeafe; color: #1d4ed8; }
+    .inc-kpi-amber { background: #fef3c7; color: #b45309; }
+    .inc-kpi-red { background: #fee2e2; color: #b91c1c; }
+    .inc-kpi-green { background: #dcfce7; color: #15803d; }
+
+    .inc-ti-kpi-number {
+      color: var(--inc-text);
+      font-size: 1.55rem;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .inc-ti-kpi-label {
+      color: var(--inc-muted);
+      font-size: .8rem;
+      font-weight: 850;
+      margin-top: 3px;
+    }
+
+    .inc-ti-area-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .inc-ti-area-card {
+      background: #ffffff;
+      border: 1px solid var(--inc-border);
+      border-radius: 22px;
+      padding: 18px;
+      text-decoration: none;
+      color: var(--inc-text);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      min-height: 118px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.05);
+      transition: .18s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .inc-ti-area-card::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: transparent;
+      transition: .18s ease;
+    }
+
+    .inc-ti-area-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(15,23,42,.09);
+      color: var(--inc-text);
+    }
+
+    .inc-ti-area-card:hover::after { background: var(--inc-blue-2); }
+
+    .inc-ti-area-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      flex-shrink: 0;
+    }
+
+    .inc-area-medica .inc-ti-area-icon { background: #fee2e2; color: #dc2626; }
+    .inc-area-nutricional .inc-ti-area-icon { background: #dcfce7; color: #16a34a; }
+    .inc-area-psicologica .inc-ti-area-icon { background: #ede9fe; color: #7c3aed; }
+    .inc-area-pedagogica .inc-ti-area-icon { background: #dbeafe; color: #2563eb; }
+
+    .inc-ti-area-name {
+      font-weight: 950;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      line-height: 1.15;
+    }
+
+    .inc-ti-area-desc {
+      color: var(--inc-muted);
+      font-size: .82rem;
+      font-weight: 650;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .inc-ti-area-action {
+      display: none;
+    }
+
+    .inc-ti-panel {
+      background: #ffffff;
+      border: 1px solid var(--inc-border);
+      border-radius: 22px;
+      box-shadow: 0 12px 28px rgba(15,23,42,.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .inc-ti-panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--inc-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .inc-ti-panel-title {
+      font-weight: 950;
+      color: var(--inc-text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .inc-ti-panel-subtitle {
+      color: var(--inc-muted);
+      font-size: .86rem;
+      font-weight: 650;
+      margin: 4px 0 0;
+    }
+
+    .inc-ti-filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .inc-ti-filter-pill {
+      text-decoration: none;
+      border-radius: 999px;
+      padding: .45rem .75rem;
+      border: 1px solid var(--inc-border);
+      background: #ffffff;
+      color: #475569;
+      font-size: .8rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: .18s ease;
+    }
+
+    .inc-ti-filter-pill:hover {
+      border-color: #93c5fd;
+      color: var(--inc-blue);
+      transform: translateY(-1px);
+    }
+
+    .inc-ti-filter-pill.active {
+      background: var(--inc-blue);
+      border-color: var(--inc-blue);
+      color: #ffffff;
+    }
+
+
+
+    .inc-ti-area-card.active {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      box-shadow: 0 14px 30px rgba(37, 99, 235, .12);
+    }
+
+    .inc-ti-area-card.active::after {
+      background: var(--inc-blue-2);
+    }
+
+    .inc-ti-filter-body {
+      padding: 18px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--inc-border);
+    }
+
+    .inc-ti-filter-form {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+
+    .inc-ti-field label {
+      color: #475569;
+      font-size: .77rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-weight: 950;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .inc-ti-field select,
+    .inc-ti-field input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--inc-text);
+      border-radius: 14px;
+      padding: .68rem .78rem;
+      font-weight: 750;
+      outline: none;
+      transition: .18s ease;
+    }
+
+    .inc-ti-field select:focus,
+    .inc-ti-field input:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, .18);
+    }
+
+    .inc-ti-table-wrap {
+      overflow-x: auto;
+    }
+
+    .inc-ti-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0;
+    }
+
+    .inc-ti-table thead th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 950;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--inc-border);
+      white-space: nowrap;
+    }
+
+    .inc-ti-table tbody td {
+      padding: 16px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: top;
+      color: #334155;
+      font-size: .9rem;
+      font-weight: 650;
+    }
+
+    .inc-ti-table tbody tr:hover td {
+      background: #f8fafc;
+    }
+
+    .inc-ti-folio {
+      font-weight: 950;
+      color: var(--inc-text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .inc-ti-row-desc {
+      color: #64748b;
+      font-size: .84rem;
+      line-height: 1.38;
+      margin-top: 4px;
+      max-width: 420px;
+    }
+
+    .inc-ti-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: .34rem .64rem;
+      font-size: .72rem;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .inc-badge-open { background: #fef3c7; color: #92400e; }
+    .inc-badge-closed { background: #dcfce7; color: #14532d; }
+    .inc-badge-high { background: #fee2e2; color: #991b1b; }
+    .inc-badge-medium { background: #ffedd5; color: #9a3412; }
+    .inc-badge-low { background: #e0f2fe; color: #075985; }
+    .inc-badge-neutral { background: #f1f5f9; color: #475569; }
+    .inc-badge-type { background: #ede9fe; color: #5b21b6; }
+
+    .inc-ti-empty {
+      padding: 42px 20px;
+      text-align: center;
+      color: var(--inc-muted);
+    }
+
+    .inc-ti-empty-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 22px;
+      background: #f1f5f9;
+      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      margin-bottom: 12px;
+    }
+
+    .inc-ti-empty h6 {
+      font-weight: 950;
+      color: var(--inc-text);
+      margin-bottom: 5px;
+    }
+
+    .inc-ti-note {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-left: 6px solid #f97316;
+      color: #9a3412;
+      border-radius: 18px;
+      padding: 13px 15px;
+      font-size: .88rem;
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    @media(max-width: 1200px) {
+      .inc-ti-kpi-grid,
+      .inc-ti-area-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media(max-width: 768px) {
+      .inc-ti-topbar { flex-direction: column; }
+      .inc-ti-action-group { width: 100%; justify-content: flex-start; }
+      .inc-ti-kpi-grid,
+      .inc-ti-area-grid,
+      .inc-ti-filter-form { grid-template-columns: 1fr; }
+      .inc-ti-alert { flex-direction: column; }
+    }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
-    <div class="container-fluid justify-content-center">
-        <div class="d-flex align-items-center" style="width: 100%; max-width: 1200px; padding: 0 20px;">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height: 45px; width: auto; object-fit: contain;">
-                <div class="text-white"><div class="ti-brand-text">PANEL DE ADMINISTRACIÓN DE SISTEMA</div></div>
-            </a>
-            <div class="ms-auto text-white d-none d-md-block">
-                <small class="me-2">Usuario: {{ user.username }} (ADMIN)</small>
-                <form action="{% url 'logout' %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-light border-0" onclick="localStorage.removeItem('activeTabID')"><i class="bi bi-power fs-5"></i></button>
-                </form>
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand-modern">
+            <div class="sidebar-logo-modern">
+                <img src="{% static 'img/logo.png' %}" alt="EIU UNACH">
+            </div>
+            <div>
+                <h1 class="sidebar-title-modern">Estancia<br>Infantil</h1>
+                <div class="sidebar-subtitle-modern">Panel de sistema</div>
             </div>
         </div>
-    </div>
-</nav>
 
-<div class="container-panel">
-    <div class="row g-4">
-        <div class="col-lg-3">
-            <div class="sidebar-card">
-                <div class="p-3 bg-light border-bottom text-center"><h6 class="m-0 fw-bold text-primary">GESTIÓN CENTRAL</h6></div>
-                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
-                    <button class="nav-link active" id="tab-staff-btn" data-bs-toggle="pill" data-bs-target="#tab-staff" onclick="rememberTab(this.id)"><i class="bi bi-briefcase-fill me-2"></i> Personal Interno</button>
+        <div class="sidebar-menu-title">Gestión central</div>
 
-                    <button class="nav-link" id="tab-ciclos-btn" data-bs-toggle="pill" data-bs-target="#tab-ciclos" onclick="rememberTab(this.id)"><i class="bi bi-calendar2-week me-2"></i> Gestión de Semestres</button>
+        <div class="nav flex-column nav-pills sidebar-nav-modern" id="v-pills-tab" role="tablist">
+            <button class="nav-link active" id="tab-staff-btn" data-bs-toggle="pill" data-bs-target="#tab-staff" onclick="rememberTab(this.id)">
+                <i class="bi bi-briefcase"></i><span>Personal Interno</span>
+            </button>
 
-                    <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)"><i class="bi bi-person-lock me-2"></i> Roles y Permisos</button>
+            <button class="nav-link" id="tab-ciclos-btn" data-bs-toggle="pill" data-bs-target="#tab-ciclos" onclick="rememberTab(this.id)">
+                <i class="bi bi-calendar2-week"></i><span>Gestión de Semestres</span>
+            </button>
 
-                    <button class="nav-link" id="tab-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-logs" onclick="rememberTab(this.id)"><i class="bi bi-terminal me-2"></i> Auditoría Técnica</button>
+            <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" onclick="rememberTab(this.id)">
+                <i class="bi bi-person-lock"></i><span>Roles y Permisos</span>
+            </button>
 
-                    <button class="nav-link" id="tab-incidencias-btn" data-bs-toggle="pill" data-bs-target="#tab-incidencias" onclick="rememberTab(this.id)"><i class="bi bi-clipboard2-pulse-fill me-2"></i> Incidencias</button>
+            <button class="nav-link" id="tab-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-logs" onclick="rememberTab(this.id)">
+                <i class="bi bi-terminal"></i><span>Auditoría Técnica</span>
+            </button>
 
-                    <button class="nav-link" id="tab-sec-btn" data-bs-toggle="pill" data-bs-target="#tab-sec" onclick="rememberTab(this.id)"><i class="bi bi-lock-fill me-2"></i> Seguridad</button>
+            <button class="nav-link" id="tab-incidencias-btn" data-bs-toggle="pill" data-bs-target="#tab-incidencias" onclick="rememberTab(this.id)">
+                <i class="bi bi-exclamation-triangle"></i><span>Incidencias</span>
+            </button>
+
+            <button class="nav-link" id="tab-sec-btn" data-bs-toggle="pill" data-bs-target="#tab-sec" onclick="rememberTab(this.id)">
+                <i class="bi bi-shield-lock"></i><span>Seguridad</span>
+            </button>
+        </div>
+
+        <div class="sidebar-divider-modern"></div>
+
+        <form action="{% url 'logout' %}" method="post" class="logout-form-modern">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn-modern" onclick="localStorage.removeItem('activeTabID')">
+                <i class="bi bi-box-arrow-right"></i><span>Cerrar sesión</span>
+            </button>
+        </form>
+    </aside>
+
+    <main class="admin-main-modern">
+        <div class="admin-topbar-modern">
+            <div>
+                <h3>Panel de Administración</h3>
+                <p>Gestión central del sistema</p>
+            </div>
+
+            <div class="admin-user-pill-modern">
+                <div class="user-avatar-modern">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div>
+                    <div class="small text-muted fw-bold">Administrador(a)</div>
+                    <div class="fw-bold">{{ user.username }}</div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-9">
-            <div class="tab-content">
+        <div class="tab-content">
 
                 <div class="tab-pane fade show active" id="tab-staff">
                     <div class="content-card">
@@ -938,7 +1746,7 @@
                                     pasará a modo consulta y se deberá iniciar uno nuevo para operar nuevamente.
                                 </p>
                                 <div class="status-actions">
-                                    <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti" class="btn btn-success btn-sm fw-bold rounded-pill px-3">
+                                    <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-success btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-eye-fill me-1"></i> Ver semestre activo
                                     </a>
 
@@ -960,16 +1768,16 @@
                                     Los demás roles solo podrán consultar información histórica hasta que se inicie un nuevo semestre.
                                 </p>
                                 <div class="status-actions">
-                                    <a href="{% url 'crear_sede' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
+                                    <a href="{% url 'crear_sede' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-building-add me-1"></i> Crear sede
                                     </a>
-                                    <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-primary btn-sm fw-bold rounded-pill px-3">
+                                    <a href="{% url 'crear_semestre' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-primary btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-calendar-plus me-1"></i> Crear semestre
                                     </a>
-                                    <a href="#semestres-registrados" class="btn btn-clone-ready btn-sm fw-bold rounded-pill px-3">
+                                    <a href="#semestres-registrados" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-clone-ready btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-files me-1"></i> Clonar semestre cerrado
                                     </a>
-                                    <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark btn-sm fw-bold rounded-pill px-3">
+                                    <a href="{% url 'lista_semestres' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-dark btn-sm fw-bold rounded-pill px-3">
                                         <i class="bi bi-list-check me-1"></i> Ver semestres
                                     </a>
                                 </div>
@@ -1023,7 +1831,7 @@
                                         </div>
                                     </div>
                                     <div class="semester-step-actions">
-                                        <a href="{% url 'crear_sede' %}?origen=ti" class="btn btn-outline-success">
+                                        <a href="{% url 'crear_sede' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-success">
                                             Crear sede
                                         </a>
                                     </div>
@@ -1040,7 +1848,7 @@
                                         </div>
                                     </div>
                                     <div class="semester-step-actions">
-                                        <a href="{% url 'crear_semestre' %}?origen=ti" class="btn btn-outline-primary">
+                                        <a href="{% url 'crear_semestre' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-primary">
                                             Crear semestre
                                         </a>
 
@@ -1049,7 +1857,7 @@
                                                 <i class="bi bi-files me-1"></i> Clonar
                                             </button>
                                         {% else %}
-                                            <a href="#semestres-registrados" class="btn btn-clone-ready">
+                                            <a href="#semestres-registrados" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-clone-ready">
                                                 <i class="bi bi-files me-1"></i> Elegir cerrado
                                             </a>
                                         {% endif %}
@@ -1078,11 +1886,11 @@
                                     </div>
                                     <div class="semester-step-actions">
                                         {% if hay_semestre_activo_operativo %}
-                                            <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti" class="btn btn-outline-dark">
+                                            <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-dark">
                                                 Ver detalle
                                             </a>
                                         {% else %}
-                                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-dark">
+                                            <a href="{% url 'lista_semestres' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-dark">
                                                 Elegir semestre
                                             </a>
                                         {% endif %}
@@ -1105,7 +1913,7 @@
                                                 <i class="bi bi-check-circle-fill me-1"></i> Ya iniciado
                                             </button>
                                         {% else %}
-                                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success">
+                                            <a href="{% url 'lista_semestres' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-success">
                                                 Elegir semestre
                                             </a>
                                         {% endif %}
@@ -1124,14 +1932,14 @@
                                     </div>
                                     <div class="semester-step-actions">
                                         {% if hay_semestre_activo_operativo %}
-                                            <a href="{% url 'enviar_encuesta_satisfaccion' semestre_activo_operativo.id %}" class="btn btn-outline-info">
+                                            <a href="{% url 'enviar_encuesta_satisfaccion' semestre_activo_operativo.id %}" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-info">
                                                 Encuesta B
                                             </a>
-                                            <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti#cierre-semestre" class="btn btn-outline-danger">
+                                            <a href="{% url 'detalle_semestre' semestre_activo_operativo.id %}?origen=ti#cierre-semestre" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-danger">
                                                 Cierre
                                             </a>
                                         {% else %}
-                                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-danger">
+                                            <a href="{% url 'lista_semestres' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-danger">
                                                 Ver semestres
                                             </a>
                                         {% endif %}
@@ -1151,7 +1959,7 @@
                                     Desde esta tabla puedes configurar, consultar, clonar semestres cerrados o descargar el informe.
                                 </p>
                             </div>
-                            <a href="{% url 'lista_semestres' %}?origen=ti" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
+                            <a href="{% url 'lista_semestres' %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
                                 Ver todos
                             </a>
                         </div>
@@ -1184,7 +1992,7 @@
                                         </td>
                                         <td>
                                             <div class="semestre-table-actions">
-                                                <a href="{% url 'detalle_semestre' ciclo.id %}?origen=ti" class="btn btn-sm {% if ciclo.estado == 'CERRADO' %}btn-outline-secondary{% elif ciclo.estado == 'ACTIVO' %}btn-success{% else %}btn-primary{% endif %} fw-bold rounded-pill px-3">
+                                                <a href="{% url 'detalle_semestre' ciclo.id %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-sm {% if ciclo.estado == 'CERRADO' %}btn-outline-secondary{% elif ciclo.estado == 'ACTIVO' %}btn-success{% else %}btn-primary{% endif %} fw-bold rounded-pill px-3">
                                                     <i class="bi bi-eye-fill me-1"></i>
                                                     {% if ciclo.estado == 'CERRADO' %}
                                                         Consultar
@@ -1201,7 +2009,7 @@
                                                             <i class="bi bi-files me-1"></i> Clonar
                                                         </button>
                                                     {% else %}
-                                                        <a href="{% url 'clonar_semestre' ciclo.id %}?origen=ti" class="btn btn-sm btn-clone-ready fw-bold rounded-pill px-3">
+                                                        <a href="{% url 'clonar_semestre' ciclo.id %}?origen=ti" onclick="rememberTab('tab-ciclos-btn')" class="btn btn-sm btn-clone-ready fw-bold rounded-pill px-3">
                                                             <i class="bi bi-files me-1"></i> Clonar / configurar
                                                         </a>
                                                     {% endif %}
@@ -1275,6 +2083,7 @@
                                 <option value="">-- Elegir Rol --</option>
                                 <option value="Administrador del Sistema">Administrador del Sistema</option>
                                 <option value="Directora">Directora</option>
+                                <option value="Supervisora General">Supervisora General</option>
                                 <option value="Trabajadora Social">Trabajadora Social</option>
                                 <option value="Coordinadora de Sala">Coordinadora de Sala</option>
                                 <option value="Médico">Médico</option>
@@ -1377,133 +2186,276 @@
                 </div>
 
                 <div class="tab-pane fade" id="tab-incidencias">
-                    <div class="content-card mb-4 border-primary border-top border-4">
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                    <div class="inc-ti-page">
+                        <div class="inc-ti-topbar">
                             <div>
-                                <h5 class="fw-bold m-0">
-                                    <i class="bi bi-clipboard2-pulse-fill text-primary me-2"></i>Gestión de Incidencias
-                                </h5>
-                                <p class="text-muted small m-0">
-                                    Consulta general, seguimiento y cierre administrativo de incidencias.
+                                <div class="inc-ti-kicker">
+                                    <i class="bi bi-shield-check"></i> Vista administrativa
+                                </div>
+                                <h2 class="inc-ti-title">Consulta general de incidencias</h2>
+                                <p class="inc-ti-desc">
+                                    El Administrador del Sistema puede consultar todas las incidencias registradas por las áreas,
+                                    revisar su estado, identificar casos de riesgo y filtrar por tipo sin salir de este panel.
                                 </p>
                             </div>
 
-                            <a href="{% url 'panel_incidencias' %}" class="btn btn-primary fw-bold">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Abrir módulo de incidencias
+                            <div class="inc-ti-action-group">
+                                <a href="{% url 'panel_gobierno_ti' %}?tab=incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-btn inc-ti-btn-primary inc-ti-btn-refresh" title="Actualizar información">
+                                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="inc-ti-alert">
+                            <div class="inc-ti-alert-icon">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+                            <div>
+                                <h6>Consulta administrativa, no captura de incidencias</h6>
+                                <p>
+                                    El Administrador supervisa y consulta. La creación de incidencias corresponde a cada área:
+                                    Coordinación de Sala, Nutrición, Médico o Psicología.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="inc-ti-kpi-grid">
+                            <a href="{% url 'panel_gobierno_ti' %}?tab=incidencias#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-kpi-card text-decoration-none">
+                                <div class="inc-ti-kpi-icon inc-kpi-blue"><i class="bi bi-clipboard2-data-fill"></i></div>
+                                <div>
+                                    <div class="inc-ti-kpi-number">{{ total_incidencias|default:"0" }}</div>
+                                    <div class="inc-ti-kpi-label">Total registradas</div>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'panel_gobierno_ti' %}?estado=ABIERTA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-kpi-card text-decoration-none">
+                                <div class="inc-ti-kpi-icon inc-kpi-amber"><i class="bi bi-folder2-open"></i></div>
+                                <div>
+                                    <div class="inc-ti-kpi-number">{{ total_abiertas|default:"0" }}</div>
+                                    <div class="inc-ti-kpi-label">Abiertas</div>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'panel_gobierno_ti' %}?nivel=ALTO#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-kpi-card text-decoration-none">
+                                <div class="inc-ti-kpi-icon inc-kpi-red"><i class="bi bi-exclamation-octagon-fill"></i></div>
+                                <div>
+                                    <div class="inc-ti-kpi-number">{{ total_riesgo_alto|default:"0" }}</div>
+                                    <div class="inc-ti-kpi-label">Riesgo alto</div>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'panel_gobierno_ti' %}?estado=CERRADA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-kpi-card text-decoration-none">
+                                <div class="inc-ti-kpi-icon inc-kpi-green"><i class="bi bi-check-circle-fill"></i></div>
+                                <div>
+                                    <div class="inc-ti-kpi-number">{{ total_cerradas|default:"0" }}</div>
+                                    <div class="inc-ti-kpi-label">Cerradas</div>
+                                </div>
                             </a>
                         </div>
 
-                        <div class="incidencias-admin-hero">
-                            <div class="d-flex align-items-start gap-3">
-                                <div class="incidencias-admin-icon" style="background:#dbeafe; color:#1d4ed8; margin-bottom:0;">
-                                    <i class="bi bi-shield-check"></i>
-                                </div>
+                        <div class="inc-ti-area-grid">
+                            <a href="{% url 'panel_gobierno_ti' %}?tipo=MEDICA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-area-card inc-area-medica {% if tipo == 'MEDICA' %}active{% endif %}">
+                                <div class="inc-ti-area-icon"><i class="bi bi-heart-pulse-fill"></i></div>
                                 <div>
-                                    <h6>Vista administrativa de incidencias</h6>
-                                    <p>
-                                        El Administrador del Sistema puede consultar todas las incidencias registradas por Coordinación de Sala,
-                                        Nutrición, Médico y Psicología. También puede cerrar incidencias como autoridad administrativa cuando el
-                                        creador no pueda hacerlo, siempre que ya exista al menos un seguimiento.
+                                    <div class="inc-ti-area-name">Médicas</div>
+                                    <div class="inc-ti-area-desc">Síntomas, caídas, fiebre, vómito, diarrea, alergias o atención médica.</div>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'panel_gobierno_ti' %}?tipo=NUTRICIONAL#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-area-card inc-area-nutricional {% if tipo == 'NUTRICIONAL' %}active{% endif %}">
+                                <div class="inc-ti-area-icon"><i class="bi bi-egg-fried"></i></div>
+                                <div>
+                                    <div class="inc-ti-area-name">Nutricionales</div>
+                                    <div class="inc-ti-area-desc">Alimentación, alergias, intolerancias, rechazo de alimentos o atragantamiento.</div>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'panel_gobierno_ti' %}?tipo=PSICOLOGICA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-area-card inc-area-psicologica {% if tipo == 'PSICOLOGICA' %}active{% endif %}">
+                                <div class="inc-ti-area-icon"><i class="bi bi-chat-square-heart-fill"></i></div>
+                                <div>
+                                    <div class="inc-ti-area-name">Psicológicas</div>
+                                    <div class="inc-ti-area-desc">Conducta, emociones, adaptación, convivencia u observaciones psicológicas.</div>
+                                </div>
+                            </a>
+
+                            <a href="{% url 'panel_gobierno_ti' %}?tipo=PEDAGOGICA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-area-card inc-area-pedagogica {% if tipo == 'PEDAGOGICA' %}active{% endif %}">
+                                <div class="inc-ti-area-icon"><i class="bi bi-easel2-fill"></i></div>
+                                <div>
+                                    <div class="inc-ti-area-name">Pedagógicas</div>
+                                    <div class="inc-ti-area-desc">Actividades, material, aprendizaje, participación o conducta pedagógica.</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="inc-ti-panel">
+                            <div class="inc-ti-panel-header">
+                                <div>
+                                    <h5 class="inc-ti-panel-title">
+                                        <i class="bi bi-funnel-fill text-primary"></i> Filtros rápidos
+                                    </h5>
+                                    <p class="inc-ti-panel-subtitle">
+                                        Consulta el listado administrativo filtrado por estado, nivel o tipo en esta misma pantalla.
                                     </p>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="incidencias-admin-grid">
-                            <div class="incidencias-admin-card">
-                                <div class="incidencias-admin-icon" style="background:#dbeafe; color:#1d4ed8;">
-                                    <i class="bi bi-eye-fill"></i>
-                                </div>
-                                <div class="incidencias-admin-title">Consultar todas</div>
-                                <div class="incidencias-admin-desc">
-                                    Revisa incidencias abiertas, cerradas, de riesgo alto o sin seguimiento.
-                                </div>
-                                <a href="{% url 'panel_incidencias' %}" class="btn btn-outline-primary btn-sm fw-bold w-100 rounded-pill">
-                                    Ver panel
-                                </a>
-                            </div>
-
-                            <div class="incidencias-admin-card">
-                                <div class="incidencias-admin-icon" style="background:#fef3c7; color:#b45309;">
-                                    <i class="bi bi-folder2-open"></i>
-                                </div>
-                                <div class="incidencias-admin-title">Incidencias abiertas</div>
-                                <div class="incidencias-admin-desc">
-                                    Consulta incidencias pendientes de seguimiento o resolución.
-                                </div>
-                                <a href="{% url 'panel_incidencias' %}?estado=ABIERTA" class="btn btn-outline-warning btn-sm fw-bold w-100 rounded-pill">
-                                    Ver abiertas
-                                </a>
-                            </div>
-
-                            <div class="incidencias-admin-card">
-                                <div class="incidencias-admin-icon" style="background:#fee2e2; color:#b91c1c;">
-                                    <i class="bi bi-exclamation-octagon-fill"></i>
-                                </div>
-                                <div class="incidencias-admin-title">Riesgo alto</div>
-                                <div class="incidencias-admin-desc">
-                                    Revisa registros críticos donde debe quedar evidencia del aviso al responsable.
-                                </div>
-                                <a href="{% url 'panel_incidencias' %}?nivel=ALTO" class="btn btn-outline-danger btn-sm fw-bold w-100 rounded-pill">
-                                    Ver riesgo alto
-                                </a>
-                            </div>
-
-                            <div class="incidencias-admin-card">
-                                <div class="incidencias-admin-icon" style="background:#ede9fe; color:#6d28d9;">
-                                    <i class="bi bi-easel2-fill"></i>
-                                </div>
-                                <div class="incidencias-admin-title">Pedagógicas</div>
-                                <div class="incidencias-admin-desc">
-                                    Registros de Coordinación de Sala relacionados con actividades, material o conducta pedagógica.
-                                </div>
-                                <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="btn btn-outline-primary btn-sm fw-bold w-100 rounded-pill">
-                                    Ver pedagógicas
-                                </a>
-                            </div>
-
-                            <div class="incidencias-admin-card">
-                                <div class="incidencias-admin-icon" style="background:#dcfce7; color:#15803d;">
-                                    <i class="bi bi-egg-fried"></i>
-                                </div>
-                                <div class="incidencias-admin-title">Nutricionales</div>
-                                <div class="incidencias-admin-desc">
-                                    Incidencias de alimentación, alergias, intolerancias, rechazo o atragantamiento.
-                                </div>
-                                <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn btn-outline-success btn-sm fw-bold w-100 rounded-pill">
-                                    Ver nutricionales
-                                </a>
-                            </div>
-
-                            <div class="incidencias-admin-card">
-                                <div class="incidencias-admin-icon" style="background:#fee2e2; color:#b91c1c;">
-                                    <i class="bi bi-heart-pulse-fill"></i>
-                                </div>
-                                <div class="incidencias-admin-title">Médicas y psicológicas</div>
-                                <div class="incidencias-admin-desc">
-                                    Consulta eventos médicos y observaciones psicológicas del menor.
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn btn-outline-danger btn-sm fw-bold w-50 rounded-pill">
-                                        Médicas
+                                <div class="inc-ti-filter-pills">
+                                    <a href="{% url 'panel_gobierno_ti' %}?tab=incidencias#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if not estado and not nivel and not tipo %}active{% endif %}">
+                                        <i class="bi bi-list-ul"></i> Todas
                                     </a>
-                                    <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn btn-outline-primary btn-sm fw-bold w-50 rounded-pill">
-                                        Psicológicas
+                                    <a href="{% url 'panel_gobierno_ti' %}?estado=ABIERTA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if estado == 'ABIERTA' %}active{% endif %}">
+                                        <i class="bi bi-folder2-open"></i> Abiertas
+                                    </a>
+                                    <a href="{% url 'panel_gobierno_ti' %}?nivel=ALTO#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if nivel == 'ALTO' %}active{% endif %}">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Riesgo alto
+                                    </a>
+                                    <a href="{% url 'panel_gobierno_ti' %}?tipo=MEDICA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if tipo == 'MEDICA' %}active{% endif %}">
+                                        <i class="bi bi-heart-pulse-fill"></i> Médicas
+                                    </a>
+                                    <a href="{% url 'panel_gobierno_ti' %}?tipo=NUTRICIONAL#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if tipo == 'NUTRICIONAL' %}active{% endif %}">
+                                        <i class="bi bi-egg-fried"></i> Nutricionales
+                                    </a>
+                                    <a href="{% url 'panel_gobierno_ti' %}?tipo=PSICOLOGICA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if tipo == 'PSICOLOGICA' %}active{% endif %}">
+                                        <i class="bi bi-chat-square-heart-fill"></i> Psicológicas
+                                    </a>
+                                    <a href="{% url 'panel_gobierno_ti' %}?tipo=PEDAGOGICA#listado-incidencias" onclick="rememberTab('tab-incidencias-btn')" class="inc-ti-filter-pill {% if tipo == 'PEDAGOGICA' %}active{% endif %}">
+                                        <i class="bi bi-easel2-fill"></i> Pedagógicas
                                     </a>
                                 </div>
                             </div>
+
+                            <div class="inc-ti-filter-body">
+                                <form method="get" action="{% url 'panel_gobierno_ti' %}#listado-incidencias" class="inc-ti-filter-form" onsubmit="rememberTab('tab-incidencias-btn')">
+                                    <div class="inc-ti-field">
+                                        <label for="estado">Estado</label>
+                                        <select name="estado" id="estado">
+                                            <option value="">Todos</option>
+                                            <option value="ABIERTA" {% if estado == 'ABIERTA' %}selected{% endif %}>Abiertas</option>
+                                            <option value="CERRADA" {% if estado == 'CERRADA' %}selected{% endif %}>Cerradas</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="inc-ti-field">
+                                        <label for="nivel">Nivel</label>
+                                        <select name="nivel" id="nivel">
+                                            <option value="">Todos</option>
+                                            <option value="ALTO" {% if nivel == 'ALTO' %}selected{% endif %}>Alto</option>
+                                            <option value="MEDIO" {% if nivel == 'MEDIO' %}selected{% endif %}>Medio</option>
+                                            <option value="BAJO" {% if nivel == 'BAJO' %}selected{% endif %}>Bajo</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="inc-ti-field">
+                                        <label for="tipo">Tipo</label>
+                                        <select name="tipo" id="tipo">
+                                            <option value="">Todos</option>
+                                            <option value="MEDICA" {% if tipo == 'MEDICA' %}selected{% endif %}>Médica</option>
+                                            <option value="NUTRICIONAL" {% if tipo == 'NUTRICIONAL' %}selected{% endif %}>Nutricional</option>
+                                            <option value="PSICOLOGICA" {% if tipo == 'PSICOLOGICA' %}selected{% endif %}>Psicológica</option>
+                                            <option value="PEDAGOGICA" {% if tipo == 'PEDAGOGICA' %}selected{% endif %}>Pedagógica</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="inc-ti-field">
+                                        <button type="submit" class="inc-ti-btn inc-ti-btn-primary w-100 justify-content-center">
+                                            <i class="bi bi-search"></i> Aplicar filtros
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
 
-                        <div class="incidencias-admin-note">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            El Administrador no crea incidencias de área. Las crea cada responsable:
-                            Coordinadora de Sala, Nutrióloga, Médico o Psicóloga. Desde aquí solo se consulta y se apoya el cierre administrativo cuando sea necesario.
-                        </div>
+                        <div class="inc-ti-panel" id="listado-incidencias">
+                            <div class="inc-ti-panel-header">
+                                <div>
+                                    <h5 class="inc-ti-panel-title">
+                                        <i class="bi bi-table text-primary"></i> Listado de incidencias
+                                    </h5>
+                                    <p class="inc-ti-panel-subtitle">
+                                        Resultado actual de la consulta administrativa dentro del Panel TI.
+                                    </p>
+                                </div>
 
-                        <div class="legacy-muted">
-                            <strong><i class="bi bi-check2-circle me-1"></i>Regla de cierre:</strong>
-                            ninguna incidencia puede cerrarse sin mínimo un seguimiento. Si existen incidencias abiertas,
-                            el cierre del día no se bloquea; solo se muestra aviso. Para cerrar semestre, las incidencias deben quedar resueltas.
+                                <span class="inc-ti-badge inc-badge-neutral">
+                                    <i class="bi bi-database-fill-check"></i>
+                                    {{ incidencias_rows|length }} resultado(s)
+                                </span>
+                            </div>
+
+                            <div class="inc-ti-table-wrap">
+                                <table class="inc-ti-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Folio / descripción</th>
+                                            <th>Tipo</th>
+                                            <th>Nivel</th>
+                                            <th>Estado</th>
+                                            <th>Menor</th>
+                                            <th>Responsable</th>
+                                            <th>Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in incidencias_rows %}
+                                        <tr>
+                                            <td>
+                                                <div class="inc-ti-folio">
+                                                    <i class="bi bi-hash text-primary"></i>
+                                                    {{ row.folio|default:row.id }}
+                                                </div>
+                                                <div class="inc-ti-row-desc">
+                                                    {{ row.descripcion|default:"Sin descripción registrada."|truncatechars:120 }}
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <span class="inc-ti-badge inc-badge-type">
+                                                    <i class="bi bi-tag-fill"></i>
+                                                    {{ row.tipo|default:"--" }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                {% if row.nivel|upper == 'ALTO' %}
+                                                    <span class="inc-ti-badge inc-badge-high"><i class="bi bi-exclamation-octagon-fill"></i> Alto</span>
+                                                {% elif row.nivel|upper == 'MEDIO' %}
+                                                    <span class="inc-ti-badge inc-badge-medium"><i class="bi bi-exclamation-triangle-fill"></i> Medio</span>
+                                                {% elif row.nivel|upper == 'BAJO' %}
+                                                    <span class="inc-ti-badge inc-badge-low"><i class="bi bi-info-circle-fill"></i> Bajo</span>
+                                                {% else %}
+                                                    <span class="inc-ti-badge inc-badge-neutral"><i class="bi bi-dash-circle"></i> {{ row.nivel|default:"--" }}</span>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>
+                                                {% if row.estado|upper == 'ABIERTA' or row.estado|upper == 'ABIERTO' or row.estado|upper == 'PENDIENTE' or row.estado|upper == 'EN_SEGUIMIENTO' %}
+                                                    <span class="inc-ti-badge inc-badge-open"><i class="bi bi-folder2-open"></i> Abierta</span>
+                                                {% elif row.estado|upper == 'CERRADA' or row.estado|upper == 'CERRADO' or row.estado|upper == 'RESUELTA' or row.estado|upper == 'RESUELTO' %}
+                                                    <span class="inc-ti-badge inc-badge-closed"><i class="bi bi-check-circle-fill"></i> Cerrada</span>
+                                                {% else %}
+                                                    <span class="inc-ti-badge inc-badge-neutral"><i class="bi bi-dash-circle"></i> {{ row.estado|default:"--" }}</span>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>{{ row.menor|default:"--" }}</td>
+                                            <td>{{ row.responsable|default:"--" }}</td>
+                                            <td>{{ row.fecha|default:"--" }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="inc-ti-empty">
+                                                    <div class="inc-ti-empty-icon">
+                                                        <i class="bi bi-inbox"></i>
+                                                    </div>
+                                                    <h6>No hay incidencias para mostrar</h6>
+                                                    <p class="mb-0">No se encontraron registros con los filtros seleccionados.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1561,9 +2513,8 @@
                     </div>
                 </div>
 
-            </div>
         </div>
-    </div>
+    </main>
 </div>
 
 <div class="modal fade" id="modalCrearUser" tabindex="-1">
@@ -1596,7 +2547,7 @@
                             <select name="tipo_persona" class="jira-input" required>
                                 <option value="">Seleccione...</option>
                                 <option value="PERSONAL">Personal de la estancia</option>
-                                <option value="SUPERVISOR">Supervisor</option>
+                                <option value="SUPERVISOR">Supervisora General</option>
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
@@ -1649,7 +2600,7 @@
                             <label class="jira-label">Tipo *</label>
                             <select name="tipo_persona" id="edit_tipo" class="jira-input" required>
                                 <option value="PERSONAL">Personal de la estancia</option>
-                                <option value="SUPERVISOR">Supervisor</option>
+                                <option value="SUPERVISOR">Supervisora General</option>
                                 <option value="ADMIN">Administrador de Sistema</option>
                             </select>
                         </div>
@@ -1683,13 +2634,112 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
+        var params = new URLSearchParams(window.location.search);
+
+        var debeAbrirSemestres =
+            params.get('tab') === 'semestres';
+
+        var debeAbrirIncidencias =
+            params.get('tab') === 'incidencias' ||
+            params.has('estado') ||
+            params.has('nivel') ||
+            params.has('tipo');
+
         var savedTabID = localStorage.getItem('activeTabID');
+
+        /*
+          Prioridad:
+          1. Si la URL pide Semestres, abre Gestión de Semestres.
+          2. Si la URL pide Incidencias, abre Incidencias.
+          3. Si no hay parámetro, respeta la última pestaña usada.
+        */
+        if (debeAbrirSemestres) {
+            savedTabID = 'tab-ciclos-btn';
+        } else if (debeAbrirIncidencias) {
+            savedTabID = 'tab-incidencias-btn';
+        }
+
         if (savedTabID) {
             var btn = document.getElementById(savedTabID);
-            if (btn) new bootstrap.Tab(btn).show();
+            if (btn) {
+                new bootstrap.Tab(btn).show();
+                localStorage.setItem('activeTabID', savedTabID);
+            }
+        }
+
+        /*
+          Solo hacemos desplazamiento automático al listado cuando realmente
+          estamos en la pestaña de Incidencias.
+        */
+        if (savedTabID === 'tab-incidencias-btn') {
+            var destino = null;
+
+            if (window.location.hash) {
+                destino = document.querySelector(window.location.hash);
+            } else if (debeAbrirIncidencias) {
+                destino = document.getElementById('listado-incidencias');
+            }
+
+            if (destino) {
+                setTimeout(function() {
+                    destino.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 220);
+            }
         }
     });
-    function rememberTab(id) { localStorage.setItem('activeTabID', id); }
+
+    function limpiarFiltrosIncidenciasDeUrl() {
+        var url = new URL(window.location.href);
+        var cambio = false;
+
+        ['estado', 'nivel', 'tipo'].forEach(function(param) {
+            if (url.searchParams.has(param)) {
+                url.searchParams.delete(param);
+                cambio = true;
+            }
+        });
+
+        if (url.searchParams.get('tab') === 'incidencias') {
+            url.searchParams.delete('tab');
+            cambio = true;
+        }
+
+        if (url.hash === '#listado-incidencias') {
+            url.hash = '';
+            cambio = true;
+        }
+
+        if (cambio) {
+            var nuevaUrl = url.pathname;
+            var query = url.searchParams.toString();
+
+            if (query) {
+                nuevaUrl += '?' + query;
+            }
+
+            if (url.hash) {
+                nuevaUrl += url.hash;
+            }
+
+            window.history.replaceState({}, '', nuevaUrl);
+        }
+    }
+
+    function rememberTab(id) {
+        localStorage.setItem('activeTabID', id);
+
+        /*
+          Si el usuario cambia a Gestión de Semestres, Personal, Roles,
+          Auditoría o Seguridad, limpiamos filtros viejos de Incidencias.
+          Así al regresar desde Crear sede / Crear semestre no vuelve a Incidencias.
+        */
+        if (id !== 'tab-incidencias-btn') {
+            limpiarFiltrosIncidenciasDeUrl();
+        }
+    }
 
     function cargarDatosEdicion(boton) {
         document.getElementById('edit_user_id').value = boton.getAttribute('data-id');

@@ -11,209 +11,393 @@
 
     <style>
         :root{
-            --azul:#1d4ed8;
-            --azul-oscuro:#1e3a8a;
-            --azul-suave:#eff6ff;
-            --gris-fondo:#f3f6fb;
-            --texto:#0f172a;
+            --azul:#2563eb;
+            --azul-oscuro:#0b2d68;
+            --azul-profundo:#1e40af;
+            --azul-suave:#eef6ff;
+            --cyan:#0891b2;
+            --cyan-claro:#ecfeff;
+            --texto:#0b1f44;
             --muted:#64748b;
             --borde:#dbe4ef;
+            --fondo:#f4f7fb;
+            --card:#ffffff;
             --verde:#16a34a;
             --amarillo:#f59e0b;
             --rojo:#dc2626;
             --morado:#7c3aed;
         }
 
-        body{
-            margin:0;
-            background:var(--gris-fondo);
-            color:var(--texto);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        *{
+            box-sizing:border-box;
         }
 
+        body{
+            margin:0;
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.10), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.08), transparent 30%),
+                linear-gradient(180deg, #ffffff 0%, var(--fondo) 48%, #eef3f9 100%);
+            color:var(--texto);
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        /* =========================
+           BARRA SUPERIOR
+        ========================= */
         .topbar{
-            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
-            color:white;
-            box-shadow:0 8px 22px rgba(15,23,42,.18);
+            background:#ffffff;
+            border-bottom:1px solid #dfe8f5;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            position:sticky;
+            top:0;
+            z-index:100;
         }
 
         .topbar-inner{
-            max-width:1220px;
-            margin:auto;
-            padding:14px 18px;
+            max-width:1320px;
+            margin:0 auto;
+            padding:18px 28px;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:16px;
+            gap:18px;
         }
 
         .brand{
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
-        .brand img{
-            height:46px;
-            max-width:120px;
+        .brand-logo{
+            width:96px;
+            height:64px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg, #1d4ed8, #0891b2);
+            padding:8px;
+            box-shadow:0 12px 26px rgba(37,99,235,.25);
+            flex:0 0 auto;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
             object-fit:contain;
+            display:block;
+            background:transparent !important;
+            border:none !important;
+            padding:0 !important;
+            box-shadow:none !important;
         }
 
         .brand-title{
-            font-size:1.05rem;
-            font-weight:900;
-            letter-spacing:.04em;
-            text-transform:uppercase;
-            line-height:1.1;
+            margin:0;
+            color:#0b1f44;
+            font-size:1.45rem;
+            font-weight:950;
+            line-height:1.05;
+            letter-spacing:-.04em;
         }
 
         .brand-subtitle{
-            font-size:.82rem;
-            opacity:.88;
-            margin-top:2px;
+            margin-top:4px;
+            color:#50678f;
+            font-weight:650;
+            font-size:.92rem;
         }
 
-        .btn-top{
-            border-radius:12px;
-            font-weight:800;
-            padding:.55rem .9rem;
+        .top-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
         }
 
+        .btn-return{
+            border:1px solid #d8e5f7;
+            background:#ffffff;
+            color:#0b1f44;
+            border-radius:14px;
+            padding:10px 16px;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            box-shadow:0 8px 18px rgba(15,23,42,.04);
+            transition:.2s ease;
+            white-space:nowrap;
+        }
+
+        .btn-return:hover{
+            transform:translateY(-1px);
+            color:var(--azul);
+            border-color:#bfdbfe;
+            background:#f8fbff;
+        }
+
+        .admin-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0b1f44;
+            font-weight:850;
+            white-space:nowrap;
+        }
+
+        .admin-icon{
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background:linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color:var(--azul);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.35rem;
+        }
+
+        /* =========================
+           CONTENIDO
+        ========================= */
         .main{
-            max-width:1220px;
-            margin:28px auto 60px;
-            padding:0 18px;
+            max-width:1320px;
+            margin:28px auto 70px;
+            padding:0 28px;
         }
 
         .hero{
-            background:linear-gradient(135deg, #1d4ed8, #2563eb);
-            border-radius:24px;
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(135deg, #1d4ed8, #0891b2);
+            border-radius:28px;
             color:white;
-            padding:30px 34px;
-            box-shadow:0 22px 50px rgba(29,78,216,.22);
+            padding:28px;
+            box-shadow:0 24px 48px rgba(29,78,216,.24);
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:20px;
-            align-items:center;
+            grid-template-columns:minmax(0,1fr) 340px;
+            gap:22px;
+            align-items:stretch;
             margin-bottom:24px;
         }
 
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:290px;
+            height:290px;
+            border-radius:50%;
+            right:-105px;
+            top:-120px;
+            background:rgba(255,255,255,.14);
+        }
+
+        .hero-main{
+            position:relative;
+            z-index:1;
+            display:flex;
+            align-items:flex-start;
+            gap:18px;
+        }
+
+        .hero-icon{
+            width:72px;
+            height:72px;
+            border-radius:21px;
+            background:rgba(255,255,255,.18);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2rem;
+            flex:0 0 auto;
+        }
+
         .hero h1{
+            margin:0 0 8px;
             font-size:2rem;
             font-weight:950;
-            margin:0 0 8px;
-            letter-spacing:-.03em;
+            letter-spacing:-.05em;
         }
 
         .hero p{
             margin:0;
-            opacity:.92;
+            max-width:760px;
             font-size:1rem;
+            line-height:1.55;
+            opacity:.95;
+            font-weight:650;
         }
 
-        .hero-icon{
-            width:92px;
-            height:92px;
-            border-radius:22px;
+        .hero-note{
+            position:relative;
+            z-index:1;
             background:rgba(255,255,255,.16);
+            border:1px solid rgba(255,255,255,.34);
+            border-radius:22px;
+            padding:20px;
+            backdrop-filter:blur(4px);
+        }
+
+        .hero-note h6{
+            margin:0 0 8px;
+            font-size:1rem;
+            font-weight:950;
             display:flex;
             align-items:center;
-            justify-content:center;
-            font-size:2.6rem;
+            gap:8px;
         }
 
-        .actions-row{
+        .hero-note p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.5;
+            font-weight:700;
+            color:white;
+            opacity:.96;
+        }
+
+        .active-strip{
+            background:rgba(255,255,255,.96);
+            border:1px solid #bfdbfe;
+            border-left:7px solid var(--azul);
+            border-radius:22px;
+            padding:18px 20px;
+            box-shadow:0 14px 28px rgba(37,99,235,.07);
+            margin-bottom:20px;
+        }
+
+        .active-title{
+            color:#1e3a8a;
+            font-size:.82rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:7px;
             display:flex;
-            flex-wrap:wrap;
-            gap:10px;
-            margin-bottom:22px;
+            align-items:center;
+            gap:8px;
         }
 
-        .action-btn{
-            border-radius:14px;
-            font-weight:850;
-            padding:.72rem 1rem;
-            box-shadow:0 10px 22px rgba(15,23,42,.08);
+        .active-name{
+            font-weight:950;
+            color:#0f172a;
+            font-size:1.05rem;
+            margin-bottom:3px;
         }
 
         .alert-soft{
             border:1px solid #bfdbfe;
             background:#eff6ff;
             color:#1e3a8a;
-            border-radius:16px;
-            padding:14px 16px;
-            margin-bottom:18px;
-            font-weight:650;
+            border-radius:18px;
+            padding:15px 17px;
+            margin-bottom:20px;
+            font-weight:700;
+            box-shadow:0 12px 26px rgba(15,23,42,.05);
         }
 
         .stats-grid{
             display:grid;
             grid-template-columns:repeat(4,minmax(0,1fr));
             gap:14px;
-            margin-bottom:22px;
+            margin:0 0 20px;
         }
 
         .stat-card{
-            background:white;
+            background:rgba(255,255,255,.96);
             border:1px solid var(--borde);
-            border-radius:18px;
+            border-radius:20px;
             padding:17px;
-            box-shadow:0 10px 22px rgba(15,23,42,.06);
+            box-shadow:0 12px 26px rgba(15,23,42,.06);
         }
 
         .stat-label{
             color:var(--muted);
-            font-size:.78rem;
-            font-weight:900;
+            font-size:.75rem;
+            font-weight:950;
             letter-spacing:.06em;
             text-transform:uppercase;
             margin-bottom:7px;
         }
 
         .stat-value{
-            font-size:1.55rem;
+            font-size:1.6rem;
             font-weight:950;
             color:#0f172a;
             line-height:1;
         }
 
+        .content-grid{
+            display:grid;
+            grid-template-columns:minmax(0,1.45fr) minmax(330px,.85fr);
+            gap:20px;
+            align-items:start;
+        }
+
         .panel{
-            background:white;
+            background:rgba(255,255,255,.96);
             border:1px solid var(--borde);
-            border-radius:22px;
+            border-radius:24px;
             overflow:hidden;
             box-shadow:0 18px 38px rgba(15,23,42,.07);
-            margin-bottom:22px;
+            margin-bottom:18px;
         }
 
         .panel-header{
-            padding:18px 20px;
-            background:#f8fafc;
+            padding:18px 22px;
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
             border-bottom:1px solid var(--borde);
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:12px;
+            gap:14px;
+            flex-wrap:wrap;
         }
 
         .panel-title{
             margin:0;
-            color:#334155;
-            font-size:1rem;
+            color:#0b1f44;
+            font-size:1.05rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .title-icon{
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            background:#eaf2ff;
+            color:var(--azul);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.1rem;
+        }
+
+        .table-wrap{
+            overflow-x:auto;
         }
 
         .table{
             margin:0;
             vertical-align:middle;
+            min-width:820px;
         }
 
         .table th{
             background:#f8fafc;
             color:#475569;
-            font-size:.75rem;
+            font-size:.72rem;
             text-transform:uppercase;
             letter-spacing:.08em;
             font-weight:950;
@@ -225,17 +409,25 @@
         .table td{
             padding:15px 16px;
             border-bottom:1px solid #edf2f7;
+            color:#0f172a;
         }
 
         .semestre-name{
             font-weight:950;
             color:#0f172a;
-            margin-bottom:3px;
+            margin-bottom:4px;
+            line-height:1.25;
         }
 
         .semestre-meta{
             color:var(--muted);
-            font-size:.86rem;
+            font-size:.84rem;
+            font-weight:650;
+        }
+
+        .staff-list{
+            font-size:.84rem;
+            line-height:1.45;
         }
 
         .badge-status{
@@ -246,6 +438,7 @@
             display:inline-flex;
             align-items:center;
             gap:5px;
+            white-space:nowrap;
         }
 
         .badge-activo{
@@ -280,16 +473,10 @@
         }
 
         .btn-mini{
-            border-radius:11px;
-            font-size:.83rem;
-            font-weight:850;
-            padding:.45rem .7rem;
-        }
-
-        .side-grid{
-            display:grid;
-            grid-template-columns:1.2fr .8fr;
-            gap:18px;
+            border-radius:12px;
+            font-size:.82rem;
+            font-weight:900;
+            padding:.48rem .72rem;
         }
 
         .sede-card{
@@ -306,13 +493,16 @@
         }
 
         .sede-name{
-            font-weight:900;
+            font-weight:950;
             color:#0f172a;
+            line-height:1.25;
         }
 
         .sede-meta{
             color:var(--muted);
             font-size:.86rem;
+            font-weight:650;
+            margin-top:2px;
         }
 
         .empty-state{
@@ -333,87 +523,100 @@
             margin-bottom:6px;
         }
 
-        .active-strip{
-            background:white;
-            border:1px solid #bfdbfe;
-            border-left:6px solid var(--azul);
-            border-radius:18px;
-            padding:16px 18px;
-            box-shadow:0 12px 26px rgba(15,23,42,.06);
-            margin-bottom:18px;
+        /* =========================
+           ALERTAS PERSONALIZADAS
+        ========================= */
+        .swal2-toast.sistema-toast{
+            border-radius:18px!important;
+            padding:14px 16px!important;
+            box-shadow:0 16px 38px rgba(15,23,42,.18)!important;
+            border:1px solid rgba(226,232,240,.95)!important;
         }
 
-        .active-title{
-            color:#1e3a8a;
-            font-size:.82rem;
-            font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-            margin-bottom:6px;
+        .swal2-toast.sistema-toast .swal2-title{
+            font-size:.92rem!important;
+            font-weight:800!important;
+            line-height:1.35!important;
+            color:#0f172a!important;
         }
 
-        .active-name{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:2px;
+        .swal2-toast.sistema-toast .swal2-icon{
+            margin:0 .65rem 0 0!important;
         }
 
-        @media(max-width:992px){
-            .hero{grid-template-columns:1fr;}
-            .hero-icon{display:none;}
-            .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-            .side-grid{grid-template-columns:1fr;}
+        .swal2-timer-progress-bar{
+            background:rgba(37,99,235,.45)!important;
         }
 
-        @media(max-width:576px){
-            .topbar-inner{align-items:flex-start;flex-direction:column;}
-            .hero{padding:24px 20px;}
-            .hero h1{font-size:1.55rem;}
-            .stats-grid{grid-template-columns:1fr;}
-            .table-responsive{font-size:.92rem;}
-            .btn-row{justify-content:flex-start;}
-        }
-
-        .management-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-bottom:22px;align-items:stretch;}
-        .action-section{padding:18px;}
-        .action-section-title{color:#334155;font-size:.9rem;font-weight:950;text-transform:uppercase;letter-spacing:.06em;margin:0;}
-        .action-section-subtitle{color:#64748b;font-size:.88rem;margin-top:4px;font-weight:650;}
-        .action-group{margin-bottom:16px;}
-        .action-group-title{font-size:.74rem;font-weight:950;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}
-        .action-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
-        .action-card{border:1px solid #dbe4ef;background:#fff;border-radius:18px;padding:14px;text-decoration:none;color:#0f172a;min-height:120px;box-shadow:0 10px 20px rgba(15,23,42,.055);display:flex;flex-direction:column;gap:9px;transition:.16s ease;}
-        .action-card:hover{transform:translateY(-2px);box-shadow:0 16px 28px rgba(15,23,42,.09);border-color:#93c5fd;color:#0f172a;}
-        .action-card.primary{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#2563eb;}
-        .action-card.success{background:#f0fdf4;border-color:#bbf7d0;}
-        .action-card.info{background:#eff6ff;border-color:#bfdbfe;}
-        .action-card.warning{background:#fffbeb;border-color:#fde68a;}
-        .action-card.muted{background:#f8fafc;border-color:#e2e8f0;}
-        .action-icon{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#eff6ff;color:#1d4ed8;font-size:1.25rem;}
-        .action-card.primary .action-icon{background:rgba(255,255,255,.18);color:#fff;}
-        .action-card.success .action-icon{background:#dcfce7;color:#166534;}
-        .action-card.warning .action-icon{background:#fef3c7;color:#92400e;}
-        .action-name{font-weight:950;line-height:1.15;}
-        .action-desc{color:#64748b;font-size:.82rem;line-height:1.32;font-weight:650;}
-        .action-card.primary .action-desc{color:rgba(255,255,255,.86);}
-        .workflow-list{display:flex;flex-direction:column;gap:10px;}
-        .workflow-step{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:11px 12px;}
-        .workflow-num{width:30px;height:30px;border-radius:999px;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:.84rem;}
-        .workflow-title{font-weight:900;color:#0f172a;line-height:1.15;}
-        .workflow-desc{color:#64748b;font-size:.8rem;margin-top:2px;font-weight:650;}
-        .workflow-badge{border-radius:999px;padding:.25rem .52rem;background:#fff;border:1px solid #cbd5e1;color:#475569;font-size:.72rem;font-weight:900;white-space:nowrap;}
-        .next-action-box{background:#f0fdf4;border:1px solid #bbf7d0;border-left:6px solid #16a34a;border-radius:18px;padding:14px 15px;margin-bottom:16px;color:#14532d;font-weight:750;}
-        .next-action-box.warning{background:#fffbeb;border-color:#fde68a;border-left-color:#f59e0b;color:#92400e;}
-        .swal2-toast.sistema-toast{border-radius:18px!important;padding:14px 16px!important;box-shadow:0 16px 38px rgba(15,23,42,.18)!important;border:1px solid rgba(226,232,240,.95)!important;}
-        .swal2-toast.sistema-toast .swal2-title{font-size:.92rem!important;font-weight:800!important;line-height:1.35!important;color:#0f172a!important;}
-        .swal2-toast.sistema-toast .swal2-icon{margin:0 .65rem 0 0!important;}
-        .swal2-timer-progress-bar{background:rgba(37,99,235,.45)!important;}
         .sistema-toast-success{border-left:7px solid #16a34a!important;background:#f0fdf4!important;}
         .sistema-toast-error{border-left:7px solid #dc2626!important;background:#fef2f2!important;}
         .sistema-toast-warning{border-left:7px solid #f59e0b!important;background:#fffbeb!important;}
         .sistema-toast-info{border-left:7px solid #2563eb!important;background:#eff6ff!important;}
-        @media(max-width:992px){.management-grid{grid-template-columns:1fr;}.action-cards{grid-template-columns:repeat(2,minmax(0,1fr));}}
-        @media(max-width:576px){.action-cards{grid-template-columns:1fr;}.workflow-step{grid-template-columns:auto 1fr;}.workflow-badge{grid-column:2;}}
 
+        @media(max-width:1100px){
+            .hero{
+                grid-template-columns:1fr;
+            }
+
+            .content-grid{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media(max-width:768px){
+            .topbar-inner{
+                flex-direction:column;
+                align-items:flex-start;
+                padding:16px 18px;
+            }
+
+            .top-actions{
+                width:100%;
+                justify-content:space-between;
+            }
+
+            .main{
+                padding:0 18px;
+                margin-top:20px;
+            }
+
+            .hero{
+                padding:22px;
+            }
+
+            .hero-main{
+                flex-direction:column;
+            }
+
+            .hero h1{
+                font-size:1.55rem;
+            }
+
+            .stats-grid{
+                grid-template-columns:repeat(2,minmax(0,1fr));
+            }
+        }
+
+        @media(max-width:576px){
+            .top-actions{
+                flex-direction:column;
+                align-items:stretch;
+            }
+
+            .btn-return,
+            .admin-chip{
+                width:100%;
+                justify-content:center;
+            }
+
+            .stats-grid{
+                grid-template-columns:1fr;
+            }
+
+            .btn-row{
+                justify-content:flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -421,53 +624,73 @@
 <nav class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
 
             <div>
-                <div class="brand-title">Configuración de Semestres</div>
+                <h1 class="brand-title">Configuración de Semestres</h1>
                 <div class="brand-subtitle">Administración del sistema</div>
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="top-actions">
             {% if request.GET.origen == "ti" %}
-                <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                    <i class="bi bi-arrow-left me-1"></i> Panel TI
+                <a href="{% url 'panel_gobierno_ti' %}" class="btn-return" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Regresar
                 </a>
             {% else %}
-                <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-light btn-top">
-                    <i class="bi bi-arrow-left me-1"></i> Panel
+                <a href="{% url 'dashboard_admin' %}" class="btn-return">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Regresar
                 </a>
             {% endif %}
-            <a href="{% url 'lista_asignacion_salas' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                <i class="bi bi-diagram-3-fill me-1"></i> Asignación de salas
-            </a>
+
+            <div class="admin-chip">
+                <span class="admin-icon">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+                <span>Administrador(a)</span>
+            </div>
         </div>
     </div>
 </nav>
 
 <main class="main">
 
-
     <section class="hero">
-        <div>
-            <h1>Gestión de Semestres</h1>
-            <p>
-                Crea sedes, configura semestres, salas, maestras, horarios, encuestas y control de cierre.
-            </p>
+        <div class="hero-main">
+            <div class="hero-icon">
+                <i class="bi bi-calendar2-week-fill"></i>
+            </div>
+            <div>
+                <h1>Configuración de Semestres</h1>
+                <p>
+                    Consulta los semestres registrados y configura salas, maestras, horarios, alumnos, encuestas y cierre del periodo.
+                </p>
+            </div>
         </div>
-        <div class="hero-icon">
-            <i class="bi bi-calendar2-week-fill"></i>
+
+        <div class="hero-note">
+            <h6>
+                <i class="bi bi-gear-fill"></i>
+                Gestión del periodo
+            </h6>
+            <p>
+                Desde esta vista puedes revisar el semestre activo, consultar detalles, editar información y administrar las sedes registradas.
+            </p>
         </div>
     </section>
 
     {% if semestre_activo %}
         <div class="active-strip">
             <div class="active-title">
-                <i class="bi bi-check-circle-fill me-1"></i> Semestre activo
+                <i class="bi bi-check-circle-fill"></i>
+                Semestre activo
             </div>
             <div class="active-name">{{ semestre_activo.nombre }}</div>
-            <div class="text-muted">
+            <div class="text-muted fw-semibold">
                 {{ semestre_activo.sede_nombre }} ·
                 {{ semestre_activo.fecha_inicio|date:"d/m/Y" }} al {{ semestre_activo.fecha_fin|date:"d/m/Y" }}
             </div>
@@ -475,84 +698,9 @@
     {% else %}
         <div class="alert-soft">
             <i class="bi bi-info-circle-fill me-2"></i>
-            No hay semestre activo. El administrador puede crear y configurar un semestre nuevo.
+            No hay semestre activo. Selecciona un semestre registrado o crea uno nuevo para configurarlo.
         </div>
     {% endif %}
-
-    <section class="management-grid">
-        <div class="panel action-section">
-            <div class="action-section-title"><i class="bi bi-grid-1x2-fill me-1"></i> Acciones principales</div>
-            <div class="action-section-subtitle mb-3">Usa primero configuración base y después opera cada semestre desde su detalle.</div>
-
-            {% if semestre_activo %}
-                <div class="next-action-box"><i class="bi bi-check-circle-fill me-1"></i> Hay un semestre activo. Puedes revisar su detalle o continuar con asignaciones.</div>
-            {% else %}
-                <div class="next-action-box warning"><i class="bi bi-info-circle-fill me-1"></i> Siguiente recomendado: crea o configura un semestre antes de iniciar operación.</div>
-            {% endif %}
-
-            <div class="action-group">
-                <div class="action-group-title">Semestres</div>
-                <div class="action-cards">
-                    <a href="{% url 'crear_semestre' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card primary">
-                        <div class="action-icon"><i class="bi bi-plus-circle-fill"></i></div>
-                        <div><div class="action-name">Crear semestre</div><div class="action-desc">Registra periodo, sede y personal institucional.</div></div>
-                    </a>
-
-                    {% if semestre_activo %}
-                        <a href="{% url 'detalle_semestre' semestre_activo.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card info">
-                            <div class="action-icon"><i class="bi bi-eye-fill"></i></div>
-                            <div><div class="action-name">Ver semestre activo</div><div class="action-desc">Consulta salas, calendario, alumnos y cierre.</div></div>
-                        </a>
-                    {% else %}
-                        <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card muted">
-                            <div class="action-icon"><i class="bi bi-calendar2-week-fill"></i></div>
-                            <div><div class="action-name">Sin semestre activo</div><div class="action-desc">Cuando inicies uno, aparecerá aquí el acceso directo.</div></div>
-                        </a>
-                    {% endif %}
-
-                    <a href="{% url 'lista_asignacion_salas' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card warning">
-                        <div class="action-icon"><i class="bi bi-person-check-fill"></i></div>
-                        <div><div class="action-name">Asignar alumnos</div><div class="action-desc">Vincula alumnos finalizados con sala y semestre.</div></div>
-                    </a>
-                </div>
-            </div>
-
-            <div class="action-group">
-                <div class="action-group-title">Configuración base</div>
-                <div class="action-cards">
-                    <a href="{% url 'crear_sede' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card info">
-                        <div class="action-icon"><i class="bi bi-building-add"></i></div>
-                        <div><div class="action-name">Crear sede</div><div class="action-desc">Alta de ubicación para semestres y salas.</div></div>
-                    </a>
-
-                    <a href="{% url 'crear_sala' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card success">
-                        <div class="action-icon"><i class="bi bi-door-open-fill"></i></div>
-                        <div><div class="action-name">Crear sala base</div><div class="action-desc">Registra lactantes, maternales o sala mixta.</div></div>
-                    </a>
-
-                    <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="action-card muted">
-                        <div class="action-icon"><i class="bi bi-files"></i></div>
-                        <div><div class="action-name">Clonar semestre</div><div class="action-desc">Pendiente de implementar para copiar configuración anterior.</div></div>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <aside class="panel action-section">
-            <div class="action-section-title"><i class="bi bi-list-ol me-1"></i> Orden recomendado</div>
-            <div class="action-section-subtitle mb-3">Sigue estos pasos para evitar configuraciones incompletas.</div>
-
-            <div class="workflow-list">
-                <div class="workflow-step"><div class="workflow-num">1</div><div><div class="workflow-title">Crear sede</div><div class="workflow-desc">Ubicación donde operará el semestre.</div></div><span class="workflow-badge">Base</span></div>
-                <div class="workflow-step"><div class="workflow-num">2</div><div><div class="workflow-title">Crear semestre</div><div class="workflow-desc">Periodo, fechas, filtros y encuesta.</div></div><span class="workflow-badge">Periodo</span></div>
-                <div class="workflow-step"><div class="workflow-num">3</div><div><div class="workflow-title">Crear salas base</div><div class="workflow-desc">Catálogo de salas disponibles por sede.</div></div><span class="workflow-badge">Salas</span></div>
-                <div class="workflow-step"><div class="workflow-num">4</div><div><div class="workflow-title">Configurar sala del semestre</div><div class="workflow-desc">Cupo y horarios desde el detalle.</div></div><span class="workflow-badge">Detalle</span></div>
-                <div class="workflow-step"><div class="workflow-num">5</div><div><div class="workflow-title">Asignar maestras</div><div class="workflow-desc">Personal por sala y horarios particulares.</div></div><span class="workflow-badge">Personal</span></div>
-                <div class="workflow-step"><div class="workflow-num">6</div><div><div class="workflow-title">Generar calendario</div><div class="workflow-desc">Días operativos, festivos y suspensiones.</div></div><span class="workflow-badge">Calendario</span></div>
-                <div class="workflow-step"><div class="workflow-num">7</div><div><div class="workflow-title">Iniciar semestre</div><div class="workflow-desc">El sistema valida requisitos antes de activar.</div></div><span class="workflow-badge">Inicio</span></div>
-            </div>
-        </aside>
-    </section>
 
     <section class="stats-grid">
         <div class="stat-card">
@@ -577,20 +725,23 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Gestión</div>
-            <div class="stat-value" style="font-size:1.25rem;">Operativa</div>
+            <div class="stat-label">Configuración</div>
+            <div class="stat-value" style="font-size:1.25rem;">Disponible</div>
         </div>
     </section>
 
-    <section class="side-grid">
+    <section class="content-grid">
         <div class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="bi bi-calendar-check me-2"></i>Listado de semestres
+                    <span class="title-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </span>
+                    Listado de semestres
                 </h2>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-wrap">
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr>
@@ -625,7 +776,7 @@
                                 {{ semestre.fecha_fin|date:"d/m/Y" }}
                             </td>
                             <td>
-                                <div class="small">
+                                <div class="staff-list">
                                     <div><strong>Médica:</strong> {{ semestre.medico_asignado|default:"Sin asignar" }}</div>
                                     <div><strong>Nutrición:</strong> {{ semestre.nutriologa_asignada|default:"Sin asignar" }}</div>
                                     <div><strong>Psicología:</strong> {{ semestre.psicologa_asignada|default:"Sin asignar" }}</div>
@@ -657,9 +808,9 @@
                                     </a>
 
                                     {% if semestre.estado != "CERRADO" %}
-                                    <a href="{% url 'editar_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-mini">
-                                        <i class="bi bi-pencil-fill me-1"></i> Editar
-                                    </a>
+                                        <a href="{% url 'editar_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-mini">
+                                            <i class="bi bi-pencil-fill me-1"></i> Editar
+                                        </a>
                                     {% endif %}
                                 </div>
                             </td>
@@ -686,7 +837,10 @@
         <aside class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="bi bi-buildings-fill me-2"></i>Sedes
+                    <span class="title-icon">
+                        <i class="bi bi-buildings-fill"></i>
+                    </span>
+                    Sedes
                 </h2>
                 <a href="{% url 'crear_sede' %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-primary btn-mini">
                     <i class="bi bi-plus-lg"></i>
@@ -726,7 +880,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 {% if messages %}
@@ -777,15 +930,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 });
 </script>
 {% endif %}
-
-
-
-<script>
-    function volverPanelTI() {
-        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
-        window.location.href = "{% url 'panel_gobierno_ti' %}";
-    }
-</script>
 
 </body>
 </html>

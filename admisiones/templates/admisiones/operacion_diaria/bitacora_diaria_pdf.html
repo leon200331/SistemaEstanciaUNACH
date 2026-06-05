@@ -3,60 +3,123 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Bitácora diaria</title>
+<title>Bitácora diaria del menor</title>
 
 <style>
     @page {
         size: letter;
-        margin: 1.4cm 1.2cm;
+        margin: 1.25cm 1.15cm;
     }
 
     body {
         font-family: Arial, Helvetica, sans-serif;
-        color: #111827;
-        font-size: 10.5px;
+        color: #0f172a;
+        font-size: 10.2px;
         line-height: 1.35;
+        background: #ffffff;
+    }
+
+    .pdf-page {
+        width: 100%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    td, th {
+        vertical-align: top;
+    }
+
+    .no-border,
+    .no-border td,
+    .no-border th {
+        border: none !important;
     }
 
     .header {
         width: 100%;
-        border-bottom: 2px solid #1d4ed8;
+        border-bottom: 3px solid #2563eb;
         padding-bottom: 8px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
     }
 
-    .logo {
-        width: 72px;
-        height: 72px;
-        object-fit: contain;
+    .logo-box {
+        width: 78px;
+        height: 64px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .logo-box img {
+        max-width: 76px;
+        max-height: 62px;
+    }
+
+    .header-center {
+        text-align: center;
+        padding: 0 12px;
     }
 
     .title {
-        font-size: 17px;
+        font-size: 18px;
         font-weight: bold;
         color: #0f172a;
-        margin: 0;
+        margin: 0 0 3px 0;
     }
 
     .subtitle {
-        font-size: 10px;
+        font-size: 9.5px;
         color: #475569;
-        margin-top: 2px;
+        margin: 1px 0;
     }
 
     .badge {
         display: inline-block;
-        padding: 3px 7px;
+        padding: 3px 8px;
         border-radius: 10px;
         background: #dbeafe;
         color: #1e40af;
         font-weight: bold;
-        font-size: 9px;
+        font-size: 8.6px;
+        text-transform: uppercase;
     }
 
+    .badge-green { background:#dcfce7; color:#166534; }
+    .badge-yellow { background:#fef3c7; color:#92400e; }
+    .badge-red { background:#fee2e2; color:#991b1b; }
+    .badge-gray { background:#e2e8f0; color:#334155; }
+
     .section {
-        margin-top: 12px;
+        margin-top: 10px;
         page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .section-keep {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .estancia-section {
+        page-break-before: always;
+        break-before: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .table-keep,
+    .table-keep table,
+    .data-table,
+    .compact-table {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    tr, td, th {
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
 
     .section-title {
@@ -65,7 +128,7 @@
         border-left: 5px solid #2563eb;
         padding: 6px 8px;
         font-weight: bold;
-        font-size: 12px;
+        font-size: 11.5px;
         margin-bottom: 6px;
     }
 
@@ -75,37 +138,96 @@
         border-left-color: #16a34a;
     }
 
+    .section-title.orange {
+        background: #fff7ed;
+        color: #9a3412;
+        border-left-color: #f97316;
+    }
+
     .section-title.red {
         background: #fef2f2;
         color: #991b1b;
         border-left-color: #dc2626;
     }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th {
+    .section-title.gray {
         background: #f8fafc;
         color: #334155;
-        border: 1px solid #cbd5e1;
-        padding: 5px;
-        text-align: left;
-        font-size: 9.5px;
+        border-left-color: #64748b;
     }
 
-    td {
+    .data-table th,
+    .data-table td,
+    .compact-table th,
+    .compact-table td {
         border: 1px solid #cbd5e1;
-        padding: 5px;
-        vertical-align: top;
+        padding: 5px 6px;
+    }
+
+    .data-table th,
+    .compact-table th {
+        background: #f8fafc;
+        color: #334155;
+        font-weight: bold;
+        text-align: left;
     }
 
     .label {
-        width: 28%;
+        width: 26%;
         font-weight: bold;
         color: #334155;
         background: #f8fafc;
+    }
+
+    .value {
+        color: #0f172a;
+    }
+
+    .student-card {
+        border: 1px solid #bfdbfe;
+        background: #f8fbff;
+        padding: 8px;
+        border-radius: 6px;
+    }
+
+    .student-photo-cell {
+        width: 86px;
+        text-align: center;
+    }
+
+    .student-photo {
+        width: 76px;
+        height: 86px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+
+    .student-photo-empty {
+        width: 76px;
+        height: 86px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #eff6ff;
+        color: #64748b;
+        text-align: center;
+        padding-top: 28px;
+        font-size: 9px;
+    }
+
+    .student-name {
+        font-size: 14px;
+        font-weight: bold;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .small {
+        font-size: 8.8px;
     }
 
     .empty {
@@ -116,12 +238,24 @@
         background: #f8fafc;
     }
 
+    .two-col td {
+        width: 50%;
+        padding-right: 6px;
+    }
+
+    .mini-title {
+        font-weight: bold;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
     .incidencia {
         border: 1px solid #fecaca;
         border-left: 5px solid #dc2626;
         padding: 8px;
         margin-bottom: 8px;
         page-break-inside: avoid;
+        background: #fffafa;
     }
 
     .inc-title {
@@ -133,7 +267,7 @@
 
     .inc-meta {
         color: #475569;
-        font-size: 9px;
+        font-size: 8.8px;
         margin-bottom: 6px;
     }
 
@@ -149,9 +283,10 @@
     }
 
     .firma-wrap {
-        margin-top: 32px;
+        margin-top: 28px;
         width: 100%;
         text-align: center;
+        page-break-inside: avoid;
     }
 
     .firma {
@@ -164,15 +299,15 @@
 
     .linea {
         border-top: 1px solid #111827;
-        margin-top: 42px;
+        margin-top: 40px;
         padding-top: 6px;
         font-weight: bold;
-        font-size: 10px;
+        font-size: 9.5px;
     }
 
     .footer {
-        margin-top: 16px;
-        font-size: 8.5px;
+        margin-top: 14px;
+        font-size: 8.2px;
         color: #64748b;
         text-align: center;
         border-top: 1px solid #cbd5e1;
@@ -182,164 +317,333 @@
 </head>
 
 <body>
+<div class="pdf-page">
 
-<table class="header">
+<table class="header no-border">
     <tr>
-        <td style="width: 85px; border: none;">
-            <img src="{% static 'img/logo.png' %}" class="logo" alt="Logo">
+        <td class="logo-box">
+            <img src="{% static 'img/logo_eiu.png' %}" alt="Logo EIU">
         </td>
-        <td style="border: none;">
+        <td class="header-center">
             <h1 class="title">Bitácora diaria del menor</h1>
             <div class="subtitle">Estancia Infantil Universitaria - Universidad Autónoma de Chiapas</div>
-            <div class="subtitle">
-                Generado: {{ fecha_generacion|date:"d/m/Y H:i" }} hrs.
+            <div class="subtitle">Generado: {{ fecha_generacion|date:"d/m/Y H:i" }} hrs.</div>
+            <div style="margin-top:5px;">
+                <span class="badge">{{ registro.formulario_bitacora|default:"Bitácora diaria" }}</span>
             </div>
         </td>
-        <td style="width: 150px; border: none; text-align: right;">
-            <span class="badge">{{ registro.formulario_bitacora|default:"Bitácora" }}</span>
+        <td class="logo-box">
+            <img src="{% static 'img/logo_unach.png' %}" alt="Logo UNACH">
         </td>
     </tr>
 </table>
 
-<div class="section">
+<div class="section section-keep">
     <div class="section-title">Datos generales del menor</div>
-    <table>
+
+    <div class="student-card">
+        <table class="no-border">
+            <tr>
+                <td class="student-photo-cell">
+                    {% if alumno.doc_menor_fotos %}
+                        <img src="{{ alumno.doc_menor_fotos.path }}" class="student-photo" alt="Foto del menor">
+                    {% else %}
+                        <div class="student-photo-empty">Sin foto</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="student-name">{{ nombre_menor }}</div>
+                    <table class="data-table">
+                        <tr>
+                            <td class="label">Fecha</td>
+                            <td class="value">
+                                {% if registro.dia_operativo %}
+                                    {{ registro.dia_operativo.fecha|date:"d/m/Y" }}
+                                {% else %}
+                                    Sin día operativo
+                                {% endif %}
+                            </td>
+                            <td class="label">Sala</td>
+                            <td class="value">{{ sala_nombre }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Edad</td>
+                            <td class="value">
+                                {{ alumno.edad_anios_menor|default:"0" }} años,
+                                {{ alumno.edad_meses_menor|default:"0" }} meses
+                            </td>
+                            <td class="label">Semestre</td>
+                            <td class="value">
+                                {% if registro.dia_operativo and registro.dia_operativo.semestre %}
+                                    {{ registro.dia_operativo.semestre.nombre }}
+                                {% elif alumno.semestre %}
+                                    {{ alumno.semestre.nombre }}
+                                {% else %}
+                                    Sin semestre
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">Estado del día</td>
+                            <td class="value">
+                                {% if registro.dia_operativo %}{{ registro.dia_operativo.get_estado_display }}{% else %}Sin estado{% endif %}
+                            </td>
+                            <td class="label">Estado del menor</td>
+                            <td class="value">{{ registro.get_estado_display }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="section section-keep">
+    <div class="section-title orange">Registro de entrada y salida</div>
+
+    <table class="two-col no-border">
         <tr>
-            <td class="label">Fecha</td>
             <td>
-                {% if registro.dia_operativo %}
-                    {{ registro.dia_operativo.fecha|date:"d/m/Y" }}
+                <div class="mini-title">Entrada</div>
+                {% if datos_entrada %}
+                    <table class="data-table">
+                        {% for fila in datos_entrada %}
+                            <tr>
+                                <td class="label">{{ fila.etiqueta }}</td>
+                                <td>{{ fila.valor }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 {% else %}
-                    Sin día operativo
+                    <div class="empty">No hay datos de entrada registrados.</div>
                 {% endif %}
             </td>
-            <td class="label">Sala</td>
-            <td>{{ sala_nombre }}</td>
-        </tr>
-        <tr>
-            <td class="label">Nombre del niño/a</td>
-            <td colspan="3">{{ nombre_menor }}</td>
-        </tr>
-        <tr>
-            <td class="label">Edad</td>
             <td>
-                {{ alumno.edad_anios_menor|default:"0" }} años,
-                {{ alumno.edad_meses_menor|default:"0" }} meses
-            </td>
-            <td class="label">Semestre</td>
-            <td>
-                {% if registro.dia_operativo and registro.dia_operativo.semestre %}
-                    {{ registro.dia_operativo.semestre.nombre }}
-                {% elif alumno.semestre %}
-                    {{ alumno.semestre.nombre }}
+                <div class="mini-title">Salida</div>
+                {% if datos_salida %}
+                    <table class="data-table">
+                        {% for fila in datos_salida %}
+                            <tr>
+                                <td class="label">{{ fila.etiqueta }}</td>
+                                <td>{{ fila.valor }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 {% else %}
-                    Sin semestre
+                    <div class="empty">No hay datos de salida registrados.</div>
                 {% endif %}
             </td>
         </tr>
     </table>
 </div>
 
-<div class="section">
+<div class="section section-keep">
     <div class="section-title">1. ¿Cómo estuvo en casa?</div>
 
-    {% if campos_casa %}
-        <table>
-            {% for fila in campos_casa %}
-                <tr>
-                    <td class="label">{{ fila.etiqueta }}</td>
-                    <td>{{ fila.valor }}</td>
-                </tr>
-            {% endfor %}
+    {% if bitacora_casa %}
+        <table class="data-table">
+            <tr>
+                <td class="label">Capturada por</td>
+                <td>
+                    {% if bitacora_casa.capturada_por %}
+                        {{ bitacora_casa.capturada_por.get_full_name|default:bitacora_casa.capturada_por.username }}
+                    {% else %}
+                        Sin usuario registrado
+                    {% endif %}
+                </td>
+                <td class="label">Capturada en</td>
+                <td>{% if bitacora_casa.capturada_en %}{{ bitacora_casa.capturada_en|date:"d/m/Y H:i" }}{% else %}Sin fecha{% endif %}</td>
+            </tr>
+            <tr>
+                <td class="label">Completa</td>
+                <td>{% if bitacora_casa.completa %}Sí{% else %}No{% endif %}</td>
+                <td class="label">Hoy desperté a las</td>
+                <td>{% if bitacora_casa.desperto_a_las %}{{ bitacora_casa.desperto_a_las|time:"H:i" }}{% else %}No capturado{% endif %}</td>
+            </tr>
+            <tr>
+                <td class="label">Hoy amanecí</td>
+                <td>{{ bitacora_casa.como_amanecio|default:"No capturado" }}</td>
+                <td class="label">En casa estuve</td>
+                <td>{{ bitacora_casa.estado_en_casa|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Mi último alimento fue a las</td>
+                <td>{% if bitacora_casa.ultimo_alimento_hora %}{{ bitacora_casa.ultimo_alimento_hora|time:"H:i" }}{% else %}No capturado{% endif %}</td>
+                <td class="label">Leche / cantidad</td>
+                <td>{{ bitacora_casa.leche_descripcion|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Papilla o alimentos completos</td>
+                <td colspan="3">{{ bitacora_casa.alimentos_descripcion|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">¿Hice popó?</td>
+                <td>{% if bitacora_casa.hizo_popo == True %}Sí{% elif bitacora_casa.hizo_popo == False %}No{% else %}No capturado{% endif %}</td>
+                <td class="label">Observaciones de casa</td>
+                <td>{{ bitacora_casa.observaciones|default:"Sin observaciones" }}</td>
+            </tr>
         </table>
     {% else %}
         <div class="empty">No se capturó información de cómo estuvo en casa.</div>
     {% endif %}
 </div>
 
-<div class="section">
+<div class="section estancia-section section-keep">
     <div class="section-title green">2. Durante mi estancia en la EIU</div>
 
-    {% if campos_estancia %}
-        <table>
-            {% for fila in campos_estancia %}
+    {% if bitacora_estancia %}
+        <table class="data-table">
+            <tr>
+                <td class="label">Capturada por</td>
+                <td>
+                    {% if bitacora_estancia.capturada_por %}
+                        {{ bitacora_estancia.capturada_por.get_full_name|default:bitacora_estancia.capturada_por.username }}
+                    {% else %}
+                        Sin usuario registrado
+                    {% endif %}
+                </td>
+                <td class="label">Capturada en</td>
+                <td>{% if bitacora_estancia.capturada_en %}{{ bitacora_estancia.capturada_en|date:"d/m/Y H:i" }}{% else %}Sin fecha{% endif %}</td>
+            </tr>
+            <tr>
+                <td class="label">Completa</td>
+                <td>{% if bitacora_estancia.completa %}Sí{% else %}No{% endif %}</td>
+                <td class="label">Hoy durante el día estuve</td>
+                <td>{{ bitacora_estancia.estado_durante_dia|default:"No capturado" }}</td>
+            </tr>
+        </table>
+
+        <div style="height:6px;"></div>
+
+        <div class="mini-title">Tomas de leche</div>
+        {% if bitacora_estancia.leche_tomas %}
+            <table class="compact-table">
                 <tr>
-                    <td class="label">{{ fila.etiqueta }}</td>
-                    <td>{{ fila.valor }}</td>
+                    <th style="width: 20%;">Toma</th>
+                    <th style="width: 40%;">Hora</th>
+                    <th style="width: 40%;">Cantidad</th>
                 </tr>
-            {% endfor %}
+                {% for numero, toma in bitacora_estancia.leche_tomas.items %}
+                    <tr>
+                        <td><strong>Toma {{ numero }}</strong></td>
+                        <td>{{ toma.hora|default:"No capturada" }}</td>
+                        <td>{{ toma.cantidad|default:"No capturada" }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty">No se registraron tomas de leche.</div>
+        {% endif %}
+
+        <div style="height:6px;"></div>
+
+        <table class="data-table">
+            <tr>
+                <td class="label">Hidratación</td>
+                <td>{{ bitacora_estancia.hidratacion|default:"No capturado" }}</td>
+                <td class="label">Desayuno</td>
+                <td>{{ bitacora_estancia.desayuno|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Colación</td>
+                <td>{{ bitacora_estancia.colacion|default:"No capturado" }}</td>
+                <td class="label">Comida</td>
+                <td>{{ bitacora_estancia.comida|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Siesta</td>
+                <td>{{ bitacora_estancia.siesta|default:"No capturado" }}</td>
+                <td class="label">Cambio de pañal</td>
+                <td>{{ bitacora_estancia.panal|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Control de esfínteres</td>
+                <td colspan="3">{{ bitacora_estancia.control_esfinteres|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Actividad pedagógica</td>
+                <td colspan="3">{{ bitacora_estancia.actividad_pedagogica|default:"No capturado" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Comentario general</td>
+                <td colspan="3">{{ bitacora_estancia.comentario_general|default:"Sin comentarios" }}</td>
+            </tr>
         </table>
     {% else %}
         <div class="empty">No se capturó información durante la estancia.</div>
     {% endif %}
 </div>
 
-{% if incidencias %}
-<div class="section">
+<div class="section section-keep">
     <div class="section-title red">3. Incidencias del día</div>
 
-    {% for incidencia in incidencias %}
-        <div class="incidencia">
-            <div class="inc-title">
-                {{ incidencia.get_tipo_display }} - {{ incidencia.get_nivel_display }}
-            </div>
-
-            <div class="inc-meta">
-                Fecha y hora: {{ incidencia.fecha_reporte|date:"d/m/Y H:i" }} hrs.
-                · Registrada por: {{ incidencia.registrada_por|default:"Sin usuario" }}
-                {% if incidencia.categoria %} · Categoría: {{ incidencia.categoria }}{% endif %}
-            </div>
-
-            <div class="inc-text">
-                <strong>Descripción de la incidencia:</strong><br>
-                {{ incidencia.descripcion }}
-            </div>
-
-            <div class="inc-text">
-                <strong>Intervención del personal:</strong><br>
-                {{ incidencia.intervencion_personal|default:"Sin intervención registrada." }}
-            </div>
-
-            {% if incidencia.seguimientos.all %}
-                <div class="inc-text"><strong>Seguimiento:</strong></div>
-                {% for seguimiento in incidencia.seguimientos.all %}
-                    <div class="seguimiento">
-                        {{ seguimiento.creado_en|date:"d/m/Y H:i" }} hrs.
-                        - {{ seguimiento.creado_por|default:"Sin usuario" }}<br>
-                        {{ seguimiento.nota }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            {% if incidencia.resolucion %}
-                <div class="inc-text">
-                    <strong>Resolución:</strong><br>
-                    {{ incidencia.resolucion }}
+    {% if incidencias %}
+        {% for incidencia in incidencias %}
+            <div class="incidencia">
+                <div class="inc-title">
+                    {{ incidencia.get_tipo_display }} - {{ incidencia.get_nivel_display }}
                 </div>
-            {% endif %}
-        </div>
-    {% endfor %}
-</div>
-{% endif %}
 
-<div class="section">
-    <div class="section-title">Firmas</div>
+                <div class="inc-meta">
+                    Fecha y hora: {{ incidencia.fecha_reporte|date:"d/m/Y H:i" }} hrs.
+                    · Registrada por: {{ incidencia.registrada_por.get_full_name|default:incidencia.registrada_por.username|default:"Sin usuario" }}
+                    {% if incidencia.categoria %} · Categoría: {{ incidencia.categoria }}{% endif %}
+                    {% if incidencia.estado %} · Estado: {{ incidencia.get_estado_display }}{% endif %}
+                </div>
+
+                <div class="inc-text">
+                    <strong>Descripción de la incidencia:</strong><br>
+                    {{ incidencia.descripcion|default:"Sin descripción registrada." }}
+                </div>
+
+                <div class="inc-text">
+                    <strong>Intervención del personal:</strong><br>
+                    {{ incidencia.intervencion_personal|default:"Sin intervención registrada." }}
+                </div>
+
+                {% if incidencia.seguimientos.all %}
+                    <div class="inc-text"><strong>Seguimiento:</strong></div>
+                    {% for seguimiento in incidencia.seguimientos.all %}
+                        <div class="seguimiento">
+                            {{ seguimiento.creado_en|date:"d/m/Y H:i" }} hrs.
+                            - {{ seguimiento.creado_por.get_full_name|default:seguimiento.creado_por.username|default:"Sin usuario" }}<br>
+                            {{ seguimiento.nota }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if incidencia.resolucion %}
+                    <div class="inc-text">
+                        <strong>Resolución:</strong><br>
+                        {{ incidencia.resolucion }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty">No hubo incidencias registradas para este menor durante el día operativo.</div>
+    {% endif %}
+</div>
+
+<div class="section section-keep">
+    <div class="section-title gray">Firmas</div>
 
     <div class="firma-wrap">
         <div class="firma">
-            <div class="linea">Nombre y Firma de la Asistente educativa</div>
+            <div class="linea">Nombre y firma de la asistente educativa</div>
         </div>
 
         <div class="firma">
-            <div class="linea">Responsable de Sala</div>
+            <div class="linea">Responsable de sala</div>
         </div>
     </div>
 </div>
 
 <div class="footer">
-    Este documento integra la bitácora del menor: cómo estuvo en casa, durante su estancia en la EIU,
-    incidencias del día si existieron y firmas correspondientes.
+    Este documento integra la bitácora diaria del menor: entrada, información reportada en casa,
+    observación durante su estancia en la EIU, salida, incidencias del día si existieron y firmas correspondientes.
 </div>
 
+</div>
 </body>
 </html>

@@ -11,308 +11,567 @@
 
     <style>
         :root{
-            --azul:#1d4ed8;
-            --azul-oscuro:#1e3a8a;
-            --gris-fondo:#f3f6fb;
-            --texto:#0f172a;
+            --azul:#2563eb;
+            --azul-oscuro:#0b2d68;
+            --cyan:#14b8a6;
+            --cyan-oscuro:#0f766e;
+            --cyan-profundo:#115e59;
+            --cyan-claro:#ecfeff;
+            --cyan-borde:#99f6e4;
+            --texto:#0b1f44;
             --muted:#64748b;
             --borde:#dbe4ef;
+            --fondo:#f4f7fb;
+            --card:#ffffff;
+            --rojo:#dc2626;
             --verde:#16a34a;
-            --cyan:#0891b2;
-            --morado:#7c3aed;
             --naranja:#f97316;
+        }
+
+        *{
+            box-sizing:border-box;
         }
 
         body{
             margin:0;
-            background:var(--gris-fondo);
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(20,184,166,.10), transparent 28%),
+                linear-gradient(180deg, #ffffff 0%, var(--fondo) 48%, #eef3f9 100%);
             color:var(--texto);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
+        /* =========================
+           BARRA SUPERIOR
+        ========================= */
         .topbar{
-            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
-            color:white;
-            box-shadow:0 8px 22px rgba(15,23,42,.18);
+            background:#ffffff;
+            border-bottom:1px solid #dfe8f5;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            position:sticky;
+            top:0;
+            z-index:100;
         }
 
         .topbar-inner{
-            max-width:1220px;
-            margin:auto;
-            padding:14px 18px;
+            max-width:1320px;
+            margin:0 auto;
+            padding:18px 28px;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:16px;
+            gap:18px;
         }
 
         .brand{
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
-        .brand img{
-            height:48px;
-            width:auto;
+        .brand-logo{
+            width:96px;
+            height:64px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg, #0f766e, #14b8a6);
+            padding:8px;
+            box-shadow:0 12px 26px rgba(20,184,166,.28);
+            flex:0 0 auto;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
             object-fit:contain;
-            background:rgba(255,255,255,.12);
-            border-radius:12px;
-            padding:4px;
+            display:block;
+            background:transparent !important;
+            border:none !important;
+            padding:0 !important;
+            box-shadow:none !important;
         }
 
         .brand-title{
-            font-size:1.02rem;
+            margin:0;
+            color:#0b1f44;
+            font-size:1.42rem;
             font-weight:950;
-            letter-spacing:.04em;
-            text-transform:uppercase;
-            line-height:1.1;
+            line-height:1.05;
+            letter-spacing:-.04em;
         }
 
         .brand-subtitle{
-            font-size:.82rem;
-            opacity:.9;
-            margin-top:2px;
+            margin-top:4px;
+            color:#50678f;
+            font-weight:650;
+            font-size:.92rem;
         }
 
-        .btn-top{
-            border-radius:12px;
+        .top-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .btn-return{
+            border:1px solid #d8e5f7;
+            background:#ffffff;
+            color:#0b1f44;
+            border-radius:14px;
+            padding:10px 16px;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            box-shadow:0 8px 18px rgba(15,23,42,.04);
+            transition:.2s ease;
+            white-space:nowrap;
+        }
+
+        .btn-return:hover{
+            transform:translateY(-1px);
+            color:var(--cyan-oscuro);
+            border-color:var(--cyan-borde);
+            background:#f8fffe;
+        }
+
+        .admin-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0b1f44;
             font-weight:850;
-            padding:.55rem .9rem;
+            white-space:nowrap;
         }
 
-        .main{
-            max-width:1220px;
+        .admin-icon{
+            width:42px;
+            height:42px;
+            border-radius:50%;
+            background:linear-gradient(135deg, #ccfbf1, #a5f3fc);
+            color:var(--cyan-oscuro);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.35rem;
+        }
+
+        /* =========================
+           CONTENIDO GENERAL
+        ========================= */
+        .page{
+            max-width:1320px;
             margin:28px auto 70px;
-            padding:0 18px;
+            padding:0 28px;
         }
 
         .hero{
-            background:linear-gradient(135deg, #0f766e, #14b8a6);
-            border-radius:24px;
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--cyan-profundo), var(--cyan));
+            border-radius:28px;
             color:white;
-            padding:30px 34px;
-            box-shadow:0 22px 50px rgba(20,184,166,.22);
+            padding:28px;
+            box-shadow:0 24px 48px rgba(20,184,166,.25);
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:20px;
-            align-items:center;
-            margin-bottom:22px;
+            grid-template-columns:minmax(0,1fr) 365px;
+            gap:22px;
+            align-items:stretch;
+            margin-bottom:24px;
         }
 
-        .hero h1{
-            font-size:1.9rem;
-            font-weight:950;
-            margin:0 0 8px;
-            letter-spacing:-.03em;
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:280px;
+            height:280px;
+            border-radius:50%;
+            right:-100px;
+            top:-110px;
+            background:rgba(255,255,255,.14);
         }
 
-        .hero p{
-            margin:0;
-            opacity:.94;
-            font-size:1rem;
+        .hero-main{
+            position:relative;
+            z-index:1;
+            display:flex;
+            align-items:flex-start;
+            gap:18px;
         }
 
         .hero-icon{
-            width:88px;
-            height:88px;
-            border-radius:22px;
+            width:72px;
+            height:72px;
+            border-radius:21px;
             background:rgba(255,255,255,.18);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:2.5rem;
+            font-size:2rem;
+            flex:0 0 auto;
         }
 
-        .layout{
-            display:grid;
-            grid-template-columns:1fr 345px;
-            gap:20px;
-            align-items:start;
+        .hero h1{
+            margin:0 0 8px;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
         }
 
-        .panel{
-            background:white;
-            border:1px solid var(--borde);
-            border-radius:22px;
-            overflow:hidden;
-            box-shadow:0 18px 38px rgba(15,23,42,.07);
-            margin-bottom:18px;
-        }
-
-        .panel-header{
-            padding:18px 22px;
-            background:#f8fafc;
-            border-bottom:1px solid var(--borde);
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:12px;
-        }
-
-        .panel-title{
+        .hero p{
             margin:0;
-            color:#334155;
+            max-width:760px;
+            font-size:1rem;
+            line-height:1.55;
+            opacity:.95;
+            font-weight:650;
+        }
+
+        .hero-reminder{
+            position:relative;
+            z-index:1;
+            background:rgba(255,255,255,.16);
+            border:1px solid rgba(255,255,255,.34);
+            border-radius:22px;
+            padding:20px;
+            backdrop-filter:blur(4px);
+        }
+
+        .hero-reminder h6{
+            margin:0 0 8px;
             font-size:1rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-        }
-
-        .panel-body{
-            padding:24px;
-        }
-
-        .section-title{
-            font-size:.82rem;
-            font-weight:950;
-            color:#0f766e;
-            text-transform:uppercase;
-            letter-spacing:.07em;
-            margin:5px 0 14px;
             display:flex;
             align-items:center;
             gap:8px;
         }
 
-        .field-card{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
+        .hero-reminder p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.5;
+            font-weight:700;
+            color:white;
+            opacity:.96;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 360px;
+            gap:22px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.95);
+            border:1px solid var(--borde);
+            border-radius:24px;
+            box-shadow:0 18px 38px rgba(15,23,42,.07);
+            overflow:hidden;
+            margin-bottom:18px;
+        }
+
+        .panel-header{
+            padding:18px 22px;
+            border-bottom:1px solid var(--borde);
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.05rem;
+            font-weight:950;
+            color:#0b1f44;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .title-icon{
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            background:#ccfbf1;
+            color:var(--cyan-oscuro);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.1rem;
+        }
+
+        .panel-body{
+            padding:22px;
+        }
+
+        .section-block{
+            background:#ffffff;
+            border:1px solid #dfe8f5;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:18px;
+        }
+
+        .section-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+        }
+
+        .section-title{
+            margin:0;
+            font-size:.86rem;
+            font-weight:950;
+            color:var(--cyan-oscuro);
+            text-transform:uppercase;
+            letter-spacing:.07em;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .section-help{
+            color:#64748b;
+            font-size:.86rem;
+            font-weight:650;
+            line-height:1.35;
+            margin-top:4px;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:16px;
+        }
+
+        .form-grid.wide-left{
+            grid-template-columns:minmax(0, 1.35fr) minmax(0, .9fr);
+        }
+
+        .field-card,
+        .time-pair-card,
+        .time-field{
+            background:#f8fbff;
+            border:1px solid #dfe8f5;
             border-radius:18px;
-            padding:16px;
-            margin-bottom:16px;
-            height:calc(100% - 16px);
+            padding:15px;
+            min-width:0;
+            max-width:100%;
+            overflow:hidden;
+        }
+
+        .field-card.full{
+            grid-column:1 / -1;
         }
 
         .form-label{
-            font-size:.78rem;
-            font-weight:950;
-            color:#334155;
-            text-transform:uppercase;
-            letter-spacing:.04em;
             margin-bottom:8px;
+            color:#0b1f44;
+            font-size:.76rem;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            font-weight:950;
+            line-height:1.25;
         }
 
         .form-control,
         .form-select{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+            border:1px solid #cbd8e8;
             border-radius:14px;
-            border:1px solid #cbd5e1;
-            padding:.72rem .9rem;
-            font-weight:650;
-            color:#0f172a;
-            background:white;
+            padding:.72rem .85rem;
+            color:#0b1f44;
+            font-weight:750;
+            background:#ffffff;
         }
 
         .form-control:focus,
         .form-select:focus{
-            border-color:#14b8a6;
-            box-shadow:0 0 0 .22rem rgba(20,184,166,.16);
+            border-color:var(--cyan);
+            box-shadow:0 0 0 .22rem rgba(20,184,166,.18);
         }
 
         .form-check{
-            background:white;
+            background:#ffffff;
             border:1px solid #dbe4ef;
-            border-radius:16px;
-            padding:14px 16px 14px 44px;
-            margin-top:6px;
+            border-radius:18px;
+            padding:16px 18px 16px 48px;
+            margin:0;
         }
 
         .form-check-input{
-            margin-left:-28px;
-            margin-top:.28rem;
+            margin-left:-30px;
+            margin-top:.3rem;
         }
 
         .form-check-label{
-            font-weight:850;
-            color:#0f172a;
+            color:#0b1f44;
+            font-weight:900;
         }
 
         .field-help{
-            color:var(--muted);
-            font-size:.84rem;
-            margin-top:6px;
+            margin-top:8px;
+            color:#64748b;
+            font-size:.82rem;
+            line-height:1.35;
+            font-weight:550;
         }
 
         .error-text{
             background:#fee2e2;
-            color:#991b1b;
             border:1px solid #fecaca;
+            color:#991b1b;
             border-radius:12px;
-            padding:8px 10px;
-            font-size:.85rem;
-            font-weight:700;
-            margin-top:8px;
+            padding:9px 11px;
+            margin-top:9px;
+            font-size:.84rem;
+            font-weight:750;
+        }
+
+        .time-pair-title{
+            color:#0b1f44;
+            font-size:.78rem;
+            font-weight:950;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:12px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            line-height:1.25;
+        }
+
+        .time-fields{
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 28px minmax(0, 1fr);
+            gap:8px;
+            align-items:end;
+        }
+
+        .compact-time-arrow{
+            width:28px;
+            height:40px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#64748b;
+            align-self:end;
+            padding-bottom:4px;
+        }
+
+        .time-note{
+            background:#ecfeff;
+            border:1px solid #a5f3fc;
+            border-left:5px solid var(--cyan);
+            color:#155e75;
+            border-radius:15px;
+            padding:11px 13px;
+            font-size:.86rem;
+            font-weight:650;
+            margin-top:14px;
+            line-height:1.35;
         }
 
         .actions{
             display:flex;
             justify-content:flex-end;
-            gap:10px;
+            gap:12px;
             flex-wrap:wrap;
-            padding-top:16px;
-            border-top:1px solid #e5e7eb;
-            margin-top:12px;
+            border-top:1px solid #e6edf7;
+            padding-top:18px;
+            margin-top:4px;
         }
 
         .btn-main{
             border-radius:14px;
-            font-weight:900;
-            padding:.72rem 1.1rem;
+            padding:.78rem 1.15rem;
+            font-weight:950;
+        }
+
+        .btn-save{
+            background:linear-gradient(135deg, var(--cyan-oscuro), var(--cyan));
+            border:none;
+            color:white;
+            box-shadow:0 12px 24px rgba(20,184,166,.24);
+        }
+
+        .btn-save:hover{
+            color:white;
+            transform:translateY(-1px);
+            filter:brightness(.98);
+        }
+
+        /* =========================
+           COLUMNA DERECHA
+        ========================= */
+        .aside-stack{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+
+        .semestre-card{
+            background:#eef6ff;
+            border:1px solid #bfdbfe;
+            border-radius:22px;
+            padding:18px;
+            color:#18396f;
+            box-shadow:0 14px 28px rgba(37,99,235,.06);
+        }
+
+        .semestre-card h6{
+            margin:0 0 10px;
+            font-weight:950;
+            color:#0b3f91;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .semestre-card p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.45;
+            font-weight:800;
         }
 
         .side-note{
             background:#ecfeff;
             border:1px solid #a5f3fc;
-            border-left:6px solid var(--cyan);
-            border-radius:18px;
+            border-left:7px solid var(--cyan);
+            border-radius:22px;
             padding:18px;
             color:#155e75;
-            margin-bottom:18px;
         }
 
         .side-note h6{
+            margin:0 0 8px;
             font-weight:950;
-            margin-bottom:8px;
+            display:flex;
+            align-items:center;
+            gap:8px;
         }
 
-        .semestre-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-radius:18px;
-            padding:16px;
-            color:#1e3a8a;
-            margin-bottom:18px;
-        }
-
-        .semestre-card h6{
-            font-weight:950;
-            margin-bottom:8px;
-        }
-
-        .semestre-card p{
+        .side-note p{
             margin:0;
-            font-size:.9rem;
+            line-height:1.48;
             font-weight:650;
-        }
-
-        .info-card{
-            background:#f8fafc;
-            border:1px solid var(--borde);
-            border-radius:18px;
-            padding:16px;
-            margin-bottom:18px;
-        }
-
-        .info-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:8px;
-        }
-
-        .info-text{
-            color:#64748b;
-            font-size:.9rem;
-            margin:0;
+            font-size:.92rem;
         }
 
         .timeline{
@@ -322,217 +581,58 @@
         }
 
         .timeline li{
-            display:flex;
-            gap:10px;
-            padding:10px 0;
+            display:grid;
+            grid-template-columns:28px 1fr;
+            gap:8px;
+            align-items:flex-start;
+            padding:13px 0;
             border-bottom:1px solid #edf2f7;
-            color:#475569;
-            font-weight:650;
+            color:#334155;
+            font-weight:750;
+            line-height:1.35;
+        }
+
+        .timeline li:first-child{
+            padding-top:0;
         }
 
         .timeline li:last-child{
             border-bottom:none;
+            padding-bottom:0;
         }
 
         .timeline i{
-            color:#0f766e;
+            color:var(--cyan-oscuro);
             margin-top:2px;
         }
 
-        .warning-box{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid var(--naranja);
+        .info-card{
+            background:#f8fafc;
+            border:1px solid var(--borde);
             border-radius:18px;
             padding:16px;
-            color:#9a3412;
         }
 
-        .warning-box h6{
+        .info-title{
             font-weight:950;
-            margin-bottom:8px;
-        }
-
-        .time-grid-title{
-            display:flex;
-            align-items:center;
-            gap:8px;
-            padding:12px 14px;
-            border-radius:16px;
-            background:#f0fdfa;
-            border:1px solid #99f6e4;
-            color:#0f766e;
-            font-weight:950;
-            margin:8px 0 16px;
-        }
-
-        @media(max-width:960px){
-            .hero{grid-template-columns:1fr;}
-            .hero-icon{display:none;}
-            .layout{grid-template-columns:1fr;}
-        }
-
-        @media(max-width:576px){
-            .topbar-inner{flex-direction:column;align-items:flex-start;}
-            .hero{padding:24px 20px;}
-            .hero h1{font-size:1.55rem;}
-            .panel-body{padding:18px;}
-            .actions{justify-content:stretch;}
-            .actions .btn{width:100%;}
-        }
-
-
-
-        .compact-time-arrow{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#64748b;
-            font-size:1.05rem;
-            padding-top:26px;
-        }
-
-        .time-pair-card{
-            padding:12px !important;
-        }
-
-        .time-fields{
-            grid-template-columns:1fr auto 1fr !important;
-            gap:9px !important;
-            align-items:start;
-        }
-
-        .time-fields .form-label{
-            margin-bottom:5px;
-        }
-
-        .time-fields .form-control,
-        .time-fields .form-select{
-            padding:.62rem .75rem;
-        }
-
-        .time-section-card{
-            padding:15px !important;
-        }
-
-        .time-section-help,
-        .time-note,
-        .field-help{
-            font-size:.8rem;
-        }
-
-        @media(max-width:768px){
-            .time-fields{
-                grid-template-columns:1fr !important;
-            }
-            .compact-time-arrow{
-                display:none;
-            }
-        }
-
-        .time-section-card{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
-            border-radius:20px;
-            padding:18px;
-            margin-bottom:18px;
-        }
-
-        .time-section-header{
-            display:flex;
-            align-items:flex-start;
-            justify-content:space-between;
-            gap:12px;
-            margin-bottom:14px;
-            flex-wrap:wrap;
-        }
-
-        .time-section-heading{
-            font-size:.82rem;
-            font-weight:950;
-            color:#0f766e;
-            text-transform:uppercase;
-            letter-spacing:.07em;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin:0;
-        }
-
-        .time-section-help{
-            color:#64748b;
-            font-size:.86rem;
-            font-weight:650;
-            margin-top:4px;
-        }
-
-        .time-pair-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
-        }
-
-        .time-pair-card{
-            background:white;
-            border:1px solid #dbe4ef;
-            border-radius:18px;
-            padding:15px;
-        }
-
-        .time-pair-title{
             color:#0f172a;
-            font-size:.8rem;
-            font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-            margin-bottom:12px;
+            margin-bottom:8px;
             display:flex;
             align-items:center;
             gap:8px;
         }
 
-        .time-fields{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
+        .info-text{
+            color:#64748b;
+            font-size:.9rem;
+            margin:0;
+            line-height:1.4;
+            font-weight:600;
         }
 
-        .single-time-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
-        }
-
-        .time-field{
-            background:white;
-            border:1px solid #dbe4ef;
-            border-radius:16px;
-            padding:14px;
-        }
-
-        .time-note{
-            background:#ecfeff;
-            border:1px solid #a5f3fc;
-            border-left:5px solid #0891b2;
-            color:#155e75;
-            border-radius:15px;
-            padding:11px 13px;
-            font-size:.86rem;
-            font-weight:650;
-            margin-top:12px;
-        }
-
-        @media(max-width:768px){
-            .time-pair-grid,
-            .single-time-grid,
-            .time-fields{
-                grid-template-columns:1fr;
-            }
-        }
-
-        /* =========================================================
+        /* =========================
            ALERTAS PERSONALIZADAS
-           ========================================================= */
+        ========================= */
         .swal2-toast.sistema-toast {
             border-radius: 18px !important;
             padding: 14px 16px !important;
@@ -575,147 +675,52 @@
             background: #eff6ff !important;
         }
 
+        @media(max-width:1120px){
+            .hero{
+                grid-template-columns:1fr;
+            }
 
-        /* =========================================================
-           AJUSTE FINAL: HORARIOS COMPACTOS SIN DESBORDES
-           ========================================================= */
-        *, *::before, *::after{
-            box-sizing:border-box;
-        }
-
-        .layout{
-            grid-template-columns:minmax(0, 1fr) 345px;
-        }
-
-        .row > [class*="col-"],
-        .panel,
-        .panel-body,
-        .field-card,
-        .time-section-card,
-        .time-pair-card,
-        .time-field,
-        .single-time-grid,
-        .time-pair-grid,
-        .time-fields{
-            min-width:0;
-            max-width:100%;
-        }
-
-        .field-card,
-        .time-section-card,
-        .time-pair-card,
-        .time-field{
-            overflow:hidden;
-        }
-
-        .form-control,
-        .form-select{
-            width:100%;
-            max-width:100%;
-            min-width:0;
-        }
-
-        .time-section-card{
-            padding:14px !important;
-            margin-bottom:14px;
-        }
-
-        .time-section-header{
-            margin-bottom:10px;
-        }
-
-        .time-section-help,
-        .field-help,
-        .time-note,
-        .info-text{
-            line-height:1.35;
-        }
-
-        .single-time-grid{
-            display:grid;
-            grid-template-columns:repeat(2, minmax(0, 1fr));
-            gap:10px;
-        }
-
-        .time-pair-grid{
-            display:grid;
-            grid-template-columns:repeat(2, minmax(0, 1fr));
-            gap:10px;
-        }
-
-        .time-pair-card{
-            padding:12px !important;
-        }
-
-        .time-pair-title{
-            margin-bottom:9px;
-            font-size:.76rem;
-            line-height:1.25;
-        }
-
-        .time-fields{
-            display:grid;
-            grid-template-columns:minmax(0, 1fr) 24px minmax(0, 1fr) !important;
-            gap:6px !important;
-            align-items:end;
-        }
-
-        .time-fields > div{
-            min-width:0;
-            max-width:100%;
-        }
-
-        .compact-time-arrow{
-            width:24px;
-            min-width:24px;
-            max-width:24px;
-            height:40px;
-            padding-top:0;
-            align-self:end;
-        }
-
-        .time-fields .form-label{
-            font-size:.72rem;
-            margin-bottom:5px;
-            white-space:nowrap;
-        }
-
-        .time-fields .form-control,
-        .time-fields .form-select,
-        .time-field .form-control,
-        .time-field .form-select{
-            padding:.58rem .65rem;
-            font-size:.9rem;
-        }
-
-        .time-field{
-            padding:12px;
-        }
-
-        .time-grid-title{
-            padding:10px 12px;
-            margin:6px 0 12px;
-        }
-
-        .time-note{
-            padding:10px 12px;
-            margin-top:10px;
-        }
-
-        @media(max-width:1100px){
             .layout{
                 grid-template-columns:1fr;
             }
         }
 
         @media(max-width:768px){
-            .single-time-grid,
-            .time-pair-grid{
+            .topbar-inner{
+                align-items:flex-start;
+                flex-direction:column;
+                padding:16px 18px;
+            }
+
+            .top-actions{
+                width:100%;
+                justify-content:space-between;
+            }
+
+            .page{
+                padding:0 18px;
+                margin-top:20px;
+            }
+
+            .hero{
+                padding:22px;
+            }
+
+            .hero-main{
+                flex-direction:column;
+            }
+
+            .hero h1{
+                font-size:1.55rem;
+            }
+
+            .form-grid,
+            .form-grid.wide-left{
                 grid-template-columns:1fr;
             }
 
             .time-fields{
-                grid-template-columns:1fr !important;
+                grid-template-columns:1fr;
             }
 
             .compact-time-arrow{
@@ -723,6 +728,30 @@
             }
         }
 
+        @media(max-width:576px){
+            .top-actions{
+                flex-direction:column;
+                align-items:stretch;
+            }
+
+            .btn-return,
+            .admin-chip{
+                width:100%;
+                justify-content:center;
+            }
+
+            .panel-body{
+                padding:18px;
+            }
+
+            .actions{
+                justify-content:stretch;
+            }
+
+            .actions .btn{
+                width:100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -730,33 +759,55 @@
 <nav class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
             <div>
-                <div class="brand-title">Sala por Semestre</div>
-                <div class="brand-subtitle">Horarios por sala · Administrador del sistema</div>
+                <h1 class="brand-title">Sala por semestre</h1>
+                <div class="brand-subtitle">Horarios por sala · Configuración operativa</div>
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                <i class="bi bi-house-door-fill me-1"></i> Panel TI
+        <div class="top-actions">
+            <a href="../../?origen=ti" class="btn-return">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
             </a>
+
+            <div class="admin-chip">
+                <span class="admin-icon">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+                <span>Administrador(a)</span>
+            </div>
         </div>
     </div>
 </nav>
 
-<main class="main">
-
+<main class="page">
 
     <section class="hero">
-        <div>
-            <h1>{{ titulo|default:"Configurar sala del semestre" }}</h1>
-            <p>
-                Selecciona la sala, define el cupo y captura los rangos de horario en formato compacto.
-            </p>
+        <div class="hero-main">
+            <div class="hero-icon">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div>
+                <h1>{{ titulo|default:"Agregar sala al semestre" }}</h1>
+                <p>
+                    Selecciona la sala, define el cupo y registra los horarios generales que se utilizarán durante el semestre.
+                    La información queda organizada por bloques para facilitar la captura.
+                </p>
+            </div>
         </div>
-        <div class="hero-icon">
-            <i class="bi bi-clock-history"></i>
+
+        <div class="hero-reminder">
+            <h6>
+                <i class="bi bi-shield-check"></i>
+                Recuerda
+            </h6>
+            <p>
+                Para iniciar el semestre, cada sala activa debe tener al menos una maestra asignada.
+            </p>
         </div>
     </section>
 
@@ -764,14 +815,19 @@
         <section class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="bi bi-door-open-fill me-2"></i>Configuración de sala
+                    <span class="title-icon">
+                        <i class="bi bi-door-open-fill"></i>
+                    </span>
+                    Configuración de sala
                 </h2>
             </div>
 
             <div class="panel-body">
                 <form method="POST" novalidate>
                     {% csrf_token %}
-                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                        <input type="hidden" name="origen" value="ti">
+                    {% endif %}
 
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger rounded-4">
@@ -781,13 +837,20 @@
                         </div>
                     {% endif %}
 
-                    <div class="section-title">
-                        <i class="bi bi-door-open-fill"></i>
-                        Sala y cupo
-                    </div>
+                    <div class="section-block">
+                        <div class="section-head">
+                            <div>
+                                <h3 class="section-title">
+                                    <i class="bi bi-door-open-fill"></i>
+                                    Sala y cupo
+                                </h3>
+                                <div class="section-help">
+                                    Define qué sala se agregará al semestre y el cupo que tendrá durante este periodo.
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="row">
-                        <div class="col-md-7">
+                        <div class="form-grid wide-left">
                             <div class="field-card">
                                 <label for="{{ form.sala.id_for_label }}" class="form-label">
                                     Sala <span class="text-danger">*</span>
@@ -802,9 +865,7 @@
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
 
-                        <div class="col-md-5">
                             <div class="field-card">
                                 <label for="{{ form.cupo.id_for_label }}" class="form-label">
                                     Cupo de la sala
@@ -819,45 +880,40 @@
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="field-card">
-                        <div class="form-check">
-                            {{ form.activa }}
-                            <label class="form-check-label" for="{{ form.activa.id_for_label }}">
-                                Sala activa en este semestre
-                            </label>
-                            <div class="field-help">
-                                Si está activa, podrá recibir maestras y alumnos durante el semestre.
+                            <div class="field-card full">
+                                <div class="form-check">
+                                    {{ form.activa }}
+                                    <label class="form-check-label" for="{{ form.activa.id_for_label }}">
+                                        Sala activa en este semestre
+                                    </label>
+                                    <div class="field-help">
+                                        Si está activa, podrá recibir maestras y alumnos durante el semestre.
+                                    </div>
+                                </div>
+                                {% if form.activa.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.activa.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
-                        {% if form.activa.errors %}
-                            <div class="error-text">
-                                {% for error in form.activa.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
                     </div>
 
-                    <div class="section-title mt-2">
-                        <i class="bi bi-clock-fill"></i>
-                        Horarios generales
-                    </div>
-
-                    <div class="time-section-card">
-                        <div class="time-section-header">
+                    <div class="section-block">
+                        <div class="section-head">
                             <div>
-                                <h3 class="time-section-heading">
+                                <h3 class="section-title">
                                     <i class="bi bi-person-workspace"></i>
                                     Personal y recepción
                                 </h3>
-                                <div class="time-section-help">
+                                <div class="section-help">
                                     Registra primero la entrada del personal y después el rango de recepción de niñas y niños.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="single-time-grid">
+                        <div class="form-grid">
                             <div class="time-field">
                                 <label for="{{ form.entrada_maestras.id_for_label }}" class="form-label">
                                     Entrada maestras
@@ -865,7 +921,9 @@
                                 {{ form.entrada_maestras }}
                                 <div class="field-help">Hora de entrada del personal de sala.</div>
                                 {% if form.entrada_maestras.errors %}
-                                    <div class="error-text">{% for error in form.entrada_maestras.errors %}{{ error }}{% endfor %}</div>
+                                    <div class="error-text">
+                                        {% for error in form.entrada_maestras.errors %}{{ error }}{% endfor %}
+                                    </div>
                                 {% endif %}
                             </div>
 
@@ -883,7 +941,9 @@
                                         {{ form.recepcion_inicio }}
                                         <div class="field-help">Inicio de recepción.</div>
                                         {% if form.recepcion_inicio.errors %}
-                                            <div class="error-text">{% for error in form.recepcion_inicio.errors %}{{ error }}{% endfor %}</div>
+                                            <div class="error-text">
+                                                {% for error in form.recepcion_inicio.errors %}{{ error }}{% endfor %}
+                                            </div>
                                         {% endif %}
                                     </div>
 
@@ -896,7 +956,9 @@
                                         {{ form.recepcion_fin }}
                                         <div class="field-help">Término de recepción.</div>
                                         {% if form.recepcion_fin.errors %}
-                                            <div class="error-text">{% for error in form.recepcion_fin.errors %}{{ error }}{% endfor %}</div>
+                                            <div class="error-text">
+                                                {% for error in form.recepcion_fin.errors %}{{ error }}{% endfor %}
+                                            </div>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -909,25 +971,20 @@
                         </div>
                     </div>
 
-                    <div class="time-grid-title">
-                        <i class="bi bi-cup-hot-fill"></i>
-                        Alimentación y descanso
-                    </div>
-
-                    <div class="time-section-card">
-                        <div class="time-section-header">
+                    <div class="section-block">
+                        <div class="section-head">
                             <div>
-                                <h3 class="time-section-heading">
-                                    <i class="bi bi-clock-history"></i>
-                                    Rangos de alimentación y siesta
+                                <h3 class="section-title">
+                                    <i class="bi bi-cup-hot-fill"></i>
+                                    Alimentación y descanso
                                 </h3>
-                                <div class="time-section-help">
-                                    Cada actividad se captura con inicio y fin en el mismo bloque.
+                                <div class="section-help">
+                                    Cada actividad se captura con hora de inicio y hora de fin dentro del mismo bloque.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="time-pair-grid">
+                        <div class="form-grid">
                             <div class="time-pair-card">
                                 <div class="time-pair-title">
                                     <i class="bi bi-cup-hot-fill"></i>
@@ -937,13 +994,17 @@
                                     <div>
                                         <label for="{{ form.desayuno_inicio.id_for_label }}" class="form-label">Inicio</label>
                                         {{ form.desayuno_inicio }}
-                                        {% if form.desayuno_inicio.errors %}<div class="error-text">{% for error in form.desayuno_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.desayuno_inicio.errors %}
+                                            <div class="error-text">{% for error in form.desayuno_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
                                     <div>
                                         <label for="{{ form.desayuno_fin.id_for_label }}" class="form-label">Fin</label>
                                         {{ form.desayuno_fin }}
-                                        {% if form.desayuno_fin.errors %}<div class="error-text">{% for error in form.desayuno_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.desayuno_fin.errors %}
+                                            <div class="error-text">{% for error in form.desayuno_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -957,13 +1018,17 @@
                                     <div>
                                         <label for="{{ form.colacion_inicio.id_for_label }}" class="form-label">Inicio</label>
                                         {{ form.colacion_inicio }}
-                                        {% if form.colacion_inicio.errors %}<div class="error-text">{% for error in form.colacion_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.colacion_inicio.errors %}
+                                            <div class="error-text">{% for error in form.colacion_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
                                     <div>
                                         <label for="{{ form.colacion_fin.id_for_label }}" class="form-label">Fin</label>
                                         {{ form.colacion_fin }}
-                                        {% if form.colacion_fin.errors %}<div class="error-text">{% for error in form.colacion_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.colacion_fin.errors %}
+                                            <div class="error-text">{% for error in form.colacion_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -977,13 +1042,17 @@
                                     <div>
                                         <label for="{{ form.comida_inicio.id_for_label }}" class="form-label">Inicio</label>
                                         {{ form.comida_inicio }}
-                                        {% if form.comida_inicio.errors %}<div class="error-text">{% for error in form.comida_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.comida_inicio.errors %}
+                                            <div class="error-text">{% for error in form.comida_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
                                     <div>
                                         <label for="{{ form.comida_fin.id_for_label }}" class="form-label">Fin</label>
                                         {{ form.comida_fin }}
-                                        {% if form.comida_fin.errors %}<div class="error-text">{% for error in form.comida_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.comida_fin.errors %}
+                                            <div class="error-text">{% for error in form.comida_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -997,38 +1066,37 @@
                                     <div>
                                         <label for="{{ form.siesta_inicio.id_for_label }}" class="form-label">Inicio</label>
                                         {{ form.siesta_inicio }}
-                                        {% if form.siesta_inicio.errors %}<div class="error-text">{% for error in form.siesta_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.siesta_inicio.errors %}
+                                            <div class="error-text">{% for error in form.siesta_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
                                     <div>
                                         <label for="{{ form.siesta_fin.id_for_label }}" class="form-label">Fin</label>
                                         {{ form.siesta_fin }}
-                                        {% if form.siesta_fin.errors %}<div class="error-text">{% for error in form.siesta_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.siesta_fin.errors %}
+                                            <div class="error-text">{% for error in form.siesta_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="time-grid-title">
-                        <i class="bi bi-palette-fill"></i>
-                        Actividad pedagógica y recreo
-                    </div>
-
-                    <div class="time-section-card">
-                        <div class="time-section-header">
+                    <div class="section-block">
+                        <div class="section-head">
                             <div>
-                                <h3 class="time-section-heading">
+                                <h3 class="section-title">
                                     <i class="bi bi-palette-fill"></i>
-                                    Actividades de la sala
+                                    Actividad pedagógica y recreo
                                 </h3>
-                                <div class="time-section-help">
-                                    Define el nombre de la actividad pedagógica y captura los rangos de actividad y recreo.
+                                <div class="section-help">
+                                    Captura el nombre de la actividad pedagógica y los rangos de actividad y recreo.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="time-field mb-3">
+                        <div class="field-card mb-3">
                             <label for="{{ form.actividad_pedagogica_nombre.id_for_label }}" class="form-label">
                                 Nombre de actividad pedagógica
                             </label>
@@ -1037,11 +1105,13 @@
                                 Ejemplo: motricidad fina, lenguaje, actividad sensorial, lectura guiada.
                             </div>
                             {% if form.actividad_pedagogica_nombre.errors %}
-                                <div class="error-text">{% for error in form.actividad_pedagogica_nombre.errors %}{{ error }}{% endfor %}</div>
+                                <div class="error-text">
+                                    {% for error in form.actividad_pedagogica_nombre.errors %}{{ error }}{% endfor %}
+                                </div>
                             {% endif %}
                         </div>
 
-                        <div class="time-pair-grid">
+                        <div class="form-grid">
                             <div class="time-pair-card">
                                 <div class="time-pair-title">
                                     <i class="bi bi-brush-fill"></i>
@@ -1051,13 +1121,17 @@
                                     <div>
                                         <label for="{{ form.actividad_pedagogica_inicio.id_for_label }}" class="form-label">Inicio</label>
                                         {{ form.actividad_pedagogica_inicio }}
-                                        {% if form.actividad_pedagogica_inicio.errors %}<div class="error-text">{% for error in form.actividad_pedagogica_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.actividad_pedagogica_inicio.errors %}
+                                            <div class="error-text">{% for error in form.actividad_pedagogica_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
                                     <div>
                                         <label for="{{ form.actividad_pedagogica_fin.id_for_label }}" class="form-label">Fin</label>
                                         {{ form.actividad_pedagogica_fin }}
-                                        {% if form.actividad_pedagogica_fin.errors %}<div class="error-text">{% for error in form.actividad_pedagogica_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.actividad_pedagogica_fin.errors %}
+                                            <div class="error-text">{% for error in form.actividad_pedagogica_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -1071,39 +1145,37 @@
                                     <div>
                                         <label for="{{ form.recreo_inicio.id_for_label }}" class="form-label">Inicio</label>
                                         {{ form.recreo_inicio }}
-                                        {% if form.recreo_inicio.errors %}<div class="error-text">{% for error in form.recreo_inicio.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.recreo_inicio.errors %}
+                                            <div class="error-text">{% for error in form.recreo_inicio.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="compact-time-arrow"><i class="bi bi-arrow-right"></i></div>
                                     <div>
                                         <label for="{{ form.recreo_fin.id_for_label }}" class="form-label">Fin</label>
                                         {{ form.recreo_fin }}
-                                        {% if form.recreo_fin.errors %}<div class="error-text">{% for error in form.recreo_fin.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                                        {% if form.recreo_fin.errors %}
+                                            <div class="error-text">{% for error in form.recreo_fin.errors %}{{ error }}{% endfor %}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-
-                    <div class="section-title mt-2">
-                        <i class="bi bi-box-arrow-right"></i>
-                        Salida
-                    </div>
-
-                    <div class="time-section-card">
-                        <div class="time-section-header">
+                    <div class="section-block">
+                        <div class="section-head">
                             <div>
-                                <h3 class="time-section-heading">
+                                <h3 class="section-title">
                                     <i class="bi bi-box-arrow-right"></i>
                                     Cierre de jornada
                                 </h3>
-                                <div class="time-section-help">
+                                <div class="section-help">
                                     Registra el horario de salida del personal de sala.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="single-time-grid">
+                        <div class="form-grid">
                             <div class="time-field">
                                 <label for="{{ form.salida_maestras.id_for_label }}" class="form-label">
                                     Salida maestras
@@ -1111,18 +1183,21 @@
                                 {{ form.salida_maestras }}
                                 <div class="field-help">Horario de salida del personal de sala.</div>
                                 {% if form.salida_maestras.errors %}
-                                    <div class="error-text">{% for error in form.salida_maestras.errors %}{{ error }}{% endfor %}</div>
+                                    <div class="error-text">
+                                        {% for error in form.salida_maestras.errors %}{{ error }}{% endfor %}
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
                     <div class="actions">
-                        <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        <a href="../../?origen=ti" class="btn btn-outline-secondary btn-main">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancelar
                         </a>
 
-                        <button type="submit" class="btn btn-info btn-main text-white">
+                        <button type="submit" class="btn btn-save btn-main">
                             <i class="bi bi-check-circle-fill me-1"></i>
                             {% if sala_semestre %}Guardar cambios{% else %}Agregar sala{% endif %}
                         </button>
@@ -1131,10 +1206,10 @@
             </div>
         </section>
 
-        <aside>
+        <aside class="aside-stack">
             <div class="semestre-card">
                 <h6>
-                    <i class="bi bi-calendar2-week-fill me-1"></i>
+                    <i class="bi bi-calendar2-week-fill"></i>
                     Semestre
                 </h6>
                 <p>
@@ -1145,10 +1220,10 @@
 
             <div class="side-note">
                 <h6>
-                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <i class="bi bi-info-circle-fill"></i>
                     ¿Qué se configura aquí?
                 </h6>
-                <p class="mb-0">
+                <p>
                     Aquí se define cómo operará esta sala durante el semestre: cupo, recepción, alimentos, actividades, descanso y salida.
                 </p>
             </div>
@@ -1156,7 +1231,10 @@
             <div class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-list-check me-2"></i>Después de guardar
+                        <span class="title-icon">
+                            <i class="bi bi-list-check"></i>
+                        </span>
+                        Después de guardar
                     </h2>
                 </div>
                 <div class="panel-body">
@@ -1183,21 +1261,11 @@
 
             <div class="info-card">
                 <div class="info-title">
-                    <i class="bi bi-clock-fill text-primary me-1"></i>
+                    <i class="bi bi-clock-fill text-primary"></i>
                     Validación de horarios
                 </div>
                 <p class="info-text">
                     Cuando captures hora de inicio y fin, el sistema valida que la hora final sea posterior a la inicial.
-                </p>
-            </div>
-
-            <div class="warning-box">
-                <h6>
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    Recuerda
-                </h6>
-                <p class="mb-0 small fw-semibold">
-                    Para iniciar el semestre, cada sala activa debe tener al menos una maestra asignada.
                 </p>
             </div>
         </aside>
@@ -1206,7 +1274,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 {% if messages %}
@@ -1267,15 +1334,6 @@
     });
 </script>
 {% endif %}
-
-
-
-<script>
-    function volverPanelTI() {
-        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
-        window.location.href = "{% url 'panel_gobierno_ti' %}";
-    }
-</script>
 
 </body>
 </html>

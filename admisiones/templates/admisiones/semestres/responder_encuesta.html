@@ -11,13 +11,16 @@
 
     <style>
         :root{
-            --azul:#1d4ed8;
-            --azul-oscuro:#1e3a8a;
-            --cyan:#0891b2;
-            --fondo:#f3f6fb;
-            --texto:#0f172a;
+            --azul:#2563eb;
+            --azul-oscuro:#0b2d68;
+            --cyan:#06b6d4;
+            --cyan-oscuro:#0e7490;
+            --cyan-profundo:#155e75;
+            --cyan-claro:#ecfeff;
+            --texto:#0b1f44;
             --muted:#64748b;
             --borde:#dbe4ef;
+            --fondo:#f3f6fb;
             --verde:#16a34a;
             --rojo:#dc2626;
             --amarillo:#f59e0b;
@@ -29,58 +32,79 @@
 
         body{
             margin:0;
-            background:
-                radial-gradient(circle at top left, rgba(8,145,178,.16), transparent 32%),
-                linear-gradient(180deg, #eef7ff 0%, var(--fondo) 42%, #f8fafc 100%);
+            min-height:100vh;
             color:var(--texto);
             font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(6,182,212,.18), transparent 32%),
+                linear-gradient(180deg, #eefaff 0%, var(--fondo) 46%, #f8fafc 100%);
         }
 
+        /* =========================
+           BARRA SUPERIOR PARA BENEFICIARIO
+        ========================= */
         .topbar{
-            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
-            color:white;
-            box-shadow:0 10px 26px rgba(15,23,42,.18);
+            background:#ffffff;
+            border-bottom:1px solid #dfe8f5;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
         }
 
         .topbar-inner{
             max-width:980px;
-            margin:auto;
-            padding:15px 18px;
+            margin:0 auto;
+            padding:18px 20px;
             display:flex;
             align-items:center;
-            justify-content:space-between;
+            justify-content:flex-start;
             gap:14px;
         }
 
         .brand{
             display:flex;
             align-items:center;
-            gap:13px;
+            gap:15px;
             min-width:0;
         }
 
-        .brand img{
-            height:48px;
-            width:auto;
+        .brand-logo{
+            width:104px;
+            height:68px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--cyan-oscuro), var(--cyan));
+            padding:8px;
+            box-shadow:0 12px 26px rgba(6,182,212,.26);
+            flex:0 0 auto;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
             object-fit:contain;
-            background:rgba(255,255,255,.12);
-            border-radius:13px;
-            padding:4px;
+            display:block;
+            background:transparent !important;
+            border:none !important;
+            padding:0 !important;
+            box-shadow:none !important;
         }
 
         .brand-title{
-            font-size:1rem;
+            margin:0;
+            color:#0b1f44;
+            font-size:1.38rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.04em;
-            line-height:1.1;
+            line-height:1.05;
+            letter-spacing:-.04em;
         }
 
         .brand-subtitle{
-            font-size:.82rem;
-            opacity:.9;
-            margin-top:2px;
+            margin-top:4px;
+            color:#50678f;
+            font-weight:650;
+            font-size:.93rem;
         }
 
         .main{
@@ -90,41 +114,92 @@
         }
 
         .hero{
-            background:linear-gradient(135deg, #0e7490, #06b6d4);
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--cyan-profundo), var(--cyan));
             color:white;
-            border-radius:26px;
-            padding:28px 30px;
+            border-radius:28px;
+            padding:28px;
             display:grid;
-            grid-template-columns:1fr auto;
+            grid-template-columns:minmax(0,1fr) 310px;
             gap:20px;
-            align-items:center;
-            box-shadow:0 22px 50px rgba(6,182,212,.22);
+            align-items:stretch;
+            box-shadow:0 24px 52px rgba(6,182,212,.24);
             margin-bottom:20px;
         }
 
-        .hero h1{
-            margin:0 0 8px;
-            font-size:1.85rem;
-            font-weight:950;
-            letter-spacing:-.03em;
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:260px;
+            height:260px;
+            border-radius:50%;
+            right:-95px;
+            top:-105px;
+            background:rgba(255,255,255,.14);
         }
 
-        .hero p{
-            margin:0;
-            opacity:.94;
-            font-size:1rem;
-            line-height:1.45;
+        .hero-main{
+            position:relative;
+            z-index:1;
+            display:flex;
+            align-items:flex-start;
+            gap:18px;
         }
 
         .hero-icon{
-            width:84px;
-            height:84px;
-            border-radius:24px;
+            width:74px;
+            height:74px;
+            border-radius:22px;
             background:rgba(255,255,255,.18);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:2.45rem;
+            font-size:2.1rem;
+            flex:0 0 auto;
+        }
+
+        .hero h1{
+            margin:0 0 8px;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:0;
+            opacity:.96;
+            font-size:1rem;
+            line-height:1.5;
+            font-weight:650;
+        }
+
+        .hero-autosave{
+            position:relative;
+            z-index:1;
+            background:rgba(255,255,255,.16);
+            border:1px solid rgba(255,255,255,.34);
+            border-radius:22px;
+            padding:18px;
+            backdrop-filter:blur(4px);
+        }
+
+        .hero-autosave h6{
+            margin:0 0 8px;
+            font-size:1rem;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .hero-autosave p{
+            margin:0;
+            font-size:.9rem;
+            line-height:1.45;
+            font-weight:700;
+            color:white;
+            opacity:.96;
         }
 
         .card-panel{
@@ -137,7 +212,7 @@
         }
 
         .panel-header{
-            background:#f8fafc;
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
             border-bottom:1px solid var(--borde);
             padding:18px 22px;
             display:flex;
@@ -151,16 +226,30 @@
             margin:0;
             font-size:1rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-            color:#334155;
+            color:#0b1f44;
+            display:flex;
+            align-items:center;
+            gap:9px;
+            letter-spacing:.02em;
+        }
+
+        .title-icon{
+            width:32px;
+            height:32px;
+            border-radius:10px;
+            background:#cffafe;
+            color:var(--cyan-oscuro);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
         }
 
         .panel-subtitle{
-            margin:5px 0 0;
+            margin:6px 0 0;
             color:#64748b;
             font-size:.9rem;
             font-weight:650;
+            line-height:1.35;
         }
 
         .panel-body{
@@ -175,10 +264,11 @@
         }
 
         .meta-card{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
+            background:#f8fbff;
+            border:1px solid #dfe8f5;
             border-radius:18px;
             padding:14px 15px;
+            min-width:0;
         }
 
         .meta-label{
@@ -192,7 +282,7 @@
 
         .meta-value{
             color:#0f172a;
-            font-weight:850;
+            font-weight:900;
             line-height:1.25;
         }
 
@@ -206,6 +296,21 @@
             font-weight:650;
             font-size:.92rem;
             margin-bottom:18px;
+        }
+
+        .autosave-status{
+            background:var(--cyan-claro);
+            border:1px solid #a5f3fc;
+            border-left:6px solid var(--cyan);
+            border-radius:18px;
+            padding:13px 15px;
+            color:#155e75;
+            font-weight:750;
+            font-size:.9rem;
+            margin-bottom:18px;
+            display:flex;
+            align-items:center;
+            gap:10px;
         }
 
         .warning{
@@ -270,10 +375,10 @@
         }
 
         .question-card{
-            border:1px solid #e2e8f0;
-            background:#fff;
+            border:1px solid #dfe8f5;
+            background:#ffffff;
             border-radius:20px;
-            padding:17px;
+            padding:16px;
             margin-bottom:13px;
             box-shadow:0 10px 22px rgba(15,23,42,.04);
         }
@@ -282,7 +387,7 @@
             display:flex;
             align-items:flex-start;
             gap:11px;
-            margin-bottom:14px;
+            margin-bottom:12px;
         }
 
         .question-number{
@@ -307,8 +412,8 @@
         }
 
         .answer-options{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
+            display:flex;
+            flex-wrap:wrap;
             gap:10px;
             padding-left:41px;
         }
@@ -324,14 +429,15 @@
         }
 
         .answer-option label{
-            width:100%;
+            min-width:132px;
             border:1px solid #cbd5e1;
             background:#f8fafc;
             color:#334155;
-            border-radius:16px;
-            padding:12px 14px;
+            border-radius:999px;
+            padding:9px 18px;
+            font-size:.88rem;
             font-weight:900;
-            display:flex;
+            display:inline-flex;
             align-items:center;
             justify-content:center;
             gap:8px;
@@ -341,8 +447,8 @@
         }
 
         .answer-option label:hover{
-            border-color:#93c5fd;
-            background:#eff6ff;
+            border-color:#67e8f9;
+            background:#ecfeff;
             transform:translateY(-1px);
         }
 
@@ -366,8 +472,8 @@
         }
 
         .comments-card{
-            border:1px solid #e2e8f0;
-            background:#f8fafc;
+            border:1px solid #dfe8f5;
+            background:#f8fbff;
             border-radius:20px;
             padding:17px;
             margin-top:18px;
@@ -410,6 +516,19 @@
             border-radius:14px;
             font-weight:900;
             padding:.76rem 1.15rem;
+        }
+
+        .btn-submit{
+            background:linear-gradient(135deg, var(--cyan-oscuro), var(--cyan));
+            border:none;
+            color:white;
+            box-shadow:0 12px 24px rgba(6,182,212,.22);
+        }
+
+        .btn-submit:hover{
+            color:white;
+            filter:brightness(.98);
+            transform:translateY(-1px);
         }
 
         .required-note{
@@ -460,8 +579,16 @@
 
         @media(max-width:768px){
             .topbar-inner{
-                flex-direction:column;
-                align-items:flex-start;
+                padding:15px 18px;
+            }
+
+            .brand-logo{
+                width:92px;
+                height:60px;
+            }
+
+            .brand-title{
+                font-size:1.14rem;
             }
 
             .hero{
@@ -469,8 +596,8 @@
                 padding:24px 20px;
             }
 
-            .hero-icon{
-                display:none;
+            .hero-main{
+                flex-direction:column;
             }
 
             .hero h1{
@@ -486,8 +613,7 @@
             }
 
             .answer-options{
-                grid-template-columns:1fr;
-                padding-left:0;
+                padding-left:41px;
             }
 
             .form-actions .btn{
@@ -496,6 +622,24 @@
 
             .required-note{
                 width:100%;
+            }
+        }
+
+        @media(max-width:576px){
+            .topbar-inner{
+                align-items:flex-start;
+            }
+
+            .brand{
+                align-items:flex-start;
+            }
+
+            .answer-options{
+                padding-left:0;
+            }
+
+            .answer-option label{
+                min-width:120px;
             }
         }
 
@@ -523,17 +667,14 @@
 <nav class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
             <div>
-                <div class="brand-title">Estancia Infantil UNACH</div>
+                <h1 class="brand-title">Estancia Infantil UNACH</h1>
                 <div class="brand-subtitle">Encuesta de Satisfacción B</div>
             </div>
         </div>
-
-        <span class="status-pill pill-blue">
-            <i class="bi bi-shield-check"></i>
-            Enlace individual
-        </span>
     </div>
 </nav>
 
@@ -558,15 +699,27 @@
     {% else %}
 
         <section class="hero">
-            <div>
-                <h1>Encuesta de Satisfacción B</h1>
-                <p>
-                    Estimado(a) {{ envio.inscripcion.solicitud_ingreso.nombre_tutor_completo }},
-                    le invitamos a responder esta encuesta sobre el servicio recibido durante el semestre.
-                </p>
+            <div class="hero-main">
+                <div class="hero-icon">
+                    <i class="bi bi-ui-checks-grid"></i>
+                </div>
+                <div>
+                    <h1>Encuesta de Satisfacción B</h1>
+                    <p>
+                        Estimado(a) {{ envio.inscripcion.solicitud_ingreso.nombre_tutor_completo }},
+                        le invitamos a responder esta encuesta sobre el servicio recibido durante el semestre.
+                    </p>
+                </div>
             </div>
-            <div class="hero-icon">
-                <i class="bi bi-ui-checks-grid"></i>
+
+            <div class="hero-autosave">
+                <h6>
+                    <i class="bi bi-cloud-check-fill"></i>
+                    Autoguardado activo
+                </h6>
+                <p>
+                    Sus respuestas se guardan automáticamente en este navegador por si desea continuar después.
+                </p>
             </div>
         </section>
 
@@ -574,10 +727,13 @@
             <div class="panel-header">
                 <div>
                     <h2 class="panel-title">
-                        <i class="bi bi-person-badge-fill me-2"></i>Datos de referencia
+                        <span class="title-icon">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </span>
+                        Datos de referencia
                     </h2>
                     <p class="panel-subtitle">
-                        La información se muestra solo para identificar el semestre y el alumno correspondiente.
+                        La información se muestra solo para identificar el semestre y el registro correspondiente.
                     </p>
                 </div>
 
@@ -597,7 +753,7 @@
             <div class="panel-body">
                 <div class="meta-grid">
                     <div class="meta-card">
-                        <div class="meta-label">Alumno(a)</div>
+                        <div class="meta-label">Alumno(a) / Hijo(a)</div>
                         <div class="meta-value">
                             {{ envio.inscripcion.solicitud_ingreso.nombre_menor_completo }}
                         </div>
@@ -643,7 +799,10 @@
             <div class="panel-header">
                 <div>
                     <h2 class="panel-title">
-                        <i class="bi bi-pencil-square me-2"></i>Formulario de encuesta
+                        <span class="title-icon">
+                            <i class="bi bi-pencil-square"></i>
+                        </span>
+                        Formulario de encuesta
                     </h2>
                     <p class="panel-subtitle">
                         Responda de acuerdo con su experiencia durante el semestre.
@@ -652,7 +811,12 @@
             </div>
 
             <div class="panel-body">
-                <form method="POST" onsubmit="return confirmarRespuestaEncuesta(this);">
+                <div class="autosave-status" id="autosaveStatus">
+                    <i class="bi bi-cloud-check-fill"></i>
+                    <span>Autoguardado listo. Sus respuestas se conservarán en este navegador hasta enviarlas.</span>
+                </div>
+
+                <form method="POST" id="encuestaForm" onsubmit="return confirmarRespuestaEncuesta(this);">
                     {% csrf_token %}
 
                     <div class="question-card">
@@ -844,11 +1008,11 @@
                             Todas las preguntas son obligatorias.
                         </span>
 
-                        <button type="reset" class="btn btn-outline-secondary btn-main">
+                        <button type="reset" class="btn btn-outline-secondary btn-main" id="btnLimpiar">
                             <i class="bi bi-eraser-fill me-1"></i> Limpiar
                         </button>
 
-                        <button type="submit" class="btn btn-info text-white btn-main">
+                        <button type="submit" class="btn btn-submit btn-main">
                             <i class="bi bi-send-check-fill me-1"></i>
                             Enviar respuestas
                         </button>
@@ -870,6 +1034,109 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+(function() {
+    const form = document.getElementById("encuestaForm");
+    const status = document.getElementById("autosaveStatus");
+    const btnLimpiar = document.getElementById("btnLimpiar");
+
+    if (!form) return;
+
+    const storageKey = "encuesta_satisfaccion_b_" + window.location.pathname;
+
+    const camposRadio = [
+        "q1_info_completa",
+        "q2_seguro",
+        "q3_orientacion_nutricion",
+        "q4_orientacion_medica",
+        "q5_orientacion_pedagogica",
+        "q6_orientacion_psicologica",
+        "q7_apoyo_estudios"
+    ];
+
+    function actualizarEstado(texto, icono) {
+        if (!status) return;
+
+        status.innerHTML = `
+            <i class="bi ${icono || "bi-cloud-check-fill"}"></i>
+            <span>${texto}</span>
+        `;
+    }
+
+    function obtenerDatosFormulario() {
+        const datos = {};
+
+        camposRadio.forEach(function(nombre) {
+            const seleccionado = form.querySelector(`input[name="${nombre}"]:checked`);
+            datos[nombre] = seleccionado ? seleccionado.value : "";
+        });
+
+        const comentarios = form.querySelector("#comentarios");
+        datos.comentarios = comentarios ? comentarios.value : "";
+        datos.guardado_en = new Date().toISOString();
+
+        return datos;
+    }
+
+    function guardarBorrador() {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(obtenerDatosFormulario()));
+            actualizarEstado("Borrador guardado automáticamente en este navegador.", "bi-cloud-check-fill");
+        } catch (error) {
+            actualizarEstado("No se pudo guardar el borrador en este navegador.", "bi-exclamation-triangle-fill");
+        }
+    }
+
+    function cargarBorrador() {
+        try {
+            const crudo = localStorage.getItem(storageKey);
+            if (!crudo) return;
+
+            const datos = JSON.parse(crudo);
+
+            camposRadio.forEach(function(nombre) {
+                if (!datos[nombre]) return;
+
+                const radio = form.querySelector(`input[name="${nombre}"][value="${datos[nombre]}"]`);
+                if (radio) radio.checked = true;
+            });
+
+            const comentarios = form.querySelector("#comentarios");
+            if (comentarios && typeof datos.comentarios === "string") {
+                comentarios.value = datos.comentarios;
+            }
+
+            actualizarEstado("Borrador recuperado. Puede continuar donde se quedó.", "bi-cloud-arrow-down-fill");
+        } catch (error) {
+            actualizarEstado("No se pudo recuperar el borrador guardado.", "bi-exclamation-triangle-fill");
+        }
+    }
+
+    let temporizador = null;
+
+    function guardarConEspera() {
+        window.clearTimeout(temporizador);
+        temporizador = window.setTimeout(guardarBorrador, 250);
+    }
+
+    cargarBorrador();
+
+    form.querySelectorAll("input[type='radio'], textarea").forEach(function(campo) {
+        campo.addEventListener("change", guardarConEspera);
+        campo.addEventListener("input", guardarConEspera);
+    });
+
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener("click", function() {
+            window.setTimeout(function() {
+                localStorage.removeItem(storageKey);
+                actualizarEstado("Borrador eliminado. Puede empezar nuevamente.", "bi-trash3-fill");
+            }, 50);
+        });
+    }
+
+    window.encuestaStorageKey = storageKey;
+})();
+
 function confirmarRespuestaEncuesta(formulario) {
     if (formulario.dataset.confirmado === "1") {
         return true;
@@ -919,6 +1186,10 @@ function confirmarRespuestaEncuesta(formulario) {
         }
     }).then(function(resultado) {
         if (resultado.isConfirmed) {
+            if (window.encuestaStorageKey) {
+                localStorage.removeItem(window.encuestaStorageKey);
+            }
+
             formulario.dataset.confirmado = "1";
             formulario.submit();
         }

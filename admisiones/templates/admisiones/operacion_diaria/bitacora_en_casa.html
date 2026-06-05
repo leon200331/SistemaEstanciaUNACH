@@ -12,6 +12,7 @@
     <style>
         :root{
             --blue:#2563eb;
+            --blue-dark:#1e40af;
             --cyan:#0891b2;
             --green:#16a34a;
             --yellow:#ca8a04;
@@ -20,37 +21,42 @@
             --slate:#0f172a;
             --muted:#64748b;
             --border:#e2e8f0;
+            --soft:#f8fafc;
+            --card:#ffffff;
+            --hero:linear-gradient(135deg,#1d4ed8,#0891b2);
+            --shadow:0 18px 45px rgba(15,23,42,.08);
         }
 
         *{box-sizing:border-box;}
 
         body{
             min-height:100vh;
+            margin:0;
             background:
-                radial-gradient(circle at top left, rgba(37,99,235,.15), transparent 30%),
-                radial-gradient(circle at top right, rgba(8,145,178,.13), transparent 32%),
+                radial-gradient(circle at top left, rgba(37,99,235,.13), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.14), transparent 32%),
                 linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
         }
 
         .page{
-            max-width:1240px;
+            max-width:1360px;
             margin:0 auto;
             padding:24px;
         }
 
         .topbar{
-            background:rgba(255,255,255,.94);
+            background:rgba(255,255,255,.95);
             backdrop-filter:blur(16px);
-            border:1px solid rgba(226,232,240,.9);
+            border:1px solid rgba(226,232,240,.92);
             border-radius:24px;
             padding:18px 20px;
             display:flex;
             align-items:center;
             justify-content:space-between;
             gap:18px;
-            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            box-shadow:var(--shadow);
             margin-bottom:22px;
         }
 
@@ -58,25 +64,29 @@
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:98px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.30);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            transform:scale(1.12);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
 
         .brand-title{
@@ -99,21 +109,61 @@
             flex-wrap:wrap;
             gap:10px;
             justify-content:flex-end;
+            align-items:center;
         }
 
-        .btn-soft{
-            border-radius:999px;
-            padding:.72rem 1rem;
-            font-weight:850;
+        .teacher-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 12px;
             border:1px solid var(--border);
-            background:white;
-            color:#334155;
+            border-radius:999px;
+            background:#fff;
+            box-shadow:0 10px 22px rgba(15,23,42,.05);
+            color:#0f172a;
+            font-weight:850;
+            max-width:300px;
+        }
+
+        .teacher-icon{
+            width:34px;
+            height:34px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#dbeafe,#eef2ff);
+            color:#2563eb;
+            flex-shrink:0;
+            font-size:1.05rem;
+        }
+
+        .teacher-name{
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:.9rem;
+        }
+
+        .btn-soft,
+        .btn-main{
+            border-radius:999px;
+            font-weight:900;
             text-decoration:none;
             display:inline-flex;
             align-items:center;
             justify-content:center;
             gap:8px;
             transition:.18s ease;
+            white-space:nowrap;
+        }
+
+        .btn-soft{
+            padding:.72rem 1rem;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
         }
 
         .btn-soft:hover{
@@ -124,16 +174,8 @@
         }
 
         .btn-main{
-            border-radius:999px;
-            padding:.82rem 1.15rem;
-            font-weight:950;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            text-decoration:none;
+            padding:.84rem 1.18rem;
             border:none;
-            transition:.18s ease;
         }
 
         .btn-main:hover{
@@ -141,18 +183,18 @@
             box-shadow:0 14px 28px rgba(15,23,42,.16);
         }
 
-        .btn-blue{
-            background:linear-gradient(135deg,var(--blue),var(--cyan));
-            color:white;
-        }
-
         .btn-green{
             background:linear-gradient(135deg,#16a34a,#22c55e);
             color:white;
         }
 
+        .btn-blue{
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:white;
+        }
+
         .hero{
-            background:linear-gradient(135deg,#1d4ed8,#0891b2);
+            background:var(--hero);
             color:white;
             border-radius:30px;
             padding:26px;
@@ -165,12 +207,12 @@
         .hero:after{
             content:"";
             position:absolute;
-            width:260px;
-            height:260px;
+            width:280px;
+            height:280px;
             border-radius:50%;
             background:rgba(255,255,255,.14);
-            right:-80px;
-            top:-90px;
+            right:-86px;
+            top:-92px;
         }
 
         .hero-content{
@@ -180,6 +222,38 @@
             grid-template-columns:1fr auto;
             gap:18px;
             align-items:center;
+        }
+
+        .hero-student{
+            display:flex;
+            align-items:center;
+            gap:18px;
+            min-width:0;
+        }
+
+        .hero-photo{
+            width:92px;
+            height:92px;
+            border-radius:28px;
+            border:3px solid rgba(255,255,255,.55);
+            background:rgba(255,255,255,.18);
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 16px 32px rgba(0,0,0,.16);
+            flex-shrink:0;
+        }
+
+        .hero-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .hero-photo i{
+            font-size:2.8rem;
+            color:white;
         }
 
         .hero-kicker{
@@ -192,7 +266,7 @@
             padding:.45rem .8rem;
             font-size:.78rem;
             font-weight:900;
-            margin-bottom:12px;
+            margin-bottom:10px;
         }
 
         .hero h1{
@@ -200,17 +274,18 @@
             font-size:2rem;
             font-weight:950;
             letter-spacing:-.05em;
+            text-shadow:0 8px 18px rgba(0,0,0,.12);
         }
 
         .hero p{
             margin:8px 0 0;
-            max-width:780px;
-            font-weight:600;
-            opacity:.94;
+            max-width:760px;
+            font-weight:650;
+            opacity:.95;
         }
 
         .day-info{
-            min-width:260px;
+            min-width:252px;
             background:rgba(255,255,255,.18);
             border:1px solid rgba(255,255,255,.28);
             border-radius:22px;
@@ -232,19 +307,145 @@
             font-weight:950;
         }
 
-        .layout{
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+
+        .summary-grid{
             display:grid;
-            grid-template-columns:.82fr 1.18fr;
-            gap:20px;
-            align-items:start;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:12px;
+            margin-bottom:22px;
+        }
+
+        .summary-card{
+            background:rgba(255,255,255,.96);
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:14px 15px;
+            box-shadow:0 12px 28px rgba(15,23,42,.06);
+            min-width:0;
+        }
+
+        .summary-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .summary-value{
+            font-weight:950;
+            color:#0f172a;
+            overflow-wrap:anywhere;
+        }
+
+        .layout{
+            display:block;
+        }
+
+        .layout main{
+            width:100%;
+        }
+
+
+        .student-horizontal{
+            margin-bottom:22px;
+        }
+
+        .student-horizontal .panel-body{
+            padding:18px;
+        }
+
+        .student-line{
+            display:grid;
+            grid-template-columns:auto minmax(220px,1.25fr) repeat(4,minmax(135px,1fr));
+            gap:12px;
+            align-items:center;
+        }
+
+        .student-mini-photo{
+            width:78px;
+            height:78px;
+            border-radius:22px;
+            background:linear-gradient(135deg,#dbeafe,#cffafe);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            border:3px solid rgba(255,255,255,.78);
+            box-shadow:0 12px 24px rgba(15,23,42,.10);
+            font-size:1.9rem;
+        }
+
+        .student-mini-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .student-main-info{
+            min-width:0;
+        }
+
+        .student-main-info .student-name{
+            margin-bottom:6px;
+        }
+
+        .student-main-info .student-meta{
+            font-size:.86rem;
+        }
+
+        .horizontal-item{
+            min-height:74px;
+            background:linear-gradient(135deg,#ffffff,#f8fafc);
+            border:1px solid rgba(148,163,184,.30);
+            border-radius:18px;
+            padding:12px 14px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .horizontal-label{
+            color:#64748b;
+            font-size:.70rem;
+            text-transform:uppercase;
+            letter-spacing:.07em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .horizontal-value{
+            font-weight:950;
+            color:#0f172a;
+            overflow-wrap:anywhere;
+            line-height:1.25;
         }
 
         .panel{
-            background:rgba(255,255,255,.95);
+            background:rgba(255,255,255,.96);
             border:1px solid var(--border);
             border-radius:26px;
             box-shadow:0 16px 38px rgba(15,23,42,.08);
             overflow:hidden;
+            min-width:0;
         }
 
         .panel-header{
@@ -269,43 +470,57 @@
             gap:8px;
         }
 
-        .panel-body{
-            padding:20px;
-        }
-
-        .alert-custom{
-            border:none;
-            border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
-        }
+        .panel-body{padding:20px;}
 
         .student-card{
-            background:linear-gradient(135deg,#eff6ff,#f8fafc);
+            background:linear-gradient(135deg,#eff6ff,#ecfeff 58%,#ffffff);
             border:1px solid #bfdbfe;
             border-radius:24px;
             padding:18px;
             margin-bottom:16px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .student-card:after{
+            content:"";
+            position:absolute;
+            width:110px;
+            height:110px;
+            border-radius:50%;
+            background:linear-gradient(135deg,rgba(255,255,255,.56),rgba(255,255,255,0));
+            right:-36px;
+            top:-38px;
         }
 
         .student-top{
             display:flex;
             gap:14px;
             align-items:flex-start;
+            position:relative;
+            z-index:1;
         }
 
         .student-avatar{
-            width:62px;
-            height:62px;
-            border-radius:20px;
+            width:86px;
+            height:86px;
+            border-radius:24px;
             background:linear-gradient(135deg,#dbeafe,#cffafe);
             color:#1d4ed8;
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:1.7rem;
+            font-size:2rem;
             flex-shrink:0;
+            overflow:hidden;
+            border:3px solid rgba(255,255,255,.72);
+            box-shadow:0 12px 26px rgba(15,23,42,.10);
+        }
+
+        .student-avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
         }
 
         .student-name{
@@ -328,6 +543,8 @@
             grid-template-columns:repeat(2,minmax(0,1fr));
             gap:10px;
             margin-top:16px;
+            position:relative;
+            z-index:1;
         }
 
         .info-item{
@@ -349,85 +566,44 @@
         .info-value{
             font-weight:900;
             color:#0f172a;
+            overflow-wrap:anywhere;
         }
 
-        .badge-soft{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            border-radius:999px;
-            padding:.42rem .68rem;
-            font-size:.76rem;
-            font-weight:950;
-            white-space:nowrap;
+        .notice-card{
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:700;
+            line-height:1.45;
+            margin-bottom:16px;
         }
 
-        .badge-yellow{background:#fef3c7;color:#92400e;}
-        .badge-green{background:#dcfce7;color:#166534;}
-        .badge-blue{background:#dbeafe;color:#1e40af;}
-        .badge-gray{background:#e2e8f0;color:#334155;}
-        .badge-purple{background:#ede9fe;color:#5b21b6;}
-
-        .help-card{
+        .notice-blue{
             background:#eff6ff;
             border:1px solid #bfdbfe;
             border-left:6px solid #2563eb;
             color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
         }
 
-        .readonly-card{
+        .notice-green{
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-left:6px solid #16a34a;
+            color:#14532d;
+        }
+
+        .notice-gray{
             background:#f8fafc;
             border:1px solid #cbd5e1;
             border-left:6px solid #64748b;
             color:#334155;
+        }
+
+        .alert-custom{
+            border:none;
             border-radius:20px;
-            padding:15px 16px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
             font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .flow-card{
-            background:white;
-            border:1px solid var(--border);
-            border-radius:20px;
-            padding:15px;
-            margin-bottom:12px;
-            display:flex;
-            gap:12px;
-            align-items:flex-start;
-        }
-
-        .flow-icon{
-            width:42px;
-            height:42px;
-            border-radius:15px;
-            background:#dbeafe;
-            color:#1d4ed8;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:1.2rem;
-            flex-shrink:0;
-        }
-
-        .flow-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:3px;
-        }
-
-        .flow-text{
-            color:#64748b;
-            font-weight:650;
-            font-size:.86rem;
-            line-height:1.4;
-            margin:0;
         }
 
         .form-section{
@@ -454,9 +630,7 @@
             gap:14px;
         }
 
-        .form-group.full{
-            grid-column:1 / -1;
-        }
+        .form-group.full{grid-column:1 / -1;}
 
         .form-label{
             font-weight:900;
@@ -473,37 +647,17 @@
             font-weight:650;
             color:#0f172a;
             background:white;
+            width:100%;
+            max-width:100%;
+            min-width:0;
         }
 
-        textarea.form-control{
-            min-height:108px;
-        }
+        textarea.form-control{min-height:104px;}
 
         .form-control:focus,
         .form-select:focus{
             border-color:#93c5fd;
             box-shadow:0 0 0 4px rgba(59,130,246,.12);
-        }
-
-        .form-check{
-            background:white;
-            border:1px solid #cbd5e1;
-            border-radius:16px;
-            padding:14px 14px 14px 44px;
-            min-height:54px;
-            display:flex;
-            align-items:center;
-        }
-
-        .form-check-input{
-            margin-left:-28px;
-            width:1.15rem;
-            height:1.15rem;
-        }
-
-        .form-check-label{
-            font-weight:850;
-            color:#334155;
         }
 
         .mini-help{
@@ -513,6 +667,126 @@
             margin-top:6px;
         }
 
+        .source-multi select[multiple]{
+            position:absolute !important;
+            opacity:0 !important;
+            pointer-events:none !important;
+            height:1px !important;
+            width:1px !important;
+            overflow:hidden !important;
+        }
+
+        .chips-wrap{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            align-items:stretch;
+        }
+
+        .question-row{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:14px;
+            margin-top:18px;
+        }
+
+        .question-card{
+            background:#fff;
+            border:1px solid #e2e8f0;
+            border-radius:20px;
+            padding:14px;
+            min-width:0;
+        }
+
+        .question-card .form-label{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:10px;
+        }
+
+        .question-icon{
+            width:30px;
+            height:30px;
+            border-radius:999px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            background:#dbeafe;
+            color:#1d4ed8;
+            flex-shrink:0;
+        }
+
+        .state-chip{
+            border:1px solid #cbd5e1;
+            background:white;
+            border-radius:18px;
+            padding:12px 12px;
+            font-weight:900;
+            color:#334155;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:flex-start;
+            gap:9px;
+            transition:.16s ease;
+            min-height:50px;
+            text-align:left;
+        }
+
+        .state-chip:hover{
+            transform:translateY(-1px);
+            box-shadow:0 10px 20px rgba(15,23,42,.08);
+            border-color:#93c5fd;
+        }
+
+        .state-chip .chip-icon{
+            width:28px;
+            height:28px;
+            border-radius:999px;
+            background:#eff6ff;
+            color:#2563eb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+        }
+
+        .state-chip.active{
+            border-color:#2563eb;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            color:#1e40af;
+            box-shadow:0 12px 24px rgba(37,99,235,.12);
+        }
+
+        .state-chip.active .chip-icon{
+            background:#2563eb;
+            color:white;
+        }
+
+        .amount-box{
+            display:grid;
+            grid-template-columns:44px 1fr;
+            gap:10px;
+            align-items:start;
+            background:#fff;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:12px;
+        }
+
+        .amount-icon{
+            width:44px;
+            height:44px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#1e40af;
+            background:linear-gradient(135deg,#dbeafe,#eef2ff);
+            font-size:1.18rem;
+        }
+
         .errors{
             margin-top:7px;
             color:#b91c1c;
@@ -520,9 +794,19 @@
             font-size:.82rem;
         }
 
-        .errors ul{
-            margin:0;
-            padding-left:18px;
+        .errors ul{margin:0;padding-left:18px;}
+
+        .auto-save-status{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            color:#166534;
+            background:#dcfce7;
+            border:1px solid #bbf7d0;
+            border-radius:999px;
+            padding:.42rem .7rem;
+            font-weight:950;
+            font-size:.76rem;
         }
 
         .submit-bar{
@@ -538,42 +822,20 @@
             color:#64748b;
             font-weight:650;
             font-size:.86rem;
-            max-width:520px;
+            max-width:560px;
         }
 
-        .required{
-            color:#dc2626;
-            font-weight:950;
-        }
+        .required{color:#dc2626;font-weight:950;}
 
-        .state-options{
-            display:grid;
-            grid-template-columns:repeat(3,minmax(0,1fr));
-            gap:8px;
-        }
-
-        .state-options select{
-            min-height:120px;
-        }
-
-        .completion-card{
-            background:#f0fdf4;
-            border:1px solid #bbf7d0;
-            border-left:6px solid #16a34a;
-            color:#14532d;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-top:12px;
-        }
-
-        @media(max-width:1050px){
-            .layout{grid-template-columns:1fr;}
+        @media(max-width:1120px){
             .hero-content{grid-template-columns:1fr;}
             .day-info{min-width:0;}
+            .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+            .student-line{grid-template-columns:auto 1fr 1fr 1fr;}
+            .student-main-info{grid-column:2 / -1;}
         }
 
-        @media(max-width:720px){
+        @media(max-width:760px){
             .page{padding:14px;}
 
             .topbar{
@@ -583,23 +845,38 @@
             }
 
             .top-actions,
+            .teacher-chip,
             .btn-soft,
             .btn-main{
                 width:100%;
                 justify-content:center;
             }
 
-            .hero{
-                padding:22px;
-                border-radius:22px;
-            }
-
+            .hero{padding:22px;border-radius:22px;}
+            .hero-student{flex-direction:column;align-items:flex-start;}
             .hero h1{font-size:1.55rem;}
 
             .form-grid,
             .info-grid,
-            .state-options{
+            .summary-grid,
+            .question-row,
+            .student-line{
                 grid-template-columns:1fr;
+            }
+
+            .student-mini-photo{
+                width:86px;
+                height:86px;
+            }
+
+            .student-main-info{grid-column:auto;}
+
+            .chips-wrap{
+                flex-direction:column;
+            }
+
+            .state-chip{
+                max-width:none;
             }
 
             .student-top{flex-direction:column;}
@@ -619,20 +896,28 @@
             <div>
                 <h1 class="brand-title">Bitácora en casa</h1>
                 <p class="brand-subtitle">
-                    Primera parte de la bitácora diaria del menor.
+                    Registro inicial de cómo llegó el menor desde casa.
                 </p>
             </div>
         </div>
 
         <div class="top-actions">
-            <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-soft">
-                <i class="bi bi-arrow-left-circle-fill"></i>
-                Volver a alumnos
-            </a>
-            <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
-                <i class="bi bi-house-door-fill"></i>
-                Panel maestra
-            </a>
+            <div class="teacher-chip" title="Maestra">
+                <span class="teacher-icon"><i class="bi bi-person-workspace"></i></span>
+                <span class="teacher-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+            </div>
+
+            {% if request.GET.origen == 'estancia' %}
+                <a href="{% url 'bitacora_estancia_maestra' registro.id %}" class="btn-soft">
+                    <i class="bi bi-journal-text"></i>
+                    Volver a estancia
+                </a>
+            {% else %}
+                <a href="{% url 'dashboard_maestra' %}#alumnos-dia" class="btn-soft">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Regresar
+                </a>
+            {% endif %}
         </div>
     </header>
 
@@ -648,20 +933,28 @@
 
     <section class="hero">
         <div class="hero-content">
-            <div>
-                <div class="hero-kicker">
-                    <i class="bi bi-house-heart-fill"></i>
-                    Información reportada por el responsable
+            <div class="hero-student">
+                <div class="hero-photo">
+                    {% if registro.alumno.doc_menor_fotos %}
+                        <img src="{{ registro.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                    {% else %}
+                        <i class="bi bi-house-heart-fill"></i>
+                    {% endif %}
                 </div>
 
-                <h1>
-                    {{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}
-                </h1>
+                <div>
+                    <div class="hero-kicker">
+                        <i class="bi bi-house-heart-fill"></i>
+                        Información reportada por el responsable
+                    </div>
 
-                <p>
-                    Captura cómo estuvo el menor en casa antes de ingresar a la estancia. Esta información la proporciona
-                    el adulto responsable durante la recepción del niño.
-                </p>
+                    <h1>{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</h1>
+
+                    <p>
+                        Captura la información que el responsable reporta al momento de la recepción: sueño,
+                        estado de ánimo, alimentos, cantidades, evacuación y observaciones generales.
+                    </p>
+                </div>
             </div>
 
             <div class="day-info">
@@ -675,7 +968,7 @@
                         </span>
                     {% else %}
                         <span class="badge-soft badge-yellow">
-                            <i class="bi bi-clock-history"></i>
+                            <i class="bi bi-pencil-square"></i>
                             En captura
                         </span>
                     {% endif %}
@@ -685,144 +978,126 @@
     </section>
 
     {% if solo_lectura %}
-        <div class="readonly-card">
+        <div class="notice-card notice-gray">
             <i class="bi bi-lock-fill me-1"></i>
             Este registro está en modo solo consulta porque el día ya no está abierto o el semestre no está activo.
         </div>
     {% endif %}
 
-    <div class="layout">
+    <section class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-label">Sala</div>
+            <div class="summary-value">
+                {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                    {{ registro.sala_semestre.sala.nombre }}
+                {% else %}
+                    Sin sala
+                {% endif %}
+            </div>
+        </div>
 
-        <aside>
-            <section class="panel mb-4">
-                <div class="panel-header">
-                    <h2 class="panel-title">
+        <div class="summary-card">
+            <div class="summary-label">Tipo de sala</div>
+            <div class="summary-value">
+                {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                    {{ registro.sala_semestre.sala.get_tipo_sala_display }}
+                {% else %}
+                    No asignada
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Entrada</div>
+            <div class="summary-value">
+                {% if registro.entrada_en %}
+                    {{ registro.entrada_en|date:"H:i" }}
+                {% else %}
+                    Sin entrada
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">Estado</div>
+            <div class="summary-value">{{ registro.get_estado_display }}</div>
+        </div>
+    </section>
+
+    <section class="panel student-horizontal">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <i class="bi bi-person-heart"></i>
+                Datos del menor
+            </h2>
+            <span class="auto-save-status" id="autoSaveStatusTop">
+                <i class="bi bi-cloud-check-fill"></i>
+                Guardado automático local
+            </span>
+        </div>
+
+        <div class="panel-body">
+            <div class="student-line">
+                <div class="student-mini-photo">
+                    {% if registro.alumno.doc_menor_fotos %}
+                        <img src="{{ registro.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                    {% else %}
                         <i class="bi bi-person-heart"></i>
-                        Datos del menor
-                    </h2>
+                    {% endif %}
                 </div>
 
-                <div class="panel-body">
-                    <div class="student-card">
-                        <div class="student-top">
-                            <div class="student-avatar">
-                                <i class="bi bi-person-heart"></i>
-                            </div>
-                            <div>
-                                <div class="student-name">
-                                    {{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}
-                                </div>
-                                <div class="student-meta">
-                                    {% if registro.sala_semestre and registro.sala_semestre.sala %}
-                                        Sala: <strong>{{ registro.sala_semestre.sala.nombre }}</strong><br>
-                                        Tipo: <strong>{{ registro.sala_semestre.sala.get_tipo_sala_display }}</strong>
-                                    {% else %}
-                                        Sala no asignada
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Formulario</div>
-                                <div class="info-value">
-                                    {% if tipo_formulario == "LACTANTES" %}
-                                        Lactantes
-                                    {% elif tipo_formulario == "MATERNAL" %}
-                                        Maternal
-                                    {% else %}
-                                        General
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Entrada</div>
-                                <div class="info-value">
-                                    {% if registro.entrada_en %}
-                                        {{ registro.entrada_en|date:"H:i" }}
-                                    {% else %}
-                                        Sin entrada
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Estado</div>
-                                <div class="info-value">
-                                    {{ registro.get_estado_display }}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Bitácora</div>
-                                <div class="info-value">
-                                    {% if bitacora.completa %}
-                                        Completa
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+                <div class="student-main-info">
+                    <div class="student-name">
+                        {{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}
                     </div>
-
-                    <div class="help-card">
-                        <i class="bi bi-info-circle-fill me-1"></i>
-                        Esta sección corresponde a lo que el responsable informa sobre cómo estuvo el menor en casa.
-                        Los comentarios son útiles para dar seguimiento durante la estancia.
+                    <div class="student-meta">
+                        {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                            Sala: <strong>{{ registro.sala_semestre.sala.nombre }}</strong> ·
+                            Tipo: <strong>{{ registro.sala_semestre.sala.get_tipo_sala_display }}</strong>
+                        {% else %}
+                            Sala no asignada
+                        {% endif %}
                     </div>
                 </div>
-            </section>
 
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-diagram-3-fill"></i>
-                        Flujo del día
-                    </h2>
-                </div>
-
-                <div class="panel-body">
-                    <div class="flow-card">
-                        <div class="flow-icon">
-                            <i class="bi bi-door-open-fill"></i>
-                        </div>
-                        <div>
-                            <div class="flow-title">Entrada</div>
-                            <p class="flow-text">
-                                Ya se registró el ingreso del menor y el responsable de entrega.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flow-card">
-                        <div class="flow-icon">
-                            <i class="bi bi-house-heart-fill"></i>
-                        </div>
-                        <div>
-                            <div class="flow-title">En casa</div>
-                            <p class="flow-text">
-                                Captura cómo amaneció, alimento, sueño, evacuación y observaciones.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flow-card">
-                        <div class="flow-icon">
-                            <i class="bi bi-journal-text"></i>
-                        </div>
-                        <div>
-                            <div class="flow-title">Durante estancia</div>
-                            <p class="flow-text">
-                                Después se registra cómo estuvo el menor durante su permanencia en la EIU.
-                            </p>
-                        </div>
+                <div class="horizontal-item">
+                    <div class="horizontal-label">Formulario</div>
+                    <div class="horizontal-value">
+                        {% if tipo_formulario == "LACTANTES" %}
+                            Lactantes
+                        {% elif tipo_formulario == "MATERNAL" %}
+                            Maternal
+                        {% else %}
+                            General
+                        {% endif %}
                     </div>
                 </div>
-            </section>
-        </aside>
+
+                <div class="horizontal-item">
+                    <div class="horizontal-label">Bitácora</div>
+                    <div class="horizontal-value">
+                        {% if bitacora.completa %}
+                            Completa
+                        {% else %}
+                            Pendiente
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="horizontal-item">
+                    <div class="horizontal-label">Semestre</div>
+                    <div class="horizontal-value">{{ registro.dia_operativo.semestre.nombre }}</div>
+                </div>
+
+                <div class="horizontal-item">
+                    <div class="horizontal-label">Captura</div>
+                    <div class="horizontal-value">Guardado automático local</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
 
         <main>
             <section class="panel">
@@ -832,17 +1107,24 @@
                         Registro “En casa”
                     </h2>
 
-                    {% if tipo_formulario == "LACTANTES" %}
-                        <span class="badge-soft badge-blue">
-                            <i class="bi bi-baby"></i>
-                            Lactantes
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="auto-save-status" id="autoSaveStatus">
+                            <i class="bi bi-cloud-check-fill"></i>
+                            Borrador automático activo
                         </span>
-                    {% elif tipo_formulario == "MATERNAL" %}
-                        <span class="badge-soft badge-purple">
-                            <i class="bi bi-balloon-heart-fill"></i>
-                            Maternal
-                        </span>
-                    {% endif %}
+
+                        {% if tipo_formulario == "LACTANTES" %}
+                            <span class="badge-soft badge-blue">
+                                <i class="bi bi-baby"></i>
+                                Lactantes
+                            </span>
+                        {% elif tipo_formulario == "MATERNAL" %}
+                            <span class="badge-soft badge-purple">
+                                <i class="bi bi-balloon-heart-fill"></i>
+                                Maternal
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="panel-body">
@@ -855,15 +1137,40 @@
                             </div>
                         {% endif %}
 
+                        {% if form.marcar_completa %}
+                            <input type="hidden" name="{{ form.marcar_completa.html_name }}" value="on">
+                        {% endif %}
+
                         <div class="form-section">
                             <div class="form-section-title">
                                 <i class="bi bi-sunrise-fill"></i>
                                 Estado al despertar
                             </div>
 
-                            <div class="form-grid">
-                                <div class="form-group">
+                            <div class="form-group full">
+                                <label for="{{ form.estado_en_casa_multiple.id_for_label }}" class="form-label">
+                                    En casa estuve <span class="mini-help">Selecciona una o varias opciones.</span>
+                                </label>
+
+                                <div class="source-multi" id="estadoSource">
+                                    {{ form.estado_en_casa_multiple }}
+                                </div>
+
+                                <div class="chips-wrap mt-2" id="estadoChips"></div>
+
+                                <div class="mini-help">
+                                    Las opciones quedan en horizontal para registrar rápido el estado del menor.
+                                </div>
+
+                                {% if form.estado_en_casa_multiple.errors %}
+                                    <div class="errors">{{ form.estado_en_casa_multiple.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="question-row">
+                                <div class="question-card">
                                     <label for="{{ form.desperto_a_las.id_for_label }}" class="form-label">
+                                        <span class="question-icon"><i class="bi bi-alarm-fill"></i></span>
                                         Hoy desperté a las
                                     </label>
                                     {{ form.desperto_a_las }}
@@ -872,8 +1179,9 @@
                                     {% endif %}
                                 </div>
 
-                                <div class="form-group">
+                                <div class="question-card">
                                     <label for="{{ form.como_amanecio.id_for_label }}" class="form-label">
+                                        <span class="question-icon"><i class="bi bi-emoji-smile-fill"></i></span>
                                         Hoy amanecí
                                     </label>
                                     {{ form.como_amanecio }}
@@ -882,16 +1190,14 @@
                                     {% endif %}
                                 </div>
 
-                                <div class="form-group full">
-                                    <label for="{{ form.estado_en_casa_multiple.id_for_label }}" class="form-label">
-                                        En casa estuve
+                                <div class="question-card">
+                                    <label for="{{ form.hizo_popo.id_for_label }}" class="form-label">
+                                        <span class="question-icon"><i class="bi bi-clipboard2-heart-fill"></i></span>
+                                        ¿Hice popó?
                                     </label>
-                                    {{ form.estado_en_casa_multiple }}
-                                    <div class="mini-help">
-                                        Puedes seleccionar más de una opción.
-                                    </div>
-                                    {% if form.estado_en_casa_multiple.errors %}
-                                        <div class="errors">{{ form.estado_en_casa_multiple.errors }}</div>
+                                    {{ form.hizo_popo }}
+                                    {% if form.hizo_popo.errors %}
+                                        <div class="errors">{{ form.hizo_popo.errors }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -918,9 +1224,14 @@
                                     <label for="{{ form.leche_descripcion.id_for_label }}" class="form-label">
                                         Leche / cantidad
                                     </label>
-                                    {{ form.leche_descripcion }}
-                                    <div class="mini-help">
-                                        Ejemplo: 6 oz, 180 ml, no tomó.
+                                    <div class="amount-box">
+                                        <div class="amount-icon">
+                                            <i class="bi bi-cup-straw"></i>
+                                        </div>
+                                        <div>
+                                            {{ form.leche_descripcion }}
+                                            <div class="mini-help">Ejemplo: 6 oz, 180 ml, 1 biberón, no tomó.</div>
+                                        </div>
                                     </div>
                                     {% if form.leche_descripcion.errors %}
                                         <div class="errors">{{ form.leche_descripcion.errors }}</div>
@@ -929,9 +1240,12 @@
 
                                 <div class="form-group full">
                                     <label for="{{ form.alimentos_descripcion.id_for_label }}" class="form-label">
-                                        Papilla o alimentos completos
+                                        Papilla o alimentos completos / cantidad aproximada
                                     </label>
                                     {{ form.alimentos_descripcion }}
+                                    <div class="mini-help">
+                                        Especifica qué comió y la cantidad aproximada. Ejemplo: papilla de plátano, media taza.
+                                    </div>
                                     {% if form.alimentos_descripcion.errors %}
                                         <div class="errors">{{ form.alimentos_descripcion.errors }}</div>
                                     {% endif %}
@@ -941,33 +1255,11 @@
 
                         <div class="form-section">
                             <div class="form-section-title">
-                                <i class="bi bi-clipboard2-heart-fill"></i>
-                                Evacuación y observaciones
+                                <i class="bi bi-journal-text"></i>
+                                Observaciones generales
                             </div>
 
                             <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="{{ form.hizo_popo.id_for_label }}" class="form-label">
-                                        ¿Hice popó?
-                                    </label>
-                                    {{ form.hizo_popo }}
-                                    {% if form.hizo_popo.errors %}
-                                        <div class="errors">{{ form.hizo_popo.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="form-check mt-4">
-                                        {{ form.marcar_completa }}
-                                        <label for="{{ form.marcar_completa.id_for_label }}" class="form-check-label">
-                                            Marcar bitácora en casa como completa
-                                        </label>
-                                    </div>
-                                    {% if form.marcar_completa.errors %}
-                                        <div class="errors">{{ form.marcar_completa.errors }}</div>
-                                    {% endif %}
-                                </div>
-
                                 <div class="form-group full">
                                     <label for="{{ form.observaciones.id_for_label }}" class="form-label">
                                         Observaciones de casa
@@ -979,34 +1271,34 @@
                                 </div>
                             </div>
 
-                            <div class="completion-card">
-                                <i class="bi bi-check-circle-fill me-1"></i>
-                                Si marcas la bitácora como completa, el sistema la tomará en cuenta para permitir el cierre del día.
-                            </div>
                         </div>
 
                         <div class="submit-bar">
                             <div class="submit-note">
-                                Puedes guardar avance sin marcar como completa. Para cerrar el día, esta bitácora deberá quedar completa.
+                                {% if request.GET.origen == 'estancia' %}
+                                    Estás consultando la bitácora en casa registrada antes de la permanencia del menor.
+                                {% else %}
+                                    La información se conserva como borrador automático en este navegador mientras realizas la captura.
+                                {% endif %}
                             </div>
 
                             <div class="d-flex gap-2 flex-wrap">
-                                <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-soft">
-                                    <i class="bi bi-arrow-left-circle-fill"></i>
-                                    Regresar
-                                </a>
-
-                                {% if not solo_lectura %}
-                                    <button type="submit" class="btn-main btn-green">
-                                        <i class="bi bi-save-fill"></i>
-                                        Guardar bitácora
-                                    </button>
-
+                                {% if request.GET.origen == 'estancia' %}
+                                    <a href="{% url 'bitacora_estancia_maestra' registro.id %}" class="btn-main btn-blue">
+                                        <i class="bi bi-journal-text"></i>
+                                        Volver a estancia
+                                    </a>
+                                {% elif not solo_lectura %}
                                     {% if registro.entrada_en %}
-                                        <a href="{% url 'bitacora_estancia_maestra' registro.id %}" class="btn-main btn-blue">
+                                        <button type="submit" class="btn-main btn-blue" data-continuar-estancia="1">
                                             <i class="bi bi-arrow-right-circle-fill"></i>
-                                            Ir a estancia
-                                        </a>
+                                            Guardar y continuar a estancia
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn-main btn-green">
+                                            <i class="bi bi-save-fill"></i>
+                                            Guardar bitácora
+                                        </button>
                                     {% endif %}
                                 {% endif %}
                             </div>
@@ -1021,13 +1313,173 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+(function(){
+    const form = document.getElementById("bitacoraForm");
+    const status = document.getElementById("autoSaveStatus");
+    const storageKey = "bitacora_en_casa_registro_{{ registro.id }}";
+
+    function setStatus(text, iconClass){
+        if(!status){ return; }
+        status.innerHTML = '<i class="bi ' + iconClass + '"></i> ' + text;
+    }
+
+    function saveDraft(){
+        if(!form){ return; }
+        const data = {};
+        form.querySelectorAll("input, select, textarea").forEach(field => {
+            if(!field.name || field.type === "hidden" || field.name === "csrfmiddlewaretoken"){
+                return;
+            }
+
+            if(field.tagName.toLowerCase() === "select" && field.multiple){
+                data[field.name] = Array.from(field.selectedOptions).map(opt => opt.value);
+            }else if(field.type === "checkbox"){
+                data[field.name] = field.checked;
+            }else if(field.type === "radio"){
+                if(field.checked){ data[field.name] = field.value; }
+            }else{
+                data[field.name] = field.value;
+            }
+        });
+
+        try{
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            setStatus("Borrador guardado", "bi-cloud-check-fill");
+        }catch(e){
+            setStatus("No se pudo guardar borrador", "bi-exclamation-circle-fill");
+        }
+    }
+
+    function restoreDraft(){
+        if(!form){ return; }
+        let raw = null;
+
+        try{
+            raw = localStorage.getItem(storageKey);
+        }catch(e){
+            return;
+        }
+
+        if(!raw){ return; }
+
+        let data = {};
+        try{
+            data = JSON.parse(raw);
+        }catch(e){
+            return;
+        }
+
+        form.querySelectorAll("input, select, textarea").forEach(field => {
+            if(!field.name || !(field.name in data) || field.type === "hidden" || field.name === "csrfmiddlewaretoken"){
+                return;
+            }
+
+            if(field.tagName.toLowerCase() === "select" && field.multiple && Array.isArray(data[field.name])){
+                Array.from(field.options).forEach(opt => {
+                    opt.selected = data[field.name].includes(opt.value);
+                });
+            }else if(field.type === "checkbox"){
+                field.checked = Boolean(data[field.name]);
+            }else if(field.type === "radio"){
+                field.checked = field.value === data[field.name];
+            }else if(!field.value){
+                field.value = data[field.name];
+            }
+        });
+    }
+
+    function buildEstadoChips(){
+        const source = document.querySelector("#estadoSource select[multiple]");
+        const chips = document.getElementById("estadoChips");
+
+        if(!source || !chips){ return; }
+
+        chips.innerHTML = "";
+
+        Array.from(source.options).forEach(option => {
+            if(!option.value){ return; }
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "state-chip" + (option.selected ? " active" : "");
+            button.dataset.value = option.value;
+            button.innerHTML = '<span class="chip-icon"><i class="bi bi-check2"></i></span><span>' + option.text + '</span>';
+
+            button.addEventListener("click", () => {
+                if(source.disabled){ return; }
+                option.selected = !option.selected;
+                button.classList.toggle("active", option.selected);
+                source.dispatchEvent(new Event("change", { bubbles:true }));
+                saveDraft();
+            });
+
+            chips.appendChild(button);
+        });
+    }
+
+    restoreDraft();
+    buildEstadoChips();
+
+    if(form){
+        form.addEventListener("input", saveDraft);
+        form.addEventListener("change", saveDraft);
+        form.addEventListener("submit", async (event) => {
+            const submitter = event.submitter;
+            const continuar = submitter && submitter.dataset && submitter.dataset.continuarEstancia === "1";
+
+            if(!continuar){
+                try{ localStorage.removeItem(storageKey); }catch(e){}
+                return;
+            }
+
+            event.preventDefault();
+            submitter.disabled = true;
+            const originalHtml = submitter.innerHTML;
+            submitter.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+
+            try{
+                const response = await fetch(form.action || window.location.href, {
+                    method: "POST",
+                    body: new FormData(form),
+                    credentials: "same-origin",
+                    headers: {"X-Requested-With": "XMLHttpRequest"}
+                });
+
+                if(response.redirected){
+                    try{ localStorage.removeItem(storageKey); }catch(e){}
+                    window.location.href = "{% url 'bitacora_estancia_maestra' registro.id %}";
+                    return;
+                }
+
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            }catch(error){
+                submitter.disabled = false;
+                submitter.innerHTML = originalHtml;
+                setStatus("No se pudo guardar", "bi-exclamation-circle-fill");
+            }
+        });
+    }
+})();
+</script>
+
+{% if request.GET.origen == 'estancia' %}
+<script>
+    document.querySelectorAll("#bitacoraForm input, #bitacoraForm select, #bitacoraForm textarea, #bitacoraForm button[type='submit']")
+        .forEach(element => {
+            element.disabled = true;
+        });
+</script>
+{% endif %}
+
 {% if solo_lectura %}
 <script>
     document.querySelectorAll("#bitacoraForm input, #bitacoraForm select, #bitacoraForm textarea, #bitacoraForm button")
         .forEach(element => {
-            if(element.tagName.toLowerCase() !== "a"){
-                element.disabled = true;
-            }
+            element.disabled = true;
         });
 </script>
 {% endif %}

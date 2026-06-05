@@ -44,6 +44,74 @@ urlpatterns = [
         name="descargar_reporte_final_padre",
     ),
 
+
+    # =========================================================
+    # PANEL SUPERVISORA GENERAL / SECRETARÍA DE DIRECCIÓN
+    # Solo consulta en tiempo real. No modifica registros.
+    # =========================================================
+    path(
+        "panel-supervisor/",
+        views.panel_supervisor,
+        name="panel_supervisor",
+    ),
+    path(
+        "panel-supervisor/datos/",
+        views.panel_supervisor_datos,
+        name="panel_supervisor_datos",
+    ),
+    path(
+        "panel-supervisor/reportes/<str:tipo_reporte>/",
+        views.descargar_reporte_supervisor,
+        name="descargar_reporte_supervisor",
+    ),
+
+    # =========================================================
+    # PASE DE LISTA Y SUPLENCIAS TEMPORALES
+    # Dirección registra asistencia del personal operativo.
+    # Si alguien está ausente, Dirección puede autorizar cobertura temporal.
+    # No se crean pantallas nuevas: las vistas regresan a los paneles existentes.
+    # =========================================================
+    path(
+        "personal/asistencia/",
+        views.registrar_asistencia_personal,
+        name="registrar_asistencia_personal",
+    ),
+    path(
+        "suplencias/",
+        views.bitacora_suplencias,
+        name="suplencias_panel",
+    ),
+    path(
+        "suplencias/crear/",
+        views.crear_suplencia,
+        name="crear_suplencia",
+    ),
+    path(
+        "suplencias/<int:autorizacion_id>/cancelar/",
+        views.cancelar_suplencia,
+        name="cancelar_suplencia",
+    ),
+    path(
+        "suplencias/bitacora/",
+        views.bitacora_suplencias,
+        name="bitacora_suplencias",
+    ),
+    path(
+        "suplencias/movimientos/<int:movimiento_id>/validar/",
+        views.validar_movimiento_suplencia,
+        name="validar_movimiento_suplencia",
+    ),
+    path(
+        "suplencias/incidencias/<int:incidencia_id>/revisar/",
+        views.revisar_incidencia_suplencia,
+        name="revisar_incidencia_suplencia",
+    ),
+    path(
+        "suplencias/trabajo-social/<int:inscripcion_id>/revisar/",
+        views.revisar_trabajo_social_suplencia,
+        name="revisar_trabajo_social_suplencia",
+    ),
+
     # =========================================================
     # FILTRO PSICOLOGÍA
     # =========================================================
@@ -312,6 +380,32 @@ urlpatterns = [
         views.registrar_entrada_alumno,
         name="registrar_entrada_alumno",
     ),
+
+    # Autorización de entrada por correo institucional o QR
+    path(
+        "operacion-diaria/autorizacion-entrada/<int:autorizacion_id>/cancelar/",
+        views.cancelar_autorizacion_entrada_maestra,
+        name="cancelar_autorizacion_entrada_maestra",
+    ),
+    path(
+        "operacion-diaria/registro/<int:registro_id>/entrada/estado-autorizacion/",
+        views.estado_autorizacion_entrada_maestra,
+        name="estado_autorizacion_entrada_maestra",
+    ),
+    # Enlace público corto por token para autorizar entrada.
+    # No expone datos personales en la URL; solo usa el token único.
+    path(
+        "a/e/<uuid:token>/",
+        views.autorizar_entrada_responsable,
+        name="autorizar_entrada_responsable",
+    ),
+
+    # Ruta anterior conservada solo por compatibilidad con enlaces ya generados.
+    path(
+        "operacion-diaria/entrada/autorizar/<uuid:token>/",
+        views.autorizar_entrada_responsable,
+        name="autorizar_entrada_responsable_legacy",
+    ),
     path(
         "operacion-diaria/registro/<int:registro_id>/bitacora-en-casa/",
         views.bitacora_entrada_casa_maestra,
@@ -326,6 +420,32 @@ urlpatterns = [
         "operacion-diaria/registro/<int:registro_id>/salida/",
         views.registrar_salida_alumno,
         name="registrar_salida_alumno",
+    ),
+
+    # Autorización de salida por correo institucional o QR
+    path(
+        "operacion-diaria/autorizacion-salida/<int:autorizacion_id>/cancelar/",
+        views.cancelar_autorizacion_salida_maestra,
+        name="cancelar_autorizacion_salida_maestra",
+    ),
+    path(
+        "operacion-diaria/registro/<int:registro_id>/salida/estado-autorizacion/",
+        views.estado_autorizacion_salida_maestra,
+        name="estado_autorizacion_salida_maestra",
+    ),
+    # Enlace público corto por token para autorizar salida.
+    # No expone datos personales en la URL; solo usa el token único.
+    path(
+        "a/s/<uuid:token>/",
+        views.autorizar_salida_responsable,
+        name="autorizar_salida_responsable",
+    ),
+
+    # Ruta anterior conservada solo por compatibilidad con enlaces ya generados.
+    path(
+        "operacion-diaria/salida/autorizar/<uuid:token>/",
+        views.autorizar_salida_responsable,
+        name="autorizar_salida_responsable_legacy",
     ),
 
     # Historial del alumno para maestra

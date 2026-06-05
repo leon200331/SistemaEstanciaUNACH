@@ -1560,3 +1560,1022 @@ def generar_pdf_inscripcion_lleno(inscripcion):
         return None
 
     return out_pdf_path
+
+
+# =========================================================
+# SUPLENCIAS OPERATIVAS
+# Pase de lista, autorizaciones temporales y bitácora.
+#
+# Estas funciones se mantienen en services.py para que views.py no concentre
+# toda la lógica. No crean pantallas nuevas: solo entregan datos para que los
+# paneles actuales muestren la viñeta de "Cubriendo temporalmente" cuando aplique.
+# =========================================================
+
+
+def _suplencias_models():
+    """
+    Importación perezosa para evitar ciclos entre models.py, views.py y services.py.
+    """
+    from admisiones.models import (
+        AsistenciaPersonal,
+        AutorizacionSuplencia,
+        MovimientoSuplencia,
+    )
+
+    return AsistenciaPersonal, AutorizacionSuplencia, MovimientoSuplencia
+
+
+def _usuario_model():
+    from django.contrib.auth import get_user_model
+
+    return get_user_model()
+
+
+def _usuario_nombre_suplencia(usuario, default="Sin usuario"):
+    """
+    Nombre visible para pase de lista, autorizaciones y bitácoras.
+    """
+    if not usuario:
+        return default
+
+    for attr in ["nombre_visible", "nombre_completo"]:
+        try:
+            valor = getattr(usuario, attr, "")
+            if callable(valor):
+                valor = valor()
+            if valor:
+                return str(valor).strip()
+        except Exception:
+            pass
+
+    try:
+        nombre = usuario.get_full_name()
+        if nombre:
+            return nombre.strip()
+    except Exception:
+        pass
+
+    return (
+        getattr(usuario, "email", "")
+        or getattr(usuario, "username", "")
+        or str(usuario)
+        or default
+    )
+
+
+def _normalizar_area_operativa(valor):
+    """
+    Normaliza áreas para comparar valores de usuarios, asistencia y suplencia.
+    """
+    valor = str(valor or "").strip().upper()
+    valor = valor.replace("Á", "A").replace("É", "E").replace("Í", "I").replace("Ó", "O").replace("Ú", "U")
+    valor = valor.replace(" ", "_").replace("-", "_")
+
+    equivalencias = {
+        "MEDICO": "MEDICA",
+        "MEDICA": "MEDICA",
+        "NUTRIOLOGA": "NUTRICION",
+        "NUTRICIONAL": "NUTRICION",
+        "NUTRICION": "NUTRICION",
+        "PSICOLOGA": "PSICOLOGIA",
+        "PSICOLOGICA": "PSICOLOGIA",
+        "PSICOLOGIA": "PSICOLOGIA",
+        "PEDAGOGIA": "PEDAGOGICA",
+        "PEDAGOGICA": "PEDAGOGICA",
+        "COORDINACION_DE_SALA": "PEDAGOGICA",
+        "COORDINADORA_DE_SALA": "PEDAGOGICA",
+        "TRABAJADORA_SOCIAL": "TRABAJO_SOCIAL",
+        "TRABAJO_SOCIAL": "TRABAJO_SOCIAL",
+        "DIRECCION": "DIRECCION",
+        "DIRECTORA": "DIRECCION",
+    }
+
+    return equivalencias.get(valor, valor)
+
+
+def _area_cubierta_desde_usuario(usuario):
+    if not usuario:
+        return ""
+
+    return _normalizar_area_operativa(getattr(usuario, "area_operativa", ""))
+
+
+def _area_display_suplencia(area):
+    area = _normalizar_area_operativa(area)
+    nombres = {
+        "MEDICA": "Médica",
+        "NUTRICION": "Nutrición",
+        "PSICOLOGIA": "Psicología",
+        "PEDAGOGICA": "Pedagógica",
+        "TRABAJO_SOCIAL": "Trabajo Social",
+        "DIRECCION": "Dirección",
+    }
+    return nombres.get(area, area.replace("_", " ").title() if area else "Sin área")
+
+
+def usuario_es_direccion_suplencias(usuario):
+    """
+    Dirección es quien registra pase de lista y autoriza suplencias.
+    También se permite superusuario/admin para soporte técnico.
+    """
+    if not usuario or not getattr(usuario, "is_authenticated", False):
+        return False
+
+    if bool(getattr(usuario, "is_superuser", False)):
+        return True
+
+    tipo_persona = str(getattr(usuario, "tipo_persona", "") or "").upper()
+    area = _area_cubierta_desde_usuario(usuario)
+
+    if area == "DIRECCION":
+        return True
+
+    if tipo_persona == "ADMIN":
+        return True
+
+    try:
+        return usuario.groups.filter(name__icontains="directora").exists()
+    except Exception:
+        return False
+
+
+def personal_operativo_pase_lista_queryset():
+    """
+    Personal que aparece en el pase de lista diario.
+
+    Incluye únicamente:
+    - Médica
+    - Nutrióloga
+    - Psicóloga
+    - Pedagógica
+    - Trabajadora Social
+
+    No incluye Directora, Supervisora, Administrador, Beneficiarios ni Alumnos.
+    """
+    User = _usuario_model()
+
+    try:
+        if hasattr(User, "personal_para_pase_lista"):
+            return User.personal_para_pase_lista()
+    except Exception:
+        pass
+
+    return User.objects.filter(
+        tipo_persona="PERSONAL",
+        estatus_operativo=True,
+        area_operativa__in=[
+            "MEDICA",
+            "NUTRICION",
+            "PSICOLOGIA",
+            "PEDAGOGICA",
+            "TRABAJO_SOCIAL",
+        ],
+    ).order_by("area_operativa", "apellido_paterno", "apellido_materno", "nombre")
+
+
+def personal_para_suplencias_queryset():
+    """
+    Personal que puede cubrir una ausencia.
+
+    Incluye Dirección y personal operativo autorizado.
+    No incluye Supervisora, Administrador del sistema, Beneficiarios ni Alumnos.
+    """
+    User = _usuario_model()
+
+    try:
+        if hasattr(User, "personal_para_suplencias"):
+            return User.personal_para_suplencias()
+    except Exception:
+        pass
+
+    return User.objects.filter(
+        tipo_persona="PERSONAL",
+        estatus_operativo=True,
+        area_operativa__in=[
+            "DIRECCION",
+            "MEDICA",
+            "NUTRICION",
+            "PSICOLOGIA",
+            "PEDAGOGICA",
+            "TRABAJO_SOCIAL",
+        ],
+    ).order_by("area_operativa", "apellido_paterno", "apellido_materno", "nombre")
+
+
+def titulares_para_suplencia_queryset():
+    """
+    Titulares que pueden marcarse como ausentes.
+    Dirección no aparece aquí porque Dirección autoriza.
+    """
+    User = _usuario_model()
+
+    try:
+        if hasattr(User, "titulares_para_suplencia"):
+            return User.titulares_para_suplencia()
+    except Exception:
+        pass
+
+    return personal_operativo_pase_lista_queryset()
+
+
+def asegurar_pase_lista_personal(fecha=None, semestre=None, registrado_por=None):
+    """
+    Crea registros NO_REGISTRADO para el pase de lista del día.
+    Esto permite que Dirección vea a todo el personal operativo aun antes de marcar asistencia.
+    """
+    AsistenciaPersonal, _, _ = _suplencias_models()
+    fecha = fecha or timezone.localdate()
+
+    registros = []
+    creados = 0
+
+    for trabajador in personal_operativo_pase_lista_queryset():
+        area = _area_cubierta_desde_usuario(trabajador)
+        if not area:
+            continue
+
+        asistencia, created = AsistenciaPersonal.objects.get_or_create(
+            fecha=fecha,
+            trabajador=trabajador,
+            defaults={
+                "semestre": semestre,
+                "area_operativa": area,
+                "estado": AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO,
+                "registrado_por": registrado_por,
+            },
+        )
+
+        cambios = []
+        if semestre and getattr(asistencia, "semestre_id", None) != getattr(semestre, "id", None):
+            asistencia.semestre = semestre
+            cambios.append("semestre")
+
+        if area and asistencia.area_operativa != area:
+            asistencia.area_operativa = area
+            cambios.append("area_operativa")
+
+        if cambios:
+            asistencia.save(update_fields=cambios + ["actualizado_en"])
+
+        if created:
+            creados += 1
+
+        registros.append(asistencia)
+
+    return registros, creados
+
+
+def guardar_pase_lista_personal(estados, usuario, fecha=None, semestre=None, observaciones=None):
+    """
+    Guarda el pase de lista capturado por Dirección.
+
+    estados puede ser:
+    - dict {trabajador_id: estado}
+    - QueryDict con campos como estado_12, asistencia_12 o trabajador_12
+    """
+    from django.core.exceptions import ValidationError
+
+    AsistenciaPersonal, _, _ = _suplencias_models()
+    fecha = fecha or timezone.localdate()
+    observaciones = observaciones or {}
+
+    if not usuario_es_direccion_suplencias(usuario):
+        return False, ["Solo Dirección puede registrar el pase de lista del personal."], []
+
+    asegurar_pase_lista_personal(fecha=fecha, semestre=semestre, registrado_por=usuario)
+
+    personal = list(personal_operativo_pase_lista_queryset())
+    estados_validos = {opcion[0] for opcion in AsistenciaPersonal.EstadoAsistencia.choices}
+    guardados = []
+    errores = []
+
+    def obtener_estado(trabajador_id):
+        trabajador_id = str(trabajador_id)
+
+        if isinstance(estados, dict):
+            for clave in [
+                trabajador_id,
+                int(trabajador_id) if trabajador_id.isdigit() else trabajador_id,
+                f"estado_{trabajador_id}",
+                f"asistencia_{trabajador_id}",
+                f"trabajador_{trabajador_id}",
+            ]:
+                if clave in estados:
+                    valor = estados.get(clave)
+                    if isinstance(valor, (list, tuple)):
+                        valor = valor[0] if valor else ""
+                    return str(valor or "").strip().upper()
+
+        if hasattr(estados, "get"):
+            return str(
+                estados.get(f"estado_{trabajador_id}")
+                or estados.get(f"asistencia_{trabajador_id}")
+                or estados.get(f"trabajador_{trabajador_id}")
+                or estados.get(trabajador_id)
+                or ""
+            ).strip().upper()
+
+        return ""
+
+    def obtener_observacion(trabajador_id):
+        trabajador_id = str(trabajador_id)
+
+        if isinstance(observaciones, dict):
+            for clave in [trabajador_id, f"observaciones_{trabajador_id}", f"observacion_{trabajador_id}"]:
+                if clave in observaciones:
+                    return str(observaciones.get(clave) or "").strip()
+
+        if hasattr(estados, "get"):
+            return str(
+                estados.get(f"observaciones_{trabajador_id}")
+                or estados.get(f"observacion_{trabajador_id}")
+                or ""
+            ).strip()
+
+        return ""
+
+    for trabajador in personal:
+        estado = obtener_estado(trabajador.id)
+        if not estado:
+            estado = AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO
+
+        if estado not in estados_validos:
+            errores.append(f"Estado no válido para {_usuario_nombre_suplencia(trabajador)}.")
+            continue
+
+        asistencia, _ = AsistenciaPersonal.objects.get_or_create(
+            fecha=fecha,
+            trabajador=trabajador,
+            defaults={
+                "semestre": semestre,
+                "area_operativa": _area_cubierta_desde_usuario(trabajador),
+                "estado": AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO,
+                "registrado_por": usuario,
+            },
+        )
+
+        asistencia.estado = estado
+        asistencia.semestre = semestre or asistencia.semestre
+        asistencia.area_operativa = _area_cubierta_desde_usuario(trabajador) or asistencia.area_operativa
+        asistencia.actualizado_por = usuario
+        asistencia.observaciones = obtener_observacion(trabajador.id)
+
+        if not asistencia.registrado_por_id:
+            asistencia.registrado_por = usuario
+
+        try:
+            asistencia.full_clean()
+            asistencia.save()
+            guardados.append(asistencia)
+        except ValidationError as exc:
+            errores.append(str(exc))
+        except Exception as exc:
+            errores.append(f"No se pudo guardar asistencia de {_usuario_nombre_suplencia(trabajador)}: {exc}")
+
+    return not errores, errores, guardados
+
+
+def estado_pase_lista_personal(fecha=None, semestre=None, crear_si_falta=True, usuario=None):
+    """
+    Devuelve el resumen del pase de lista para Dirección.
+    """
+    AsistenciaPersonal, _, _ = _suplencias_models()
+    fecha = fecha or timezone.localdate()
+
+    if crear_si_falta:
+        asegurar_pase_lista_personal(fecha=fecha, semestre=semestre, registrado_por=usuario)
+
+    personal = list(personal_operativo_pase_lista_queryset())
+    asistencias = {
+        asistencia.trabajador_id: asistencia
+        for asistencia in AsistenciaPersonal.objects.filter(fecha=fecha).select_related("trabajador", "registrado_por")
+    }
+
+    filas = []
+    total_presente = 0
+    total_ausente = 0
+    total_retardo = 0
+    total_no_registrado = 0
+
+    for trabajador in personal:
+        asistencia = asistencias.get(trabajador.id)
+        estado = getattr(asistencia, "estado", AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO)
+
+        if estado == AsistenciaPersonal.EstadoAsistencia.PRESENTE:
+            total_presente += 1
+        elif estado in [
+            AsistenciaPersonal.EstadoAsistencia.AUSENTE,
+            AsistenciaPersonal.EstadoAsistencia.PERMISO,
+            AsistenciaPersonal.EstadoAsistencia.INCAPACIDAD,
+        ]:
+            total_ausente += 1
+        elif estado == AsistenciaPersonal.EstadoAsistencia.RETARDO:
+            total_retardo += 1
+        else:
+            total_no_registrado += 1
+
+        filas.append({
+            "trabajador": trabajador,
+            "trabajador_id": trabajador.id,
+            "nombre": _usuario_nombre_suplencia(trabajador),
+            "area_operativa": _area_cubierta_desde_usuario(trabajador),
+            "area_display": _area_display_suplencia(_area_cubierta_desde_usuario(trabajador)),
+            "asistencia": asistencia,
+            "estado": estado,
+            "estado_display": asistencia.get_estado_display() if asistencia else "No registrado",
+            "permite_suplencia": bool(asistencia and asistencia.permite_suplencia),
+            "esta_presente": estado == AsistenciaPersonal.EstadoAsistencia.PRESENTE,
+            "sin_registrar": estado == AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO,
+        })
+
+    total_personal = len(personal)
+    pase_lista_completo = bool(total_personal and total_no_registrado == 0)
+    todo_personal_presente = bool(pase_lista_completo and total_ausente == 0)
+
+    return {
+        "fecha_pase_lista": fecha,
+        "personal_pase_lista": personal,
+        "asistencias_pase_lista": filas,
+        "total_personal_pase_lista": total_personal,
+        "total_presentes_pase_lista": total_presente,
+        "total_ausentes_pase_lista": total_ausente,
+        "total_retardos_pase_lista": total_retardo,
+        "total_no_registrado_pase_lista": total_no_registrado,
+        "pase_lista_completo": pase_lista_completo,
+        "todo_personal_presente": todo_personal_presente,
+        "hay_personal_ausente": total_ausente > 0,
+        "ausencias_para_suplencia": [fila for fila in filas if fila["permite_suplencia"]],
+    }
+
+
+def actualizar_suplencias_vencidas(fecha=None):
+    """
+    Marca como vencidas las autorizaciones activas cuya vigencia ya terminó.
+    """
+    _, AutorizacionSuplencia, _ = _suplencias_models()
+    ahora = timezone.now()
+    qs = AutorizacionSuplencia.objects.filter(
+        estado=AutorizacionSuplencia.EstadoAutorizacion.ACTIVA,
+        fin__isnull=False,
+        fin__lt=ahora,
+    )
+
+    if fecha:
+        qs = qs.filter(fecha=fecha)
+
+    return qs.update(estado=AutorizacionSuplencia.EstadoAutorizacion.VENCIDA, updated_at=ahora)
+
+
+def obtener_suplencias_activas_usuario(usuario, fecha=None):
+    _, AutorizacionSuplencia, _ = _suplencias_models()
+
+    if not usuario or not getattr(usuario, "is_authenticated", False):
+        return AutorizacionSuplencia.objects.none()
+
+    actualizar_suplencias_vencidas(fecha=fecha)
+
+    try:
+        return AutorizacionSuplencia.activas_para_usuario(usuario, fecha=fecha).select_related(
+            "titular_ausente",
+            "suplente",
+            "autorizada_por",
+            "asistencia_personal",
+        )
+    except Exception:
+        fecha = fecha or timezone.localdate()
+        ahora = timezone.now()
+        return AutorizacionSuplencia.objects.filter(
+            suplente=usuario,
+            fecha=fecha,
+            estado=AutorizacionSuplencia.EstadoAutorizacion.ACTIVA,
+            inicio__lte=ahora,
+        ).filter(
+            fin__isnull=True
+        ) | AutorizacionSuplencia.objects.filter(
+            suplente=usuario,
+            fecha=fecha,
+            estado=AutorizacionSuplencia.EstadoAutorizacion.ACTIVA,
+            inicio__lte=ahora,
+            fin__gte=ahora,
+        )
+
+
+def obtener_suplencia_activa_usuario_area(usuario, area_cubierta, accion=None, fecha=None):
+    """
+    Devuelve una autorización activa del usuario para el área y acción solicitadas.
+    accion puede ser INCIDENCIA, DICTAMEN o TRABAJO_SOCIAL.
+    """
+    area_cubierta = _normalizar_area_operativa(area_cubierta)
+    qs = obtener_suplencias_activas_usuario(usuario, fecha=fecha).filter(area_cubierta=area_cubierta)
+
+    for autorizacion in qs:
+        if not accion:
+            return autorizacion
+        try:
+            if autorizacion.permite_accion(accion):
+                return autorizacion
+        except Exception:
+            pass
+
+    return None
+
+
+def area_cubierta_desde_area_filtro(area_filtro):
+    """
+    Convierte nombres usados por filtros a áreas de suplencia.
+    """
+    area = _normalizar_area_operativa(area_filtro)
+    mapeo = {
+        "MEDICO": "MEDICA",
+        "MEDICA": "MEDICA",
+        "NUTRICION": "NUTRICION",
+        "PSICOLOGIA": "PSICOLOGIA",
+    }
+    return mapeo.get(area, area)
+
+
+def obtener_suplencia_activa_para_filtro(usuario, area_filtro, fecha=None):
+    area = area_cubierta_desde_area_filtro(area_filtro)
+    return obtener_suplencia_activa_usuario_area(usuario, area, accion="DICTAMEN", fecha=fecha)
+
+
+def area_cubierta_desde_tipo_incidencia(tipo_incidencia):
+    tipo = _normalizar_area_operativa(tipo_incidencia)
+    mapeo = {
+        "MEDICA": "MEDICA",
+        "NUTRICIONAL": "NUTRICION",
+        "NUTRICION": "NUTRICION",
+        "PSICOLOGICA": "PSICOLOGIA",
+        "PSICOLOGIA": "PSICOLOGIA",
+        "PEDAGOGICA": "PEDAGOGICA",
+    }
+    return mapeo.get(tipo, tipo)
+
+
+def obtener_suplencia_activa_para_tipo_incidencia(usuario, tipo_incidencia, fecha=None):
+    area = area_cubierta_desde_tipo_incidencia(tipo_incidencia)
+    return obtener_suplencia_activa_usuario_area(usuario, area, accion="INCIDENCIA", fecha=fecha)
+
+
+def puede_autorizar_suplencia_para_asistencia(asistencia):
+    """
+    Reglas centrales:
+    - Presente: no se puede suplir.
+    - No registrado: primero debe registrarse pase de lista.
+    - Ausente, permiso o incapacidad: sí permite suplencia.
+    """
+    AsistenciaPersonal, _, _ = _suplencias_models()
+
+    if not asistencia:
+        return False, "Primero debe registrarse el pase de lista del personal."
+
+    if asistencia.estado == AsistenciaPersonal.EstadoAsistencia.PRESENTE:
+        return False, "No se puede autorizar suplencia porque el personal titular está presente."
+
+    if asistencia.estado == AsistenciaPersonal.EstadoAsistencia.NO_REGISTRADO:
+        return False, "Primero debe completarse el pase de lista antes de autorizar suplencias."
+
+    if not asistencia.permite_suplencia:
+        return False, "Solo se permite suplencia cuando el estado sea Ausente, Permiso o Incapacidad."
+
+    return True, "Suplencia permitida."
+
+
+def crear_autorizacion_suplencia(
+    titular_ausente,
+    suplente,
+    autorizada_por,
+    asistencia_personal=None,
+    tipo_cobertura=None,
+    inicio=None,
+    fin=None,
+    motivo="",
+    observaciones="",
+    fecha=None,
+):
+    """
+    Crea una autorización temporal de suplencia validando el pase de lista.
+    """
+    from django.core.exceptions import ValidationError
+
+    AsistenciaPersonal, AutorizacionSuplencia, _ = _suplencias_models()
+    fecha = fecha or timezone.localdate()
+    inicio = inicio or timezone.now()
+
+    if not usuario_es_direccion_suplencias(autorizada_por):
+        return None, ["Solo Dirección puede autorizar suplencias."]
+
+    area_cubierta = _area_cubierta_desde_usuario(titular_ausente)
+
+    if not asistencia_personal:
+        asistencia_personal = AsistenciaPersonal.objects.filter(
+            fecha=fecha,
+            trabajador=titular_ausente,
+        ).first()
+
+    ok_asistencia, mensaje_asistencia = puede_autorizar_suplencia_para_asistencia(asistencia_personal)
+    if not ok_asistencia:
+        return None, [mensaje_asistencia]
+
+    if area_cubierta == AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL:
+        tipo_cobertura = AutorizacionSuplencia.TipoCobertura.PROCESO_SOCIAL_COMPLETO
+    elif not tipo_cobertura:
+        tipo_cobertura = AutorizacionSuplencia.TipoCobertura.INCIDENCIA_DICTAMEN
+
+    activa_existente = AutorizacionSuplencia.objects.filter(
+        fecha=fecha,
+        area_cubierta=area_cubierta,
+        estado=AutorizacionSuplencia.EstadoAutorizacion.ACTIVA,
+    ).first()
+
+    if activa_existente:
+        return None, [
+            "Ya existe una suplencia activa para "
+            f"{_area_display_suplencia(area_cubierta)} en esta fecha."
+        ]
+
+    autorizacion = AutorizacionSuplencia(
+        fecha=fecha,
+        asistencia_personal=asistencia_personal,
+        titular_ausente=titular_ausente,
+        suplente=suplente,
+        autorizada_por=autorizada_por,
+        area_cubierta=area_cubierta,
+        tipo_cobertura=tipo_cobertura,
+        inicio=inicio,
+        fin=fin,
+        motivo=motivo,
+        observaciones=observaciones,
+    )
+
+    try:
+        autorizacion.full_clean()
+        autorizacion.save()
+        return autorizacion, []
+    except ValidationError as exc:
+        if hasattr(exc, "message_dict"):
+            errores = []
+            for lista in exc.message_dict.values():
+                errores.extend(lista if isinstance(lista, list) else [lista])
+            return None, errores
+        return None, [str(exc)]
+    except Exception as exc:
+        return None, [f"No se pudo crear la suplencia: {exc}"]
+
+
+def cancelar_autorizacion_suplencia(autorizacion, usuario=None, motivo=""):
+    if not autorizacion:
+        return False, ["No se encontró la autorización de suplencia."]
+
+    if not usuario_es_direccion_suplencias(usuario):
+        return False, ["Solo Dirección puede cancelar suplencias."]
+
+    try:
+        return autorizacion.cancelar(usuario=usuario, motivo=motivo)
+    except Exception as exc:
+        return False, [str(exc)]
+
+
+def registrar_movimiento_suplencia(
+    autorizacion,
+    usuario,
+    accion=None,
+    descripcion="",
+    solicitud=None,
+    inscripcion=None,
+    incidencia=None,
+    objeto=None,
+    estado=None,
+):
+    """
+    Guarda un movimiento en la bitácora de suplencias para que Supervisora lo consulte.
+    """
+    _, _, MovimientoSuplencia = _suplencias_models()
+
+    if not autorizacion:
+        return None
+
+    if objeto is None:
+        objeto = incidencia or inscripcion or solicitud
+
+    if not accion:
+        accion = MovimientoSuplencia.TipoAccion.OTRO
+
+    if not descripcion:
+        descripcion = "Movimiento registrado mediante suplencia autorizada por Dirección."
+
+    objeto_modelo = ""
+    objeto_id = None
+
+    if objeto is not None:
+        objeto_modelo = f"{objeto.__class__.__module__}.{objeto.__class__.__name__}"
+        objeto_id = getattr(objeto, "id", None) or getattr(objeto, "pk", None)
+
+    try:
+        return MovimientoSuplencia.objects.create(
+            autorizacion=autorizacion,
+            usuario=usuario,
+            titular_area=getattr(autorizacion, "titular_ausente", None),
+            area_cubierta=getattr(autorizacion, "area_cubierta", ""),
+            accion=accion,
+            descripcion=descripcion,
+            solicitud=solicitud,
+            inscripcion=inscripcion,
+            incidencia=incidencia,
+            objeto_modelo=objeto_modelo,
+            objeto_id=objeto_id,
+            estado=estado or MovimientoSuplencia.EstadoMovimiento.PENDIENTE,
+        )
+    except Exception:
+        return None
+
+
+def marcar_dictamen_por_suplencia(solicitud, area_filtro, autorizacion, usuario=None):
+    """
+    Marca un dictamen como preliminar por suplencia si el modelo tiene los campos.
+    No rompe el flujo si algún campo aún no existe.
+    """
+    if not solicitud or not autorizacion:
+        return solicitud
+
+    prefijos = {
+        "PSICOLOGIA": "psicologia",
+        "NUTRICION": "nutricion",
+        "MEDICO": "medico",
+        "MEDICA": "medico",
+    }
+    prefijo = prefijos.get(_normalizar_area_operativa(area_filtro))
+
+    if not prefijo:
+        return solicitud
+
+    cambios = []
+
+    asignaciones = {
+        f"{prefijo}_es_suplencia": True,
+        f"{prefijo}_autorizacion_suplencia": autorizacion,
+        f"{prefijo}_suplente": usuario,
+        f"{prefijo}_titular_ausente": getattr(autorizacion, "titular_ausente", None),
+        f"{prefijo}_pendiente_revision_titular": True,
+    }
+
+    for campo, valor in asignaciones.items():
+        if hasattr(solicitud, campo):
+            setattr(solicitud, campo, valor)
+            cambios.append(campo)
+
+    if cambios:
+        try:
+            solicitud.save(update_fields=cambios)
+        except Exception:
+            solicitud.save()
+
+    return solicitud
+
+
+def marcar_incidencia_por_suplencia(incidencia, autorizacion, usuario=None):
+    """
+    Marca una incidencia como creada por suplencia si existen los campos en el modelo.
+    """
+    if not incidencia or not autorizacion:
+        return incidencia
+
+    cambios = []
+
+    asignaciones = {
+        "es_suplencia": True,
+        "creada_por_suplencia": True,
+        "autorizacion_suplencia": autorizacion,
+        "area_original_suplencia": getattr(incidencia, "tipo", getattr(autorizacion, "area_cubierta", "")),
+        "titular_ausente_suplencia": getattr(autorizacion, "titular_ausente", None),
+        "suplente_suplencia": usuario or getattr(autorizacion, "suplente", None),
+        "pendiente_revision_titular": True,
+    }
+
+    for campo, valor in asignaciones.items():
+        if hasattr(incidencia, campo):
+            setattr(incidencia, campo, valor)
+            cambios.append(campo)
+
+    if cambios:
+        try:
+            incidencia.save(update_fields=cambios)
+        except Exception:
+            incidencia.save()
+
+    return incidencia
+
+
+def marcar_trabajo_social_por_suplencia(inscripcion=None, solicitud=None, autorizacion=None, usuario=None, descripcion=""):
+    """
+    Marca movimientos del proceso de Trabajo Social hechos mediante cobertura completa.
+    """
+    _, AutorizacionSuplencia, MovimientoSuplencia = _suplencias_models()
+
+    if not autorizacion and usuario:
+        autorizacion = obtener_suplencia_activa_usuario_area(
+            usuario,
+            AutorizacionSuplencia.AreaCubierta.TRABAJO_SOCIAL,
+            accion="TRABAJO_SOCIAL",
+        )
+
+    if not autorizacion:
+        return None
+
+    cambios = []
+
+    if inscripcion:
+        asignaciones = {
+            "trabajo_social_es_suplencia": True,
+            "trabajo_social_autorizacion_suplencia": autorizacion,
+            "trabajo_social_suplente": usuario or getattr(autorizacion, "suplente", None),
+            "trabajo_social_titular_ausente": getattr(autorizacion, "titular_ausente", None),
+            "trabajo_social_pendiente_revision": True,
+        }
+
+        for campo, valor in asignaciones.items():
+            if hasattr(inscripcion, campo):
+                setattr(inscripcion, campo, valor)
+                cambios.append(campo)
+
+        if cambios:
+            try:
+                inscripcion.save(update_fields=cambios)
+            except Exception:
+                inscripcion.save()
+
+    return registrar_movimiento_suplencia(
+        autorizacion=autorizacion,
+        usuario=usuario or getattr(autorizacion, "suplente", None),
+        accion=MovimientoSuplencia.TipoAccion.PROCESO_TRABAJO_SOCIAL,
+        descripcion=descripcion or "Movimiento de Trabajo Social realizado mediante cobertura temporal.",
+        solicitud=solicitud,
+        inscripcion=inscripcion,
+        objeto=inscripcion or solicitud,
+    )
+
+
+def movimientos_suplencia_queryset():
+    """
+    Query base para la bitácora de suplencias que consulta Supervisora.
+    """
+    _, _, MovimientoSuplencia = _suplencias_models()
+
+    return (
+        MovimientoSuplencia.objects
+        .select_related(
+            "autorizacion",
+            "autorizacion__titular_ausente",
+            "autorizacion__suplente",
+            "autorizacion__autorizada_por",
+            "usuario",
+            "titular_area",
+            "solicitud",
+            "inscripcion",
+            "inscripcion__solicitud_ingreso",
+            "incidencia",
+        )
+        .order_by("-creado_en")
+    )
+
+
+def filtrar_movimientos_suplencia(
+    fecha_inicio=None,
+    fecha_fin=None,
+    area=None,
+    estado=None,
+    usuario=None,
+    titular=None,
+    texto=None,
+):
+    """
+    Filtros simples para reportes de Supervisora.
+    """
+    from django.db.models import Q
+
+    qs = movimientos_suplencia_queryset()
+
+    if fecha_inicio:
+        qs = qs.filter(creado_en__date__gte=fecha_inicio)
+
+    if fecha_fin:
+        qs = qs.filter(creado_en__date__lte=fecha_fin)
+
+    if area:
+        qs = qs.filter(area_cubierta=_normalizar_area_operativa(area))
+
+    if estado:
+        qs = qs.filter(estado=str(estado).strip().upper())
+
+    if usuario:
+        qs = qs.filter(usuario=usuario)
+
+    if titular:
+        qs = qs.filter(titular_area=titular)
+
+    if texto:
+        texto = str(texto).strip()
+        qs = qs.filter(
+            Q(descripcion__icontains=texto)
+            | Q(solicitud__folio__icontains=texto)
+            | Q(inscripcion__solicitud_ingreso__folio__icontains=texto)
+            | Q(usuario__email__icontains=texto)
+            | Q(titular_area__email__icontains=texto)
+        )
+
+    return qs
+
+
+def contexto_suplencias_usuario(usuario, fecha=None):
+    """
+    Contexto para cualquier panel operativo: médica, nutrición, psicología,
+    pedagógica o trabajo social.
+    """
+    suplencias = list(obtener_suplencias_activas_usuario(usuario, fecha=fecha))
+
+    return {
+        "suplencias_activas_usuario": suplencias,
+        "tiene_suplencia_activa": bool(suplencias),
+        "texto_suplencia_activa": "; ".join(
+            f"Cubriendo temporalmente: {_area_display_suplencia(s.area_cubierta)}"
+            for s in suplencias
+        ),
+    }
+
+
+def contexto_suplencias_direccion(usuario=None, fecha=None, semestre=None, crear_pase=True):
+    """
+    Contexto para la viñeta de Dirección:
+    - pase de lista
+    - ausencias detectadas
+    - suplencias activas
+    - movimientos recientes
+    """
+    _, AutorizacionSuplencia, _ = _suplencias_models()
+    fecha = fecha or timezone.localdate()
+
+    estado = estado_pase_lista_personal(
+        fecha=fecha,
+        semestre=semestre,
+        crear_si_falta=crear_pase,
+        usuario=usuario,
+    )
+
+    actualizar_suplencias_vencidas(fecha=fecha)
+
+    suplencias_activas = (
+        AutorizacionSuplencia.objects
+        .filter(fecha=fecha, estado=AutorizacionSuplencia.EstadoAutorizacion.ACTIVA)
+        .select_related("titular_ausente", "suplente", "autorizada_por", "asistencia_personal")
+        .order_by("area_cubierta", "inicio")
+    )
+
+    movimientos_recientes = movimientos_suplencia_queryset()[:10]
+
+    return {
+        **estado,
+        "suplencias_activas_dia": suplencias_activas,
+        "movimientos_suplencia_recientes": movimientos_recientes,
+        "bitacora_suplencias": movimientos_recientes,
+    }
+
+
+def contexto_bitacora_suplencias(limite=100, **filtros):
+    qs = filtrar_movimientos_suplencia(**filtros)
+
+    return {
+        "movimientos_suplencia": qs[:limite],
+        "total_movimientos_suplencia": qs.count(),
+    }
+
+
+def expediente_permite_edicion_por_suplencia(inscripcion):
+    """
+    Trabajo Social por suplencia solo puede continuar expedientes abiertos.
+    Finalizados, validados o cerrados quedan solo lectura.
+    """
+    if not inscripcion:
+        return False
+
+    estado = str(getattr(inscripcion, "estado", "") or "").strip().upper()
+
+    return estado in {
+        "NUEVA",
+        "EN_PROCESO",
+        "DEVUELTA",
+        "EN_REVISION",
+        "FILTROS",
+        "REVISION_FINAL_TS",
+        "ESPERANDO_DIRECTORA",
+        "ACEPTADO_ESPERANDO_PAGO",
+    }
+
+
+def mensaje_bloqueo_expediente_suplencia(inscripcion):
+    if expediente_permite_edicion_por_suplencia(inscripcion):
+        return ""
+
+    return (
+        "Este expediente ya se encuentra finalizado, validado, rechazado o cerrado. "
+        "En cobertura temporal de Trabajo Social solo puede visualizarse."
+    )

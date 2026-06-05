@@ -1,9 +1,12 @@
 import io
 import os
+import re
 from pathlib import Path
+from datetime import timedelta
 
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
@@ -12,6 +15,7 @@ from django.http import JsonResponse, HttpResponse, FileResponse
 from django.utils import timezone
 from django.utils.html import escape
 from django.db import transaction
+from django.db.models import Q
 
 try:
     from xhtml2pdf import pisa
@@ -88,17 +92,277 @@ def enmascarar_datos(texto):
 
 
 
+def limpiar_correo(valor):
+    """
+    Limpia correos capturados en formularios del panel de usuarios.
+
+    Reglas:
+    - Quita espacios al inicio y al final.
+    - Convierte a minúsculas.
+    - Quita espacios internos accidentales, por ejemplo:
+      'trabajadora @unach.mx' -> 'trabajadora@unach.mx'.
+    """
+    valor = (valor or "").strip().lower()
+    valor = re.sub(r"\s+", "", valor)
+    return valor
+
+
 def usuario_tiene_grupo(user, texto_grupo):
     """
     Busca un texto dentro de los grupos del usuario.
     Ejemplo: usuario_tiene_grupo(user, "trabajadora social")
     """
-    if not user.is_authenticated:
+    if not user or not getattr(user, "is_authenticated", False):
         return False
 
     texto_grupo = (texto_grupo or "").strip().lower()
 
     return user.groups.filter(name__icontains=texto_grupo).exists()
+
+
+def obtener_texto_grupos_usuario(user):
+    """
+    Devuelve todos los grupos del usuario en un solo texto normalizado.
+    Sirve como respaldo para usuarios que ya tenían roles asignados por Group.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return ""
+
+    try:
+        return " ".join(g.name.strip().lower() for g in user.groups.all())
+    except Exception:
+        return ""
+
+
+def obtener_area_operativa_por_rol(nombre_rol):
+    """
+    Convierte el nombre del rol/grupo en el área operativa usada por el modelo Usuario.
+
+    Esto permite que, cuando el Administrador del Sistema asigne un rol fijo,
+    también quede guardada el área necesaria para pase de lista y suplencias.
+    """
+    rol = (nombre_rol or "").strip().lower()
+
+    if not rol:
+        return None
+
+    if "directora" in rol or "direccion" in rol or "dirección" in rol:
+        return "DIRECCION"
+
+    if "trabajadora social" in rol or "trabajo social" in rol:
+        return "TRABAJO_SOCIAL"
+
+    if "psicóloga" in rol or "psicologa" in rol or "psicología" in rol or "psicologia" in rol:
+        return "PSICOLOGIA"
+
+    if "nutrióloga" in rol or "nutriologa" in rol or "nutrición" in rol or "nutricion" in rol:
+        return "NUTRICION"
+
+    if "médico" in rol or "medico" in rol or "médica" in rol or "medica" in rol:
+        return "MEDICA"
+
+    if (
+        "pedagógica" in rol
+        or "pedagogica" in rol
+        or "pedagogía" in rol
+        or "pedagogia" in rol
+        or "coordinadora" in rol
+        or "coordinador" in rol
+        or "coordinacion de sala" in rol
+        or "coordinación de sala" in rol
+    ):
+        return "PEDAGOGICA"
+
+    if "maestra" in rol or "asistente" in rol or "sala" in rol:
+        return "MAESTRA"
+
+    return None
+
+
+def limpiar_area_operativa(valor, tipo_persona="PERSONAL"):
+    """
+    Limpia y valida el área operativa recibida desde formularios.
+
+    Si el usuario no es PERSONAL, se regresa None para evitar que supervisora,
+    administrador, beneficiarios o alumnos aparezcan en pase de lista o suplencias.
+    """
+    if (tipo_persona or "").strip().upper() != "PERSONAL":
+        return None
+
+    area = (valor or "").strip().upper()
+    if not area:
+        return None
+
+    User = get_user_model()
+    areas_validas = [choice[0] for choice in getattr(User, "AREA_OPERATIVA_CHOICES", [])]
+
+    if areas_validas and area not in areas_validas:
+        return None
+
+    return area
+
+
+def aplicar_area_operativa_por_rol(usuario, nombre_rol):
+    """
+    Asigna area_operativa al usuario según el rol fijo seleccionado.
+    No reemplaza los grupos, solo mantiene sincronizado el campo nuevo.
+    """
+    area = obtener_area_operativa_por_rol(nombre_rol)
+
+    if hasattr(usuario, "area_operativa"):
+        usuario.area_operativa = area
+
+    return area
+
+
+def usuario_es_directora(user):
+    """
+    Identifica a Dirección usando primero area_operativa y luego grupos.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") != "PERSONAL":
+        return False
+
+    if getattr(user, "area_operativa", None) == "DIRECCION":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return "directora" in grupos_usuario or "direccion" in grupos_usuario or "dirección" in grupos_usuario
+
+
+def usuario_es_trabajadora_social(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") == "PERSONAL" and getattr(user, "area_operativa", None) == "TRABAJO_SOCIAL":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return "trabajadora social" in grupos_usuario or "trabajo social" in grupos_usuario
+
+
+def usuario_es_psicologia(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") == "PERSONAL" and getattr(user, "area_operativa", None) == "PSICOLOGIA":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return "psicóloga" in grupos_usuario or "psicologa" in grupos_usuario
+
+
+def usuario_es_nutricion(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") == "PERSONAL" and getattr(user, "area_operativa", None) == "NUTRICION":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return "nutrióloga" in grupos_usuario or "nutriologa" in grupos_usuario
+
+
+def usuario_es_medica(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") == "PERSONAL" and getattr(user, "area_operativa", None) == "MEDICA":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return "médico" in grupos_usuario or "medico" in grupos_usuario or "médica" in grupos_usuario or "medica" in grupos_usuario
+
+
+def usuario_es_pedagogica(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") == "PERSONAL" and getattr(user, "area_operativa", None) == "PEDAGOGICA":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return (
+        "pedagógica" in grupos_usuario
+        or "pedagogica" in grupos_usuario
+        or "coordinadora" in grupos_usuario
+        or "coordinador" in grupos_usuario
+        or "coordinacion de sala" in grupos_usuario
+        or "coordinación de sala" in grupos_usuario
+    )
+
+
+def usuario_es_maestra(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "tipo_persona", "") == "PERSONAL" and getattr(user, "area_operativa", None) == "MAESTRA":
+        return True
+
+    grupos_usuario = obtener_texto_grupos_usuario(user)
+    return "asistente" in grupos_usuario or "maestra" in grupos_usuario
+
+
+def obtener_contexto_personal_operativo():
+    """
+    Contexto base para paneles donde se necesitará pase de lista o suplencias.
+    No crea suplencias todavía; solo manda listas filtradas desde usuarios.
+    """
+    User = get_user_model()
+
+    try:
+        personal_pase_lista = User.personal_para_pase_lista()
+    except Exception:
+        personal_pase_lista = User.objects.none()
+
+    try:
+        personal_suplencias = User.personal_para_suplencias()
+    except Exception:
+        personal_suplencias = User.objects.none()
+
+    return {
+        "personal_pase_lista": personal_pase_lista,
+        "personal_suplencias": personal_suplencias,
+    }
+
+
+def usuario_es_supervisor_general(user):
+    """
+    Identifica a la Supervisora General / Secretaria de Dirección.
+
+    Este rol es de solo consulta: entra al panel de supervisión general
+    y no debe enviarse al panel de Dirección ni a paneles operativos.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+
+    tipo_persona = (getattr(user, "tipo_persona", "") or "").strip().upper()
+    if tipo_persona == "SUPERVISOR":
+        return True
+
+    try:
+        grupos_usuario = " ".join(
+            g.name.strip().lower() for g in user.groups.all()
+        )
+    except Exception:
+        grupos_usuario = ""
+
+    palabras_clave = [
+        "supervisor",
+        "supervisora",
+        "supervision",
+        "supervisión",
+        "supervisora general",
+        "supervisor general",
+        "secretaria de direccion",
+        "secretaria de dirección",
+        "secretario de direccion",
+        "secretario de dirección",
+    ]
+
+    return any(palabra in grupos_usuario for palabra in palabras_clave)
 
 
 
@@ -137,43 +401,37 @@ def root_redirect_view(request):
         messages.error(request, "El sistema está en mantenimiento. Intente más tarde.")
         return redirect("login")
 
+    # Supervisora General / Secretaria de Dirección.
+    # Entra a su panel de solo consulta y no participa en suplencias.
+    if usuario_es_supervisor_general(user):
+        return redirect("panel_supervisor")
+
     if getattr(user, "tipo_persona", "") == "BENEFICIARIO":
         return redirect("portal_padres_home")
 
     if user.is_staff:
-        # Se revisan todos los grupos del usuario, no solo el primero.
-        grupos_usuario = " ".join(
-            g.name.strip().lower() for g in user.groups.all()
-        )
-
-        if "directora" in grupos_usuario:
+        # Primero revisamos area_operativa, pero conservamos compatibilidad con grupos.
+        if usuario_es_directora(user):
             return redirect("dashboard_directiva")
 
-        if "trabajadora social" in grupos_usuario:
+        if usuario_es_trabajadora_social(user):
             return redirect("dashboard_admin")
 
-        if "psicóloga" in grupos_usuario or "psicologa" in grupos_usuario:
+        if usuario_es_psicologia(user):
             return redirect("psicologia_pendientes")
 
-        if "nutrióloga" in grupos_usuario or "nutriologa" in grupos_usuario:
+        if usuario_es_nutricion(user):
             return redirect("nutricion_pendientes")
 
-        if "médico" in grupos_usuario or "medico" in grupos_usuario:
+        if usuario_es_medica(user):
             return redirect("medico_pendientes")
 
-        # SPRINT 5:
-        # Coordinadora de Sala ya tiene panel activo para incidencias pedagógicas.
-        if (
-            "coordinadora" in grupos_usuario
-            or "coordinador" in grupos_usuario
-            or "coordinacion de sala" in grupos_usuario
-            or "coordinación de sala" in grupos_usuario
-        ):
+        # Pedagógica / Coordinación de Sala.
+        if usuario_es_pedagogica(user):
             return redirect("dashboard_coordinadora")
 
-        # SPRINT 4 - Segunda parte:
-        # Maestras / Asistentes de sala ya tienen panel activo de operación diaria.
-        if "asistente" in grupos_usuario or "maestra" in grupos_usuario:
+        # Maestras / Asistentes de sala.
+        if usuario_es_maestra(user):
             return redirect("dashboard_maestra")
 
         logout(request)
@@ -194,10 +452,15 @@ def root_redirect_view(request):
 @login_required
 def dashboard_directiva(request):
     user = request.user
-    grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
 
-    # Verificamos que sea Directora o Admin
-    if getattr(user, "tipo_persona", "") != "ADMIN" and "directora" not in grupo and "secretario" not in grupo:
+    # La Supervisora General tiene su propio panel de solo consulta.
+    # Aunque tenga un grupo parecido a Dirección, no debe entrar aquí.
+    if usuario_es_supervisor_general(user):
+        return redirect("panel_supervisor")
+
+    # Verificamos que sea Directora o Admin.
+    # Se usa area_operativa y también grupos para no romper usuarios anteriores.
+    if not usuario_es_directora_o_admin(user):
         logout(request)
         messages.error(request, "Acceso denegado. Área exclusiva de Dirección.")
         return redirect("login")
@@ -241,6 +504,9 @@ def dashboard_directiva(request):
         ).order_by("-fecha_reporte"),
     }
 
+    # Contexto preparado para el pase de lista del personal operativo.
+    # La lógica real de asistencia/suplencias se conectará desde admisiones.
+    context.update(obtener_contexto_personal_operativo())
     context.update(contexto_semestre_operativo())
 
     return render(request, "portal/home_directiva.html", context)
@@ -251,15 +517,13 @@ def usuario_es_directora_o_admin(user):
     """
     Permite validar que solo Directora o Administrador emitan el veredicto final.
     """
-    if not user.is_authenticated:
+    if not user or not getattr(user, "is_authenticated", False):
         return False
 
-    grupo = user.groups.first().name.strip().lower() if user.groups.exists() else ""
-
     return (
-        user.is_superuser
+        getattr(user, "is_superuser", False)
         or getattr(user, "tipo_persona", "") == "ADMIN"
-        or "directora" in grupo
+        or usuario_es_directora(user)
     )
 
 
@@ -453,32 +717,223 @@ def dashboard_admin(request):
     """
     Panel de Trabajo Social.
 
-    Si el Administrador del Sistema cae aquí por accidente,
-    no se le cierra la sesión ni se muestra error; se redirige a Gobierno TI.
+    Aquí se calculan los números reales para el panel general:
+    beneficiarios inscritos, pendientes, en proceso, finalizados y actividad reciente.
     """
     if usuario_es_admin_sistema(request.user):
         return redirect("panel_gobierno_ti")
 
-    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
-
-    if not request.user.is_staff or "trabajadora social" not in grupo:
+    if not request.user.is_staff or not usuario_es_trabajadora_social(request.user):
         logout(request)
         messages.error(request, "Acceso denegado. Área exclusiva de Trabajo Social.")
         return redirect("login")
 
-    return render(request, "portal/panel_admin.html", contexto_semestre_operativo())
+    semestre_context = contexto_semestre_operativo()
+    semestre_activo = semestre_context.get("semestre_activo_operativo")
+
+    # Base de inscripciones. Si el modelo tiene campo semestre/ciclo/periodo, se filtra por el semestre activo.
+    inscripciones_qs = SolicitudInscripcion.objects.all()
+    campos_inscripcion = {campo.name for campo in SolicitudInscripcion._meta.get_fields()}
+
+    if semestre_activo:
+        for campo_semestre in ["semestre", "ciclo", "periodo"]:
+            if campo_semestre in campos_inscripcion:
+                try:
+                    inscripciones_qs = inscripciones_qs.filter(**{campo_semestre: semestre_activo})
+                    break
+                except Exception:
+                    pass
+
+    def filtrar_estados(qs, estados):
+        """Filtra por varios estados sin depender de mayúsculas/minúsculas."""
+        if "estado" not in campos_inscripcion:
+            return qs.none()
+
+        consulta = Q()
+        for estado in estados:
+            consulta |= Q(estado__iexact=estado)
+        return qs.filter(consulta)
+
+    def excluir_estados(qs, estados):
+        """Excluye varios estados sin depender de mayúsculas/minúsculas."""
+        if "estado" not in campos_inscripcion:
+            return qs
+
+        consulta = Q()
+        for estado in estados:
+            consulta |= Q(estado__iexact=estado)
+        return qs.exclude(consulta)
+
+    def porcentaje(valor, total):
+        if not total:
+            return 0
+        return round((valor * 100) / total, 1)
+
+    estados_finalizados = [
+        "FINALIZADA",
+        "FINALIZADO",
+        "INSCRITA",
+        "INSCRITO",
+        "COMPLETADA",
+        "COMPLETADO",
+    ]
+
+    estados_fuera_proceso = [
+        "RECHAZADA",
+        "RECHAZADO",
+        "CANCELADA",
+        "CANCELADO",
+        "BAJA",
+    ]
+
+    # Estados que normalmente requieren revisión o seguimiento de Trabajo Social.
+    estados_pendientes_trabajo_social = [
+        "CAPTURA",
+        "EN_REVISION",
+        "PENDIENTE",
+        "FILTROS",
+        "SALA_RECHAZADA",
+        "ACEPTADO_ESPERANDO_PAGO",
+        "PAGO_PENDIENTE",
+        "PAGO_EN_REVISION",
+        "COMPROBANTE_SUBIDO",
+        "PAGO_RECHAZADO",
+        "CODIGO_PENDIENTE",
+        "CODIGO_GENERADO",
+    ]
+
+    estados_solicitudes = [
+        "CAPTURA",
+        "EN_REVISION",
+        "PENDIENTE",
+        "FILTROS",
+        "SALA_RECHAZADA",
+        "SALA_EN_REVISION",
+    ]
+
+    estados_reportes = [
+        "FILTROS",
+        "SALA_EN_REVISION",
+        "ESPERANDO_DIRECTORA",
+        "SALA_APROBADA",
+    ]
+
+    estados_pagos = [
+        "ACEPTADO_ESPERANDO_PAGO",
+        "PAGO_PENDIENTE",
+        "PAGO_EN_REVISION",
+        "COMPROBANTE_SUBIDO",
+        "PAGO_RECHAZADO",
+    ]
+
+    estados_codigos = [
+        "CODIGO_PENDIENTE",
+        "CODIGO_GENERADO",
+        "CODIGO_ENTREGADO",
+    ]
+
+    inscripciones_activas_qs = excluir_estados(inscripciones_qs, estados_fuera_proceso)
+
+    total_beneficiarios_inscribiendo = inscripciones_activas_qs.count()
+    beneficiarios_proceso_completo = filtrar_estados(inscripciones_activas_qs, estados_finalizados).count()
+    beneficiarios_en_proceso = max(total_beneficiarios_inscribiendo - beneficiarios_proceso_completo, 0)
+
+    beneficiarios_pendientes_atender = filtrar_estados(
+        inscripciones_activas_qs,
+        estados_pendientes_trabajo_social,
+    ).count()
+
+    # Si no coincide ningún estado específico, al menos se muestran los que siguen en proceso.
+    if beneficiarios_pendientes_atender == 0 and beneficiarios_en_proceso > 0:
+        beneficiarios_pendientes_atender = beneficiarios_en_proceso
+
+    solicitudes_activas = filtrar_estados(inscripciones_activas_qs, estados_solicitudes).count()
+    reportes_pendientes = filtrar_estados(inscripciones_activas_qs, estados_reportes).count()
+    pagos_pendientes = filtrar_estados(inscripciones_activas_qs, estados_pagos).count()
+    codigos_pendientes = filtrar_estados(inscripciones_activas_qs, estados_codigos).count()
+
+    # Si existe algún campo booleano relacionado con entrega de código, lo usamos para mejorar el conteo.
+    for campo_codigo in [
+        "codigo_entregado",
+        "codigo_seguridad_entregado",
+        "codigo_responsable_entregado",
+        "credencial_entregada",
+    ]:
+        if campo_codigo in campos_inscripcion:
+            try:
+                codigos_pendientes = inscripciones_activas_qs.filter(**{campo_codigo: False}).count()
+                break
+            except Exception:
+                pass
+
+    # Actividad reciente: inscripciones modificadas o creadas en los últimos 15 minutos.
+    hace_15_minutos = timezone.now() - timedelta(minutes=15)
+
+    if "updated_at" in campos_inscripcion:
+        beneficiarios_inscribiendo_ahora = inscripciones_activas_qs.filter(
+            updated_at__gte=hace_15_minutos
+        ).count()
+    elif "fecha_actualizacion" in campos_inscripcion:
+        beneficiarios_inscribiendo_ahora = inscripciones_activas_qs.filter(
+            fecha_actualizacion__gte=hace_15_minutos
+        ).count()
+    elif "created_at" in campos_inscripcion:
+        beneficiarios_inscribiendo_ahora = inscripciones_activas_qs.filter(
+            created_at__gte=hace_15_minutos
+        ).count()
+    elif "fecha_registro" in campos_inscripcion:
+        beneficiarios_inscribiendo_ahora = inscripciones_activas_qs.filter(
+            fecha_registro__gte=hace_15_minutos
+        ).count()
+    else:
+        beneficiarios_inscribiendo_ahora = beneficiarios_en_proceso
+
+    context = {
+        "total_beneficiarios_inscribiendo": total_beneficiarios_inscribiendo,
+        "beneficiarios_pendientes_atender": beneficiarios_pendientes_atender,
+        "beneficiarios_proceso_completo": beneficiarios_proceso_completo,
+        "porcentaje_proceso_completo": porcentaje(
+            beneficiarios_proceso_completo,
+            total_beneficiarios_inscribiendo,
+        ),
+        "beneficiarios_en_proceso": beneficiarios_en_proceso,
+        "porcentaje_en_proceso": porcentaje(
+            beneficiarios_en_proceso,
+            total_beneficiarios_inscribiendo,
+        ),
+        "beneficiarios_inscribiendo_ahora": beneficiarios_inscribiendo_ahora,
+        "porcentaje_pendientes_atender": porcentaje(
+            beneficiarios_pendientes_atender,
+            total_beneficiarios_inscribiendo,
+        ),
+        "solicitudes_activas": solicitudes_activas,
+        "reportes_pendientes": reportes_pendientes,
+        "pagos_pendientes": pagos_pendientes,
+        "codigos_pendientes": codigos_pendientes,
+        "porcentaje_solicitudes": porcentaje(solicitudes_activas, total_beneficiarios_inscribiendo),
+        "porcentaje_reportes": porcentaje(reportes_pendientes, total_beneficiarios_inscribiendo),
+        "porcentaje_pagos": porcentaje(pagos_pendientes, total_beneficiarios_inscribiendo),
+        "porcentaje_codigos": porcentaje(codigos_pendientes, total_beneficiarios_inscribiendo),
+    }
+
+    context.update(obtener_contexto_personal_operativo())
+    context.update(semestre_context)
+
+    return render(request, "portal/panel_admin.html", context)
 
 
 @login_required
 def dashboard_medico(request):
-    grupo = request.user.groups.first().name.strip().lower() if request.user.groups.exists() else ""
-
-    if not request.user.is_staff or ("médico" not in grupo and "medico" not in grupo):
+    if not request.user.is_staff or not usuario_es_medica(request.user):
         logout(request)
         messages.error(request, "Acceso denegado. Área exclusiva del personal Médico.")
         return redirect("login")
 
-    return render(request, "dashboard/home_medico.html", contexto_semestre_operativo())
+    context = {}
+    context.update(obtener_contexto_personal_operativo())
+    context.update(contexto_semestre_operativo())
+
+    return render(request, "dashboard/home_medico.html", context)
 
 
 @login_required
@@ -497,13 +952,17 @@ def panel_gobierno_ti(request):
 
         try:
             if accion == "create_user":
-                email = request.POST.get("email", "").strip().lower()
+                email = limpiar_correo(request.POST.get("email", ""))
                 password = request.POST.get("password")
                 nombre = request.POST.get("nombre", "").strip()
                 apellido_paterno = request.POST.get("apellido_paterno", "").strip()
                 apellido_materno = request.POST.get("apellido_materno", "").strip()
                 curp = request.POST.get("curp", "").strip().upper()
                 tipo_persona = request.POST.get("tipo_persona") or "PERSONAL"
+                area_operativa = limpiar_area_operativa(
+                    request.POST.get("area_operativa"),
+                    tipo_persona=tipo_persona,
+                )
                 num_empleado = request.POST.get("numero_empleado", "").strip()
 
                 # =====================================================
@@ -514,6 +973,9 @@ def panel_gobierno_ti(request):
 
                 if not email:
                     errores.append("El correo es obligatorio.")
+
+                if email and not email.endswith("@unach.mx"):
+                    errores.append("El correo del personal debe terminar en @unach.mx.")
 
                 if not password:
                     errores.append("La contraseña es obligatoria.")
@@ -572,6 +1034,8 @@ def panel_gobierno_ti(request):
                     u.apellido_materno = apellido_materno
                     u.curp = curp
                     u.tipo_persona = tipo_persona
+                    if hasattr(u, "area_operativa"):
+                        u.area_operativa = area_operativa
                     u.numero_empleado = num_empleado
                     u.estatus_operativo = True
                     u.is_active = True
@@ -597,8 +1061,12 @@ def panel_gobierno_ti(request):
                 apellido_paterno = request.POST.get("apellido_paterno", "").strip()
                 apellido_materno = request.POST.get("apellido_materno", "").strip()
                 curp = request.POST.get("curp", "").strip().upper()
-                email = request.POST.get("email", "").strip().lower()
+                email = limpiar_correo(request.POST.get("email", ""))
                 tipo_persona = request.POST.get("tipo_persona") or "PERSONAL"
+                area_operativa = limpiar_area_operativa(
+                    request.POST.get("area_operativa", getattr(usr_edit, "area_operativa", "")),
+                    tipo_persona=tipo_persona,
+                )
                 numero_empleado = request.POST.get("numero_empleado", "").strip()
                 estatus_operativo = request.POST.get("estatus_operativo", "true")
                 password = request.POST.get("password", "").strip()
@@ -657,6 +1125,8 @@ def panel_gobierno_ti(request):
                     usr_edit.email = email
                     usr_edit.username = email
                     usr_edit.tipo_persona = tipo_persona
+                    if hasattr(usr_edit, "area_operativa"):
+                        usr_edit.area_operativa = area_operativa
                     usr_edit.numero_empleado = numero_empleado
                     usr_edit.estatus_operativo = estatus_operativo == "true"
                     usr_edit.is_active = estatus_operativo == "true"
@@ -706,20 +1176,46 @@ def panel_gobierno_ti(request):
                 empleado.groups.clear()
                 empleado.groups.add(grupo)
 
+                area_asignada = aplicar_area_operativa_por_rol(empleado, rol_fijo)
+                campos_actualizar = []
+
+                if hasattr(empleado, "area_operativa"):
+                    campos_actualizar.append("area_operativa")
+
+                # Al asignar un rol operativo, se asegura que el usuario sea personal activo.
+                if rol_fijo != "Administrador del Sistema" and getattr(empleado, "tipo_persona", "") != "ADMIN":
+                    empleado.tipo_persona = "PERSONAL"
+                    empleado.is_staff = True
+                    empleado.is_active = True
+                    campos_actualizar.extend(["tipo_persona", "is_staff", "is_active"])
+
+                if campos_actualizar:
+                    empleado.save(update_fields=list(dict.fromkeys(campos_actualizar)))
+
                 AccessLog.objects.create(
                     usuario=request.user,
                     accion=f"ASIGNÓ ROL: '{rol_fijo}' a {empleado.nombre}",
                 )
 
-                response_data["msg"] = (
-                    f'Rol "{rol_fijo}" asignado correctamente. '
-                    "La asignación a semestre/sala/horarios se realiza en Gestión de Semestres."
-                )
+                if area_asignada:
+                    response_data["msg"] = (
+                        f'Rol "{rol_fijo}" asignado correctamente. '
+                        f"Área operativa actualizada a {area_asignada}. "
+                        "La asignación a semestre/sala/horarios se realiza en Gestión de Semestres."
+                    )
+                else:
+                    response_data["msg"] = (
+                        f'Rol "{rol_fijo}" asignado correctamente. '
+                        "La asignación a semestre/sala/horarios se realiza en Gestión de Semestres."
+                    )
 
             elif accion == "remove_fixed_role":
                 usuario_id = request.POST.get("usuario_id")
                 empleado = User.objects.get(id=usuario_id)
                 empleado.groups.clear()
+                if hasattr(empleado, "area_operativa"):
+                    empleado.area_operativa = None
+                    empleado.save(update_fields=["area_operativa"])
                 AsignacionMaestra.objects.filter(maestra=empleado).delete()
                 response_data["msg"] = "Rol removido. También se quitaron sus asignaciones de maestra si existían."
 
@@ -730,10 +1226,14 @@ def panel_gobierno_ti(request):
 
                 sucesor.is_superuser = True
                 sucesor.tipo_persona = "ADMIN"
+                if hasattr(sucesor, "area_operativa"):
+                    sucesor.area_operativa = None
                 sucesor.save()
 
                 yo.is_superuser = False
                 yo.tipo_persona = "PERSONAL"
+                if hasattr(yo, "area_operativa"):
+                    yo.area_operativa = None
                 yo.save()
 
                 AccessLog.objects.create(
@@ -789,16 +1289,177 @@ def panel_gobierno_ti(request):
 
     staff_list = User.objects.exclude(tipo_persona="BENEFICIARIO").order_by("-date_joined")
 
+    area_operativa_choices = getattr(User, "AREA_OPERATIVA_CHOICES", [])
+    areas_suplencia = getattr(User, "AREAS_PERMITIDAS_SUPLENCIA", [])
+    areas_pase_lista = getattr(User, "AREAS_PASE_LISTA", [])
+
+    # =====================================================
+    # INCIDENCIAS DENTRO DEL MISMO PANEL TI
+    # Ya no se manda a otra vista. Los filtros se aplican aquí mismo.
+    # URL resultante: /gobierno-ti/?tipo=NUTRICIONAL, etc.
+    # =====================================================
+    estado = (request.GET.get("estado") or "").strip().upper()
+    nivel = (request.GET.get("nivel") or "").strip().upper()
+    tipo = (request.GET.get("tipo") or "").strip().upper()
+
+    campos_incidencia = {campo.name for campo in Incidencia._meta.get_fields()}
+    incidencias_qs = Incidencia.objects.all()
+
+    if estado:
+        if "estado" in campos_incidencia:
+            estados_alias = {
+                "ABIERTA": ["ABIERTA", "ABIERTO", "PENDIENTE", "EN_SEGUIMIENTO"],
+                "CERRADA": ["CERRADA", "CERRADO", "RESUELTA", "RESUELTO"],
+            }.get(estado, [estado])
+
+            q_estado = Q()
+            for valor_estado in estados_alias:
+                q_estado |= Q(estado__iexact=valor_estado)
+
+            incidencias_qs = incidencias_qs.filter(q_estado)
+
+        elif "resuelta" in campos_incidencia:
+            if estado in ["ABIERTA", "ABIERTO", "PENDIENTE", "EN_SEGUIMIENTO"]:
+                incidencias_qs = incidencias_qs.filter(resuelta=False)
+            elif estado in ["CERRADA", "CERRADO", "RESUELTA", "RESUELTO"]:
+                incidencias_qs = incidencias_qs.filter(resuelta=True)
+
+    if nivel:
+        if "nivel" in campos_incidencia:
+            incidencias_qs = incidencias_qs.filter(nivel__iexact=nivel)
+        elif "nivel_riesgo" in campos_incidencia:
+            incidencias_qs = incidencias_qs.filter(nivel_riesgo__iexact=nivel)
+
+    if tipo:
+        campos_tipo = [
+            nombre_campo
+            for nombre_campo in ["tipo", "tipo_incidencia", "categoria", "area"]
+            if nombre_campo in campos_incidencia
+        ]
+
+        alias_tipo = {
+            "MEDICA": ["MEDICA", "MÉDICA", "MEDICO", "MÉDICO", "SALUD"],
+            "NUTRICIONAL": ["NUTRICIONAL", "NUTRICION", "NUTRICIÓN", "NUTRICIONALES"],
+            "PSICOLOGICA": ["PSICOLOGICA", "PSICOLÓGICA", "PSICOLOGIA", "PSICOLOGÍA"],
+            "PEDAGOGICA": ["PEDAGOGICA", "PEDAGÓGICA", "PEDAGOGIA", "PEDAGOGÍA", "COORDINACION", "COORDINACIÓN"],
+        }.get(tipo, [tipo])
+
+        q_tipo = Q()
+        for campo_tipo in campos_tipo:
+            for valor_tipo in alias_tipo:
+                q_tipo |= Q(**{f"{campo_tipo}__iexact": valor_tipo})
+
+        if q_tipo.children:
+            incidencias_qs = incidencias_qs.filter(q_tipo)
+
+    if "fecha_reporte" in campos_incidencia:
+        incidencias_qs = incidencias_qs.order_by("-fecha_reporte", "-id")
+    elif "fecha_registro" in campos_incidencia:
+        incidencias_qs = incidencias_qs.order_by("-fecha_registro", "-id")
+    elif "created_at" in campos_incidencia:
+        incidencias_qs = incidencias_qs.order_by("-created_at", "-id")
+    else:
+        incidencias_qs = incidencias_qs.order_by("-id")
+
+    def valor_incidencia(obj, *nombres, default="--"):
+        for nombre in nombres:
+            if hasattr(obj, nombre):
+                valor = getattr(obj, nombre)
+                if valor is not None and valor != "":
+                    return valor
+        return default
+
+    incidencias_rows = []
+    for inc in incidencias_qs:
+        if "estado" in campos_incidencia:
+            estado_mostrar = valor_incidencia(inc, "estado")
+        elif "resuelta" in campos_incidencia:
+            estado_mostrar = "CERRADA" if getattr(inc, "resuelta", False) else "ABIERTA"
+        else:
+            estado_mostrar = "--"
+
+        incidencias_rows.append({
+            "obj": inc,
+            "id": inc.id,
+            "folio": valor_incidencia(inc, "folio", "codigo", default=f"INC-{inc.id}"),
+            "tipo": valor_incidencia(inc, "tipo", "tipo_incidencia", "categoria", "area"),
+            "nivel": valor_incidencia(inc, "nivel", "nivel_riesgo"),
+            "estado": estado_mostrar,
+            "fecha": valor_incidencia(inc, "fecha_reporte", "fecha_registro", "created_at", "fecha"),
+            "descripcion": valor_incidencia(inc, "descripcion", "detalle", "observaciones", "motivo"),
+            "responsable": valor_incidencia(inc, "creado_por", "registrado_por", "reportado_por", "usuario"),
+            "menor": valor_incidencia(inc, "menor", "nino", "niño", "alumno", "solicitud_inscripcion"),
+        })
+
+    # Contadores generales para tarjetas.
+    total_incidencias = Incidencia.objects.count()
+
+    if "resuelta" in campos_incidencia:
+        total_abiertas = Incidencia.objects.filter(resuelta=False).count()
+        total_cerradas = Incidencia.objects.filter(resuelta=True).count()
+    elif "estado" in campos_incidencia:
+        total_abiertas = Incidencia.objects.filter(
+            estado__in=["ABIERTA", "ABIERTO", "PENDIENTE", "EN_SEGUIMIENTO"]
+        ).count()
+        total_cerradas = Incidencia.objects.filter(
+            estado__in=["CERRADA", "CERRADO", "RESUELTA", "RESUELTO"]
+        ).count()
+    else:
+        total_abiertas = 0
+        total_cerradas = 0
+
+    if "nivel" in campos_incidencia:
+        total_riesgo_alto = Incidencia.objects.filter(nivel__iexact="ALTO").count()
+    elif "nivel_riesgo" in campos_incidencia:
+        total_riesgo_alto = Incidencia.objects.filter(nivel_riesgo__iexact="ALTO").count()
+    else:
+        total_riesgo_alto = 0
+
     context = {
         "lista_staff": staff_list,
+        "area_operativa_choices": area_operativa_choices,
+        "areas_suplencia": areas_suplencia,
+        "areas_pase_lista": areas_pase_lista,
         "ciclos_historial": Semestre.objects.all().order_by("-fecha_inicio"),
         "logs": AccessLog.objects.all().order_by("-fecha_acceso")[:50],
         "encrypt_active": request.session.get("sec_encrypt", True),
+        "estado": estado,
+        "nivel": nivel,
+        "tipo": tipo,
+        "incidencias_rows": incidencias_rows,
+        "total_incidencias": total_incidencias,
+        "total_abiertas": total_abiertas,
+        "total_cerradas": total_cerradas,
+        "total_riesgo_alto": total_riesgo_alto,
     }
 
     context.update(contexto_semestre_operativo())
 
     return render(request, "portal/panel_ti.html", context)
+
+
+# ==============================================================
+# INCIDENCIAS - VISTA EXCLUSIVA PARA ADMINISTRADOR DEL SISTEMA
+# Esta vista evita mandar al Administrador al panel de Directora.
+# ==============================================================
+@login_required
+def panel_incidencias_ti(request):
+    """
+    Compatibilidad con la URL anterior.
+    Ya no renderiza otro HTML: redirige al mismo Panel TI conservando filtros.
+    """
+    if not usuario_es_admin_sistema(request.user):
+        logout(request)
+        messages.error(request, "ACCESO DENEGADO. Área exclusiva del Administrador del Sistema.")
+        return redirect("login")
+
+    base_url = reverse("panel_gobierno_ti")
+    query_string = request.META.get("QUERY_STRING", "")
+
+    if query_string:
+        return redirect(f"{base_url}?{query_string}")
+
+    return redirect(base_url)
 
 
 # ==============================================================

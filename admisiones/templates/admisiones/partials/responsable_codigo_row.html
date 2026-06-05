@@ -1,7 +1,8 @@
 <div
-    class="responsible-row {% if principal %}principal{% endif %}"
+    class="responsible-row {% if principal %}principal{% endif %} {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}row-suplencia{% endif %} {% if modo_solo_consulta or solo_consulta_suplencia or registro_bloqueado_por_estado %}row-bloqueada{% endif %}"
     data-codigo="{% if responsable.tiene_codigo %}CON_CODIGO{% else %}SIN_CODIGO{% endif %}"
     data-entrega="{% if responsable.codigo_entregado %}ENTREGADO{% else %}PENDIENTE_ENTREGA{% endif %}"
+    data-origen="{% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}SUPLENCIA_TRABAJO_SOCIAL{% else %}TITULAR{% endif %}"
 >
     <div class="responsible-info">
         <div class="avatar responsible">
@@ -24,6 +25,15 @@
             {% if responsable.telefono %}
                 <div class="responsible-meta">
                     <i class="bi bi-telephone-fill me-1"></i>{{ responsable.telefono }}
+                </div>
+            {% endif %}
+
+            {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                <div class="responsible-meta mt-1">
+                    <span class="badge-soft badge-blue">
+                        <i class="bi bi-person-gear"></i>
+                        Cobertura temporal de Trabajo Social
+                    </span>
                 </div>
             {% endif %}
         </div>
@@ -84,30 +94,63 @@
                 Pendiente
             </span>
         {% endif %}
+
+        {% if responsable.movimiento_suplencia_pendiente or responsable.pendiente_revision_titular %}
+            <span class="badge-soft badge-purple">
+                <i class="bi bi-clock-history"></i>
+                Pendiente titular
+            </span>
+        {% endif %}
     </div>
 
     <div class="action-group">
-        {% if not responsable.tiene_codigo %}
-            <a href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="mini-btn primary">
-                <i class="bi bi-key-fill"></i>
-                Generar
-            </a>
-        {% else %}
-            <a href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="mini-btn danger">
-                <i class="bi bi-arrow-clockwise"></i>
-                Resetear
-            </a>
+        {% if modo_solo_consulta or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+            <span class="mini-btn disabled" title="Este registro solo puede consultarse porque está finalizado, validado, cerrado o el semestre está en modo consulta.">
+                <i class="bi bi-lock-fill"></i>
+                Solo consulta
+            </span>
 
-            {% if not responsable.codigo_entregado %}
-                <a href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}" class="mini-btn success">
-                    <i class="bi bi-person-check-fill"></i>
-                    Confirmar entrega
+        {% else %}
+            {% if not responsable.tiene_codigo %}
+                <a
+                    href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}{% if autorizacion_suplencia_id %}&autorizacion_suplencia_id={{ autorizacion_suplencia_id }}{% endif %}"
+                    class="mini-btn primary"
+                    {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        title="Acción realizada dentro de cobertura temporal de Trabajo Social"
+                    {% endif %}
+                >
+                    <i class="bi bi-key-fill"></i>
+                    Generar
                 </a>
             {% else %}
-                <span class="mini-btn disabled">
-                    <i class="bi bi-check-circle-fill"></i>
-                    Entregado
-                </span>
+                <a
+                    href="{% url 'generar_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}{% if autorizacion_suplencia_id %}&autorizacion_suplencia_id={{ autorizacion_suplencia_id }}{% endif %}"
+                    class="mini-btn danger"
+                    {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        title="Reset realizado dentro de cobertura temporal de Trabajo Social"
+                    {% endif %}
+                >
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Resetear
+                </a>
+
+                {% if not responsable.codigo_entregado %}
+                    <a
+                        href="{% url 'confirmar_entrega_codigo_responsable' inscripcion.id %}?responsable_codigo_id={{ responsable.id }}{% if autorizacion_suplencia_id %}&autorizacion_suplencia_id={{ autorizacion_suplencia_id }}{% endif %}"
+                        class="mini-btn success"
+                        {% if suplencia_trabajo_social_activa or es_cobertura_trabajo_social or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            title="Entrega confirmada dentro de cobertura temporal de Trabajo Social"
+                        {% endif %}
+                    >
+                        <i class="bi bi-person-check-fill"></i>
+                        Confirmar entrega
+                    </a>
+                {% else %}
+                    <span class="mini-btn disabled">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Entregado
+                    </span>
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>

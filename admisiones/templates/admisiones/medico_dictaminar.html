@@ -9,128 +9,319 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    body{ background:#f3f5f8; font-family:'Segoe UI',sans-serif; }
 
-    .navbar-ti{ background:#0f766e; padding:.75rem 0; box-shadow:0 4px 10px rgba(0,0,0,.12); }
-    .ti-brand-text{ font-size:1.1rem; font-weight:800; color:#fff; letter-spacing:.5px; line-height:1.15; }
-    .ti-subtext{ color:rgba(255,255,255,.75); font-size:.85rem; }
+    :root{
+      --medico:#0f766e;
+      --medico-dark:#0b5f58;
+      --medico-soft:#ecfdf5;
+      --medico-border:#bbf7d0;
+      --accent:#2563eb;
+      --danger:#dc2626;
+      --text:#0f172a;
+      --muted:#64748b;
+      --bg:#f3f6fb;
+      --border:#e2e8f0;
+      --shadow:0 18px 40px rgba(15,23,42,.09);
+      --topbar:92px;
+    }
 
-    .container-panel{ max-width:1150px; margin:0 auto; padding:22px 16px; margin-top:92px; }
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(15,118,110,.10), transparent 28%),
+        radial-gradient(circle at 92% 0%, rgba(37,99,235,.10), transparent 28%),
+        var(--bg);
+      font-family:'Segoe UI',sans-serif;
+      color:var(--text);
+    }
+
+    .topbar-medico{
+      min-height:var(--topbar);
+      background:rgba(255,255,255,.96);
+      border-bottom:1px solid var(--border);
+      box-shadow:0 10px 30px rgba(15,23,42,.08);
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      backdrop-filter:blur(12px);
+    }
+
+    .topbar-inner{
+      max-width:1180px;
+      min-height:var(--topbar);
+      margin:0 auto;
+      padding:12px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand-medico{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      text-decoration:none;
+      min-width:0;
+    }
+
+    .logo-box{
+      width:74px;
+      height:60px;
+      border-radius:18px;
+      background:linear-gradient(135deg,var(--medico),#14b8a6,var(--accent));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 14px 28px rgba(15,118,110,.22);
+      flex-shrink:0;
+      overflow:hidden;
+    }
+
+    .logo-box img{
+      width:58px;
+      height:auto;
+      max-height:48px;
+      object-fit:contain;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
+    }
+
+    .brand-title{
+      font-size:1.35rem;
+      font-weight:950;
+      line-height:1.05;
+      color:#102047;
+      letter-spacing:-.02em;
+    }
+
+    .brand-subtitle{
+      margin-top:5px;
+      color:#475569;
+      font-weight:700;
+      font-size:.9rem;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-shrink:0;
+    }
+
+    .btn-soft{
+      min-height:44px;
+      border-radius:14px;
+      font-weight:900;
+      padding:.62rem 1rem;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      text-decoration:none;
+      border:1px solid var(--border);
+    }
+
+    .btn-top-light{
+      background:#fff;
+      color:#334155;
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+    }
+
+    .btn-top-light:hover{
+      background:#f8fafc;
+      color:var(--medico);
+      border-color:#bae6fd;
+    }
+
+    .profile-pill{
+      min-height:48px;
+      border-radius:16px;
+      background:#fff;
+      border:1px solid #dbeafe;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:7px 14px;
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+      max-width:330px;
+    }
+
+    .profile-icon{
+      width:36px;
+      height:36px;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--medico),#14b8a6);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      font-size:1rem;
+    }
+
+    .profile-role{
+      display:block;
+      font-size:.64rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:950;
+      color:#64748b;
+      line-height:1;
+      margin-bottom:3px;
+    }
+
+    .profile-name{
+      display:block;
+      font-size:.86rem;
+      font-weight:950;
+      color:#0f172a;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:230px;
+    }
+
+    .container-panel{
+      max-width:1180px;
+      margin:0 auto;
+      padding:28px 18px 38px;
+      margin-top:calc(var(--topbar) + 18px);
+    }
 
     .card-panel{
-      border-radius:18px;
-      box-shadow:0 10px 25px rgba(0,0,0,.08);
-      border:none;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(226,232,240,.9);
       background:#fff;
+      overflow:hidden;
     }
 
     .section-title{
-      font-size:.92rem;
+      font-size:.9rem;
       text-transform:uppercase;
-      font-weight:800;
-      color:#166534;
-      letter-spacing:.05em;
+      font-weight:950;
+      color:var(--medico);
+      letter-spacing:.06em;
       margin-bottom:14px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .section-title::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:99px;
+      background:var(--medico);
+      box-shadow:0 0 0 5px rgba(15,118,110,.10);
+      flex-shrink:0;
     }
 
     .subsection-title{
-      font-size:.9rem;
-      font-weight:800;
+      font-size:.92rem;
+      font-weight:950;
       color:#0f172a;
       margin-bottom:12px;
     }
 
     .section-block{
-      background:#f0fdf4;
-      border:1px solid #bbf7d0;
-      border-radius:16px;
-      padding:18px;
+      background:linear-gradient(180deg,#ffffff,#f8fffb);
+      border:1px solid var(--medico-border);
+      border-radius:20px;
+      padding:20px;
       margin-bottom:18px;
+      box-shadow:0 8px 18px rgba(15,23,42,.035);
+    }
+
+    .section-block.medical-final{
+      background:#f8fafc;
+      border-color:#cbd5e1;
     }
 
     .info-box{
       background:#f8fafc;
-      border:1px solid #e2e8f0;
-      border-radius:12px;
-      padding:10px 12px;
-      min-height:58px;
+      border:1px solid #dbe3ec;
+      border-radius:16px;
+      padding:12px 14px;
+      min-height:66px;
     }
 
     .info-label{
-      font-size:.78rem;
+      font-size:.72rem;
       color:#64748b;
-      font-weight:700;
-      margin-bottom:3px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      margin-bottom:5px;
     }
 
     .info-value{
-      font-size:.96rem;
-      font-weight:600;
+      font-size:.98rem;
+      font-weight:850;
       color:#0f172a;
+      overflow-wrap:anywhere;
     }
 
-    .btn-soft{ border-radius:10px; font-weight:700; padding:.55rem 1rem; }
-
-    .section-block .row > div[class*="col-"] {
-        display: flex;
-        flex-direction: column;
+    .section-block .row > div[class*="col-"]{
+      display:flex;
+      flex-direction:column;
     }
 
     .section-block .row > div[class*="col-"] > label,
-    label.form-label {
-        margin-bottom: 6px !important;
-        font-weight: normal;
-        color: #2c3e50;
+    label.form-label{
+      margin-bottom:7px!important;
+      font-weight:750;
+      color:#274060;
+      font-size:.9rem;
     }
 
     .section-block .row > div[class*="col-"] > input,
     .section-block .row > div[class*="col-"] > select,
     .section-block .row > div[class*="col-"] > textarea,
-    .section-block .row > div[class*="col-"] > .pdf-box {
-        margin-top: auto;
-        flex: 0 0 auto;
+    .section-block .row > div[class*="col-"] > .pdf-box{
+      margin-top:auto;
+      flex:0 0 auto;
     }
 
-    textarea.form-control{ resize:none; min-height:90px; }
-    .form-control, .form-select{
-      border-radius:12px;
+    textarea.form-control{resize:vertical; min-height:96px;}
+
+    .form-control,.form-select{
+      border-radius:14px;
       min-height:44px;
-      border-color:#dbe3ec;
+      border-color:#cfd9e6;
+      font-weight:600;
     }
 
-    .form-control:focus, .form-select:focus{
-      border-color:#0f766e;
-      box-shadow:0 0 0 .2rem rgba(15,118,110,.12);
+    .form-control:focus,.form-select:focus{
+      border-color:var(--medico);
+      box-shadow:0 0 0 .2rem rgba(15,118,110,.13);
     }
 
     .pdf-box{
-      background:#ffffff;
+      background:#fff;
       border:1px dashed #94a3b8;
-      border-radius:12px;
+      border-radius:16px;
       padding:14px;
     }
 
-    .hr-soft{
-      border:0;
-      border-top:1px solid #bbf7d0;
-      margin:1.2rem 0;
-    }
+    .hr-soft{border:0;border-top:1px solid #bbf7d0;margin:1.25rem 0;}
 
-    /* ESTILO ESTRICTO PARA BLOQUEAR CASILLAS QUE YA TIENEN DATOS */
-    .campo-bloqueado {
-        background-color: #e9ecef !important;
-        pointer-events: none !important;
-        color: #495057 !important;
-        font-weight: bold;
+    .campo-bloqueado{
+      background-color:#e9eef5!important;
+      pointer-events:none!important;
+      color:#334155!important;
+      font-weight:850;
     }
-
 
     .estado-operativo{
-      background:#fff;
-      border-radius:16px;
-      box-shadow:0 8px 20px rgba(0,0,0,.06);
-      padding:16px 18px;
-      margin-bottom:20px;
+      border-radius:20px;
+      box-shadow:0 10px 26px rgba(15,23,42,.06);
+      padding:17px 19px;
+      margin-bottom:18px;
       display:flex;
       gap:14px;
       align-items:flex-start;
@@ -140,296 +331,670 @@
     .estado-operativo .status-icon{
       width:46px;
       height:46px;
-      border-radius:14px;
+      border-radius:16px;
       display:flex;
       align-items:center;
       justify-content:center;
       flex-shrink:0;
-      font-size:1.35rem;
+      font-size:1.3rem;
     }
 
-    .estado-operativo h5{
-      margin:0 0 4px;
-      font-weight:900;
-    }
+    .estado-operativo h5{margin:0 0 4px;font-weight:950;}
+    .estado-operativo p{margin:0;line-height:1.5;font-size:.94rem;}
 
-    .estado-operativo p{
-      margin:0;
-      line-height:1.5;
-      font-size:.94rem;
-    }
-
-    .estado-activo{
-      background:#f0fdf4;
-      border-color:#bbf7d0;
-      border-left:7px solid #16a34a;
-      color:#14532d;
-    }
-
-    .estado-activo .status-icon{
-      background:#dcfce7;
-      color:#15803d;
-    }
-
-    .estado-consulta{
-      background:#fff7ed;
-      border-color:#fed7aa;
-      border-left:7px solid #f97316;
-      color:#9a3412;
-    }
-
-    .estado-consulta .status-icon{
-      background:#ffedd5;
-      color:#c2410c;
-    }
+    .estado-activo{background:#f0fdf4;border-color:#bbf7d0;border-left:7px solid #16a34a;color:#14532d;}
+    .estado-activo .status-icon{background:#dcfce7;color:#15803d;}
+    .estado-consulta{background:#fff7ed;border-color:#fed7aa;border-left:7px solid #f97316;color:#9a3412;}
+    .estado-consulta .status-icon{background:#ffedd5;color:#c2410c;}
 
     .modo-badge{
       display:inline-flex;
       align-items:center;
       gap:6px;
       border-radius:999px;
-      padding:.38rem .7rem;
+      padding:.38rem .75rem;
       font-size:.76rem;
-      font-weight:900;
+      font-weight:950;
       margin-top:8px;
     }
 
-    .modo-badge-activo{
-      background:#dcfce7;
-      color:#166534;
-      border:1px solid #86efac;
-    }
+    .modo-badge-activo{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+    .modo-badge-consulta{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
 
-    .modo-badge-consulta{
-      background:#ffedd5;
-      color:#9a3412;
-      border:1px solid #fed7aa;
-    }
-
-    .readonly-warning{
-      background:#fff7ed;
-      border:1px solid #fed7aa;
-      border-left:6px solid #f97316;
-      border-radius:14px;
-      padding:14px 16px;
-      margin-bottom:18px;
-      color:#9a3412;
-    }
-
-    .readonly-warning .title{
-      font-weight:900;
-      margin-bottom:3px;
-    }
-
-    .lock-banner{
-      background:#f8fafc;
-      border:1px solid #cbd5e1;
-      border-left:6px solid #64748b;
-      border-radius:14px;
-      padding:14px 16px;
-      margin-bottom:18px;
-    }
-
-    .lock-banner .title{
-      font-weight:800;
-      color:#334155;
-      margin-bottom:3px;
-    }
-
-    /* =========================================================
-       SPRINT 5 - INCIDENCIAS MÉDICAS
-       ========================================================= */
-    .incidencias-card{
-      background:linear-gradient(135deg,#fef2f2,#fff7ed);
-      border:1px solid #fecaca;
-      border-left:7px solid #dc2626;
+    .readonly-warning,.lock-banner{
       border-radius:16px;
-      padding:16px 18px;
-      margin-bottom:20px;
-      box-shadow:0 8px 20px rgba(0,0,0,.06);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
+      padding:14px 16px;
+      margin-bottom:18px;
     }
+    .readonly-warning{background:#fff7ed;border:1px solid #fed7aa;border-left:6px solid #f97316;color:#9a3412;}
+    .readonly-warning .title,.lock-banner .title{font-weight:950;margin-bottom:3px;}
+    .lock-banner{background:#f8fafc;border:1px solid #cbd5e1;border-left:6px solid #64748b;}
+    .lock-banner .title{color:#334155;}
 
-    .incidencias-card .icon-box{
-      width:48px;
-      height:48px;
-      border-radius:15px;
-      background:#fee2e2;
-      color:#b91c1c;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.45rem;
-      flex-shrink:0;
-    }
-
-    .incidencias-card h5{
-      margin:0 0 4px;
-      font-weight:900;
-      color:#991b1b;
-    }
-
-    .incidencias-card p{
-      margin:0;
-      color:#7f1d1d;
-      line-height:1.45;
-      font-size:.94rem;
-    }
-
-    .incidencias-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      align-items:center;
-      min-width:260px;
-    }
-
-    .btn-incidencia{
-      border-radius:999px;
-      font-weight:800;
-      padding:.62rem .92rem;
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      text-decoration:none;
-      white-space:nowrap;
-    }
-
-    .btn-incidencia-create{
-      background:#dc2626;
-      color:white;
-      border:1px solid #dc2626;
-    }
-
-    .btn-incidencia-create:hover{
-      background:#b91c1c;
-      color:white;
-    }
-
-    .btn-incidencia-list{
-      background:white;
-      color:#991b1b;
-      border:1px solid #fecaca;
-    }
-
-    .btn-incidencia-list:hover{
-      background:#fef2f2;
-      color:#991b1b;
-    }
-
-    @media(max-width:768px){
-      .incidencias-card{
-        flex-direction:column;
-      }
-
-      .incidencias-actions,
-      .btn-incidencia{
-        width:100%;
-        justify-content:center;
-      }
-    }
-
-    /* =========================================================
-       ACLARACIÓN: DICTAMEN DE INSCRIPCIÓN, NO OPERACIÓN DIARIA
-       ========================================================= */
     .dictamen-incidencias-note{
       background:#fef2f2;
       border:1px solid #fecaca;
       border-left:6px solid #dc2626;
       color:#991b1b;
-      border-radius:16px;
-      padding:14px 16px;
-      margin-bottom:20px;
-      box-shadow:0 8px 20px rgba(0,0,0,.05);
+      border-radius:20px;
+      padding:15px 17px;
+      margin-bottom:18px;
+      box-shadow:0 8px 20px rgba(0,0,0,.045);
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:14px;
     }
 
-    .dictamen-incidencias-note .note-left{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
+    .dictamen-incidencias-note .note-left{display:flex;gap:12px;align-items:flex-start;}
+    .dictamen-incidencias-note .note-icon{width:40px;height:40px;border-radius:14px;background:#fee2e2;color:#b91c1c;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.15rem;}
+    .dictamen-incidencias-note .note-title{font-weight:950;margin-bottom:3px;}
+    .dictamen-incidencias-note p{margin:0;font-size:.9rem;line-height:1.4;}
+    .dictamen-incidencias-note .note-actions{flex-shrink:0;}
+
+    .btn-incidencia{
+      border-radius:999px;
+      font-weight:900;
+      padding:.62rem .92rem;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      text-decoration:none;
+      white-space:nowrap;
+      background:white;
+      color:#991b1b;
+      border:1px solid #fecaca;
+    }
+    .btn-incidencia:hover{background:#fff1f2;color:#7f1d1d;}
+
+    .nutrition-review-box{
+      border:1px solid #d8b4fe;
+      background:linear-gradient(180deg,#faf5ff,#ffffff);
+      border-radius:18px;
+      padding:16px;
+      margin-top:14px;
     }
 
-    .dictamen-incidencias-note .note-icon{
-      width:40px;
-      height:40px;
-      border-radius:13px;
-      background:#fee2e2;
-      color:#b91c1c;
+    .nutrition-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .nutrition-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:950;
+      color:#6b21a8;
+      margin:0;
+    }
+
+    .nutrition-title i{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      background:#f3e8ff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#7c3aed;
+    }
+
+    .readonly-pill{
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-size:.75rem;
+      font-weight:950;
+      padding:.35rem .7rem;
+      border:1px solid #c7d2fe;
+      white-space:nowrap;
+    }
+
+    .nutrition-readonly fieldset{
+      margin:0;
+    }
+
+    .nutrition-readonly input,
+    .nutrition-readonly select,
+    .nutrition-readonly textarea{
+      background:#edf2f7!important;
+      color:#475569!important;
+      cursor:not-allowed!important;
+    }
+
+    .nutrition-empty{
+      background:#fff7ed;
+      border:1px dashed #fdba74;
+      border-radius:14px;
+      padding:14px;
+      color:#9a3412;
+      font-weight:800;
+    }
+
+    .nutrition-toggle-btn{
+      border:1px solid #c4b5fd;
+      background:#fff;
+      color:#5b21b6;
+      border-radius:999px;
+      padding:.45rem .75rem;
+      font-weight:950;
+      font-size:.82rem;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      box-shadow:0 8px 18px rgba(124,58,237,.08);
+    }
+    .nutrition-toggle-btn:hover{background:#f5f3ff;color:#4c1d95;}
+    .nutrition-toggle-btn .bi-chevron-down{transition:transform .2s ease;}
+    .nutrition-toggle-btn[aria-expanded="true"] .bi-chevron-down{transform:rotate(180deg);}
+    .nutrition-collapse-body{
+      margin-top:14px;
+      border-top:1px solid #eadcff;
+      padding-top:14px;
+    }
+
+    .actions-bar{
+      position:sticky;
+      bottom:0;
+      z-index:50;
+      margin-top:18px;
+      background:rgba(255,255,255,.96);
+      border:1px solid #e2e8f0;
+      border-radius:20px;
+      box-shadow:0 -12px 30px rgba(15,23,42,.08);
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      backdrop-filter:blur(10px);
+    }
+
+    .actions-caption{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#475569;
+      font-size:.88rem;
+      font-weight:800;
+    }
+
+    .actions-caption i{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      background:#dcfce7;
+      color:#15803d;
       display:flex;
       align-items:center;
       justify-content:center;
-      flex-shrink:0;
-      font-size:1.18rem;
     }
 
-    .dictamen-incidencias-note .note-title{
-      font-weight:900;
-      margin-bottom:3px;
+    .btn-save-medico{
+      background:linear-gradient(135deg,#0f766e,#14b8a6);
+      border:0;
+      color:#fff;
+      border-radius:14px;
+      font-weight:950;
+      padding:.72rem 1.15rem;
+      box-shadow:0 10px 20px rgba(15,118,110,.22);
+    }
+    .btn-save-medico:hover{color:#fff;filter:brightness(.96);}
+    .btn-cancel-medico{background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:14px;font-weight:950;padding:.72rem 1.1rem;}
+    .btn-cancel-medico:hover{background:#f8fafc;color:#0f172a;}
+
+
+
+    /* =========================================================
+       Datos compartidos entre filtros
+       Médico puede consultar datos previos o capturarlos si aún no existen
+       ========================================================= */
+    .shared-summary-box{
+      background:rgba(255,255,255,.98);
+      border:1px solid #99f6e4;
+      border-left:7px solid var(--medico);
+      border-radius:24px;
+      box-shadow:0 18px 44px rgba(15,23,42,.075);
+      padding:20px;
+      margin:0 0 22px;
     }
 
-    .dictamen-incidencias-note p{
+    .shared-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+
+    .shared-summary-box .section-title{
       margin:0;
-      font-size:.9rem;
-      line-height:1.4;
+      color:#0f766e;
+      font-size:1rem;
     }
 
-    .dictamen-incidencias-note .note-actions{
-      flex-shrink:0;
+    .shared-summary-box .section-title::before{display:none;}
+
+    .shared-summary-box .section-title i{
+      width:36px;
+      height:36px;
+      border-radius:13px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      background:linear-gradient(135deg,var(--medico),#14b8a6,var(--accent));
+      box-shadow:0 10px 20px rgba(15,118,110,.18);
     }
 
-    @media(max-width:768px){
-      .dictamen-incidencias-note{
-        flex-direction:column;
-      }
-
-      .dictamen-incidencias-note .note-actions,
-      .dictamen-incidencias-note .note-actions a{
-        width:100%;
-      }
+    .shared-mini-pill{
+      border-radius:999px;
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid #a7f3d0;
+      padding:.42rem .75rem;
+      font-size:.78rem;
+      font-weight:950;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      white-space:nowrap;
     }
 
-  </style>
+    .shared-help{
+      color:#52627c;
+      font-size:.92rem;
+      font-weight:700;
+      line-height:1.48;
+      margin:0 0 15px;
+    }
+
+    .shared-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .shared-card{
+      min-height:116px;
+      border-radius:20px;
+      padding:15px 16px;
+      border:1px solid #dbe4ef;
+      background:#f8fafc;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:9px;
+    }
+
+    .shared-card.shared-locked{background:#eff6ff;border-color:#bfdbfe;}
+    .shared-card.shared-owned{background:#f0fdf4;border-color:#bbf7d0;}
+    .shared-card.shared-empty{background:#fff7ed;border-color:#fed7aa;}
+
+    .shared-label{
+      color:#64748b;
+      font-size:.70rem;
+      font-weight:950;
+      letter-spacing:.075em;
+      text-transform:uppercase;
+    }
+
+    .shared-value{
+      color:#0b2559;
+      font-weight:950;
+      line-height:1.22;
+      margin-top:4px;
+      overflow-wrap:anywhere;
+    }
+
+    .shared-note{
+      color:#52627c;
+      font-size:.78rem;
+      font-weight:750;
+      line-height:1.35;
+    }
+
+    .shared-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.22rem .48rem;
+      font-size:.68rem;
+      font-weight:950;
+      margin-bottom:4px;
+    }
+
+    .shared-chip.locked{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;}
+    .shared-chip.owned{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+    .shared-chip.empty{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
+
+    .shared-field-note{
+      margin-top:7px;
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:.78rem;
+      font-weight:800;
+      line-height:1.35;
+    }
+
+    .shared-field-note.locked{
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      color:#1e40af;
+    }
+
+    .shared-field-note.editable{
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+    }
+
+    .shared-field-note.available{
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+      color:#166534;
+    }
+
+
+/* =========================================================
+   SUPLENCIAS - Dictamen médico preliminar por cobertura temporal
+   ========================================================= */
+.suplencia-dictamen-banner{
+  background:linear-gradient(135deg,#ecfdf5,#eef4ff);
+  border:1px solid #99f6e4;
+  border-left:7px solid var(--medico);
+  border-radius:22px;
+  box-shadow:0 16px 36px rgba(15,118,110,.10);
+  padding:18px 20px;
+  margin-bottom:18px;
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+}
+.suplencia-dictamen-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  background:linear-gradient(135deg,var(--medico),#14b8a6,var(--accent));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-size:1.25rem;
+  box-shadow:0 10px 20px rgba(15,118,110,.18);
+}
+.suplencia-dictamen-banner h5{margin:0 0 5px;color:#0f5f59;font-weight:950;}
+.suplencia-dictamen-banner p{margin:0;color:#52627c;font-weight:700;line-height:1.48;}
+.suplencia-dictamen-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.suplencia-dictamen-pill{
+  border-radius:999px;
+  padding:.38rem .68rem;
+  background:#fff;
+  border:1px solid #99f6e4;
+  color:#0f5f59;
+  font-size:.78rem;
+  font-weight:950;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.suplencia-stamp{
+  border-radius:18px;
+  border:1px solid #bfdbfe;
+  border-left:6px solid #2563eb;
+  background:#eff6ff;
+  color:#1e40af;
+  padding:13px 15px;
+  font-weight:800;
+  margin-bottom:18px;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.suplencia-stamp i{font-size:1.25rem;}
+@media(max-width:900px){.suplencia-dictamen-banner{flex-direction:column;}}
+
+    @media(max-width:900px){
+      .topbar-medico{position:relative;}
+      .topbar-inner{flex-direction:column;align-items:flex-start;}
+      .top-actions{width:100%;flex-direction:column;align-items:stretch;}
+      .profile-pill,.btn-soft{width:100%;max-width:none;justify-content:center;}
+      .container-panel{margin-top:18px;padding:18px 12px 28px;}
+      .dictamen-incidencias-note,.actions-bar,.nutrition-header{flex-direction:column;align-items:stretch;}
+      .shared-grid{grid-template-columns:1fr;}
+    }
+
+
+
+/* =========================================================
+   AJUSTE COMPACTO - Datos compartidos entre filtros
+   Se quita la tarjeta de edad porque la edad ya viene de inscripción.
+   ========================================================= */
+.shared-summary-box{
+    padding:14px 16px!important;
+    border-radius:20px!important;
+    margin-bottom:16px!important;
+    box-shadow:0 14px 34px rgba(15,23,42,.065)!important;
+}
+.shared-summary-box .section-head,
+.shared-summary-box .shared-head{
+    margin-bottom:4px!important;
+}
+.shared-summary-box .section-title{
+    font-size:1rem!important;
+    margin-bottom:0!important;
+}
+.shared-summary-box p,
+.shared-summary-box .shared-help{
+    display:none!important;
+}
+.shared-summary-grid,
+.shared-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:8px!important;
+}
+.shared-card{
+    min-height:64px!important;
+    border-radius:15px!important;
+    padding:10px 98px 10px 12px!important;
+    display:block!important;
+    position:relative!important;
+    box-shadow:0 8px 18px rgba(15,23,42,.035)!important;
+}
+.shared-label{
+    font-size:.61rem!important;
+    line-height:1.1!important;
+    margin-bottom:4px!important;
+}
+.shared-value{
+    font-size:.86rem!important;
+    line-height:1.18!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+}
+.shared-note{
+    position:absolute!important;
+    right:9px!important;
+    top:9px!important;
+    font-size:0!important;
+    line-height:1!important;
+    max-width:86px!important;
+    text-align:right!important;
+}
+.shared-note br{display:none!important;}
+.shared-chip{
+    font-size:.61rem!important;
+    padding:.22rem .44rem!important;
+    margin:0!important;
+    gap:4px!important;
+}
+.shared-chip.empty{
+    background:#ccfbf1!important;
+    color:var(--medico)!important;
+    border-color:#99f6e4!important;
+}
+.shared-card.shared-empty{
+    background:linear-gradient(180deg,#fff,#ecfdf5)!important;
+    border-color:#99f6e4!important;
+}
+.shared-card.shared-locked{
+    background:linear-gradient(180deg,#fff,#eff6ff)!important;
+    border-color:#bfdbfe!important;
+}
+.shared-card.shared-owned{
+    background:linear-gradient(180deg,#fff,#f0fdf4)!important;
+    border-color:#bbf7d0!important;
+}
+.fixed-inscription-note,
+.shared-field-note.fixed-inscription{
+    margin-top:7px;
+    border-radius:12px;
+    padding:8px 10px;
+    font-size:.78rem;
+    font-weight:800;
+    line-height:1.35;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1d4ed8;
+}
+@media(max-width:1100px){
+    .shared-summary-grid,
+    .shared-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(max-width:760px){
+    .shared-summary-grid,
+    .shared-grid{grid-template-columns:1fr!important;}
+    .shared-card{padding-right:96px!important;}
+}
+
+
+/* =========================================================
+   Ajuste final: datos compartidos compactos y simétricos
+   Edad, sexo y fecha de nacimiento vienen de inscripción.
+   ========================================================= */
+.fixed-inscription-note,
+.shared-field-note.fixed-inscription{display:none!important;}
+.shared-summary-box{
+    padding:12px 15px!important;
+    border-radius:18px!important;
+    border-left-width:6px!important;
+}
+.shared-grid,.shared-summary-grid{gap:7px!important;}
+.shared-card{
+    min-height:56px!important;
+    padding:8px 82px 8px 10px!important;
+    border-radius:14px!important;
+}
+.shared-label{font-size:.58rem!important;margin-bottom:3px!important;}
+.shared-value{font-size:.82rem!important;line-height:1.14!important;}
+.shared-note{right:8px!important;top:8px!important;max-width:74px!important;}
+.shared-chip{font-size:.58rem!important;padding:.18rem .40rem!important;}
+.shared-chip.empty{
+    background:#ccfbf1!important;
+    color:var(--medico)!important;
+    border-color:#99f6e4!important;
+}
+.shared-card.shared-empty{
+    background:linear-gradient(180deg,#fff,#ecfdf5)!important;
+    border-color:#99f6e4!important;
+}
+.shared-field-hint,
+.shared-field-note.editable,
+.shared-field-note.available,
+.shared-field-note.locked{
+    display:inline-flex!important;
+    align-items:center!important;
+    width:auto!important;
+    max-width:max-content!important;
+    min-height:22px!important;
+    margin-top:6px!important;
+    padding:.22rem .50rem!important;
+    border-radius:999px!important;
+    font-size:0!important;
+    line-height:1!important;
+    font-weight:950!important;
+    white-space:nowrap!important;
+}
+.shared-field-hint > *,
+.shared-field-note.editable > *,
+.shared-field-note.available > *,
+.shared-field-note.locked > *{display:none!important;}
+.shared-field-hint.shared-open,
+.shared-field-note.editable{
+    background:#ccfbf1!important;
+    border:1px solid #99f6e4!important;
+    color:var(--medico)!important;
+}
+.shared-field-hint.shared-open::after,
+.shared-field-note.editable::after{content:'Pendiente';font-size:.66rem;}
+.shared-field-hint.shared-own,
+.shared-field-note.available{
+    background:#f0fdf4!important;
+    border:1px solid #bbf7d0!important;
+    color:#166534!important;
+}
+.shared-field-hint.shared-own::after,
+.shared-field-note.available::after{content:'Compartido';font-size:.66rem;}
+.shared-field-hint.shared-lock,
+.shared-field-note.locked{
+    background:#eff6ff!important;
+    border:1px solid #bfdbfe!important;
+    color:#1d4ed8!important;
+}
+.shared-field-hint.shared-lock::after,
+.shared-field-note.locked::after{content:'Solo lectura';font-size:.66rem;}
+
+</style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
-  <div class="container-fluid justify-content-center">
-    <div class="d-flex align-items-center" style="width:100%; max-width:1150px; padding:0 18px;">
-      <a class="navbar-brand d-flex align-items-center" href="{% url 'medico_pendientes' %}">
-        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
-        <div class="text-white">
-          <div class="ti-brand-text">DICTAMEN MÉDICO</div>
-          <div class="ti-subtext">Revisión y validación médica de la solicitud</div>
-        </div>
+
+<header class="topbar-medico">
+  <div class="topbar-inner">
+    <a class="brand-medico" href="{% url 'medico_pendientes' %}">
+      <div class="logo-box">
+        <img src="{% static 'img/logo.png' %}" alt="EIU UNACH">
+      </div>
+      <div>
+        <div class="brand-title">Dictamen médico</div>
+        <div class="brand-subtitle">Revisión y validación médica de la solicitud</div>
+      </div>
+    </a>
+
+    <div class="top-actions">
+      <a href="{% url 'medico_pendientes' %}" class="btn-soft btn-top-light">
+        <i class="bi bi-arrow-left-circle-fill"></i>
+        Regresar
       </a>
 
-      <div class="ms-auto d-flex gap-2 align-items-center">
-        <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn btn-outline-light btn-soft">
-          <i class="bi bi-clipboard2-pulse me-1"></i> Incidencias
-        </a>
-
-        <a href="{% url 'medico_pendientes' %}" class="btn btn-outline-light btn-soft">
-          <i class="bi bi-arrow-left me-1"></i> Regresar
-        </a>
-
-        <form method="post" action="{% url 'logout' %}" class="d-inline">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-light btn-soft">
-            <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
-          </button>
-        </form>
+      <div class="profile-pill" title="Médico responsable">
+        <div class="profile-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+        <div class="min-w-0">
+          <span class="profile-role">Médica</span>
+          <span class="profile-name">
+            {% if medico_asignado %}
+              {{ medico_asignado }}
+            {% elif request.user.get_full_name %}
+              {{ request.user.get_full_name }}
+            {% else %}
+              {{ request.user.username }}
+            {% endif %}
+          </span>
+        </div>
       </div>
     </div>
   </div>
-</nav>
+</header>
+
 
 <div class="container-panel">
 
@@ -465,28 +1030,40 @@
     </div>
   </div>
   {% endif %}
-  <div class="dictamen-incidencias-note">
-    <div class="note-left">
-      <div class="note-icon">
-        <i class="bi bi-info-circle-fill"></i>
-      </div>
-      <div>
-        <div class="note-title">Este formulario es un dictamen de inscripción</div>
-        <p>
-          Aquí no se crean incidencias porque la solicitud todavía pertenece al proceso de admisión.
-          Las incidencias médicas se registran solo para niñas y niños ya inscritos en operación diaria.
-        </p>
-      </div>
-    </div>
 
-    <div class="note-actions">
-      <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="btn-incidencia btn-incidencia-list">
-        <i class="bi bi-eye-fill"></i>
-        Ver incidencias
-      </a>
+  {% if tiene_suplencia_activa %}
+  <div class="suplencia-dictamen-banner">
+    <div class="suplencia-dictamen-icon"><i class="bi bi-person-badge-fill"></i></div>
+    <div>
+      <h5>Cubriendo temporalmente</h5>
+      <p>
+        Estás trabajando con una autorización temporal de Dirección. Si esta autorización corresponde al área médica, el dictamen se registrará como preliminar por suplencia y quedará pendiente de revisión por la médica titular.
+      </p>
+      <div class="suplencia-dictamen-list">
+        {% for sup in suplencias_activas_usuario %}
+        <span class="suplencia-dictamen-pill">
+          <i class="bi bi-shield-check"></i>
+          {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · {{ sup.get_tipo_cobertura_display|default:sup.tipo_cobertura }}
+        </span>
+        {% endfor %}
+      </div>
     </div>
   </div>
+  {% endif %}
 
+  {% if sol.medico_es_suplencia %}
+  <div class="suplencia-stamp">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>
+      <strong>Dictamen médico registrado por suplencia.</strong><br>
+      {% if sol.medico_pendiente_revision_titular %}
+        Está pendiente de revisión por la médica titular.
+      {% else %}
+        Ya fue revisado o validado por el área titular.
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 <div class="card card-panel p-4 mb-4">
     <div class="section-title" style="color: #64748b;">Información de la solicitud</div>
     <!-- DATOS DEL MENOR: se toman automáticamente del expediente; no se capturan en Médico. -->
@@ -621,16 +1198,18 @@
 
         <div class="row g-3 mt-1">
           <div class="col-md-4 mb-3">
-              <label class="form-label" for="id_fecha_nacimiento">Fecha de nacimiento</label>
-              <input type="text" name="fecha_nacimiento" id="id_fecha_nacimiento" class="form-control campo-bloqueado text-primary fw-bold" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'Y-m-d' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'Y-m-d' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'Y-m-d' }}{% else %}⚠️ Faltan datos{% endif %}" readonly tabindex="-1">
+              <label class="form-label" for="id_fecha_nacimiento_inscripcion">Fecha de nacimiento</label>
+              <input type="text" id="id_fecha_nacimiento_inscripcion" class="form-control campo-bloqueado text-primary fw-bold" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'d/m/Y' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'d/m/Y' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'d/m/Y' }}{% elif historia_form.initial.fecha_nacimiento %}{{ historia_form.initial.fecha_nacimiento }}{% else %}-{% endif %}" readonly tabindex="-1">
+              <input type="hidden" name="fecha_nacimiento" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'Y-m-d' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'Y-m-d' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'Y-m-d' }}{% elif historia_form.initial.fecha_nacimiento %}{{ historia_form.initial.fecha_nacimiento }}{% endif %}">
           </div>
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_edad">Edad</label>
               <input type="text" name="edad" id="id_edad" class="form-control campo-bloqueado text-primary fw-bold" value="{% if insc.edad_anios_menor or insc.edad_meses_menor %}{{ insc.edad_anios_menor|default:'0' }} años, {{ insc.edad_meses_menor|default:'0' }} meses{% elif historia_form.initial.edad %}{{ historia_form.initial.edad }}{% else %}0 años, 0 meses{% endif %}" readonly tabindex="-1">
           </div>
           <div class="col-md-4 mb-3">
-              <label class="form-label" for="id_sexo">Sexo</label>
-              <input type="text" name="sexo" id="id_sexo" class="form-control campo-bloqueado text-primary fw-bold" value="{% if insc.sexo_menor == 'M' or sol.sexo_menor == 'M' %}Masculino{% elif insc.sexo_menor == 'F' or sol.sexo_menor == 'F' %}Femenino{% elif insc.sexo_menor %}{{ insc.sexo_menor }}{% elif sol.sexo_menor %}{{ sol.sexo_menor }}{% else %}⚠️ Faltan datos{% endif %}" readonly tabindex="-1">
+              <label class="form-label" for="id_sexo_inscripcion">Sexo</label>
+              <input type="text" id="id_sexo_inscripcion" class="form-control campo-bloqueado text-primary fw-bold" value="{% firstof sexo_menor sol.sexo_menor insc.sexo_menor historia_form.initial.sexo '-' %}" readonly tabindex="-1">
+              <input type="hidden" name="sexo" value="{% firstof sexo_menor sol.sexo_menor insc.sexo_menor historia_form.initial.sexo '' %}">
           </div>
         </div>
 
@@ -786,15 +1365,42 @@
         <div class="row g-3">
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_numero_gestas">Número de gestas</label>
-              <input type="text" name="numero_gestas" id="id_numero_gestas" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.numero_gestas|default:'⚠️ Falta dato' }}" readonly tabindex="-1">
+              {% with dato=datos_compartidos_por_clave.numero_gestas %}
+                {% if dato.bloqueado_por_otra_area %}
+                  <input type="text" name="numero_gestas" id="id_numero_gestas" class="form-control campo-bloqueado text-primary fw-bold" value="{{ dato.valor }}" readonly tabindex="-1">
+                  <input type="hidden" name="dato_compartido_numero_gestas" value="{{ dato.valor }}">
+                  <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+                {% else %}
+                  {{ historia_form.numero_gestas }}
+                  {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Médico puede capturarlo si aún no existe.</div>{% endif %}
+                {% endif %}
+              {% endwith %}
           </div>
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_semanas_gestacion">Semanas de gestación</label>
-              <input type="text" name="semanas_gestacion" id="id_semanas_gestacion" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.semanas_gestacion|default:'⚠️ Falta dato' }}" readonly tabindex="-1">
+              {% with dato=datos_compartidos_por_clave.semanas_gestacion %}
+                {% if dato.bloqueado_por_otra_area %}
+                  <input type="text" name="semanas_gestacion" id="id_semanas_gestacion" class="form-control campo-bloqueado text-primary fw-bold" value="{{ dato.valor }}" readonly tabindex="-1">
+                  <input type="hidden" name="dato_compartido_semanas_gestacion" value="{{ dato.valor }}">
+                  <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+                {% else %}
+                  {{ historia_form.semanas_gestacion }}
+                  {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Médico puede capturarlo si aún no existe.</div>{% endif %}
+                {% endif %}
+              {% endwith %}
           </div>
           <div class="col-md-4 mb-3">
               <label class="form-label" for="id_tipo_parto">Tipo de parto</label>
-              <input type="text" name="tipo_parto" id="id_tipo_parto" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.tipo_parto|default:'⚠️ Falta dato' }}" readonly tabindex="-1">
+              {% with dato=datos_compartidos_por_clave.tipo_nacimiento %}
+                {% if dato.bloqueado_por_otra_area %}
+                  <input type="text" name="tipo_parto" id="id_tipo_parto" class="form-control campo-bloqueado text-primary fw-bold" value="{{ dato.valor }}" readonly tabindex="-1">
+                  <input type="hidden" name="dato_compartido_tipo_nacimiento" value="{{ dato.valor }}">
+                  <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+                {% else %}
+                  {{ historia_form.tipo_parto }}
+                  {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Médico puede capturarlo si aún no existe.</div>{% endif %}
+                {% endif %}
+              {% endwith %}
           </div>
         </div>
         <div class="row g-3">
@@ -813,7 +1419,19 @@
       <div class="section-block">
         <div class="section-title">Antecedentes personales patológicos</div>
         <div class="row g-3">
-          <div class="col-md-6 mb-3">{{ historia_form.enfermedades_actuales.label_tag }}{{ historia_form.enfermedades_actuales }}</div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="id_enfermedades_actuales">Enfermedades actuales</label>
+            {% with dato=datos_compartidos_por_clave.enfermedades_actuales %}
+              {% if dato.bloqueado_por_otra_area %}
+                <textarea name="enfermedades_actuales" id="id_enfermedades_actuales" class="form-control campo-bloqueado" readonly tabindex="-1">{{ dato.valor }}</textarea>
+                <input type="hidden" name="dato_compartido_enfermedades_actuales" value="{{ dato.valor }}">
+                <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+              {% else %}
+                {{ historia_form.enfermedades_actuales }}
+                {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% endif %}
+              {% endif %}
+            {% endwith %}
+          </div>
           <div class="col-md-6 mb-3">{{ historia_form.enfermedades_neonatales.label_tag }}{{ historia_form.enfermedades_neonatales }}</div>
         </div>
         <div class="row g-3">
@@ -821,8 +1439,32 @@
           <div class="col-md-6 mb-3">{{ historia_form.internamientos_quirurgicos.label_tag }}{{ historia_form.internamientos_quirurgicos }}</div>
         </div>
         <div class="row g-3">
-          <div class="col-md-6 mb-3">{{ historia_form.alergia_medicamentos.label_tag }}{{ historia_form.alergia_medicamentos }}</div>
-          <div class="col-md-6 mb-3">{{ historia_form.alergia_alimentos.label_tag }}{{ historia_form.alergia_alimentos }}</div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="id_alergia_medicamentos">Alergia a medicamentos</label>
+            {% with dato=datos_compartidos_por_clave.alergia_medicamentos %}
+              {% if dato.bloqueado_por_otra_area %}
+                <textarea name="alergia_medicamentos" id="id_alergia_medicamentos" class="form-control campo-bloqueado" readonly tabindex="-1">{{ dato.valor }}</textarea>
+                <input type="hidden" name="dato_compartido_alergia_medicamentos" value="{{ dato.valor }}">
+                <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+              {% else %}
+                {{ historia_form.alergia_medicamentos }}
+                {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% endif %}
+              {% endif %}
+            {% endwith %}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="id_alergia_alimentos">Alergia a alimentos</label>
+            {% with dato=datos_compartidos_por_clave.alergia_alimentos %}
+              {% if dato.bloqueado_por_otra_area %}
+                <textarea name="alergia_alimentos" id="id_alergia_alimentos" class="form-control campo-bloqueado" readonly tabindex="-1">{{ dato.valor }}</textarea>
+                <input type="hidden" name="dato_compartido_alergia_alimentos" value="{{ dato.valor }}">
+                <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+              {% else %}
+                {{ historia_form.alergia_alimentos }}
+                {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Si Nutrición todavía no lo capturó, Médico puede registrarlo.</div>{% endif %}
+              {% endif %}
+            {% endwith %}
+          </div>
         </div>
         <div class="row g-3">
           <div class="col-md-12 mb-3">{{ historia_form.personas_enfermas_casa.label_tag }}{{ historia_form.personas_enfermas_casa }}</div>
@@ -851,11 +1493,29 @@
         <div class="row g-3">
           <div class="col-md-2 mb-3">
               <label class="form-label" for="id_peso_actual">Peso actual (kg)</label>
-              <input type="text" name="peso_actual" id="id_peso_actual" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.peso_actual|default:'⚠️' }}" readonly tabindex="-1">
+              {% with dato=datos_compartidos_por_clave.peso_actual %}
+                {% if dato.bloqueado_por_otra_area %}
+                  <input type="text" name="peso_actual" id="id_peso_actual" class="form-control campo-bloqueado text-primary fw-bold" value="{{ dato.valor }}" readonly tabindex="-1">
+                  <input type="hidden" name="dato_compartido_peso_actual" value="{{ dato.valor }}">
+                  <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+                {% else %}
+                  {{ historia_form.peso_actual }}
+                  {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Médico puede capturarlo.</div>{% endif %}
+                {% endif %}
+              {% endwith %}
           </div>
           <div class="col-md-2 mb-3">
               <label class="form-label" for="id_talla">Talla (cm)</label>
-              <input type="text" name="talla" id="id_talla" class="form-control campo-bloqueado text-primary fw-bold" value="{{ historia_form.initial.talla|default:'⚠️' }}" readonly tabindex="-1">
+              {% with dato=datos_compartidos_por_clave.talla_actual %}
+                {% if dato.bloqueado_por_otra_area %}
+                  <input type="text" name="talla" id="id_talla" class="form-control campo-bloqueado text-primary fw-bold" value="{{ dato.valor }}" readonly tabindex="-1">
+                  <input type="hidden" name="dato_compartido_talla_actual" value="{{ dato.valor }}">
+                  <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+                {% else %}
+                  {{ historia_form.talla }}
+                  {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato compartido disponible.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Médico puede capturarlo.</div>{% endif %}
+                {% endif %}
+              {% endwith %}
           </div>
           <div class="col-md-2 mb-3">{{ historia_form.temperatura.label_tag }}{{ historia_form.temperatura }}</div>
           <div class="col-md-2 mb-3">{{ historia_form.frecuencia_cardiaca.label_tag }}{{ historia_form.frecuencia_cardiaca }}</div>
@@ -863,7 +1523,113 @@
           <div class="col-md-2 mb-3">{{ historia_form.tension_arterial.label_tag }}{{ historia_form.tension_arterial }}</div>
         </div>
         <div class="row g-3">
-          <div class="col-md-12 mb-3">{{ historia_form.estado_nutricional.label_tag }}{{ historia_form.estado_nutricional }}</div>
+          <div class="col-md-12 mb-3">
+            <label class="form-label" for="id_estado_nutricional">Estado nutricional observado por Médico</label>
+            {% with dato=datos_compartidos_por_clave.estado_nutricional %}
+              {% if dato.bloqueado_por_otra_area %}
+                <input type="text" name="estado_nutricional" id="id_estado_nutricional" class="form-control campo-bloqueado" value="{{ dato.valor }}" readonly tabindex="-1">
+                <input type="hidden" name="dato_compartido_estado_nutricional" value="{{ dato.valor }}">
+                <div class="shared-field-note locked"><i class="bi bi-lock-fill me-1"></i> Capturado por {{ dato.area_origen|default:"otro filtro" }}.</div>
+              {% else %}
+                {{ historia_form.estado_nutricional }}
+                {% if dato.tiene_valor %}<div class="shared-field-note available"><i class="bi bi-check-circle-fill me-1"></i> Dato registrado por Médico y disponible para consulta.</div>{% else %}<div class="shared-field-note editable"><i class="bi bi-pencil-square me-1"></i> Registra aquí la conclusión médica del estado nutricional.</div>{% endif %}
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+
+        <div class="nutrition-review-box">
+          <div class="nutrition-header mb-0">
+            <h6 class="nutrition-title">
+              <i class="bi bi-clipboard2-pulse-fill"></i>
+              Formulario de Nutrición para consulta médica
+            </h6>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="readonly-pill">
+                <i class="bi bi-eye-fill me-1"></i> Solo lectura
+              </span>
+              <button class="nutrition-toggle-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#nutritionReadonlyCollapse" aria-expanded="false" aria-controls="nutritionReadonlyCollapse">
+                <i class="bi bi-layout-text-window-reverse"></i>
+                Ver formulario
+                <i class="bi bi-chevron-down"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="collapse" id="nutritionReadonlyCollapse">
+            <div class="nutrition-collapse-body">
+              <p class="text-muted mb-3" style="font-weight:700; line-height:1.45;">
+                Esta sección permite que el área médica revise la valoración capturada por Nutrición sin modificarla.
+                La conclusión médica se registra abajo como parte del dictamen médico.
+              </p>
+
+              <div class="nutrition-readonly">
+                {% if nutricion_form %}
+                  <fieldset disabled>
+                    <div class="row g-3">
+                      {% for field in nutricion_form.visible_fields %}
+                        <div class="col-md-4 mb-2">
+                          <label class="form-label">{{ field.label }}</label>
+                          {{ field }}
+                          {% if field.help_text %}
+                            <small class="text-muted">{{ field.help_text }}</small>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </fieldset>
+                {% elif valoracion_nutricion %}
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="info-box">
+                        <div class="info-label">Estado nutrición</div>
+                        <div class="info-value">{{ valoracion_nutricion.estado_nutricion|default:"No capturado" }}</div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="info-box">
+                        <div class="info-label">Peso actual</div>
+                        <div class="info-value">{{ valoracion_nutricion.peso_actual|default:"No capturado" }}</div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="info-box">
+                        <div class="info-label">Talla actual</div>
+                        <div class="info-value">{{ valoracion_nutricion.talla_actual|default:"No capturada" }}</div>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="info-box">
+                        <div class="info-label">Observaciones de Nutrición</div>
+                        <div class="info-value">{{ valoracion_nutricion.observaciones_nutricion|default:"Sin observaciones" }}</div>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="nutrition-empty">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Aún no hay formulario de Nutrición disponible para esta solicitud, o la vista médica todavía no lo envía al template.
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <label class="form-label" for="id_revision_nutricion_medica">Revisión médica de Nutrición</label>
+              <select name="revision_nutricion_medica" id="id_revision_nutricion_medica" class="form-select">
+                <option value="">Seleccione...</option>
+                <option value="BIEN" {% if revision_nutricion_medica == 'BIEN' %}selected{% endif %}>Bien / sin observaciones</option>
+                <option value="OBSERVACION" {% if revision_nutricion_medica == 'OBSERVACION' %}selected{% endif %}>Con observaciones</option>
+                <option value="SEGUIMIENTO" {% if revision_nutricion_medica == 'SEGUIMIENTO' %}selected{% endif %}>Requiere seguimiento</option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label" for="id_comentario_nutricion_medica">Comentario médico sobre Nutrición</label>
+              <textarea name="comentario_nutricion_medica" id="id_comentario_nutricion_medica" class="form-control" rows="3" placeholder="Escribe aquí si la valoración nutricional está bien, si requiere aclaración o seguimiento.">{% firstof comentario_nutricion_medica "" %}</textarea>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -880,7 +1646,7 @@
         </div>
       </div>
 
-      <div class="section-block" style="background-color: #f1f5f9; border-color: #cbd5e1;">
+      <div class="section-block medical-final">
         <div class="section-title" style="color: #334155;">Resolución y Archivos</div>
         <div class="row g-3">
           <div class="col-md-6 mb-3">
@@ -931,24 +1697,35 @@
       </div>
       {% endif %}
 
-      <div class="d-flex gap-2 flex-wrap">
-        {% if modo_solo_consulta %}
-          <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
-            <i class="bi bi-eye-fill me-1"></i> Solo consulta
-          </button>
-        {% elif bloqueado %}
-          <button type="button" class="btn btn-secondary btn-soft" disabled>
-            <i class="bi bi-lock me-1"></i> Evaluación finalizada
-          </button>
-        {% else %}
-          <button type="submit" class="btn btn-success btn-soft">
-            <i class="bi bi-save me-1"></i> Guardar dictamen médico
-          </button>
-        {% endif %}
+      <div class="actions-bar">
+        <div class="actions-caption">
+          <i class="bi bi-shield-check"></i>
+          {% if tiene_suplencia_activa %}
+          <span>El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.</span>
+          {% else %}
+          <span>El registro queda firmado por el médico en sesión.</span>
+          {% endif %}
+        </div>
 
-        <a href="{% url 'medico_pendientes' %}" class="btn btn-outline-secondary btn-soft">
-          <i class="bi bi-arrow-left me-1"></i> Regresar
-        </a>
+        <div class="d-flex gap-2 flex-wrap justify-content-end">
+          <a href="{% url 'medico_pendientes' %}" class="btn btn-cancel-medico">
+            <i class="bi bi-x-circle me-1"></i> Cancelar
+          </a>
+
+          {% if modo_solo_consulta %}
+            <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
+              <i class="bi bi-eye-fill me-1"></i> Solo consulta
+            </button>
+          {% elif bloqueado %}
+            <button type="button" class="btn btn-secondary btn-soft" disabled>
+              <i class="bi bi-lock me-1"></i> Evaluación finalizada
+            </button>
+          {% else %}
+            <button type="submit" class="btn btn-save-medico">
+              <i class="bi bi-save me-1"></i> Guardar
+            </button>
+          {% endif %}
+        </div>
       </div>
     </form>
   </div>
@@ -956,6 +1733,21 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll('.nutrition-readonly input, .nutrition-readonly select, .nutrition-readonly textarea, .nutrition-readonly button').forEach(function(el) {
+          el.disabled = true;
+          el.classList.add('campo-bloqueado');
+      });
+
+      const elaboradoPor = document.getElementById('id_elaborado_por');
+      if (elaboradoPor && !elaboradoPor.value && !window.modoSoloConsultaOperacion) {
+          elaboradoPor.value = `{% if medico_asignado %}{{ medico_asignado|escapejs }}{% elif request.user.get_full_name %}{{ request.user.get_full_name|escapejs }}{% else %}{{ request.user.username|escapejs }}{% endif %}`;
+      }
+  });
+</script>
+
 
 
 <script>
@@ -1237,6 +2029,20 @@
       });
 
   });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.shared-field-hint.shared-open, .shared-field-note.editable').forEach(function(el){
+    el.setAttribute('title','Dato pendiente. Esta área puede capturarlo si aún no existe en otro filtro.');
+  });
+  document.querySelectorAll('.shared-field-hint.shared-lock, .shared-field-note.locked').forEach(function(el){
+    el.setAttribute('title','Dato capturado por otro filtro. Se muestra en solo lectura para evitar duplicidad.');
+  });
+  document.querySelectorAll('.shared-field-hint.shared-own, .shared-field-note.available').forEach(function(el){
+    el.setAttribute('title','Dato disponible para compartir entre filtros.');
+  });
+});
 </script>
 </body>
 </html>

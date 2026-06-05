@@ -1,500 +1,1308 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Gestion de Trabajo Social{% endblock %}
+{% block title %}Gestión de Trabajo Social{% endblock %}
 
 {% block extra_css %}
 <style>
-  body { background:#f6f7fb; font-family:'Segoe UI',sans-serif; }
+  :root{
+    --azul-unach:#163f91;
+    --azul-vivo:#2563eb;
+    --azul-suave:#eff6ff;
+    --texto:#0b2454;
+    --muted:#64748b;
+    --linea:#dbe5f3;
+    --fondo:#f4f7fb;
+    --card:#ffffff;
+    --verde:#16a34a;
+    --naranja:#f59e0b;
+    --cyan:#0891b2;
+    --rojo:#ef4444;
+    --morado:#7c3aed;
+  }
 
-  /* Topbar */
-  .topbar{
-    background:#1e3a8a;
+  body{
+    background:var(--fondo);
+    font-family:'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color:var(--texto);
+  }
+
+  .ts-shell{
+    min-height:100vh;
+    display:flex;
+    background:
+      radial-gradient(circle at 82% 8%, rgba(37,99,235,.08), transparent 30%),
+      linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%);
+  }
+
+  .ts-sidebar{
+    width:288px;
+    min-height:100vh;
+    background:rgba(255,255,255,.92);
+    border-right:1px solid var(--linea);
+    box-shadow:12px 0 32px rgba(15,23,42,.04);
+    padding:26px 22px 22px;
+    position:sticky;
+    top:0;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    z-index:10;
+  }
+
+  .brand-panel{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:0 4px 18px;
+    border-bottom:1px solid #e8eef8;
+  }
+
+  .brand-logo{
+    width:72px;
+    height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    padding:9px;
+    background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);
+    border:1px solid rgba(255,255,255,.38);
+    border-radius:20px;
+    box-shadow:0 14px 28px rgba(37,99,235,.24);
+    overflow:hidden;
+    position:relative;
+  }
+
+  .brand-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+    background:transparent;
+    border:0;
+    position:relative;
+    z-index:2;
+  }
+
+  .logo-fallback{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
     color:#fff;
-    padding:14px 0;
-    box-shadow:0 2px 10px rgba(0,0,0,.15);
+    font-weight:950;
+    font-size:1.22rem;
+    letter-spacing:-.06em;
+    z-index:1;
   }
-  .topbar .brand{
+
+  .brand-text strong{
+    display:block;
+    font-size:1.18rem;
+    line-height:1.05;
+    font-weight:900;
+    color:#0b2454;
+    letter-spacing:-.03em;
+  }
+
+  .brand-text span{
+    display:block;
+    margin-top:4px;
+    font-size:.78rem;
     font-weight:800;
-    letter-spacing:.2px;
+    color:#2563eb;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+
+  .side-section-title{
+    font-size:.76rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#8ca0bf;
+    font-weight:900;
+    margin:2px 10px 8px;
+  }
+
+  .side-nav{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .side-link,
+  .side-logout{
+    min-height:50px;
     display:flex;
     align-items:center;
-    gap:.6rem;
+    gap:13px;
+    padding:12px 14px;
+    border-radius:16px;
+    text-decoration:none;
+    color:#27466f;
+    font-weight:800;
+    border:1px solid transparent;
+    background:transparent;
+    transition:.22s ease;
+    width:100%;
+    text-align:left;
   }
-  .topbar .brand i{ font-size:1.25rem; }
-  .topbar .userbox{
-    display:flex;
-    align-items:center;
-    gap:.8rem;
-  }
-  .chip{
+
+  .side-link i,
+  .side-logout i{
+    width:28px;
+    height:28px;
+    border-radius:10px;
     display:inline-flex;
     align-items:center;
-    gap:.4rem;
-    padding:.35rem .7rem;
-    border-radius:999px;
-    background:rgba(255,255,255,.12);
-    border:1px solid rgba(255,255,255,.18);
-    font-size:.9rem;
+    justify-content:center;
+    color:#2563eb;
+    font-size:1.05rem;
+    background:#eef4ff;
+    flex-shrink:0;
   }
 
-  /* Hero Banner Elegante */
-  .hero{
-    border-radius:24px;
-    padding:40px;
-    background:linear-gradient(135deg, #153c9e 0%, #2061b4 100%);
+  .side-link:hover{
+    color:#1d4ed8;
+    background:#f2f7ff;
+    border-color:#dbeafe;
+    transform:translateX(4px);
+  }
+
+  .side-link.active{
+    color:#1d4ed8;
+    background:linear-gradient(135deg,#eaf2ff 0%,#f7fbff 100%);
+    border-color:#d9e8ff;
+    box-shadow:0 10px 24px rgba(37,99,235,.10);
+  }
+
+  .side-link.active i{
     color:#fff;
-    box-shadow:0 15px 35px rgba(21, 60, 158, 0.2);
+    background:#2563eb;
+  }
+
+  .sidebar-spacer{ flex:1; }
+
+  .sidebar-footer{
+    border-top:1px solid #e8eef8;
+    padding-top:18px;
+  }
+
+  .side-logout{
+    color:#dc2626;
+    cursor:pointer;
+  }
+
+  .side-logout i{
+    color:#dc2626;
+    background:#fff1f2;
+  }
+
+  .side-logout:hover{
+    background:#fff1f2;
+    border-color:#fecdd3;
+    transform:translateX(4px);
+  }
+
+  .ts-main{
+    flex:1;
+    min-width:0;
+    padding:30px 34px 34px;
+  }
+
+  .ts-header{
+    min-height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    margin-bottom:28px;
+  }
+
+  .header-title h1{
+    margin:0;
+    font-size:1.95rem;
+    line-height:1.15;
+    font-weight:950;
+    letter-spacing:-.04em;
+    color:#071b46;
+  }
+
+  .header-title p{
+    margin:6px 0 0;
+    color:#597091;
+    font-weight:650;
+  }
+
+  .worker-profile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    max-width:390px;
+    padding:9px 14px 9px 10px;
+    border-radius:20px;
+    background:rgba(255,255,255,.88);
+    border:1px solid #dbe5f3;
+    box-shadow:0 10px 25px rgba(37,99,235,.10);
+  }
+
+  .worker-profile.coverage-profile{
+    border-color:#bfdbfe;
+    background:linear-gradient(135deg,#eff6ff,#ffffff);
+  }
+
+  .worker-avatar{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);
+    font-size:1.28rem;
+    flex-shrink:0;
+    box-shadow:0 10px 20px rgba(37,99,235,.18);
+  }
+
+  .coverage-profile .worker-avatar{
+    background:linear-gradient(135deg,#0891b2,#2563eb);
+  }
+
+  .worker-info{
+    min-width:0;
+    line-height:1.18;
+  }
+
+  .worker-info small{
+    display:block;
+    color:#71839f;
+    font-size:.72rem;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-bottom:3px;
+  }
+
+  .worker-info span{
+    display:block;
+    max-width:260px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    color:#071b46;
+    font-size:.92rem;
+    font-weight:900;
+  }
+
+  .dashboard-hero{
+    border-radius:26px;
+    padding:28px 30px;
+    background:linear-gradient(135deg,#153c9e 0%,#2563eb 58%,#0f766e 130%);
+    color:#fff;
+    box-shadow:0 22px 42px rgba(21,60,158,.22);
     position:relative;
     overflow:hidden;
-    margin-bottom: 35px;
+    margin-bottom:24px;
   }
-  .hero h1{ font-weight:900; margin-bottom:.5rem; letter-spacing: -0.5px; }
-  .hero .sub{ opacity:.9; font-size: 1.05rem; }
-  .hero .muted{ opacity:.75; font-size:.95rem; margin-top: 10px; }
-  .hero .icon{
+
+  .dashboard-hero::before{
+    content:"";
     position:absolute;
-    right:40px;
-    top:50%;
-    transform: translateY(-50%);
-    font-size:7rem;
-    opacity:0.15;
+    width:270px;
+    height:270px;
+    right:-90px;
+    top:-100px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
   }
 
-  /* =========================================
-     DISEÑO DINÁMICO Y ELEGANTE (LISTA)
-     ========================================= */
-  .list-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem; /* Más espacio para que "respiren" */
-      max-width: 950px;
-      margin: 0 auto;
+  .dashboard-hero::after{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    right:80px;
+    bottom:-110px;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
   }
 
-  .module-row-card {
-      background: #ffffff;
-      border-radius: 20px; /* Bordes más suaves */
-      padding: 22px 30px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.03);
-      border: 1px solid rgba(0,0,0,.04);
-      display: flex;
-      align-items: center;
-      gap: 1.8rem;
-      /* Animación premium */
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      border-left: 6px solid transparent;
+  .hero-content{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:22px;
   }
 
-  /* Efecto al pasar el mouse (Hover) */
-  .module-row-card:hover {
-      transform: translateY(-5px); /* Se levanta */
-      box-shadow: 0 15px 35px rgba(0,0,0,.08); /* Sombra más amplia */
-      border-left-width: 10px; /* El borde de color se hace más grueso */
+  .hero-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.20);
+    font-size:.78rem;
+    font-weight:900;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    margin-bottom:12px;
   }
 
-  .module-icon-row {
-      width: 70px;
-      height: 70px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      flex-shrink: 0;
-      transition: transform 0.3s ease;
+  .dashboard-hero h2{
+    margin:0 0 7px;
+    font-size:2rem;
+    font-weight:950;
+    letter-spacing:-.045em;
   }
 
-  /* El icono gira o crece un poquito al hacer hover en la tarjeta */
-  .module-row-card:hover .module-icon-row {
-      transform: scale(1.1);
+  .dashboard-hero p{
+    margin:0;
+    max-width:780px;
+    color:rgba(255,255,255,.88);
+    font-weight:600;
   }
 
-  .module-content-row {
-      flex-grow: 1;
+  .hero-big-icon{
+    width:98px;
+    height:98px;
+    border-radius:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(255,255,255,.85);
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    font-size:3rem;
+    flex-shrink:0;
   }
 
-  .module-content-row h4 {
-      font-weight: 800;
-      margin-bottom: 0.3rem;
-      font-size: 1.25rem;
-      color: #1e293b;
+  .coverage-card{
+    border-radius:24px;
+    padding:18px 20px;
+    margin-bottom:24px;
+    background:linear-gradient(135deg,#eff6ff,#ecfeff);
+    border:1px solid #bfdbfe;
+    border-left:7px solid #0891b2;
+    box-shadow:0 14px 34px rgba(8,145,178,.10);
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:16px;
+    align-items:center;
   }
 
-  .module-content-row p {
-      color: #64748b;
-      margin-bottom: 0;
-      font-size: 0.95rem;
-      line-height: 1.5;
+  .coverage-icon{
+    width:52px;
+    height:52px;
+    border-radius:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#dbeafe;
+    color:#1d4ed8;
+    font-size:1.35rem;
+    flex-shrink:0;
   }
 
-  .btn-row {
-      border-radius: 12px;
-      padding: 0.75rem 1.5rem;
-      font-weight: 700;
-      white-space: nowrap;
-      transition: all 0.2s ease;
+  .coverage-title{
+    margin:0 0 4px;
+    color:#0b2454;
+    font-size:1.05rem;
+    font-weight:950;
   }
 
-  /* El botón crece un poco al pasar el mouse */
-  .btn-row:hover {
-      transform: scale(1.03);
+  .coverage-text{
+    margin:0;
+    color:#31557d;
+    font-weight:700;
+    line-height:1.45;
   }
 
-  /* Colores de Borde Izquierdo y Botones */
-  .card-blue { border-left-color: #0d6efd; }
-  .card-yellow { border-left-color: #ffc107; }
-  .card-purple { border-left-color: #8b5cf6; } /* Nuevo color para Salas */
-  .card-green { border-left-color: #198754; }
-  .card-cyan { border-left-color: #0891b2; }
-
-
-  .sprint4-note{
-      max-width:950px;
-      margin:0 auto 1.5rem auto;
-      background:#eff6ff;
-      border:1px solid #bfdbfe;
-      border-left:6px solid #0d6efd;
-      color:#1e3a8a;
-      border-radius:18px;
-      padding:16px 20px;
-      font-size:.95rem;
-      font-weight:600;
-      box-shadow:0 4px 15px rgba(0,0,0,.03);
-  }
-  .sprint4-note strong{ font-weight:900; }
-
-
-  .estado-operativo{
-      max-width:950px;
-      margin:0 auto 1.5rem auto;
-      border-radius:20px;
-      padding:18px 22px;
-      display:flex;
-      align-items:flex-start;
-      gap:14px;
-      box-shadow:0 8px 22px rgba(15,23,42,.06);
-      border:1px solid transparent;
+  .coverage-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:10px;
   }
 
-  .estado-operativo .status-icon{
-      width:46px;
-      height:46px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.35rem;
-      flex-shrink:0;
+  .coverage-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border-radius:999px;
+    padding:7px 10px;
+    background:#ffffff;
+    border:1px solid #dbeafe;
+    color:#1e40af;
+    font-size:.78rem;
+    font-weight:900;
   }
 
-  .estado-operativo h5{
-      margin:0 0 4px;
-      font-weight:900;
+  .coverage-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    justify-content:flex-end;
   }
 
-  .estado-operativo p{
-      margin:0;
-      font-size:.94rem;
-      line-height:1.5;
+  .coverage-btn{
+    min-height:42px;
+    border-radius:14px;
+    padding:0 13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    font-weight:950;
+    text-decoration:none;
+    border:1px solid #bfdbfe;
+    background:#fff;
+    color:#1d4ed8;
+    white-space:nowrap;
+    transition:.18s ease;
   }
 
-  .estado-activo{
-      background:#f0fdf4;
-      border-color:#bbf7d0;
-      color:#14532d;
-      border-left:7px solid #16a34a;
+  .coverage-btn:hover{
+    color:#fff;
+    background:#2563eb;
+    transform:translateY(-1px);
+    box-shadow:0 12px 22px rgba(37,99,235,.18);
   }
 
-  .estado-activo .status-icon{
-      background:#dcfce7;
-      color:#15803d;
+  .status-card{
+    border-radius:22px;
+    padding:18px 20px;
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:24px;
+    box-shadow:0 12px 30px rgba(15,23,42,.06);
+    border:1px solid transparent;
   }
 
-  .estado-bloqueado{
-      background:#fff7ed;
-      border-color:#fed7aa;
-      color:#9a3412;
-      border-left:7px solid #f97316;
+  .status-card .status-icon{
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.25rem;
+    flex-shrink:0;
   }
 
-  .estado-bloqueado .status-icon{
-      background:#ffedd5;
-      color:#c2410c;
+  .status-card h5{
+    margin:0 0 4px;
+    font-weight:950;
+    color:inherit;
   }
 
-  .mode-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:.38rem .68rem;
-      border-radius:999px;
-      font-size:.76rem;
-      font-weight:900;
-      margin-top:9px;
+  .status-card p{
+    margin:0;
+    font-size:.95rem;
+    line-height:1.5;
+    font-weight:600;
   }
 
-  .mode-badge-active{
-      background:#dcfce7;
-      color:#166534;
-      border:1px solid #86efac;
+  .status-active{
+    background:#f0fdf4;
+    border-color:#bbf7d0;
+    color:#14532d;
+    border-left:7px solid #16a34a;
   }
 
-  .mode-badge-readonly{
-      background:#ffedd5;
-      color:#9a3412;
-      border:1px solid #fed7aa;
+  .status-active .status-icon{
+    background:#dcfce7;
+    color:#15803d;
   }
 
-  .readonly-summary{
-      max-width:950px;
-      margin:1.5rem auto 0 auto;
-      background:#f8fafc;
-      border:1px solid #e2e8f0;
-      border-radius:20px;
-      padding:18px 22px;
-      color:#475569;
-      box-shadow:0 4px 15px rgba(0,0,0,.03);
+  .status-blocked{
+    background:#fff7ed;
+    border-color:#fed7aa;
+    color:#9a3412;
+    border-left:7px solid #f97316;
   }
 
-  .readonly-summary h6{
-      font-weight:900;
-      color:#0f172a;
-      margin-bottom:.5rem;
+  .status-blocked .status-icon{
+    background:#ffedd5;
+    color:#c2410c;
   }
 
-  .readonly-summary ul{
-      margin:0;
-      padding-left:1.25rem;
+  .section-heading{
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+    gap:16px;
+    margin:4px 0 14px;
   }
 
-  .readonly-summary li{
-      margin:.22rem 0;
-      font-weight:600;
+  .section-heading h3{
+    margin:0;
+    color:#071b46;
+    font-size:1.15rem;
+    font-weight:950;
   }
 
-  /* Responsivo para celulares */
-  @media (max-width: 768px) {
-      .module-row-card {
-          flex-direction: column;
-          text-align: center;
-          gap: 1.2rem;
-          padding: 25px 20px;
-      }
-      .btn-row { width: 100%; }
-      .hero .icon { display: none; }
+  .section-heading span{
+    color:#71839f;
+    font-size:.9rem;
+    font-weight:700;
+  }
+
+  .refresh-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 12px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid #dbe5f3;
+    color:#526b8d;
+    font-size:.82rem;
+    font-weight:800;
+    box-shadow:0 8px 18px rgba(15,23,42,.04);
+    white-space:nowrap;
+  }
+
+  .refresh-chip i{ color:#2563eb; }
+
+  .overview-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:18px;
+    margin-bottom:18px;
+  }
+
+  .metric-card{
+    background:rgba(255,255,255,.88);
+    border:1px solid #e4ebf7;
+    border-radius:24px;
+    padding:20px;
+    min-height:190px;
+    box-shadow:0 12px 30px rgba(15,23,42,.055);
+    position:relative;
+    overflow:hidden;
+    transition:.25s ease;
+  }
+
+  .metric-card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:6px;
+    background:var(--accent,#2563eb);
+  }
+
+  .metric-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 20px 42px rgba(15,23,42,.09);
+    border-color:#d4e0f2;
+  }
+
+  .metric-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  .metric-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.5rem;
+    color:var(--accent,#2563eb);
+    background:var(--accent-soft,#eff6ff);
+  }
+
+  .metric-label{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:#71839f;
+    font-size:.78rem;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+
+  .metric-number{
+    display:block;
+    color:#071b46;
+    font-size:2.55rem;
+    line-height:1;
+    font-weight:950;
+    letter-spacing:-.05em;
+    margin-bottom:8px;
+  }
+
+  .metric-title{
+    margin:0;
+    color:#071b46;
+    font-size:1.02rem;
+    font-weight:950;
+    letter-spacing:-.02em;
+  }
+
+  .metric-desc{
+    margin:8px 0 0;
+    color:#617596;
+    font-size:.88rem;
+    line-height:1.42;
+    font-weight:650;
+  }
+
+  .progress-wrap{
+    height:10px;
+    background:#edf2f8;
+    border-radius:999px;
+    overflow:hidden;
+    margin-top:14px;
+  }
+
+  .progress-bar-soft{
+    height:100%;
+    width:calc(var(--progress, 0) * 1%);
+    max-width:100%;
+    border-radius:999px;
+    background:var(--accent,#2563eb);
+    transition:width .5s ease;
+  }
+
+  .metric-blue{ --accent:#2563eb; --accent-soft:#eff6ff; }
+  .metric-orange{ --accent:#f59e0b; --accent-soft:#fffbeb; }
+  .metric-green{ --accent:#16a34a; --accent-soft:#f0fdf4; }
+  .metric-cyan{ --accent:#0891b2; --accent-soft:#ecfeff; }
+  .metric-purple{ --accent:#7c3aed; --accent-soft:#f5f3ff; }
+
+  .summary-layout{
+    display:grid;
+    grid-template-columns:1.25fr .75fr;
+    gap:18px;
+    align-items:stretch;
+    margin-top:18px;
+  }
+
+  .process-card,
+  .live-card{
+    background:rgba(255,255,255,.88);
+    border:1px solid #e4ebf7;
+    border-radius:24px;
+    box-shadow:0 12px 30px rgba(15,23,42,.055);
+    overflow:hidden;
+  }
+
+  .process-card{ padding:22px; }
+
+  .card-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+  }
+
+  .card-heading h4{
+    margin:0;
+    color:#071b46;
+    font-size:1.08rem;
+    font-weight:950;
+  }
+
+  .card-heading span{
+    color:#71839f;
+    font-size:.84rem;
+    font-weight:800;
+  }
+
+  .process-row{
+    display:grid;
+    grid-template-columns:170px 1fr 72px;
+    align-items:center;
+    gap:14px;
+    padding:13px 0;
+    border-top:1px solid #edf2f8;
+  }
+
+  .process-row:first-of-type{ border-top:0; }
+
+  .process-name{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#27466f;
+    font-weight:900;
+  }
+
+  .process-name i{
+    width:30px;
+    height:30px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--accent-soft,#eff6ff);
+    color:var(--accent,#2563eb);
+  }
+
+  .process-value{
+    text-align:right;
+    color:#071b46;
+    font-weight:950;
+  }
+
+  .live-card{
+    padding:0;
+    position:relative;
+    background:
+      radial-gradient(circle at 92% 8%, rgba(37,99,235,.16), transparent 28%),
+      linear-gradient(135deg,#ffffff 0%,#f8fbff 100%);
+  }
+
+  .live-card-inner{
+    padding:26px;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:20px;
+  }
+
+  .live-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+  }
+
+  .live-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:#166534;
+    background:#dcfce7;
+    border:1px solid #86efac;
+    padding:7px 11px;
+    border-radius:999px;
+    font-size:.78rem;
+    font-weight:950;
+  }
+
+  .live-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#16a34a;
+    box-shadow:0 0 0 0 rgba(22,163,74,.55);
+    animation:pulseLive 1.6s infinite;
+  }
+
+  @keyframes pulseLive{
+    0%{ box-shadow:0 0 0 0 rgba(22,163,74,.55); }
+    70%{ box-shadow:0 0 0 12px rgba(22,163,74,0); }
+    100%{ box-shadow:0 0 0 0 rgba(22,163,74,0); }
+  }
+
+  .live-icon{
+    width:52px;
+    height:52px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#eaf2ff;
+    color:#2563eb;
+    font-size:1.45rem;
+  }
+
+  .live-number{
+    display:block;
+    color:#071b46;
+    font-size:4.3rem;
+    line-height:.95;
+    font-weight:950;
+    letter-spacing:-.06em;
+  }
+
+  .live-title{
+    margin:8px 0 0;
+    color:#071b46;
+    font-size:1.18rem;
+    font-weight:950;
+  }
+
+  .live-desc{
+    margin:8px 0 0;
+    color:#617596;
+    line-height:1.5;
+    font-weight:650;
+  }
+
+  .rules-card{
+    margin-top:20px;
+    background:rgba(255,255,255,.82);
+    border:1px solid #dbe5f3;
+    border-radius:22px;
+    padding:19px 22px;
+    box-shadow:0 10px 26px rgba(15,23,42,.045);
+  }
+
+  .rules-card h6{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0 0 10px;
+    color:#071b46;
+    font-weight:950;
+  }
+
+  .rules-card ul{
+    margin:0;
+    padding-left:1.15rem;
+    color:#415a7e;
+  }
+
+  .rules-card li{
+    margin:.28rem 0;
+    font-weight:700;
+    line-height:1.5;
+  }
+
+  @media (max-width: 1280px){
+    .overview-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .summary-layout{ grid-template-columns:1fr; }
+    .coverage-card{ grid-template-columns:auto minmax(0,1fr); }
+    .coverage-actions{ grid-column:1 / -1; justify-content:flex-start; }
+  }
+
+  @media (max-width: 1100px){
+    .ts-sidebar{ width:250px; }
+  }
+
+  @media (max-width: 820px){
+    .ts-shell{ display:block; }
+    .ts-sidebar{
+      position:relative;
+      width:100%;
+      min-height:auto;
+      border-right:0;
+      border-bottom:1px solid var(--linea);
+    }
+    .side-nav{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .sidebar-spacer{ display:none; }
+    .ts-main{ padding:22px 16px; }
+    .hero-content{ align-items:flex-start; }
+    .hero-big-icon{ display:none; }
+    .section-heading{ align-items:flex-start; flex-direction:column; }
+  }
+
+  @media (max-width: 620px){
+    .overview-grid{ grid-template-columns:1fr; }
+    .process-row{ grid-template-columns:1fr; gap:8px; }
+    .process-value{ text-align:left; }
+    .coverage-card{ grid-template-columns:1fr; }
+    .coverage-actions{ grid-column:auto; }
+    .coverage-btn{ width:100%; }
+  }
+
+  @media (max-width: 560px){
+    .side-nav{ grid-template-columns:1fr; }
+    .ts-header{ align-items:flex-start; flex-direction:column; }
+    .worker-profile{ width:100%; max-width:none; }
+    .worker-info span{ max-width:100%; }
+    .dashboard-hero{ padding:24px 20px; }
+    .dashboard-hero h2{ font-size:1.55rem; }
+    .live-number{ font-size:3.4rem; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
+{% static 'img/logo.png' as logo_principal %}
+{% static 'logo.png' as logo_respaldo %}
 
-<div class="topbar">
-  <div class="container d-flex justify-content-between align-items-center">
-    <div class="brand">
-      <i class="bi bi-shield-lock-fill"></i>
-      Estancia Infantil UNACH
+<div class="ts-shell">
+
+  <aside class="ts-sidebar">
+    <div class="brand-panel">
+      <div class="brand-logo" aria-label="Logo Estancia Infantil UNACH">
+        <img src="{{ logo_principal }}" alt="Logo UNACH" onerror="this.onerror=function(){this.style.display='none'; this.nextElementSibling.style.display='flex';}; this.src='{{ logo_respaldo }}';">
+        <span class="logo-fallback">EIU</span>
+      </div>
+      <div class="brand-text">
+        <strong>Estancia<br>Infantil</strong>
+        <span>UNACH</span>
+      </div>
     </div>
 
-    <div class="userbox">
-      <span class="chip">
-        <i class="bi bi-person-circle"></i>
-        {{ request.user.username }}
-      </span>
+    <nav aria-label="Menú de Trabajo Social">
+      <div class="side-section-title">Trabajo Social</div>
+      <div class="side-nav">
+        <a class="side-link active" href="{{ request.path }}">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Panel</span>
+        </a>
+        <a class="side-link" href="{% url 'panel_admisiones' %}">
+          <i class="bi bi-file-earmark-text"></i>
+          <span>Solicitudes</span>
+        </a>
+        <a class="side-link" href="{% url 'reporte_final_pendientes' %}">
+          <i class="bi bi-file-earmark-check-fill"></i>
+          <span>Reportes finales</span>
+        </a>
+        <a class="side-link" href="{% url 'validacion_pagos_pendientes' %}">
+          <i class="bi bi-cash-coin"></i>
+          <span>Validación de pagos</span>
+        </a>
+        <a class="side-link" href="{% url 'codigos_responsable_pendientes' %}">
+          <i class="bi bi-shield-lock-fill"></i>
+          <span>Códigos</span>
+        </a>
+      </div>
+    </nav>
+
+    {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}
+      <div class="coverage-meta" style="margin:0 6px;">
+        <span class="coverage-pill"><i class="bi bi-person-check-fill"></i> Cobertura activa</span>
+        <span class="coverage-pill"><i class="bi bi-building-check"></i> Trabajo Social</span>
+      </div>
+    {% endif %}
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-footer">
       <form action="{% url 'logout' %}" method="post" class="mb-0">
         {% csrf_token %}
-        <button class="btn btn-outline-light btn-sm">
-          <i class="bi bi-box-arrow-right"></i> Salir
+        <button type="submit" class="side-logout">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Cerrar sesión</span>
         </button>
       </form>
     </div>
-  </div>
-</div>
+  </aside>
 
-<div class="container py-4">
+  <main class="ts-main">
+    <div class="ts-header">
+      <div class="header-title">
+        <h1>Gestión de Trabajo Social</h1>
+        <p>Vista general de beneficiarios, solicitudes y avance de inscripción.</p>
+      </div>
 
-  <div class="hero">
-    <i class="bi bi-building icon"></i>
-    <h1 class="mb-1">Gestión de Trabajo Social</h1>
-    <div class="sub">Gestión interna • Admisiones • Documentación • Reportes</div>
-    <div class="muted">Accede a los módulos del personal autorizado.</div>
-  </div>
-
-  {% if modo_solo_consulta %}
-    <div class="estado-operativo estado-bloqueado">
-      <div class="status-icon">
-        <i class="bi bi-lock-fill"></i>
-      </div>
-      <div>
-        <h5>Modo solo consulta</h5>
-        <p>
-          {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar información existente, pero no puedes operar, agregar, modificar ni eliminar registros hasta que el Administrador inicie un nuevo semestre." }}
-        </p>
-      </div>
-    </div>
-  {% else %}
-    <div class="estado-operativo estado-activo">
-      <div class="status-icon">
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
-      <div>
-        <h5>Semestre activo</h5>
-        <p>
-          Trabajo Social puede operar normalmente en el semestre:
-          <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
-        </p>
-      </div>
-    </div>
-  {% endif %}
-
-  <div class="list-grid">
-
-    <div class="module-row-card card-blue">
-      <div class="module-icon-row" style="background:#eff6ff; color:#3b82f6;">
-        <i class="bi bi-file-earmark-text"></i>
-      </div>
-      <div class="module-content-row">
-        <h4>Solicitudes de ingreso</h4>
-        <p>
-          {% if modo_solo_consulta %}
-            Consulta solicitudes existentes y descarga PDFs FO-301-02-01. La creación y edición quedan bloqueadas.
+      <div class="worker-profile {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}coverage-profile{% endif %}" title="Usuario activo">
+        <div class="worker-avatar" aria-hidden="true">
+          {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}
+            <i class="bi bi-person-check-fill"></i>
           {% else %}
-            Genera enlaces de captura, revisa estados y descarga PDFs FO-301-02-01.
+            <i class="bi bi-person-badge-fill"></i>
           {% endif %}
-        </p>
-        {% if modo_solo_consulta %}
-          <span class="mode-badge mode-badge-readonly">
-            <i class="bi bi-eye-fill"></i> Solo consulta
+        </div>
+        <div class="worker-info">
+          <small>
+            {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}
+              Cobertura temporal
+            {% else %}
+              Trabajadora Social
+            {% endif %}
+          </small>
+          <span>
+            {% if request.user.nombre %}
+              {{ request.user.nombre }}{% if request.user.apellido_paterno %} {{ request.user.apellido_paterno }}{% endif %}
+            {% else %}
+              {{ request.user.username }}
+            {% endif %}
           </span>
-        {% else %}
-          <span class="mode-badge mode-badge-active">
-            <i class="bi bi-pencil-square"></i> Operación activa
-          </span>
-        {% endif %}
-      </div>
-      <div>
-        <a class="btn btn-primary btn-row shadow-sm" href="{% url 'panel_admisiones' %}">
-          {% if modo_solo_consulta %}Consultar solicitudes{% else %}Ir a Panel Admisiones{% endif %}
-          <i class="bi bi-arrow-right-short"></i>
-        </a>
+        </div>
       </div>
     </div>
 
-    <div class="module-row-card card-yellow">
-      <div class="module-icon-row" style="background:#fefce8; color:#eab308;">
-        <i class="bi bi-file-earmark-check-fill"></i>
+    <section class="dashboard-hero">
+      <div class="hero-content">
+        <div>
+          <div class="hero-kicker">
+            <i class="bi bi-person-check-fill"></i>
+            Vista general
+          </div>
+          <h2>Panel de control</h2>
+          <p>
+            Consulta el estado actual de inscripción de beneficiarios. Las acciones principales permanecen en el menú lateral para evitar repetir botones dentro del panel.
+          </p>
+        </div>
+        <div class="hero-big-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
       </div>
-      <div class="module-content-row">
-        <h4>Reportes Finales</h4>
-        <p>
-          {% if modo_solo_consulta %}
-            Consulta reportes finales existentes. Registrar nuevos reportes queda bloqueado hasta que exista semestre activo.
-          {% else %}
-            Genera el Reporte Final (FO-301-02-18) de los menores que aprobaron los filtros.
-          {% endif %}
-        </p>
-        {% if modo_solo_consulta %}
-          <span class="mode-badge mode-badge-readonly">
-            <i class="bi bi-eye-fill"></i> Solo consulta
-          </span>
-        {% else %}
-          <span class="mode-badge mode-badge-active">
-            <i class="bi bi-pencil-square"></i> Operación activa
-          </span>
-        {% endif %}
-      </div>
-      <div>
-        <a class="btn btn-warning btn-row shadow-sm fw-bold text-dark" href="{% url 'reporte_final_pendientes' %}">
-          {% if modo_solo_consulta %}Consultar reportes{% else %}Ir a Reportes{% endif %}
-          <i class="bi bi-arrow-right-short"></i>
-        </a>
-      </div>
-    </div>
-    <div class="module-row-card card-green">
-      <div class="module-icon-row" style="background:#f0fdf4; color:#22c55e;">
-        <i class="bi bi-cash-coin"></i>
-      </div>
-      <div class="module-content-row">
-        <h4>Validación de Pagos</h4>
-        <p>
-          {% if modo_solo_consulta %}
-            Consulta comprobantes y pagos existentes. Validar, rechazar o registrar pagos queda bloqueado.
-          {% else %}
-            Revisa y aprueba los comprobantes de pago para finalizar la inscripción.
-          {% endif %}
-        </p>
-        {% if modo_solo_consulta %}
-          <span class="mode-badge mode-badge-readonly">
-            <i class="bi bi-eye-fill"></i> Solo consulta
-          </span>
-        {% else %}
-          <span class="mode-badge mode-badge-active">
-            <i class="bi bi-pencil-square"></i> Operación activa
-          </span>
-        {% endif %}
-      </div>
-      <div>
-        <a class="btn btn-success btn-row shadow-sm fw-bold text-white" href="{% url 'validacion_pagos_pendientes' %}">
-          {% if modo_solo_consulta %}Consultar pagos{% else %}Ir a Pagos{% endif %}
-          <i class="bi bi-arrow-right-short"></i>
-        </a>
-      </div>
-    </div>
+    </section>
 
-
-    <div class="module-row-card card-cyan">
-      <div class="module-icon-row" style="background:#ecfeff; color:#0891b2;">
-        <i class="bi bi-shield-lock-fill"></i>
-      </div>
-      <div class="module-content-row">
-        <h4>Códigos de seguridad</h4>
-        <p>
-          {% if modo_solo_consulta %}
-            Consulta el estado de códigos existentes. Generar, resetear o confirmar entregas queda bloqueado hasta que exista semestre activo.
-          {% else %}
-            Genera, resetea y confirma la entrega del código de 4 dígitos junto con la credencial del responsable.
-          {% endif %}
-        </p>
-        {% if modo_solo_consulta %}
-          <span class="mode-badge mode-badge-readonly">
-            <i class="bi bi-eye-fill"></i> Solo consulta
-          </span>
-        {% else %}
-          <span class="mode-badge mode-badge-active">
-            <i class="bi bi-key-fill"></i> Operación activa
-          </span>
-        {% endif %}
-      </div>
-      <div>
-        <a class="btn btn-info btn-row shadow-sm fw-bold text-white" href="{% url 'codigos_responsable_pendientes' %}">
-          {% if modo_solo_consulta %}Consultar códigos{% else %}Gestionar códigos{% endif %}
-          <i class="bi bi-arrow-right-short"></i>
-        </a>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="readonly-summary">
-    <h6>
-      <i class="bi bi-shield-check me-1"></i>
-      Reglas operativas por semestre
-    </h6>
-    {% if modo_solo_consulta %}
-      <ul>
-        <li>Trabajo Social puede consultar información histórica y descargar documentos.</li>
-        <li>No se permite crear, modificar, validar pagos ni registrar reportes nuevos.</li>
-        <li>La operación se habilitará cuando el Administrador del Sistema inicie un nuevo semestre.</li>
-      </ul>
-    {% else %}
-      <ul>
-        <li>El semestre activo permite operar solicitudes, reportes finales y validación de pagos.</li>
-        <li>Cuando el semestre se cierre, esta área pasará automáticamente a modo solo consulta.</li>
-        <li>La asignación de salas, maestras y horarios corresponde al Administrador del Sistema.</li>
-      </ul>
+    {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}
+      <section class="coverage-card">
+        <div class="coverage-icon">
+          <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <div>
+          <h5 class="coverage-title">Cubriendo temporalmente Trabajo Social</h5>
+          <p class="coverage-text">
+            Tienes autorización de Dirección para apoyar el proceso social completo. Tu rol real no cambia y cada movimiento quedará registrado para revisión posterior de la titular y para consulta de Supervisora.
+          </p>
+          <div class="coverage-meta">
+            <span class="coverage-pill"><i class="bi bi-shield-check"></i> Autorizado por Dirección</span>
+            <span class="coverage-pill"><i class="bi bi-clock-history"></i> Acceso temporal</span>
+            <span class="coverage-pill"><i class="bi bi-clipboard-data"></i> Movimientos en bitácora</span>
+          </div>
+        </div>
+        <div class="coverage-actions">
+          <a href="{% url 'panel_admisiones' %}" class="coverage-btn"><i class="bi bi-file-earmark-text"></i> Solicitudes</a>
+          <a href="{% url 'reporte_final_pendientes' %}" class="coverage-btn"><i class="bi bi-file-earmark-check"></i> Reportes</a>
+          <a href="{% url 'validacion_pagos_pendientes' %}" class="coverage-btn"><i class="bi bi-cash-coin"></i> Pagos</a>
+          <a href="{% url 'codigos_responsable_pendientes' %}" class="coverage-btn"><i class="bi bi-shield-lock"></i> Códigos</a>
+        </div>
+      </section>
     {% endif %}
-  </div>
+
+    {% if modo_solo_consulta %}
+      <section class="status-card status-blocked">
+        <div class="status-icon">
+          <i class="bi bi-lock-fill"></i>
+        </div>
+        <div>
+          <h5>Modo solo consulta</h5>
+          <p>
+            {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar información existente, pero no puedes operar, agregar, modificar ni eliminar registros hasta que el Administrador inicie un nuevo semestre." }}
+          </p>
+        </div>
+      </section>
+    {% else %}
+      <section class="status-card status-active">
+        <div class="status-icon">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div>
+          <h5>Semestre activo</h5>
+          <p>
+            Trabajo Social puede operar normalmente en el semestre:
+            <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+            {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}
+              Esta operación se muestra como cobertura temporal autorizada.
+            {% endif %}
+          </p>
+        </div>
+      </section>
+    {% endif %}
+
+    <div class="section-heading">
+      <div>
+        <h3>Resumen general de inscripción</h3>
+        <span>Indicadores principales del proceso de beneficiarios.</span>
+      </div>
+      <div class="refresh-chip">
+        <i class="bi bi-arrow-clockwise"></i>
+        Actualizado: <span data-last-update>automáticamente</span>
+      </div>
+    </div>
+
+    <section class="overview-grid">
+      <article class="metric-card metric-blue">
+        <div class="metric-top">
+          <div class="metric-icon"><i class="bi bi-people-fill"></i></div>
+          <span class="metric-label"><i class="bi bi-dot"></i> Inscripción</span>
+        </div>
+        <strong class="metric-number" data-live-key="total_inscribiendo" data-live-value="{{ total_beneficiarios_inscribiendo|default:'0' }}">{{ total_beneficiarios_inscribiendo|default:"0" }}</strong>
+        <h4 class="metric-title">Beneficiarios inscribiéndose</h4>
+        <p class="metric-desc">Total de beneficiarios registrados dentro del proceso de inscripción del semestre activo.</p>
+      </article>
+
+      <article class="metric-card metric-orange">
+        <div class="metric-top">
+          <div class="metric-icon"><i class="bi bi-hourglass-split"></i></div>
+          <span class="metric-label"><i class="bi bi-dot"></i> Pendientes</span>
+        </div>
+        <strong class="metric-number" data-live-key="pendientes_atender" data-live-value="{{ beneficiarios_pendientes_atender|default:'0' }}">{{ beneficiarios_pendientes_atender|default:"0" }}</strong>
+        <h4 class="metric-title">Beneficiarios por atender</h4>
+        <p class="metric-desc">Solicitudes que todavía requieren revisión, seguimiento o validación por Trabajo Social.</p>
+        <div class="progress-wrap">
+          <div class="progress-bar-soft" data-progress-source="porcentaje_pendientes" style="--progress:{{ porcentaje_pendientes_atender|default:'0' }};"></div>
+        </div>
+      </article>
+
+      <article class="metric-card metric-green">
+        <div class="metric-top">
+          <div class="metric-icon"><i class="bi bi-check2-circle"></i></div>
+          <span class="metric-label"><i class="bi bi-dot"></i> Finalizados</span>
+        </div>
+        <strong class="metric-number" data-live-key="proceso_completo" data-live-value="{{ beneficiarios_proceso_completo|default:'0' }}">{{ beneficiarios_proceso_completo|default:"0" }}</strong>
+        <h4 class="metric-title">Pasaron todo el proceso</h4>
+        <p class="metric-desc"><span data-live-key="porcentaje_completo" data-live-value="{{ porcentaje_proceso_completo|default:'0' }}">{{ porcentaje_proceso_completo|default:"0" }}</span>% de beneficiarios ya completaron todos los pasos.</p>
+        <div class="progress-wrap">
+          <div class="progress-bar-soft" data-progress-source="porcentaje_completo" style="--progress:{{ porcentaje_proceso_completo|default:'0' }};"></div>
+        </div>
+      </article>
+
+      <article class="metric-card metric-cyan">
+        <div class="metric-top">
+          <div class="metric-icon"><i class="bi bi-arrow-repeat"></i></div>
+          <span class="metric-label"><i class="bi bi-dot"></i> En proceso</span>
+        </div>
+        <strong class="metric-number" data-live-key="en_proceso" data-live-value="{{ beneficiarios_en_proceso|default:'0' }}">{{ beneficiarios_en_proceso|default:"0" }}</strong>
+        <h4 class="metric-title">Beneficiarios en proceso</h4>
+        <p class="metric-desc"><span data-live-key="porcentaje_en_proceso" data-live-value="{{ porcentaje_en_proceso|default:'0' }}">{{ porcentaje_en_proceso|default:"0" }}</span>% aún se encuentra avanzando en admisión, pago, reporte o código.</p>
+        <div class="progress-wrap">
+          <div class="progress-bar-soft" data-progress-source="porcentaje_en_proceso" style="--progress:{{ porcentaje_en_proceso|default:'0' }};"></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="summary-layout">
+      <article class="process-card">
+        <div class="card-heading">
+          <h4>Avance por etapa</h4>
+          <span>Resumen operativo</span>
+        </div>
+
+        <div class="process-row metric-blue">
+          <div class="process-name"><i class="bi bi-file-earmark-text"></i> Solicitudes</div>
+          <div class="progress-wrap">
+            <div class="progress-bar-soft" data-progress-source="porcentaje_solicitudes" style="--progress:{{ porcentaje_solicitudes|default:'0' }};"></div>
+          </div>
+          <div class="process-value"><span data-live-key="solicitudes_activas" data-live-value="{{ solicitudes_activas|default:'0' }}">{{ solicitudes_activas|default:"0" }}</span></div>
+        </div>
+
+        <div class="process-row metric-orange">
+          <div class="process-name"><i class="bi bi-file-earmark-check-fill"></i> Reportes</div>
+          <div class="progress-wrap">
+            <div class="progress-bar-soft" data-progress-source="porcentaje_reportes" style="--progress:{{ porcentaje_reportes|default:'0' }};"></div>
+          </div>
+          <div class="process-value"><span data-live-key="reportes_pendientes" data-live-value="{{ reportes_pendientes|default:'0' }}">{{ reportes_pendientes|default:"0" }}</span></div>
+        </div>
+
+        <div class="process-row metric-green">
+          <div class="process-name"><i class="bi bi-cash-coin"></i> Pagos</div>
+          <div class="progress-wrap">
+            <div class="progress-bar-soft" data-progress-source="porcentaje_pagos" style="--progress:{{ porcentaje_pagos|default:'0' }};"></div>
+          </div>
+          <div class="process-value"><span data-live-key="pagos_pendientes" data-live-value="{{ pagos_pendientes|default:'0' }}">{{ pagos_pendientes|default:"0" }}</span></div>
+        </div>
+
+        <div class="process-row metric-cyan">
+          <div class="process-name"><i class="bi bi-shield-lock-fill"></i> Códigos</div>
+          <div class="progress-wrap">
+            <div class="progress-bar-soft" data-progress-source="porcentaje_codigos" style="--progress:{{ porcentaje_codigos|default:'0' }};"></div>
+          </div>
+          <div class="process-value"><span data-live-key="codigos_pendientes" data-live-value="{{ codigos_pendientes|default:'0' }}">{{ codigos_pendientes|default:"0" }}</span></div>
+        </div>
+      </article>
+
+      <article class="live-card">
+        <div class="live-card-inner">
+          <div class="live-top">
+            <span class="live-badge"><span class="live-dot"></span> En tiempo real</span>
+            <div class="live-icon"><i class="bi bi-person-lines-fill"></i></div>
+          </div>
+
+          <div>
+            <strong class="live-number" data-live-key="inscribiendo_ahora" data-live-value="{{ beneficiarios_inscribiendo_ahora|default:'0' }}">{{ beneficiarios_inscribiendo_ahora|default:"0" }}</strong>
+            <h4 class="live-title">Beneficiarios inscribiéndose al momento</h4>
+            <p class="live-desc">Este número se actualiza automáticamente para reflejar cuántos beneficiarios están actualmente dentro del proceso de inscripción.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="rules-card">
+      <h6>
+        <i class="bi bi-shield-check"></i>
+        Reglas operativas por semestre
+      </h6>
+      {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa %}
+        <ul>
+          <li>La cobertura temporal permite apoyar el proceso social completo: solicitudes, reportes finales, pagos y códigos.</li>
+          <li>El usuario conserva su cuenta real; no se utiliza la contraseña de la trabajadora social titular.</li>
+          <li>Los movimientos realizados durante la cobertura quedan registrados en bitácora y pueden ser revisados por la titular y Supervisora.</li>
+          <li>Los expedientes finalizados, validados o cerrados deben mantenerse como solo consulta cuando así lo indique el sistema.</li>
+        </ul>
+      {% elif modo_solo_consulta %}
+        <ul>
+          <li>Trabajo Social puede consultar información histórica y descargar documentos.</li>
+          <li>No se permite crear, modificar, validar pagos ni registrar reportes nuevos.</li>
+          <li>La operación se habilitará cuando el Administrador del Sistema inicie un nuevo semestre.</li>
+        </ul>
+      {% else %}
+        <ul>
+          <li>El semestre activo permite operar solicitudes, reportes finales y validación de pagos.</li>
+          <li>Cuando el semestre se cierre, esta área pasará automáticamente a modo solo consulta.</li>
+          <li>La asignación de salas, maestras y horarios corresponde al Administrador del Sistema.</li>
+        </ul>
+      {% endif %}
+    </section>
+  </main>
 
 </div>
 
+<script>
+  (function(){
+    const intervalo = 15000;
+
+    function normalizarNumero(valor){
+      const limpio = String(valor || '0').replace('%','').replace(',','.').trim();
+      const numero = parseFloat(limpio);
+      if(Number.isNaN(numero)) return 0;
+      return Math.max(0, Math.min(100, numero));
+    }
+
+    function actualizarBarras(){
+      document.querySelectorAll('[data-progress-source]').forEach((bar) => {
+        const key = bar.getAttribute('data-progress-source');
+        const fuente = document.querySelector(`[data-live-key="${key}"]`);
+        const valor = fuente ? (fuente.getAttribute('data-live-value') || fuente.textContent) : bar.style.getPropertyValue('--progress');
+        bar.style.setProperty('--progress', normalizarNumero(valor));
+      });
+    }
+
+    function actualizarHora(){
+      const destino = document.querySelector('[data-last-update]');
+      if(!destino) return;
+      const ahora = new Date();
+      destino.textContent = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+
+    async function actualizarDatos(){
+      try{
+        const respuesta = await fetch(window.location.href, {
+          headers:{ 'X-Requested-With':'XMLHttpRequest' },
+          cache:'no-store'
+        });
+        if(!respuesta.ok) return;
+
+        const html = await respuesta.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+
+        document.querySelectorAll('[data-live-key]').forEach((destino) => {
+          const key = destino.getAttribute('data-live-key');
+          const origen = doc.querySelector(`[data-live-key="${key}"]`);
+          if(!origen) return;
+          destino.textContent = origen.textContent.trim();
+          destino.setAttribute('data-live-value', origen.getAttribute('data-live-value') || origen.textContent.trim());
+        });
+
+        actualizarBarras();
+        actualizarHora();
+      }catch(error){
+        /* Si la vista no permite refresco por fetch, el panel conserva los datos renderizados. */
+      }
+    }
+
+    actualizarBarras();
+    actualizarHora();
+    window.setInterval(actualizarDatos, intervalo);
+  })();
+</script>
 {% endblock %}

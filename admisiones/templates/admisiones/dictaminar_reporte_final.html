@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,312 +10,1366 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        :root {
+            --azul-900: #08265f;
+            --azul-800: #123c8c;
+            --azul-700: #1d4ed8;
+            --azul-600: #2563eb;
+            --azul-500: #3b82f6;
+            --azul-100: #eaf2ff;
+            --texto: #08265f;
+            --muted: #5b7198;
+            --linea: #dbe7fb;
+            --verde: #16a34a;
+            --rojo: #dc2626;
+            --gris-fondo: #f4f7fb;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            background: #f3f5f8;
-            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(circle at 82% 0%, rgba(37, 99, 235, .12), transparent 34%),
+                linear-gradient(180deg, #f7faff 0%, #f3f6fb 46%, #f6f8fb 100%);
+            color: var(--texto);
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        .navbar-ts {
-            background: #7c3aed;
-            padding: .75rem 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,.12);
-        }
+        a { text-decoration: none; }
 
-        .brand-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: .5px;
-            line-height: 1.15;
-        }
-
-        .brand-subtitle {
-            color: rgba(255,255,255,.78);
-            font-size: .85rem;
-        }
-
-        .container-panel {
-            max-width: 1100px;
+        .top-shell {
+            width: min(1450px, calc(100% - 48px));
             margin: 0 auto;
-            padding: 22px 16px;
-            margin-top: 92px;
         }
 
-        .card-panel {
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,.08);
-            border: none;
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255,255,255,.88);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(219, 231, 251, .92);
+            box-shadow: 0 12px 34px rgba(15, 39, 95, .07);
+        }
+
+        .topbar-inner {
+            min-height: 86px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 14px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .logo-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 48%, #0f2f7a 100%);
+            box-shadow: 0 16px 28px rgba(37,99,235,.25);
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .logo-box img {
+            width: 82%;
+            height: 82%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(1.15rem, 1.55vw, 1.65rem);
+            font-weight: 900;
+            letter-spacing: -.03em;
+            color: var(--azul-900);
+        }
+
+        .brand p {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: .92rem;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-return {
+            min-height: 46px;
+            border-radius: 14px;
+            border: 1px solid #c8d8f7;
+            color: var(--azul-800);
             background: #fff;
+            font-weight: 900;
+            padding: .72rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            box-shadow: 0 10px 20px rgba(20, 64, 140, .08);
         }
 
-        .info-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 12px 14px;
-            min-height: 70px;
+        .btn-return:hover {
+            background: var(--azul-100);
+            color: var(--azul-900);
+            border-color: #9db9f5;
         }
 
-        .info-label {
-            font-size: .78rem;
-            color: #64748b;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .user-pill {
+            min-height: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px 8px 8px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid #dbe7fb;
+            box-shadow: 0 14px 34px rgba(31, 78, 160, .10);
+            color: var(--azul-900);
         }
 
-        .info-value {
-            font-size: .96rem;
-            font-weight: 700;
-            color: #0f172a;
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: var(--azul-700);
+            font-size: 1.15rem;
+            flex: 0 0 auto;
         }
 
-        .btn-soft {
-            border-radius: 10px;
-            font-weight: 700;
-            padding: .55rem 1rem;
+        .user-name {
+            line-height: 1.05;
+            font-weight: 900;
+            font-size: .93rem;
+            max-width: 210px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .section-title {
-            color: #6b21a8;
-            font-size: 1.05rem;
+        .user-role {
+            display: block;
+            margin-top: 2px;
+            color: var(--muted);
             font-weight: 800;
+            font-size: .72rem;
+        }
+
+        .page {
+            width: min(1450px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 28px 0 46px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            min-height: 210px;
+            padding: 34px;
+            background:
+                radial-gradient(circle at 89% 6%, rgba(255,255,255,.18) 0 13%, transparent 14%),
+                radial-gradient(circle at 93% 80%, rgba(255,255,255,.11) 0 16%, transparent 17%),
+                linear-gradient(135deg, #1e3a8a 0%, #255ed9 52%, #1880d5 100%);
+            box-shadow: 0 24px 50px rgba(29,78,216,.22);
+            color: #fff;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -60px -110px auto;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.09);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,.13);
+            border: 1px solid rgba(255,255,255,.28);
+            color: #fff;
+            font-weight: 900;
+            font-size: .78rem;
             text-transform: uppercase;
             letter-spacing: .04em;
+            margin-bottom: 16px;
+        }
+
+        .hero h2 {
+            position: relative;
+            z-index: 2;
+            font-size: clamp(2rem, 3.2vw, 3.2rem);
+            line-height: .98;
+            font-weight: 950;
+            letter-spacing: -.055em;
+            margin: 0 0 12px;
+        }
+
+        .hero p {
+            position: relative;
+            z-index: 2;
+            margin: 0;
+            max-width: 780px;
+            color: rgba(255,255,255,.91);
+            font-size: 1.04rem;
+            line-height: 1.55;
+            font-weight: 650;
+        }
+
+        .hero-tags {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.13);
+            border: 1px solid rgba(255,255,255,.25);
+            color: #fff;
+            font-weight: 850;
+            font-size: .84rem;
+        }
+
+        .hero-illustration {
+            position: relative;
+            z-index: 2;
+            width: 160px;
+            height: 160px;
+            border-radius: 34px;
+            background: rgba(255,255,255,.13);
+            border: 1px solid rgba(255,255,255,.26);
+            display: grid;
+            place-items: center;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+        }
+
+        .hero-illustration i {
+            font-size: 4.6rem;
+            color: rgba(255,255,255,.84);
+        }
+
+        .grid-main {
+            display: grid;
+            grid-template-columns: minmax(0, 1.58fr) minmax(330px, .72fr);
+            gap: 22px;
+            margin-top: 22px;
+            align-items: start;
+        }
+
+        .panel-card {
+            position: relative;
+            background: rgba(255,255,255,.94);
+            border: 1px solid rgba(207, 222, 247, .95);
+            border-radius: 24px;
+            box-shadow: 0 18px 42px rgba(22, 53, 108, .08);
+            overflow: hidden;
+        }
+
+        .panel-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 4px;
+            background: linear-gradient(90deg, var(--azul-600), #06b6d4);
+        }
+
+        .panel-head {
+            min-height: 72px;
+            padding: 22px 24px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 1px solid #e7eefb;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .title-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #eff6ff;
+            color: var(--azul-700);
+            font-size: 1.25rem;
+            flex: 0 0 auto;
+        }
+
+        .panel-head h3 {
+            margin: 0;
+            font-weight: 950;
+            letter-spacing: -.035em;
+            font-size: clamp(1.25rem, 1.7vw, 1.75rem);
+            color: var(--azul-900);
+        }
+
+        .panel-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: .92rem;
+            font-weight: 700;
+        }
+
+        .pill-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: var(--azul-700);
+            font-weight: 900;
+            font-size: .82rem;
+            border: 1px solid #dbeafe;
+            white-space: nowrap;
+        }
+
+        .panel-body { padding: 22px 24px 24px; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 22px;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 128px;
+            padding: 18px;
+            border-radius: 22px;
+            background: #fff;
+            border: 1px solid #d8e5fb;
+            box-shadow: 0 15px 32px rgba(31, 78, 160, .07);
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            top: -45px;
+            right: -45px;
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, .08);
+        }
+
+        .summary-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: #eff6ff;
+            color: var(--azul-700);
+            font-size: 1.1rem;
             margin-bottom: 14px;
+        }
+
+        .summary-label {
+            color: #5c7299;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-size: .72rem;
+            font-weight: 950;
+            margin-bottom: 6px;
+        }
+
+        .summary-value {
+            color: var(--azul-900);
+            font-size: 1.08rem;
+            font-weight: 950;
+            line-height: 1.22;
+            word-break: break-word;
+        }
+
+        .summary-card.success .summary-icon { background: #dcfce7; color: #16a34a; }
+        .summary-card.warning .summary-icon { background: #fff7ed; color: #f59e0b; }
+        .summary-card.info .summary-icon { background: #ecfeff; color: #0891b2; }
+
+        .filters-board {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .filter-state {
+            border: 1px solid #dbe7fb;
+            background: linear-gradient(180deg, #fff, #f8fbff);
+            border-radius: 18px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-state .state-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #dcfce7;
+            color: var(--verde);
+            font-size: 1.2rem;
+            flex: 0 0 auto;
+        }
+
+        .filter-state .filter-label {
+            color: var(--muted);
+            font-weight: 900;
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .filter-state .filter-value {
+            margin-top: 2px;
+            color: var(--azul-900);
+            font-weight: 950;
+        }
+
+        .doc-preview-wrap {
+            padding: 10px;
+            border-radius: 26px;
+            background:
+                linear-gradient(135deg, rgba(37,99,235,.16), rgba(6,182,212,.11));
+            border: 1px solid #dbe7fb;
         }
 
         .report-preview {
             background: #ffffff;
-            border: 1px dashed #94a3b8;
-            border-radius: 14px;
-            padding: 28px;
+            border: 1px dashed #a8bad7;
+            border-radius: 22px;
+            padding: 34px;
+            color: #0f2247;
+            min-height: 520px;
+            box-shadow: inset 0 0 0 1px rgba(219,231,251,.5);
+        }
+
+        .doc-header {
+            display: grid;
+            grid-template-columns: 125px minmax(0, 1fr) 125px;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .doc-logo {
+            height: 74px;
+            width: 118px;
+            object-fit: contain;
+        }
+
+        .doc-logo-box {
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            padding: 10px;
+            min-height: 92px;
+        }
+
+        .doc-title {
+            text-align: center;
+        }
+
+        .doc-title .uni {
+            font-weight: 950;
+            color: #566a86;
+            letter-spacing: .02em;
+        }
+
+        .doc-title .estancia {
+            margin-top: 3px;
+            color: #5f7393;
+            font-weight: 850;
+        }
+
+        .doc-title .form-name {
+            margin-top: 18px;
+            color: #061f4b;
+            font-weight: 950;
+            letter-spacing: .01em;
+        }
+
+        .doc-code {
+            color: #0b2a68;
+            font-weight: 950;
+            font-size: .86rem;
+            text-align: center;
+            margin-top: 7px;
+        }
+
+        .date-line {
+            text-align: right;
+            margin: 16px 0 24px;
+            color: #263d61;
+        }
+
+        .date-line span {
+            display: inline-block;
+            min-width: 230px;
+            border-bottom: 2px solid #1f2937;
+            text-align: center;
+            padding: 0 8px 3px;
+            font-weight: 900;
+        }
+
+        .doc-text {
+            line-height: 1.7;
+            font-size: .98rem;
+            margin-bottom: 16px;
+        }
+
+        .choice-line {
+            display: flex;
+            gap: 10px;
+            margin: 14px 0;
+            line-height: 1.55;
+        }
+
+        .checkbox-fake {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #64748b;
+            border-radius: 6px;
+            flex: 0 0 auto;
+            margin-top: 1px;
         }
 
         .line-box {
-            border-bottom: 1px solid #111;
-            height: 28px;
+            border-bottom: 1.8px solid #1f2937;
+            height: 30px;
+            margin-top: 8px;
         }
 
-        textarea {
-            min-height: 150px;
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 26px;
+            margin-top: 74px;
         }
-    </style>
+
+        .signature-line {
+            border-top: 1.8px solid #1f2937;
+            padding-top: 10px;
+            text-align: center;
+            font-weight: 750;
+            color: #22385d;
+        }
+
+        .decision-card {
+            position: sticky;
+            top: 108px;
+        }
+
+        .decision-card::before {
+            background: linear-gradient(90deg, var(--verde), var(--azul-600));
+        }
+
+        .decision-note {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            font-weight: 750;
+            font-size: .9rem;
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-weight: 950;
+            color: var(--azul-900);
+        }
+
+        textarea.form-control {
+            min-height: 170px;
+            resize: vertical;
+            border-radius: 18px;
+            border: 1px solid #cbdcf7;
+            background: #f9fbff;
+            padding: 14px 15px;
+            color: #0f2247;
+            font-weight: 650;
+        }
+
+        textarea.form-control:focus {
+            border-color: var(--azul-500);
+            box-shadow: 0 0 0 .22rem rgba(59,130,246,.14);
+            background: #fff;
+        }
+
+        .form-text { color: #6b7fa4; font-weight: 650; }
+
+        .decision-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn-action {
+            min-height: 48px;
+            border-radius: 15px;
+            font-weight: 950;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            border: 0;
+            padding: .82rem 1rem;
+        }
+
+        .btn-accept {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(22,163,74,.22);
+        }
+
+        .btn-accept:hover { color: #fff; filter: brightness(.97); }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(220,38,38,.18);
+        }
+
+        .btn-reject:hover { color: #fff; filter: brightness(.97); }
+
+        .btn-cancel {
+            background: #fff;
+            border: 1px solid #cad8ee;
+            color: #526681;
+            box-shadow: 0 10px 20px rgba(22,53,108,.05);
+        }
+
+        .btn-cancel:hover {
+            background: #f8fafc;
+            color: var(--azul-900);
+            border-color: #aabddd;
+        }
+
+        .mini-flow {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 20px;
+            background: #f8fbff;
+            border: 1px solid #dbe7fb;
+        }
+
+        .mini-flow-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 950;
+            color: var(--azul-900);
+            margin-bottom: 12px;
+        }
+
+        .flow-item {
+            display: grid;
+            grid-template-columns: 32px 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 8px 0;
+        }
+
+        .flow-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            background: #dcfce7;
+            color: var(--verde);
+        }
+
+        .flow-dot.now {
+            background: #eff6ff;
+            color: var(--azul-700);
+        }
+
+        .flow-dot.next {
+            background: #fff7ed;
+            color: #f97316;
+        }
+
+        .flow-text strong {
+            display: block;
+            color: var(--azul-900);
+            font-weight: 950;
+            line-height: 1.2;
+        }
+
+        .flow-text span {
+            color: var(--muted);
+            font-size: .83rem;
+            font-weight: 650;
+        }
+
+        .alert {
+            border-radius: 16px;
+            border: 0;
+            box-shadow: 0 12px 26px rgba(22, 53, 108, .08);
+            font-weight: 700;
+        }
+
+        @media (max-width: 1180px) {
+            .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .grid-main { grid-template-columns: 1fr; }
+            .decision-card { position: static; }
+        }
+
+        @media (max-width: 768px) {
+            .top-shell, .page { width: min(100% - 24px, 1450px); }
+            .topbar-inner { align-items: flex-start; }
+            .brand h1 { font-size: 1.05rem; }
+            .brand p { font-size: .78rem; }
+            .logo-box { width: 54px; height: 54px; border-radius: 16px; }
+            .top-actions { justify-content: flex-start; }
+            .user-pill { width: 100%; justify-content: flex-start; }
+            .hero { grid-template-columns: 1fr; padding: 24px; }
+            .hero-illustration { display: none; }
+            .summary-grid, .filters-board { grid-template-columns: 1fr; }
+            .panel-head { align-items: flex-start; flex-direction: column; }
+            .doc-header { grid-template-columns: 1fr; text-align: center; }
+            .doc-logo-box { width: 150px; margin: 0 auto; }
+            .date-line { text-align: left; }
+            .signature-grid { grid-template-columns: 1fr; gap: 58px; }
+            .report-preview { padding: 22px; }
+        }
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
+  </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ts fixed-top">
-    <div class="container-fluid justify-content-center">
-        <div class="d-flex align-items-center" style="width:100%; max-width:1100px; padding:0 18px;">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'reporte_final_pendientes' %}">
-                <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" class="me-3" style="height:44px;">
-                <div>
-                    <div class="brand-title">DICTAMEN DE REPORTE FINAL</div>
-                    <div class="brand-subtitle">Trabajo Social · FO-301-02-18</div>
-                </div>
+<header class="topbar">
+    <div class="top-shell topbar-inner">
+        <a class="brand" href="{% url 'reporte_final_pendientes' %}" aria-label="Regresar a reportes finales pendientes">
+            <div class="logo-box">
+                <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
+            </div>
+            <div>
+                <h1>Dictamen de Reporte Final</h1>
+                <p>Trabajo Social · FO-301-02-18</p>
+            </div>
+        </a>
+
+        <div class="top-actions">
+            <a href="{% url 'reporte_final_pendientes' %}" class="btn-return">
+                <i class="bi bi-arrow-left"></i>
+                Regresar
             </a>
 
-            <div class="ms-auto d-flex gap-2 align-items-center">
-                <a href="{% url 'reporte_final_pendientes' %}" class="btn btn-light btn-soft">
-                    <i class="bi bi-arrow-left me-1"></i> Pendientes
-                </a>
-
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-light btn-soft">
-                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
-                    </button>
-                </form>
+            <div class="user-pill" title="Trabajadora Social">
+                <div class="user-avatar">
+                    <i class="bi bi-person-heart"></i>
+                </div>
+                <div>
+                    <div class="user-name">
+                        {% if request.user.get_full_name %}
+                            {{ request.user.get_full_name }}
+                        {% else %}
+                            {{ request.user.username }}
+                        {% endif %}
+                    </div>
+                    <span class="user-role">Trabajadora Social</span>
+                </div>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
-<div class="container-panel">
+<main class="page">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
 
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <div class="card card-panel p-4 mb-4">
-        <h3 class="fw-bold mb-1">
-            <i class="bi bi-file-earmark-medical-fill me-2 text-primary"></i>
-            Reporte Final de Ingreso
-        </h3>
-        <p class="text-muted mb-0">
-            Revisa los filtros y registra si el menor se encuentra en condiciones para concluir el trámite.
-        </p>
-    </div>
-
-    <div class="card card-panel p-4 mb-4">
-        <div class="section-title">Información del expediente</div>
-
-        <div class="row g-3">
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="info-label">Folio</div>
-                    <div class="info-value">#{{ solicitud.folio }}</div>
-                </div>
+    <section class="hero">
+        <div>
+            <div class="hero-badge">
+                <i class="bi bi-shield-check"></i>
+                Revisión final autorizada
             </div>
-
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="info-label">Estado</div>
-                    <div class="info-value">{{ inscripcion.get_estado_display }}</div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="info-label">Psicología</div>
-                    <div class="info-value">{{ solicitud.get_estado_psicologia_display }}</div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="info-label">Nutrición</div>
-                    <div class="info-value">{{ solicitud.get_estado_nutricion_display }}</div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="info-label">Médico</div>
-                    <div class="info-value">{{ solicitud.get_estado_medico_display }}</div>
-                </div>
-            </div>
-
-            <div class="col-md-9">
-                <div class="info-box">
-                    <div class="info-label">Menor</div>
-                    <div class="info-value">{{ solicitud.nombre_menor_completo }}</div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="info-box">
-                    <div class="info-label">Tutor / Beneficiario</div>
-                    <div class="info-value">{{ solicitud.nombre_tutor_completo }}</div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="info-box">
-                    <div class="info-label">Correo</div>
-                    <div class="info-value">{{ solicitud.correo }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card card-panel p-4 mb-4">
-        <div class="section-title">Vista previa del contenido FO-301-02-18</div>
-
-        <div class="report-preview">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <img src="{% static 'img/logo_unach.png' %}" alt="UNACH" style="height:62px;">
-                <div class="text-center">
-                    <div class="fw-bold text-secondary">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
-                    <div class="text-muted fw-semibold">ESTANCIA INFANTIL UNACH</div>
-                    <div class="fw-bold mt-3">REPORTE FINAL DE INGRESO</div>
-                </div>
-                <div class="text-center">
-                    <img src="{% static 'img/logo_eiu.png' %}" alt="EIU" style="height:62px;">
-                    <div class="fw-bold small mt-1">FO-301-02-18</div>
-                </div>
-            </div>
-
-            <p class="text-end mb-4">
-                Fecha:
-                <span style="display:inline-block; width:260px; border-bottom:1px solid #111;">
-                    {{ now|date:"d/m/Y" }}
-                </span>
-            </p>
-
+            <h2>Reporte Final de Ingreso</h2>
             <p>
-                Derivado de la información proporcionada por las diversas áreas que participan
-                en el proceso de inscripción al servicio que proporciona la Estancia Infantil UNACH,
-                se determina que el menor
-                <strong>{{ solicitud.nombre_menor_completo }}</strong>:
+                Revisa el resultado de los filtros institucionales y registra la resolución de Trabajo Social
+                para continuar el proceso con Dirección.
             </p>
+            <div class="hero-tags">
+                <span class="hero-tag"><i class="bi bi-file-earmark-text"></i> Folio #{{ solicitud.folio }}</span>
+                <span class="hero-tag"><i class="bi bi-person-check"></i> {{ solicitud.nombre_menor_completo }}</span>
+                <span class="hero-tag"><i class="bi bi-clipboard2-check"></i> FO-301-02-18</span>
+            </div>
+        </div>
+        <div class="hero-illustration" aria-hidden="true">
+            <i class="bi bi-file-earmark-check"></i>
+        </div>
+    </section>
 
-            <p class="mb-2">
-                ( &nbsp; ) Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.
-            </p>
+    <section class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-icon"><i class="bi bi-hash"></i></div>
+            <div class="summary-label">Folio</div>
+            <div class="summary-value">#{{ solicitud.folio }}</div>
+        </div>
+        <div class="summary-card info">
+            <div class="summary-icon"><i class="bi bi-person-badge"></i></div>
+            <div class="summary-label">Menor</div>
+            <div class="summary-value">{{ solicitud.nombre_menor_completo }}</div>
+        </div>
+        <div class="summary-card success">
+            <div class="summary-icon"><i class="bi bi-clipboard-check"></i></div>
+            <div class="summary-label">Estado actual</div>
+            <div class="summary-value">{{ inscripcion.get_estado_display }}</div>
+        </div>
+        <div class="summary-card warning">
+            <div class="summary-icon"><i class="bi bi-envelope-at"></i></div>
+            <div class="summary-label">Correo</div>
+            <div class="summary-value">{{ solicitud.correo }}</div>
+        </div>
+    </section>
 
-            <p class="mb-3">
-                ( &nbsp; ) No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza
-                la inscripción del mismo por los siguientes motivos:
-            </p>
+    <section class="grid-main">
+        <div class="left-column">
+            <div class="panel-card mb-4">
+                <div class="panel-head">
+                    <div class="title-row">
+                        <div class="title-icon"><i class="bi bi-folder2-open"></i></div>
+                        <div>
+                            <h3>Información del expediente</h3>
+                            <p class="panel-subtitle">Datos generales y resultado de los filtros.</p>
+                        </div>
+                    </div>
+                    <span class="pill-status"><i class="bi bi-activity"></i> En revisión final</span>
+                </div>
+                <div class="panel-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="summary-card h-100">
+                                <div class="summary-icon"><i class="bi bi-person-vcard"></i></div>
+                                <div class="summary-label">Tutor / Beneficiario</div>
+                                <div class="summary-value">{{ solicitud.nombre_tutor_completo }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="summary-card h-100">
+                                <div class="summary-icon"><i class="bi bi-ui-checks"></i></div>
+                                <div class="summary-label">Etapa del trámite</div>
+                                <div class="summary-value">{{ inscripcion.get_estado_display }}</div>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="line-box"></div>
-            <div class="line-box"></div>
-            <div class="line-box"></div>
-
-            <div class="row mt-5 pt-4">
-                <div class="col-md-6 text-center">
-                    <div style="border-top:1px solid #111; padding-top:6px;">
-                        Nombre y Firma de la Trabajadora Social
+                    <div class="filters-board">
+                        <div class="filter-state">
+                            <div class="state-icon"><i class="bi bi-check2-circle"></i></div>
+                            <div>
+                                <div class="filter-label">Psicología</div>
+                                <div class="filter-value">{{ solicitud.get_estado_psicologia_display }}</div>
+                            </div>
+                        </div>
+                        <div class="filter-state">
+                            <div class="state-icon"><i class="bi bi-check2-circle"></i></div>
+                            <div>
+                                <div class="filter-label">Nutrición</div>
+                                <div class="filter-value">{{ solicitud.get_estado_nutricion_display }}</div>
+                            </div>
+                        </div>
+                        <div class="filter-state">
+                            <div class="state-icon"><i class="bi bi-check2-circle"></i></div>
+                            <div>
+                                <div class="filter-label">Médico</div>
+                                <div class="filter-value">{{ solicitud.get_estado_medico_display }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-6 text-center">
-                    <div style="border-top:1px solid #111; padding-top:6px;">
-                        Nombre y Firma de la Directora
+            <div class="panel-card">
+                <div class="panel-head">
+                    <div class="title-row">
+                        <div class="title-icon"><i class="bi bi-file-earmark-richtext"></i></div>
+                        <div>
+                            <h3>Vista previa del formato</h3>
+                            <p class="panel-subtitle">Contenido visual del reporte FO-301-02-18.</p>
+                        </div>
+                    </div>
+                    <span class="pill-status"><i class="bi bi-eye"></i> Previsualización</span>
+                </div>
+                <div class="panel-body">
+                    <div class="doc-preview-wrap">
+                        <div class="report-preview">
+                            <div class="doc-header">
+                                <div class="doc-logo-box">
+                                    <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH" class="doc-logo">
+                                </div>
+                                <div class="doc-title">
+                                    <div class="uni">UNIVERSIDAD AUTÓNOMA DE CHIAPAS</div>
+                                    <div class="estancia">ESTANCIA INFANTIL UNACH</div>
+                                    <div class="form-name">REPORTE FINAL DE INGRESO</div>
+                                </div>
+                                <div class="doc-logo-box">
+                                    <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH" class="doc-logo">
+                                    <div class="doc-code text-white">FO-301-02-18</div>
+                                </div>
+                            </div>
+
+                            <p class="date-line">
+                                Fecha:
+                                <span>{{ now|date:"d/m/Y" }}</span>
+                            </p>
+
+                            <p class="doc-text">
+                                Derivado de la información proporcionada por las diversas áreas que participan
+                                en el proceso de inscripción al servicio que proporciona la Estancia Infantil UNACH,
+                                se determina que el menor
+                                <strong>{{ solicitud.nombre_menor_completo }}</strong>:
+                            </p>
+
+                            <div class="choice-line">
+                                <span class="checkbox-fake"></span>
+                                <div>Se encuentra en condiciones para concluir el trámite y se autoriza la inscripción del mismo.</div>
+                            </div>
+
+                            <div class="choice-line">
+                                <span class="checkbox-fake"></span>
+                                <div>No se encuentra en condiciones para concluir el trámite, por lo que no se autoriza la inscripción del mismo por los siguientes motivos:</div>
+                            </div>
+
+                            <div class="line-box"></div>
+                            <div class="line-box"></div>
+                            <div class="line-box"></div>
+
+                            <div class="signature-grid">
+                                <div class="signature-line">Nombre y Firma de la Trabajadora Social</div>
+                                <div class="signature-line">Nombre y Firma de la Directora</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <form method="post" class="card card-panel p-4">
-        {% csrf_token %}
+        <aside class="right-column">
+            <form method="post" class="panel-card decision-card">
+                {% csrf_token %}
 
-        <div class="section-title">Resolución de Trabajo Social</div>
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
 
-        <div class="mb-3">
-            <label class="form-label fw-bold">Motivos / observaciones del Reporte Final</label>
-            <textarea
-                name="reporte_final_motivos"
-                class="form-control"
-                placeholder="Escribe aquí los motivos si se rechaza, o una observación general si se acepta.">{{ inscripcion.reporte_final_motivos|default:"" }}</textarea>
-            <div class="form-text">
-                Si rechazas la inscripción, este campo es obligatorio.
-            </div>
-        </div>
+                <div class="panel-head">
+                    <div class="title-row">
+                        <div class="title-icon"><i class="bi bi-check2-square"></i></div>
+                        <div>
+                            <h3>Resolución</h3>
+                            <p class="panel-subtitle">Dictamen final de Trabajo Social.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="decision-note">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Al aceptar, el expediente se enviará a Dirección. Al rechazar, escribe obligatoriamente los motivos.
+                    </div>
 
-        <div class="d-flex justify-content-end gap-2 flex-wrap">
-            <a href="{% url 'reporte_final_pendientes' %}" class="btn btn-outline-secondary btn-soft">
-                <i class="bi bi-arrow-left me-1"></i> Cancelar
-            </a>
+                    <div class="mb-3">
+                        <label class="form-label">Motivos / observaciones del Reporte Final</label>
+                        <textarea
+                            name="reporte_final_motivos"
+                            class="form-control"
+                            placeholder="Escribe aquí los motivos si se rechaza, o una observación general si se acepta.">{{ inscripcion.reporte_final_motivos|default:"" }}</textarea>
+                        <div class="form-text mt-2">
+                            Si rechazas la inscripción, este campo es obligatorio.
+                        </div>
+                    </div>
 
-            <button
-                type="submit"
-                name="accion_reporte_final"
-                value="RECHAZAR"
-                class="btn btn-danger btn-soft"
-                onclick="return confirm('¿Confirmas rechazar la inscripción desde Trabajo Social?');">
-                <i class="bi bi-x-circle me-1"></i> Rechazar inscripción
-            </button>
+                    <div class="decision-actions">
+                        <button
+                            type="submit"
+                            name="accion_reporte_final"
+                            value="ACEPTAR"
+                            class="btn btn-action btn-accept"
+                            onclick="return confirm('¿Confirmas aceptar la inscripción y enviarla a Dirección?');">
+                            <i class="bi bi-check-circle"></i>
+                            Aceptar y enviar a Dirección
+                        </button>
 
-            <button
-                type="submit"
-                name="accion_reporte_final"
-                value="ACEPTAR"
-                class="btn btn-success btn-soft"
-                onclick="return confirm('¿Confirmas aceptar la inscripción y enviarla a Dirección?');">
-                <i class="bi bi-check-circle me-1"></i> Aceptar y enviar a Dirección
-            </button>
-        </div>
-    </form>
+                        <button
+                            type="submit"
+                            name="accion_reporte_final"
+                            value="RECHAZAR"
+                            class="btn btn-action btn-reject"
+                            onclick="return confirm('¿Confirmas rechazar la inscripción desde Trabajo Social?');">
+                            <i class="bi bi-x-circle"></i>
+                            Rechazar inscripción
+                        </button>
 
-</div>
+                        <a href="{% url 'reporte_final_pendientes' %}" class="btn btn-action btn-cancel">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancelar
+                        </a>
+                    </div>
+
+                    <div class="mini-flow">
+                        <div class="mini-flow-title">
+                            <i class="bi bi-diagram-3"></i>
+                            Flujo del trámite
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-dot"><i class="bi bi-check"></i></div>
+                            <div class="flow-text">
+                                <strong>Filtros finalizados</strong>
+                                <span>Psicología, Nutrición y Médico ya emitieron dictamen.</span>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-dot now"><i class="bi bi-person-heart"></i></div>
+                            <div class="flow-text">
+                                <strong>Trabajo Social</strong>
+                                <span>Registra el reporte final y determina si continúa.</span>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-dot next"><i class="bi bi-building-check"></i></div>
+                            <div class="flow-text">
+                                <strong>Dirección</strong>
+                                <span>Recibe el expediente si Trabajo Social lo acepta.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </aside>
+    </section>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

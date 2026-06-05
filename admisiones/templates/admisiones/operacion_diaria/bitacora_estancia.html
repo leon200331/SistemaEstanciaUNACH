@@ -12,6 +12,7 @@
     <style>
         :root{
             --blue:#2563eb;
+            --blue-dark:#1e40af;
             --cyan:#0891b2;
             --green:#16a34a;
             --yellow:#ca8a04;
@@ -20,6 +21,7 @@
             --slate:#0f172a;
             --muted:#64748b;
             --border:#e2e8f0;
+            --soft:#f8fafc;
         }
 
         *{box-sizing:border-box;}
@@ -35,7 +37,7 @@
         }
 
         .page{
-            max-width:1280px;
+            max-width:1320px;
             margin:0 auto;
             padding:24px;
         }
@@ -58,25 +60,29 @@
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
         .brand-logo{
-            width:64px;
+            width:96px;
             height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.32);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            transform:scale(1.1);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
 
         .brand-title{
@@ -99,6 +105,41 @@
             flex-wrap:wrap;
             gap:10px;
             justify-content:flex-end;
+            align-items:center;
+        }
+
+        .teacher-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 12px;
+            border:1px solid var(--border);
+            border-radius:999px;
+            background:#fff;
+            box-shadow:0 10px 22px rgba(15,23,42,.05);
+            color:#0f172a;
+            font-weight:850;
+            max-width:285px;
+        }
+
+        .teacher-chip .teacher-icon{
+            width:34px;
+            height:34px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#ede9fe,#dbeafe);
+            color:#6d28d9;
+            flex-shrink:0;
+            font-size:1.05rem;
+        }
+
+        .teacher-name{
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:.9rem;
         }
 
         .btn-soft{
@@ -114,6 +155,7 @@
             justify-content:center;
             gap:8px;
             transition:.18s ease;
+            white-space:nowrap;
         }
 
         .btn-soft:hover{
@@ -141,11 +183,6 @@
             box-shadow:0 14px 28px rgba(15,23,42,.16);
         }
 
-        .btn-blue{
-            background:linear-gradient(135deg,var(--blue),var(--cyan));
-            color:white;
-        }
-
         .btn-green{
             background:linear-gradient(135deg,#16a34a,#22c55e);
             color:white;
@@ -156,18 +193,13 @@
             color:white;
         }
 
-        .btn-red{
-            background:linear-gradient(135deg,#dc2626,#f97316);
-            color:white;
-        }
-
         .hero{
             background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);
             color:white;
             border-radius:30px;
             padding:26px;
             box-shadow:0 24px 60px rgba(37,99,235,.24);
-            margin-bottom:22px;
+            margin-bottom:20px;
             position:relative;
             overflow:hidden;
         }
@@ -175,12 +207,12 @@
         .hero:after{
             content:"";
             position:absolute;
-            width:260px;
-            height:260px;
+            width:280px;
+            height:280px;
             border-radius:50%;
             background:rgba(255,255,255,.14);
-            right:-80px;
-            top:-90px;
+            right:-90px;
+            top:-100px;
         }
 
         .hero-content{
@@ -190,6 +222,38 @@
             grid-template-columns:1fr auto;
             gap:18px;
             align-items:center;
+        }
+
+        .hero-student{
+            display:flex;
+            align-items:center;
+            gap:18px;
+            min-width:0;
+        }
+
+        .hero-photo{
+            width:92px;
+            height:92px;
+            border-radius:26px;
+            border:3px solid rgba(255,255,255,.55);
+            background:rgba(255,255,255,.18);
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 16px 32px rgba(0,0,0,.16);
+            flex-shrink:0;
+        }
+
+        .hero-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .hero-photo i{
+            font-size:2.8rem;
+            color:white;
         }
 
         .hero-kicker{
@@ -202,7 +266,7 @@
             padding:.45rem .8rem;
             font-size:.78rem;
             font-weight:900;
-            margin-bottom:12px;
+            margin-bottom:10px;
         }
 
         .hero h1{
@@ -210,17 +274,18 @@
             font-size:2rem;
             font-weight:950;
             letter-spacing:-.05em;
+            text-shadow:0 8px 18px rgba(0,0,0,.12);
         }
 
         .hero p{
             margin:8px 0 0;
             max-width:820px;
-            font-weight:600;
-            opacity:.94;
+            font-weight:650;
+            opacity:.95;
         }
 
         .day-info{
-            min-width:260px;
+            min-width:250px;
             background:rgba(255,255,255,.18);
             border:1px solid rgba(255,255,255,.28);
             border-radius:22px;
@@ -242,19 +307,120 @@
             font-weight:950;
         }
 
-        .layout{
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-purple{background:#ede9fe;color:#5b21b6;}
+
+        .summary-strip{
             display:grid;
-            grid-template-columns:.82fr 1.18fr;
-            gap:20px;
-            align-items:start;
+            grid-template-columns:1.7fr repeat(5, minmax(0, 1fr));
+            gap:12px;
+            margin-bottom:20px;
+            align-items:stretch;
+        }
+
+        .student-summary{
+            background:linear-gradient(135deg,#f5f3ff,#eff6ff 60%,#ffffff);
+            border:1px solid #c4b5fd;
+            border-radius:22px;
+            padding:14px;
+            display:flex;
+            align-items:center;
+            gap:14px;
+            box-shadow:0 14px 34px rgba(15,23,42,.06);
+            min-width:0;
+        }
+
+        .student-avatar{
+            width:66px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#ede9fe,#dbeafe);
+            color:#6d28d9;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.8rem;
+            flex-shrink:0;
+            overflow:hidden;
+            border:3px solid rgba(255,255,255,.74);
+            box-shadow:0 12px 26px rgba(15,23,42,.10);
+        }
+
+        .student-avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .student-name{
+            font-weight:950;
+            font-size:1.05rem;
+            color:#0f172a;
+            letter-spacing:-.03em;
+            margin-bottom:3px;
+            overflow-wrap:anywhere;
+        }
+
+        .student-meta{
+            color:#475569;
+            font-size:.86rem;
+            font-weight:700;
+            line-height:1.35;
+        }
+
+        .quick-card{
+            background:rgba(255,255,255,.95);
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:14px 15px;
+            box-shadow:0 12px 28px rgba(15,23,42,.06);
+            min-width:0;
+        }
+
+        .quick-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .quick-value{
+            font-weight:950;
+            color:#0f172a;
+            overflow-wrap:anywhere;
         }
 
         .panel{
-            background:rgba(255,255,255,.95);
+            background:rgba(255,255,255,.96);
             border:1px solid var(--border);
             border-radius:26px;
             box-shadow:0 16px 38px rgba(15,23,42,.08);
             overflow:hidden;
+            min-width:0;
         }
 
         .panel-header{
@@ -279,179 +445,7 @@
             gap:8px;
         }
 
-        .panel-body{
-            padding:20px;
-        }
-
-        .alert-custom{
-            border:none;
-            border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
-        }
-
-        .student-card{
-            background:linear-gradient(135deg,#f5f3ff,#eff6ff);
-            border:1px solid #c4b5fd;
-            border-radius:24px;
-            padding:18px;
-            margin-bottom:16px;
-        }
-
-        .student-top{
-            display:flex;
-            gap:14px;
-            align-items:flex-start;
-        }
-
-        .student-avatar{
-            width:62px;
-            height:62px;
-            border-radius:20px;
-            background:linear-gradient(135deg,#ede9fe,#dbeafe);
-            color:#6d28d9;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:1.7rem;
-            flex-shrink:0;
-        }
-
-        .student-name{
-            font-weight:950;
-            font-size:1.18rem;
-            color:#0f172a;
-            letter-spacing:-.03em;
-            margin-bottom:4px;
-        }
-
-        .student-meta{
-            color:#475569;
-            font-size:.9rem;
-            font-weight:700;
-            line-height:1.45;
-        }
-
-        .info-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-            margin-top:16px;
-        }
-
-        .info-item{
-            background:white;
-            border:1px solid rgba(148,163,184,.28);
-            border-radius:16px;
-            padding:12px;
-        }
-
-        .info-label{
-            color:#64748b;
-            font-size:.72rem;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-            font-weight:950;
-            margin-bottom:4px;
-        }
-
-        .info-value{
-            font-weight:900;
-            color:#0f172a;
-        }
-
-        .badge-soft{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            border-radius:999px;
-            padding:.42rem .68rem;
-            font-size:.76rem;
-            font-weight:950;
-            white-space:nowrap;
-        }
-
-        .badge-yellow{background:#fef3c7;color:#92400e;}
-        .badge-green{background:#dcfce7;color:#166534;}
-        .badge-blue{background:#dbeafe;color:#1e40af;}
-        .badge-gray{background:#e2e8f0;color:#334155;}
-        .badge-purple{background:#ede9fe;color:#5b21b6;}
-        .badge-red{background:#fee2e2;color:#991b1b;}
-
-        .help-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .readonly-card{
-            background:#f8fafc;
-            border:1px solid #cbd5e1;
-            border-left:6px solid #64748b;
-            color:#334155;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .warning-card{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            color:#9a3412;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .flow-card{
-            background:white;
-            border:1px solid var(--border);
-            border-radius:20px;
-            padding:15px;
-            margin-bottom:12px;
-            display:flex;
-            gap:12px;
-            align-items:flex-start;
-        }
-
-        .flow-icon{
-            width:42px;
-            height:42px;
-            border-radius:15px;
-            background:#ede9fe;
-            color:#6d28d9;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:1.2rem;
-            flex-shrink:0;
-        }
-
-        .flow-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:3px;
-        }
-
-        .flow-text{
-            color:#64748b;
-            font-weight:650;
-            font-size:.86rem;
-            line-height:1.4;
-            margin:0;
-        }
+        .panel-body{padding:20px;}
 
         .form-section{
             border:1px solid var(--border);
@@ -481,9 +475,7 @@
             grid-template-columns:repeat(3,minmax(0,1fr));
         }
 
-        .form-group.full{
-            grid-column:1 / -1;
-        }
+        .form-group.full{grid-column:1 / -1;}
 
         .form-label{
             font-weight:900;
@@ -500,37 +492,74 @@
             font-weight:650;
             color:#0f172a;
             background:white;
+            width:100%;
+            max-width:100%;
+            min-width:0;
         }
 
-        textarea.form-control{
-            min-height:108px;
-        }
+        textarea.form-control{min-height:108px;}
 
         .form-control:focus,
         .form-select:focus{
-            border-color:#93c5fd;
-            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+            border-color:#a78bfa;
+            box-shadow:0 0 0 4px rgba(124,58,237,.12);
         }
 
-        .form-check{
-            background:white;
+        .native-multi-select select{
+            display:none;
+        }
+
+        .chip-grid{
+            display:flex;
+            flex-wrap:wrap;
+            gap:9px;
+        }
+
+        .choice-chip{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            gap:9px;
+            padding:.74rem .92rem;
             border:1px solid #cbd5e1;
             border-radius:16px;
-            padding:14px 14px 14px 44px;
-            min-height:54px;
+            background:#fff;
+            color:#0f172a;
+            font-weight:900;
+            cursor:pointer;
+            transition:.16s ease;
+            min-width:130px;
+            justify-content:flex-start;
+        }
+
+        .choice-chip:hover{
+            transform:translateY(-1px);
+            border-color:#a78bfa;
+            box-shadow:0 10px 22px rgba(124,58,237,.10);
+        }
+
+        .choice-chip .check{
+            width:28px;
+            height:28px;
+            border-radius:999px;
+            background:#ede9fe;
+            color:#7c3aed;
             display:flex;
             align-items:center;
+            justify-content:center;
+            font-size:.95rem;
+            flex-shrink:0;
         }
 
-        .form-check-input{
-            margin-left:-28px;
-            width:1.15rem;
-            height:1.15rem;
+        .choice-chip.is-selected{
+            border-color:#7c3aed;
+            background:linear-gradient(135deg,#f5f3ff,#eff6ff);
+            box-shadow:0 12px 24px rgba(124,58,237,.13);
         }
 
-        .form-check-label{
-            font-weight:850;
-            color:#334155;
+        .choice-chip.is-selected .check{
+            background:linear-gradient(135deg,#7c3aed,#2563eb);
+            color:white;
         }
 
         .mini-help{
@@ -550,33 +579,6 @@
         .errors ul{
             margin:0;
             padding-left:18px;
-        }
-
-        .submit-bar{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
-            gap:12px;
-            padding-top:4px;
-        }
-
-        .submit-note{
-            color:#64748b;
-            font-weight:650;
-            font-size:.86rem;
-            max-width:560px;
-        }
-
-        .completion-card{
-            background:#f0fdf4;
-            border:1px solid #bbf7d0;
-            border-left:6px solid #16a34a;
-            color:#14532d;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-top:12px;
         }
 
         .milk-grid{
@@ -606,54 +608,217 @@
             gap:9px;
         }
 
-        .conditional-note{
-            background:#f8fafc;
-            border:1px dashed #cbd5e1;
-            border-radius:16px;
-            padding:12px;
-            color:#64748b;
-            font-weight:650;
-            font-size:.84rem;
+        .amount-row{
+            display:grid;
+            grid-template-columns:auto 1fr 86px;
+            align-items:center;
+            gap:8px;
+            background:#fff;
+            border:1px solid #cbd5e1;
+            border-radius:18px;
+            padding:9px 10px;
         }
 
-        @media(max-width:1050px){
-            .layout{grid-template-columns:1fr;}
+        .amount-row .amount-icon{
+            width:34px;
+            height:34px;
+            border-radius:12px;
+            background:#ede9fe;
+            color:#6d28d9;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .amount-row .form-control,
+        .amount-row .form-select{
+            border:none;
+            padding:.55rem .25rem;
+            box-shadow:none !important;
+            background:transparent;
+        }
+
+        .amount-row .form-select{
+            border-left:1px solid #e2e8f0;
+            border-radius:0;
+            padding-left:10px;
+            font-weight:950;
+        }
+
+        .time-range-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+        }
+
+        .time-mini-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:6px;
+        }
+
+        .hygiene-grid{
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:18px;
+            align-items:start;
+        }
+
+        .hygiene-grid > .form-group{
+            min-width:0;
+        }
+
+        .hygiene-column{
+            display:flex;
+            flex-direction:column;
+            height:100%;
+        }
+
+        .hygiene-column .input-icon,
+        .hygiene-column .form-select{
+            min-height:58px;
+        }
+
+        .hygiene-select-wrap{
+            display:grid;
+            grid-template-columns:auto 1fr;
+            align-items:center;
+            gap:10px;
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:18px;
+            padding:10px 12px;
+        }
+
+        .hygiene-select-wrap:focus-within{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        .hygiene-select-wrap i{
+            width:34px;
+            height:34px;
+            border-radius:12px;
+            background:#ede9fe;
+            color:#6d28d9;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .hygiene-select-wrap .form-select{
+            border:none;
+            padding:.55rem .25rem;
+            box-shadow:none !important;
+            background:transparent;
+        }
+
+        .panal-detail{
+            display:none;
+            margin-top:10px;
+        }
+
+        .panal-detail.show{display:block;}
+
+        .control-full{grid-column:1 / -1;}
+
+        .input-icon{
+            display:grid;
+            grid-template-columns:auto 1fr;
+            align-items:center;
+            gap:10px;
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:18px;
+            padding:10px 12px;
+        }
+
+        .input-icon i{
+            width:34px;
+            height:34px;
+            border-radius:12px;
+            background:#ede9fe;
+            color:#6d28d9;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .input-icon .form-control,
+        .input-icon .form-select{
+            border:none;
+            padding:.55rem .25rem;
+            box-shadow:none !important;
+        }
+
+        .submit-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            padding-top:4px;
+        }
+
+        .submit-note{
+            color:#64748b;
+            font-weight:650;
+            font-size:.86rem;
+            max-width:620px;
+        }
+
+        .autosave-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            padding:.48rem .75rem;
+            border-radius:999px;
+            background:#dcfce7;
+            color:#166534;
+            font-weight:950;
+            font-size:.76rem;
+        }
+
+        .readonly-card{
+            background:#f8fafc;
+            border:1px solid #cbd5e1;
+            border-left:6px solid #64748b;
+            color:#334155;
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:650;
+            margin-bottom:16px;
+            line-height:1.45;
+        }
+
+        @media(max-width:1180px){
+            .summary-strip{grid-template-columns:1fr 1fr 1fr;}
+            .student-summary{grid-column:1 / -1;}
             .hero-content{grid-template-columns:1fr;}
             .day-info{min-width:0;}
         }
 
-        @media(max-width:720px){
-            .page{padding:14px;}
-
-            .topbar{
-                flex-direction:column;
-                align-items:flex-start;
-                border-radius:20px;
-            }
-
-            .top-actions,
-            .btn-soft,
-            .btn-main{
-                width:100%;
-                justify-content:center;
-            }
-
-            .hero{
-                padding:22px;
-                border-radius:22px;
-            }
-
-            .hero h1{font-size:1.55rem;}
-
+        @media(max-width:820px){
+            .summary-strip,
             .form-grid,
             .form-grid.three,
-            .info-grid,
             .milk-grid{
                 grid-template-columns:1fr;
             }
+        }
 
-            .student-top{flex-direction:column;}
+        @media(max-width:720px){
+            .page{padding:14px;}
+            .topbar{flex-direction:column;align-items:flex-start;border-radius:20px;}
+            .top-actions,.btn-soft,.btn-main,.teacher-chip{width:100%;justify-content:center;}
+            .hero{padding:22px;border-radius:22px;}
+            .hero-student{flex-direction:column;align-items:flex-start;}
+            .hero h1{font-size:1.55rem;}
+            .student-summary{align-items:flex-start;}
             .submit-bar{align-items:stretch;}
+            .choice-chip{width:100%;}
         }
     </style>
 </head>
@@ -668,27 +833,25 @@
             </div>
             <div>
                 <h1 class="brand-title">Durante mi estancia en la EIU</h1>
-                <p class="brand-subtitle">
-                    Segunda parte de la bitácora diaria del menor.
-                </p>
+                <p class="brand-subtitle">Segunda parte de la bitácora diaria del menor.</p>
             </div>
         </div>
 
         <div class="top-actions">
-            <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-soft">
+            <a href="{% url 'dashboard_maestra' %}#alumnos-dia" class="btn-soft">
                 <i class="bi bi-arrow-left-circle-fill"></i>
-                Volver a alumnos
+                Regresar
             </a>
 
-            <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}" class="btn-soft">
+            <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}?origen=estancia" class="btn-soft">
                 <i class="bi bi-house-heart-fill"></i>
                 Ver en casa
             </a>
 
-            <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
-                <i class="bi bi-house-door-fill"></i>
-                Panel maestra
-            </a>
+            <div class="teacher-chip" title="Maestra">
+                <span class="teacher-icon"><i class="bi bi-person-workspace"></i></span>
+                <span class="teacher-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+            </div>
         </div>
     </header>
 
@@ -704,20 +867,27 @@
 
     <section class="hero">
         <div class="hero-content">
-            <div>
-                <div class="hero-kicker">
-                    <i class="bi bi-journal-text"></i>
-                    Observación durante la permanencia
+            <div class="hero-student">
+                <div class="hero-photo">
+                    {% if registro.alumno.doc_menor_fotos %}
+                        <img src="{{ registro.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                    {% else %}
+                        <i class="bi bi-person-heart"></i>
+                    {% endif %}
                 </div>
 
-                <h1>
-                    {{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}
-                </h1>
+                <div>
+                    <div class="hero-kicker">
+                        <i class="bi bi-journal-text"></i>
+                        Observación durante la permanencia
+                    </div>
 
-                <p>
-                    Registra cómo estuvo el menor dentro de la Estancia Infantil Universitaria: alimentación,
-                    hidratación, descanso, pañal o control de esfínteres, actividad pedagógica y comentarios generales.
-                </p>
+                    <h1>{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</h1>
+
+                    <p>
+                        Registra alimentación, hidratación, descanso, higiene, actividad pedagógica y comentarios generales del menor durante su permanencia en la estancia.
+                    </p>
+                </div>
             </div>
 
             <div class="day-info">
@@ -725,15 +895,9 @@
                 <div class="day-value">{{ dia.fecha|date:"d/m/Y" }}</div>
                 <div class="mt-2">
                     {% if bitacora.completa %}
-                        <span class="badge-soft badge-green">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Completa
-                        </span>
+                        <span class="badge-soft badge-green"><i class="bi bi-check-circle-fill"></i> Completa</span>
                     {% else %}
-                        <span class="badge-soft badge-yellow">
-                            <i class="bi bi-clock-history"></i>
-                            En captura
-                        </span>
+                        <span class="badge-soft badge-yellow"><i class="bi bi-clock-history"></i> En captura</span>
                     {% endif %}
                 </div>
             </div>
@@ -747,425 +911,523 @@
         </div>
     {% endif %}
 
-    <div class="layout">
-
-        <aside>
-            <section class="panel mb-4">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-person-heart"></i>
-                        Datos del menor
-                    </h2>
-                </div>
-
-                <div class="panel-body">
-                    <div class="student-card">
-                        <div class="student-top">
-                            <div class="student-avatar">
-                                <i class="bi bi-person-heart"></i>
-                            </div>
-                            <div>
-                                <div class="student-name">
-                                    {{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}
-                                </div>
-                                <div class="student-meta">
-                                    {% if registro.sala_semestre and registro.sala_semestre.sala %}
-                                        Sala: <strong>{{ registro.sala_semestre.sala.nombre }}</strong><br>
-                                        Tipo: <strong>{{ registro.sala_semestre.sala.get_tipo_sala_display }}</strong>
-                                    {% else %}
-                                        Sala no asignada
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Formulario</div>
-                                <div class="info-value">
-                                    {% if tipo_formulario == "LACTANTES" %}
-                                        Lactantes
-                                    {% elif tipo_formulario == "MATERNAL" %}
-                                        Maternal
-                                    {% else %}
-                                        General
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Entrada</div>
-                                <div class="info-value">
-                                    {% if registro.entrada_en %}
-                                        {{ registro.entrada_en|date:"H:i" }}
-                                    {% else %}
-                                        Sin entrada
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Salida</div>
-                                <div class="info-value">
-                                    {% if registro.salida_en %}
-                                        {{ registro.salida_en|date:"H:i" }}
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Bitácora</div>
-                                <div class="info-value">
-                                    {% if bitacora.completa %}
-                                        Completa
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="help-card">
-                        <i class="bi bi-info-circle-fill me-1"></i>
-                        Esta sección la llena la maestra con base en la observación del menor durante su permanencia en la EIU.
-                    </div>
-
-                    {% if tipo_formulario == "LACTANTES" %}
-                        <div class="warning-card">
-                            <i class="bi bi-baby me-1"></i>
-                            Para lactantes, el campo de pañal es importante. El control de esfínteres puede quedar sin captura.
-                        </div>
-                    {% elif tipo_formulario == "MATERNAL" %}
-                        <div class="warning-card">
-                            <i class="bi bi-balloon-heart-fill me-1"></i>
-                            Para maternal, registra control de esfínteres cuando aplique. El pañal puede quedar sin captura.
-                        </div>
+    <section class="summary-strip">
+        <div class="student-summary">
+            <div class="student-avatar">
+                {% if registro.alumno.doc_menor_fotos %}
+                    <img src="{{ registro.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                {% else %}
+                    <i class="bi bi-person-heart"></i>
+                {% endif %}
+            </div>
+            <div>
+                <div class="student-name">{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</div>
+                <div class="student-meta">
+                    {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                        Sala: <strong>{{ registro.sala_semestre.sala.nombre }}</strong> · Tipo: <strong>{{ registro.sala_semestre.sala.get_tipo_sala_display }}</strong>
+                    {% else %}
+                        Sala no asignada
                     {% endif %}
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-diagram-3-fill"></i>
-                        Flujo del día
-                    </h2>
-                </div>
+        <div class="quick-card">
+            <div class="quick-label">Formulario</div>
+            <div class="quick-value">
+                {% if tipo_formulario == "LACTANTES" %}Lactantes{% elif tipo_formulario == "MATERNAL" %}Maternal{% else %}General{% endif %}
+            </div>
+        </div>
 
-                <div class="panel-body">
-                    <div class="flow-card">
-                        <div class="flow-icon">
-                            <i class="bi bi-house-heart-fill"></i>
-                        </div>
-                        <div>
-                            <div class="flow-title">En casa</div>
-                            <p class="flow-text">
-                                Información proporcionada por el responsable al ingreso.
-                            </p>
-                        </div>
-                    </div>
+        <div class="quick-card">
+            <div class="quick-label">Entrada</div>
+            <div class="quick-value">{% if registro.entrada_en %}{{ registro.entrada_en|date:"H:i" }}{% else %}Sin entrada{% endif %}</div>
+        </div>
 
-                    <div class="flow-card">
-                        <div class="flow-icon">
-                            <i class="bi bi-journal-text"></i>
-                        </div>
-                        <div>
-                            <div class="flow-title">Durante estancia</div>
-                            <p class="flow-text">
-                                Observaciones de la maestra durante el día.
-                            </p>
-                        </div>
-                    </div>
+        <div class="quick-card">
+            <div class="quick-label">Salida</div>
+            <div class="quick-value">{% if registro.salida_en %}{{ registro.salida_en|date:"H:i" }}{% else %}Pendiente{% endif %}</div>
+        </div>
 
-                    <div class="flow-card">
-                        <div class="flow-icon">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </div>
-                        <div>
-                            <div class="flow-title">Salida</div>
-                            <p class="flow-text">
-                                Al final se valida responsable, credencial y código de seguridad.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </aside>
+        <div class="quick-card">
+            <div class="quick-label">Bitácora</div>
+            <div class="quick-value">{% if bitacora.completa %}Completa{% else %}Pendiente{% endif %}</div>
+        </div>
 
-        <main>
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-pencil-square"></i>
-                        Registro “Durante mi estancia”
-                    </h2>
+        <div class="quick-card">
+            <div class="quick-label">Captura</div>
+            <div class="quick-value">Borrador automático local</div>
+        </div>
+    </section>
 
+    <main>
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="bi bi-pencil-square"></i>
+                    Registro “Durante mi estancia”
+                </h2>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="autosave-pill"><i class="bi bi-cloud-check-fill"></i> Borrador automático activo</span>
                     {% if tipo_formulario == "LACTANTES" %}
-                        <span class="badge-soft badge-blue">
-                            <i class="bi bi-baby"></i>
-                            Lactantes
-                        </span>
+                        <span class="badge-soft badge-blue"><i class="bi bi-baby"></i> Lactantes</span>
                     {% elif tipo_formulario == "MATERNAL" %}
-                        <span class="badge-soft badge-purple">
-                            <i class="bi bi-balloon-heart-fill"></i>
-                            Maternal
-                        </span>
+                        <span class="badge-soft badge-purple"><i class="bi bi-balloon-heart-fill"></i> Maternal</span>
                     {% endif %}
                 </div>
+            </div>
 
-                <div class="panel-body">
-                    <form method="post" novalidate id="bitacoraForm">
-                        {% csrf_token %}
+            <div class="panel-body">
+                <form method="post" novalidate id="bitacoraForm">
+                    {% csrf_token %}
 
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger alert-custom">
-                                {{ form.non_field_errors }}
-                            </div>
-                        {% endif %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-custom">{{ form.non_field_errors }}</div>
+                    {% endif %}
 
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-emoji-smile-fill"></i>
-                                Estado durante el día
-                            </div>
+                    {% if form.marcar_completa %}
+                        <input type="hidden" name="{{ form.marcar_completa.html_name }}" value="on" id="{{ form.marcar_completa.id_for_label }}">
+                    {% endif %}
 
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.estado_durante_dia_multiple.id_for_label }}" class="form-label">
-                                        Hoy durante el día estuve
-                                    </label>
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-emoji-smile-fill"></i>
+                            Estado durante el día
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label for="{{ form.estado_durante_dia_multiple.id_for_label }}" class="form-label">
+                                    Hoy durante el día estuve
+                                </label>
+                                <div class="native-multi-select" data-native-select="{{ form.estado_durante_dia_multiple.id_for_label }}">
                                     {{ form.estado_durante_dia_multiple }}
-                                    <div class="mini-help">
-                                        Puedes seleccionar más de una opción.
-                                    </div>
-                                    {% if form.estado_durante_dia_multiple.errors %}
-                                        <div class="errors">{{ form.estado_durante_dia_multiple.errors }}</div>
-                                    {% endif %}
                                 </div>
+                                <div class="chip-grid mt-2" id="estadoDuranteChips"></div>
+                                <div class="mini-help">Puedes elegir más de una opción; el sistema guardará todas las seleccionadas.</div>
+                                {% if form.estado_durante_dia_multiple.errors %}
+                                    <div class="errors">{{ form.estado_durante_dia_multiple.errors }}</div>
+                                {% endif %}
+                            </div>
 
-                                <div class="form-group full">
-                                    <label for="{{ form.hidratacion.id_for_label }}" class="form-label">
-                                        Hidratación
-                                    </label>
+                            <div class="form-group full">
+                                <label for="{{ form.hidratacion.id_for_label }}" class="form-label">Hidratación</label>
+                                <div class="input-icon">
+                                    <i class="bi bi-droplet-half"></i>
                                     {{ form.hidratacion }}
-                                    {% if form.hidratacion.errors %}
-                                        <div class="errors">{{ form.hidratacion.errors }}</div>
-                                    {% endif %}
+                                </div>
+                                {% if form.hidratacion.errors %}<div class="errors">{{ form.hidratacion.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-droplet-half"></i>
+                            Tomas de leche
+                        </div>
+
+                        <div class="milk-grid">
+                            <div class="milk-card">
+                                <div class="milk-title"><i class="bi bi-1-circle-fill"></i> Toma 1</div>
+                                <div class="milk-fields">
+                                    <input type="time" name="leche_1_hora" class="form-control" placeholder="Hora">
+                                    <input type="hidden" name="leche_1_cantidad" id="leche_1_cantidad">
+                                    <div class="amount-row">
+                                        <span class="amount-icon"><i class="bi bi-cup-straw"></i></span>
+                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_1_numero" data-milk-number="1" placeholder="Cantidad">
+                                        <select class="form-select" id="leche_1_unidad" data-milk-unit="1" aria-label="Unidad toma 1">
+                                            <option value="oz">oz</option>
+                                            <option value="ml">ml</option>
+                                            <option value="L">L</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="milk-card">
+                                <div class="milk-title"><i class="bi bi-2-circle-fill"></i> Toma 2</div>
+                                <div class="milk-fields">
+                                    <input type="time" name="leche_2_hora" class="form-control" placeholder="Hora">
+                                    <input type="hidden" name="leche_2_cantidad" id="leche_2_cantidad">
+                                    <div class="amount-row">
+                                        <span class="amount-icon"><i class="bi bi-cup-straw"></i></span>
+                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_2_numero" data-milk-number="2" placeholder="Cantidad">
+                                        <select class="form-select" id="leche_2_unidad" data-milk-unit="2" aria-label="Unidad toma 2">
+                                            <option value="oz">oz</option>
+                                            <option value="ml">ml</option>
+                                            <option value="L">L</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="milk-card">
+                                <div class="milk-title"><i class="bi bi-3-circle-fill"></i> Toma 3</div>
+                                <div class="milk-fields">
+                                    <input type="time" name="leche_3_hora" class="form-control" placeholder="Hora">
+                                    <input type="hidden" name="leche_3_cantidad" id="leche_3_cantidad">
+                                    <div class="amount-row">
+                                        <span class="amount-icon"><i class="bi bi-cup-straw"></i></span>
+                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_3_numero" data-milk-number="3" placeholder="Cantidad">
+                                        <select class="form-select" id="leche_3_unidad" data-milk-unit="3" aria-label="Unidad toma 3">
+                                            <option value="oz">oz</option>
+                                            <option value="ml">ml</option>
+                                            <option value="L">L</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-droplet-half"></i>
-                                Tomas de leche
-                            </div>
+                        <div class="mini-help mt-2">Registra la hora y la cantidad. Puedes usar onzas, mililitros o litros. Si no tomó leche, deja la toma vacía.</div>
+                    </div>
 
-                            <div class="milk-grid">
-                                <div class="milk-card">
-                                    <div class="milk-title">
-                                        <i class="bi bi-1-circle-fill"></i>
-                                        Toma 1
-                                    </div>
-                                    <div class="milk-fields">
-                                        <input type="time" name="leche_1_hora" class="form-control" placeholder="Hora">
-                                        <input type="text" name="leche_1_cantidad" class="form-control" placeholder="Cantidad">
-                                    </div>
-                                </div>
-
-                                <div class="milk-card">
-                                    <div class="milk-title">
-                                        <i class="bi bi-2-circle-fill"></i>
-                                        Toma 2
-                                    </div>
-                                    <div class="milk-fields">
-                                        <input type="time" name="leche_2_hora" class="form-control" placeholder="Hora">
-                                        <input type="text" name="leche_2_cantidad" class="form-control" placeholder="Cantidad">
-                                    </div>
-                                </div>
-
-                                <div class="milk-card">
-                                    <div class="milk-title">
-                                        <i class="bi bi-3-circle-fill"></i>
-                                        Toma 3
-                                    </div>
-                                    <div class="milk-fields">
-                                        <input type="time" name="leche_3_hora" class="form-control" placeholder="Hora">
-                                        <input type="text" name="leche_3_cantidad" class="form-control" placeholder="Cantidad">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mini-help mt-2">
-                                Si el menor no tomó leche, puedes dejar estos campos vacíos.
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-egg-fried"></i>
+                            Alimentación dentro de la estancia
                         </div>
 
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-egg-fried"></i>
-                                Alimentación dentro de la estancia
+                        <div class="form-grid three">
+                            <div class="form-group">
+                                <label for="{{ form.desayuno.id_for_label }}" class="form-label">Desayuno</label>
+                                {{ form.desayuno }}
+                                {% if form.desayuno.errors %}<div class="errors">{{ form.desayuno.errors }}</div>{% endif %}
                             </div>
 
-                            <div class="form-grid three">
-                                <div class="form-group">
-                                    <label for="{{ form.desayuno.id_for_label }}" class="form-label">
-                                        Desayuno
-                                    </label>
-                                    {{ form.desayuno }}
-                                    {% if form.desayuno.errors %}
-                                        <div class="errors">{{ form.desayuno.errors }}</div>
-                                    {% endif %}
-                                </div>
+                            <div class="form-group">
+                                <label for="{{ form.colacion.id_for_label }}" class="form-label">Colación</label>
+                                {{ form.colacion }}
+                                {% if form.colacion.errors %}<div class="errors">{{ form.colacion.errors }}</div>{% endif %}
+                            </div>
 
-                                <div class="form-group">
-                                    <label for="{{ form.colacion.id_for_label }}" class="form-label">
-                                        Colación
-                                    </label>
-                                    {{ form.colacion }}
-                                    {% if form.colacion.errors %}
-                                        <div class="errors">{{ form.colacion.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="{{ form.comida.id_for_label }}" class="form-label">
-                                        Comida
-                                    </label>
-                                    {{ form.comida }}
-                                    {% if form.comida.errors %}
-                                        <div class="errors">{{ form.comida.errors }}</div>
-                                    {% endif %}
-                                </div>
+                            <div class="form-group">
+                                <label for="{{ form.comida.id_for_label }}" class="form-label">Comida</label>
+                                {{ form.comida }}
+                                {% if form.comida.errors %}<div class="errors">{{ form.comida.errors }}</div>{% endif %}
                             </div>
                         </div>
+                    </div>
 
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-moon-stars-fill"></i>
-                                Descanso e higiene
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-moon-stars-fill"></i>
+                            Descanso e higiene
+                        </div>
 
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="{{ form.siesta.id_for_label }}" class="form-label">
-                                        Siesta
-                                    </label>
-                                    {{ form.siesta }}
-                                    <div class="mini-help">
-                                        Ejemplo: Durmió de 10:30 a 11:15.
+                        <div class="form-grid hygiene-grid">
+                            <div class="form-group hygiene-column">
+                                <label for="{{ form.siesta.id_for_label }}" class="form-label">Siesta</label>
+                                {{ form.siesta.as_hidden }}
+                                <div class="time-range-grid">
+                                    <div>
+                                        <div class="time-mini-label">Desde</div>
+                                        <div class="input-icon">
+                                            <i class="bi bi-clock"></i>
+                                            <input type="time" id="siesta_inicio_visual" class="form-control" data-siesta-time="inicio">
+                                        </div>
                                     </div>
-                                    {% if form.siesta.errors %}
-                                        <div class="errors">{{ form.siesta.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="{{ form.panal.id_for_label }}" class="form-label">
-                                        Cambio de pañal
-                                    </label>
-                                    {{ form.panal }}
-                                    {% if form.panal.errors %}
-                                        <div class="errors">{{ form.panal.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group full">
-                                    <label for="{{ form.control_esfinteres.id_for_label }}" class="form-label">
-                                        Control de esfínteres
-                                    </label>
-                                    {{ form.control_esfinteres }}
-                                    {% if form.control_esfinteres.errors %}
-                                        <div class="errors">{{ form.control_esfinteres.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-palette-fill"></i>
-                                Actividad pedagógica y comentarios
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.actividad_pedagogica.id_for_label }}" class="form-label">
-                                        Actividad pedagógica
-                                    </label>
-                                    {{ form.actividad_pedagogica }}
-                                    {% if form.actividad_pedagogica.errors %}
-                                        <div class="errors">{{ form.actividad_pedagogica.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group full">
-                                    <label for="{{ form.comentario_general.id_for_label }}" class="form-label">
-                                        Comentario general
-                                    </label>
-                                    {{ form.comentario_general }}
-                                    {% if form.comentario_general.errors %}
-                                        <div class="errors">{{ form.comentario_general.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group full">
-                                    <div class="form-check">
-                                        {{ form.marcar_completa }}
-                                        <label for="{{ form.marcar_completa.id_for_label }}" class="form-check-label">
-                                            Marcar bitácora durante estancia como completa
-                                        </label>
+                                    <div>
+                                        <div class="time-mini-label">Hasta</div>
+                                        <div class="input-icon">
+                                            <i class="bi bi-clock-history"></i>
+                                            <input type="time" id="siesta_fin_visual" class="form-control" data-siesta-time="fin">
+                                        </div>
                                     </div>
-                                    {% if form.marcar_completa.errors %}
-                                        <div class="errors">{{ form.marcar_completa.errors }}</div>
-                                    {% endif %}
                                 </div>
+                                <div class="mini-help">Ejemplo: Durmió de 10:30 a 11:15.</div>
+                                {% if form.siesta.errors %}<div class="errors">{{ form.siesta.errors }}</div>{% endif %}
                             </div>
 
-                            <div class="completion-card">
-                                <i class="bi bi-check-circle-fill me-1"></i>
-                                Si marcas esta bitácora como completa, el sistema la tomará en cuenta para permitir el cierre del día.
+                            <div class="form-group hygiene-column">
+                                <label for="{{ form.panal.id_for_label }}" class="form-label">Cambio de pañal</label>
+                                {{ form.panal.as_hidden }}
+                                <div class="time-mini-label">Seleccione</div>
+                                <div class="hygiene-select-wrap">
+                                    <i class="bi bi-droplet-half"></i>
+                                    <select id="panal_aplica_visual" class="form-select">
+                                        <option value="">Seleccione...</option>
+                                        <option value="SI">Sí</option>
+                                        <option value="NO">No</option>
+                                    </select>
+                                </div>
+                                <div class="panal-detail" id="panalCantidadWrap">
+                                    <div class="time-mini-label">¿Cuántas veces?</div>
+                                    <div class="input-icon">
+                                        <i class="bi bi-123"></i>
+                                        <input type="number" min="1" step="1" id="panal_cantidad_visual" class="form-control" placeholder="Ej. 2">
+                                    </div>
+                                </div>
+                                {% if form.panal.errors %}<div class="errors">{{ form.panal.errors }}</div>{% endif %}
+                            </div>
+
+                            <div class="form-group control-full">
+                                <label for="{{ form.control_esfinteres.id_for_label }}" class="form-label">Control de esfínteres</label>
+                                {{ form.control_esfinteres }}
+                                <div class="mini-help">Puedes escribir observaciones completas si el texto es largo.</div>
+                                {% if form.control_esfinteres.errors %}<div class="errors">{{ form.control_esfinteres.errors }}</div>{% endif %}
                             </div>
                         </div>
+                    </div>
 
-                        <div class="submit-bar">
-                            <div class="submit-note">
-                                Puedes guardar avance durante el día. Para cerrar el día, esta bitácora deberá quedar completa.
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-palette-fill"></i>
+                            Actividad pedagógica y comentarios
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label for="{{ form.actividad_pedagogica.id_for_label }}" class="form-label">Actividad pedagógica</label>
+                                {{ form.actividad_pedagogica }}
+                                {% if form.actividad_pedagogica.errors %}<div class="errors">{{ form.actividad_pedagogica.errors }}</div>{% endif %}
                             </div>
 
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-soft">
-                                    <i class="bi bi-arrow-left-circle-fill"></i>
-                                    Regresar
-                                </a>
+                            <div class="form-group full">
+                                <label for="{{ form.comentario_general.id_for_label }}" class="form-label">Comentario general</label>
+                                {{ form.comentario_general }}
+                                {% if form.comentario_general.errors %}<div class="errors">{{ form.comentario_general.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
 
-                                {% if not solo_lectura %}
+                    <div class="submit-bar">
+                        <div class="submit-note">
+                            El borrador se conserva en este navegador mientras capturas. Al continuar, la bitácora se guardará como completa.
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% if not solo_lectura %}
+                                {% if registro.entrada_en and not registro.salida_en %}
+                                    <button type="submit" class="btn-main btn-purple" name="continuar_salida" value="1" data-continuar-salida="1">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        Guardar y registrar salida
+                                    </button>
+                                {% else %}
                                     <button type="submit" class="btn-main btn-green">
                                         <i class="bi bi-save-fill"></i>
                                         Guardar bitácora
                                     </button>
-
-                                    {% if registro.entrada_en and not registro.salida_en %}
-                                        <a href="{% url 'registrar_salida_alumno' registro.id %}" class="btn-main btn-purple">
-                                            <i class="bi bi-box-arrow-right"></i>
-                                            Registrar salida
-                                        </a>
-                                    {% endif %}
                                 {% endif %}
-                            </div>
+                            {% endif %}
                         </div>
-                    </form>
-                </div>
-            </section>
-        </main>
-
-    </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const storageKey = "bitacora_estancia_{{ registro.id }}";
+    const form = document.getElementById("bitacoraForm");
+
+    function createMultiSelectChips(selectId, containerId){
+        const select = document.getElementById(selectId);
+        const container = document.getElementById(containerId);
+
+        if(!select || !container){ return; }
+
+        container.innerHTML = "";
+
+        Array.from(select.options).forEach(option => {
+            if(!option.value){ return; }
+
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "choice-chip" + (option.selected ? " is-selected" : "");
+            chip.dataset.value = option.value;
+            chip.innerHTML = '<span class="check"><i class="bi bi-check"></i></span><span>' + option.text + '</span>';
+
+            chip.addEventListener("click", () => {
+                option.selected = !option.selected;
+                chip.classList.toggle("is-selected", option.selected);
+                select.dispatchEvent(new Event("change", {bubbles:true}));
+                saveDraft();
+            });
+
+            container.appendChild(chip);
+        });
+    }
+
+    function saveDraft(){
+        if(!form){ return; }
+
+        const data = {};
+        form.querySelectorAll("input, select, textarea").forEach(field => {
+            if(!field.name || field.type === "hidden" || field.name === "csrfmiddlewaretoken"){
+                return;
+            }
+
+            if(field.type === "checkbox"){
+                data[field.name] = field.checked;
+            }else if(field.tagName.toLowerCase() === "select" && field.multiple){
+                data[field.name] = Array.from(field.selectedOptions).map(option => option.value);
+            }else{
+                data[field.name] = field.value;
+            }
+        });
+
+        localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function restoreDraft(){
+        if(!form){ return; }
+
+        const raw = localStorage.getItem(storageKey);
+        if(!raw){ return; }
+
+        try{
+            const data = JSON.parse(raw);
+
+            form.querySelectorAll("input, select, textarea").forEach(field => {
+                if(!field.name || !(field.name in data) || field.type === "hidden"){
+                    return;
+                }
+
+                if(field.type === "checkbox"){
+                    field.checked = Boolean(data[field.name]);
+                }else if(field.tagName.toLowerCase() === "select" && field.multiple && Array.isArray(data[field.name])){
+                    Array.from(field.options).forEach(option => {
+                        option.selected = data[field.name].includes(option.value);
+                    });
+                }else{
+                    field.value = data[field.name];
+                }
+            });
+        }catch(error){
+            console.warn("No se pudo restaurar el borrador local", error);
+        }
+    }
+
+    function syncMilkAmount(toma){
+        const hidden = document.getElementById("leche_" + toma + "_cantidad");
+        const number = document.getElementById("leche_" + toma + "_numero");
+        const unit = document.getElementById("leche_" + toma + "_unidad");
+        if(!hidden || !number || !unit){ return; }
+
+        const value = (number.value || "").trim();
+        hidden.value = value ? (value + " " + unit.value) : "";
+    }
+
+    function syncSiesta(){
+        const hidden = document.getElementById("{{ form.siesta.id_for_label }}");
+        const inicio = document.getElementById("siesta_inicio_visual");
+        const fin = document.getElementById("siesta_fin_visual");
+        if(!hidden || !inicio || !fin){ return; }
+
+        if(inicio.value && fin.value){
+            hidden.value = "Durmió de " + inicio.value + " a " + fin.value;
+        }else if(inicio.value){
+            hidden.value = "Durmió desde " + inicio.value;
+        }else if(fin.value){
+            hidden.value = "Durmió hasta " + fin.value;
+        }else{
+            hidden.value = "";
+        }
+    }
+
+    function syncPanal(){
+        const hidden = document.getElementById("{{ form.panal.id_for_label }}");
+        const aplica = document.getElementById("panal_aplica_visual");
+        const cantidad = document.getElementById("panal_cantidad_visual");
+        const wrap = document.getElementById("panalCantidadWrap");
+        if(!hidden || !aplica || !cantidad){ return; }
+
+        if(aplica.value === "SI"){
+            wrap?.classList.add("show");
+            const veces = (cantidad.value || "").trim();
+            hidden.value = veces ? ("Sí, " + veces + " cambio(s) de pañal") : "Sí";
+        }else{
+            wrap?.classList.remove("show");
+            cantidad.value = "";
+            hidden.value = aplica.value === "NO" ? "No" : "";
+        }
+    }
+
+    function syncCustomFields(){
+        [1,2,3].forEach(syncMilkAmount);
+        syncSiesta();
+        syncPanal();
+    }
+
+    restoreDraft();
+    syncCustomFields();
+    createMultiSelectChips("{{ form.estado_durante_dia_multiple.id_for_label }}", "estadoDuranteChips");
+
+    document.querySelectorAll("[data-milk-number], [data-milk-unit]").forEach(element => {
+        element.addEventListener("input", () => {
+            syncMilkAmount(element.dataset.milkNumber || element.dataset.milkUnit);
+            saveDraft();
+        });
+        element.addEventListener("change", () => {
+            syncMilkAmount(element.dataset.milkNumber || element.dataset.milkUnit);
+            saveDraft();
+        });
+    });
+
+    document.querySelectorAll("[data-siesta-time]").forEach(element => {
+        element.addEventListener("input", () => {syncSiesta(); saveDraft();});
+        element.addEventListener("change", () => {syncSiesta(); saveDraft();});
+    });
+
+    ["panal_aplica_visual", "panal_cantidad_visual"].forEach(id => {
+        const element = document.getElementById(id);
+        if(element){
+            element.addEventListener("input", () => {syncPanal(); saveDraft();});
+            element.addEventListener("change", () => {syncPanal(); saveDraft();});
+        }
+    });
+
+    if(form){
+        form.addEventListener("input", saveDraft);
+        form.addEventListener("change", saveDraft);
+        form.addEventListener("submit", async (event) => {
+            const submitter = event.submitter;
+            const continuarSalida = submitter && submitter.dataset && submitter.dataset.continuarSalida === "1";
+
+            if(!continuarSalida){
+                syncCustomFields();
+                localStorage.removeItem(storageKey);
+                return;
+            }
+
+            event.preventDefault();
+            syncCustomFields();
+            submitter.disabled = true;
+            const originalHtml = submitter.innerHTML;
+            submitter.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+
+            try{
+                const response = await fetch(form.action || window.location.href, {
+                    method: "POST",
+                    body: new FormData(form),
+                    credentials: "same-origin",
+                    headers: {"X-Requested-With": "XMLHttpRequest"}
+                });
+
+                if(response.redirected){
+                    localStorage.removeItem(storageKey);
+                    window.location.href = "{% url 'registrar_salida_alumno' registro.id %}";
+                    return;
+                }
+
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            }catch(error){
+                submitter.disabled = false;
+                submitter.innerHTML = originalHtml;
+                alert("No se pudo guardar la bitácora. Revisa tu conexión e inténtalo de nuevo.");
+            }
+        });
+    }
+</script>
 
 {% if solo_lectura %}
 <script>

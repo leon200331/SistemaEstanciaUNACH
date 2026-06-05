@@ -1,145 +1,1137 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Portal Padres - Estancia Infantil UNACH{% endblock %}
+{% block title %}Portal de Padres - Estancia Infantil UNACH{% endblock %}
 
 {% block extra_css %}
 <style>
     :root {
-      --brand: #1e3a8a;
-      --brand2: #2563eb;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --card: #ffffff;
-      --bg: #f6f8fc;
+        --azul: #1e3a8a;
+        --azul-2: #2563eb;
+        --azul-3: #3b82f6;
+        --texto: #0f172a;
+        --muted: #64748b;
+        --linea: #dbe7fb;
+        --fondo: #f5f8ff;
+        --card: #ffffff;
+        --verde: #16a34a;
+        --verde-bg: #ecfdf5;
+        --amarillo: #f59e0b;
+        --amarillo-bg: #fffbeb;
+        --rojo: #ef4444;
+        --rojo-bg: #fef2f2;
     }
 
-    body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: var(--ink); }
-
-    /* Barra de Navegación UNACH */
-    .navbar-unach {
-        background-color: var(--brand);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        padding: 0.75rem 0;
-    }
-    .navbar-brand { font-weight: 800; color: white !important; letter-spacing: 0.5px; }
-    .logo-img { max-height: 42px; margin-right: 12px; object-fit: contain; }
-
-    .btn-nav {
-      border-radius: 10px;
-      font-weight: 800;
-      padding: 0.5rem 0.9rem;
+    html {
+        scroll-behavior: smooth;
     }
 
-    /* Tarjeta de Bienvenida (Hero) */
+    body {
+        background:
+            radial-gradient(circle at top right, rgba(37, 99, 235, .10), transparent 35%),
+            linear-gradient(180deg, #f8fbff 0%, var(--fondo) 100%);
+        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--texto);
+    }
+
+    .portal-shell {
+        min-height: 100vh;
+    }
+
+    .portal-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 278px;
+        background: rgba(255, 255, 255, .92);
+        border-right: 1px solid var(--linea);
+        box-shadow: 12px 0 35px rgba(15, 23, 42, .06);
+        backdrop-filter: blur(14px);
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 20px;
+    }
+
+    .brand-wrap {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid var(--linea);
+        margin-bottom: 22px;
+    }
+
+    .logo-frame {
+        width: 82px;
+        height: 82px;
+        min-width: 82px;
+        border-radius: 24px;
+        background:
+            radial-gradient(circle at 20% 18%, rgba(255,255,255,.22), transparent 28%),
+            linear-gradient(135deg, #061a45 0%, #123c95 48%, var(--azul-2) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 20px 38px rgba(30, 58, 138, .38);
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,.34);
+        position: relative;
+    }
+
+    .logo-frame::before {
+        content: "";
+        position: absolute;
+        inset: 7px;
+        border-radius: 19px;
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.22);
+    }
+
+    .logo-frame::after {
+        content: "";
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        right: -22px;
+        bottom: -22px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.16);
+        pointer-events: none;
+    }
+
+    .logo-frame img {
+        width: 112%;
+        height: 112%;
+        object-fit: contain;
+        filter: brightness(0) invert(1) drop-shadow(0 6px 10px rgba(0,0,0,.25));
+        position: relative;
+        z-index: 2;
+    }
+
+    .brand-title {
+        font-size: 1.25rem;
+        line-height: 1.05;
+        font-weight: 900;
+        color: #0b2a68;
+        margin: 0;
+    }
+
+    .brand-sub {
+        color: var(--muted);
+        font-size: .82rem;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+    .sidebar-label {
+        color: #8aa0c5;
+        font-size: .72rem;
+        letter-spacing: .10em;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin: 8px 8px 12px;
+    }
+
+    .nav-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 14px;
+        border-radius: 16px;
+        color: #26456f;
+        text-decoration: none;
+        font-weight: 800;
+        margin-bottom: 8px;
+        transition: all .18s ease;
+        border: 1px solid transparent;
+    }
+
+    .nav-card:hover {
+        transform: translateX(4px);
+        color: var(--azul-2);
+        background: #eef5ff;
+        border-color: #d6e6ff;
+    }
+
+    .nav-card.active {
+        color: var(--azul-2);
+        background: linear-gradient(135deg, #eef5ff, #f8fbff);
+        border-color: #cfe0ff;
+        box-shadow: 0 12px 24px rgba(37, 99, 235, .10);
+    }
+
+    .nav-card.disabled {
+        opacity: .55;
+        pointer-events: none;
+    }
+
+    .nav-card .nav-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: #edf4ff;
+        color: var(--azul-2);
+        font-size: 1.1rem;
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+        border-top: 1px solid var(--linea);
+        padding-top: 18px;
+    }
+
+    .logout-btn {
+        width: 100%;
+        border: 0;
+        background: #fff5f5;
+        color: #dc2626;
+        font-weight: 900;
+        border-radius: 16px;
+        padding: 13px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        transition: all .18s ease;
+    }
+
+    .logout-btn:hover {
+        background: #fee2e2;
+        transform: translateY(-1px);
+    }
+
+    .portal-main {
+        margin-left: 278px;
+        padding: 28px 34px 40px;
+    }
+
+    .topbar {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 26px;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #0b2a68;
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -.03em;
+    }
+
+    .page-subtitle {
+        color: #60749d;
+        margin-top: 4px;
+        font-weight: 700;
+    }
+
+    .user-chip {
+        background: rgba(255,255,255,.88);
+        border: 1px solid var(--linea);
+        border-radius: 999px;
+        padding: 9px 14px 9px 9px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+        min-width: 230px;
+    }
+
+    .avatar-circle {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: var(--azul-2);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        font-size: 1rem;
+        border: 1px solid #cfe0ff;
+    }
+
+    .user-name {
+        font-weight: 900;
+        color: #0b2a68;
+        line-height: 1.15;
+    }
+
+    .user-role {
+        color: #60749d;
+        font-size: .78rem;
+        font-weight: 800;
+    }
+
     .hero-card {
-        background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
-        color: white;
-        border-radius: 20px;
-        padding: 35px 40px;
-        margin-bottom: 35px;
-        margin-top: 20px;
-        box-shadow: 0 18px 40px rgba(30, 58, 138, 0.18);
+        background: linear-gradient(135deg, var(--azul) 0%, var(--azul-2) 58%, #1f7cff 100%);
+        border-radius: 28px;
+        padding: 34px;
+        color: #fff;
+        box-shadow: 0 22px 50px rgba(37, 99, 235, .22);
         position: relative;
         overflow: hidden;
+        margin-bottom: 24px;
     }
-    .hero-card:after {
+
+    .hero-card::before {
         content: "";
         position: absolute;
         right: -80px;
-        top: -100px;
-        width: 300px;
-        height: 300px;
-        background: rgba(255,255,255,0.1);
+        top: -110px;
+        width: 320px;
+        height: 320px;
         border-radius: 50%;
-        filter: blur(2px);
+        background: rgba(255,255,255,.13);
     }
-    .hero-card h1 { font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
-    .hero-card .lead { font-size: 1.1rem; opacity: 0.95; font-weight: 500; }
-    .hero-icon { font-size: 6rem; opacity: 0.2; transform: rotate(-10deg); position: absolute; right: 40px; top: 20px; }
 
-    /* Tarjetas de Acciones */
-    .action-card {
-        background: var(--card);
-        border-radius: 20px;
-        border: none;
-        padding: 35px;
-        transition: all 0.3s ease;
-        height: 100%;
-        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
-        display: flex;
-        flex-direction: column;
+    .hero-card::after {
+        content: "";
+        position: absolute;
+        right: 52px;
+        bottom: -90px;
+        width: 210px;
+        height: 210px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.08);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1.4fr .8fr;
         align-items: center;
-        justify-content: space-between;
-    }
-    .action-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
-    }
-
-    .icon-box-primary {
-        width: 80px; height: 80px;
-        background: rgba(37, 99, 235, 0.1);
-        color: var(--brand2);
-        border-radius: 22px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 2.5rem;
-        margin-bottom: 20px;
-    }
-    .icon-box-success {
-        width: 80px; height: 80px;
-        background: rgba(25, 135, 84, 0.1);
-        color: #198754;
-        border-radius: 22px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 2.5rem;
-        margin-bottom: 20px;
-    }
-
-    .card-title-custom { font-weight: 900; color: var(--ink); margin-bottom: 15px; font-size: 1.35rem; }
-    .card-text-custom { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; flex-grow: 1; }
-
-    .btn-action {
-        border-radius: 12px;
-        font-weight: 800;
-        padding: 0.8rem 1.5rem;
-        width: 100%;
-        transition: all 0.2s;
-    }
-    .btn-primary-custom {
-        background: linear-gradient(135deg, var(--brand2), var(--brand));
-        border: none; color: white;
-        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
-    }
-    .btn-primary-custom:hover { background: linear-gradient(135deg, #1d4ed8, #1e3a8a); color: white; transform: scale(1.02); }
-
-    .status-pill {
-        border-radius: 999px;
-        padding: 0.8rem 1.5rem;
-        font-weight: 800;
-        width: 100%;
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-
-    .alert-custom { border-radius: 16px; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
-
-    /* Alerta de devolución especial para el home */
-    .alert-devuelta-home {
-        background-color: #fffafa;
-        border: 2px solid #ffcdd2;
-        border-left: 8px solid #dc3545;
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
-        display: flex;
-        align-items: flex-start;
         gap: 20px;
     }
-    .alert-devuelta-home i { font-size: 2.5rem; line-height: 1; margin-top: 5px; }
-    .alert-devuelta-home h4 { font-weight: 900; margin-bottom: 10px; }
-    .alert-devuelta-home p { margin-bottom: 15px; font-size: 1.05rem; }
-    .btn-corregir { border-radius: 12px; font-weight: 800; padding: 0.6rem 1.5rem; }
+
+    .hero-title {
+        font-size: clamp(2rem, 4vw, 3.1rem);
+        line-height: .98;
+        font-weight: 950;
+        letter-spacing: -.05em;
+        margin: 0 0 10px;
+    }
+
+    .hero-text {
+        margin: 0;
+        color: rgba(255,255,255,.88);
+        font-size: 1.02rem;
+        font-weight: 700;
+        max-width: 760px;
+    }
+
+    .hero-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .hero-pill {
+        background: rgba(255,255,255,.15);
+        border: 1px solid rgba(255,255,255,.24);
+        color: #fff;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-weight: 900;
+        font-size: .82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .kindergarten-scene {
+        justify-self: end;
+        width: 390px;
+        height: 205px;
+        position: relative;
+        overflow: visible;
+        isolation: isolate;
+    }
+
+    .kindergarten-scene::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 42px;
+        background:
+            radial-gradient(circle at 78% 10%, rgba(255,255,255,.25) 0 68px, transparent 70px),
+            radial-gradient(circle at 12% 86%, rgba(22,163,74,.30) 0 90px, transparent 92px),
+            linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+        opacity: .95;
+        border: 1px solid rgba(255,255,255,.18);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.20);
+        z-index: 0;
+    }
+
+    .scene-sun {
+        position: absolute;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.92);
+        left: 46px;
+        top: 24px;
+        box-shadow: 0 0 0 14px rgba(255,255,255,.10);
+        z-index: 1;
+    }
+
+    .scene-cloud {
+        position: absolute;
+        height: 22px;
+        width: 78px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.34);
+        top: 46px;
+        right: 72px;
+        z-index: 1;
+    }
+
+    .scene-cloud::before,
+    .scene-cloud::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,.36);
+    }
+
+    .scene-cloud::before {
+        width: 34px;
+        height: 34px;
+        left: 12px;
+        bottom: 6px;
+    }
+
+    .scene-cloud::after {
+        width: 26px;
+        height: 26px;
+        left: 42px;
+        bottom: 7px;
+    }
+
+    .scene-grass {
+        position: absolute;
+        left: 0;
+        right: -10px;
+        bottom: -6px;
+        height: 78px;
+        border-radius: 50% 50% 38px 38px;
+        background:
+            radial-gradient(circle at 18% 28%, rgba(74,222,128,.88) 0 38px, transparent 40px),
+            radial-gradient(circle at 70% 22%, rgba(22,163,74,.92) 0 55px, transparent 58px),
+            linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        z-index: 2;
+        box-shadow: inset 0 12px 20px rgba(255,255,255,.12);
+    }
+
+    .scene-path {
+        position: absolute;
+        width: 76px;
+        height: 70px;
+        right: 118px;
+        bottom: -4px;
+        background: rgba(219,234,254,.76);
+        clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+        z-index: 3;
+        opacity: .9;
+    }
+
+    .scene-school {
+        position: absolute;
+        right: 72px;
+        bottom: 46px;
+        width: 148px;
+        height: 94px;
+        border-radius: 18px 18px 12px 12px;
+        background: rgba(255,255,255,.86);
+        box-shadow: 0 16px 28px rgba(8, 47, 120, .20);
+        z-index: 4;
+    }
+
+    .scene-school::before {
+        content: "";
+        position: absolute;
+        inset: -50px 10px auto 10px;
+        height: 68px;
+        background: rgba(255,255,255,.92);
+        clip-path: polygon(50% 0, 100% 100%, 0 100%);
+        filter: drop-shadow(0 10px 12px rgba(8,47,120,.14));
+    }
+
+    .scene-school::after {
+        content: "";
+        position: absolute;
+        width: 42px;
+        height: 52px;
+        left: 53px;
+        bottom: 0;
+        border-radius: 18px 18px 0 0;
+        background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+    }
+
+    .scene-heart {
+        position: absolute;
+        z-index: 5;
+        color: var(--azul-2);
+        font-size: 2.4rem;
+        right: 124px;
+        bottom: 94px;
+        filter: drop-shadow(0 6px 8px rgba(8,47,120,.12));
+    }
+
+    .scene-window {
+        position: absolute;
+        z-index: 5;
+        width: 25px;
+        height: 25px;
+        border-radius: 8px;
+        background: #bfdbfe;
+        border: 3px solid #60a5fa;
+        top: 28px;
+    }
+
+    .scene-window.one { left: 22px; }
+    .scene-window.two { right: 22px; }
+
+    .scene-tree {
+        position: absolute;
+        left: 52px;
+        bottom: 42px;
+        width: 28px;
+        height: 58px;
+        border-radius: 999px;
+        background: rgba(21,128,61,.92);
+        z-index: 4;
+        box-shadow: 32px 8px 0 rgba(34,197,94,.82);
+    }
+
+    .scene-tree::after {
+        content: "";
+        position: absolute;
+        left: 10px;
+        bottom: -24px;
+        width: 8px;
+        height: 32px;
+        border-radius: 999px;
+        background: rgba(120,53,15,.72);
+        box-shadow: 32px 8px 0 rgba(120,53,15,.62);
+    }
+
+    .scene-kid {
+        position: absolute;
+        z-index: 6;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: rgba(37,99,235,.92);
+        box-shadow: 0 10px 14px rgba(8,47,120,.18);
+        bottom: 28px;
+        font-size: 1.05rem;
+    }
+
+    .scene-kid.one { left: 100px; }
+    .scene-kid.two { left: 145px; background: rgba(14,165,233,.92); }
+
+    .alert-modern {
+        border: 0;
+        border-radius: 22px;
+        padding: 20px 22px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, .06);
+        margin-bottom: 22px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .alert-modern .alert-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        font-size: 1.25rem;
+        flex: 0 0 auto;
+    }
+
+    .alert-devuelta {
+        background: #fff7f7;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-devuelta .alert-icon {
+        color: #dc2626;
+        background: #fee2e2;
+    }
+
+    .alert-success-soft {
+        background: var(--verde-bg);
+        border: 1px solid #bbf7d0;
+    }
+
+    .alert-success-soft .alert-icon {
+        color: var(--verde);
+        background: #dcfce7;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 22px;
+        scroll-margin-top: 22px;
+    }
+
+    .metric-card {
+        background: rgba(255,255,255,.90);
+        border: 1px solid var(--linea);
+        border-radius: 22px;
+        padding: 20px;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, .05);
+        min-height: 148px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card::after {
+        content: "";
+        position: absolute;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        right: -46px;
+        top: -50px;
+        background: #eff6ff;
+    }
+
+    .metric-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        color: var(--azul-2);
+        background: #eff6ff;
+        font-size: 1.25rem;
+        margin-bottom: 14px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .metric-label {
+        color: #60749d;
+        font-size: .78rem;
+        font-weight: 900;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .metric-value {
+        color: #0b2a68;
+        font-weight: 950;
+        font-size: 1.15rem;
+        line-height: 1.15;
+        position: relative;
+        z-index: 1;
+    }
+
+    .metric-hint {
+        color: var(--muted);
+        font-weight: 700;
+        font-size: .82rem;
+        margin-top: 8px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel-card {
+        background: rgba(255,255,255,.92);
+        border: 1px solid var(--linea);
+        border-radius: 24px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, .06);
+        overflow: hidden;
+    }
+
+    .panel-head {
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--linea);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .panel-title {
+        font-weight: 950;
+        color: #0b2a68;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .panel-title i {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        color: var(--azul-2);
+        background: #eff6ff;
+    }
+
+    .panel-body {
+        padding: 22px;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: .78rem;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+    }
+
+    .badge-blue {
+        color: var(--azul-2);
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+    }
+
+    .badge-green {
+        color: #15803d;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+    }
+
+    .badge-yellow {
+        color: #b45309;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+    }
+
+    .badge-red {
+        color: #dc2626;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .action-card {
+        border: 1px solid var(--linea);
+        border-radius: 22px;
+        background: #fff;
+        padding: 20px;
+        min-height: 225px;
+        display: flex;
+        flex-direction: column;
+        transition: all .18s ease;
+    }
+
+    .action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 32px rgba(37, 99, 235, .09);
+    }
+
+    .action-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        font-size: 1.6rem;
+        margin-bottom: 14px;
+    }
+
+    .action-icon.blue {
+        background: #eff6ff;
+        color: var(--azul-2);
+    }
+
+    .action-icon.green {
+        background: #ecfdf5;
+        color: #16a34a;
+    }
+
+    .action-card h3 {
+        color: #0b2a68;
+        font-weight: 950;
+        font-size: 1.25rem;
+        margin-bottom: 10px;
+    }
+
+    .action-card p {
+        color: #5c6f93;
+        font-weight: 650;
+        line-height: 1.55;
+        margin-bottom: 18px;
+    }
+
+    .btn-main {
+        border: 0;
+        color: #fff;
+        background: linear-gradient(135deg, var(--azul-2), var(--azul));
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-weight: 950;
+        text-decoration: none;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 14px 24px rgba(37, 99, 235, .20);
+        margin-top: auto;
+    }
+
+    .btn-main:hover {
+        color: #fff;
+        filter: brightness(.98);
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-main {
+        color: var(--azul-2);
+        background: #fff;
+        border: 1px solid #bcd2ff;
+        border-radius: 14px;
+        padding: 11px 16px;
+        font-weight: 950;
+        text-decoration: none;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-outline-main:hover {
+        background: #eff6ff;
+        color: var(--azul);
+    }
+
+    .status-pill {
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 950;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    .status-pill[title] {
+        cursor: help;
+    }
+
+    .status-inprocess {
+        background: #eff6ff;
+        color: var(--azul-2);
+        border: 1px solid #bfdbfe;
+    }
+
+    .status-warning {
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #fed7aa;
+    }
+
+    .status-locked {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .payment-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid var(--linea);
+        border-radius: 24px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, .06);
+        overflow: hidden;
+    }
+
+    .payment-top {
+        padding: 22px;
+        background: linear-gradient(135deg, #ecfdf5, #ffffff);
+        border-bottom: 1px solid #bbf7d0;
+    }
+
+    .payment-top h3 {
+        margin: 0;
+        color: #14532d;
+        font-weight: 950;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .payment-body {
+        padding: 22px;
+    }
+
+    .upload-zone {
+        border: 2px dashed #a7c7ff;
+        border-radius: 20px;
+        background: #f8fbff;
+        padding: 20px;
+        text-align: center;
+        transition: all .18s ease;
+    }
+
+    .upload-zone:hover {
+        border-color: var(--azul-2);
+        background: #eff6ff;
+    }
+
+    .upload-zone i {
+        font-size: 2.2rem;
+        color: var(--azul-2);
+    }
+
+    .file-input {
+        margin-top: 14px;
+        border-radius: 14px !important;
+        padding: .75rem !important;
+        border: 1px solid #cfe0ff !important;
+    }
+
+    .upload-help {
+        color: #60749d;
+        font-size: .84rem;
+        font-weight: 700;
+        margin-top: 10px;
+    }
+
+    .btn-pay {
+        border: 0;
+        width: 100%;
+        border-radius: 16px;
+        padding: 13px 16px;
+        color: #fff;
+        font-weight: 950;
+        background: linear-gradient(135deg, #22c55e, #15803d);
+        box-shadow: 0 14px 24px rgba(34, 197, 94, .20);
+        margin-top: 14px;
+    }
+
+    .btn-pay:hover {
+        filter: brightness(.98);
+    }
+
+    .timeline {
+        display: grid;
+        gap: 12px;
+    }
+
+    .timeline-item {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+    }
+
+    .timeline-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        font-weight: 950;
+        background: #eef5ff;
+        color: var(--azul-2);
+        border: 1px solid #dbeafe;
+    }
+
+    .timeline-dot.done {
+        background: #dcfce7;
+        color: #15803d;
+        border-color: #bbf7d0;
+    }
+
+    .timeline-dot.warn {
+        background: #fef3c7;
+        color: #b45309;
+        border-color: #fde68a;
+    }
+
+    .timeline-title {
+        color: #0b2a68;
+        font-weight: 950;
+        margin-bottom: 2px;
+    }
+
+    .timeline-text {
+        color: #64748b;
+        font-weight: 700;
+        font-size: .86rem;
+        line-height: 1.4;
+    }
+
+    .closed-card {
+        background: #fff;
+        border: 1px solid var(--linea);
+        border-radius: 26px;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, .07);
+        padding: 54px 30px;
+        text-align: center;
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .closed-icon {
+        width: 92px;
+        height: 92px;
+        border-radius: 28px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 22px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 2.8rem;
+    }
+
+    .file-error {
+        display: none;
+        color: #dc2626;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-weight: 800;
+        font-size: .85rem;
+        margin-top: 12px;
+    }
+
+    .file-ok {
+        display: none;
+        color: #15803d;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-weight: 800;
+        font-size: .85rem;
+        margin-top: 12px;
+    }
+
+    .status-process-card {
+        scroll-margin-top: 28px;
+    }
+
+    .status-process-card:target {
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 4px rgba(37,99,235,.12), 0 18px 42px rgba(15,23,42,.08);
+    }
+
+    .timeline-dot.current {
+        background: #dbeafe;
+        color: var(--azul-2);
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 5px rgba(37,99,235,.10);
+    }
+
+    .timeline-dot.pending {
+        background: #f1f5f9;
+        color: #94a3b8;
+        border-color: #e2e8f0;
+    }
+
+    .timeline-small-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+        border-radius: 999px;
+        padding: 5px 9px;
+        font-size: .72rem;
+        font-weight: 950;
+        color: #2563eb;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+    }
+
+    @media (max-width: 1080px) {
+        .portal-sidebar {
+            width: 238px;
+        }
+
+        .portal-main {
+            margin-left: 238px;
+            padding: 24px 22px 34px;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 780px) {
+        .portal-sidebar {
+            position: relative;
+            width: auto;
+            min-height: auto;
+            border-right: 0;
+            border-bottom: 1px solid var(--linea);
+        }
+
+        .sidebar-footer {
+            margin-top: 12px;
+        }
+
+        .portal-main {
+            margin-left: 0;
+            padding: 20px 16px 28px;
+        }
+
+        .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .user-chip {
+            width: 100%;
+        }
+
+        .hero-content {
+            grid-template-columns: 1fr;
+        }
+
+        .kindergarten-scene {
+            display: none;
+        }
+
+        .dashboard-grid,
+        .action-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -147,184 +1139,637 @@
 
 {% with mi_inscripcion=inscripcion|default:request.user.expediente_inscripcion %}
 
-<nav class="navbar navbar-expand-lg navbar-unach fixed-top">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="{% static 'img/logo.png' %}" alt="Logo UNACH" class="logo-img">
-            Estancia Infantil UNACH
+<div class="portal-shell">
+
+    <aside class="portal-sidebar">
+        <div class="brand-wrap">
+            <div class="logo-frame">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Estancia Infantil</h1>
+                <div class="brand-sub">Portal de padres</div>
+            </div>
+        </div>
+
+        <div class="sidebar-label">Beneficiario</div>
+
+        <a class="nav-card active" href="#inicio" data-nav="inicio">
+            <span class="nav-icon"><i class="bi bi-house-door"></i></span>
+            <span>Inicio</span>
         </a>
-        <div class="ms-auto d-flex gap-3 align-items-center">
-            <span class="text-white fw-semibold small d-none d-md-inline">
-                <i class="bi bi-person-circle me-1"></i> {{ request.user.email }} (Tutor)
-            </span>
+
+        <a class="nav-card" href="{% url 'portal_inscripcion' %}">
+            <span class="nav-icon"><i class="bi bi-folder-check"></i></span>
+            <span>Mi expediente</span>
+        </a>
+
+        <a class="nav-card" href="#estatus" data-nav="estatus" title="Consulta el estado de cada etapa del proceso.">
+            <span class="nav-icon"><i class="bi bi-clipboard2-pulse"></i></span>
+            <span>Estatus</span>
+        </a>
+
+        <a class="nav-card {% if not mi_inscripcion or mi_inscripcion.estado != 'ACEPTADO_ESPERANDO_PAGO' %}disabled{% endif %}" href="#pago" data-nav="pago">
+            <span class="nav-icon"><i class="bi bi-receipt"></i></span>
+            <span>Pago</span>
+        </a>
+
+        <div class="sidebar-footer">
             <form action="{% url 'logout' %}" method="post" class="m-0">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light btn-nav">
-                    <i class="bi bi-box-arrow-right me-1"></i> Salir
+                <button type="submit" class="logout-btn">
+                    <i class="bi bi-box-arrow-left"></i>
+                    Cerrar sesión
                 </button>
             </form>
         </div>
-    </div>
-</nav>
+    </aside>
 
-<div class="container" style="padding-top: 90px; max-width: 1100px;">
-
-    <div class="hero-card">
-        <i class="bi bi-house-heart-fill hero-icon d-none d-md-block"></i>
-        <div class="position-relative" style="z-index: 2;">
-            <h1>¡Bienvenido(a), {{ mi_inscripcion.solicitud_ingreso.nombres_tutor|default:"Beneficiario" }}!</h1>
-
-            <p class="lead">Panel de Gestión Familiar</p>
-            <div class="d-inline-flex align-items-center gap-2 mt-2 px-3 py-1 rounded-pill" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);">
-                <i class="bi bi-stars"></i> <span class="small fw-bold">Estamos listos para recibir a tus pequeños.</span>
+    <main class="portal-main" id="inicio">
+        <header class="topbar">
+            <div>
+                <h2 class="page-title">Portal de padres</h2>
+                <div class="page-subtitle">Seguimiento familiar del proceso de inscripción</div>
             </div>
-        </div>
-    </div>
 
-    {% if ciclo_activo or mi_inscripcion %}
-
-        {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
-            <div class="card-header bg-success text-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-check-circle-fill me-2"></i> ¡Inscripción Aprobada por Dirección!</h5>
-            </div>
-            <div class="card-body p-4" style="background-color: #f0fdf4;">
-                <div class="row align-items-center">
-                    <div class="col-md-7">
-                        <h4 class="fw-black text-dark mb-3">Último Paso: Confirmar tu Pago</h4>
-                        <p class="text-muted fs-5">Felicidades, tu menor ha sido aceptado oficialmente. Para finalizar tu proceso, por favor sube tu comprobante de pago de inscripción.</p>
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'descargar_reporte_final_padre' mi_inscripcion.id %}" class="btn btn-outline-success fw-bold rounded-pill">
-                                <i class="bi bi-download me-1"></i> Descargar Reporte Final
-                            </a>
-                        </div>
+            <div class="user-chip">
+                <div class="avatar-circle">
+                    {% if mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}
+                        {{ mi_inscripcion.solicitud_ingreso.nombres_tutor|slice:":1"|upper }}
+                    {% else %}
+                        <i class="bi bi-person-heart"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="user-name">
+                        {% if mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}
+                            {{ mi_inscripcion.solicitud_ingreso.nombres_tutor }}
+                        {% else %}
+                            Beneficiario
+                        {% endif %}
                     </div>
-                    <div class="col-md-5">
-                        <div class="bg-white p-4 rounded-4 shadow-sm border">
-                            <form method="POST" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <label class="form-label fw-bold text-brand small mb-2 text-uppercase">Subir Comprobante (PDF o Imagen)</label>
-                                <input type="file" name="comprobante_pago" class="form-control mb-3" required>
-                                <button type="submit" name="subir_pago" class="btn btn-success w-100 fw-bold py-2 shadow-sm rounded-3">
-                                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> Enviar a Validación
-                                </button>
-                            </form>
-                            {% if mi_inscripcion.doc_tutor_pago %}
-                            <div class="text-center mt-3 text-success small fw-bold">
-                                <i class="bi bi-file-earmark-check"></i> Ya enviaste un archivo.
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
+                    <div class="user-role">{{ request.user.email|default:"Tutor" }}</div>
                 </div>
             </div>
-        </div>
+        </header>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
         {% endif %}
 
-        {% if mi_inscripcion.estado == 'DEVUELTA' %}
-        <div class="alert-devuelta-home">
-            <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-            <div class="w-100">
-                <h4 class="text-danger">¡Acción Requerida! Expediente Devuelto</h4>
-                <p class="text-dark">
-                    Trabajo Social ha revisado tus documentos y encontró detalles que deben corregirse.
-                    El trámite está <strong>pausado</strong> hasta que lo resuelvas.
-                </p>
-                <a href="{% url 'portal_inscripcion' %}" class="btn btn-danger btn-corregir shadow-sm">
-                    <i class="bi bi-pencil-square me-2"></i> Ir a mi Expediente para Corregirlo
-                </a>
-            </div>
-        </div>
-        {% elif mi_inscripcion.estado == 'FILTROS' %}
-        <div class="alert alert-success d-flex align-items-center alert-custom mb-4" style="border-left: 6px solid #198754; background-color: #f6fcf9;">
-            <i class="bi bi-check-circle-fill fs-1 me-3 text-success"></i>
-            <div>
-                <h4 class="fw-bold mb-1 text-success">¡Documentación Aprobada!</h4>
-                <p class="mb-0 text-dark">Tu expediente ha sido validado correctamente. Has avanzado a la fase de Evaluaciones (Filtros Médicos y Psicológicos).</p>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="row g-4 mb-5">
-            <div class="col-md-6">
-                <div class="action-card">
-                    <div class="w-100 text-center">
-                        <div class="icon-box-primary mx-auto">
-                            <i class="bi bi-folder-check"></i>
-                        </div>
-                        <h3 class="card-title-custom">Mi Expediente de Inscripción</h3>
-                        <p class="card-text-custom text-dark">
-                            <strong>¡Tu solicitud fue aprobada!</strong> El siguiente paso es presentarte en la Estancia Infantil para realizar las <strong>valoraciones médicas, nutricionales y psicológicas presenciales.</strong>
-                        </p>
-                    </div>
-
-                    <div class="w-100 mt-2">
-                        {% if not mi_inscripcion or mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}
-                            <a href="{% url 'portal_inscripcion' %}" class="btn btn-action btn-primary-custom">
-                                Ver progreso del trámite <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
-                            </a>
-                        {% elif mi_inscripcion.estado == 'EN_REVISION' %}
-                            <div class="status-pill bg-warning text-dark shadow-sm">
-                                <i class="bi bi-hourglass-split"></i> En Revisión
-                            </div>
-                            <div class="text-center mt-3 text-warning-emphasis fw-bold small">
-                                Trabajo Social está verificando tus documentos.
-                            </div>
+        <section class="hero-card">
+            <div class="hero-content">
+                <div>
+                    <h1 class="hero-title">
+                        ¡Bienvenido(a),
+                        {% if mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}
+                            {{ mi_inscripcion.solicitud_ingreso.nombres_tutor }}
                         {% else %}
-                            <div class="status-pill bg-secondary text-white shadow-sm opacity-75">
-                                <i class="bi bi-lock-fill"></i> Expediente Cerrado
-                            </div>
-                            <div class="text-center mt-3 text-success fw-bold small">
-                                <i class="bi bi-check-circle-fill me-1"></i> Trámite documental finalizado.
-                            </div>
+                            Beneficiario
+                        {% endif %}!
+                    </h1>
+                    <p class="hero-text">
+                        Estamos listos para recibir a tus pequeños con seguridad, cuidado y acompañamiento durante todo el proceso.
+                    </p>
+
+                    <div class="hero-pills">
+                        <span class="hero-pill">
+                            <i class="bi bi-shield-check"></i>
+                            Portal seguro
+                        </span>
+                        <span class="hero-pill">
+                            <i class="bi bi-clock-history"></i>
+                            Seguimiento del trámite
+                        </span>
+                        {% if mi_inscripcion %}
+                        <span class="hero-pill">
+                            <i class="bi bi-bookmark-check"></i>
+                            Folio {{ mi_inscripcion.solicitud_ingreso.folio|default:"Sin folio" }}
+                        </span>
                         {% endif %}
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6">
-                <div class="action-card">
-                    <div class="w-100 text-center">
-                        <div class="icon-box-success mx-auto">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        <h3 class="card-title-custom">Consulta de Estatus</h3>
-                        <p class="card-text-custom">
-                            Una vez que envíes tu expediente definitivo, el área de Trabajo Social lo revisará. Ingresa a tu portal regularmente para monitorear el progreso de tu trámite.
-                        </p>
+                <div class="kindergarten-scene" aria-hidden="true">
+                    <span class="scene-sun"></span>
+                    <span class="scene-cloud"></span>
+                    <span class="scene-grass"></span>
+                    <span class="scene-path"></span>
+                    <span class="scene-tree"></span>
+                    <span class="scene-school">
+                        <span class="scene-window one"></span>
+                        <span class="scene-window two"></span>
+                    </span>
+                    <i class="bi bi-heart-fill scene-heart"></i>
+                    <span class="scene-kid one"><i class="bi bi-person-arms-up"></i></span>
+                    <span class="scene-kid two"><i class="bi bi-balloon-heart"></i></span>
+                </div>
+            </div>
+        </section>
+
+        {% if ciclo_activo or mi_inscripcion %}
+
+            {% if mi_inscripcion.estado == 'DEVUELTA' %}
+            <div class="alert-modern alert-devuelta">
+                <div class="alert-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold text-danger mb-1">Acción requerida: expediente devuelto</h4>
+                    <p class="mb-3 text-dark">
+                        Trabajo Social encontró detalles que deben corregirse. El trámite está pausado hasta que actualices tu expediente.
+                    </p>
+                    <a href="{% url 'portal_inscripcion' %}" class="btn btn-danger fw-bold rounded-3 px-4">
+                        <i class="bi bi-pencil-square me-1"></i> Corregir expediente
+                    </a>
+                </div>
+            </div>
+            {% elif mi_inscripcion.estado == 'FILTROS' %}
+            <div class="alert-modern alert-success-soft">
+                <div class="alert-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold text-success mb-1">Documentación aprobada</h4>
+                    <p class="mb-0 text-dark">
+                        Tu expediente fue validado correctamente. Ahora continúa la etapa de evaluaciones institucionales.
+                    </p>
+                </div>
+            </div>
+            {% elif mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+            <div class="alert-modern alert-success-soft">
+                <div class="alert-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold text-success mb-1">Inscripción aceptada por Dirección</h4>
+                    <p class="mb-0 text-dark">
+                        Ya puedes subir tu comprobante de pago para concluir el proceso.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <section class="dashboard-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="bi bi-hash"></i>
+                    </div>
+                    <div class="metric-label">Folio</div>
+                    <div class="metric-value">
+                        {% if mi_inscripcion %}
+                            {{ mi_inscripcion.solicitud_ingreso.folio|default:"Sin folio" }}
+                        {% else %}
+                            Sin iniciar
+                        {% endif %}
+                    </div>
+                    <div class="metric-hint">Identificador de tu trámite.</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="bi bi-person-hearts"></i>
+                    </div>
+                    <div class="metric-label">Menor</div>
+                    <div class="metric-value">
+                        {% if mi_inscripcion %}
+                            {{ mi_inscripcion.solicitud_ingreso.nombre_menor_completo|default:"Pendiente" }}
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </div>
+                    <div class="metric-hint">Datos capturados en solicitud.</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="bi bi-clipboard2-check"></i>
+                    </div>
+                    <div class="metric-label">Estado actual</div>
+                    <div class="metric-value">
+                        {% if mi_inscripcion %}
+                            {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}
+                        {% else %}
+                            Sin iniciar
+                        {% endif %}
+                    </div>
+                    <div class="metric-hint">Avance general del proceso.</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="bi bi-credit-card-2-front"></i>
+                    </div>
+                    <div class="metric-label">Pago</div>
+                    <div class="metric-value">
+                        {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+                            Pendiente
+                        {% elif mi_inscripcion.doc_tutor_pago %}
+                            Enviado
+                        {% elif mi_inscripcion.estado == 'FINALIZADA' %}
+                            Validado
+                        {% else %}
+                            No habilitado
+                        {% endif %}
+                    </div>
+                    <div class="metric-hint">Se habilita cuando Dirección autoriza el pago.</div>
+                </div>
+            </section>
+
+            <section class="content-grid">
+
+                <div class="panel-card">
+                    <div class="panel-head">
+                        <h3 class="panel-title">
+                            <i class="bi bi-grid-1x2"></i>
+                            Acciones principales
+                        </h3>
+
+                        {% if mi_inscripcion %}
+                            {% if mi_inscripcion.estado == 'DEVUELTA' %}
+                                <span class="status-badge badge-red"><i class="bi bi-exclamation-circle"></i> Requiere corrección</span>
+                            {% elif mi_inscripcion.estado == 'EN_REVISION' %}
+                                <span class="status-badge badge-yellow"><i class="bi bi-hourglass-split"></i> En revisión</span>
+                            {% elif mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+                                <span class="status-badge badge-green"><i class="bi bi-check2-circle"></i> Pago habilitado</span>
+                            {% else %}
+                                <span class="status-badge badge-blue"><i class="bi bi-info-circle"></i> {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="status-badge badge-blue"><i class="bi bi-info-circle"></i> Sin expediente</span>
+                        {% endif %}
                     </div>
 
-                    <div class="w-100 mt-2">
-                        <div class="status-pill border border-success text-success bg-white fw-bold">
-                            <i class="bi bi-info-circle-fill me-1"></i> Estatus:
-                            {% if not mi_inscripcion %}
-                                Sin Iniciar
-                            {% else %}
-                                {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}
+                    <div class="panel-body">
+                        <div class="action-grid">
+                            <div class="action-card">
+                                <div class="action-icon blue">
+                                    <i class="bi bi-folder-check"></i>
+                                </div>
+                                <h3>Mi expediente</h3>
+                                <p>
+                                    Para continuar con la inscripción, entra desde la viñeta <strong>Mi expediente</strong> del menú lateral.
+                                </p>
+
+                                {% if not mi_inscripcion %}
+                                    <div class="status-pill status-inprocess" title="Favor de entrar en la sección Mi expediente para iniciar el proceso de inscripción.">
+                                        <i class="bi bi-pencil-square"></i> Sin iniciar
+                                    </div>
+                                {% elif mi_inscripcion.estado == 'NUEVA' %}
+                                    <div class="status-pill status-inprocess" title="Favor de entrar en la sección Mi expediente para continuar con el proceso de inscripción.">
+                                        <i class="bi bi-pencil-square"></i> En captura
+                                    </div>
+                                {% elif mi_inscripcion.estado == 'EN_PROCESO' %}
+                                    <div class="status-pill status-inprocess" title="Favor de entrar en la sección Mi expediente para continuar con el proceso de inscripción.">
+                                        <i class="bi bi-arrow-repeat"></i> En proceso
+                                    </div>
+                                {% elif mi_inscripcion.estado == 'DEVUELTA' %}
+                                    <div class="status-pill status-warning" title="Trabajo Social devolvió el expediente. Entra en Mi expediente para corregir lo solicitado.">
+                                        <i class="bi bi-exclamation-triangle"></i> Corrección pendiente
+                                    </div>
+                                {% elif mi_inscripcion.estado == 'EN_REVISION' %}
+                                    <div class="status-pill status-warning" title="Trabajo Social está revisando tu expediente.">
+                                        <i class="bi bi-hourglass-split"></i> En revisión
+                                    </div>
+                                {% else %}
+                                    <div class="status-pill status-locked" title="El expediente ya no puede modificarse en esta etapa.">
+                                        <i class="bi bi-lock-fill"></i> Expediente cerrado
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="action-card">
+                                <div class="action-icon green">
+                                    <i class="bi bi-activity"></i>
+                                </div>
+                                <h3>Consulta de estatus</h3>
+                                <p>
+                                    Revisa en qué etapa se encuentra tu trámite y cuál es el siguiente paso a realizar.
+                                </p>
+
+                                <div class="status-pill {% if mi_inscripcion.estado == 'DEVUELTA' %}status-warning{% else %}status-locked{% endif %}">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    {% if not mi_inscripcion %}
+                                        Sin iniciar
+                                    {% else %}
+                                        {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside>
+                    {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}
+                    <div class="payment-card mb-3" id="pago">
+                        <div class="payment-top">
+                            <h3>
+                                <i class="bi bi-receipt-cutoff"></i>
+                                Subir comprobante de pago
+                            </h3>
+                            <p class="mb-0 mt-2 text-success fw-bold">
+                                Último paso para finalizar tu inscripción.
+                            </p>
+                        </div>
+
+                        <div class="payment-body">
+                            <div class="mb-3">
+                                <a href="{% url 'descargar_reporte_final_padre' mi_inscripcion.id %}" class="btn-outline-main w-100">
+                                    <i class="bi bi-download"></i>
+                                    Descargar reporte final
+                                </a>
+                            </div>
+
+                            <form method="POST" enctype="multipart/form-data" id="form-pago">
+                                {% csrf_token %}
+                                <input type="hidden" name="subir_comprobante_pago" value="1">
+
+                                <div class="upload-zone">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                    <h5 class="fw-bold mt-2 mb-1">Selecciona tu comprobante</h5>
+                                    <div class="upload-help">
+                                        Formatos permitidos: PDF, JPG, JPEG o PNG. Tamaño máximo: 5 MB.
+                                    </div>
+
+                                    <input
+                                        type="file"
+                                        name="doc_tutor_pago"
+                                        id="doc_tutor_pago"
+                                        class="form-control file-input"
+                                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                                        required
+                                    >
+
+                                    <div class="file-error" id="file-error"></div>
+                                    <div class="file-ok" id="file-ok"></div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <label class="form-label fw-bold text-primary">Observaciones opcionales</label>
+                                    <textarea
+                                        name="pago_observaciones"
+                                        class="form-control"
+                                        rows="3"
+                                        style="border-radius:16px;"
+                                        placeholder="Ejemplo: pago realizado en banco, transferencia o aclaración breve."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn-pay">
+                                    <i class="bi bi-send-check-fill me-1"></i>
+                                    Enviar comprobante a validación
+                                </button>
+                            </form>
+
+                            {% if mi_inscripcion.doc_tutor_pago %}
+                            <div class="status-badge badge-green mt-3 w-100 justify-content-center">
+                                <i class="bi bi-file-earmark-check"></i>
+                                Ya existe un comprobante enviado
+                            </div>
                             {% endif %}
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                    {% endif %}
 
-    {% else %}
+                    <div class="panel-card status-process-card" id="estatus">
+                        <div class="panel-head">
+                            <h3 class="panel-title">
+                                <i class="bi bi-clipboard2-pulse"></i>
+                                Estatus del proceso
+                            </h3>
+                            {% if mi_inscripcion %}
+                                <span class="status-badge badge-blue"><i class="bi bi-info-circle"></i> {{ mi_inscripcion.get_estado_display|default:mi_inscripcion.estado }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="panel-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-dot done">
+                                        <i class="bi bi-check"></i>
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">1. Solicitud aprobada</div>
+                                        <div class="timeline-text">Trabajo Social aprobó la solicitud inicial y habilitó el expediente de inscripción.</div>
+                                        <span class="timeline-small-badge"><i class="bi bi-person-badge"></i> Trabajo Social</span>
+                                    </div>
+                                </div>
 
-        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px; background: white;">
-            <div class="card-body p-5 text-center">
-                <div class="mb-4">
-                    <i class="bi bi-calendar-x-fill text-secondary" style="font-size: 5rem; opacity: 0.5;"></i>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot {% if mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}current{% else %}done{% endif %}">
+                                        {% if mi_inscripcion.estado == 'NUEVA' or mi_inscripcion.estado == 'EN_PROCESO' or mi_inscripcion.estado == 'DEVUELTA' %}
+                                            <i class="bi bi-pencil"></i>
+                                        {% else %}
+                                            <i class="bi bi-check"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">2. Expediente documental</div>
+                                        <div class="timeline-text">
+                                            El beneficiario captura datos y documentos. Si Trabajo Social solicita correcciones, se atienden aquí.
+                                        </div>
+                                        <span class="timeline-small-badge"><i class="bi bi-folder-check"></i> Beneficiario</span>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-dot {% if mi_inscripcion.estado == 'EN_REVISION' %}current{% elif mi_inscripcion.estado == 'FILTROS' or mi_inscripcion.estado == 'REVISION_FINAL_TS' or mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' or mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}done{% else %}pending{% endif %}">
+                                        {% if mi_inscripcion.estado == 'FILTROS' or mi_inscripcion.estado == 'REVISION_FINAL_TS' or mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' or mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}
+                                            <i class="bi bi-check"></i>
+                                        {% else %}
+                                            <i class="bi bi-search"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">3. Revisión de expediente</div>
+                                        <div class="timeline-text">
+                                            Trabajo Social verifica que los datos y documentos estén completos antes de avanzar a filtros.
+                                        </div>
+                                        <span class="timeline-small-badge"><i class="bi bi-person-vcard"></i> Trabajo Social</span>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-dot {% if mi_inscripcion.estado == 'FILTROS' %}current{% elif mi_inscripcion.estado == 'REVISION_FINAL_TS' or mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' or mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}done{% else %}pending{% endif %}">
+                                        {% if mi_inscripcion.estado == 'REVISION_FINAL_TS' or mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' or mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}
+                                            <i class="bi bi-check"></i>
+                                        {% else %}
+                                            <i class="bi bi-heart-pulse"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">4. Filtros institucionales</div>
+                                        <div class="timeline-text">
+                                            Psicología, Nutrición y Médico revisan el expediente y emiten su dictamen.
+                                        </div>
+                                        <span class="timeline-small-badge"><i class="bi bi-hospital"></i> Áreas de filtro</span>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-dot {% if mi_inscripcion.estado == 'REVISION_FINAL_TS' %}current{% elif mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' or mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}done{% else %}pending{% endif %}">
+                                        {% if mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' or mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}
+                                            <i class="bi bi-check"></i>
+                                        {% else %}
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">5. Reporte final</div>
+                                        <div class="timeline-text">
+                                            Trabajo Social integra el Reporte Final de Ingreso con base en los tres filtros.
+                                        </div>
+                                        <span class="timeline-small-badge"><i class="bi bi-file-check"></i> Trabajo Social</span>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-dot {% if mi_inscripcion.estado == 'ESPERANDO_DIRECTORA' %}current{% elif mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}done{% else %}pending{% endif %}">
+                                        {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' or mi_inscripcion.estado == 'FINALIZADA' %}
+                                            <i class="bi bi-check"></i>
+                                        {% else %}
+                                            <i class="bi bi-person-check"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">6. Autorización final</div>
+                                        <div class="timeline-text">
+                                            Dirección revisa el reporte final y autoriza la continuidad del trámite.
+                                        </div>
+                                        <span class="timeline-small-badge"><i class="bi bi-building-check"></i> Dirección</span>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-dot {% if mi_inscripcion.estado == 'ACEPTADO_ESPERANDO_PAGO' %}current{% elif mi_inscripcion.estado == 'FINALIZADA' %}done{% else %}pending{% endif %}">
+                                        {% if mi_inscripcion.estado == 'FINALIZADA' %}
+                                            <i class="bi bi-check"></i>
+                                        {% else %}
+                                            <i class="bi bi-receipt"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="timeline-title">7. Pago y cierre</div>
+                                        <div class="timeline-text">
+                                            Cuando Dirección autorice, se habilita la viñeta de Pago para subir el comprobante y cerrar el proceso.
+                                        </div>
+                                        <span class="timeline-small-badge"><i class="bi bi-credit-card"></i> Pago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+
+        {% else %}
+
+            <div class="closed-card">
+                <div class="closed-icon">
+                    <i class="bi bi-calendar-x"></i>
                 </div>
-                <h2 class="fw-black text-dark mb-3">Convocatoria Cerrada</h2>
-                <p class="text-muted fs-5 mb-0" style="max-width: 600px; margin: 0 auto;">
-                    Actualmente no hay un ciclo escolar activo para nuevas inscripciones en la Estancia Infantil UNACH. Por favor, mantente atento(a) a las próximas fechas oficiales emitidas por la Administración.
+                <h2 class="fw-bold text-dark mb-3">Convocatoria cerrada</h2>
+                <p class="text-muted fs-5 mb-0">
+                    Actualmente no hay un ciclo escolar activo para nuevas inscripciones en la Estancia Infantil UNACH.
+                    Mantente atento(a) a las próximas fechas oficiales.
                 </p>
             </div>
-        </div>
 
-    {% endif %}
-
+        {% endif %}
+    </main>
 </div>
 
 {% endwith %}
+
+<script>
+(function() {
+    const navItems = document.querySelectorAll('.nav-card[data-nav]');
+    function setActiveFromHash(hash) {
+        const clean = (hash || '#inicio').replace('#', '') || 'inicio';
+        navItems.forEach(item => item.classList.remove('active'));
+        const current = document.querySelector('.nav-card[data-nav="' + clean + '"]');
+        if (current && !current.classList.contains('disabled')) current.classList.add('active');
+        else {
+            const inicio = document.querySelector('.nav-card[data-nav="inicio"]');
+            if (inicio) inicio.classList.add('active');
+        }
+    }
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            setActiveFromHash(this.getAttribute('href'));
+        });
+    });
+    window.addEventListener('hashchange', () => setActiveFromHash(window.location.hash));
+    setActiveFromHash(window.location.hash);
+})();
+</script>
+
+<script>
+(function() {
+    const inputPago = document.getElementById("doc_tutor_pago");
+    const formPago = document.getElementById("form-pago");
+    const fileError = document.getElementById("file-error");
+    const fileOk = document.getElementById("file-ok");
+    const maxBytes = 5 * 1024 * 1024;
+    const permitidos = ["application/pdf", "image/jpeg", "image/png"];
+
+    function mostrarError(mensaje) {
+        if (!fileError) return;
+        fileError.textContent = mensaje;
+        fileError.style.display = "block";
+        if (fileOk) fileOk.style.display = "none";
+    }
+
+    function mostrarOk(mensaje) {
+        if (!fileOk) return;
+        fileOk.textContent = mensaje;
+        fileOk.style.display = "block";
+        if (fileError) fileError.style.display = "none";
+    }
+
+    function validarArchivo() {
+        if (!inputPago || !inputPago.files || !inputPago.files.length) {
+            return true;
+        }
+
+        const archivo = inputPago.files[0];
+        const nombre = archivo.name || "";
+        const extensionValida = /\.(pdf|jpg|jpeg|png)$/i.test(nombre);
+        const tipoValido = permitidos.includes(archivo.type) || extensionValida;
+
+        if (!tipoValido) {
+            inputPago.value = "";
+            mostrarError("Formato no permitido. Sube un archivo PDF, JPG, JPEG o PNG.");
+            return false;
+        }
+
+        if (archivo.size > maxBytes) {
+            inputPago.value = "";
+            mostrarError("El archivo supera el tamaño máximo de 5 MB. Comprime la imagen o usa un PDF más ligero.");
+            return false;
+        }
+
+        const mb = (archivo.size / (1024 * 1024)).toFixed(2);
+        mostrarOk("Archivo listo: " + nombre + " (" + mb + " MB).");
+        return true;
+    }
+
+    if (inputPago) {
+        inputPago.addEventListener("change", validarArchivo);
+    }
+
+    if (formPago) {
+        formPago.addEventListener("submit", function(e) {
+            if (!validarArchivo()) {
+                e.preventDefault();
+            }
+        });
+    }
+})();
+</script>
+
 {% endblock %}

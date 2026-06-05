@@ -12,178 +12,235 @@
     <style>
         :root{
             --blue:#2563eb;
+            --blue-dark:#1e3a8a;
             --cyan:#0891b2;
             --green:#16a34a;
             --yellow:#ca8a04;
+            --orange:#f97316;
             --red:#dc2626;
             --purple:#7c3aed;
             --slate:#0f172a;
+            --text:#1e293b;
             --muted:#64748b;
             --border:#e2e8f0;
+            --soft:#f8fafc;
         }
 
         *{box-sizing:border-box;}
 
         body{
             min-height:100vh;
+            margin:0;
             background:
-                radial-gradient(circle at top left, rgba(220,38,38,.12), transparent 30%),
-                radial-gradient(circle at top right, rgba(37,99,235,.14), transparent 32%),
-                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+                radial-gradient(circle at top left, rgba(220,38,38,.10), transparent 30%),
+                radial-gradient(circle at top right, rgba(37,99,235,.16), transparent 32%),
+                linear-gradient(135deg,#f8fbff,#edf5ff 48%,#f8fafc);
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
         }
 
         .page{
-            max-width:1320px;
+            width:min(100%, 1500px);
             margin:0 auto;
-            padding:24px;
+            padding:28px 32px 36px;
         }
 
         .topbar{
-            background:rgba(255,255,255,.94);
-            backdrop-filter:blur(16px);
-            border:1px solid rgba(226,232,240,.9);
-            border-radius:24px;
-            padding:18px 20px;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:18px;
-            box-shadow:0 18px 45px rgba(15,23,42,.08);
-            margin-bottom:22px;
+            gap:22px;
+            padding:0 4px 24px;
         }
 
         .brand{
             display:flex;
             align-items:center;
-            gap:14px;
+            gap:16px;
+            min-width:0;
         }
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:78px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e40af,#2563eb 60%,#0ea5e9);
             display:flex;
             align-items:center;
             justify-content:center;
             padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            box-shadow:0 18px 35px rgba(37,99,235,.24);
+            border:1px solid rgba(255,255,255,.38);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            filter:drop-shadow(0 5px 9px rgba(0,0,0,.23));
+            transform:scale(1.12);
         }
 
         .brand-title{
             margin:0;
             font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.35rem;
-            color:#0f172a;
+            letter-spacing:-.055em;
+            font-size:2rem;
+            color:#0b1f4d;
+            line-height:1;
         }
 
         .brand-subtitle{
-            margin:2px 0 0;
-            color:var(--muted);
-            font-weight:650;
-            font-size:.92rem;
+            margin:6px 0 0;
+            color:#45638f;
+            font-weight:750;
+            font-size:1rem;
         }
 
         .top-actions{
             display:flex;
-            flex-wrap:wrap;
-            gap:10px;
+            align-items:center;
             justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
         }
 
-        .btn-soft{
-            border-radius:999px;
-            padding:.72rem 1rem;
-            font-weight:850;
-            border:1px solid var(--border);
-            background:white;
-            color:#334155;
-            text-decoration:none;
+        .teacher-pill,
+        .semester-pill{
+            height:54px;
+            border-radius:18px;
+            border:1px solid #dbe7fb;
+            background:rgba(255,255,255,.86);
+            box-shadow:0 12px 28px rgba(15,23,42,.06);
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 14px;
+            color:#0b1f4d;
+            font-weight:900;
+            white-space:nowrap;
+        }
+
+        .teacher-pill small,
+        .semester-pill small{
+            display:block;
+            color:#64748b;
+            font-size:.72rem;
+            font-weight:900;
+            text-transform:uppercase;
+            letter-spacing:.055em;
+            line-height:1;
+            margin-bottom:4px;
+        }
+
+        .teacher-avatar,
+        .semester-icon{
+            width:38px;
+            height:38px;
+            border-radius:14px;
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            gap:8px;
-            transition:.18s ease;
+            background:#dbeafe;
+            color:#2563eb;
+            flex-shrink:0;
+            font-size:1.1rem;
         }
 
-        .btn-soft:hover{
-            transform:translateY(-1px);
-            color:#0f172a;
-            background:#f8fafc;
-            box-shadow:0 12px 25px rgba(15,23,42,.09);
-        }
-
-        .btn-main{
+        .teacher-avatar{
             border-radius:999px;
-            padding:.84rem 1.16rem;
+            background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+            border:1px solid rgba(37,99,235,.16);
+        }
+
+        .btn-back,
+        .btn-main{
+            min-height:54px;
+            border-radius:18px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:9px;
+            padding:.88rem 1.08rem;
+            font-weight:950;
+            text-decoration:none;
+            border:1px solid #dbe7fb;
+            background:white;
+            color:#0b1f4d;
+            transition:.18s ease;
+            box-shadow:0 12px 28px rgba(15,23,42,.06);
+            white-space:nowrap;
+        }
+
+        .btn-back:hover,
+        .btn-main:hover{
+            transform:translateY(-1px);
+            color:#0b1f4d;
+            box-shadow:0 16px 35px rgba(15,23,42,.11);
+        }
+
+        .btn-close-day{
+            background:linear-gradient(135deg,#ef4444,#f97316);
+            color:white;
+            border:none;
+            min-height:52px;
+            border-radius:18px;
+            padding:.88rem 1.16rem;
             font-weight:950;
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            gap:8px;
-            text-decoration:none;
+            gap:9px;
+            box-shadow:0 16px 34px rgba(239,68,68,.22);
+        }
+
+        .btn-close-day:disabled{
+            opacity:.45;
+            box-shadow:none;
+            cursor:not-allowed;
+        }
+
+        .alert-custom{
             border:none;
-            transition:.18s ease;
-        }
-
-        .btn-main:hover{
-            transform:translateY(-1px);
-            box-shadow:0 14px 28px rgba(15,23,42,.16);
-        }
-
-        .btn-red{
-            background:linear-gradient(135deg,#dc2626,#f97316);
-            color:white;
-        }
-
-        .btn-green{
-            background:linear-gradient(135deg,#16a34a,#22c55e);
-            color:white;
-        }
-
-        .btn-blue{
-            background:linear-gradient(135deg,#2563eb,#0891b2);
-            color:white;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:700;
         }
 
         .hero{
-            background:linear-gradient(135deg,#dc2626,#f97316,#2563eb);
+            background:
+                linear-gradient(135deg,rgba(220,38,38,.95),rgba(249,115,22,.94) 45%,rgba(37,99,235,.94)),
+                url("{% static 'img/estancia_bg.jpg' %}");
+            background-size:cover;
+            background-position:center;
             color:white;
-            border-radius:30px;
-            padding:26px;
-            box-shadow:0 24px 60px rgba(220,38,38,.22);
-            margin-bottom:22px;
+            border-radius:28px;
+            padding:30px;
             position:relative;
             overflow:hidden;
+            box-shadow:0 24px 60px rgba(220,38,38,.18);
+            margin-bottom:18px;
         }
 
         .hero:after{
             content:"";
             position:absolute;
-            width:260px;
-            height:260px;
+            width:310px;
+            height:310px;
             border-radius:50%;
             background:rgba(255,255,255,.14);
-            right:-80px;
-            top:-90px;
+            right:-90px;
+            top:-120px;
         }
 
         .hero-content{
             position:relative;
             z-index:1;
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:18px;
+            grid-template-columns:1fr 270px;
+            gap:22px;
             align-items:center;
         }
 
@@ -192,98 +249,60 @@
             align-items:center;
             gap:8px;
             background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.26);
+            border:1px solid rgba(255,255,255,.28);
             border-radius:999px;
-            padding:.45rem .8rem;
+            padding:.48rem .85rem;
             font-size:.78rem;
-            font-weight:900;
-            margin-bottom:12px;
+            font-weight:950;
+            margin-bottom:14px;
         }
 
         .hero h1{
             margin:0;
-            font-size:2rem;
+            font-size:2.15rem;
+            line-height:1.05;
             font-weight:950;
-            letter-spacing:-.05em;
+            letter-spacing:-.06em;
         }
 
         .hero p{
-            margin:8px 0 0;
-            max-width:840px;
-            font-weight:600;
-            opacity:.94;
+            margin:10px 0 0;
+            max-width:850px;
+            color:rgba(255,255,255,.92);
+            font-weight:750;
+            line-height:1.55;
         }
 
-        .day-info{
-            min-width:270px;
-            background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.28);
-            border-radius:22px;
-            padding:16px;
-            backdrop-filter:blur(12px);
+        .day-card{
+            background:rgba(255,255,255,.17);
+            border:1px solid rgba(255,255,255,.32);
+            border-radius:24px;
+            padding:18px;
+            backdrop-filter:blur(14px);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.14);
         }
 
         .day-label{
             font-size:.72rem;
             text-transform:uppercase;
-            letter-spacing:.08em;
-            opacity:.82;
+            letter-spacing:.09em;
+            color:rgba(255,255,255,.78);
             font-weight:950;
-            margin-bottom:4px;
+            margin-bottom:5px;
         }
 
         .day-value{
-            font-size:1.18rem;
+            font-size:1.28rem;
             font-weight:950;
+            margin-bottom:10px;
         }
 
-        .layout{
-            display:grid;
-            grid-template-columns:.9fr 1.1fr;
-            gap:20px;
-            align-items:start;
-        }
-
-        .panel{
-            background:rgba(255,255,255,.95);
-            border:1px solid var(--border);
-            border-radius:26px;
-            box-shadow:0 16px 38px rgba(15,23,42,.08);
-            overflow:hidden;
-        }
-
-        .panel-header{
-            padding:18px 20px;
-            border-bottom:1px solid var(--border);
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:14px;
-            flex-wrap:wrap;
-            background:white;
-        }
-
-        .panel-title{
-            margin:0;
-            font-size:1.08rem;
-            font-weight:950;
-            letter-spacing:-.03em;
-            color:#0f172a;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
-
-        .panel-body{
-            padding:20px;
-        }
-
-        .alert-custom{
-            border:none;
-            border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
+        .opened-by{
+            margin-top:10px;
+            color:rgba(255,255,255,.86);
+            font-size:.86rem;
+            font-weight:750;
+            line-height:1.35;
         }
 
         .badge-soft{
@@ -291,7 +310,7 @@
             align-items:center;
             gap:6px;
             border-radius:999px;
-            padding:.42rem .68rem;
+            padding:.42rem .7rem;
             font-size:.76rem;
             font-weight:950;
             white-space:nowrap;
@@ -307,16 +326,30 @@
         .summary-grid{
             display:grid;
             grid-template-columns:repeat(3,minmax(0,1fr));
-            gap:12px;
+            gap:14px;
             margin-bottom:18px;
         }
 
         .summary-card{
-            background:white;
-            border:1px solid var(--border);
-            border-radius:20px;
-            padding:15px;
-            box-shadow:0 10px 24px rgba(15,23,42,.05);
+            background:rgba(255,255,255,.92);
+            border:1px solid #dbe7fb;
+            border-radius:22px;
+            padding:17px;
+            box-shadow:0 15px 35px rgba(15,23,42,.07);
+            position:relative;
+            overflow:hidden;
+            min-height:118px;
+        }
+
+        .summary-card:after{
+            content:"";
+            position:absolute;
+            width:86px;
+            height:86px;
+            border-radius:999px;
+            right:-28px;
+            top:-34px;
+            background:#eff6ff;
         }
 
         .summary-icon{
@@ -327,7 +360,9 @@
             align-items:center;
             justify-content:center;
             font-size:1.25rem;
-            margin-bottom:10px;
+            margin-bottom:12px;
+            position:relative;
+            z-index:1;
         }
 
         .icon-blue{background:#dbeafe;color:#1d4ed8;}
@@ -336,48 +371,39 @@
         .icon-yellow{background:#fef3c7;color:#b45309;}
 
         .summary-number{
-            font-size:1.55rem;
+            font-size:1.65rem;
             font-weight:950;
-            letter-spacing:-.04em;
+            letter-spacing:-.045em;
             line-height:1;
+            position:relative;
+            z-index:1;
+            color:#0b1f4d;
         }
 
         .summary-label{
-            color:#64748b;
-            font-weight:800;
-            font-size:.82rem;
-            margin-top:4px;
+            color:#45638f;
+            font-weight:850;
+            font-size:.84rem;
+            margin-top:5px;
+            position:relative;
+            z-index:1;
         }
 
         .status-card{
             border-radius:22px;
             padding:18px;
-            margin-bottom:16px;
             border:1px solid var(--border);
+            margin-bottom:18px;
         }
 
-        .status-ok{
-            background:#f0fdf4;
-            border-color:#bbf7d0;
-            color:#14532d;
-        }
-
-        .status-error{
-            background:#fef2f2;
-            border-color:#fecaca;
-            color:#991b1b;
-        }
-
-        .status-warning{
-            background:#fff7ed;
-            border-color:#fed7aa;
-            color:#9a3412;
-        }
+        .status-ok{background:#f0fdf4;border-color:#bbf7d0;color:#14532d;}
+        .status-error{background:#fef2f2;border-color:#fecaca;color:#991b1b;}
+        .status-warning{background:#fff7ed;border-color:#fed7aa;color:#9a3412;}
 
         .status-top{
             display:flex;
-            gap:12px;
             align-items:flex-start;
+            gap:12px;
         }
 
         .status-icon{
@@ -388,20 +414,19 @@
             align-items:center;
             justify-content:center;
             font-size:1.35rem;
-            background:rgba(255,255,255,.72);
+            background:rgba(255,255,255,.78);
             flex-shrink:0;
         }
 
         .status-title{
+            font-size:1.04rem;
             font-weight:950;
-            color:inherit;
-            margin-bottom:3px;
-            font-size:1.02rem;
+            margin-bottom:4px;
         }
 
         .status-text{
             margin:0;
-            font-weight:650;
+            font-weight:750;
             line-height:1.45;
         }
 
@@ -410,7 +435,7 @@
             padding:0;
             list-style:none;
             display:grid;
-            gap:8px;
+            gap:9px;
         }
 
         .error-list li{
@@ -419,32 +444,124 @@
             color:#991b1b;
             border-radius:14px;
             padding:10px 12px;
-            font-weight:750;
+            font-weight:800;
             display:flex;
             gap:8px;
             align-items:flex-start;
         }
 
-        .error-list li i{
-            margin-top:2px;
-            flex-shrink:0;
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0,1.5fr) minmax(360px,.72fr);
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.94);
+            border:1px solid #dbe7fb;
+            border-radius:24px;
+            box-shadow:0 18px 44px rgba(15,23,42,.075);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:rgba(255,255,255,.78);
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.1rem;
+            font-weight:950;
+            letter-spacing:-.035em;
+            color:#0b1f4d;
+            display:flex;
+            align-items:center;
+            gap:9px;
+        }
+
+        .panel-title .panel-icon{
+            width:36px;
+            height:36px;
+            border-radius:13px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            background:#dbeafe;
+            color:#2563eb;
+        }
+
+        .panel-body{padding:18px 20px 20px;}
+
+        .side-stack{
+            display:grid;
+            gap:16px;
+        }
+
+        .rule-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            color:#9a3412;
+            border-radius:20px;
+            padding:16px;
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+        }
+
+        .rule-card .status-icon{
+            width:42px;
+            height:42px;
+            border-radius:15px;
+            color:#f97316;
+        }
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            border-radius:18px;
+            padding:14px 15px;
+            font-weight:750;
+            line-height:1.45;
+            margin-bottom:14px;
+        }
+
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+            border-radius:18px;
+            padding:14px 15px;
+            font-weight:750;
+            line-height:1.45;
+            margin-bottom:14px;
         }
 
         .form-section{
             border:1px solid var(--border);
             background:#f8fafc;
-            border-radius:22px;
-            padding:18px;
-            margin-bottom:16px;
+            border-radius:20px;
+            padding:16px;
+            margin-bottom:14px;
         }
 
         .form-section-title{
             display:flex;
             align-items:center;
             gap:8px;
-            margin-bottom:14px;
+            margin-bottom:12px;
             font-weight:950;
-            color:#0f172a;
+            color:#0b1f4d;
             letter-spacing:-.02em;
         }
 
@@ -459,15 +576,13 @@
         .form-select{
             border-radius:16px;
             border:1px solid #cbd5e1;
-            padding:.78rem .9rem;
-            font-weight:650;
+            padding:.82rem .9rem;
+            font-weight:700;
             color:#0f172a;
             background:white;
         }
 
-        textarea.form-control{
-            min-height:118px;
-        }
+        textarea.form-control{min-height:108px;}
 
         .form-control:focus,
         .form-select:focus{
@@ -480,7 +595,7 @@
             border:1px solid #cbd5e1;
             border-radius:16px;
             padding:14px 14px 14px 44px;
-            min-height:54px;
+            min-height:56px;
             display:flex;
             align-items:center;
         }
@@ -492,36 +607,33 @@
         }
 
         .form-check-label{
-            font-weight:850;
+            font-weight:900;
             color:#334155;
+            line-height:1.35;
         }
 
         .errors{
             margin-top:7px;
             color:#b91c1c;
-            font-weight:700;
+            font-weight:800;
             font-size:.82rem;
         }
 
-        .errors ul{
-            margin:0;
-            padding-left:18px;
-        }
-
-        .submit-bar{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
-            gap:12px;
-            padding-top:4px;
-        }
+        .errors ul{margin:0;padding-left:18px;}
 
         .submit-note{
-            color:#64748b;
-            font-weight:650;
-            font-size:.86rem;
-            max-width:600px;
+            color:#45638f;
+            font-weight:750;
+            font-size:.88rem;
+            line-height:1.45;
+            margin-bottom:13px;
+        }
+
+        .actions-row{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            flex-wrap:wrap;
         }
 
         .table-wrap{
@@ -533,7 +645,7 @@
 
         .table{
             margin:0;
-            min-width:900px;
+            min-width:920px;
         }
 
         .table thead th{
@@ -555,9 +667,7 @@
             font-size:.9rem;
         }
 
-        .table tbody tr:last-child td{
-            border-bottom:none;
-        }
+        .table tbody tr:last-child td{border-bottom:none;}
 
         .student-name{
             font-weight:950;
@@ -568,13 +678,13 @@
         .student-meta{
             color:#64748b;
             font-size:.8rem;
-            font-weight:650;
-            margin-top:2px;
+            font-weight:700;
+            margin-top:3px;
         }
 
         .check-grid{
             display:grid;
-            gap:6px;
+            gap:7px;
             min-width:180px;
         }
 
@@ -584,14 +694,11 @@
             justify-content:space-between;
             gap:8px;
             font-size:.78rem;
-            font-weight:850;
+            font-weight:900;
             color:#475569;
         }
 
-        .check-line i{
-            font-size:.95rem;
-        }
-
+        .check-line i{font-size:.95rem;}
         .ok{color:#16a34a;}
         .pending{color:#ca8a04;}
         .missing{color:#dc2626;}
@@ -599,12 +706,12 @@
 
         .empty-state{
             text-align:center;
-            padding:36px 18px;
+            padding:42px 18px;
             color:#64748b;
         }
 
         .empty-state i{
-            font-size:2.4rem;
+            font-size:2.5rem;
             color:#94a3b8;
             margin-bottom:10px;
         }
@@ -617,70 +724,29 @@
 
         .empty-state p{
             margin:0;
-            font-weight:650;
+            font-weight:700;
         }
 
-        .help-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .warning-card{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            color:#9a3412;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        @media(max-width:1100px){
-            .layout{grid-template-columns:1fr;}
+        @media(max-width:1120px){
+            .topbar{align-items:flex-start; flex-direction:column;}
+            .top-actions{width:100%; justify-content:flex-start;}
             .hero-content{grid-template-columns:1fr;}
-            .day-info{min-width:0;}
+            .layout{grid-template-columns:1fr;}
             .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
         }
 
         @media(max-width:720px){
-            .page{padding:14px;}
-
-            .topbar{
-                flex-direction:column;
-                align-items:flex-start;
-                border-radius:20px;
-            }
-
+            .page{padding:18px 14px 28px;}
+            .brand-title{font-size:1.55rem;}
+            .brand-logo{width:66px;height:58px;}
             .top-actions,
-            .btn-soft,
-            .btn-main{
-                width:100%;
-                justify-content:center;
-            }
-
-            .hero{
-                padding:22px;
-                border-radius:22px;
-            }
-
-            .hero h1{font-size:1.55rem;}
-
-            .summary-grid{
-                grid-template-columns:1fr;
-            }
-
-            .submit-bar{
-                align-items:stretch;
-            }
+            .teacher-pill,
+            .semester-pill,
+            .btn-back,
+            .btn-close-day{width:100%;}
+            .hero{padding:22px;border-radius:24px;}
+            .hero h1{font-size:1.6rem;}
+            .summary-grid{grid-template-columns:1fr;}
         }
     </style>
 </head>
@@ -695,21 +761,30 @@
             </div>
             <div>
                 <h1 class="brand-title">Cerrar día operativo</h1>
-                <p class="brand-subtitle">
-                    Validación final de entradas, bitácoras y salidas del día.
-                </p>
+                <p class="brand-subtitle">Validación final de entradas, bitácoras y salidas del día.</p>
             </div>
         </div>
 
         <div class="top-actions">
-            <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-soft">
-                <i class="bi bi-arrow-left-circle-fill"></i>
-                Volver a alumnos
-            </a>
+            <div class="semester-pill">
+                <span class="semester-icon"><i class="bi bi-calendar3"></i></span>
+                <span>
+                    <small>Semestre activo</small>
+                    {{ semestre.nombre }}
+                </span>
+            </div>
 
-            <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
-                <i class="bi bi-house-door-fill"></i>
-                Panel maestra
+            <div class="teacher-pill">
+                <span class="teacher-avatar"><i class="bi bi-person-fill"></i></span>
+                <span>
+                    <small>Maestra</small>
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </span>
+            </div>
+
+            <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-back">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
             </a>
         </div>
     </header>
@@ -733,39 +808,37 @@
                 </div>
 
                 <h1>{{ semestre.nombre }}</h1>
-
                 <p>
-                    Antes de cerrar el día, el sistema revisa que todos los niños con entrada tengan salida
+                    Antes de cerrar el día, el sistema revisa que los niños con entrada tengan salida
                     y que sus bitácoras obligatorias estén completas. Una vez cerrado, el día quedará solo en consulta.
                 </p>
             </div>
 
-            <div class="day-info">
+            <div class="day-card">
                 <div class="day-label">Día operativo</div>
                 <div class="day-value">{{ dia.fecha|date:"d/m/Y" }}</div>
-                <div class="mt-2">
-                    {% if dia.estado == "ABIERTO" %}
-                        <span class="badge-soft badge-green">
-                            <i class="bi bi-unlock-fill"></i>
-                            Abierto
-                        </span>
-                    {% elif dia.estado == "CERRADO" %}
-                        <span class="badge-soft badge-gray">
-                            <i class="bi bi-lock-fill"></i>
-                            Cerrado
-                        </span>
-                    {% else %}
-                        <span class="badge-soft badge-yellow">
-                            <i class="bi bi-clock-history"></i>
-                            Programado
-                        </span>
-                    {% endif %}
-                </div>
+
+                {% if dia.estado == "ABIERTO" %}
+                    <span class="badge-soft badge-green">
+                        <i class="bi bi-unlock-fill"></i>
+                        Abierto
+                    </span>
+                {% elif dia.estado == "CERRADO" %}
+                    <span class="badge-soft badge-gray">
+                        <i class="bi bi-lock-fill"></i>
+                        Cerrado
+                    </span>
+                {% else %}
+                    <span class="badge-soft badge-yellow">
+                        <i class="bi bi-clock-history"></i>
+                        Programado
+                    </span>
+                {% endif %}
 
                 {% if dia.abierto_por %}
-                    <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
-                        Abierto por:
-                        {{ dia.abierto_por.get_full_name|default:dia.abierto_por.username }}
+                    <div class="opened-by">
+                        Abierto por:<br>
+                        <strong>{{ dia.abierto_por.get_full_name|default:dia.abierto_por.username }}</strong>
                     </div>
                 {% endif %}
             </div>
@@ -817,28 +890,20 @@
     {% if dia.estado == "CERRADO" %}
         <div class="status-card status-warning">
             <div class="status-top">
-                <div class="status-icon">
-                    <i class="bi bi-lock-fill"></i>
-                </div>
+                <div class="status-icon"><i class="bi bi-lock-fill"></i></div>
                 <div>
                     <div class="status-title">Este día ya está cerrado</div>
-                    <p class="status-text">
-                        Los registros de este día quedaron en modo solo consulta y no deben modificarse.
-                    </p>
+                    <p class="status-text">Los registros de este día quedaron en modo solo consulta y no deben modificarse.</p>
                 </div>
             </div>
         </div>
     {% elif errores_cierre %}
         <div class="status-card status-error">
             <div class="status-top">
-                <div class="status-icon">
-                    <i class="bi bi-exclamation-octagon-fill"></i>
-                </div>
+                <div class="status-icon"><i class="bi bi-exclamation-octagon-fill"></i></div>
                 <div>
                     <div class="status-title">No se puede cerrar el día todavía</div>
-                    <p class="status-text">
-                        Corrige los pendientes de la lista antes de intentar cerrar el día.
-                    </p>
+                    <p class="status-text">Corrige los pendientes de la lista antes de intentar cerrar el día.</p>
                 </div>
             </div>
 
@@ -854,14 +919,11 @@
     {% else %}
         <div class="status-card status-ok">
             <div class="status-top">
-                <div class="status-icon">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
+                <div class="status-icon"><i class="bi bi-check-circle-fill"></i></div>
                 <div>
                     <div class="status-title">Todo está listo para cerrar</div>
                     <p class="status-text">
-                        Los registros visibles cumplen las validaciones requeridas. Confirma el cierre para bloquear
-                        la edición del día.
+                        Los registros visibles cumplen las validaciones requeridas. Confirma el cierre para bloquear la edición del día.
                     </p>
                 </div>
             </div>
@@ -869,12 +931,11 @@
     {% endif %}
 
     <div class="layout">
-
         <main>
             <section class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-clipboard2-check-fill"></i>
+                        <span class="panel-icon"><i class="bi bi-clipboard2-check-fill"></i></span>
                         Revisión por alumno
                     </h2>
 
@@ -905,7 +966,6 @@
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
                                     {% for registro in registros %}
                                         <tr>
@@ -921,9 +981,7 @@
                                             <td>
                                                 {% if registro.sala_semestre and registro.sala_semestre.sala %}
                                                     <strong>{{ registro.sala_semestre.sala.nombre }}</strong>
-                                                    <div class="student-meta">
-                                                        {{ registro.sala_semestre.sala.get_tipo_sala_display }}
-                                                    </div>
+                                                    <div class="student-meta">{{ registro.sala_semestre.sala.get_tipo_sala_display }}</div>
                                                 {% else %}
                                                     <span class="badge-soft badge-red">Sin sala</span>
                                                 {% endif %}
@@ -955,7 +1013,6 @@
                                                             <i class="bi bi-dash-circle-fill muted"></i>
                                                         {% endif %}
                                                     </div>
-
                                                     <div class="check-line">
                                                         <span>En estancia</span>
                                                         {% if registro.tiene_bitacora_estancia_completa %}
@@ -990,35 +1047,17 @@
 
                                             <td>
                                                 {% if registro.estado == "COMPLETO" %}
-                                                    <span class="badge-soft badge-green">
-                                                        <i class="bi bi-check-circle-fill"></i>
-                                                        Completo
-                                                    </span>
+                                                    <span class="badge-soft badge-green"><i class="bi bi-check-circle-fill"></i> Completo</span>
                                                 {% elif registro.estado == "EN_ESTANCIA" %}
-                                                    <span class="badge-soft badge-blue">
-                                                        <i class="bi bi-person-walking"></i>
-                                                        En estancia
-                                                    </span>
+                                                    <span class="badge-soft badge-blue"><i class="bi bi-person-walking"></i> En estancia</span>
                                                 {% elif registro.estado == "SALIDA_NORMAL" %}
-                                                    <span class="badge-soft badge-purple">
-                                                        <i class="bi bi-box-arrow-right"></i>
-                                                        Salida registrada
-                                                    </span>
+                                                    <span class="badge-soft badge-purple"><i class="bi bi-box-arrow-right"></i> Salida registrada</span>
                                                 {% elif registro.estado == "SALIDA_ANTICIPADA" %}
-                                                    <span class="badge-soft badge-yellow">
-                                                        <i class="bi bi-exclamation-triangle-fill"></i>
-                                                        Salida anticipada
-                                                    </span>
+                                                    <span class="badge-soft badge-yellow"><i class="bi bi-exclamation-triangle-fill"></i> Salida anticipada</span>
                                                 {% elif registro.estado == "SALIDA_POR_INCIDENCIA" %}
-                                                    <span class="badge-soft badge-red">
-                                                        <i class="bi bi-exclamation-octagon-fill"></i>
-                                                        Salida especial
-                                                    </span>
+                                                    <span class="badge-soft badge-red"><i class="bi bi-exclamation-octagon-fill"></i> Salida especial</span>
                                                 {% else %}
-                                                    <span class="badge-soft badge-gray">
-                                                        <i class="bi bi-hourglass-split"></i>
-                                                        Sin entrada
-                                                    </span>
+                                                    <span class="badge-soft badge-gray"><i class="bi bi-hourglass-split"></i> Sin entrada</span>
                                                 {% endif %}
                                             </td>
                                         </tr>
@@ -1030,20 +1069,38 @@
                         <div class="empty-state">
                             <i class="bi bi-clipboard-x"></i>
                             <h5>No hay registros para revisar</h5>
-                            <p>
-                                Cuando existan alumnos registrados en el día, aparecerán en esta tabla.
-                            </p>
+                            <p>Cuando existan alumnos registrados en el día, aparecerán en esta tabla.</p>
                         </div>
                     {% endif %}
                 </div>
             </section>
         </main>
 
-        <aside>
-            <section class="panel mb-4">
+        <aside class="side-stack">
+            <section class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-lock-fill"></i>
+                        <span class="panel-icon"><i class="bi bi-shield-check"></i></span>
+                        Reglas de cierre
+                    </h2>
+                </div>
+                <div class="panel-body">
+                    <div class="rule-card">
+                        <div class="status-icon"><i class="bi bi-list-check"></i></div>
+                        <div>
+                            <div class="status-title">Para cerrar el día</div>
+                            <p class="status-text">
+                                Todos los niños que tuvieron entrada deben tener salida, bitácora en casa completa y bitácora durante estancia completa.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span class="panel-icon"><i class="bi bi-lock-fill"></i></span>
                         Confirmar cierre
                     </h2>
                 </div>
@@ -1052,13 +1109,12 @@
                     <div class="help-card">
                         <i class="bi bi-info-circle-fill me-1"></i>
                         Al cerrar el día, ya no se podrán registrar entradas, bitácoras ni salidas para esta fecha.
-                        El día quedará como historial de consulta.
                     </div>
 
                     {% if errores_cierre %}
                         <div class="warning-card">
                             <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                            Primero debes resolver los pendientes. El botón de cierre no debe usarse hasta que la validación esté completa.
+                            Primero debes resolver los pendientes antes de confirmar el cierre.
                         </div>
                     {% endif %}
 
@@ -1077,9 +1133,7 @@
                                 Observaciones del cierre
                             </div>
 
-                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
-                                Observaciones
-                            </label>
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">Observaciones</label>
                             {{ form.observaciones }}
                             {% if form.observaciones.errors %}
                                 <div class="errors">{{ form.observaciones.errors }}</div>
@@ -1103,58 +1157,24 @@
                             {% endif %}
                         </div>
 
-                        <div class="submit-bar">
-                            <div class="submit-note">
-                                El cierre quedará registrado con tu usuario, fecha y hora.
-                            </div>
+                        <div class="submit-note">
+                            El cierre quedará registrado con tu usuario, fecha y hora.
+                        </div>
 
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-soft">
-                                    <i class="bi bi-x-circle-fill"></i>
-                                    Cancelar
-                                </a>
-
-                                <button
-                                    type="submit"
-                                    class="btn-main btn-red"
-                                    {% if errores_cierre or dia.estado != "ABIERTO" %}disabled{% endif %}
-                                >
-                                    <i class="bi bi-lock-fill"></i>
-                                    Cerrar día
-                                </button>
-                            </div>
+                        <div class="actions-row">
+                            <button
+                                type="submit"
+                                class="btn-close-day"
+                                {% if errores_cierre or dia.estado != "ABIERTO" %}disabled{% endif %}
+                            >
+                                <i class="bi bi-lock-fill"></i>
+                                Cerrar día
+                            </button>
                         </div>
                     </form>
                 </div>
             </section>
-
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-shield-check"></i>
-                        Reglas de cierre
-                    </h2>
-                </div>
-
-                <div class="panel-body">
-                    <div class="status-card status-warning mb-0">
-                        <div class="status-top">
-                            <div class="status-icon">
-                                <i class="bi bi-list-check"></i>
-                            </div>
-                            <div>
-                                <div class="status-title">Para cerrar el día</div>
-                                <p class="status-text">
-                                    Todos los niños que tuvieron entrada deben tener salida,
-                                    bitácora en casa completa y bitácora durante estancia completa.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </aside>
-
     </div>
 </div>
 

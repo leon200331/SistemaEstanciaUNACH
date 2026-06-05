@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,799 +10,1724 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f4f7f6;
-            font-family: 'Segoe UI', sans-serif;
+        :root {
+            --azul-unach: #1e40af;
+            --azul-profundo: #0b2a66;
+            --azul-vivo: #2563eb;
+            --teal: #0f766e;
+            --teal-vivo: #14b8a6;
+            --verde: #16a34a;
+            --rojo: #dc2626;
+            --ambar: #f59e0b;
+            --gris-fondo: #f4f7fb;
+            --texto: #0b2454;
+            --muted: #64748b;
+            --linea: #dbe5f6;
+            --card: #ffffff;
+            --shadow: 0 18px 45px rgba(15, 23, 42, .08);
         }
 
-        .navbar-ts {
-            background: #0f766e;
-            padding: .75rem 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,.16);
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background:
+                radial-gradient(circle at top right, rgba(37, 99, 235, .10), transparent 34%),
+                linear-gradient(180deg, #f8fbff 0%, #f4f7fb 48%, #f7fafc 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--texto);
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            background: rgba(255,255,255,.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(219, 229, 246, .9);
+            box-shadow: 0 8px 25px rgba(15, 23, 42, .05);
+        }
+
+        .topbar-inner {
+            max-width: 1420px;
+            margin: 0 auto;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-logo {
+            width: 72px;
+            height: 58px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #1e40af, #2563eb 52%, #0f766e);
+            box-shadow: 0 14px 26px rgba(37, 99, 235, .22);
+            border: 1px solid rgba(255,255,255,.35);
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .brand-logo img {
+            width: 88%;
+            height: 88%;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,.18));
         }
 
         .brand-title {
-            color: #fff;
-            font-weight: 800;
             font-size: 1.08rem;
-            letter-spacing: .4px;
-            line-height: 1.15;
+            font-weight: 900;
+            color: var(--azul-profundo);
+            line-height: 1.1;
+            letter-spacing: -.02em;
+            margin: 0;
         }
 
         .brand-subtitle {
-            color: rgba(255,255,255,.78);
-            font-size: .84rem;
-        }
-
-        .container-panel {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 24px 16px;
-            margin-top: 92px;
-        }
-
-        .card-panel {
-            background: #fff;
-            border: none;
-            border-radius: 18px;
-            box-shadow: 0 10px 26px rgba(15,23,42,.08);
-        }
-
-        .summary-card {
-            border-radius: 18px;
-            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
-            color: #fff;
-            padding: 24px;
-            box-shadow: 0 12px 30px rgba(15,118,110,.22);
-        }
-
-        .table-card {
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-        }
-
-        .btn-soft {
-            border-radius: 999px;
+            color: #526b9a;
+            font-size: .86rem;
             font-weight: 700;
-            padding: .45rem .9rem;
+            margin-top: 3px;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn-pill {
+            border-radius: 999px;
+            font-weight: 900;
+            padding: .72rem 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            line-height: 1;
+        }
+
+        .btn-regresar {
+            background: #ffffff;
+            color: var(--azul-profundo);
+            border: 1px solid #cbdaf5;
+            box-shadow: 0 10px 24px rgba(15,23,42,.06);
+        }
+
+        .btn-regresar:hover {
+            background: #eef4ff;
+            color: var(--azul-vivo);
+            border-color: #9db9f5;
+        }
+
+        .user-pill {
+            border: 1px solid #dbe5f6;
+            background: #ffffff;
+            border-radius: 999px;
+            padding: 8px 14px 8px 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+            max-width: 310px;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #dbeafe, #ecfeff);
+            display: grid;
+            place-items: center;
+            color: var(--azul-vivo);
+            font-size: 1.15rem;
+            flex: 0 0 auto;
+        }
+
+        .user-name {
+            font-size: .9rem;
+            font-weight: 900;
+            color: var(--azul-profundo);
+            line-height: 1.05;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: .74rem;
+            color: #64748b;
+            font-weight: 800;
+        }
+
+        .page-shell {
+            max-width: 1420px;
+            margin: 0 auto;
+            padding: 28px 22px 54px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0f766e 100%);
+            color: #ffffff;
+            border-radius: 28px;
+            padding: 34px 34px;
+            box-shadow: 0 24px 55px rgba(37, 99, 235, .24);
+            min-height: 190px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .hero::before,
+        .hero::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            background: rgba(255,255,255,.13);
+            pointer-events: none;
+        }
+
+        .hero::before {
+            width: 260px;
+            height: 260px;
+            right: -60px;
+            top: -95px;
+        }
+
+        .hero::after {
+            width: 190px;
+            height: 190px;
+            right: 130px;
+            bottom: -115px;
+            background: rgba(255,255,255,.08);
+        }
+
+        .hero-content,
+        .hero-visual { position: relative; z-index: 1; }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 13px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.28);
+            background: rgba(255,255,255,.14);
+            color: #eaf3ff;
+            font-weight: 900;
+            font-size: .76rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            font-weight: 950;
+            line-height: .98;
+            letter-spacing: -.05em;
+        }
+
+        .hero p {
+            margin: 0;
+            color: rgba(255,255,255,.88);
+            max-width: 720px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 22px;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.22);
+            color: #ffffff;
+            font-weight: 850;
+            font-size: .83rem;
+        }
+
+        .hero-visual {
+            width: 170px;
+            height: 140px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.09));
+            border: 1px solid rgba(255,255,255,.26);
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
+        }
+
+        .hero-visual i {
+            font-size: 4.6rem;
+            color: rgba(255,255,255,.86);
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,.18));
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid #dbe5f6;
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            min-height: 150px;
+        }
+
+        .kpi-card::after {
+            content: "";
+            position: absolute;
+            right: -38px;
+            top: -42px;
+            width: 118px;
+            height: 118px;
+            border-radius: 999px;
+            background: #eef4ff;
+        }
+
+        .kpi-card.teal { border-left: 5px solid var(--teal-vivo); }
+        .kpi-card.blue { border-left: 5px solid var(--azul-vivo); }
+        .kpi-card.green { border-left: 5px solid var(--verde); }
+        .kpi-card.orange { border-left: 5px solid var(--ambar); }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: #eef4ff;
+            color: var(--azul-vivo);
+            font-size: 1.35rem;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card.teal .kpi-icon { background: #ecfeff; color: var(--teal); }
+        .kpi-card.green .kpi-icon { background: #ecfdf5; color: var(--verde); }
+        .kpi-card.orange .kpi-icon { background: #fff7ed; color: var(--ambar); }
+
+        .kpi-label {
+            font-size: .78rem;
+            font-weight: 950;
+            letter-spacing: .06em;
+            color: #60749d;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+
+        .kpi-value {
+            font-size: 2.25rem;
+            font-weight: 950;
+            line-height: 1;
+            margin-top: 8px;
+            color: var(--azul-profundo);
+            position: relative;
+            z-index: 1;
+        }
+
+        .kpi-help {
+            color: #526b9a;
+            font-size: .86rem;
+            margin-top: 8px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-soft {
+            height: 8px;
+            border-radius: 999px;
+            background: #eaf1fb;
+            overflow: hidden;
+            margin-top: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-soft span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--azul-vivo), var(--teal-vivo));
+            transition: width .5s ease;
+        }
+
+        .toolbar-card {
+            background: #ffffff;
+            border: 1px solid #dbe5f6;
+            border-radius: 24px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            margin: 22px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-title {
+            font-size: 1.05rem;
+            font-weight: 950;
+            color: var(--azul-profundo);
+        }
+
+        .toolbar-subtitle {
+            color: #526b9a;
+            font-size: .88rem;
+            font-weight: 700;
+        }
+
+        .search-box {
+            min-width: min(420px, 100%);
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7890ba;
+        }
+
+        .search-box input {
+            border: 1px solid #dbe5f6;
+            border-radius: 16px;
+            padding: 12px 14px 12px 42px;
+            font-weight: 700;
+            color: var(--azul-profundo);
+            box-shadow: none;
+        }
+
+        .section-card {
+            background: #ffffff;
+            border: 1px solid #dbe5f6;
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-top: 22px;
+        }
+
+        .section-head {
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #dbe5f6;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+        }
+
+        .section-title {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.45rem;
+            line-height: 1.1;
+            color: var(--azul-profundo);
+            font-weight: 950;
+            letter-spacing: -.035em;
+        }
+
+        .section-title .icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #eef4ff;
+            color: var(--azul-vivo);
+        }
+
+        .section-title.teal .icon { background: #ecfeff; color: var(--teal); }
+        .section-count {
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: #eef4ff;
+            color: var(--azul-vivo);
+            font-size: .86rem;
+            font-weight: 950;
+        }
+
+        .payments-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+
+
+        .registered-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .registered-grid .payment-card {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .registered-grid .meta-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .collapse-toggle {
+            border: 1px solid #cbdaf5;
+            background: #ffffff;
+            color: var(--azul-vivo);
+            border-radius: 999px;
+            padding: 9px 14px;
+            font-weight: 950;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            box-shadow: 0 10px 22px rgba(15,23,42,.05);
+        }
+
+        .collapse-toggle:hover {
+            background: #eef4ff;
+            color: var(--azul-profundo);
+        }
+
+        .proof-secure-note {
+            font-size: .78rem;
+            color: #60749d;
+            font-weight: 800;
+            margin-top: 7px;
+        }
+
+        .payment-card {
+            border: 1px solid #dbe5f6;
+            border-radius: 22px;
+            background: #ffffff;
+            padding: 18px;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, .045);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-card::after {
+            content: "";
+            position: absolute;
+            right: -40px;
+            top: -45px;
+            width: 118px;
+            height: 118px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, .06);
+        }
+
+        .payment-main {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .folio-pill {
+            background: #eef4ff;
+            border: 1px solid #cbdaf5;
+            color: var(--azul-vivo);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 950;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+
+        .student-name {
+            font-weight: 950;
+            color: var(--azul-profundo);
+            font-size: 1.06rem;
+            text-transform: uppercase;
+            letter-spacing: -.02em;
+        }
+
+        .small-muted {
+            font-size: .84rem;
+            color: #60749d;
+            font-weight: 700;
+        }
+
+        .meta-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-item {
+            background: #f8fbff;
+            border: 1px solid #dbe5f6;
+            border-radius: 16px;
+            padding: 10px 12px;
+        }
+
+        .meta-label {
+            color: #7890ba;
+            font-size: .72rem;
+            font-weight: 950;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 4px;
+        }
+
+        .meta-value {
+            color: var(--azul-profundo);
+            font-weight: 900;
+            font-size: .9rem;
         }
 
         .badge-state {
             border-radius: 999px;
-            padding: .45rem .75rem;
-            font-weight: 800;
+            padding: .55rem .8rem;
+            font-weight: 950;
             font-size: .78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .student-name {
-            font-weight: 800;
-            color: #0f172a;
-            text-transform: uppercase;
-        }
-
-        .small-muted {
-            font-size: .82rem;
-            color: #64748b;
-        }
-
-        .payment-proof-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 12px;
-        }
-
-        .modal-content-custom {
+        .proof-panel {
+            margin-top: 14px;
+            border: 1px solid #dbe5f6;
             border-radius: 18px;
-            border: none;
-            box-shadow: 0 18px 45px rgba(15,23,42,.28);
-            overflow: hidden;
+            padding: 13px;
+            background: #fbfdff;
+            position: relative;
+            z-index: 1;
         }
 
-        .modal-header-presencial {
-            background: linear-gradient(135deg, #0284c7, #0369a1);
-            color: #fff;
-        }
-
-        .modal-header-success {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            color: #fff;
-        }
-
-        .modal-header-danger {
-            background: linear-gradient(135deg, #dc2626, #991b1b);
-            color: #fff;
-        }
-
-        .empty-state {
-            padding: 56px 20px;
-            text-align: center;
-        }
-
-        .empty-state i {
-            font-size: 3.5rem;
-            color: #94a3b8;
-        }
-
-
-        .upload-box {
-            background: #f8fafc;
-            border: 1px dashed #94a3b8;
-            border-radius: 14px;
-            padding: 14px;
-        }
-
-        .upload-help {
-            font-size: .82rem;
-            color: #64748b;
-            margin-top: 6px;
-        }
-
-        .section-title {
-            font-weight: 900;
-            color: #0f172a;
-            letter-spacing: -.02em;
-        }
-
-        .registered-card {
-            border-radius: 18px;
-            border: 1px solid #dbeafe;
-            background: #ffffff;
-            box-shadow: 0 10px 26px rgba(15,23,42,.06);
-            overflow: hidden;
-        }
-
-        .registered-header {
-            background: linear-gradient(135deg, #1d4ed8, #0f766e);
-            color: white;
-            padding: 18px 20px;
-        }
-
-        .registered-header p {
-            color: rgba(255,255,255,.82);
+        .proof-title {
+            font-weight: 950;
+            color: var(--azul-profundo);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 8px;
         }
 
         .action-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
             justify-content: flex-end;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-action {
+            border-radius: 14px;
+            font-weight: 950;
+            padding: .58rem .85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .empty-state {
+            padding: 62px 20px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .empty-icon {
+            width: 84px;
+            height: 84px;
+            border-radius: 28px;
+            display: grid;
+            place-items: center;
+            background: #eef4ff;
+            color: #7890ba;
+            font-size: 2.8rem;
+            margin: 0 auto 16px;
+        }
+
+        .empty-state h5 {
+            font-weight: 950;
+            color: var(--azul-profundo);
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            color: #60749d;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .tips-card {
+            margin-top: 22px;
+            background: #ffffff;
+            border: 1px solid #dbe5f6;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 22px;
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 18px;
+        }
+
+        .tips-card h5 {
+            font-weight: 950;
+            color: var(--azul-profundo);
+            margin-bottom: 10px;
+        }
+
+        .tip-list {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+            display: grid;
+            gap: 9px;
+        }
+
+        .tip-list li {
+            display: flex;
+            gap: 10px;
+            color: #526b9a;
+            font-weight: 750;
+        }
+
+        .tip-list i { color: var(--teal); }
+
+        .mini-panel {
+            border-radius: 18px;
+            background: linear-gradient(135deg, #eff6ff, #ecfeff);
+            border: 1px solid #cbdaf5;
+            padding: 16px;
+        }
+
+        .modal-content-custom {
+            border-radius: 22px;
+            border: none;
+            box-shadow: 0 26px 60px rgba(15,23,42,.28);
+            overflow: hidden;
+        }
+
+        .modal-header-custom {
+            color: #ffffff;
+            border: 0;
+            padding: 18px 22px;
+        }
+
+        .modal-header-presencial { background: linear-gradient(135deg, #0284c7, #0f766e); }
+        .modal-header-success { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .modal-header-danger { background: linear-gradient(135deg, #dc2626, #991b1b); }
+
+        .upload-box {
+            background: #f8fbff;
+            border: 1px dashed #9db9f5;
+            border-radius: 18px;
+            padding: 15px;
+        }
+
+        .upload-help {
+            font-size: .82rem;
+            color: #60749d;
+            font-weight: 700;
+            margin-top: 7px;
+        }
+
+        .file-warning {
+            display: none;
+            color: #dc2626;
+            font-weight: 800;
+            font-size: .84rem;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 1120px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .payments-grid { grid-template-columns: 1fr; }
+            .registered-grid .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .tips-card { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
-            .action-grid {
-                justify-content: flex-start;
-            }
+            .topbar-inner { align-items: flex-start; flex-direction: column; }
+            .top-actions { width: 100%; justify-content: space-between; }
+            .hero { align-items: flex-start; flex-direction: column; padding: 28px 22px; }
+            .hero-visual { width: 120px; height: 105px; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .toolbar-card { align-items: stretch; }
+            .search-box { min-width: 100%; }
+            .payment-main { flex-direction: column; }
+            .action-grid { justify-content: flex-start; }
+            .meta-grid { grid-template-columns: 1fr; }
+            .registered-grid .meta-grid { grid-template-columns: 1fr; }
         }
-    </style>
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
+  </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ts fixed-top">
-    <div class="container-fluid justify-content-center">
-        <div class="d-flex align-items-center" style="width:100%; max-width:1280px; padding:0 18px;">
-            <a class="navbar-brand d-flex align-items-center text-decoration-none" href="{% url 'validacion_pagos_pendientes' %}">
-                <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
-                <div>
-                    <div class="brand-title">VALIDACIÓN DE COMPROBANTES DE PAGO</div>
-                    <div class="brand-subtitle">Trabajo Social · Inscripciones aceptadas por Dirección</div>
-                </div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="{% url 'validacion_pagos_pendientes' %}">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Validación de comprobantes de pago</h1>
+                <div class="brand-subtitle">Trabajo Social · Inscripciones aceptadas por Dirección</div>
+            </div>
+        </a>
+
+        <div class="top-actions">
+            <a href="{% url 'dashboard_admin' %}" class="btn btn-regresar btn-pill">
+                <i class="bi bi-arrow-left"></i>
+                Regresar
             </a>
 
-            <div class="ms-auto d-flex gap-2 align-items-center">
-                <a href="{% url 'dashboard_admin' %}" class="btn btn-light btn-soft">
-                    <i class="bi bi-arrow-left me-1"></i> Panel Trabajo Social
-                </a>
-
-                <form method="post" action="{% url 'logout' %}" class="mb-0">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-light btn-soft">
-                        <i class="bi bi-box-arrow-right me-1"></i> Salir
-                    </button>
-                </form>
+            <div class="user-pill">
+                <div class="user-avatar"><i class="bi bi-person-badge"></i></div>
+                <div class="min-w-0">
+                    <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                    <div class="user-role">Trabajadora Social</div>
+                </div>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
-<div class="container-panel">
+<main class="page-shell" id="payment-dashboard"
+      data-pendientes="{{ inscripciones|length }}"
+      data-registrados="{{ pagos_registrados|length }}"
+      data-validados="{{ resumen_pagos.validados|default:0 }}"
+      data-presenciales="{{ resumen_pagos.presenciales|default:0 }}">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
 
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm border-0" role="alert">
                 <strong><i class="bi bi-info-circle-fill me-2"></i>Aviso:</strong> {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
     {% endif %}
 
-    <div class="summary-card mb-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-            <div>
-                <h3 class="fw-bold mb-1">
-                    <i class="bi bi-receipt-cutoff me-2"></i>
-                    Pagos pendientes de validación
-                </h3>
-                <p class="mb-0 opacity-75">
-                    Aquí aparecen los expedientes aprobados por Dirección que están esperando comprobante de pago.
-                </p>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="bi bi-shield-check"></i>
+                Control de pagos
             </div>
-
-            <div class="d-flex gap-2 flex-wrap justify-content-end">
-                <div class="bg-white text-success rounded-pill px-4 py-2 fw-bold shadow-sm">
-                    Pendientes: {{ resumen_pagos.pendientes|default:inscripciones|length }}
-                </div>
-                <div class="bg-white text-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
-                    Registrados: {{ resumen_pagos.registrados|default:pagos_registrados|length }}
-                </div>
+            <h1>Pagos y comprobantes</h1>
+            <p>
+                Revisa quién falta por pagar, valida comprobantes recibidos y registra entregas presenciales sin saturar el sistema.
+            </p>
+            <div class="hero-tags">
+                <span class="hero-tag"><i class="bi bi-file-earmark-pdf"></i> PDF permitido</span>
+                <span class="hero-tag"><i class="bi bi-image"></i> JPG / PNG permitido</span>
+                <span class="hero-tag"><i class="bi bi-hdd-network"></i> Máximo 5 MB por archivo</span>
             </div>
         </div>
-    </div>
-
-    <div class="card card-panel table-card">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="min-width:130px;">Folio</th>
-                        <th style="min-width:270px;">Beneficiario / Menor</th>
-                        <th style="min-width:220px;">Estado del comprobante</th>
-                        <th style="min-width:260px;">Comprobante</th>
-                        <th style="min-width:300px;" class="text-end">Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for ins in inscripciones %}
-                    <tr>
-                        <td>
-                            <span class="fw-bold text-primary">#{{ ins.solicitud_ingreso.folio }}</span>
-                            <div class="small-muted">
-                                ID inscripción: {{ ins.id }}
-                            </div>
-                        </td>
-
-                        <td>
-                            <div class="student-name">
-                                {{ ins.solicitud_ingreso.nombre_menor_completo }}
-                            </div>
-                            <div class="small-muted">
-                                Tutor: {{ ins.solicitud_ingreso.nombre_tutor_completo }}
-                            </div>
-                            <div class="small-muted">
-                                <i class="bi bi-envelope me-1"></i>{{ ins.solicitud_ingreso.correo|default:"Sin correo" }}
-                            </div>
-                            <div class="small-muted">
-                                Matrícula: {{ ins.solicitud_ingreso.matricula|default:"SIN_MATRICULA" }}
-                            </div>
-                        </td>
-
-                        <td>
-                            {% if ins.estado_pago == 'VALIDADO' %}
-                                <span class="badge bg-success badge-state">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Validado
-                                </span>
-
-                            {% elif ins.estado_pago == 'SUBIDO_BENEFICIARIO' %}
-                                <span class="badge bg-primary badge-state">
-                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subido por beneficiario
-                                </span>
-
-                            {% elif ins.estado_pago == 'ENTREGADO_PRESENCIAL' or ins.pago_entregado_presencial %}
-                                <span class="badge bg-info text-dark badge-state">
-                                    <i class="bi bi-person-check-fill me-1"></i> Entregado presencial
-                                </span>
-
-                            {% elif ins.estado_pago == 'RECHAZADO' %}
-                                <span class="badge bg-danger badge-state">
-                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazado
-                                </span>
-
-                            {% else %}
-                                <span class="badge bg-warning text-dark badge-state">
-                                    <i class="bi bi-hourglass-split me-1"></i> Pendiente
-                                </span>
-                            {% endif %}
-
-                            {% if ins.pago_observaciones %}
-                                <div class="small-muted mt-2">
-                                    <strong>Obs:</strong> {{ ins.pago_observaciones|truncatechars:90 }}
-                                </div>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            <div class="payment-proof-box">
-                                {% if ins.doc_tutor_pago %}
-                                    <div class="fw-bold text-success mb-2">
-                                        <i class="bi bi-file-earmark-check-fill me-1"></i>
-                                        Archivo disponible
-                                    </div>
-
-                                    <div class="d-flex gap-2 flex-wrap">
-                                        <a href="{{ ins.doc_tutor_pago.url }}" target="_blank" class="btn btn-outline-success btn-sm btn-soft">
-                                            <i class="bi bi-eye-fill me-1"></i> Ver
-                                        </a>
-
-                                        <a href="{% url 'descargar_archivo_expediente' ins.id 'doc_tutor_pago' %}" class="btn btn-outline-primary btn-sm btn-soft">
-                                            <i class="bi bi-download me-1"></i> Descargar
-                                        </a>
-                                    </div>
-
-                                {% elif ins.pago_entregado_presencial %}
-                                    <div class="fw-bold text-info">
-                                        <i class="bi bi-person-check-fill me-1"></i>
-                                        Ticket recibido presencialmente
-                                    </div>
-                                    {% if ins.pago_recibido_presencial_en %}
-                                    <div class="small-muted mt-1">
-                                        {{ ins.pago_recibido_presencial_en|date:"d/m/Y H:i" }}
-                                    </div>
-                                    {% endif %}
-
-                                {% else %}
-                                    <div class="fw-bold text-warning">
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                        Sin comprobante
-                                    </div>
-                                    <div class="small-muted mt-1">
-                                        El beneficiario puede subirlo desde su portal o entregarlo presencialmente.
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </td>
-
-                        <td class="text-end">
-                            <div class="action-grid">
-
-                                {% if not ins.doc_tutor_pago and not ins.pago_entregado_presencial %}
-                                <button type="button"
-                                        class="btn btn-info btn-sm btn-soft text-dark"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalPresencial{{ ins.id }}">
-                                    <i class="bi bi-person-check-fill me-1"></i> Presencial
-                                </button>
-                                {% endif %}
-
-                                {% if ins.doc_tutor_pago or ins.pago_entregado_presencial %}
-                                <button type="button"
-                                        class="btn btn-success btn-sm btn-soft"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalValidar{{ ins.id }}">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Validar
-                                </button>
-                                {% endif %}
-
-                                {% if ins.doc_tutor_pago %}
-                                <button type="button"
-                                        class="btn btn-danger btn-sm btn-soft"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalRechazar{{ ins.id }}">
-                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazar
-                                </button>
-                                {% endif %}
-                            </div>
-
-                            <!-- MODAL ENTREGA PRESENCIAL -->
-                            <div class="modal fade" id="modalPresencial{{ ins.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header modal-header-presencial">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-person-check-fill me-2"></i>
-                                                Registrar entrega presencial
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <form method="post" action="{% url 'registrar_pago_valido' ins.id %}" enctype="multipart/form-data">
-                                            {% csrf_token %}
-                                            <div class="modal-body text-start p-4">
-                                                <p>
-                                                    Confirma que el beneficiario entregó presencialmente el comprobante de pago de:
-                                                    <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>.
-                                                </p>
-
-                                                <div class="alert alert-info small">
-                                                    <i class="bi bi-info-circle-fill me-2"></i>
-                                                    Adjunta una foto o PDF del comprobante físico para conservar evidencia digital en el sistema.
-                                                </div>
-
-                                                <div class="upload-box mb-3">
-                                                    <label class="form-label fw-bold">
-                                                        Comprobante de pago <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="file"
-                                                           name="comprobante_pago"
-                                                           class="form-control"
-                                                           accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                                                           required>
-                                                    <div class="upload-help">
-                                                        Formatos permitidos: PDF, JPG, JPEG o PNG. Tamaño máximo recomendado: 5 MB.
-                                                    </div>
-                                                </div>
-
-                                                <label class="form-label fw-bold">Observaciones opcionales</label>
-                                                <textarea name="pago_observaciones"
-                                                          class="form-control"
-                                                          rows="3"
-                                                          placeholder="Ej. Ticket recibido físicamente en Trabajo Social."></textarea>
-                                            </div>
-
-                                            <div class="modal-footer bg-light">
-                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">
-                                                    Cancelar
-                                                </button>
-                                                <button type="submit" name="accion_pago" value="PRESENCIAL" class="btn btn-info btn-soft text-dark">
-                                                    <i class="bi bi-upload me-1"></i> Registrar presencial
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- MODAL VALIDAR -->
-                            <div class="modal fade" id="modalValidar{{ ins.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header modal-header-success">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-check-circle-fill me-2"></i>
-                                                Validar pago
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
-                                            {% csrf_token %}
-                                            <div class="modal-body text-start p-4">
-                                                <p>
-                                                    Al validar el pago, la inscripción de
-                                                    <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
-                                                    quedará como <strong>FINALIZADA</strong>.
-                                                </p>
-
-                                                <div class="alert alert-success small">
-                                                    <i class="bi bi-info-circle-fill me-2"></i>
-                                                    Esta acción confirma que el comprobante digital o presencial fue aceptado por Trabajo Social.
-                                                </div>
-
-                                                <label class="form-label fw-bold">Observaciones opcionales</label>
-                                                <textarea name="pago_observaciones"
-                                                          class="form-control"
-                                                          rows="3"
-                                                          placeholder="Ej. Pago validado correctamente.">{{ ins.pago_observaciones|default:"" }}</textarea>
-                                            </div>
-
-                                            <div class="modal-footer bg-light">
-                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">
-                                                    Cancelar
-                                                </button>
-                                                <button type="submit" name="accion_pago" value="VALIDAR" class="btn btn-success btn-soft">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Validar y finalizar
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- MODAL RECHAZAR -->
-                            <div class="modal fade" id="modalRechazar{{ ins.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header modal-header-danger">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-x-octagon-fill me-2"></i>
-                                                Rechazar comprobante
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
-                                            {% csrf_token %}
-                                            <div class="modal-body text-start p-4">
-                                                <p>
-                                                    Indica por qué se rechaza el comprobante de
-                                                    <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>.
-                                                </p>
-
-                                                <div class="alert alert-danger small">
-                                                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
-                                                    El beneficiario podrá subir un nuevo comprobante desde su portal.
-                                                </div>
-
-                                                <label class="form-label fw-bold">Motivo del rechazo <span class="text-danger">*</span></label>
-                                                <textarea name="pago_observaciones"
-                                                          class="form-control"
-                                                          rows="4"
-                                                          required
-                                                          placeholder="Ej. El comprobante no es legible, no corresponde al pago o está incompleto."></textarea>
-                                            </div>
-
-                                            <div class="modal-footer bg-light">
-                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">
-                                                    Cancelar
-                                                </button>
-                                                <button type="submit" name="accion_pago" value="RECHAZAR" class="btn btn-danger btn-soft">
-                                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazar comprobante
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">
-                            <div class="empty-state">
-                                <i class="bi bi-inbox"></i>
-                                <h5 class="fw-bold mt-3">No hay pagos pendientes</h5>
-                                <p class="text-muted mb-0">
-                                    Cuando Dirección apruebe una inscripción, aparecerá aquí para registrar o validar el comprobante de pago.
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="hero-visual">
+            <i class="bi bi-receipt-cutoff"></i>
         </div>
-    </div>
+    </section>
 
+    <section class="kpi-grid">
+        <article class="kpi-card teal">
+            <div class="kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="kpi-label">Pendientes de pago</div>
+            <div class="kpi-value">{{ inscripciones|length }}</div>
+            <div class="kpi-help"><span id="txtPendientesPorcentaje">Calculando...</span></div>
+            <div class="progress-soft"><span id="barPendientes"></span></div>
+        </article>
 
-    <div class="registered-card mt-4">
-        <div class="registered-header">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <h4 class="section-title text-white mb-1">
-                        <i class="bi bi-folder-check me-2"></i>
-                        Pagos registrados / comprobantes recibidos
-                    </h4>
-                    <p class="mb-0">
-                        Aquí puedes consultar los beneficiarios que ya entregaron o subieron comprobante.
-                    </p>
+        <article class="kpi-card blue">
+            <div class="kpi-icon"><i class="bi bi-folder-check"></i></div>
+            <div class="kpi-label">Comprobantes recibidos</div>
+            <div class="kpi-value">{{ pagos_registrados|length }}</div>
+            <div class="kpi-help"><span id="txtRegistradosPorcentaje">Calculando...</span></div>
+            <div class="progress-soft"><span id="barRegistrados"></span></div>
+        </article>
+
+        <article class="kpi-card green">
+            <div class="kpi-icon"><i class="bi bi-check-circle"></i></div>
+            <div class="kpi-label">Pagos validados</div>
+            <div class="kpi-value">{{ resumen_pagos.validados|default:0 }}</div>
+            <div class="kpi-help">Inscripciones finalizadas por pago.</div>
+            <div class="progress-soft"><span id="barValidados"></span></div>
+        </article>
+
+        <article class="kpi-card orange">
+            <div class="kpi-icon"><i class="bi bi-person-check"></i></div>
+            <div class="kpi-label">Entregas presenciales</div>
+            <div class="kpi-value">{{ resumen_pagos.presenciales|default:0 }}</div>
+            <div class="kpi-help">Tickets recibidos físicamente.</div>
+            <div class="progress-soft"><span id="barPresenciales"></span></div>
+        </article>
+    </section>
+
+    <section class="toolbar-card">
+        <div>
+            <div class="toolbar-title">Vista operativa de comprobantes</div>
+            <div class="toolbar-subtitle">Usa el buscador para localizar por folio, tutor, menor, correo o matrícula.</div>
+        </div>
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control" id="buscadorPagos" placeholder="Buscar beneficiario, folio o correo...">
+        </div>
+    </section>
+
+    <section class="section-card" id="pendientes">
+        <div class="section-head">
+            <h2 class="section-title teal">
+                <span class="icon"><i class="bi bi-clock-history"></i></span>
+                Pagos pendientes
+            </h2>
+            <span class="section-count">{{ inscripciones|length }} pendiente(s)</span>
+        </div>
+
+        <div class="payments-grid">
+            {% for ins in inscripciones %}
+            <article class="payment-card js-payment-card">
+                <div class="payment-main">
+                    <div>
+                        <span class="folio-pill"><i class="bi bi-hash"></i> Folio {{ ins.solicitud_ingreso.folio }}</span>
+                        <div class="student-name js-search-text">
+                            {{ ins.solicitud_ingreso.nombre_menor_completo }} {{ ins.solicitud_ingreso.nombre_tutor_completo }} {{ ins.solicitud_ingreso.correo }} {{ ins.solicitud_ingreso.matricula }} {{ ins.solicitud_ingreso.folio }}
+                        </div>
+                        <div class="small-muted mt-1">Tutor: {{ ins.solicitud_ingreso.nombre_tutor_completo }}</div>
+                        <div class="small-muted"><i class="bi bi-envelope me-1"></i>{{ ins.solicitud_ingreso.correo|default:"Sin correo" }}</div>
+                    </div>
+
+                    <div class="text-start text-md-end">
+                        {% if ins.estado_pago == 'VALIDADO' %}
+                            <span class="badge bg-success badge-state"><i class="bi bi-check-circle-fill"></i> Validado</span>
+                        {% elif ins.estado_pago == 'SUBIDO_BENEFICIARIO' %}
+                            <span class="badge bg-primary badge-state"><i class="bi bi-cloud-arrow-up-fill"></i> Subido por beneficiario</span>
+                        {% elif ins.estado_pago == 'ENTREGADO_PRESENCIAL' or ins.pago_entregado_presencial %}
+                            <span class="badge bg-info text-dark badge-state"><i class="bi bi-person-check-fill"></i> Entregado presencial</span>
+                        {% elif ins.estado_pago == 'RECHAZADO' %}
+                            <span class="badge bg-danger badge-state"><i class="bi bi-x-circle-fill"></i> Rechazado</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark badge-state"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <span class="badge bg-light text-primary rounded-pill px-3 py-2">
-                    Total: {{ pagos_registrados|length }}
-                </span>
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <div class="meta-label">ID inscripción</div>
+                        <div class="meta-value">{{ ins.id }}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Matrícula</div>
+                        <div class="meta-value">{{ ins.solicitud_ingreso.matricula|default:"SIN_MATRICULA" }}</div>
+                    </div>
+                </div>
+
+                <div class="proof-panel">
+                    {% if ins.doc_tutor_pago %}
+                        <div class="proof-title text-success"><i class="bi bi-file-earmark-check-fill"></i> Archivo disponible</div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'descargar_archivo_expediente' ins.id 'doc_tutor_pago' %}" class="btn btn-outline-primary btn-sm btn-action">
+                                <i class="bi bi-download"></i> Descargar comprobante
+                            </a>
+                        </div>
+                    {% elif ins.pago_entregado_presencial %}
+                        <div class="proof-title text-info"><i class="bi bi-person-check-fill"></i> Ticket recibido presencialmente</div>
+                        {% if ins.pago_recibido_presencial_en %}
+                            <div class="small-muted">{{ ins.pago_recibido_presencial_en|date:"d/m/Y H:i" }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div class="proof-title text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Sin comprobante</div>
+                        <div class="small-muted">El beneficiario puede subirlo desde su portal o entregarlo presencialmente.</div>
+                    {% endif %}
+
+                    {% if ins.pago_observaciones %}
+                        <div class="small-muted mt-2"><strong>Observación:</strong> {{ ins.pago_observaciones|truncatechars:120 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="action-grid mt-3">
+                    {% if not ins.doc_tutor_pago and not ins.pago_entregado_presencial %}
+                    <button type="button"
+                            class="btn btn-info btn-sm btn-action text-dark"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalPresencial{{ ins.id }}">
+                        <i class="bi bi-person-check-fill"></i> Registrar presencial
+                    </button>
+                    {% endif %}
+
+                    {% if ins.doc_tutor_pago or ins.pago_entregado_presencial %}
+                    <button type="button"
+                            class="btn btn-success btn-sm btn-action"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalValidar{{ ins.id }}">
+                        <i class="bi bi-check-circle-fill"></i> Validar pago
+                    </button>
+                    {% endif %}
+
+                    {% if ins.doc_tutor_pago %}
+                    <button type="button"
+                            class="btn btn-danger btn-sm btn-action"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalRechazar{{ ins.id }}">
+                        <i class="bi bi-x-circle-fill"></i> Rechazar
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="modal fade" id="modalPresencial{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content modal-content-custom">
+                            <div class="modal-header modal-header-custom modal-header-presencial">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-person-check-fill me-2"></i>Registrar entrega presencial</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <form method="post" action="{% url 'registrar_pago_valido' ins.id %}" enctype="multipart/form-data" class="js-upload-form">
+                                {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
+                                <div class="modal-body text-start p-4">
+                                    <p class="mb-3">
+                                        Confirma que el beneficiario entregó presencialmente el comprobante de pago de
+                                        <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>.
+                                    </p>
+
+                                    <div class="alert alert-info small fw-semibold">
+                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        Adjunta una foto o PDF del comprobante físico. El archivo no debe superar 5 MB.
+                                    </div>
+
+                                    <div class="upload-box mb-3">
+                                        <label class="form-label fw-bold">Comprobante de pago <span class="text-danger">*</span></label>
+                                        <input type="file"
+                                               name="comprobante_pago"
+                                               class="form-control js-file-validate"
+                                               accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                                               data-max-size="5242880"
+                                               data-allowed="pdf,jpg,jpeg,png"
+                                               required>
+                                        <div class="upload-help">Formatos permitidos: PDF, JPG, JPEG o PNG. Tamaño máximo: 5 MB.</div>
+                                        <div class="file-warning"></div>
+                                    </div>
+
+                                    <label class="form-label fw-bold">Observaciones opcionales</label>
+                                    <textarea name="pago_observaciones" class="form-control" rows="3" placeholder="Ej. Ticket recibido físicamente en Trabajo Social."></textarea>
+                                </div>
+
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary btn-action" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="accion_pago" value="PRESENCIAL" class="btn btn-info btn-action text-dark">
+                                        <i class="bi bi-upload"></i> Registrar presencial
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalValidar{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content modal-content-custom">
+                            <div class="modal-header modal-header-custom modal-header-success">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Validar pago</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
+                                {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
+                                <div class="modal-body text-start p-4">
+                                    <p>
+                                        Al validar el pago, la inscripción de
+                                        <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
+                                        quedará como <strong>FINALIZADA</strong>.
+                                    </p>
+                                    <div class="alert alert-success small fw-semibold">
+                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        Esta acción confirma que el comprobante digital o presencial fue aceptado por Trabajo Social.
+                                    </div>
+                                    <label class="form-label fw-bold">Observaciones opcionales</label>
+                                    <textarea name="pago_observaciones" class="form-control" rows="3" placeholder="Ej. Pago validado correctamente.">{{ ins.pago_observaciones|default:"" }}</textarea>
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary btn-action" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="accion_pago" value="VALIDAR" class="btn btn-success btn-action">
+                                        <i class="bi bi-check-circle-fill"></i> Validar y finalizar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalRechazar{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content modal-content-custom">
+                            <div class="modal-header modal-header-custom modal-header-danger">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-x-octagon-fill me-2"></i>Rechazar comprobante</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <form method="post" action="{% url 'registrar_pago_valido' ins.id %}">
+                                {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
+                                <div class="modal-body text-start p-4">
+                                    <p>Indica por qué se rechaza el comprobante de <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>.</p>
+                                    <div class="alert alert-danger small fw-semibold">
+                                        <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                                        El beneficiario podrá subir un nuevo comprobante desde su portal.
+                                    </div>
+                                    <label class="form-label fw-bold">Motivo del rechazo <span class="text-danger">*</span></label>
+                                    <textarea name="pago_observaciones" class="form-control" rows="4" required placeholder="Ej. El comprobante no es legible, no corresponde al pago o está incompleto."></textarea>
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary btn-action" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="accion_pago" value="RECHAZAR" class="btn btn-danger btn-action">
+                                        <i class="bi bi-x-circle-fill"></i> Rechazar comprobante
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                <h5>No hay pagos pendientes</h5>
+                <p>Cuando Dirección apruebe una inscripción, aparecerá aquí para registrar o validar el comprobante de pago.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section-card" id="registrados">
+        <div class="section-head">
+            <h2 class="section-title">
+                <span class="icon"><i class="bi bi-folder-check"></i></span>
+                Pagos registrados / comprobantes recibidos
+            </h2>
+            <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
+                <span class="section-count">{{ pagos_registrados|length }} registrado(s)</span>
+                <button class="collapse-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#listaPagosRegistrados" aria-expanded="true" aria-controls="listaPagosRegistrados">
+                    <i class="bi bi-chevron-down"></i>
+                    Desplegar / ocultar
+                </button>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="min-width:130px;">Folio</th>
-                        <th style="min-width:270px;">Beneficiario / Menor</th>
-                        <th style="min-width:210px;">Tipo de comprobante</th>
-                        <th style="min-width:220px;">Fecha / recepción</th>
-                        <th style="min-width:260px;">Comprobante</th>
-                        <th style="min-width:260px;" class="text-end">Acciones</th>
-                    </tr>
-                </thead>
+        <div id="listaPagosRegistrados" class="collapse show">
+            <div class="payments-grid registered-grid">
+            {% for pago in pagos_registrados %}
+            <article class="payment-card js-payment-card">
+                <div class="payment-main">
+                    <div>
+                        <span class="folio-pill"><i class="bi bi-hash"></i> Folio {{ pago.solicitud_ingreso.folio }}</span>
+                        <div class="student-name js-search-text">
+                            {{ pago.solicitud_ingreso.nombre_menor_completo }} {{ pago.solicitud_ingreso.nombre_tutor_completo }} {{ pago.solicitud_ingreso.correo }} {{ pago.solicitud_ingreso.matricula }} {{ pago.solicitud_ingreso.folio }}
+                        </div>
+                        <div class="small-muted mt-1">Tutor: {{ pago.solicitud_ingreso.nombre_tutor_completo }}</div>
+                        <div class="small-muted"><i class="bi bi-envelope me-1"></i>{{ pago.solicitud_ingreso.correo|default:"Sin correo" }}</div>
+                    </div>
 
-                <tbody>
-                    {% for pago in pagos_registrados %}
-                    <tr>
-                        <td>
-                            <span class="fw-bold text-primary">#{{ pago.solicitud_ingreso.folio }}</span>
-                            <div class="small-muted">ID inscripción: {{ pago.id }}</div>
-                        </td>
+                    <div class="text-start text-md-end">
+                        {% if pago.estado_pago == 'VALIDADO' %}
+                            <span class="badge bg-success badge-state"><i class="bi bi-check-circle-fill"></i> Validado</span>
+                        {% elif pago.pago_entregado_presencial or pago.estado_pago == 'ENTREGADO_PRESENCIAL' %}
+                            <span class="badge bg-info text-dark badge-state"><i class="bi bi-person-check-fill"></i> Presencial</span>
+                        {% elif pago.estado_pago == 'SUBIDO_BENEFICIARIO' %}
+                            <span class="badge bg-primary badge-state"><i class="bi bi-cloud-arrow-up-fill"></i> Portal beneficiario</span>
+                        {% elif pago.estado_pago == 'RECHAZADO' %}
+                            <span class="badge bg-danger badge-state"><i class="bi bi-x-circle-fill"></i> Rechazado</span>
+                        {% else %}
+                            <span class="badge bg-secondary badge-state"><i class="bi bi-receipt"></i> {{ pago.estado_pago|default:"Registrado" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
 
-                        <td>
-                            <div class="student-name">{{ pago.solicitud_ingreso.nombre_menor_completo }}</div>
-                            <div class="small-muted">Tutor: {{ pago.solicitud_ingreso.nombre_tutor_completo }}</div>
-                            <div class="small-muted">
-                                <i class="bi bi-envelope me-1"></i>{{ pago.solicitud_ingreso.correo|default:"Sin correo" }}
-                            </div>
-                            <div class="small-muted">
-                                Matrícula: {{ pago.solicitud_ingreso.matricula|default:"SIN_MATRICULA" }}
-                            </div>
-                        </td>
-
-                        <td>
-                            {% if pago.estado_pago == 'VALIDADO' %}
-                                <span class="badge bg-success badge-state">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Validado
-                                </span>
-                            {% elif pago.pago_entregado_presencial or pago.estado_pago == 'ENTREGADO_PRESENCIAL' %}
-                                <span class="badge bg-info text-dark badge-state">
-                                    <i class="bi bi-person-check-fill me-1"></i> Presencial
-                                </span>
-                            {% elif pago.estado_pago == 'SUBIDO_BENEFICIARIO' %}
-                                <span class="badge bg-primary badge-state">
-                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Portal beneficiario
-                                </span>
-                            {% elif pago.estado_pago == 'RECHAZADO' %}
-                                <span class="badge bg-danger badge-state">
-                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazado
-                                </span>
-                            {% else %}
-                                <span class="badge bg-secondary badge-state">
-                                    {{ pago.estado_pago|default:"Registrado" }}
-                                </span>
-                            {% endif %}
-
-                            {% if pago.pago_observaciones %}
-                                <div class="small-muted mt-2">
-                                    <strong>Obs:</strong> {{ pago.pago_observaciones|truncatechars:90 }}
-                                </div>
-                            {% endif %}
-                        </td>
-
-                        <td>
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <div class="meta-label">ID inscripción</div>
+                        <div class="meta-value">{{ pago.id }}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Matrícula</div>
+                        <div class="meta-value">{{ pago.solicitud_ingreso.matricula|default:"SIN_MATRICULA" }}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Fecha / recepción</div>
+                        <div class="meta-value">
                             {% if pago.pago_recibido_presencial_en %}
-                                <div class="fw-bold">{{ pago.pago_recibido_presencial_en|date:"d/m/Y H:i" }}</div>
-                                <div class="small-muted">
-                                    Recibido por:
-                                    {% if pago.pago_recibido_presencial_por %}
-                                        {{ pago.pago_recibido_presencial_por.get_full_name|default:pago.pago_recibido_presencial_por.username }}
-                                    {% else %}
-                                        Sin usuario
-                                    {% endif %}
-                                </div>
+                                {{ pago.pago_recibido_presencial_en|date:"d/m/Y H:i" }}
                             {% elif pago.pago_validado_en %}
-                                <div class="fw-bold">{{ pago.pago_validado_en|date:"d/m/Y H:i" }}</div>
-                                <div class="small-muted">Pago validado</div>
+                                {{ pago.pago_validado_en|date:"d/m/Y H:i" }}
                             {% else %}
-                                <span class="small-muted">Sin fecha registrada</span>
+                                Sin fecha registrada
                             {% endif %}
-                        </td>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Recibido por</div>
+                        <div class="meta-value">
+                            {% if pago.pago_recibido_presencial_por %}
+                                {{ pago.pago_recibido_presencial_por.get_full_name|default:pago.pago_recibido_presencial_por.username }}
+                            {% elif pago.pago_validado_por %}
+                                {{ pago.pago_validado_por.get_full_name|default:pago.pago_validado_por.username }}
+                            {% else %}
+                                Sin usuario
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
-                        <td>
-                            <div class="payment-proof-box">
-                                {% if pago.doc_tutor_pago %}
-                                    <div class="fw-bold text-success mb-2">
-                                        <i class="bi bi-file-earmark-check-fill me-1"></i>
-                                        Archivo disponible
-                                    </div>
+                <div class="proof-panel">
+                    {% if pago.doc_tutor_pago %}
+                        <div class="proof-title text-success"><i class="bi bi-file-earmark-check-fill"></i> Archivo disponible</div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'descargar_archivo_expediente' pago.id 'doc_tutor_pago' %}" class="btn btn-outline-primary btn-sm btn-action">
+                                <i class="bi bi-download"></i> Descargar comprobante
+                            </a>
+                        </div>
+                        <div class="proof-secure-note"><i class="bi bi-lock-fill me-1"></i>Acceso mediante descarga protegida del sistema.</div>
+                    {% else %}
+                        <div class="proof-title text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Sin archivo digital</div>
+                    {% endif %}
 
-                                    <div class="d-flex gap-2 flex-wrap">
-                                        <a href="{{ pago.doc_tutor_pago.url }}" target="_blank" class="btn btn-outline-success btn-sm btn-soft">
-                                            <i class="bi bi-eye-fill me-1"></i> Ver
-                                        </a>
+                    {% if pago.pago_observaciones %}
+                        <div class="small-muted mt-2"><strong>Observación:</strong> {{ pago.pago_observaciones|truncatechars:120 }}</div>
+                    {% endif %}
+                </div>
 
-                                        <a href="{% url 'descargar_archivo_expediente' pago.id 'doc_tutor_pago' %}" class="btn btn-outline-primary btn-sm btn-soft">
-                                            <i class="bi bi-download me-1"></i> Descargar
-                                        </a>
-                                    </div>
-                                {% else %}
-                                    <div class="fw-bold text-warning">
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                        Sin archivo digital
-                                    </div>
-                                {% endif %}
+                <div class="action-grid mt-3">
+                    {% if pago.estado_pago != 'VALIDADO' and pago.doc_tutor_pago %}
+                        <button type="button" class="btn btn-success btn-sm btn-action" data-bs-toggle="modal" data-bs-target="#modalValidarRegistrado{{ pago.id }}">
+                            <i class="bi bi-check-circle-fill"></i> Validar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm btn-action" data-bs-toggle="modal" data-bs-target="#modalRechazarRegistrado{{ pago.id }}">
+                            <i class="bi bi-x-circle-fill"></i> Rechazar
+                        </button>
+                    {% else %}
+                        <span class="badge bg-light text-muted border rounded-pill px-3 py-2">Sin acciones pendientes</span>
+                    {% endif %}
+                </div>
+
+                <div class="modal fade" id="modalValidarRegistrado{{ pago.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content modal-content-custom">
+                            <div class="modal-header modal-header-custom modal-header-success">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Validar pago registrado</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                        </td>
 
-                        <td class="text-end">
-                            <div class="action-grid">
-                                {% if pago.estado_pago != 'VALIDADO' and pago.doc_tutor_pago %}
-                                    <button type="button"
-                                            class="btn btn-success btn-sm btn-soft"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalValidarRegistrado{{ pago.id }}">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Validar
-                                    </button>
+                            <form method="post" action="{% url 'registrar_pago_valido' pago.id %}">
+                                {% csrf_token %}
 
-                                    <button type="button"
-                                            class="btn btn-danger btn-sm btn-soft"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalRechazarRegistrado{{ pago.id }}">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Rechazar
-                                    </button>
-                                {% else %}
-                                    <span class="badge bg-light text-muted border">Sin acciones pendientes</span>
-                                {% endif %}
-                            </div>
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
 
-                            <div class="modal fade" id="modalValidarRegistrado{{ pago.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header modal-header-success">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-check-circle-fill me-2"></i>
-                                                Validar pago registrado
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <form method="post" action="{% url 'registrar_pago_valido' pago.id %}">
-                                            {% csrf_token %}
-                                            <div class="modal-body text-start p-4">
-                                                <p>
-                                                    Al validar el pago, la inscripción de
-                                                    <strong>{{ pago.solicitud_ingreso.nombre_menor_completo }}</strong>
-                                                    quedará como <strong>FINALIZADA</strong>.
-                                                </p>
-
-                                                <label class="form-label fw-bold">Observaciones opcionales</label>
-                                                <textarea name="pago_observaciones"
-                                                          class="form-control"
-                                                          rows="3"
-                                                          placeholder="Ej. Pago validado correctamente.">{{ pago.pago_observaciones|default:"" }}</textarea>
-                                            </div>
-
-                                            <div class="modal-footer bg-light">
-                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" name="accion_pago" value="VALIDAR" class="btn btn-success btn-soft">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Validar y finalizar
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                <div class="modal-body text-start p-4">
+                                    <p>
+                                        Al validar el pago, la inscripción de
+                                        <strong>{{ pago.solicitud_ingreso.nombre_menor_completo }}</strong>
+                                        quedará como <strong>FINALIZADA</strong>.
+                                    </p>
+                                    <label class="form-label fw-bold">Observaciones opcionales</label>
+                                    <textarea name="pago_observaciones" class="form-control" rows="3" placeholder="Ej. Pago validado correctamente.">{{ pago.pago_observaciones|default:"" }}</textarea>
                                 </div>
-                            </div>
-
-                            <div class="modal fade" id="modalRechazarRegistrado{{ pago.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header modal-header-danger">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-x-octagon-fill me-2"></i>
-                                                Rechazar comprobante
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <form method="post" action="{% url 'registrar_pago_valido' pago.id %}">
-                                            {% csrf_token %}
-                                            <div class="modal-body text-start p-4">
-                                                <p>
-                                                    Indica por qué se rechaza el comprobante de
-                                                    <strong>{{ pago.solicitud_ingreso.nombre_menor_completo }}</strong>.
-                                                </p>
-
-                                                <label class="form-label fw-bold">
-                                                    Motivo del rechazo <span class="text-danger">*</span>
-                                                </label>
-                                                <textarea name="pago_observaciones"
-                                                          class="form-control"
-                                                          rows="4"
-                                                          required
-                                                          placeholder="Ej. El comprobante no es legible, no corresponde al pago o está incompleto."></textarea>
-                                            </div>
-
-                                            <div class="modal-footer bg-light">
-                                                <button type="button" class="btn btn-secondary btn-soft" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" name="accion_pago" value="RECHAZAR" class="btn btn-danger btn-soft">
-                                                    <i class="bi bi-x-circle-fill me-1"></i> Rechazar comprobante
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary btn-action" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="accion_pago" value="VALIDAR" class="btn btn-success btn-action">
+                                        <i class="bi bi-check-circle-fill"></i> Validar y finalizar
+                                    </button>
                                 </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalRechazarRegistrado{{ pago.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content modal-content-custom">
+                            <div class="modal-header modal-header-custom modal-header-danger">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-x-octagon-fill me-2"></i>Rechazar comprobante</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <i class="bi bi-folder2-open"></i>
-                                <h5 class="fw-bold mt-3">Aún no hay comprobantes registrados</h5>
-                                <p class="text-muted mb-0">
-                                    Cuando el beneficiario suba comprobante o Trabajo Social registre uno presencial, aparecerá aquí.
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+                            <form method="post" action="{% url 'registrar_pago_valido' pago.id %}">
+                                {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
+                                <div class="modal-body text-start p-4">
+                                    <p>Indica por qué se rechaza el comprobante de <strong>{{ pago.solicitud_ingreso.nombre_menor_completo }}</strong>.</p>
+                                    <label class="form-label fw-bold">Motivo del rechazo <span class="text-danger">*</span></label>
+                                    <textarea name="pago_observaciones" class="form-control" rows="4" required placeholder="Ej. El comprobante no es legible, no corresponde al pago o está incompleto."></textarea>
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary btn-action" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="accion_pago" value="RECHAZAR" class="btn btn-danger btn-action">
+                                        <i class="bi bi-x-circle-fill"></i> Rechazar comprobante
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-folder2-open"></i></div>
+                <h5>Aún no hay comprobantes registrados</h5>
+                <p>Cuando el beneficiario suba comprobante o Trabajo Social registre uno presencial, aparecerá aquí.</p>
+            </div>
+            {% endfor %}
+            </div>
         </div>
-    </div>
-
-</div>
+    </section>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    const dashboard = document.getElementById('payment-dashboard');
+    if (!dashboard) return;
+
+    const toNumber = (value) => {
+        const n = parseInt(value || '0', 10);
+        return Number.isFinite(n) ? n : 0;
+    };
+
+    const pendientes = toNumber(dashboard.dataset.pendientes);
+    const registrados = toNumber(dashboard.dataset.registrados);
+    const validados = toNumber(dashboard.dataset.validados);
+    const presenciales = toNumber(dashboard.dataset.presenciales);
+    const total = Math.max(pendientes + registrados, 1);
+
+    const porcentaje = (cantidad) => Math.round((cantidad * 100) / total);
+
+    const setBar = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.style.width = Math.min(Math.max(value, 0), 100) + '%';
+    };
+
+    const txtPendientes = document.getElementById('txtPendientesPorcentaje');
+    if (txtPendientes) txtPendientes.textContent = porcentaje(pendientes) + '% falta por pagar o registrar comprobante.';
+
+    const txtRegistrados = document.getElementById('txtRegistradosPorcentaje');
+    if (txtRegistrados) txtRegistrados.textContent = porcentaje(registrados) + '% ya cuenta con comprobante recibido.';
+
+    setBar('barPendientes', porcentaje(pendientes));
+    setBar('barRegistrados', porcentaje(registrados));
+    setBar('barValidados', porcentaje(validados));
+    setBar('barPresenciales', porcentaje(presenciales));
+
+    const buscador = document.getElementById('buscadorPagos');
+    const cards = Array.from(document.querySelectorAll('.js-payment-card'));
+
+    if (buscador) {
+        buscador.addEventListener('input', function () {
+            const term = this.value.trim().toLowerCase();
+            cards.forEach(card => {
+                const text = (card.textContent || '').toLowerCase();
+                card.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+    }
+
+    const formatBytes = (bytes) => {
+        if (!bytes) return '0 MB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    };
+
+    document.querySelectorAll('.js-file-validate').forEach(input => {
+        input.addEventListener('change', function () {
+            const file = this.files && this.files[0];
+            const maxSize = toNumber(this.dataset.maxSize || '5242880');
+            const allowed = (this.dataset.allowed || 'pdf,jpg,jpeg,png').split(',').map(x => x.trim().toLowerCase());
+            const warning = this.closest('.upload-box')?.querySelector('.file-warning');
+
+            if (warning) {
+                warning.style.display = 'none';
+                warning.textContent = '';
+            }
+
+            if (!file) return;
+
+            const ext = (file.name.split('.').pop() || '').toLowerCase();
+            let error = '';
+
+            if (!allowed.includes(ext)) {
+                error = 'Formato no permitido. Usa PDF, JPG, JPEG o PNG.';
+            } else if (file.size > maxSize) {
+                error = 'El archivo pesa ' + formatBytes(file.size) + '. El tamaño máximo permitido es 5 MB.';
+            }
+
+            if (error) {
+                this.value = '';
+                if (warning) {
+                    warning.textContent = error;
+                    warning.style.display = 'block';
+                } else {
+                    alert(error);
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-upload-form').forEach(form => {
+        form.addEventListener('submit', function (event) {
+            const input = this.querySelector('.js-file-validate');
+            if (!input || !input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+            const maxSize = toNumber(input.dataset.maxSize || '5242880');
+            if (file.size > maxSize) {
+                event.preventDefault();
+                alert('El comprobante supera el límite de 5 MB. Comprime el archivo o sube una imagen/PDF más ligero.');
+            }
+        });
+    });
+})();
+</script>
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
+</script>
 
 </body>
 </html>

@@ -1,210 +1,675 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Captura de Solicitud</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
   <style>
     :root{
-      --brand:#1e3a8a;
-      --brand2:#2563eb;
-      --ink:#0f172a;
-      --muted:#64748b;
+      --unach-blue:#1e3a8a;
+      --unach-blue-2:#2563eb;
+      --unach-blue-3:#0f2f76;
+      --ink:#061b49;
+      --muted:#60749d;
+      --line:#dbe6f7;
+      --soft:#f4f7fc;
       --card:#ffffff;
-      --bg:#f6f8fc;
+      --success:#16a34a;
+      --warning:#f59e0b;
+      --danger:#ef4444;
+      --shadow:0 18px 45px rgba(15, 35, 90, .10);
+      --shadow-soft:0 10px 28px rgba(15, 35, 90, .08);
     }
-    body { background:var(--bg); font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); }
 
-    .navbar-ti{
-      background: #1e3a8a;
-      padding:.75rem 0;
-      box-shadow:0 4px 10px rgba(0,0,0,.12);
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(37,99,235,.10), transparent 34%),
+        radial-gradient(circle at 88% 2%, rgba(30,58,138,.12), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #eef3fb 100%);
     }
-    .ti-brand-text{
-      font-size:1.05rem;
-      font-weight:900;
+
+    .topbar{
+      background:linear-gradient(135deg, var(--unach-blue-3) 0%, var(--unach-blue) 46%, var(--unach-blue-2) 100%);
       color:#fff;
-      letter-spacing:.4px;
-      line-height:1.1;
-    }
-    .ti-subtext{ color:rgba(255,255,255,.78); font-size:.85rem; }
-    .btn-nav{
-      border-radius:10px;
-      font-weight:800;
-      padding:.5rem .9rem;
-    }
-
-    .page-wrap { max-width: 1020px; margin-top: 92px; }
-
-    .hero{
-      background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
-      color:#fff;
-      border-radius:18px;
-      padding:22px 22px;
-      box-shadow:0 18px 40px rgba(30,58,138,.18);
+      box-shadow:0 12px 28px rgba(11,42,104,.18);
       position:relative;
       overflow:hidden;
     }
-    .hero:after{
+
+    .topbar::after{
       content:"";
       position:absolute;
       right:-90px;
       top:-120px;
-      width:260px;
-      height:260px;
-      background:rgba(255,255,255,.12);
+      width:310px;
+      height:310px;
       border-radius:50%;
-      filter: blur(1px);
+      background:rgba(255,255,255,.13);
     }
-    .hero .sub{opacity:.9; color:rgba(255,255,255,.85)}
-    .hero .pill{
-      background:rgba(255,255,255,.16);
-      border:1px solid rgba(255,255,255,.25);
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.85rem;
+
+    .topbar::before{
+      content:"";
+      position:absolute;
+      right:150px;
+      bottom:-115px;
+      width:230px;
+      height:230px;
+      border-radius:50%;
+      background:rgba(255,255,255,.07);
+    }
+
+    .topbar-inner{
+      width:min(1120px, calc(100% - 32px));
+      margin:0 auto;
+      min-height:88px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      position:relative;
+      z-index:1;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      min-width:0;
+    }
+
+    .brand img{
+      height:52px;
+      width:auto;
+      object-fit:contain;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.16));
+    }
+
+    .brand-title{
+      margin:0;
+      font-size:1.18rem;
+      line-height:1.05;
+      font-weight:950;
+      letter-spacing:.35px;
+      text-transform:uppercase;
+    }
+
+    .brand-subtitle{
+      margin-top:4px;
+      color:rgba(255,255,255,.84);
+      font-size:.86rem;
+      font-weight:650;
+    }
+
+    .secure-chip{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      white-space:nowrap;
-    }
-
-    .progress-wrap{
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.22);
-      border-radius:14px;
-      padding:10px 12px;
-      width: 320px;
-      max-width: 100%;
-    }
-    .progress{
-      height:8px;
+      padding:9px 13px;
       border-radius:999px;
-      background:rgba(255,255,255,.18);
-    }
-    .progress-bar{
-      background:rgba(255,255,255,.88);
-    }
-    .progress-meta{
-      display:flex;
-      justify-content:space-between;
-      margin-top:6px;
-      font-size:.82rem;
-      color:rgba(255,255,255,.88);
-      font-weight:700;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24);
+      color:#fff;
+      font-weight:850;
+      font-size:.86rem;
+      white-space:nowrap;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
     }
 
-    .card-soft{
+    .page{
+      width:min(1120px, calc(100% - 32px));
+      margin:26px auto 42px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.4fr .9fr;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:20px;
+    }
+
+    .hero-card{
+      background:#fff;
+      border:1px solid rgba(219,230,247,.92);
+      border-radius:24px;
+      padding:24px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-card.primary{
+      background:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      color:#fff;
       border:0;
+    }
+
+    .hero-card.primary::after{
+      content:"";
+      position:absolute;
+      right:-42px;
+      bottom:-58px;
+      width:190px;
+      height:190px;
+      border-radius:50%;
+      background:rgba(255,255,255,.12);
+    }
+
+    .hero-eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.12);
+      padding:7px 11px;
+      border-radius:999px;
+      font-weight:850;
+      font-size:.82rem;
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font-weight:950;
+      letter-spacing:-.04em;
+      font-size:clamp(2rem, 4vw, 3rem);
+      line-height:.96;
+    }
+
+    .hero p{
+      position:relative;
+      z-index:1;
+      margin:12px 0 0;
+      color:rgba(255,255,255,.88);
+      font-weight:600;
+      max-width:650px;
+    }
+
+    .autosave-card{
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .autosave-top{
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+    }
+
+    .autosave-icon,
+    .section-icon{
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border-radius:15px;
+      background:#eef5ff;
+      color:#2563eb;
+      flex:0 0 auto;
+      font-size:1.2rem;
+    }
+
+    .autosave-card h2{
+      margin:0;
+      font-weight:950;
+      letter-spacing:-.03em;
+      font-size:1.12rem;
+    }
+
+    .autosave-card p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-weight:600;
+      font-size:.92rem;
+    }
+
+    .status-row{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:10px;
+    }
+
+    .status-box{
+      padding:12px;
+      border-radius:16px;
+      background:#f8fbff;
+      border:1px solid #e4edfb;
+    }
+
+    .status-label{
+      color:var(--muted);
+      font-size:.72rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .status-value{
+      margin-top:3px;
+      color:var(--ink);
+      font-weight:950;
+      font-size:.96rem;
+    }
+
+    .notice{
+      display:flex;
+      gap:12px;
+      padding:14px 16px;
       border-radius:18px;
-      background:var(--card);
-      box-shadow:0 14px 30px rgba(2,6,23,.08);
+      background:#ecfdf5;
+      border:1px solid #bbf7d0;
+      color:#14532d;
+      margin-bottom:20px;
+      font-weight:650;
+      box-shadow:0 8px 20px rgba(22,163,74,.07);
+    }
+
+    .form-shell{
+      display:grid;
+      gap:18px;
+    }
+
+    .section-card{
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(219,230,247,.95);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter: blur(10px);
     }
 
     .section-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
+      gap:16px;
+      padding-bottom:14px;
+      margin-bottom:18px;
+      border-bottom:1px solid #e4ecfa;
     }
-    .section-title{
+
+    .section-title-wrap{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .section-title-wrap h3{
+      margin:0;
+      font-weight:950;
+      font-size:1.07rem;
+      letter-spacing:-.02em;
+      color:var(--ink);
+    }
+
+    .section-title-wrap span{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:.83rem;
+      font-weight:650;
+    }
+
+    .section-badge{
+      background:#eef5ff;
+      color:#1d4ed8;
+      border:1px solid #d5e5ff;
+      border-radius:999px;
+      padding:6px 11px;
+      font-size:.76rem;
       font-weight:900;
-      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+
+    .form-label{
+      margin-bottom:7px;
+      font-weight:900;
+      color:#08245e;
+      font-size:.92rem;
+    }
+
+    .req{ color:var(--danger); font-weight:950; }
+
+    .help-text{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:.79rem;
+      font-weight:600;
+    }
+
+    .form-control,
+    .form-select{
+      min-height:48px;
+      border-radius:14px !important;
+      border:1px solid rgba(96,116,157,.28);
+      background:#fff;
+      color:#0b2a68;
+      font-weight:650;
+      padding:.72rem .88rem;
+      transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+      border-color:rgba(37,99,235,.66);
+      box-shadow:0 0 0 .24rem rgba(37,99,235,.15);
+    }
+
+    .readonly-box{
+      background:#f7faff !important;
+      border-color:#dce7f8 !important;
+      color:#4e6592 !important;
+      cursor:not-allowed;
+      font-weight:850;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection{
+      min-height:48px;
+      border-radius:14px;
+      border:1px solid rgba(96,116,157,.28);
+      padding-top:5px;
+      font-weight:650;
+    }
+
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+    .select2-container--bootstrap-5.select2-container--open .select2-selection{
+      border-color:rgba(37,99,235,.66);
+      box-shadow:0 0 0 .24rem rgba(37,99,235,.15);
+    }
+
+    .select2-container--bootstrap-5 .select2-dropdown{
+      border-radius:14px;
+      overflow:hidden;
+      border-color:#cfe0fb;
+      box-shadow:0 12px 28px rgba(15,35,90,.12);
+    }
+
+    .hidden-django-field{
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      overflow:hidden !important;
+      opacity:0 !important;
+      pointer-events:none !important;
+    }
+
+    .submit-card{
+      background:linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+      border:1px solid #dbe6f7;
+      border-radius:24px;
+      padding:18px 20px;
+      box-shadow:var(--shadow-soft);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .submit-note{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      color:var(--muted);
+      max-width:680px;
+      font-weight:650;
+      font-size:.92rem;
+    }
+
+    .submit-note i{ color:#2563eb; font-size:1.2rem; margin-top:1px; }
+
+    .btn-primary{
+      background:linear-gradient(135deg, #2563eb, #1e3a8a);
+      border:0;
+      border-radius:14px;
+      padding:.83rem 1.25rem;
+      font-weight:950;
+      box-shadow:0 14px 24px rgba(37,99,235,.24);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      box-shadow:0 16px 28px rgba(37,99,235,.30);
+    }
+
+    .toast-save{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      z-index:9999;
+      border-radius:16px;
+      background:#0f172a;
+      color:#fff;
+      padding:12px 14px;
       display:flex;
       align-items:center;
       gap:10px;
-    }
-    .section-badge{
-      font-size:.78rem;
-      font-weight:800;
-      color:var(--brand);
-      background:rgba(37,99,235,.08);
-      border:1px solid rgba(37,99,235,.18);
-      padding:4px 10px;
-      border-radius:999px;
-      white-space:nowrap;
-    }
-    .divider{
-      height:1px;
-      background:linear-gradient(90deg, rgba(2,6,23,.08), rgba(2,6,23,.02));
-      margin:18px 0;
+      box-shadow:0 18px 40px rgba(0,0,0,.22);
+      transform:translateY(18px);
+      opacity:0;
+      pointer-events:none;
+      transition:.2s ease;
+      font-weight:750;
+      max-width:min(360px, calc(100vw - 32px));
     }
 
-    .form-label{ font-weight:800; color:#0f172a; margin-bottom: 6px; }
-    .help-text{ font-size:.82rem; color:var(--muted); margin-top:4px; }
-    .req{ color:#ef4444; font-weight:900; }
-
-    .form-control, .form-select{
-      border-radius:12px !important;
-      padding:.70rem .85rem;
-      border:1px solid rgba(15,23,42,.14);
-      transition: box-shadow .15s ease, border-color .15s ease;
-      background:#fff;
+    .toast-save.show{
+      opacity:1;
+      transform:translateY(0);
     }
-    .form-control:focus, .form-select:focus{
-      border-color: rgba(37,99,235,.55);
-      box-shadow:0 0 0 .25rem rgba(37,99,235,.16);
-    }
-    .is-valid{ box-shadow:none !important; }
-    .is-invalid{ box-shadow:none !important; }
-
-    .readonly-box { background: #f8fafc !important; cursor: not-allowed; color: #64748b; font-weight: 700; border-color: #e2e8f0; }
-
-    /* ESTILOS SELECT2 UNIFICADO */
-    .select2-container--bootstrap-5 .select2-selection {
-        border-radius: 12px;
-        min-height: 48px;
-        border: 1px solid rgba(15,23,42,.14);
-        padding-top: 4px;
-    }
-    .select2-container--bootstrap-5.select2-container--focus .select2-selection {
-        border-color: rgba(37,99,235,.55);
-        box-shadow: 0 0 0 .25rem rgba(37,99,235,.16);
-    }
-    .is-invalid-select2 .select2-selection {
-        border-color: #dc3545 !important;
-    }
-    select.select2-buscador {
-        display: block !important; height: 1px !important; width: 1px !important; position: absolute !important; opacity: 0 !important; padding: 0 !important; margin: 0 !important; border: 0 !important; bottom: 0 !important;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg, var(--brand2), var(--brand));
-      border:0; border-radius:12px; padding:.72rem 1.05rem;
-      box-shadow:0 12px 22px rgba(37,99,235,.22); font-weight:900;
-    }
-    .btn-outline-secondary{
-      border-radius:12px; padding:.72rem 1.05rem; font-weight:800;
-    }
-
-    .card-inner{ padding:22px; }
-    @media (min-width: 768px){ .card-inner{ padding:26px; } }
 
     #toast-notification{
-      visibility:hidden; min-width:260px; max-width:92vw;
-      background:#111827; color:#fff; text-align:left;
-      border-radius:14px; padding:12px 14px;
-      position:fixed; z-index:9999;
-      left:50%; bottom:22px; transform:translateX(-50%);
+      visibility:hidden;
+      min-width:260px;
+      max-width:92vw;
+      background:#111827;
+      color:#fff;
+      text-align:left;
+      border-radius:14px;
+      padding:12px 14px;
+      position:fixed;
+      z-index:10000;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
       box-shadow:0 10px 25px rgba(0,0,0,.25);
-      display:flex; gap:10px; align-items:flex-start;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
     }
+
     #toast-notification.show{ visibility:visible; animation:fadein .25s, fadeout .25s 2.2s; }
     @keyframes fadein{ from{ opacity:0; transform:translateX(-50%) translateY(10px);} to{ opacity:1; transform:translateX(-50%) translateY(0);} }
     @keyframes fadeout{ from{ opacity:1;} to{ opacity:0;} }
+
+    @media (max-width: 860px){
+      .topbar-inner{ min-height:auto; padding:16px 0; align-items:flex-start; flex-direction:column; }
+      .brand img{ height:46px; }
+      .hero{ grid-template-columns:1fr; }
+      .section-head{ align-items:flex-start; flex-direction:column; }
+      .submit-card{ align-items:stretch; }
+      .submit-card .btn{ width:100%; }
+    }
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
   </style>
 </head>
 
 <body>
-
 <div id="toast-notification">
   <i class="bi bi-exclamation-triangle-fill" style="font-size:1.15rem;"></i>
   <div>
@@ -213,260 +678,394 @@
   </div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
-  <div class="container-fluid justify-content-center">
-    <div class="d-flex align-items-center" style="width:100%; max-width:1100px; padding:0 18px;">
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3"
-             style="height:42px; width:auto; object-fit:contain;">
-        <div class="text-white">
-          <div class="ti-brand-text">CAPTURA DE SOLICITUD</div>
-          <div class="ti-subtext">Estancia Infantil • Universidad</div>
-        </div>
-      </a>
+<div class="toast-save" id="autosave-toast">
+  <i class="bi bi-cloud-check-fill"></i>
+  <span>Borrador guardado en este navegador</span>
+</div>
 
-      <div class="ms-auto d-flex gap-2">
-        <a href="javascript:history.back()" class="btn btn-outline-light btn-nav">
-          <i class="bi bi-arrow-left me-1"></i> Volver
-        </a>
-      </div>
-    </div>
-  </div>
-</nav>
-
-<div class="container page-wrap py-4">
-
-  <div class="hero mb-4">
-    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
       <div>
-        <div class="d-flex align-items-center gap-2 mb-1">
-          <i class="bi bi-clipboard-check fs-4"></i>
-          <h3 class="m-0 fw-bold">Captura de Solicitud</h3>
-        </div>
-        <div class="sub">
-          Complete la información solicitada. Los campos con <span class="req">*</span> son obligatorios.
+        <h1 class="brand-title">Captura de solicitud</h1>
+        <div class="brand-subtitle">Estancia Infantil UNACH · Registro de beneficiario</div>
+      </div>
+    </div>
+
+    <div class="secure-chip">
+      <i class="bi bi-shield-lock"></i>
+      <span>Link seguro de un solo uso</span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <section class="hero">
+    <div class="hero-card primary">
+      <div class="hero-eyebrow"><i class="bi bi-clipboard2-check"></i> Formulario de ingreso</div>
+      <h1>Captura tus datos para iniciar el proceso.</h1>
+      <p>Completa la información solicitada con cuidado. Los campos marcados con <span class="req">*</span> son obligatorios y serán revisados por Trabajo Social.</p>
+    </div>
+
+    <div class="hero-card autosave-card">
+      <div class="autosave-top">
+        <div class="autosave-icon"><i class="bi bi-save2"></i></div>
+        <div>
+          <h2>Guardado automático</h2>
+          <p>Si no terminas al momento, tus datos se conservarán temporalmente en este navegador hasta que envíes la solicitud.</p>
         </div>
       </div>
-
-      <div class="d-flex flex-column gap-2 align-items-start align-items-md-end">
-        <div class="pill">
-          <i class="bi bi-shield-check"></i>
-          <span>Validación automática</span>
+      <div class="status-row">
+        <div class="status-box">
+          <div class="status-label">Estado</div>
+          <div class="status-value" id="autosave-status">Listo</div>
         </div>
-
-        <div class="progress-wrap">
-          <div class="progress">
-            <div class="progress-bar" style="width:50%"></div>
-          </div>
-          <div class="progress-meta">
-            <span>Paso 1 / 2</span>
-            <span>Datos generales</span>
-          </div>
+        <div class="status-box">
+          <div class="status-label">Seguridad</div>
+          <div class="status-value">Uso único</div>
         </div>
       </div>
     </div>
+  </section>
+
+  <div class="notice">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>Este enlace se desactivará después de enviar la solicitud. Revisa bien los datos antes de guardar.</div>
   </div>
 
-  <form method="post" class="card card-soft" id="form-solicitud" novalidate>
+  <form method="post" id="form-solicitud" novalidate>
     {% csrf_token %}
-    <div class="card-inner">
 
-      {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-          {{ form.non_field_errors }}
-        </div>
-      {% endif %}
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
 
-      <div class="section-head">
-        <div class="section-title">
-          <i class="bi bi-person-badge"></i>
-          <span>Datos del tutor</span>
-        </div>
-        <span class="section-badge">Información del solicitante</span>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger rounded-4 shadow-sm">
+        {{ form.non_field_errors }}
       </div>
+    {% endif %}
 
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Nombre(s) <span class="req">*</span></label>
-          {{ form.nombres_tutor }}
-          <div class="help-text">Solo letras y espacios.</div>
-          <div class="text-danger small mt-1">{{ form.nombres_tutor.errors }}</div>
+    <div class="form-shell">
+      <section class="section-card">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <div class="section-icon"><i class="bi bi-person-vcard"></i></div>
+            <div>
+              <h3>Datos del tutor</h3>
+              <span>Información general del beneficiario solicitante.</span>
+            </div>
+          </div>
+          <span class="section-badge">Información del solicitante</span>
         </div>
 
-        <div class="col-md-4">
-          <label class="form-label">Apellido paterno <span class="req">*</span></label>
-          {{ form.apellido_paterno_tutor }}
-          <div class="help-text">Solo letras.</div>
-          <div class="text-danger small mt-1">{{ form.apellido_paterno_tutor.errors }}</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Nombre(s) <span class="req">*</span></label>
+            {{ form.nombres_tutor }}
+            <div class="help-text">Solo letras y espacios.</div>
+            <div class="text-danger small mt-1">{{ form.nombres_tutor.errors }}</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Apellido paterno <span class="req">*</span></label>
+            {{ form.apellido_paterno_tutor }}
+            <div class="help-text">Solo letras.</div>
+            <div class="text-danger small mt-1">{{ form.apellido_paterno_tutor.errors }}</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Apellido materno <span class="req">*</span></label>
+            {{ form.apellido_materno_tutor }}
+            <div class="help-text">Solo letras.</div>
+            <div class="text-danger small mt-1">{{ form.apellido_materno_tutor.errors }}</div>
+          </div>
+
+          <div class="col-md-4" id="box_matricula">
+            <label class="form-label">Matrícula</label>
+            {{ form.matricula }}
+            <div class="help-text">Dato universitario del beneficiario.</div>
+            <div class="text-danger small mt-1">{{ form.matricula.errors }}</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Correo electrónico <span class="req">*</span></label>
+            {{ form.correo }}
+            <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional.</div>
+            <div class="text-danger small mt-1">{{ form.correo.errors }}</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Celular <span class="req">*</span></label>
+            {{ form.celular }}
+            <div class="help-text">10 dígitos exactos.</div>
+            <div class="text-danger small mt-1">{{ form.celular.errors }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <div class="section-icon"><i class="bi bi-mortarboard"></i></div>
+            <div>
+              <h3>Información académica</h3>
+              <span>Selecciona el programa educativo según la unidad académica registrada.</span>
+            </div>
+          </div>
+          <span class="section-badge">Datos universitarios</span>
         </div>
 
-        <div class="col-md-4">
-          <label class="form-label">Apellido materno <span class="req">*</span></label>
-          {{ form.apellido_materno_tutor }}
-          <div class="help-text">Solo letras.</div>
-          <div class="text-danger small mt-1">{{ form.apellido_materno_tutor.errors }}</div>
-        </div>
-
-        <div class="col-md-4" id="box_matricula">
-          <label class="form-label">Matrícula</label>
-          {{ form.matricula }}
-          <div class="text-danger small mt-1">{{ form.matricula.errors }}</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Correo electrónico <span class="req">*</span></label>
-          {{ form.correo }}
-          <div class="help-text">Debe ser Gmail, Hotmail, Outlook o institucional.</div>
-          <div class="text-danger small mt-1">{{ form.correo.errors }}</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Celular <span class="req">*</span></label>
-          {{ form.celular }}
-          <div class="help-text">10 dígitos exactos.</div>
-          <div class="text-danger small mt-1">{{ form.celular.errors }}</div>
-        </div>
-
-        <div class="col-md-12 mt-4 mb-1">
-            <h6 class="fw-bold border-bottom pb-2 text-primary"><i class="bi bi-book-fill me-1"></i> Información Académica</h6>
-        </div>
-
-        <div class="col-md-6">
+        <div class="row g-3">
+          <div class="col-md-6">
             <label class="form-label">Facultad / Unidad Académica</label>
             <input type="text" class="form-control readonly-box" value="{{ form.instance.unidad_academica|default:'No especificada' }}" readonly>
             <div class="help-text">Dato obtenido de tu registro universitario.</div>
-        </div>
+          </div>
 
-        <div class="col-md-6 position-relative">
-            <label class="form-label">Programa educativo (Nombre de carrera) <span class="req">*</span></label>
-            <select id="sel_programa_educativo" class="form-select select2-buscador">
-                <option value="">Escribe o selecciona tu carrera...</option>
+          <div class="col-md-6 position-relative">
+            <label class="form-label">Programa educativo <span class="req">*</span></label>
+            <select id="sel_programa_educativo" class="form-select select2-buscador" data-placeholder="Escribe o selecciona tu carrera...">
+              <option value="">Escribe o selecciona tu carrera...</option>
             </select>
-            <div class="d-none">{{ form.programa_educativo }}</div>
+            <div class="hidden-django-field">{{ form.programa_educativo }}</div>
+            <div class="help-text">Licenciatura, ingeniería o PSU disponible para tu facultad.</div>
             <div class="text-danger small mt-1">{{ form.programa_educativo.errors }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <div class="section-icon"><i class="bi bi-geo-alt"></i></div>
+            <div>
+              <h3>Dirección del domicilio</h3>
+              <span>Captura la ubicación actual del beneficiario.</span>
+            </div>
+          </div>
+          <span class="section-badge">Ubicación del beneficiario</span>
         </div>
 
-        <div class="col-md-12 mt-4 mb-1">
-            <h6 class="fw-bold border-bottom pb-2 text-primary"><i class="bi bi-geo-alt-fill me-1"></i> Dirección del Domicilio</h6>
-        </div>
-
-        <div class="col-md-4 position-relative">
-          <label class="form-label">Estado <span class="req">*</span></label>
-          <select id="sel_estado_domicilio" class="form-select select2-buscador">
+        <div class="row g-3">
+          <div class="col-md-4 position-relative">
+            <label class="form-label">Estado <span class="req">*</span></label>
+            <select id="sel_estado_domicilio" class="form-select select2-buscador" data-placeholder="Escribe o selecciona...">
               <option value="">Escribe o selecciona...</option>
-          </select>
-          <div class="d-none">{{ form.estado_domicilio }}</div>
-          <div class="text-danger small mt-1">{{ form.estado_domicilio.errors }}</div>
-        </div>
+            </select>
+            <div class="hidden-django-field">{{ form.estado_domicilio }}</div>
+            <div class="text-danger small mt-1">{{ form.estado_domicilio.errors }}</div>
+          </div>
 
-        <div class="col-md-4 position-relative">
-          <label class="form-label">Ciudad / Municipio <span class="req">*</span></label>
-          <select id="sel_ciudad" class="form-select select2-buscador">
+          <div class="col-md-4 position-relative">
+            <label class="form-label">Ciudad / Municipio <span class="req">*</span></label>
+            <select id="sel_ciudad" class="form-select select2-buscador" data-placeholder="Primero selecciona estado...">
               <option value="">Primero selecciona estado...</option>
-          </select>
-          <div class="d-none">{{ form.ciudad }}</div>
-          <div class="text-danger small mt-1">{{ form.ciudad.errors }}</div>
+            </select>
+            <div class="hidden-django-field">{{ form.ciudad }}</div>
+            <div class="text-danger small mt-1">{{ form.ciudad.errors }}</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Código postal <span class="req">*</span></label>
+            {{ form.codigo_postal }}
+            <div class="text-danger small mt-1">{{ form.codigo_postal.errors }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Calle <span class="req">*</span></label>
+            {{ form.calle }}
+            <div class="text-danger small mt-1">{{ form.calle.errors }}</div>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Número exterior <span class="req">*</span></label>
+            {{ form.numero_exterior }}
+            <div class="help-text">Solo números.</div>
+            <div class="text-danger small mt-1">{{ form.numero_exterior.errors }}</div>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Número interior</label>
+            {{ form.numero_interior }}
+            <div class="help-text">Opcional.</div>
+            <div class="text-danger small mt-1">{{ form.numero_interior.errors }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <div class="section-icon"><i class="bi bi-people"></i></div>
+            <div>
+              <h3>Parentesco</h3>
+              <span>Indica la relación del beneficiario con el menor.</span>
+            </div>
+          </div>
+          <span class="section-badge">Relación con el menor</span>
         </div>
 
-        <div class="col-md-4">
-          <label class="form-label">Código Postal <span class="req">*</span></label>
-          {{ form.codigo_postal }}
-          <div class="text-danger small mt-1">{{ form.codigo_postal.errors }}</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Parentesco con el menor <span class="req">*</span></label>
+            {{ form.parentesco }}
+            <div class="text-danger small mt-1">{{ form.parentesco.errors }}</div>
+          </div>
+
+          <div class="col-md-6" id="box_parent_otro" style="display:none;">
+            <label class="form-label">Parentesco (otro) <span class="req">*</span></label>
+            {{ form.parentesco_otro }}
+            <div class="text-danger small mt-1">{{ form.parentesco_otro.errors }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <div class="section-icon"><i class="bi bi-emoji-smile"></i></div>
+            <div>
+              <h3>Datos del menor</h3>
+              <span>Información de identidad que se usará en los filtros institucionales.</span>
+            </div>
+          </div>
+          <span class="section-badge">Información del niño(a)</span>
         </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Calle <span class="req">*</span></label>
-          {{ form.calle }}
-          <div class="text-danger small mt-1">{{ form.calle.errors }}</div>
-        </div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Nombre(s) del menor <span class="req">*</span></label>
+            {{ form.nombres_menor }}
+            <div class="help-text">Solo letras y espacios.</div>
+            <div class="text-danger small mt-1">{{ form.nombres_menor.errors }}</div>
+          </div>
 
-        <div class="col-md-3">
-          <label class="form-label">Número Exterior <span class="req">*</span></label>
-          {{ form.numero_exterior }}
-          <div class="text-danger small mt-1">{{ form.numero_exterior.errors }}</div>
-        </div>
+          <div class="col-md-4">
+            <label class="form-label">Apellido paterno <span class="req">*</span></label>
+            {{ form.apellido_paterno_menor }}
+            <div class="help-text">Solo letras.</div>
+            <div class="text-danger small mt-1">{{ form.apellido_paterno_menor.errors }}</div>
+          </div>
 
-        <div class="col-md-3">
-          <label class="form-label">Num. Int. (Opcional)</label>
-          {{ form.numero_interior }}
-          <div class="text-danger small mt-1">{{ form.numero_interior.errors }}</div>
-        </div>
+          <div class="col-md-4">
+            <label class="form-label">Apellido materno <span class="req">*</span></label>
+            {{ form.apellido_materno_menor }}
+            <div class="help-text">Solo letras.</div>
+            <div class="text-danger small mt-1">{{ form.apellido_materno_menor.errors }}</div>
+          </div>
 
-        <div class="col-md-12 mt-4 mb-1">
-            <h6 class="fw-bold border-bottom pb-2 text-primary"><i class="bi bi-people-fill me-1"></i> Parentesco</h6>
-        </div>
+          <div class="col-md-6">
+            <label class="form-label">Fecha de nacimiento <span class="req">*</span></label>
+            {{ form.fecha_nacimiento_menor }}
+            <div class="help-text">El menor debe tener entre 6 meses y 3 años.</div>
+            <div class="text-danger small mt-1">{{ form.fecha_nacimiento_menor.errors }}</div>
+          </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Parentesco con el menor <span class="req">*</span></label>
-          {{ form.parentesco }}
-          <div class="text-danger small mt-1">{{ form.parentesco.errors }}</div>
+          <div class="col-md-6">
+            <label class="form-label">CURP del menor <span class="req">*</span></label>
+            {{ form.curp_menor }}
+            <div class="help-text">18 caracteres. Letras mayúsculas y números.</div>
+            <div class="text-danger small mt-1">{{ form.curp_menor.errors }}</div>
+          </div>
         </div>
+      </section>
 
-        <div class="col-md-6" id="box_parent_otro" style="display:none;">
-          <label class="form-label">Parentesco (Otro) <span class="req">*</span></label>
-          {{ form.parentesco_otro }}
-          <div class="text-danger small mt-1">{{ form.parentesco_otro.errors }}</div>
+      <div class="submit-card">
+        <div class="submit-note">
+          <i class="bi bi-shield-check"></i>
+          <div>
+            <strong>Antes de enviar:</strong> verifica que el nombre del menor, CURP, correo y programa educativo sean correctos. Después de guardar, el enlace quedará usado.
+          </div>
         </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="section-head">
-        <div class="section-title">
-          <i class="bi bi-emoji-smile"></i>
-          <span>Datos del menor</span>
-        </div>
-        <span class="section-badge">Información del niño(a)</span>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Nombre(s) del menor <span class="req">*</span></label>
-          {{ form.nombres_menor }}
-          <div class="help-text">Solo letras y espacios.</div>
-          <div class="text-danger small mt-1">{{ form.nombres_menor.errors }}</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Apellido paterno <span class="req">*</span></label>
-          {{ form.apellido_paterno_menor }}
-          <div class="help-text">Solo letras.</div>
-          <div class="text-danger small mt-1">{{ form.apellido_paterno_menor.errors }}</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Apellido materno <span class="req">*</span></label>
-          {{ form.apellido_materno_menor }}
-          <div class="help-text">Solo letras.</div>
-          <div class="text-danger small mt-1">{{ form.apellido_materno_menor.errors }}</div>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Fecha de nacimiento <span class="req">*</span></label>
-          {{ form.fecha_nacimiento_menor }}
-          <div class="help-text">El menor debe tener entre 6 meses y 3 años.</div>
-          <div class="text-danger small mt-1">{{ form.fecha_nacimiento_menor.errors }}</div>
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label">CURP del menor <span class="req">*</span></label>
-          {{ form.curp_menor }}
-          <div class="help-text">18 caracteres. Letras mayúsculas y números.</div>
-          <div class="text-danger small mt-1">{{ form.curp_menor.errors }}</div>
-        </div>
-      </div>
-
-      <div class="d-flex gap-2 mt-4 flex-wrap">
         <button type="submit" class="btn btn-primary px-4" id="btn-guardar">
           Guardar solicitud <i class="bi bi-check2-circle ms-1"></i>
         </button>
-        <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
-          Volver
-        </a>
       </div>
-
     </div>
   </form>
-</div>
+</main>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -475,9 +1074,83 @@
 
 <script>
 $(document).ready(function() {
+    const draftKey = "captura_solicitud_draft:" + window.location.pathname;
+    const lastDraftKey = "captura_solicitud_last_draft_key";
+    const autosaveStatus = document.getElementById("autosave-status");
+    const autosaveToast = document.getElementById("autosave-toast");
+    let autosaveTimer = null;
+    let toastTimer = null;
+
+    function showAutosaveToast() {
+        if (!autosaveToast) return;
+        autosaveToast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => autosaveToast.classList.remove("show"), 1500);
+    }
+
+    function syncVisualSelectorsToHidden() {
+        const selProg = $('#sel_programa_educativo');
+        const selEdo = $('#sel_estado_domicilio');
+        const selMun = $('#sel_ciudad');
+        $('#id_programa_educativo').val(selProg.val() || $('#id_programa_educativo').val());
+        $('#id_estado_domicilio').val(selEdo.val() || $('#id_estado_domicilio').val());
+        $('#id_ciudad').val(selMun.val() || $('#id_ciudad').val());
+    }
+
+    function saveDraft() {
+        syncVisualSelectorsToHidden();
+        const data = {};
+        $('#form-solicitud').find('input, select, textarea').each(function() {
+            if (!this.name || this.name === 'csrfmiddlewaretoken') return;
+            if (this.type === 'checkbox') {
+                data[this.name] = this.checked;
+            } else {
+                data[this.name] = this.value;
+            }
+        });
+
+        try {
+            localStorage.setItem(draftKey, JSON.stringify(data));
+            localStorage.setItem(lastDraftKey, draftKey);
+            if (autosaveStatus) autosaveStatus.textContent = "Guardado";
+            showAutosaveToast();
+        } catch (e) {
+            if (autosaveStatus) autosaveStatus.textContent = "Sin espacio";
+        }
+    }
+
+    function scheduleDraftSave() {
+        if (autosaveStatus) autosaveStatus.textContent = "Guardando...";
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(saveDraft, 650);
+    }
+
+    function restoreDraft() {
+        let raw = null;
+        try { raw = localStorage.getItem(draftKey); } catch(e) { raw = null; }
+        if (!raw) return;
+
+        let data = {};
+        try { data = JSON.parse(raw); } catch(e) { return; }
+
+        Object.keys(data).forEach(function(name) {
+            const field = $('#form-solicitud').find(`[name="${name}"]`);
+            if (!field.length) return;
+            field.each(function() {
+                if (this.type === 'checkbox') {
+                    this.checked = Boolean(data[name]);
+                } else {
+                    this.value = data[name];
+                }
+            });
+        });
+
+        if (autosaveStatus) autosaveStatus.textContent = "Borrador restaurado";
+    }
+
+    restoreDraft();
 
     // === CAMPOS CRÍTICOS DEL MENOR ===
-    // Estos datos se guardan en Solicitud y después se muestran en Psicología, Nutrición y Médico.
     const camposIdentidadMenor = [
         'id_nombres_menor',
         'id_apellido_paterno_menor',
@@ -495,65 +1168,61 @@ $(document).ready(function() {
     });
 
     // === REGLAS ESTRICTAS PARA NOMBRES (SOLO LETRAS Y FORMATO TÍTULO) ===
-    const camposNombres = ['id_nombres_menor', 'id_apellido_paterno_menor', 'id_apellido_materno_menor'];
+    const camposNombres = [
+        'id_nombres_tutor',
+        'id_apellido_paterno_tutor',
+        'id_apellido_materno_tutor',
+        'id_nombres_menor',
+        'id_apellido_paterno_menor',
+        'id_apellido_materno_menor'
+    ];
 
     camposNombres.forEach(function(id) {
         const input = document.getElementById(id);
         if (input) {
             input.addEventListener('input', function() {
-                // 1. Quitar números y símbolos al instante
                 let valorLimpio = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-
-                // 2. Aplicar Formato Título (Ej. maria -> Maria)
                 valorLimpio = valorLimpio.split(' ').map(palabra => {
                     if (palabra.length > 0) {
                         return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
                     }
                     return '';
                 }).join(' ');
-
                 this.value = valorLimpio;
             });
         }
     });
 
-    // === REGLAS ESTRICTAS PARA NÚMERO EXTERIOR E INTERIOR (SOLO NÚMEROS) ===
-    const camposNumeros = ['id_numero_exterior', 'id_numero_interior'];
+    // === REGLAS ESTRICTAS PARA NÚMEROS ===
+    const camposNumeros = ['id_numero_exterior', 'id_numero_interior', 'id_codigo_postal'];
     camposNumeros.forEach(function(id) {
         const input = document.getElementById(id);
         if (input) {
             input.addEventListener('input', function() {
-                // Elimina todo lo que no sea un número (del 0 al 9)
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
         }
     });
 
-    // === REGLAS ESTRICTAS PARA EL CURP ===
+    // === CURP ===
     const curpInput = document.getElementById('id_curp_menor');
     if(curpInput) {
-        // Bloqueamos a 18 caracteres máximo desde el HTML
         curpInput.setAttribute('maxlength', '18');
-
         curpInput.addEventListener('input', function() {
-            // Convierte a mayúscula al instante y borra minúsculas o caracteres especiales
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         });
     }
 
-    // === REGLAS ESTRICTAS PARA EL CELULAR ===
+    // === CELULAR ===
     const celularInput = document.getElementById('id_celular');
     if(celularInput) {
-        // Bloqueamos a 10 caracteres máximo desde el HTML
         celularInput.setAttribute('maxlength', '10');
-
         celularInput.addEventListener('input', function() {
-            // Elimina al instante cualquier cosa que NO sea un número del 0 al 9
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
 
-    // === 1. LISTA DE ESTADOS, MUNICIPIOS Y CARRERAS ===
+    // === LISTA DE ESTADOS, MUNICIPIOS Y CARRERAS ===
     const ESTADOS_MX_COMPLETOS = [
         { nombre: "Aguascalientes", municipios: ["Aguascalientes", "Asientos", "Calvillo", "Cosío", "Jesús María", "Pabellón de Arteaga", "Rincón de Romos", "San José de Gracia", "Tepezalá", "El Llano", "San Francisco de los Romo"] },
         { nombre: "Baja California", municipios: ["Ensenada", "Mexicali", "Tecate", "Tijuana", "Playas de Rosarito", "San Quintín", "San Felipe"] },
@@ -602,23 +1271,26 @@ $(document).ready(function() {
         "Facultad de Ciencias Agrícolas": ["Ingeniero Agrónomo", "Ingeniero Forestal"],
         "Facultad de Humanidades": ["Licenciatura en Bibliotecología y Gestión de Información", "Licenciatura en Comunicación", "Licenciatura en Filosofía", "Licenciatura en Lengua y Literatura Hispanoamericanas", "Licenciatura en Pedagogía", "PSU en Bienestar Humano y Comunitario"],
         "Facultad de Lenguas": ["Licenciatura en Enseñanza del Francés", "Licenciatura en Enseñanza del Inglés"],
+        "Facultad de Ciencias en Física y Matemáticas": ["Licenciatura en Física", "Ingeniería Física", "Licenciatura en Matemáticas", "Licenciatura en Matemáticas Aplicadas"],
         "Facultad de Ciencias en Fisica y Matematicas": ["Licenciatura en Física", "Ingeniería Física", "Licenciatura en Matemáticas", "Licenciatura en Matemáticas Aplicadas"],
         "Facultad Maya de Estudios Agropecuarios": ["Licenciatura en Agronegocios", "Ingeniería en Desarrollo Rural", "Ingeniería en Procesos Agroindustriales", "Ingeniería en Agronomía", "Ingeniería en Sistemas Forestales", "Licenciatura en Medicina Veterinaria y Zootecnia", "PSU en Acuicultura"]
     };
 
-    // Función para quitar acentos y que las comparaciones sean exactas
     const quitarAcentos = (str) => {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        return String(str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     };
 
-    // Leemos la facultad que viene de Django
     let facultadPadre = "{{ form.instance.unidad_academica|escapejs }}";
     if(facultadPadre === "None") facultadPadre = "";
 
-    // === 2. INICIALIZAR BUSCADORES VISUALES ===
+    // Evita que campos Django ocultos bloqueen la validación visual.
+    $('#id_programa_educativo, #id_estado_domicilio, #id_ciudad').removeAttr('required');
+
+    // === INICIALIZAR BUSCADORES VISUALES ===
     $('.select2-buscador').select2({
         theme: 'bootstrap-5',
         width: '100%',
+        allowClear: true,
         language: { noResults: () => "Sin resultados" }
     });
 
@@ -630,12 +1302,10 @@ $(document).ready(function() {
     const hiddenMun = $('#id_ciudad');
     const hiddenProg = $('#id_programa_educativo');
 
-    // === 3. CARGAR LAS OPCIONES A LOS BUSCADORES ===
-
-    // Cargar Estados
+    // === CARGAR ESTADOS ===
     ESTADOS_MX_COMPLETOS.forEach(e => selEdo.append(new Option(e.nombre, e.nombre)));
 
-    // Cargar Carreras (LÓGICA CORREGIDA)
+    // === CARGAR CARRERAS SEGÚN FACULTAD ===
     let carrerasMatch = [];
     if (facultadPadre) {
         let facNormalizada = quitarAcentos(facultadPadre);
@@ -649,26 +1319,37 @@ $(document).ready(function() {
         }
     }
 
-    // Si no detectó la facultad, cargamos TODAS para no bloquear al estudiante
+    // Si no detecta facultad, carga todas para no bloquear al beneficiario.
     if (carrerasMatch.length === 0) {
         Object.values(ofertaEducativa).forEach(lista => carrerasMatch = carrerasMatch.concat(lista));
         carrerasMatch = [...new Set(carrerasMatch)];
     }
 
     carrerasMatch.sort().forEach(c => selProg.append(new Option(c, c)));
+    selProg.trigger('change.select2');
+    selEdo.trigger('change.select2');
 
-    // === 4. SINCRONIZACIÓN (Visual -> Django) ===
+    // === SINCRONIZACIÓN VISUAL -> DJANGO ===
     selEdo.on('change', function() {
-        hiddenEdo.val(this.value);
+        hiddenEdo.val(this.value || "");
         selMun.empty().append(new Option("Escribe o selecciona...", ""));
         const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === this.value);
         if(data) data.municipios.sort().forEach(m => selMun.append(new Option(m, m)));
+        selMun.val(hiddenMun.val() || "").trigger('change.select2');
+        scheduleDraftSave();
     });
 
-    selMun.on('change', function() { hiddenMun.val(this.value); });
-    selProg.on('change', function() { hiddenProg.val(this.value); });
+    selMun.on('change', function() {
+        hiddenMun.val(this.value || "");
+        scheduleDraftSave();
+    });
 
-    // === 5. RESTAURAR VALORES ===
+    selProg.on('change', function() {
+        hiddenProg.val(this.value || "");
+        scheduleDraftSave();
+    });
+
+    // === RESTAURAR VALORES ===
     if(hiddenEdo.val()) {
         selEdo.val(hiddenEdo.val()).trigger('change.select2');
         const data = ESTADOS_MX_COMPLETOS.find(e => e.nombre === hiddenEdo.val());
@@ -691,14 +1372,21 @@ $(document).ready(function() {
         }
     }
 
-    // === 6. LÓGICA DE PARENTESCO ===
+    // === PARENTESCO ===
     const par = document.getElementById("id_parentesco");
     const boxPar = document.getElementById("box_parent_otro");
-    function togglePar() { if (boxPar) boxPar.style.display = (par && par.value === "OTRO") ? "block" : "none"; }
+    function togglePar() {
+        if (boxPar) boxPar.style.display = (par && par.value === "OTRO") ? "block" : "none";
+    }
     if (par) par.addEventListener("change", togglePar);
     togglePar();
 
-    // === 7. VALIDACIÓN AL GUARDAR CON SWEETALERT ===
+    // === AUTOGUARDADO ===
+    $('#form-solicitud').on('input change', 'input, select, textarea', function() {
+        scheduleDraftSave();
+    });
+
+    // === VALIDACIÓN AL GUARDAR ===
     const form = document.getElementById("form-solicitud");
     const btn = document.getElementById("btn-guardar");
 
@@ -706,13 +1394,10 @@ $(document).ready(function() {
       form.addEventListener("submit", (e) => {
           e.preventDefault();
 
-          // Sincronizar selectores
-          hiddenProg.val(selProg.val());
-          hiddenEdo.val(selEdo.val());
-          hiddenMun.val(selMun.val());
+          hiddenProg.val(selProg.val() || hiddenProg.val());
+          hiddenEdo.val(selEdo.val() || hiddenEdo.val());
+          hiddenMun.val(selMun.val() || hiddenMun.val());
 
-          // 0. Validar explícitamente identidad del menor.
-          // Si estos campos llegan vacíos, los filtros aparecerán como "No capturado".
           const nombresMenor = document.getElementById('id_nombres_menor');
           const paternoMenor = document.getElementById('id_apellido_paterno_menor');
           const maternoMenor = document.getElementById('id_apellido_materno_menor');
@@ -733,67 +1418,58 @@ $(document).ready(function() {
               return;
           }
 
-          // 1. Validar que no falten campos obligatorios
-          // checkValidity revisa todos los inputs con atributo "required"
           if(!form.checkValidity() || !hiddenProg.val() || !hiddenEdo.val() || !hiddenMun.val()) {
               Swal.fire({
                   icon: 'error',
                   title: 'Campos incompletos',
-                  text: 'Hacen falta campos obligatorios para poder enviar la solicitud.',
+                  text: 'Hacen falta campos obligatorios para poder enviar la solicitud. Revisa programa educativo, estado, ciudad y los datos marcados con asterisco.',
                   confirmButtonColor: '#1d4ed8'
               });
-              form.reportValidity(); // Muestra visualmente qué campo falta
+              form.reportValidity();
               return;
           }
 
-          // 2. Validar CURP explícitamente (18 caracteres)
           if(curpInput && curpInput.value.length !== 18) {
               Swal.fire({
                   icon: 'warning',
-                  title: 'CURP Inválido',
+                  title: 'CURP inválido',
                   text: 'El CURP debe tener exactamente 18 caracteres.',
                   confirmButtonColor: '#1d4ed8'
               });
               return;
           }
 
-          // 2.5 Validar Celular explícitamente (10 dígitos)
           if(celularInput && celularInput.value.length !== 10) {
               Swal.fire({
                   icon: 'warning',
-                  title: 'Celular Inválido',
+                  title: 'Celular inválido',
                   text: 'El número de celular debe tener exactamente 10 dígitos numéricos.',
                   confirmButtonColor: '#1d4ed8'
               });
               return;
           }
 
-          // 3. Alerta bonita de confirmación final
           Swal.fire({
-              title: '¿Estás seguro de enviarlo?',
-              text: "Una vez que lo envíes no podrás modificar los datos.",
+              title: '¿Confirmas el envío?',
+              text: "Después de guardar, este enlace quedará usado y no podrás volver a modificar la captura desde aquí.",
               icon: 'question',
               showCancelButton: true,
-              confirmButtonColor: '#1d4ed8', // Azul acorde a tu diseño
-              cancelButtonColor: '#6b7280',  // Gris
-              confirmButtonText: 'Sí, enviar',
+              confirmButtonColor: '#1d4ed8',
+              cancelButtonColor: '#64748b',
+              confirmButtonText: 'Sí, guardar solicitud',
               cancelButtonText: 'Revisar',
               reverseButtons: true
           }).then((result) => {
               if (result.isConfirmed) {
-                  // Bloquear botón para evitar doble clic
                   btn.disabled = true;
-                  btn.innerHTML = 'Guardando... <span class="spinner-border spinner-border-sm ms-2"></span>';
+                  btn.innerHTML = 'Guardando solicitud... <span class="spinner-border spinner-border-sm ms-2"></span>';
 
-                  // Normalizar espacios antes de enviar al backend
                   camposNombres.forEach(function(id) {
                       const campo = document.getElementById(id);
-                      if (campo) {
-                          campo.value = campo.value.trim().replace(/\s+/g, ' ');
-                      }
+                      if (campo) campo.value = campo.value.trim().replace(/\s+/g, ' ');
                   });
 
-                  // Enviar el formulario
+                  saveDraft();
                   form.submit();
               }
           });
@@ -801,5 +1477,35 @@ $(document).ready(function() {
     }
 });
 </script>
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

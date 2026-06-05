@@ -1,127 +1,1036 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Editar Solicitud</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    body { background:#f6f7fb; font-family:'Segoe UI',sans-serif; }
-    .page-wrap { max-width: 980px; }
-    .card-soft { border:0; border-radius:18px; box-shadow:0 12px 30px rgba(0,0,0,.08); }
-    .muted { color:#6c757d; }
-    .req { color:#dc3545; font-weight:700; }
-    .title { font-weight:800; letter-spacing:.2px; }
-    .form-control { border-radius:12px; padding:.7rem .9rem; }
-    .form-control:focus { box-shadow:0 0 0 .2rem rgba(13,110,253,.15); }
-    .btn-soft { border-radius:12px; padding:.65rem 1rem; }
+    :root{
+      --brand:#1e3a8a;
+      --brand-2:#2563eb;
+      --ink:#071b4d;
+      --muted:#64748b;
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --line:#dbe5f4;
+      --soft:#eef5ff;
+      --success:#16a34a;
+    }
 
-    /* IMPORTANTE: asegura que nada bloquee el click */
-    input, button, a { pointer-events: auto !important; }
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,.10), transparent 32%),
+        linear-gradient(180deg,#f8fbff 0%, var(--bg) 100%);
+      font-family:'Segoe UI',sans-serif;
+      color:var(--ink);
+      min-height:100vh;
+    }
+
+    input, button, a, select, textarea{ pointer-events:auto !important; }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+      box-shadow:0 10px 30px rgba(15,23,42,.05);
+    }
+
+    .topbar-inner{
+      max-width:1240px;
+      margin:0 auto;
+      padding:18px 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand-area{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .logo-box{
+      width:74px;
+      height:58px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#1746ad,#2563eb);
+      box-shadow:0 16px 34px rgba(37,99,235,.22);
+      overflow:hidden;
+      flex:0 0 auto;
+      padding:8px;
+    }
+
+    .logo-box img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      background:transparent !important;
+    }
+
+    .brand-title{
+      margin:0;
+      font-size:1.35rem;
+      font-weight:900;
+      letter-spacing:-.04em;
+      color:#06194a;
+      line-height:1.05;
+    }
+
+    .brand-subtitle{
+      margin-top:4px;
+      color:#4f6695;
+      font-size:.92rem;
+      font-weight:700;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .user-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:9px 14px;
+      border-radius:18px;
+      background:#eef5ff;
+      border:1px solid #d9e7ff;
+      color:#14336f;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .user-chip i{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#dbeafe;
+      color:#2563eb;
+      font-size:1.1rem;
+    }
+
+    .btn-dashboard{
+      border-radius:15px;
+      font-weight:900;
+      padding:.72rem 1.05rem;
+      border:1px solid #b9c9e5;
+      color:#153467;
+      background:#fff;
+      box-shadow:0 10px 24px rgba(15,23,42,.06);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+    }
+
+    .btn-dashboard:hover{
+      color:#0f2b5c;
+      border-color:#8fa9d4;
+      transform:translateY(-1px);
+    }
+
+    .page{
+      max-width:1240px;
+      margin:0 auto;
+      padding:28px 22px 42px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      padding:28px;
+      background:linear-gradient(135deg,#1e40af 0%, #0d6efd 58%, #0c7bb3 100%);
+      color:#fff;
+      box-shadow:0 24px 50px rgba(30,64,175,.19);
+      margin-bottom:24px;
+    }
+
+    .hero::before,
+    .hero::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      background:rgba(255,255,255,.13);
+      pointer-events:none;
+    }
+
+    .hero::before{
+      width:190px;
+      height:190px;
+      right:-42px;
+      top:-50px;
+    }
+
+    .hero::after{
+      width:145px;
+      height:145px;
+      right:112px;
+      bottom:-82px;
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      gap:22px;
+      align-items:center;
+    }
+
+    .hero-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:.45rem .75rem;
+      border-radius:999px;
+      background:rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.23);
+      font-size:.78rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:2rem;
+      font-weight:950;
+      letter-spacing:-.05em;
+    }
+
+    .hero p{
+      margin:8px 0 0;
+      max-width:720px;
+      color:rgba(255,255,255,.88);
+      font-weight:700;
+      line-height:1.55;
+    }
+
+    .hero-icon{
+      width:92px;
+      height:92px;
+      border-radius:25px;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.20);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:2.75rem;
+      flex:0 0 auto;
+    }
+
+    .grid-main{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 350px;
+      gap:22px;
+      align-items:start;
+    }
+
+    .card-shell{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:0 16px 34px rgba(15,23,42,.07);
+      overflow:hidden;
+    }
+
+    .card-head{
+      padding:18px 22px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,#f8fbff);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .card-title{
+      margin:0;
+      color:#06194a;
+      font-weight:950;
+      letter-spacing:-.025em;
+      font-size:1.15rem;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .card-title i{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      background:#eef5ff;
+      color:#2563eb;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1rem;
+    }
+
+    .card-body-custom{ padding:22px; }
+
+    .section-label{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:#17366c;
+      font-weight:950;
+      margin-bottom:14px;
+      letter-spacing:-.02em;
+    }
+
+    .section-label i{
+      color:#2563eb;
+    }
+
+    .form-label{
+      color:#123061;
+      font-weight:850;
+      font-size:.88rem;
+      margin-bottom:7px;
+    }
+
+    .req{ color:#dc2626; font-weight:900; }
+
+    .form-control,
+    .form-select{
+      border-radius:14px;
+      border:1px solid #cdd9ec;
+      background:#fff;
+      padding:.78rem .9rem;
+      color:#0b1f4d;
+      font-weight:650;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+      border-color:#2563eb;
+      box-shadow:0 0 0 .2rem rgba(37,99,235,.14);
+    }
+
+    .hint{
+      margin-top:6px;
+      color:#6a7fa9;
+      font-size:.78rem;
+      font-weight:650;
+    }
+
+    .divider-soft{
+      height:1px;
+      background:var(--line);
+      margin:24px 0;
+    }
+
+    .savebar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      padding:18px 22px;
+      background:#f8fbff;
+      border-top:1px solid var(--line);
+    }
+
+    .btn-save{
+      border:0;
+      border-radius:15px;
+      padding:.78rem 1.2rem;
+      background:linear-gradient(135deg,#0d6efd,#2563eb);
+      color:#fff;
+      font-weight:950;
+      box-shadow:0 12px 25px rgba(13,110,253,.24);
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+    }
+
+    .btn-save:hover{ color:#fff; transform:translateY(-1px); }
+
+    .btn-cancel{
+      border-radius:15px;
+      padding:.78rem 1.2rem;
+      font-weight:900;
+      border:1px solid #b9c9e5;
+      color:#334b73;
+      background:#fff;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+    }
+
+    .summary-card{
+      position:sticky;
+      top:104px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:0 16px 34px rgba(15,23,42,.07);
+      overflow:hidden;
+    }
+
+    .summary-top{
+      padding:20px;
+      background:linear-gradient(135deg,#eff6ff,#ffffff);
+      border-bottom:1px solid var(--line);
+    }
+
+    .folio-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:.42rem .72rem;
+      border-radius:999px;
+      background:#dbeafe;
+      color:#1d4ed8;
+      font-weight:950;
+      font-size:.82rem;
+      margin-bottom:12px;
+    }
+
+    .summary-top h3{
+      margin:0;
+      font-size:1.25rem;
+      font-weight:950;
+      letter-spacing:-.035em;
+      color:#06194a;
+    }
+
+    .summary-top p{
+      margin:6px 0 0;
+      color:#64748b;
+      font-weight:700;
+      font-size:.9rem;
+    }
+
+    .summary-list{
+      padding:16px 20px 20px;
+      display:grid;
+      gap:12px;
+    }
+
+    .summary-item{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:12px;
+      border-radius:16px;
+      background:#f8fafc;
+      border:1px solid #edf2fb;
+    }
+
+    .summary-item i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#eef5ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+
+    .summary-item strong{
+      display:block;
+      color:#0b1f4d;
+      font-size:.88rem;
+      font-weight:950;
+      margin-bottom:2px;
+    }
+
+    .summary-item span{
+      display:block;
+      color:#64748b;
+      font-size:.82rem;
+      font-weight:650;
+      line-height:1.35;
+    }
+
+    .alert-clean{
+      border:1px solid #bbf7d0;
+      background:#f0fdf4;
+      color:#166534;
+      border-radius:18px;
+      font-weight:800;
+      padding:14px 16px;
+      margin-bottom:18px;
+    }
+
+    .alert-clean.alert-error{
+      border-color:#fecaca;
+      background:#fff1f2;
+      color:#991b1b;
+    }
+
+    @media (max-width: 992px){
+      .grid-main{ grid-template-columns:1fr; }
+      .summary-card{ position:static; }
+      .hero-content{ align-items:flex-start; }
+      .hero-icon{ display:none; }
+    }
+
+    @media (max-width: 768px){
+      .topbar-inner{ align-items:flex-start; flex-direction:column; }
+      .top-actions{ justify-content:flex-start; width:100%; }
+      .user-chip{ white-space:normal; }
+      .hero{ padding:22px; }
+      .hero h1{ font-size:1.65rem; }
+      .savebar{ justify-content:stretch; }
+      .savebar .btn-save,
+      .savebar .btn-cancel{ width:100%; justify-content:center; }
+    }
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
   </style>
 </head>
 
 <body>
-  <div class="container page-wrap py-4">
-
-    <div class="d-flex align-items-start justify-content-between mb-3">
-      <div>
-        <h2 class="title mb-1">
-          <i class="bi bi-pencil-square me-2"></i>Editar Solicitud
-        </h2>
-        <div class="muted">Folio: <strong>{{ solicitud.folio }}</strong></div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-area">
+        <div class="logo-box">
+          <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH" onerror="this.onerror=null; this.src='{% static 'logo.png' %}';">
+        </div>
+        <div>
+          <h1 class="brand-title">Editar solicitud</h1>
+          <div class="brand-subtitle">Actualización de datos básicos del beneficiario</div>
+        </div>
       </div>
 
-      <a href="{% url 'panel_admisiones' %}" class="btn btn-outline-secondary btn-soft">
-        <i class="bi bi-arrow-left me-1"></i> Volver
-      </a>
+      <div class="top-actions">
+        <a href="{% url 'panel_admisiones' %}" class="btn-dashboard">
+          <i class="bi bi-arrow-left"></i> Regresar
+        </a>
+        <div class="user-chip" title="Trabajadora Social">
+          <i class="bi bi-person-heart"></i>
+          <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
     </div>
 
-    {% if messages %}
-      <div class="mb-3">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
         {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
       </div>
     {% endif %}
+  </section>
+  {% endif %}
 
-    <form method="post" class="card card-soft p-4" autocomplete="off">
-      {% csrf_token %}
-
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Nombre(s) <span class="req">*</span></label>
-          <input
-            type="text"
-            name="nombres_tutor"
-            class="form-control w-100"
-            placeholder="Nombre(s)"
-            value="{{ solicitud.nombres_tutor|default:'' }}"
-          >
-          <div class="muted small mt-1">Solo letras y espacios.</div>
+    <section class="hero">
+      <div class="hero-content">
+        <div>
+          <div class="hero-tag"><i class="bi bi-pencil-square"></i> Edición controlada</div>
+          <h1>Solicitud folio {{ solicitud.folio|default:"-" }}</h1>
+          <p>
+            Modifica únicamente los datos básicos del tutor/beneficiario. Los documentos PDF, CURP y datos sensibles del menor no se editan desde esta pantalla.
+          </p>
         </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Apellido paterno <span class="req">*</span></label>
-          <input
-            type="text"
-            name="apellido_paterno_tutor"
-            class="form-control w-100"
-            placeholder="Apellido paterno"
-            value="{{ solicitud.apellido_paterno_tutor|default:'' }}"
-          >
-          <div class="muted small mt-1">Solo letras.</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Apellido materno</label>
-          <input
-            type="text"
-            name="apellido_materno_tutor"
-            class="form-control w-100"
-            placeholder="Apellido materno"
-            value="{{ solicitud.apellido_materno_tutor|default:'' }}"
-          >
-          <div class="muted small mt-1">Opcional.</div>
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Matrícula</label>
-          <input
-            type="text"
-            name="matricula"
-            class="form-control w-100"
-            placeholder="Ej. A123456"
-            value="{{ solicitud.matricula|default:'' }}"
-          >
-          <div class="muted small mt-1">Ej: A123456</div>
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Correo</label>
-          <input
-            type="email"
-            name="correo"
-            class="form-control w-100"
-            placeholder="correo@ejemplo.com"
-            value="{{ solicitud.correo|default:'' }}"
-          >
-          <div class="muted small mt-1">Ej: Gmail / Hotmail / Outlook / @unach.mx</div>
-        </div>
+        <div class="hero-icon"><i class="bi bi-people-fill"></i></div>
       </div>
+    </section>
 
-      <div class="d-flex gap-2 mt-4">
-        <button type="submit" class="btn btn-primary btn-soft fw-bold px-4">
-          Guardar cambios <i class="bi bi-check2-circle ms-1"></i>
-        </button>
-        <a href="{% url 'panel_admisiones' %}" class="btn btn-outline-secondary btn-soft px-4">
-          Cancelar
-        </a>
-      </div>
-    </form>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert-clean {% if 'error' in message.tags or 'danger' in message.tags %}alert-error{% endif %}">
+          <i class="bi bi-info-circle-fill me-1"></i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
 
-  </div>
+    <div class="grid-main">
+      <form method="post" class="card-shell" autocomplete="off" id="formEditarSolicitud">
+        {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
+        <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+
+        <div class="card-head">
+          <h2 class="card-title"><i class="bi bi-ui-checks-grid"></i> Datos editables</h2>
+          <span class="folio-pill mb-0"><i class="bi bi-hash"></i> Folio {{ solicitud.folio|default:"-" }}</span>
+        </div>
+
+        <div class="card-body-custom">
+          <div class="section-label"><i class="bi bi-person-badge-fill"></i> Datos del tutor / beneficiario</div>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Nombre(s) <span class="req">*</span></label>
+              <input type="text" name="nombres_tutor" class="form-control text-name" placeholder="Nombre(s)" value="{{ solicitud.nombres_tutor|default:'' }}" required>
+              <div class="hint">Solo letras y espacios.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Apellido paterno <span class="req">*</span></label>
+              <input type="text" name="apellido_paterno_tutor" class="form-control text-name" placeholder="Apellido paterno" value="{{ solicitud.apellido_paterno_tutor|default:'' }}" required>
+              <div class="hint">Dato básico del responsable.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Apellido materno</label>
+              <input type="text" name="apellido_materno_tutor" class="form-control text-name" placeholder="Apellido materno" value="{{ solicitud.apellido_materno_tutor|default:'' }}">
+              <div class="hint">Opcional.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Parentesco</label>
+              <select name="parentesco" id="parentescoSelect" class="form-select">
+                <option value="PADRE" {% if solicitud.parentesco == "PADRE" %}selected{% endif %}>Padre</option>
+                <option value="MADRE" {% if solicitud.parentesco == "MADRE" %}selected{% endif %}>Madre</option>
+                <option value="TUTOR" {% if solicitud.parentesco == "TUTOR" %}selected{% endif %}>Tutor(a)</option>
+                <option value="OTRO" {% if solicitud.parentesco == "OTRO" %}selected{% endif %}>Otro</option>
+              </select>
+              <div class="hint">Relación con el menor.</div>
+            </div>
+
+            <div class="col-md-4" id="parentescoOtroBox">
+              <label class="form-label">Especificar parentesco</label>
+              <input type="text" name="parentesco_otro" class="form-control text-name" placeholder="Ej. Abuela, tío, responsable" value="{{ solicitud.parentesco_otro|default:'' }}">
+              <div class="hint">Solo aplica cuando se selecciona “Otro”.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Matrícula</label>
+              <input type="text" name="matricula" class="form-control text-uppercase" placeholder="Ej. A123456" value="{{ solicitud.matricula|default:'' }}">
+              <div class="hint">Ejemplo: A123456.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Correo</label>
+              <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" value="{{ solicitud.correo|default:'' }}">
+              <div class="hint">Correo para seguimiento y notificaciones.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Celular</label>
+              <input type="text" name="celular" class="form-control phone-input" placeholder="Ej. 9611239284" value="{{ solicitud.celular|default:'' }}" maxlength="10">
+              <div class="hint">Solo números, máximo 10 dígitos.</div>
+            </div>
+          </div>
+
+          <div class="divider-soft"></div>
+
+          <div class="section-label"><i class="bi bi-mortarboard-fill"></i> Información académica</div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Programa educativo</label>
+              <input type="text" name="programa_educativo" class="form-control" placeholder="Ej. Licenciatura en Gerontología" value="{{ solicitud.programa_educativo|default:'' }}">
+              <div class="hint">Carrera o programa del beneficiario.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Unidad académica</label>
+              <input type="text" name="unidad_academica" class="form-control" placeholder="Ej. Facultad de Medicina Humana..." value="{{ solicitud.unidad_academica|default:'' }}">
+              <div class="hint">Facultad, escuela o campus correspondiente.</div>
+            </div>
+          </div>
+
+          <div class="divider-soft"></div>
+
+          <div class="section-label"><i class="bi bi-geo-alt-fill"></i> Domicilio</div>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Estado</label>
+              <input type="text" name="estado_domicilio" class="form-control text-name" placeholder="Ej. Chiapas" value="{{ solicitud.estado_domicilio|default:'' }}">
+              <div class="hint">Estado del domicilio.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Ciudad / municipio</label>
+              <input type="text" name="ciudad" class="form-control text-name" placeholder="Ej. Tuxtla Gutiérrez" value="{{ solicitud.ciudad|default:'' }}">
+              <div class="hint">Ciudad o municipio.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Calle / colonia</label>
+              <input type="text" name="calle" class="form-control" placeholder="Ej. Privada napiniaca" value="{{ solicitud.calle|default:'' }}">
+              <div class="hint">Calle, privada o referencia principal.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Número exterior</label>
+              <input type="text" name="numero_exterior" class="form-control" placeholder="Ej. 219" value="{{ solicitud.numero_exterior|default:'' }}">
+              <div class="hint">Número de vivienda.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="savebar">
+          <a href="{% url 'panel_admisiones' %}" class="btn-cancel">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </a>
+          <button type="submit" class="btn-save">
+            Guardar cambios <i class="bi bi-check2-circle"></i>
+          </button>
+        </div>
+      </form>
+
+      <aside class="summary-card">
+        <div class="summary-top">
+          <span class="folio-pill"><i class="bi bi-pencil-square"></i> Resumen</span>
+          <h3>{{ solicitud.nombres_tutor|default:"Beneficiario" }} {{ solicitud.apellido_paterno_tutor|default:"" }}</h3>
+          <p>Verifica que los datos básicos coincidan antes de guardar.</p>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-item">
+            <i class="bi bi-person-lines-fill"></i>
+            <div>
+              <strong>Datos permitidos</strong>
+              <span>Nombre, parentesco, matrícula, correo, celular, programa, unidad académica y domicilio.</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <i class="bi bi-file-earmark-lock-fill"></i>
+            <div>
+              <strong>No editable aquí</strong>
+              <span>PDFs, documentos subidos, CURP, fecha de nacimiento y datos sensibles del menor.</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <i class="bi bi-shield-check"></i>
+            <div>
+              <strong>Revisión de Trabajo Social</strong>
+              <span>Los cambios quedan registrados desde el flujo de solicitudes de admisión.</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      const textInputs = document.querySelectorAll('.text-name');
+      textInputs.forEach(function(input){
+        input.addEventListener('input', function(){
+          this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.]/g, '');
+        });
+      });
+
+      const matricula = document.querySelector('input[name="matricula"]');
+      if(matricula){
+        matricula.addEventListener('input', function(){
+          this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        });
+      }
+
+      const phone = document.querySelector('.phone-input');
+      if(phone){
+        phone.addEventListener('input', function(){
+          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+        });
+      }
+
+      const parentescoSelect = document.getElementById('parentescoSelect');
+      const parentescoOtroBox = document.getElementById('parentescoOtroBox');
+
+      function toggleParentescoOtro(){
+        if(!parentescoSelect || !parentescoOtroBox) return;
+        parentescoOtroBox.style.display = parentescoSelect.value === 'OTRO' ? 'block' : 'none';
+        const input = parentescoOtroBox.querySelector('input');
+        if(input && parentescoSelect.value !== 'OTRO') input.value = '';
+      }
+
+      if(parentescoSelect){
+        parentescoSelect.addEventListener('change', toggleParentescoOtro);
+        toggleParentescoOtro();
+      }
+    });
+  </script>
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

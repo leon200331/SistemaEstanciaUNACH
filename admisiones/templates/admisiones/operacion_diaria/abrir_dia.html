@@ -12,168 +12,200 @@
     <style>
         :root{
             --blue:#2563eb;
+            --blue-dark:#1e3a8a;
             --cyan:#0891b2;
             --green:#16a34a;
             --yellow:#ca8a04;
             --red:#dc2626;
-            --purple:#7c3aed;
             --slate:#0f172a;
             --muted:#64748b;
-            --border:#e2e8f0;
+            --border:#dbe5f2;
+            --soft:#f8fafc;
+            --card:#ffffff;
         }
 
-        *{box-sizing:border-box;}
+        *{ box-sizing:border-box; }
 
         body{
             min-height:100vh;
+            margin:0;
             background:
-                radial-gradient(circle at top left, rgba(22,163,74,.14), transparent 30%),
-                radial-gradient(circle at top right, rgba(37,99,235,.15), transparent 32%),
-                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+                radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.16), transparent 34%),
+                linear-gradient(135deg,#f8fbff 0%,#eef6ff 44%,#f1f5f9 100%);
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
         }
 
         .page{
-            max-width:1180px;
+            width:min(1440px, 100%);
             margin:0 auto;
-            padding:24px;
+            padding:28px 34px 40px;
         }
 
         .topbar{
+            min-height:90px;
             background:rgba(255,255,255,.94);
-            backdrop-filter:blur(16px);
-            border:1px solid rgba(226,232,240,.9);
-            border-radius:24px;
-            padding:18px 20px;
-            display:flex;
+            backdrop-filter:blur(18px);
+            border:1px solid rgba(219,229,242,.95);
+            border-radius:26px;
+            padding:16px 20px;
+            display:grid;
+            grid-template-columns:1fr auto;
             align-items:center;
-            justify-content:space-between;
             gap:18px;
-            box-shadow:0 18px 45px rgba(15,23,42,.08);
-            margin-bottom:22px;
+            box-shadow:0 18px 44px rgba(15,23,42,.08);
+            margin-bottom:24px;
         }
 
         .brand{
+            min-width:0;
             display:flex;
             align-items:center;
-            gap:14px;
+            gap:16px;
         }
 
         .brand-logo{
-            width:96px;
+            width:92px;
             height:64px;
             border-radius:18px;
-            background:linear-gradient(135deg, #1e3a8a, #2563eb);
-            border:1px solid rgba(255,255,255,.25);
+            background:linear-gradient(135deg,#1e3a8a,#2563eb);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:6px;
+            padding:7px;
             box-shadow:0 16px 34px rgba(29,78,216,.28);
-            flex-shrink:0;
+            border:1px solid rgba(255,255,255,.22);
+            flex:0 0 auto;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));
             transform:scale(1.12);
         }
 
-        .brand-title{
+        .brand h1{
             margin:0;
+            color:#081b4b;
+            font-size:1.85rem;
+            line-height:1.05;
+            letter-spacing:-.055em;
             font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.35rem;
-            color:#0f172a;
         }
 
-        .brand-subtitle{
-            margin:2px 0 0;
-            color:var(--muted);
-            font-weight:650;
-            font-size:.92rem;
+        .brand p{
+            margin:5px 0 0;
+            color:#456083;
+            font-weight:700;
+            font-size:.96rem;
         }
 
         .top-actions{
             display:flex;
-            flex-wrap:wrap;
-            gap:10px;
+            align-items:center;
             justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .teacher-pill{
+            height:52px;
+            border:1px solid #d7e4f5;
+            background:#fff;
+            border-radius:999px;
+            padding:6px 12px 6px 7px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#1d2f55;
+            font-weight:850;
+            white-space:nowrap;
+            box-shadow:0 10px 24px rgba(15,23,42,.05);
+        }
+
+        .teacher-icon{
+            width:40px;
+            height:40px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#dbeafe,#eff6ff);
+            color:#2563eb;
+            font-size:1.22rem;
+            flex:0 0 auto;
+        }
+
+        .btn-soft,
+        .btn-main{
+            border-radius:999px;
+            border:1px solid var(--border);
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            font-weight:900;
+            transition:.18s ease;
+            cursor:pointer;
         }
 
         .btn-soft{
-            border-radius:999px;
-            padding:.72rem 1rem;
-            font-weight:850;
-            border:1px solid var(--border);
-            background:white;
-            color:#334155;
-            text-decoration:none;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            transition:.18s ease;
+            height:52px;
+            padding:0 18px;
+            background:#fff;
+            color:#1e2f53;
         }
 
         .btn-soft:hover{
-            transform:translateY(-1px);
-            color:#0f172a;
             background:#f8fafc;
-            box-shadow:0 12px 25px rgba(15,23,42,.09);
+            color:#0f172a;
+            transform:translateY(-1px);
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
         }
 
         .btn-main{
-            border-radius:999px;
-            padding:.84rem 1.16rem;
-            font-weight:950;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            text-decoration:none;
+            min-height:52px;
+            padding:.78rem 1.18rem;
             border:none;
-            transition:.18s ease;
         }
 
         .btn-main:hover{
             transform:translateY(-1px);
-            box-shadow:0 14px 28px rgba(15,23,42,.16);
+            box-shadow:0 14px 30px rgba(15,23,42,.15);
         }
 
-        .btn-green{
-            background:linear-gradient(135deg,#16a34a,#22c55e);
-            color:white;
-        }
-
-        .btn-blue{
-            background:linear-gradient(135deg,#2563eb,#0891b2);
-            color:white;
-        }
+        .btn-green{ background:linear-gradient(135deg,#16a34a,#22c55e); color:white; }
+        .btn-blue{ background:linear-gradient(135deg,#2563eb,#0891b2); color:white; }
+        .btn-dark{ background:linear-gradient(135deg,#0f172a,#334155); color:white; }
 
         .hero{
-            background:linear-gradient(135deg,#16a34a,#2563eb,#0891b2);
-            color:white;
-            border-radius:30px;
-            padding:28px;
-            box-shadow:0 24px 60px rgba(37,99,235,.24);
-            margin-bottom:22px;
             position:relative;
             overflow:hidden;
+            border-radius:30px;
+            background:
+                linear-gradient(135deg, rgba(30,64,175,.98), rgba(8,145,178,.92)),
+                url("https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=1400&q=80");
+            background-position:center;
+            background-size:cover;
+            color:white;
+            padding:28px;
+            box-shadow:0 24px 64px rgba(37,99,235,.22);
+            margin-bottom:22px;
         }
 
         .hero:after{
             content:"";
             position:absolute;
-            width:280px;
-            height:280px;
+            width:310px;
+            height:310px;
+            right:-92px;
+            top:-115px;
             border-radius:50%;
             background:rgba(255,255,255,.14);
-            right:-90px;
-            top:-100px;
         }
 
         .hero-content{
@@ -181,107 +213,63 @@
             z-index:1;
             display:grid;
             grid-template-columns:1fr auto;
-            gap:18px;
             align-items:center;
+            gap:22px;
         }
 
-        .hero-kicker{
+        .kicker{
+            width:max-content;
+            max-width:100%;
             display:inline-flex;
             align-items:center;
             gap:8px;
-            background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.26);
+            background:rgba(255,255,255,.17);
+            border:1px solid rgba(255,255,255,.27);
             border-radius:999px;
-            padding:.45rem .8rem;
+            padding:.46rem .82rem;
             font-size:.78rem;
-            font-weight:900;
+            font-weight:950;
             margin-bottom:12px;
         }
 
-        .hero h1{
+        .hero h2{
             margin:0;
-            font-size:2rem;
+            font-size:2.15rem;
+            line-height:1.05;
+            letter-spacing:-.06em;
             font-weight:950;
-            letter-spacing:-.05em;
         }
 
         .hero p{
-            margin:8px 0 0;
+            margin:10px 0 0;
             max-width:800px;
-            font-weight:600;
-            opacity:.94;
+            line-height:1.45;
+            font-weight:700;
+            opacity:.95;
         }
 
-        .day-info{
+        .day-card-hero{
             min-width:270px;
-            background:rgba(255,255,255,.18);
             border:1px solid rgba(255,255,255,.28);
-            border-radius:22px;
-            padding:16px;
+            background:rgba(255,255,255,.17);
+            border-radius:24px;
+            padding:17px;
             backdrop-filter:blur(12px);
         }
 
         .day-label{
+            color:rgba(255,255,255,.78);
             font-size:.72rem;
             text-transform:uppercase;
             letter-spacing:.08em;
-            opacity:.82;
             font-weight:950;
-            margin-bottom:4px;
+            margin-bottom:5px;
         }
 
         .day-value{
-            font-size:1.18rem;
-            font-weight:950;
-        }
-
-        .layout{
-            display:grid;
-            grid-template-columns:.86fr 1.14fr;
-            gap:20px;
-            align-items:start;
-        }
-
-        .panel{
-            background:rgba(255,255,255,.95);
-            border:1px solid var(--border);
-            border-radius:26px;
-            box-shadow:0 16px 38px rgba(15,23,42,.08);
-            overflow:hidden;
-        }
-
-        .panel-header{
-            padding:18px 20px;
-            border-bottom:1px solid var(--border);
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:14px;
-            flex-wrap:wrap;
-            background:white;
-        }
-
-        .panel-title{
-            margin:0;
-            font-size:1.08rem;
+            font-size:1.35rem;
             font-weight:950;
             letter-spacing:-.03em;
-            color:#0f172a;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
-
-        .panel-body{
-            padding:20px;
-        }
-
-        .alert-custom{
-            border:none;
-            border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
         }
 
         .badge-soft{
@@ -289,226 +277,194 @@
             align-items:center;
             gap:6px;
             border-radius:999px;
-            padding:.42rem .68rem;
+            padding:.44rem .72rem;
             font-size:.76rem;
             font-weight:950;
             white-space:nowrap;
         }
 
-        .badge-yellow{background:#fef3c7;color:#92400e;}
-        .badge-green{background:#dcfce7;color:#166534;}
-        .badge-blue{background:#dbeafe;color:#1e40af;}
-        .badge-gray{background:#e2e8f0;color:#334155;}
-        .badge-red{background:#fee2e2;color:#991b1b;}
+        .badge-yellow{ background:#fef3c7; color:#92400e; }
+        .badge-green{ background:#dcfce7; color:#166534; }
+        .badge-blue{ background:#dbeafe; color:#1e40af; }
+        .badge-gray{ background:#e2e8f0; color:#334155; }
+        .badge-red{ background:#fee2e2; color:#991b1b; }
+
+        .message-list{ margin-bottom:18px; }
+
+        .alert-custom{
+            border:none;
+            border-radius:18px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:700;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:.9fr 1.1fr;
+            gap:22px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.96);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 40px rgba(15,23,42,.08);
+            overflow:hidden;
+        }
+
+        .panel + .panel{ margin-top:22px; }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+            background:#fff;
+        }
+
+        .panel-title{
+            margin:0;
+            color:#081b4b;
+            font-size:1.08rem;
+            letter-spacing:-.03em;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:9px;
+        }
+
+        .panel-title-icon{
+            width:34px;
+            height:34px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#eef6ff;
+            color:#2563eb;
+            flex:0 0 auto;
+        }
+
+        .panel-body{ padding:18px 20px 20px; }
 
         .status-card{
             border-radius:22px;
             padding:18px;
-            margin-bottom:16px;
             border:1px solid var(--border);
-        }
-
-        .status-ready{
-            background:#f0fdf4;
-            border-color:#bbf7d0;
-            color:#14532d;
-        }
-
-        .status-open{
-            background:#eff6ff;
-            border-color:#bfdbfe;
-            color:#1e3a8a;
-        }
-
-        .status-closed{
-            background:#f8fafc;
-            border-color:#cbd5e1;
-            color:#334155;
-        }
-
-
-        .status-inhabil{
-            background:#f8fafc;
-            border-color:#cbd5e1;
-            color:#475569;
-            border-style:dashed;
-        }
-
-        .status-inhabil .status-icon{
-            background:#e2e8f0;
-            color:#475569;
-        }
-
-        .non-operational-card{
-            background:#f8fafc;
-            border:1px dashed #cbd5e1;
-            border-radius:22px;
-            padding:18px;
-            color:#475569;
-            font-weight:700;
-            line-height:1.45;
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
             margin-bottom:16px;
-        }
-
-        .non-operational-card strong{
-            color:#0f172a;
-            font-weight:950;
-        }
-
-        .non-operational-list{
-            margin:12px 0 0;
-            padding-left:0;
-            list-style:none;
-            display:grid;
-            gap:8px;
-        }
-
-        .non-operational-list li{
-            display:flex;
-            gap:8px;
-            align-items:flex-start;
-        }
-
-        .non-operational-list i{
-            margin-top:2px;
-            color:#64748b;
-        }
-
-        .btn-disabled-operacion{
-            opacity:.55;
-            pointer-events:none;
-            filter:grayscale(.2);
-        }
-
-        .status-warning{
-            background:#fff7ed;
-            border-color:#fed7aa;
-            color:#9a3412;
-        }
-
-        .status-top{
-            display:flex;
-            gap:12px;
-            align-items:flex-start;
         }
 
         .status-icon{
-            width:48px;
-            height:48px;
-            border-radius:16px;
+            width:50px;
+            height:50px;
+            border-radius:17px;
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:1.4rem;
-            background:rgba(255,255,255,.72);
-            flex-shrink:0;
+            font-size:1.35rem;
+            flex:0 0 auto;
         }
 
+        .status-ready{ background:#f0fdf4; border-color:#bbf7d0; color:#14532d; }
+        .status-ready .status-icon{ background:#dcfce7; color:#15803d; }
+        .status-open{ background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a; }
+        .status-open .status-icon{ background:#dbeafe; color:#2563eb; }
+        .status-closed,.status-inhabil{ background:#f8fafc; border-color:#cbd5e1; color:#475569; }
+        .status-inhabil{ border-style:dashed; }
+        .status-closed .status-icon,.status-inhabil .status-icon{ background:#e2e8f0; color:#475569; }
+        .status-warning{ background:#fff7ed; border-color:#fed7aa; color:#9a3412; }
+        .status-warning .status-icon{ background:#ffedd5; color:#c2410c; }
+
         .status-title{
-            font-weight:950;
-            color:inherit;
-            margin-bottom:3px;
             font-size:1.05rem;
+            color:inherit;
+            font-weight:950;
+            margin-bottom:3px;
         }
 
         .status-text{
             margin:0;
-            font-weight:650;
+            color:inherit;
+            font-weight:700;
             line-height:1.45;
         }
 
         .info-grid{
             display:grid;
             grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-            margin-top:16px;
+            gap:11px;
         }
 
         .info-item{
-            background:white;
-            border:1px solid rgba(148,163,184,.28);
-            border-radius:16px;
-            padding:12px;
+            background:#fff;
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:13px 14px;
+            min-height:80px;
         }
 
         .info-label{
             color:#64748b;
             font-size:.72rem;
             text-transform:uppercase;
-            letter-spacing:.06em;
+            letter-spacing:.075em;
             font-weight:950;
-            margin-bottom:4px;
+            margin-bottom:5px;
         }
 
         .info-value{
-            font-weight:900;
             color:#0f172a;
+            font-weight:950;
+            line-height:1.25;
         }
 
-        .help-card{
+        .opened-by{
+            margin-top:14px;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            background:#eff6ff;
+            color:#1e3a8a;
+            border-radius:18px;
+            padding:14px 15px;
+            font-weight:800;
+        }
+
+        .form-note,
+        .readonly-box,
+        .warning-box{
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:750;
+            line-height:1.45;
+            margin-bottom:16px;
+        }
+
+        .form-note{
             background:#eff6ff;
             border:1px solid #bfdbfe;
             border-left:6px solid #2563eb;
             color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
         }
 
-        .warning-card{
+        .warning-box{
             background:#fff7ed;
             border:1px solid #fed7aa;
             border-left:6px solid #f97316;
             color:#9a3412;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
         }
 
-        .steps{
-            display:grid;
-            gap:12px;
-        }
-
-        .step{
-            display:flex;
-            gap:12px;
-            align-items:flex-start;
-            padding:13px;
-            border:1px solid var(--border);
-            background:white;
-            border-radius:18px;
-        }
-
-        .step-number{
-            width:32px;
-            height:32px;
-            border-radius:999px;
-            background:#dcfce7;
-            color:#15803d;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:950;
-            flex-shrink:0;
-        }
-
-        .step-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:2px;
-        }
-
-        .step-text{
-            color:#64748b;
-            font-size:.86rem;
-            margin:0;
-            font-weight:650;
-            line-height:1.4;
+        .readonly-box{
+            background:#f8fafc;
+            border:1px dashed #cbd5e1;
+            color:#475569;
         }
 
         .form-section{
@@ -523,141 +479,162 @@
             display:flex;
             align-items:center;
             gap:8px;
-            margin-bottom:14px;
-            font-weight:950;
             color:#0f172a;
+            font-weight:950;
+            margin-bottom:13px;
             letter-spacing:-.02em;
         }
 
         .form-label{
             font-weight:900;
             color:#334155;
-            margin-bottom:7px;
-            font-size:.88rem;
+            margin-bottom:8px;
+            font-size:.9rem;
         }
 
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select,
         .form-control,
         .form-select{
-            border-radius:16px;
+            width:100%;
             border:1px solid #cbd5e1;
-            padding:.78rem .9rem;
-            font-weight:650;
-            color:#0f172a;
             background:white;
+            color:#0f172a;
+            border-radius:16px;
+            padding:.78rem .9rem;
+            font-weight:700;
+            outline:none;
         }
 
-        textarea.form-control{
-            min-height:118px;
-        }
+        textarea,
+        textarea.form-control{ min-height:116px; resize:vertical; }
 
+        input:focus,
+        textarea:focus,
+        select:focus,
         .form-control:focus,
         .form-select:focus{
             border-color:#93c5fd;
-            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+            box-shadow:0 0 0 4px rgba(37,99,235,.12);
         }
 
-        .form-check{
+        .check-card{
             background:white;
             border:1px solid #cbd5e1;
-            border-radius:16px;
-            padding:14px 14px 14px 44px;
-            min-height:54px;
+            border-radius:18px;
+            padding:15px 16px;
             display:flex;
             align-items:center;
+            gap:12px;
         }
 
-        .form-check-input{
-            margin-left:-28px;
+        .check-card input[type="checkbox"]{
             width:1.15rem;
             height:1.15rem;
+            flex:0 0 auto;
         }
 
-        .form-check-label{
-            font-weight:850;
-            color:#334155;
+        .check-card label{
+            margin:0;
+            color:#1e2f53;
+            font-weight:900;
+        }
+
+        .mini-help{
+            color:#64748b;
+            font-size:.84rem;
+            font-weight:700;
+            margin-top:8px;
         }
 
         .errors{
-            margin-top:7px;
             color:#b91c1c;
-            font-weight:700;
-            font-size:.82rem;
+            font-size:.84rem;
+            font-weight:750;
+            margin-top:8px;
         }
 
-        .errors ul{
-            margin:0;
-            padding-left:18px;
-        }
+        .errors ul{ margin:0; padding-left:18px; }
 
         .submit-bar{
             display:flex;
             justify-content:space-between;
             align-items:center;
+            gap:14px;
             flex-wrap:wrap;
-            gap:12px;
-            padding-top:4px;
+            padding-top:2px;
         }
 
         .submit-note{
             color:#64748b;
-            font-weight:650;
-            font-size:.86rem;
+            font-size:.88rem;
+            font-weight:750;
             max-width:560px;
         }
 
-        .mini-help{
-            color:#64748b;
-            font-size:.82rem;
-            font-weight:650;
-            margin-top:7px;
+        .steps{
+            display:grid;
+            gap:10px;
         }
 
-        .readonly-box{
-            background:#f8fafc;
-            border:1px dashed #cbd5e1;
+        .step{
+            border:1px solid var(--border);
             border-radius:18px;
-            padding:14px;
-            color:#475569;
-            font-weight:650;
-            line-height:1.45;
+            background:#fff;
+            padding:13px 14px;
+            display:flex;
+            align-items:flex-start;
+            gap:12px;
         }
 
-        @media(max-width:1050px){
-            .layout{grid-template-columns:1fr;}
-            .hero-content{grid-template-columns:1fr;}
-            .day-info{min-width:0;}
+        .step-number{
+            width:32px;
+            height:32px;
+            border-radius:999px;
+            background:#dbeafe;
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:950;
+            flex:0 0 auto;
         }
 
-        @media(max-width:720px){
-            .page{padding:14px;}
+        .step-title{
+            color:#0f172a;
+            font-weight:950;
+            margin-bottom:2px;
+        }
 
-            .topbar{
-                flex-direction:column;
-                align-items:flex-start;
-                border-radius:20px;
-            }
+        .step-text{
+            color:#64748b;
+            margin:0;
+            font-weight:700;
+            line-height:1.35;
+            font-size:.86rem;
+        }
 
-            .top-actions,
-            .btn-soft,
-            .btn-main{
-                width:100%;
-                justify-content:center;
-            }
+        @media(max-width:1100px){
+            .layout{ grid-template-columns:1fr; }
+            .hero-content{ grid-template-columns:1fr; }
+            .day-card-hero{ min-width:0; }
+        }
 
-            .hero{
-                padding:22px;
-                border-radius:22px;
-            }
-
-            .hero h1{font-size:1.55rem;}
-
-            .info-grid{
-                grid-template-columns:1fr;
-            }
-
-            .submit-bar{
-                align-items:stretch;
-            }
+        @media(max-width:760px){
+            .page{ padding:16px; }
+            .topbar{ grid-template-columns:1fr; border-radius:22px; }
+            .top-actions{ justify-content:flex-start; width:100%; }
+            .teacher-pill,.btn-soft,.btn-main{ width:100%; }
+            .brand-logo{ width:86px; height:58px; }
+            .brand h1{ font-size:1.45rem; }
+            .hero{ padding:22px; border-radius:24px; }
+            .hero h2{ font-size:1.55rem; }
+            .info-grid{ grid-template-columns:1fr; }
+            .submit-bar{ align-items:stretch; }
+            .submit-bar .d-flex{ width:100%; }
+            .submit-bar .d-flex > *{ flex:1 1 100%; }
         }
     </style>
 </head>
@@ -671,23 +648,28 @@
                 <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
             </div>
             <div>
-                <h1 class="brand-title">Abrir día operativo</h1>
-                <p class="brand-subtitle">
-                    Inicio de operación diaria para las maestras de la sede.
-                </p>
+                <h1>Abrir día operativo</h1>
+                <p>Inicio de operación diaria para las salas asignadas.</p>
             </div>
         </div>
 
         <div class="top-actions">
             <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
                 <i class="bi bi-arrow-left-circle-fill"></i>
-                Volver al panel
+                Regresar
             </a>
+
+            <div class="teacher-pill" title="Maestra que inició sesión">
+                <div class="teacher-icon">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+            </div>
         </div>
     </header>
 
     {% if messages %}
-        <div class="mb-3">
+        <div class="message-list">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
                     {{ message }}
@@ -699,27 +681,27 @@
     <section class="hero">
         <div class="hero-content">
             <div>
-                <div class="hero-kicker">
+                <div class="kicker">
                     <i class="bi bi-unlock-fill"></i>
                     Apertura por sede
                 </div>
 
-                <h1>Inicio de operación del día</h1>
+                <h2>Confirmación de apertura del día</h2>
 
                 <p>
-                    Al abrir el día, se habilita la captura de entradas, bitácoras, salidas y cierre diario.
-                    Esta acción solo aplica de lunes a viernes en días hábiles. Sábados y domingos son inhábiles automáticos.
+                    Al abrir el día se habilitan los registros de entrada, bitácoras, salidas y cierre diario.
+                    La apertura queda guardada con el usuario de la maestra, fecha y hora.
                 </p>
             </div>
 
-            <div class="day-info">
+            <div class="day-card-hero">
                 <div class="day-label">Día operativo</div>
                 <div class="day-value">{{ dia.fecha|date:"d/m/Y" }}</div>
                 <div class="mt-2">
                     {% if not dia.es_habil %}
                         <span class="badge-soft badge-gray">
                             <i class="bi bi-calendar-x-fill"></i>
-                            Inhábil automático
+                            Día inhábil
                         </span>
                     {% elif dia.estado == "PROGRAMADO" %}
                         <span class="badge-soft badge-yellow">
@@ -728,7 +710,7 @@
                         </span>
                     {% elif dia.estado == "ABIERTO" %}
                         <span class="badge-soft badge-green">
-                            <i class="bi bi-unlock-fill"></i>
+                            <i class="bi bi-check-circle-fill"></i>
                             Ya abierto
                         </span>
                     {% elif dia.estado == "CERRADO" %}
@@ -745,10 +727,10 @@
     <div class="layout">
 
         <aside>
-            <section class="panel mb-4">
+            <section class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-calendar-day-fill"></i>
+                        <span class="panel-title-icon"><i class="bi bi-calendar-day-fill"></i></span>
                         Datos del día
                     </h2>
                 </div>
@@ -756,64 +738,54 @@
                 <div class="panel-body">
                     {% if not dia.es_habil %}
                         <div class="status-card status-inhabil">
-                            <div class="status-top">
-                                <div class="status-icon">
-                                    <i class="bi bi-calendar-x-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="status-title">Día inhábil automático</div>
-                                    <p class="status-text">
-                                        {% if dia.fecha|date:"w" == "0" or dia.fecha|date:"w" == "6" %}
-                                            La estancia no opera sábados ni domingos.
-                                        {% else %}
-                                            Este día está marcado como inhábil en el calendario operativo.
-                                        {% endif %}
-                                        No se permite abrir operación diaria, registrar entradas, salidas ni bitácoras.
-                                    </p>
-                                </div>
+                            <div class="status-icon">
+                                <i class="bi bi-calendar-x-fill"></i>
+                            </div>
+                            <div>
+                                <div class="status-title">Día inhábil automático</div>
+                                <p class="status-text">
+                                    {% if dia.fecha|date:"w" == "0" or dia.fecha|date:"w" == "6" %}
+                                        La estancia no opera sábados ni domingos.
+                                    {% else %}
+                                        Este día está marcado como inhábil en el calendario operativo.
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
-
                     {% elif dia.estado == "PROGRAMADO" %}
                         <div class="status-card status-ready">
-                            <div class="status-top">
-                                <div class="status-icon">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="status-title">Día listo para abrir</div>
-                                    <p class="status-text">
-                                        El calendario operativo tiene este día programado. Puedes abrirlo para iniciar la recepción de niños.
-                                    </p>
-                                </div>
+                            <div class="status-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div>
+                                <div class="status-title">Día listo para abrir</div>
+                                <p class="status-text">
+                                    El calendario operativo tiene este día programado y puede iniciar la recepción.
+                                </p>
                             </div>
                         </div>
                     {% elif dia.estado == "ABIERTO" %}
                         <div class="status-card status-open">
-                            <div class="status-top">
-                                <div class="status-icon">
-                                    <i class="bi bi-unlock-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="status-title">Este día ya está abierto</div>
-                                    <p class="status-text">
-                                        Puedes continuar con la operación diaria desde la lista de alumnos del día.
-                                    </p>
-                                </div>
+                            <div class="status-icon">
+                                <i class="bi bi-unlock-fill"></i>
+                            </div>
+                            <div>
+                                <div class="status-title">La operación ya está abierta</div>
+                                <p class="status-text">
+                                    Puedes continuar con alumnos del día y registros diarios.
+                                </p>
                             </div>
                         </div>
                     {% elif dia.estado == "CERRADO" %}
                         <div class="status-card status-closed">
-                            <div class="status-top">
-                                <div class="status-icon">
-                                    <i class="bi bi-lock-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="status-title">Este día ya está cerrado</div>
-                                    <p class="status-text">
-                                        La información de este día queda solo para consulta histórica.
-                                    </p>
-                                </div>
+                            <div class="status-icon">
+                                <i class="bi bi-lock-fill"></i>
+                            </div>
+                            <div>
+                                <div class="status-title">Día cerrado</div>
+                                <p class="status-text">
+                                    Este día queda únicamente para consulta histórica.
+                                </p>
                             </div>
                         </div>
                     {% endif %}
@@ -840,13 +812,9 @@
                         </div>
 
                         <div class="info-item">
-                            <div class="info-label">Operación diaria</div>
+                            <div class="info-label">Operación</div>
                             <div class="info-value">
-                                {% if dia.es_habil %}
-                                    Permitida
-                                {% else %}
-                                    No permitida
-                                {% endif %}
+                                {% if dia.es_habil %}Permitida{% else %}No permitida{% endif %}
                             </div>
                         </div>
 
@@ -863,10 +831,13 @@
                     </div>
 
                     {% if dia.abierto_por %}
-                        <div class="help-card mt-3 mb-0">
+                        <div class="opened-by">
                             <i class="bi bi-person-check-fill me-1"></i>
-                            Este día fue abierto por:
-                            <strong>{{ dia.abierto_por.get_full_name|default:dia.abierto_por.username }}</strong>.
+                            Este día fue abierto por
+                            <strong>{{ dia.abierto_por.get_full_name|default:dia.abierto_por.username }}</strong>
+                            {% if dia.abierto_en %}
+                                a las <strong>{{ dia.abierto_en|date:"H:i" }}</strong>.
+                            {% endif %}
                         </div>
                     {% endif %}
                 </div>
@@ -875,8 +846,8 @@
             <section class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-diagram-3-fill"></i>
-                        Flujo después de abrir
+                        <span class="panel-title-icon"><i class="bi bi-shield-check"></i></span>
+                        Seguridad de apertura
                     </h2>
                 </div>
 
@@ -885,40 +856,24 @@
                         <div class="step">
                             <div class="step-number">1</div>
                             <div>
-                                <div class="step-title">Abrir día</div>
-                                <p class="step-text">
-                                    Se registra quién abrió la operación y a qué hora. Solo aplica en días hábiles.
-                                </p>
+                                <div class="step-title">Validación</div>
+                                <p class="step-text">Solo una maestra asignada al semestre puede abrir el día operativo.</p>
                             </div>
                         </div>
 
                         <div class="step">
                             <div class="step-number">2</div>
                             <div>
-                                <div class="step-title">Preparar alumnos</div>
-                                <p class="step-text">
-                                    El sistema prepara los registros diarios de los niños de tus salas únicamente cuando el día está habilitado.
-                                </p>
+                                <div class="step-title">Registro</div>
+                                <p class="step-text">Se guarda quién abrió, la fecha, hora y observaciones capturadas.</p>
                             </div>
                         </div>
 
                         <div class="step">
                             <div class="step-number">3</div>
                             <div>
-                                <div class="step-title">Registrar entradas</div>
-                                <p class="step-text">
-                                    Se valida responsable, credencial y código de seguridad.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="step">
-                            <div class="step-number">4</div>
-                            <div>
-                                <div class="step-title">Cerrar día</div>
-                                <p class="step-text">
-                                    Al final se cierra cuando todos los niños que ingresaron tengan salida y bitácoras completas.
-                                </p>
+                                <div class="step-title">Operación</div>
+                                <p class="step-text">Después de abrir, se preparan los alumnos para entradas, bitácoras y salidas.</p>
                             </div>
                         </div>
                     </div>
@@ -930,7 +885,7 @@
             <section class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-unlock-fill"></i>
+                        <span class="panel-title-icon"><i class="bi bi-unlock-fill"></i></span>
                         Confirmar apertura
                     </h2>
 
@@ -960,50 +915,35 @@
                 <div class="panel-body">
                     {% if not dia.es_habil %}
                         <div class="status-card status-inhabil">
-                            <div class="status-top">
-                                <div class="status-icon">
-                                    <i class="bi bi-calendar-x-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="status-title">No se puede abrir este día</div>
-                                    <p class="status-text">
-                                        {% if dia.fecha|date:"w" == "0" or dia.fecha|date:"w" == "6" %}
-                                            Sábado y domingo son días inhábiles automáticos en la estancia.
-                                        {% else %}
-                                            Este día está marcado como inhábil en el calendario operativo.
-                                        {% endif %}
-                                    </p>
-                                </div>
+                            <div class="status-icon">
+                                <i class="bi bi-calendar-x-fill"></i>
+                            </div>
+                            <div>
+                                <div class="status-title">No se puede abrir este día</div>
+                                <p class="status-text">
+                                    {% if dia.fecha|date:"w" == "0" or dia.fecha|date:"w" == "6" %}
+                                        Sábado y domingo son días inhábiles automáticos en la estancia.
+                                    {% else %}
+                                        Este día está marcado como inhábil en el calendario operativo.
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
 
-                        <div class="non-operational-card">
-                            <strong>Acciones bloqueadas para este día:</strong>
-                            <ul class="non-operational-list">
-                                <li><i class="bi bi-x-circle-fill"></i><span>No abrir operación diaria.</span></li>
-                                <li><i class="bi bi-x-circle-fill"></i><span>No registrar entrada de menores.</span></li>
-                                <li><i class="bi bi-x-circle-fill"></i><span>No capturar bitácoras.</span></li>
-                                <li><i class="bi bi-x-circle-fill"></i><span>No registrar salida ni cierre manual.</span></li>
-                            </ul>
-                        </div>
-
                         <div class="readonly-box">
-                            Puedes volver al panel de maestra para consultar información. Este día no cuenta como pendiente
-                            para cerrar el semestre.
+                            Puedes regresar al panel de maestra para consultar información. Este día no requiere apertura ni cierre manual.
                         </div>
 
-                        <div class="mt-3">
-                            <a href="{% url 'dashboard_maestra' %}" class="btn-main btn-blue">
-                                <i class="bi bi-house-door-fill"></i>
-                                Volver al panel
-                            </a>
-                        </div>
+                        <a href="{% url 'dashboard_maestra' %}" class="btn-main btn-blue">
+                            <i class="bi bi-arrow-left-circle-fill"></i>
+                            Regresar al panel
+                        </a>
 
                     {% elif dia.estado == "PROGRAMADO" %}
-                        <div class="help-card">
+                        <div class="form-note">
                             <i class="bi bi-info-circle-fill me-1"></i>
                             Cualquier maestra asignada a una sala del semestre puede abrir la operación del día.
-                            Esta acción no debe repetirse si otra maestra ya lo abrió.
+                            Si otra maestra ya lo abrió, el sistema enviará a la lista de alumnos del día.
                         </div>
 
                         <form method="post" novalidate>
@@ -1021,9 +961,9 @@
                                     Confirmación obligatoria
                                 </div>
 
-                                <div class="form-check">
+                                <div class="check-card">
                                     {{ form.confirmar }}
-                                    <label for="{{ form.confirmar.id_for_label }}" class="form-check-label">
+                                    <label for="{{ form.confirmar.id_for_label }}">
                                         Confirmo que deseo abrir la operación del día
                                     </label>
                                 </div>
@@ -1057,10 +997,11 @@
 
                             <div class="submit-bar">
                                 <div class="submit-note">
-                                    La apertura quedará registrada con tu usuario, fecha y hora.
+                                    La apertura quedará registrada con tu usuario:
+                                    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>.
                                 </div>
 
-                                <div class="d-flex gap-2 flex-wrap">
+                                <div class="d-flex gap-2 flex-wrap justify-content-end">
                                     <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
                                         <i class="bi bi-x-circle-fill"></i>
                                         Cancelar
@@ -1073,20 +1014,27 @@
                                 </div>
                             </div>
                         </form>
+
                     {% elif dia.estado == "ABIERTO" %}
                         <div class="status-card status-open">
-                            <div class="status-top">
-                                <div class="status-icon">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="status-title">La operación ya está abierta</div>
-                                    <p class="status-text">
-                                        Continúa con el registro de entradas, bitácoras y salidas de los alumnos del día.
-                                    </p>
-                                </div>
+                            <div class="status-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div>
+                                <div class="status-title">La operación ya está abierta</div>
+                                <p class="status-text">
+                                    Continúa con el registro de entradas, bitácoras y salidas de los alumnos del día.
+                                </p>
                             </div>
                         </div>
+
+                        {% if dia.abierto_por %}
+                            <div class="opened-by mb-3">
+                                <i class="bi bi-person-check-fill me-1"></i>
+                                Abierto por <strong>{{ dia.abierto_por.get_full_name|default:dia.abierto_por.username }}</strong>
+                                {% if dia.abierto_en %}a las <strong>{{ dia.abierto_en|date:"H:i" }}</strong>{% endif %}.
+                            </div>
+                        {% endif %}
 
                         {% if dia.es_habil %}
                             <a href="{% url 'lista_alumnos_dia_maestra' dia.id %}" class="btn-main btn-blue">
@@ -1094,23 +1042,21 @@
                                 Ir a alumnos del día
                             </a>
                         {% endif %}
+
                     {% else %}
-                        <div class="warning-card">
+                        <div class="warning-box">
                             <i class="bi bi-lock-fill me-1"></i>
                             Este día no puede abrirse porque está cerrado o no se encuentra disponible para operación.
                         </div>
 
                         <div class="readonly-box">
-                            Puedes consultar la información desde el panel de maestra, pero no se permitirá capturar
-                            ni modificar registros si el día está cerrado o no es operativo.
+                            Puedes consultar la información desde el panel de maestra, pero no se permitirá capturar ni modificar registros.
                         </div>
 
-                        <div class="mt-3">
-                            <a href="{% url 'dashboard_maestra' %}" class="btn-main btn-blue">
-                                <i class="bi bi-house-door-fill"></i>
-                                Volver al panel
-                            </a>
-                        </div>
+                        <a href="{% url 'dashboard_maestra' %}" class="btn-main btn-blue">
+                            <i class="bi bi-arrow-left-circle-fill"></i>
+                            Regresar al panel
+                        </a>
                     {% endif %}
                 </div>
             </section>
@@ -1120,6 +1066,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

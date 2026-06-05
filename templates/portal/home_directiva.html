@@ -1,871 +1,2500 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Centro de Mando - Estancia Infantil UNACH{% endblock %}
+{% block title %}Dashboard Directivo - Estancia Infantil UNACH{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ... Estilos originales ... */
-    body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-    .navbar-unach { background-color: #1e3a8a; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-    .navbar-brand { font-weight: bold; color: white !important; }
-    .logo-img { max-height: 40px; margin-right: 10px; }
-    .welcome-banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border-radius: 15px; padding: 30px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15); display: flex; align-items: center; justify-content: space-between; }
-    .dash-card { background: white; border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; }
-    .dash-card-header { background: #f8fafc; padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-weight: bold; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; justify-content: space-between; }
-    .dash-card-body { padding: 20px; }
-    .kpi-box { padding: 20px; border-radius: 12px; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; }
-    .kpi-box:hover { transform: translateY(-3px); }
-    .kpi-box h3 { margin: 0; font-size: 2rem; font-weight: 900; }
-    .kpi-box p { margin: 0; font-size: 0.85rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-    .kpi-box i { font-size: 2.5rem; opacity: 0.4; }
-
-    /* ... Estilos nuevos para el Centro de Mando ... */
-    .header-section { background: #f8fafc; padding: 15px; font-weight: bold; border-bottom: 1px solid #eee; }
-    .msg-item { border-left: 4px solid #3b82f6; background: #f0f7ff; margin-bottom: 8px; padding: 10px; border-radius: 0 8px 8px 0; }
-    .msg-alumno { border-left-color: #10b981; background: #f0fff4; }
-    .incidencia-alta { background: #fff5f5; border: 1px solid #feb2b2; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-    .incidencia-baja { background: #fffaf0; border: 1px solid #fbd38d; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-    .badge-alto { background: #e53e3e; color: white; }
-    .badge-bajo { background: #dd6b20; color: white; }
-
-    .filter-mini { display: flex; flex-direction: column; gap: 4px; }
-    .filter-mini .badge { width: fit-content; }
-    .action-btn-circle {
-        width: 34px;
-        height: 34px;
-        border-radius: 999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .modal-content-directiva {
-        border-radius: 16px;
-        overflow: hidden;
-        border: none;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, .25);
-    }
-    .modal-header-success {
-        background: linear-gradient(135deg, #16a34a, #15803d);
-        color: #fff;
-    }
-    .modal-header-danger {
-        background: linear-gradient(135deg, #dc2626, #991b1b);
-        color: #fff;
+    :root{
+        --ei-blue:#2757d7;
+        --ei-blue-dark:#102b6b;
+        --ei-blue-soft:#eef4ff;
+        --ei-text:#09245a;
+        --ei-muted:#6b7a99;
+        --ei-border:#dbe5f6;
+        --ei-bg:#f7faff;
+        --ei-card:#ffffff;
+        --ei-green:#36b65b;
+        --ei-orange:#ff9800;
+        --ei-red:#ef4444;
+        --ei-purple:#8b5cf6;
+        --ei-shadow:0 14px 35px rgba(13,39,90,.08);
+        --ei-shadow-sm:0 8px 22px rgba(13,39,90,.06);
     }
 
-    .estado-operativo{
-        border-radius: 18px;
-        padding: 18px 22px;
-        margin-bottom: 24px;
+    body{
+        background:var(--ei-bg);
+        color:var(--ei-text);
+        font-family:'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        overflow-x:hidden;
+    }
+
+    .director-shell{
+        min-height:100vh;
+        background:
+            radial-gradient(circle at top right, rgba(39,87,215,.08), transparent 34%),
+            linear-gradient(180deg,#fbfdff 0%, #f5f8ff 100%);
+    }
+
+    .director-sidebar{
+        position:fixed;
+        inset:0 auto 0 0;
+        width:292px;
+        background:rgba(255,255,255,.93);
+        backdrop-filter:blur(16px);
+        border-right:1px solid var(--ei-border);
+        z-index:1030;
         display:flex;
+        flex-direction:column;
+        padding:24px 22px;
+    }
+
+    .director-brand{
+        display:flex;
+        align-items:center;
         gap:14px;
-        align-items:flex-start;
-        box-shadow:0 8px 22px rgba(15,23,42,.06);
-        border:1px solid transparent;
+        padding-bottom:24px;
+        margin-bottom:14px;
+        border-bottom:1px solid #edf2fb;
     }
-    .estado-operativo .status-icon{
-        width:48px;
-        height:48px;
+
+    .director-brand img{
+        width:96px;
+        height:72px;
+        object-fit:contain;
+        border-radius:18px;
+        background:linear-gradient(135deg,#2c62df,#133fba);
+        box-shadow:0 14px 30px rgba(39,87,215,.28);
+        padding:6px;
+    }
+
+    .director-brand-title{
+        font-size:1.22rem;
+        line-height:1.08;
+        font-weight:900;
+        color:#0c2a66;
+        margin:0;
+    }
+
+    .director-nav{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        flex:1;
+    }
+
+    .director-nav-link,
+    .director-nav-disabled{
+        min-height:48px;
         border-radius:14px;
         display:flex;
         align-items:center;
-        justify-content:center;
-        flex-shrink:0;
-        font-size:1.4rem;
-    }
-    .estado-operativo h5{
-        margin:0 0 5px;
-        font-weight:900;
-    }
-    .estado-operativo p{
-        margin:0;
-        line-height:1.5;
-        font-size:.95rem;
-    }
-    .estado-activo{
-        background:#f0fdf4;
-        border-color:#bbf7d0;
-        border-left:7px solid #16a34a;
-        color:#14532d;
-    }
-    .estado-activo .status-icon{
-        background:#dcfce7;
-        color:#15803d;
-    }
-    .estado-consulta{
-        background:#fff7ed;
-        border-color:#fed7aa;
-        border-left:7px solid #f97316;
-        color:#9a3412;
-    }
-    .estado-consulta .status-icon{
-        background:#ffedd5;
-        color:#c2410c;
-    }
-    .solo-consulta-badge{
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        border-radius:999px;
-        padding:.38rem .68rem;
-        font-size:.76rem;
-        font-weight:900;
-        background:#ffedd5;
-        color:#9a3412;
-        border:1px solid #fed7aa;
-    }
-    .operacion-activa-badge{
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        border-radius:999px;
-        padding:.38rem .68rem;
-        font-size:.76rem;
-        font-weight:900;
-        background:#dcfce7;
-        color:#166534;
-        border:1px solid #86efac;
-    }
-    .readonly-card-note{
-        background:#fff7ed;
-        border:1px solid #fed7aa;
-        border-left:5px solid #f97316;
-        color:#9a3412;
-        border-radius:12px;
-        padding:10px 12px;
-        font-size:.86rem;
-        font-weight:600;
-    }
-    .sprint4-salas-note{
-        background:#eff6ff;
-        border:1px solid #bfdbfe;
-        border-left:5px solid #2563eb;
-        color:#1e3a8a;
-        border-radius:12px;
+        gap:14px;
         padding:12px 14px;
-        font-size:.9rem;
-        font-weight:600;
-    }
-
-    .final-report-note {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        border-left: 5px solid #2563eb;
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: .86rem;
-        color: #1e3a8a;
-    }
-
-    /* =========================================================
-       SPRINT 5 - INCIDENCIAS / VISTA DIRECTIVA
-       ========================================================= */
-    .incidencias-directiva-hero{
-        background:linear-gradient(135deg,#eff6ff,#f5f3ff);
-        border:1px solid #bfdbfe;
-        border-left:7px solid #2563eb;
-        border-radius:16px;
-        padding:16px 18px;
-        margin-bottom:18px;
-        color:#1e3a8a;
-        box-shadow:0 8px 18px rgba(15,23,42,.06);
-    }
-    .incidencias-directiva-hero h6{
-        margin:0 0 5px;
-        font-weight:900;
-        color:#1e3a8a;
-    }
-    .incidencias-directiva-hero p{
-        margin:0;
-        font-size:.9rem;
-        line-height:1.45;
-        font-weight:600;
-    }
-    .incidencias-directiva-actions{
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:10px;
-        margin-bottom:18px;
-    }
-    .incidencias-directiva-btn{
-        border-radius:14px;
-        padding:12px;
         text-decoration:none;
-        font-weight:900;
-        display:flex;
-        align-items:center;
-        gap:10px;
-        border:1px solid #e2e8f0;
-        background:#fff;
-        color:#0f172a;
-        box-shadow:0 6px 15px rgba(15,23,42,.05);
+        color:#25416f;
+        font-weight:700;
         transition:.18s ease;
     }
-    .incidencias-directiva-btn:hover{
-        transform:translateY(-1px);
-        box-shadow:0 10px 22px rgba(15,23,42,.09);
-        color:#0f172a;
+
+    .director-nav-link i,
+    .director-nav-disabled i{
+        font-size:1.25rem;
+        width:24px;
+        text-align:center;
+        color:#466aa7;
     }
-    .incidencias-directiva-btn .icon{
+
+    .director-nav-link:hover{
+        background:#eef4ff;
+        color:#1643b7;
+        transform:translateX(2px);
+    }
+
+    .director-nav-link.active{
+        background:linear-gradient(135deg,#edf3ff,#dfeaff);
+        color:#1643b7;
+        box-shadow:0 10px 24px rgba(39,87,215,.10);
+    }
+
+    .director-nav-link.active i{ color:#245bd6; }
+
+    .director-nav-disabled{
+        opacity:.58;
+        cursor:not-allowed;
+    }
+
+    .director-logout{
+        border-top:1px solid #edf2fb;
+        padding-top:18px;
+        margin-top:16px;
+    }
+
+    .director-main{
+        margin-left:292px;
+        min-height:100vh;
+        padding:30px 38px 36px;
+    }
+
+    .director-topbar{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:20px;
+        margin-bottom:28px;
+    }
+
+    .director-title h1{
+        font-size:2rem;
+        color:#0b2a68;
+        font-weight:900;
+        margin:0;
+        letter-spacing:-.03em;
+    }
+
+    .director-title p{
+        margin:4px 0 0;
+        color:#526b9a;
+        font-size:1.02rem;
+    }
+
+    .topbar-actions{
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:14px;
+        flex-wrap:wrap;
+    }
+
+    .semester-pill,
+    .user-pill{
+        min-height:52px;
+        border:1px solid var(--ei-border);
+        background:rgba(255,255,255,.9);
+        border-radius:16px;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        padding:10px 16px;
+        color:#0b2a68;
+        font-weight:700;
+        box-shadow:var(--ei-shadow-sm);
+    }
+
+    .semester-pill .icon,
+    .user-pill .avatar{
         width:36px;
         height:36px;
         border-radius:12px;
         display:flex;
         align-items:center;
         justify-content:center;
+        background:#e8f0ff;
+        color:#245bd6;
+        font-size:1.1rem;
         flex-shrink:0;
-        font-size:1.05rem;
     }
-    .incidencia-item{
+
+    .user-pill .avatar{
+        border-radius:999px;
+        background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+        font-size:1.35rem;
+    }
+
+    .mobile-menu-btn{
+        display:none;
+        border:1px solid var(--ei-border);
+        background:#fff;
+        color:#0b2a68;
         border-radius:14px;
-        padding:12px;
-        margin-bottom:10px;
-        box-shadow:0 6px 15px rgba(15,23,42,.05);
+        width:46px;
+        height:46px;
+        align-items:center;
+        justify-content:center;
+        box-shadow:var(--ei-shadow-sm);
     }
-    .incidencia-item-alta{
-        background:#fef2f2;
-        border:1px solid #fecaca;
-        border-left:6px solid #dc2626;
+
+    .director-select-row{
+        display:flex;
+        align-items:flex-end;
+        justify-content:space-between;
+        gap:18px;
+        margin-bottom:26px;
+        flex-wrap:wrap;
     }
-    .incidencia-item-seguimiento{
+
+    .sede-selector label{
+        display:block;
+        color:#0b2a68;
+        font-weight:800;
+        margin-bottom:8px;
+    }
+
+    .fake-select{
+        width:min(520px, 100%);
+        min-height:54px;
+        border:1px solid var(--ei-border);
+        border-radius:15px;
+        background:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        padding:12px 18px;
+        box-shadow:var(--ei-shadow-sm);
+        font-weight:800;
+        color:#0b2a68;
+    }
+
+    .auto-refresh-note{
+        color:#6c7da0;
+        font-weight:700;
+        font-size:.9rem;
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+
+    .dashboard-grid{
+        display:grid;
+        grid-template-columns:1.35fr .75fr;
+        gap:24px;
+        margin-bottom:24px;
+    }
+
+    .director-card{
+        background:rgba(255,255,255,.96);
+        border:1px solid var(--ei-border);
+        border-radius:22px;
+        box-shadow:var(--ei-shadow);
+        overflow:hidden;
+    }
+
+    .director-card-header{
+        padding:20px 22px 10px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+    }
+
+    .director-card-title{
+        margin:0;
+        color:#102b6b;
+        font-weight:900;
+        font-size:1.1rem;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    .director-card-title .title-icon{
+        width:36px;
+        height:36px;
+        border-radius:12px;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        background:#e8f0ff;
+        color:#245bd6;
+        flex-shrink:0;
+    }
+
+    .director-card-body{ padding:18px 22px 22px; }
+
+    .status-banner{
+        border-radius:20px;
+        border:1px solid transparent;
+        padding:16px 18px;
+        margin-bottom:24px;
+        display:flex;
+        gap:14px;
+        align-items:flex-start;
+        box-shadow:var(--ei-shadow-sm);
+    }
+
+    .status-banner .status-icon{
+        width:46px;
+        height:46px;
+        border-radius:15px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-shrink:0;
+        font-size:1.25rem;
+    }
+
+    .status-banner h5{
+        margin:0 0 4px;
+        font-weight:900;
+        font-size:1rem;
+    }
+
+    .status-banner p{
+        margin:0;
+        color:inherit;
+        font-weight:600;
+        line-height:1.45;
+    }
+
+    .status-active{
+        background:#effdf4;
+        border-color:#bdf3cc;
+        color:#14532d;
+    }
+    .status-active .status-icon{ background:#dcfce7; color:#16a34a; }
+
+    .status-readonly{
+        background:#fff7ed;
+        border-color:#fed7aa;
+        color:#9a3412;
+    }
+    .status-readonly .status-icon{ background:#ffedd5; color:#f97316; }
+
+    .status-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        border-radius:999px;
+        padding:.38rem .68rem;
+        font-size:.76rem;
+        font-weight:900;
+        margin-top:10px;
+        border:1px solid currentColor;
+        background:rgba(255,255,255,.5);
+    }
+
+    .metric-grid{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:16px;
+    }
+
+    .metric-card{
+        border:1px solid var(--ei-border);
+        border-radius:17px;
+        padding:18px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        min-height:152px;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+    }
+
+    .metric-top{
+        display:flex;
+        align-items:center;
+        gap:14px;
+    }
+
+    .metric-icon{
+        width:58px;
+        height:58px;
+        border-radius:999px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.75rem;
+        flex-shrink:0;
+    }
+
+    .metric-label{
+        color:#16356f;
+        font-weight:800;
+        line-height:1.2;
+    }
+
+    .metric-value{
+        margin-top:10px;
+        font-size:2rem;
+        line-height:1;
+        font-weight:900;
+        color:#0a2a66;
+    }
+
+    .metric-bar{
+        height:9px;
+        border-radius:999px;
+        background:#edf2f7;
+        overflow:hidden;
+        margin-top:16px;
+    }
+
+    .metric-bar span{
+        display:block;
+        height:100%;
+        border-radius:999px;
+        width:100%;
+    }
+
+    .metric-green .metric-icon{ background:#e7f8eb; color:var(--ei-green); }
+    .metric-green .metric-bar span{ background:var(--ei-green); width:78%; }
+    .metric-orange .metric-icon{ background:#fff4df; color:var(--ei-orange); }
+    .metric-orange .metric-bar span{ background:var(--ei-orange); width:52%; }
+    .metric-red .metric-icon{ background:#ffe8eb; color:var(--ei-red); }
+    .metric-red .metric-bar span{ background:var(--ei-red); width:38%; }
+    .metric-blue .metric-icon{ background:#e8f0ff; color:var(--ei-blue); }
+    .metric-blue .metric-bar span{ background:var(--ei-blue); width:62%; }
+    .metric-purple .metric-icon{ background:#f0e9ff; color:var(--ei-purple); }
+    .metric-purple .metric-bar span{ background:var(--ei-purple); width:68%; }
+
+    .summary-total{
+        text-align:left;
+        padding:8px 0 12px;
+    }
+
+    .summary-total .small-label{
+        color:#60749d;
+        font-weight:800;
+        font-size:.92rem;
+    }
+
+    .summary-total .big-number{
+        font-size:3.2rem;
+        line-height:1;
+        font-weight:900;
+        color:#0a2a66;
+        margin-top:8px;
+    }
+
+    .legend-list{
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+        margin-top:12px;
+    }
+
+    .legend-item{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        color:#18396f;
+        font-weight:800;
+        border-bottom:1px solid #edf2fb;
+        padding-bottom:10px;
+    }
+
+    .legend-item:last-child{ border-bottom:0; }
+
+    .legend-name{
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    .legend-dot{
+        width:14px;
+        height:14px;
+        border-radius:5px;
+        display:inline-block;
+    }
+
+    .content-grid{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:24px;
+        align-items:start;
+    }
+
+    .mini-stats{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:14px;
+        margin-bottom:18px;
+    }
+
+    .mini-stat{
+        border:1px solid var(--ei-border);
+        border-radius:16px;
+        padding:14px 16px;
+        background:#fff;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        min-height:96px;
+    }
+
+    .mini-stat .mini-icon{
+        width:48px;
+        height:48px;
+        border-radius:999px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.5rem;
+        background:#eef4ff;
+        color:#245bd6;
+        flex-shrink:0;
+    }
+
+    .mini-stat .mini-label{
+        color:#274371;
+        font-weight:800;
+        font-size:.9rem;
+    }
+
+    .mini-stat .mini-number{
+        font-size:1.65rem;
+        line-height:1;
+        font-weight:900;
+        color:#0b2a68;
+        margin-top:4px;
+    }
+
+    .director-table{
+        width:100%;
+        border:1px solid var(--ei-border);
+        border-radius:14px;
+        overflow:hidden;
+        background:#fff;
+    }
+
+    .director-table table{ margin:0; color:#0b2a68; }
+    .director-table thead th{
+        background:#f6f9ff;
+        color:#173a73;
+        font-size:.86rem;
+        font-weight:900;
+        border-bottom:1px solid var(--ei-border);
+        padding:13px 14px;
+    }
+    .director-table tbody td{
+        padding:13px 14px;
+        border-bottom:1px solid #edf2fb;
+        vertical-align:middle;
+    }
+    .director-table tbody tr:last-child td{ border-bottom:0; }
+
+    .filter-mini{
+        display:flex;
+        flex-direction:column;
+        gap:5px;
+        align-items:flex-start;
+    }
+
+    .action-btn-circle{
+        width:36px;
+        height:36px;
+        border-radius:999px;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .readonly-note,
+    .info-note{
+        border-radius:15px;
+        padding:13px 15px;
+        font-size:.9rem;
+        font-weight:700;
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+        line-height:1.45;
+    }
+
+    .readonly-note{
         background:#fff7ed;
         border:1px solid #fed7aa;
-        border-left:6px solid #f97316;
+        color:#9a3412;
     }
-    .incidencia-item .inc-title{
+
+    .info-note{
+        background:#eef4ff;
+        border:1px solid #c7d9ff;
+        color:#143b8f;
+    }
+
+    .incident-actions{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:10px;
+        margin-bottom:18px;
+    }
+
+    .incident-action{
+        border:1px solid var(--ei-border);
+        border-radius:14px;
+        padding:12px;
+        text-decoration:none;
+        color:#0b2a68;
         font-weight:900;
-        color:#0f172a;
-        margin-bottom:2px;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        background:#fff;
+        transition:.18s ease;
     }
-    .incidencia-item .inc-desc{
-        color:#334155;
-        font-size:.84rem;
+
+    .incident-action:hover{
+        transform:translateY(-1px);
+        box-shadow:var(--ei-shadow-sm);
+        color:#1643b7;
+    }
+
+    .incident-action .icon{
+        width:34px;
+        height:34px;
+        border-radius:11px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-shrink:0;
+    }
+
+    .incident-item,
+    .message-item{
+        border:1px solid var(--ei-border);
+        border-left-width:6px;
+        border-radius:15px;
+        padding:13px 14px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        margin-bottom:12px;
+    }
+
+    .incident-high{ border-left-color:#ef4444; background:#fff7f8; }
+    .incident-low{ border-left-color:#ff9800; background:#fffaf0; }
+    .message-asp{ border-left-color:#245bd6; background:#f8fbff; }
+    .message-alumno{ border-left-color:#36b65b; background:#f6fff8; }
+
+    .item-title{
+        color:#0b2a68;
+        font-weight:900;
+        margin-bottom:4px;
+    }
+
+    .item-desc{
+        color:#475b83;
+        font-size:.86rem;
         line-height:1.35;
-        margin-bottom:6px;
+        margin-bottom:8px;
     }
-    .incidencia-item .inc-meta{
-        color:#64748b;
+
+    .item-meta{
+        color:#6b7a99;
         font-size:.78rem;
-        font-weight:700;
+        font-weight:800;
     }
-    .incidencia-link{
+
+    .pill-link{
         border-radius:999px;
         font-size:.76rem;
         font-weight:900;
-        padding:.35rem .65rem;
+        padding:.35rem .68rem;
         text-decoration:none;
         display:inline-flex;
         align-items:center;
-        gap:5px;
+        gap:6px;
     }
-    @media(max-width:576px){
-        .incidencias-directiva-actions{
-            grid-template-columns:1fr;
+
+    .section-subtitle{
+        color:#7182a4;
+        font-weight:700;
+        font-size:.9rem;
+        margin-top:-4px;
+        margin-bottom:14px;
+    }
+
+    .empty-state{
+        text-align:center;
+        color:#7b8aa8;
+        padding:26px 12px;
+        background:#f8fbff;
+        font-weight:700;
+        border-radius:12px;
+    }
+
+    .modal-content-directiva{
+        border-radius:18px;
+        overflow:hidden;
+        border:none;
+        box-shadow:0 18px 45px rgba(15,23,42,.25);
+    }
+    .modal-header-success{ background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; }
+    .modal-header-danger{ background:linear-gradient(135deg,#dc2626,#991b1b); color:#fff; }
+    .final-report-note{
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left:5px solid #2563eb;
+        border-radius:12px;
+        padding:10px 12px;
+        font-size:.86rem;
+        color:#1e3a8a;
+        font-weight:700;
+    }
+
+
+
+    /* ===== Indicador de niños estilo dashboard directivo ===== */
+    .kids-indicator-layout{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:18px;
+    }
+
+    .kid-status-card{
+        border:1px solid var(--ei-border);
+        border-radius:18px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        padding:18px;
+        display:flex;
+        gap:16px;
+        align-items:center;
+        min-height:150px;
+    }
+
+    .kid-status-icon{
+        width:72px;
+        height:72px;
+        border-radius:999px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:2.1rem;
+        flex-shrink:0;
+    }
+
+    .kid-status-card .kid-label{
+        color:#18396f;
+        font-weight:850;
+        line-height:1.2;
+        margin-bottom:8px;
+    }
+
+    .kid-status-card .kid-number{
+        font-size:2.1rem;
+        line-height:1;
+        color:#0a2a66;
+        font-weight:950;
+        margin-bottom:8px;
+    }
+
+    .kid-status-card .kid-percent{
+        font-size:1.22rem;
+        font-weight:950;
+    }
+
+    .kid-progress{
+        height:9px;
+        border-radius:999px;
+        overflow:hidden;
+        margin-top:14px;
+        background:#edf2f7;
+    }
+
+    .kid-progress span{
+        display:block;
+        height:100%;
+        border-radius:999px;
+    }
+
+    .kid-green .kid-status-icon{background:#e7f8eb;color:var(--ei-green);}
+    .kid-green .kid-percent{color:var(--ei-green);}
+    .kid-green .kid-progress span{background:var(--ei-green);width:var(--bar,100%);}
+    .kid-orange .kid-status-icon{background:#fff4df;color:var(--ei-orange);}
+    .kid-orange .kid-percent{color:var(--ei-orange);}
+    .kid-orange .kid-progress span{background:var(--ei-orange);width:var(--bar,0%);}
+    .kid-red .kid-status-icon{background:#ffe8eb;color:var(--ei-red);}
+    .kid-red .kid-percent{color:var(--ei-red);}
+    .kid-red .kid-progress span{background:var(--ei-red);width:var(--bar,0%);}
+
+    .total-kids-layout{
+        display:grid;
+        grid-template-columns:170px 1fr;
+        gap:22px;
+        align-items:center;
+    }
+
+    .donut-chart{
+        width:150px;
+        height:150px;
+        border-radius:999px;
+        background:conic-gradient(
+            var(--ei-green) 0 calc(var(--estancia,100) * 1%),
+            var(--ei-orange) calc(var(--estancia,100) * 1%) calc((var(--estancia,100) + var(--ausentes,0)) * 1%),
+            var(--ei-red) calc((var(--estancia,100) + var(--ausentes,0)) * 1%) 100%
+        );
+        position:relative;
+        box-shadow:inset 0 0 0 1px rgba(13,39,90,.05), var(--ei-shadow-sm);
+    }
+
+    .donut-chart::after{
+        content:"";
+        position:absolute;
+        inset:34px;
+        background:#fff;
+        border-radius:999px;
+        box-shadow:inset 0 0 0 1px #edf2fb;
+    }
+
+    .total-kids-number{
+        font-size:3.15rem;
+        color:#0a2a66;
+        font-weight:950;
+        line-height:1;
+        margin-bottom:16px;
+    }
+
+    .manual-update-footer{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:16px;
+        border-top:1px solid #dfe7f5;
+        margin-top:24px;
+        padding-top:18px;
+        color:#60749d;
+        font-weight:750;
+        flex-wrap:wrap;
+    }
+
+    .manual-update-btn{
+        border:0;
+        background:transparent;
+        color:#466aa7;
+        font-weight:900;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        padding:8px 0;
+    }
+
+    .manual-update-btn:hover{color:#1643b7;}
+
+    .mobile-overlay{
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(8,25,60,.45);
+        z-index:1020;
+    }
+
+    body.sidebar-open .mobile-overlay{ display:block; }
+
+    @media(max-width:1200px){
+        .dashboard-grid,
+        .content-grid{ grid-template-columns:1fr; }
+    }
+
+    @media(max-width:992px){
+        .director-sidebar{
+            transform:translateX(-105%);
+            transition:.22s ease;
         }
+        body.sidebar-open .director-sidebar{ transform:translateX(0); }
+        .director-main{ margin-left:0; padding:22px 18px 28px; }
+        .mobile-menu-btn{ display:inline-flex; }
+        .director-topbar{ align-items:flex-start; }
+        .metric-grid{ grid-template-columns:1fr; }
+        .mini-stats{ grid-template-columns:1fr; }
     }
+
+    @media(max-width:576px){
+        .director-topbar{ flex-direction:column; }
+        .topbar-actions{ justify-content:flex-start; width:100%; }
+        .semester-pill,.user-pill{ width:100%; }
+        .incident-actions{ grid-template-columns:1fr; }
+        .director-main{ padding:18px 12px 28px; }
+        .director-card{ border-radius:18px; }
+        .director-card-header,.director-card-body{ padding-left:16px; padding-right:16px; }
+    }
+
+
+
+
+    @media(max-width:1300px){
+        .kids-indicator-layout{grid-template-columns:1fr;}
+        .total-kids-layout{grid-template-columns:1fr;}
+        .donut-chart{margin:0 auto;}
+    }
+
+    @media(max-width:576px){
+        .kid-status-card{flex-direction:column;align-items:flex-start;}
+        .manual-update-footer{align-items:flex-start;flex-direction:column;}
+    }
+
+
+
+    /* ===== Navegación por pestañas internas del panel directivo ===== */
+    .view-section{display:none;}
+    .view-section.active{display:block;}
+    .module-page{display:flex;flex-direction:column;gap:22px;}
+    .module-hero{
+        border:1px solid var(--ei-border);
+        border-radius:22px;
+        background:rgba(255,255,255,.96);
+        box-shadow:var(--ei-shadow);
+        padding:24px;
+        display:grid;
+        grid-template-columns:minmax(0,1fr) auto;
+        gap:18px;
+        align-items:center;
+    }
+    .module-hero h2{margin:0;color:#0b2a68;font-weight:950;font-size:1.55rem;}
+    .module-hero p{margin:6px 0 0;color:#60749d;font-weight:650;line-height:1.5;}
+    .module-hero-icon{
+        width:70px;height:70px;border-radius:20px;background:#e8f0ff;color:#245bd6;
+        display:flex;align-items:center;justify-content:center;font-size:2rem;
+    }
+    .module-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;}
+    .module-grid.two{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .module-info-card{
+        border:1px solid var(--ei-border);border-radius:20px;background:#fff;box-shadow:var(--ei-shadow-sm);
+        padding:18px;min-height:132px;
+    }
+    .module-info-card .label{color:#60749d;font-weight:850;font-size:.9rem;margin-bottom:8px;}
+    .module-info-card .value{color:#0a2a66;font-weight:950;font-size:2.05rem;line-height:1;}
+    .module-info-card .desc{color:#526b9a;font-weight:650;font-size:.9rem;margin-top:10px;line-height:1.4;}
+    .module-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+    .module-search{
+        min-height:48px;border:1px solid var(--ei-border);border-radius:15px;background:#fff;
+        padding:0 16px;color:#0b2a68;font-weight:750;min-width:300px;box-shadow:var(--ei-shadow-sm);
+    }
+    .module-search:focus{outline:2px solid rgba(39,87,215,.16);border-color:#a9c1ff;}
+    .module-soft-btn{
+        border:1px solid var(--ei-border);background:#fff;color:#0b2a68;border-radius:999px;
+        padding:10px 15px;font-weight:900;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+        box-shadow:var(--ei-shadow-sm);
+    }
+    .module-soft-btn:hover{color:#1643b7;background:#f8fbff;}
+    .module-primary-btn{
+        border:0;background:#245bd6;color:#fff;border-radius:999px;padding:10px 16px;font-weight:900;
+        display:inline-flex;align-items:center;gap:8px;box-shadow:0 10px 22px rgba(39,87,215,.18);text-decoration:none;
+    }
+    .module-primary-btn:hover{color:#fff;background:#1643b7;}
+    .module-table-card{border:1px solid var(--ei-border);border-radius:20px;background:#fff;box-shadow:var(--ei-shadow);overflow:hidden;}
+    .module-table-card .table{margin:0;}
+    .module-table-card thead th{background:#f6f9ff;color:#173a73;font-weight:950;border-bottom:1px solid var(--ei-border);padding:14px 16px;}
+    .module-table-card tbody td{padding:14px 16px;border-bottom:1px solid #edf2fb;vertical-align:middle;color:#263f6d;font-weight:650;}
+    .module-table-card tbody tr:last-child td{border-bottom:0;}
+    .report-card{border:1px solid var(--ei-border);border-radius:20px;background:#fff;box-shadow:var(--ei-shadow-sm);padding:18px;}
+    .report-card h4{font-size:1.05rem;color:#0b2a68;font-weight:950;margin:0 0 8px;}
+    .report-card p{color:#60749d;font-weight:650;margin:0 0 12px;line-height:1.45;}
+    .report-progress{height:10px;border-radius:999px;background:#edf2f7;overflow:hidden;margin:12px 0;}
+    .report-progress span{display:block;height:100%;border-radius:999px;background:#245bd6;width:var(--progress,0%);}
+    .report-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+    .report-detail-card{grid-column:1 / -1;border:1px solid var(--ei-border);border-radius:22px;background:#fff;box-shadow:var(--ei-shadow);overflow:hidden;margin-top:4px;}
+    .report-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;padding:20px 22px;border-bottom:1px solid #edf2fb;background:#fbfdff;}
+    .report-detail-head h3{margin:0;color:#0b2a68;font-weight:950;font-size:1.35rem;}
+    .report-detail-head p{margin:6px 0 0;color:#60749d;font-weight:650;line-height:1.45;}
+    .report-detail-body{padding:20px 22px 22px;}
+    .report-detail-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px;}
+    .report-detail-metric{border:1px solid #dbe5f6;border-radius:18px;background:#fff;padding:15px;box-shadow:var(--ei-shadow-sm);}
+    .report-detail-metric .m-label{color:#60749d;font-weight:850;font-size:.88rem;margin-bottom:8px;}
+    .report-detail-metric .m-value{font-size:1.9rem;font-weight:950;color:#0a2a66;line-height:1;}
+    .report-detail-metric .m-hint{color:#526b9a;font-weight:650;font-size:.84rem;margin-top:8px;line-height:1.35;}
+    .report-empty-note{border:1px dashed #cbdaf5;border-radius:16px;background:#f8fbff;padding:16px;color:#60749d;font-weight:750;}
+    @media(max-width:1200px){.report-detail-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:576px){.report-detail-metrics{grid-template-columns:1fr;}}
+    .calendar-shell{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start;}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+    .calendar-cell{min-height:92px;border:1px solid #e3ebf7;background:#fff;border-radius:14px;padding:10px;box-shadow:var(--ei-shadow-sm);}
+    .calendar-cell .day{font-weight:950;color:#0b2a68;margin-bottom:6px;}
+    .calendar-cell .event{font-size:.76rem;font-weight:850;color:#245bd6;background:#eef4ff;border-radius:999px;padding:3px 7px;display:inline-block;margin-top:4px;}
+    .calendar-cell.inactive{opacity:.45;background:#f8fbff;}
+    .quick-form{border:1px solid var(--ei-border);border-radius:20px;background:#fff;box-shadow:var(--ei-shadow);padding:18px;}
+    .quick-form h4{font-size:1.05rem;font-weight:950;color:#0b2a68;margin-bottom:14px;}
+    .quick-form .form-control,.quick-form .form-select{border-radius:14px;border-color:#dbe5f6;font-weight:650;}
+    .director-nav-link[data-view-link].active{background:linear-gradient(135deg,#edf3ff,#dfeaff);color:#1643b7;box-shadow:0 10px 24px rgba(39,87,215,.10);}
+    @media(max-width:1200px){.module-grid,.module-grid.two,.calendar-shell{grid-template-columns:1fr;}.module-hero{grid-template-columns:1fr;}.module-hero-icon{display:none;}}
+    @media(max-width:576px){.module-search{min-width:0;width:100%;}.module-grid{gap:12px;}.calendar-grid{grid-template-columns:repeat(2,1fr);}.calendar-cell{min-height:80px;}}
+
+
+    /* ===== Suplencias y pase de lista ===== */
+    .staff-attendance-grid{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:14px;
+        margin-bottom:18px;
+    }
+
+    .staff-summary-card{
+        border:1px solid var(--ei-border);
+        border-radius:18px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        padding:16px;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        min-height:106px;
+    }
+
+    .staff-summary-icon{
+        width:48px;
+        height:48px;
+        border-radius:14px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.35rem;
+        flex-shrink:0;
+    }
+
+    .staff-summary-card .label{
+        color:#60749d;
+        font-weight:850;
+        font-size:.88rem;
+        margin-bottom:5px;
+    }
+
+    .staff-summary-card .value{
+        color:#0a2a66;
+        font-weight:950;
+        font-size:1.75rem;
+        line-height:1;
+    }
+
+    .staff-blue .staff-summary-icon{background:#e8f0ff;color:#245bd6;}
+    .staff-green .staff-summary-icon{background:#e7f8eb;color:#16a34a;}
+    .staff-orange .staff-summary-icon{background:#fff4df;color:#f59e0b;}
+    .staff-red .staff-summary-icon{background:#ffe8eb;color:#ef4444;}
+
+    .attendance-table-card,
+    .substitution-card{
+        border:1px solid var(--ei-border);
+        border-radius:20px;
+        background:#fff;
+        box-shadow:var(--ei-shadow-sm);
+        overflow:hidden;
+    }
+
+    .attendance-table-card table,
+    .substitution-card table{margin:0;}
+
+    .attendance-table-card thead th,
+    .substitution-card thead th{
+        background:#f6f9ff;
+        color:#173a73;
+        font-weight:950;
+        border-bottom:1px solid var(--ei-border);
+        padding:13px 14px;
+        font-size:.86rem;
+    }
+
+    .attendance-table-card tbody td,
+    .substitution-card tbody td{
+        padding:13px 14px;
+        border-bottom:1px solid #edf2fb;
+        vertical-align:middle;
+        color:#263f6d;
+        font-weight:650;
+    }
+
+    .attendance-table-card tbody tr:last-child td,
+    .substitution-card tbody tr:last-child td{border-bottom:0;}
+
+    .attendance-select{
+        border:1px solid #dbe5f6;
+        border-radius:12px;
+        min-height:42px;
+        color:#0b2a68;
+        font-weight:750;
+        padding:8px 10px;
+        background:#fff;
+        width:100%;
+    }
+
+    .attendance-textarea{
+        border:1px solid #dbe5f6;
+        border-radius:12px;
+        color:#0b2a68;
+        font-weight:650;
+        padding:8px 10px;
+        width:100%;
+        min-height:42px;
+        resize:vertical;
+    }
+
+    .substitution-alert{
+        border-radius:18px;
+        border:1px solid #c7d9ff;
+        background:#eef4ff;
+        color:#143b8f;
+        padding:14px 16px;
+        display:flex;
+        gap:12px;
+        align-items:flex-start;
+        font-weight:700;
+        line-height:1.45;
+    }
+
+    .substitution-alert.success{background:#effdf4;border-color:#bdf3cc;color:#14532d;}
+    .substitution-alert.warning{background:#fff7ed;border-color:#fed7aa;color:#9a3412;}
+    .substitution-alert.danger{background:#fff1f2;border-color:#fecdd3;color:#991b1b;}
+
+    .substitution-alert i{font-size:1.2rem;margin-top:2px;}
+
+    .coverage-form-grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:14px;
+    }
+
+    .coverage-form-grid .full{grid-column:1 / -1;}
+
+    .coverage-form-grid label{
+        color:#0b2a68;
+        font-weight:850;
+        margin-bottom:7px;
+    }
+
+    .coverage-form-grid select,
+    .coverage-form-grid input,
+    .coverage-form-grid textarea{
+        border-radius:14px!important;
+        border-color:#dbe5f6!important;
+        color:#0b2a68;
+        font-weight:650;
+    }
+
+    .coverage-card{
+        border:1px solid #dbe5f6;
+        border-radius:18px;
+        padding:16px;
+        background:#fbfdff;
+        box-shadow:var(--ei-shadow-sm);
+        height:100%;
+    }
+
+    .coverage-card h4{
+        font-size:1rem;
+        color:#0b2a68;
+        font-weight:950;
+        margin:0 0 8px;
+    }
+
+    .coverage-card p{
+        color:#60749d;
+        font-weight:650;
+        margin:0 0 10px;
+        line-height:1.4;
+        font-size:.9rem;
+    }
+
+    .coverage-meta{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        margin-top:10px;
+    }
+
+    .coverage-meta span{
+        border-radius:999px;
+        background:#eef4ff;
+        color:#143b8f;
+        font-size:.76rem;
+        font-weight:900;
+        padding:.34rem .62rem;
+    }
+
+    .movement-actions{
+        display:flex;
+        gap:8px;
+        align-items:center;
+        flex-wrap:wrap;
+    }
+
+    .movement-actions select{
+        border-radius:999px;
+        border:1px solid #dbe5f6;
+        min-height:36px;
+        color:#0b2a68;
+        font-weight:750;
+        padding:6px 10px;
+        background:#fff;
+    }
+
+    .movement-actions input{
+        border-radius:999px;
+        border:1px solid #dbe5f6;
+        min-height:36px;
+        color:#0b2a68;
+        font-weight:650;
+        padding:6px 10px;
+        min-width:190px;
+    }
+
+    @media(max-width:1200px){
+        .staff-attendance-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+
+    @media(max-width:768px){
+        .staff-attendance-grid,.coverage-form-grid{grid-template-columns:1fr;}
+        .coverage-form-grid .full{grid-column:auto;}
+    }
+
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-unach mb-4">
-    <div class="container-fluid px-4">
-        <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="{% static 'img/logo.png' %}" alt="Logo UNACH" class="logo-img">
-            Estancia Infantil UNACH
-        </a>
-        <div class="d-flex">
-            <span class="text-white me-3 align-self-center fw-bold">
-                <i class="bi bi-person-circle"></i> {{ request.user.nombre|default:request.user.email }} ({{ request.user.puesto|default:"Directiva" }})
-            </span>
-            <a href="{% url 'panel_incidencias' %}" class="btn btn-outline-light btn-sm me-2">
-                <i class="bi bi-clipboard2-pulse-fill"></i> Incidencias
+<div class="director-shell">
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <aside class="director-sidebar" id="directorSidebar">
+        <div class="director-brand">
+            <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
+            <div>
+                <p class="director-brand-title">Estancia<br>Infantil</p>
+                <small class="text-muted fw-bold">UNACH</small>
+            </div>
+        </div>
+
+        <nav class="director-nav">
+            <a href="?seccion=inicio" class="director-nav-link active" data-view-link="inicio">
+                <i class="bi bi-house-door"></i>
+                <span>Inicio</span>
             </a>
+            <a href="?seccion=sedes" class="director-nav-link" data-view-link="sedes">
+                <i class="bi bi-building"></i>
+                <span>Sedes</span>
+            </a>
+            <a href="?seccion=ninos" class="director-nav-link" data-view-link="ninos">
+                <i class="bi bi-people"></i>
+                <span>Niños</span>
+            </a>
+            <a href="{% url 'panel_incidencias' %}" class="director-nav-link">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>Incidencias</span>
+            </a>
+            <a href="?seccion=suplencias" class="director-nav-link" data-view-link="suplencias">
+                <i class="bi bi-person-check"></i>
+                <span>Suplencias</span>
+            </a>
+            <a href="?seccion=actividades" class="director-nav-link" data-view-link="actividades">
+                <i class="bi bi-calendar2-check"></i>
+                <span>Actividades</span>
+            </a>
+            <a href="?seccion=reportes" class="director-nav-link" data-view-link="reportes">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Reportes</span>
+            </a>
+            <a href="?seccion=calendario" class="director-nav-link" data-view-link="calendario">
+                <i class="bi bi-calendar3"></i>
+                <span>Calendario</span>
+            </a>
+            <a href="?seccion=configuracion" class="director-nav-link" data-view-link="configuracion">
+                <i class="bi bi-gear"></i>
+                <span>Configuración</span>
+            </a>
+        </nav>
+
+        <div class="director-logout">
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Salir
+                <button type="submit" class="btn btn-outline-danger w-100 rounded-4 fw-bold py-2">
+                    <i class="bi bi-box-arrow-left me-2"></i> Cerrar sesión
                 </button>
             </form>
         </div>
-    </div>
-</nav>
+    </aside>
 
-<div class="container-fluid px-4 mb-5">
-
-    <div class="welcome-banner">
-        <div>
-            <p class="text-uppercase mb-1 fw-bold text-white-50" style="letter-spacing: 2px; font-size: 0.85rem;">
-                Centro de Mando Directivo · {{ request.user.puesto|default:"Dirección General" }}
-            </p>
-            <h2 class="fw-bold mb-0">¡Bienvenida(o), {{ request.user.nombre|default:"Licenciada" }}!</h2>
-            <p class="mt-2 mb-0 fw-light">Supervisión general de expedientes, incidencias y comunicación de la Estancia Infantil.</p>
-        </div>
-        <div class="d-none d-md-block pe-4">
-            <i class="bi bi-shield-lock-fill display-1 opacity-25"></i>
-        </div>
-    </div>
-
-    {% if modo_solo_consulta %}
-    <div class="estado-operativo estado-consulta">
-        <div class="status-icon">
-            <i class="bi bi-lock-fill"></i>
-        </div>
-        <div>
-            <h5>Modo solo consulta</h5>
-            <p>
-                {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Dirección puede consultar información existente, pero no puede aprobar, rechazar, modificar ni autorizar operaciones hasta que el Administrador inicie un nuevo semestre." }}
-            </p>
-            <span class="solo-consulta-badge mt-2">
-                <i class="bi bi-eye-fill"></i> Consulta histórica habilitada
-            </span>
-        </div>
-    </div>
-    {% else %}
-    <div class="estado-operativo estado-activo">
-        <div class="status-icon">
-            <i class="bi bi-check-circle-fill"></i>
-        </div>
-        <div>
-            <h5>Semestre activo</h5>
-            <p>
-                Dirección puede operar normalmente en el semestre:
-                <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
-            </p>
-            <span class="operacion-activa-badge mt-2">
-                <i class="bi bi-pencil-square"></i> Operación activa
-            </span>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #198754, #146c43);"><div><p>Alumnos Activos</p><h3>{{ kpi_alumnos|default:"0" }}</h3></div><i class="bi bi-people-fill"></i></div></div>
-        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #fd7e14, #d35400);"><div><p>Pendientes Veredicto</p><h3>{{ kpi_pendientes|default:"0" }}</h3></div><i class="bi bi-file-earmark-check-fill"></i></div></div>
-        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #dc3545, #b02a37);"><div><p>Riesgos Críticos</p><h3>{{ kpi_riesgo|default:"0" }}</h3></div><i class="bi bi-shield-exclamation"></i></div></div>
-        <div class="col-md-3"><div class="kpi-box" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0);"><div><p>Salas Config.</p><h3>{{ kpi_salas|default:"6" }}</h3></div><i class="bi bi-door-open-fill"></i></div></div>
-    </div>
-
-    <div class="row g-4">
-
-        <div class="col-lg-7">
-
-            <div class="dash-card">
-                <div class="dash-card-header bg-white border-bottom-0 pb-0">
-                    <span><i class="bi bi-award-fill text-warning me-2"></i> Bandeja de Veredicto Final (Firma)</span>
+    <main class="director-main">
+        <div class="director-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <div class="director-title">
+                    <h1 data-page-title>Inicio</h1>
+                    <p data-page-subtitle>Resumen general por sede</p>
                 </div>
-                <div class="dash-card-body pt-2">
-                    {% if modo_solo_consulta %}
-                    <div class="readonly-card-note mb-3">
-                        <i class="bi bi-lock-fill me-2"></i>
-                        <strong>Semestre cerrado o sin semestre activo:</strong>
-                        puedes revisar expedientes y reportes, pero las acciones de aprobar, rechazar o mantener pendiente están bloqueadas.
-                    </div>
-                    {% else %}
-                    <div class="alert alert-primary border-0 bg-light shadow-sm d-flex align-items-center mb-3">
-                        <i class="bi bi-info-circle-fill fs-3 text-primary me-3"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Instrucciones de Firma Digital</h6>
-                            <p class="mb-0 small text-dark">Al hacer clic en <strong>Aceptar</strong>, el sistema estampará su nombre en el formato FO-301 y notificará al beneficiario.</p>
-                        </div>
-                    </div>
-                    {% endif %}
+            </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle border mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Aspirante y Folio</th>
-                                    <th>Estado Filtros</th>
-                                    <th class="text-center">Veredicto</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-{% for ins in dictamenes_pendientes %}
-<tr>
-    <td>
-        <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
-        <span class="text-uppercase d-block fw-bold">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
-        <small class="text-muted d-block">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
-        <small class="text-muted">
-            <i class="bi bi-envelope me-1"></i>{{ ins.solicitud_ingreso.correo|default:"Sin correo" }}
-        </small>
-    </td>
+            <div class="topbar-actions">
+                <div class="semester-pill">
+                    <span class="icon"><i class="bi bi-calendar2-week"></i></span>
+                    <span>
+                        {% if modo_solo_consulta %}
+                            Modo solo consulta
+                        {% else %}
+                            Semestre activo: {{ semestre_activo_operativo.nombre|default:"enero - junio 2026" }}
+                        {% endif %}
+                    </span>
+                    <i class="bi bi-chevron-down small text-muted"></i>
+                </div>
 
-    <td>
-        <div class="filter-mini">
-            {% if ins.solicitud_ingreso.estado_psicologia == 'APROBADO' %}
-                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Psicología aprobó</span>
-            {% elif ins.solicitud_ingreso.estado_psicologia == 'RECHAZADO' %}
-                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Psicología rechazó</span>
-            {% else %}
-                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Psicología pendiente</span>
-            {% endif %}
-
-            {% if ins.solicitud_ingreso.estado_nutricion == 'APROBADO' %}
-                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Nutrición aprobó</span>
-            {% elif ins.solicitud_ingreso.estado_nutricion == 'RECHAZADO' %}
-                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Nutrición rechazó</span>
-            {% else %}
-                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Nutrición pendiente</span>
-            {% endif %}
-
-            {% if ins.solicitud_ingreso.estado_medico == 'APROBADO' %}
-                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Médico aprobó</span>
-            {% elif ins.solicitud_ingreso.estado_medico == 'RECHAZADO' %}
-                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Médico rechazó</span>
-            {% else %}
-                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Médico pendiente</span>
-            {% endif %}
+                <div class="dropdown">
+                    <button class="user-pill border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar"><i class="bi bi-person-fill"></i></span>
+                        <span>{{ request.user.nombre|default:request.user.email|default:"Directora" }}</span>
+                        <i class="bi bi-chevron-down small text-muted"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
+                        <li>
+                            <span class="dropdown-item-text small text-muted">
+                                {{ request.user.puesto|default:"Dirección General" }}
+                            </span>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item rounded-3 fw-bold" href="{% url 'panel_incidencias' %}">
+                                <i class="bi bi-clipboard2-pulse me-2"></i> Incidencias
+                            </a>
+                        </li>
+                        <li>
+                            <form action="{% url 'logout' %}" method="post" class="px-2 py-1">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-3 fw-bold">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Salir
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </td>
 
-    <td class="text-center">
+        <section class="view-section active" data-view-section="inicio">
+        <div class="director-select-row">
+            <div class="sede-selector flex-grow-1">
+                <label>Seleccionar sede</label>
+                <div class="fake-select">
+                    <span><i class="bi bi-building me-2 text-primary"></i> Estancia Infantil UNACH Tuxtla Gutiérrez</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+            </div>
+
+        </div>
+
         {% if modo_solo_consulta %}
-        <span class="solo-consulta-badge">
-            <i class="bi bi-lock-fill"></i> Solo consulta
-        </span>
+        <div class="status-banner status-readonly">
+            <div class="status-icon"><i class="bi bi-lock-fill"></i></div>
+            <div>
+                <h5>Modo solo consulta</h5>
+                <p>
+                    {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Dirección puede consultar información existente, pero no puede aprobar, rechazar, modificar ni autorizar operaciones hasta que el Administrador inicie un nuevo semestre." }}
+                </p>
+                <span class="status-badge"><i class="bi bi-eye-fill"></i> Consulta histórica habilitada</span>
+            </div>
+        </div>
         {% else %}
-        <span class="operacion-activa-badge mb-2">
-            <i class="bi bi-check2-circle"></i> Puede resolver
-        </span>
+        <div class="status-banner status-active">
+            <div class="status-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div>
+                <h5>Semestre activo</h5>
+                <p>
+                    Dirección puede operar normalmente en el semestre:
+                    <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
+                </p>
+                <span class="status-badge"><i class="bi bi-pencil-square"></i> Operación activa</span>
+            </div>
+        </div>
         {% endif %}
 
-        <div class="d-flex justify-content-center gap-1 flex-wrap">
-            <button type="button" class="btn btn-success btn-sm shadow-sm action-btn-circle"
-                    title="Aprobar inscripción final"
-                    data-bs-toggle="modal"
-                    data-bs-target="#aprobarFinalModal{{ ins.id }}" {% if modo_solo_consulta %}disabled{% endif %}>
-                <i class="bi bi-check-circle-fill"></i>
-            </button>
-
-            <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" name="accion" value="PENDIENTE"
-                        class="btn btn-warning btn-sm text-dark shadow-sm action-btn-circle"
-                        title="Mantener pendiente"
-                        onclick="return confirm('¿Deseas mantener este expediente pendiente de resolución final?');" {% if modo_solo_consulta %}disabled{% endif %}>
-                    <i class="bi bi-hourglass-split"></i>
-                </button>
-            </form>
-
-            <button type="button" class="btn btn-danger btn-sm shadow-sm action-btn-circle"
-                    title="Rechazar inscripción final"
-                    data-bs-toggle="modal"
-                    data-bs-target="#rechazarFinalModal{{ ins.id }}" {% if modo_solo_consulta %}disabled{% endif %}>
-                <i class="bi bi-x-circle"></i>
-            </button>
-        </div>
-
-        <div class="modal fade" id="aprobarFinalModal{{ ins.id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content modal-content-directiva">
-                    <div class="modal-header modal-header-success">
-                        <h5 class="modal-title fw-bold">
-                            <i class="bi bi-check-circle-fill me-2"></i>Aprobar inscripción final
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-
-                    <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
-                        {% csrf_token %}
-                        <div class="modal-body text-start p-4">
-                            <p class="mb-2">
-                                Confirmas la aprobación final de:
-                                <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
-                            </p>
-
-                            <div class="final-report-note mb-3">
-                                Al aprobar, el sistema generará el Reporte Final FO-301-02-18,
-                                lo guardará en el expediente y enviará correo al beneficiario.
+        <section class="dashboard-grid">
+            <div class="director-card">
+                <div class="director-card-header">
+                    <h2 class="director-card-title">
+                        <span class="title-icon"><i class="bi bi-people-fill"></i></span>
+                        1. Indicador de Niños
+                    </h2>
+                </div>
+                <div class="director-card-body">
+                    <div class="kids-indicator-layout">
+                        <div class="kid-status-card kid-green" style="--bar:{% firstof porcentaje_ninos_estancia '100' %}%;">
+                            <div class="kid-status-icon"><i class="bi bi-people"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="kid-label">Niños en estancia</div>
+                                <div class="kid-number">{% firstof ninos_en_estancia kpi_alumnos "0" %}</div>
+                                <div class="kid-percent">{% firstof porcentaje_ninos_estancia "100" %}%</div>
+                                <div class="kid-progress"><span></span></div>
                             </div>
-
-                            <label class="form-label fw-bold">Observaciones de Dirección (opcional)</label>
-                            <textarea name="directora_observaciones"
-                                      class="form-control"
-                                      rows="3"
-                                      placeholder="Ej. Se autoriza la inscripción conforme al reporte final."></textarea>
                         </div>
 
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                                Cancelar
-                            </button>
-                            <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success rounded-pill px-4 fw-bold" {% if modo_solo_consulta %}disabled{% endif %}>
-                                <i class="bi bi-check-circle me-1"></i> Aprobar y enviar correo
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="rechazarFinalModal{{ ins.id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content modal-content-directiva">
-                    <div class="modal-header modal-header-danger">
-                        <h5 class="modal-title fw-bold">
-                            <i class="bi bi-x-octagon-fill me-2"></i>Rechazar inscripción final
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-
-                    <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
-                        {% csrf_token %}
-                        <div class="modal-body text-start p-4">
-                            <p class="mb-2">
-                                Estás por rechazar la inscripción final de:
-                                <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong>
-                            </p>
-
-                            <div class="alert alert-danger py-2 small mb-3">
-                                Para rechazar es obligatorio escribir el motivo. Este texto se incluirá como observación de Dirección.
+                        <div class="kid-status-card kid-orange" style="--bar:{% firstof porcentaje_ninos_ausentes '0' %}%;">
+                            <div class="kid-status-icon"><i class="bi bi-person"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="kid-label">Niños ausentes</div>
+                                <div class="kid-number">{% firstof ninos_ausentes "0" %}</div>
+                                <div class="kid-percent">{% firstof porcentaje_ninos_ausentes "0" %}%</div>
+                                <div class="kid-progress"><span></span></div>
                             </div>
-
-                            <label class="form-label fw-bold">Motivo / observaciones de rechazo</label>
-                            <textarea name="directora_observaciones"
-                                      class="form-control"
-                                      rows="4"
-                                      placeholder="Escribe el motivo del rechazo final..."
-                                      required></textarea>
                         </div>
 
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                                Cancelar
-                            </button>
-                            <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger rounded-pill px-4 fw-bold" {% if modo_solo_consulta %}disabled{% endif %}>
-                                <i class="bi bi-x-circle me-1"></i> Rechazar y enviar correo
-                            </button>
+                        <div class="kid-status-card kid-red" style="--bar:{% firstof porcentaje_ninos_fuera '0' %}%;">
+                            <div class="kid-status-icon"><i class="bi bi-person-x"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="kid-label">Niños fuera de estancia</div>
+                                <div class="kid-number">{% firstof ninos_fuera_estancia "0" %}</div>
+                                <div class="kid-percent">{% firstof porcentaje_ninos_fuera "0" %}%</div>
+                                <div class="kid-progress"><span></span></div>
+                            </div>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </td>
-</tr>
-{% empty %}
-<tr>
-    <td colspan="3" class="text-center py-4 text-muted">
-        No hay expedientes pendientes.
-    </td>
-</tr>
-{% endfor %}
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
 
-            <div class="dash-card border-info mt-4">
-                <div class="dash-card-header bg-info bg-opacity-10 border-info border-opacity-25 pb-2">
-                    <span class="text-info-emphasis">
-                        <i class="bi bi-door-open-fill me-2"></i> Consulta de Asignación de Salas
-                    </span>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                        Sprint 4
-                    </span>
+            <div class="director-card">
+                <div class="director-card-header">
+                    <h2 class="director-card-title">
+                        <span class="title-icon"><i class="bi bi-people-fill"></i></span>
+                        Total de niños
+                    </h2>
                 </div>
-                <div class="dash-card-body pt-2">
-                    <div class="sprint4-salas-note mb-3">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Con el Sprint 4, la asignación de salas, maestras y horarios corresponde al
-                        <strong>Administrador del Sistema</strong> desde Gestión de Semestres.
-                        Dirección conserva esta sección solo como consulta histórica si existen registros anteriores.
+                <div class="director-card-body">
+                    <div class="total-kids-number">{% firstof total_ninos kpi_alumnos "0" %}</div>
+                    <div class="total-kids-layout">
+                        <div class="donut-chart" style="--estancia:{% firstof porcentaje_ninos_estancia '100' %}; --ausentes:{% firstof porcentaje_ninos_ausentes '0' %};"></div>
+                        <div class="legend-list">
+                            <div class="legend-item">
+                                <span class="legend-name"><span class="legend-dot" style="background:var(--ei-green);"></span> En estancia</span>
+                                <span>{% firstof porcentaje_ninos_estancia "100" %}% ({% firstof ninos_en_estancia kpi_alumnos "0" %})</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-name"><span class="legend-dot" style="background:var(--ei-orange);"></span> Ausentes</span>
+                                <span>{% firstof porcentaje_ninos_ausentes "0" %}% ({% firstof ninos_ausentes "0" %})</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-name"><span class="legend-dot" style="background:var(--ei-red);"></span> Fuera de estancia</span>
+                                <span>{% firstof porcentaje_ninos_fuera "0" %}% ({% firstof ninos_fuera_estancia "0" %})</span>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle border mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Alumno</th>
-                                    <th>Sala registrada</th>
-                                    <th class="text-center">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for sala_req in salas_en_revision %}
-                                <tr>
-                                    <td>
-                                        <span class="fw-bold text-dark d-block">
-                                            {{ sala_req.solicitud_ingreso.nombres_menor }} {{ sala_req.solicitud_ingreso.apellido_paterno_menor }}
-                                        </span>
-                                        <small class="text-muted">Folio #{{ sala_req.solicitud_ingreso.folio }}</small>
-                                    </td>
-                                    <td>
-                                        {% if sala_req.sala_asignada %}
-                                            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
-                                                <i class="bi bi-house-door-fill me-1"></i> Sala {{ sala_req.sala_asignada.nombre }}
+        <section class="content-grid mb-4">
+            <div class="director-card" style="grid-column:1 / -1;">
+                <div class="director-card-header">
+                    <h2 class="director-card-title">
+                        <span class="title-icon"><i class="bi bi-calendar2-check"></i></span>
+                        2. Asignación de salas y expedientes
+                    </h2>
+                </div>
+                <div class="director-card-body">
+                    <p class="section-subtitle">Consulta de sala registrada por alumno.</p>
+                    <div class="director-table mb-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Alumno</th>
+                                        <th>Sala registrada</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sala_req in salas_en_revision %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ sala_req.solicitud_ingreso.nombres_menor }} {{ sala_req.solicitud_ingreso.apellido_paterno_menor }}</strong><br>
+                                            <small class="text-muted">Folio #{{ sala_req.solicitud_ingreso.folio }}</small>
+                                        </td>
+                                        <td>
+                                            {% if sala_req.sala_asignada %}
+                                                <span class="badge bg-primary rounded-pill px-3 py-2">
+                                                    <i class="bi bi-house-door-fill me-1"></i> Sala {{ sala_req.sala_asignada.nombre }}
+                                                </span>
+                                            {% elif sala_req.sala_semestre_asignada %}
+                                                <span class="badge bg-primary rounded-pill px-3 py-2">
+                                                    <i class="bi bi-house-door-fill me-1"></i> {{ sala_req.sala_semestre_asignada.sala.nombre }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Sin sala</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2">
+                                                <i class="bi bi-eye-fill me-1"></i> Consulta
                                             </span>
-                                        {% elif sala_req.sala_semestre_asignada %}
-                                            <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
-                                                <i class="bi bi-house-door-fill me-1"></i> {{ sala_req.sala_semestre_asignada.sala.nombre }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Sin sala</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="solo-consulta-badge">
-                                            <i class="bi bi-eye-fill"></i> Consulta
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center py-4 text-muted bg-light">
-                                        <i class="bi bi-inbox-fill fs-3 text-secondary mb-2 d-block opacity-25"></i>
-                                        <small class="fw-bold m-0 text-secondary">
-                                            No hay registros de sala pendientes o históricos para mostrar.
-                                        </small>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dash-card">
-                <div class="header-section text-primary bg-white pb-2 pt-3 px-4">
-                    <i class="bi bi-search me-2"></i> Supervisión Global: Expedientes en Áreas
-                </div>
-                <div class="dash-card-body pt-0">
-                    <p class="small text-muted mb-3">Aquí puedes monitorear en qué área están atorados los expedientes antes de que lleguen a tu bandeja.</p>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead class="table-light small">
-                                <tr>
-                                    <th>Folio y Aspirante</th>
-                                    <th>Médico</th>
-                                    <th>Psicología</th>
-                                    <th>Nutrición</th>
-                                </tr>
-                            </thead>
-                            <tbody class="small">
-                                {% for exp in expedientes_en_filtros %}
-                                <tr>
-                                    <td><strong>#{{ exp.solicitud_ingreso.folio }}</strong> - {{ exp.solicitud_ingreso.nombres_menor }}</td>
-                                    <td>
-                                        {% if exp.solicitud_ingreso.estado_medico == 'APROBADO' %}<span class="badge bg-success">OK</span>
-                                        {% elif exp.solicitud_ingreso.estado_medico == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
-                                        {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
-                                    </td>
-                                    <td>
-                                        {% if exp.solicitud_ingreso.estado_psicologia == 'APROBADO' %}<span class="badge bg-success">OK</span>
-                                        {% elif exp.solicitud_ingreso.estado_psicologia == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
-                                        {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
-                                    </td>
-                                    <td>
-                                        {% if exp.solicitud_ingreso.estado_nutricion == 'APROBADO' %}<span class="badge bg-success">OK</span>
-                                        {% elif exp.solicitud_ingreso.estado_nutricion == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
-                                        {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" class="text-center py-3 text-muted fst-italic">No hay expedientes atascados en filtros en este momento.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="col-lg-5">
-
-            <div class="dash-card border border-danger border-opacity-25">
-                <div class="header-section text-danger bg-white pb-2 pt-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <span>
-                        <i class="bi bi-shield-exclamation me-2"></i> Consulta directiva de incidencias
-                    </span>
-                    <a href="{% url 'panel_incidencias' %}" class="btn btn-danger btn-sm rounded-pill fw-bold">
-                        <i class="bi bi-box-arrow-up-right me-1"></i> Abrir módulo
-                    </a>
-                </div>
-
-                <div class="dash-card-body pt-0">
-                    <div class="incidencias-directiva-hero">
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                                 style="width:44px;height:44px;background:#dbeafe;color:#1d4ed8;">
-                                <i class="bi bi-eye-fill fs-4"></i>
-                            </div>
-                            <div>
-                                <h6>Vista de supervisión</h6>
-                                <p>
-                                    Dirección puede consultar incidencias pedagógicas, nutricionales, médicas y psicológicas,
-                                    revisar seguimientos, archivos y resolución. La creación y seguimiento corresponden al área responsable.
-                                </p>
-                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3">
+                                            <div class="empty-state">
+                                                <i class="bi bi-inbox d-block fs-3 opacity-50 mb-1"></i>
+                                                No hay registros de sala pendientes o históricos para mostrar.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
+                    <p class="section-subtitle">Supervisión global: expedientes en áreas antes de llegar a Dirección.</p>
+                    <div class="director-table">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Folio y aspirante</th>
+                                        <th>Médico</th>
+                                        <th>Psicología</th>
+                                        <th>Nutrición</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for exp in expedientes_en_filtros %}
+                                    <tr>
+                                        <td><strong>#{{ exp.solicitud_ingreso.folio }}</strong> - {{ exp.solicitud_ingreso.nombres_menor }}</td>
+                                        <td>
+                                            {% if exp.solicitud_ingreso.estado_medico == 'APROBADO' %}<span class="badge bg-success">OK</span>
+                                            {% elif exp.solicitud_ingreso.estado_medico == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
+                                            {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            {% if exp.solicitud_ingreso.estado_psicologia == 'APROBADO' %}<span class="badge bg-success">OK</span>
+                                            {% elif exp.solicitud_ingreso.estado_psicologia == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
+                                            {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            {% if exp.solicitud_ingreso.estado_nutricion == 'APROBADO' %}<span class="badge bg-success">OK</span>
+                                            {% elif exp.solicitud_ingreso.estado_nutricion == 'RECHAZADO' %}<span class="badge bg-danger">Rechazado</span>
+                                            {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-muted fst-italic">
+                                            No hay expedientes atascados en filtros en este momento.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <div class="director-card">
+                <div class="director-card-header">
+                    <h2 class="director-card-title">
+                        <span class="title-icon"><i class="bi bi-award-fill"></i></span>
+                        Bandeja de veredicto final
+                    </h2>
+                </div>
+                <div class="director-card-body">
                     {% if modo_solo_consulta %}
-                    <div class="readonly-card-note mb-3">
-                        <i class="bi bi-eye-fill me-2"></i>
-                        Las incidencias de semestres cerrados son de consulta. No se pueden modificar desde Dirección.
+                    <div class="readonly-note mb-3">
+                        <i class="bi bi-lock-fill fs-5"></i>
+                        <span><strong>Semestre cerrado o sin semestre activo:</strong> puedes revisar expedientes y reportes, pero las acciones de aprobar, rechazar o mantener pendiente están bloqueadas.</span>
+                    </div>
+                    {% else %}
+                    <div class="info-note mb-3">
+                        <i class="bi bi-info-circle-fill fs-5"></i>
+                        <span>Al hacer clic en <strong>Aceptar</strong>, el sistema estampará su nombre en el formato FO-301 y notificará al beneficiario.</span>
                     </div>
                     {% endif %}
 
-                    <div class="incidencias-directiva-actions">
-                        <a href="{% url 'panel_incidencias' %}?estado=ABIERTA" class="incidencias-directiva-btn">
-                            <span class="icon" style="background:#fef3c7;color:#b45309;">
-                                <i class="bi bi-folder2-open"></i>
-                            </span>
-                            <span>Abiertas</span>
-                        </a>
+                    <div class="director-table">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Aspirante y folio</th>
+                                        <th>Estado filtros</th>
+                                        <th class="text-center">Veredicto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ins in dictamenes_pendientes %}
+                                    <tr>
+                                        <td>
+                                            <span class="fw-bold text-primary">Folio #{{ ins.solicitud_ingreso.folio }}</span><br>
+                                            <span class="text-uppercase d-block fw-bold">{{ ins.solicitud_ingreso.nombre_menor_completo }}</span>
+                                            <small class="text-muted d-block">{{ ins.solicitud_ingreso.nombre_tutor_completo }}</small>
+                                            <small class="text-muted"><i class="bi bi-envelope me-1"></i>{{ ins.solicitud_ingreso.correo|default:"Sin correo" }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="filter-mini">
+                                                {% if ins.solicitud_ingreso.estado_psicologia == 'APROBADO' %}
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Psicología aprobó</span>
+                                                {% elif ins.solicitud_ingreso.estado_psicologia == 'RECHAZADO' %}
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Psicología rechazó</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Psicología pendiente</span>
+                                                {% endif %}
 
-                        <a href="{% url 'panel_incidencias' %}?nivel=ALTO" class="incidencias-directiva-btn">
-                            <span class="icon" style="background:#fee2e2;color:#b91c1c;">
-                                <i class="bi bi-exclamation-octagon-fill"></i>
-                            </span>
-                            <span>Riesgo alto</span>
-                        </a>
+                                                {% if ins.solicitud_ingreso.estado_nutricion == 'APROBADO' %}
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Nutrición aprobó</span>
+                                                {% elif ins.solicitud_ingreso.estado_nutricion == 'RECHAZADO' %}
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Nutrición rechazó</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Nutrición pendiente</span>
+                                                {% endif %}
 
-                        <a href="{% url 'panel_incidencias' %}?tipo=MEDICA" class="incidencias-directiva-btn">
-                            <span class="icon" style="background:#fee2e2;color:#b91c1c;">
-                                <i class="bi bi-heart-pulse-fill"></i>
-                            </span>
-                            <span>Médicas</span>
-                        </a>
+                                                {% if ins.solicitud_ingreso.estado_medico == 'APROBADO' %}
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Médico aprobó</span>
+                                                {% elif ins.solicitud_ingreso.estado_medico == 'RECHAZADO' %}
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Médico rechazó</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Médico pendiente</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if modo_solo_consulta %}
+                                            <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2 mb-2">
+                                                <i class="bi bi-lock-fill me-1"></i> Solo consulta
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 mb-2">
+                                                <i class="bi bi-check2-circle me-1"></i> Puede resolver
+                                            </span>
+                                            {% endif %}
 
-                        <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="incidencias-directiva-btn">
-                            <span class="icon" style="background:#dbeafe;color:#1d4ed8;">
-                                <i class="bi bi-person-hearts"></i>
-                            </span>
-                            <span>Psicológicas</span>
-                        </a>
+                                            <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                                <button type="button" class="btn btn-success btn-sm shadow-sm action-btn-circle"
+                                                        title="Aprobar inscripción final"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#aprobarFinalModal{{ ins.id }}" {% if modo_solo_consulta %}disabled{% endif %}>
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                </button>
 
-                        <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="incidencias-directiva-btn">
-                            <span class="icon" style="background:#dcfce7;color:#15803d;">
-                                <i class="bi bi-egg-fried"></i>
-                            </span>
-                            <span>Nutricionales</span>
-                        </a>
+                                                <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button type="submit" name="accion" value="PENDIENTE"
+                                                            class="btn btn-warning btn-sm text-dark shadow-sm action-btn-circle"
+                                                            title="Mantener pendiente"
+                                                            onclick="return confirm('¿Deseas mantener este expediente pendiente de resolución final?');" {% if modo_solo_consulta %}disabled{% endif %}>
+                                                        <i class="bi bi-hourglass-split"></i>
+                                                    </button>
+                                                </form>
 
-                        <a href="{% url 'panel_incidencias' %}?tipo=PEDAGOGICA" class="incidencias-directiva-btn">
-                            <span class="icon" style="background:#ede9fe;color:#6d28d9;">
-                                <i class="bi bi-easel2-fill"></i>
-                            </span>
-                            <span>Pedagógicas</span>
-                        </a>
+                                                <button type="button" class="btn btn-danger btn-sm shadow-sm action-btn-circle"
+                                                        title="Rechazar inscripción final"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#rechazarFinalModal{{ ins.id }}" {% if modo_solo_consulta %}disabled{% endif %}>
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal fade" id="aprobarFinalModal{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content modal-content-directiva">
+                                                        <div class="modal-header modal-header-success">
+                                                            <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Aprobar inscripción final</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <div class="modal-body text-start p-4">
+                                                                <p class="mb-2">Confirmas la aprobación final de: <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong></p>
+                                                                <div class="final-report-note mb-3">
+                                                                    Al aprobar, el sistema generará el Reporte Final FO-301-02-18, lo guardará en el expediente y enviará correo al beneficiario.
+                                                                </div>
+                                                                <label class="form-label fw-bold">Observaciones de Dirección (opcional)</label>
+                                                                <textarea name="directora_observaciones" class="form-control" rows="3" placeholder="Ej. Se autoriza la inscripción conforme al reporte final."></textarea>
+                                                            </div>
+                                                            <div class="modal-footer bg-light">
+                                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                                <button type="submit" name="accion" value="ACEPTAR" class="btn btn-success rounded-pill px-4 fw-bold" {% if modo_solo_consulta %}disabled{% endif %}>
+                                                                    <i class="bi bi-check-circle me-1"></i> Aprobar y enviar correo
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="modal fade" id="rechazarFinalModal{{ ins.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content modal-content-directiva">
+                                                        <div class="modal-header modal-header-danger">
+                                                            <h5 class="modal-title fw-bold"><i class="bi bi-x-octagon-fill me-2"></i>Rechazar inscripción final</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <form action="{% url 'veredicto_final_directora' ins.id %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <div class="modal-body text-start p-4">
+                                                                <p class="mb-2">Estás por rechazar la inscripción final de: <strong>{{ ins.solicitud_ingreso.nombre_menor_completo }}</strong></p>
+                                                                <div class="alert alert-danger py-2 small mb-3">
+                                                                    Para rechazar es obligatorio escribir el motivo. Este texto se incluirá como observación de Dirección.
+                                                                </div>
+                                                                <label class="form-label fw-bold">Motivo / observaciones de rechazo</label>
+                                                                <textarea name="directora_observaciones" class="form-control" rows="4" placeholder="Escribe el motivo del rechazo final..." required></textarea>
+                                                            </div>
+                                                            <div class="modal-footer bg-light">
+                                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                                <button type="submit" name="accion" value="RECHAZAR" class="btn btn-danger rounded-pill px-4 fw-bold" {% if modo_solo_consulta %}disabled{% endif %}>
+                                                                    <i class="bi bi-x-circle me-1"></i> Rechazar y enviar correo
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted">No hay expedientes pendientes.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-
-                    <h6 class="fw-bold small text-danger border-bottom pb-1">
-                        <i class="bi bi-fire"></i> RIESGO ALTO / CRÍTICAS
-                    </h6>
-
-                    {% for inc in incidencias_alto %}
-                    <div class="incidencia-item incidencia-item-alta">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                            <div>
-                                <div class="inc-title">
-                                    {{ inc.nombre_alumno|default:inc.alumno.solicitud_ingreso.nombres_menor }}
-                                </div>
-                                <div class="inc-desc">
-                                    {{ inc.descripcion|truncatechars:120 }}
-                                </div>
-                                <div class="inc-meta">
-                                    <i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}
-                                    · {{ inc.get_tipo_display|default:"Incidencia" }}
-                                    · {{ inc.get_estado_display|default:"Abierta" }}
-                                </div>
-                            </div>
-                            <span class="badge badge-alto px-2 py-1">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                            </span>
-                        </div>
-
-                        <div class="mt-2">
-                            <a href="{% url 'detalle_incidencia' inc.id %}" class="incidencia-link bg-danger-subtle text-danger border border-danger-subtle">
-                                <i class="bi bi-eye-fill"></i> Ver detalle
-                            </a>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="small text-muted py-1 fst-italic">Sin incidencias de alto riesgo.</p>
-                    {% endfor %}
-
-                    <h6 class="fw-bold small text-warning border-bottom pb-1 mt-4">
-                        <i class="bi bi-exclamation-circle"></i> LEVE / BAJO RIESGO O SEGUIMIENTO
-                    </h6>
-
-                    {% for inc in incidencias_bajo %}
-                    <div class="incidencia-item incidencia-item-seguimiento">
-                        <div class="inc-title">
-                            {{ inc.nombre_alumno|default:inc.alumno.solicitud_ingreso.nombres_menor }}
-                        </div>
-                        <div class="inc-desc">
-                            {{ inc.descripcion|truncatechars:120 }}
-                        </div>
-                        <div class="inc-meta">
-                            <i class="bi bi-clock"></i> {{ inc.fecha_reporte|date:"d/m/Y H:i" }}
-                            · {{ inc.get_tipo_display|default:"Incidencia" }}
-                            · {{ inc.get_estado_display|default:"Abierta" }}
-                        </div>
-                        <div class="mt-2">
-                            <a href="{% url 'detalle_incidencia' inc.id %}" class="incidencia-link bg-warning-subtle text-warning-emphasis border border-warning-subtle">
-                                <i class="bi bi-eye-fill"></i> Ver detalle
-                            </a>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="small text-muted py-1 fst-italic">Sin incidencias menores.</p>
-                    {% endfor %}
                 </div>
             </div>
 
-            <div class="dash-card">
-                <div class="header-section text-dark bg-white pb-2 pt-3 px-4">
-                    <i class="bi bi-envelope-paper-fill text-primary me-2"></i> Bandeja de Entrada (Correos)
+            <div class="director-card">
+                <div class="director-card-header">
+                    <h2 class="director-card-title">
+                        <span class="title-icon"><i class="bi bi-envelope-paper-fill"></i></span>
+                        Bandeja de entrada
+                    </h2>
                 </div>
-                <div class="dash-card-body pt-0">
-
-                    <h6 class="fw-bold text-muted small border-bottom pb-1 mt-2">
-                        <i class="bi bi-person-lines-fill me-1"></i> DE ASPIRANTES (NUEVO INGRESO)
+                <div class="director-card-body">
+                    <h6 class="fw-bold text-primary border-bottom pb-2">
+                        <i class="bi bi-person-lines-fill me-1"></i> De aspirantes / nuevo ingreso
                     </h6>
                     {% for msg in mensajes_aspirantes %}
-                    <div class="msg-item shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="message-item message-asp">
+                        <div class="d-flex justify-content-between align-items-center mb-1 gap-2">
                             <span class="fw-bold text-primary small">{{ msg.remitente.email }}</span>
                             <span class="badge bg-light text-muted border">{{ msg.fecha_envio|date:"d/m" }}</span>
                         </div>
-                        <p class="mb-1 small fw-bold text-dark">{{ msg.asunto }}</p>
-                        <p class="mb-0 small text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <div class="item-title small">{{ msg.asunto }}</div>
+                        <div class="item-desc mb-0" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
                             {{ msg.contenido }}
-                        </p>
+                        </div>
                     </div>
                     {% empty %}
-                    <p class="text-center py-3 small text-muted fst-italic bg-light rounded">No hay correos de aspirantes.</p>
+                    <div class="empty-state py-3">No hay correos de aspirantes.</div>
                     {% endfor %}
 
-                    <h6 class="fw-bold text-success small border-bottom pb-1 mt-4">
-                        <i class="bi bi-person-check-fill me-1"></i> DE ALUMNOS INSCRITOS
+                    <h6 class="fw-bold text-success border-bottom pb-2 mt-4">
+                        <i class="bi bi-person-check-fill me-1"></i> De alumnos inscritos
                     </h6>
                     {% for msg in mensajes_alumnos %}
-                    <div class="msg-item msg-alumno shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="message-item message-alumno">
+                        <div class="d-flex justify-content-between align-items-center mb-1 gap-2">
                             <span class="fw-bold text-success small">{{ msg.remitente.email }}</span>
                             <span class="badge bg-light text-muted border">{{ msg.fecha_envio|date:"d/m" }}</span>
                         </div>
-                        <p class="mb-1 small fw-bold text-dark">{{ msg.asunto }}</p>
-                        <p class="mb-0 small text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <div class="item-title small">{{ msg.asunto }}</div>
+                        <div class="item-desc mb-0" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
                             {{ msg.contenido }}
-                        </p>
+                        </div>
                     </div>
                     {% empty %}
-                    <p class="text-center py-3 small text-muted fst-italic bg-light rounded">No hay correos de alumnos inscritos.</p>
+                    <div class="empty-state py-3">No hay correos de alumnos inscritos.</div>
                     {% endfor %}
-
                 </div>
             </div>
+        </section>
 
+        </section>
+
+
+
+        <section class="view-section" data-view-section="suplencias">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Suplencias y autorizaciones</h2>
+                        <p>Dirección registra el pase de lista del personal operativo y autoriza coberturas temporales solo cuando una titular está ausente, con permiso o incapacidad.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-person-check"></i></div>
+                </div>
+
+                {% if modo_solo_consulta %}
+                <div class="substitution-alert warning">
+                    <i class="bi bi-lock-fill"></i>
+                    <div>
+                        <strong>Modo solo consulta.</strong><br>
+                        No se pueden guardar pases de lista ni crear suplencias porque no hay un semestre activo operativo.
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="staff-attendance-grid">
+                    <div class="staff-summary-card staff-blue">
+                        <div class="staff-summary-icon"><i class="bi bi-people-fill"></i></div>
+                        <div><div class="label">Personal operativo</div><div class="value">{{ total_personal_pase_lista|default:"0" }}</div></div>
+                    </div>
+                    <div class="staff-summary-card staff-green">
+                        <div class="staff-summary-icon"><i class="bi bi-check-circle-fill"></i></div>
+                        <div><div class="label">Presentes</div><div class="value">{{ total_personal_presente|default:"0" }}</div></div>
+                    </div>
+                    <div class="staff-summary-card staff-orange">
+                        <div class="staff-summary-icon"><i class="bi bi-clock-history"></i></div>
+                        <div><div class="label">Sin registrar</div><div class="value">{{ total_personal_no_registrado|default:"0" }}</div></div>
+                    </div>
+                    <div class="staff-summary-card staff-red">
+                        <div class="staff-summary-icon"><i class="bi bi-person-dash-fill"></i></div>
+                        <div><div class="label">Ausencias cubribles</div><div class="value">{{ total_personal_ausente|default:"0" }}</div></div>
+                    </div>
+                </div>
+
+                {% if pase_lista_completo and todo_personal_presente %}
+                <div class="substitution-alert success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>Todo el personal operativo está presente.</strong><br>
+                        No hay suplencias disponibles por el momento. El sistema bloqueará cualquier autorización porque no existe personal titular ausente.
+                    </div>
+                </div>
+                {% elif not pase_lista_completo %}
+                <div class="substitution-alert warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Primero completa el pase de lista.</strong><br>
+                        Mientras exista personal sin registrar, el sistema no debe autorizar suplencias.
+                    </div>
+                </div>
+                {% else %}
+                <div class="substitution-alert danger">
+                    <i class="bi bi-person-dash-fill"></i>
+                    <div>
+                        <strong>Hay personal ausente, con permiso o incapacidad.</strong><br>
+                        Dirección puede autorizar una cobertura temporal para que la persona suplente actúe desde su propio panel.
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="director-card">
+                    <div class="director-card-header">
+                        <h2 class="director-card-title">
+                            <span class="title-icon"><i class="bi bi-clipboard-check"></i></span>
+                            Pase de lista del personal
+                        </h2>
+                        <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2">
+                            {{ fecha_pase_lista|date:"d/m/Y" }}
+                        </span>
+                    </div>
+                    <div class="director-card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion_directiva" value="guardar_pase_lista">
+                            <input type="hidden" name="confirmar" value="on">
+                            <div class="attendance-table-card">
+                                <div class="table-responsive">
+                                    <table class="table align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Personal</th>
+                                                <th>Área</th>
+                                                <th>Estado de hoy</th>
+                                                <th>Observaciones</th>
+                                                <th>Resultado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for fila in asistencias_pase_lista %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ fila.trabajador.nombre_completo|default:fila.trabajador.email }}</strong><br>
+                                                    <small class="text-muted">{{ fila.trabajador.email|default:"Sin correo" }}</small>
+                                                </td>
+                                                <td>
+                                                    {% if fila.area_pendiente %}
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis border rounded-pill px-3 py-2">
+                                                            <i class="bi bi-exclamation-circle me-1"></i> Área pendiente en usuario
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-light text-primary border rounded-pill px-3 py-2">
+                                                            {{ fila.area_display }}
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="min-width:190px;">
+                                                    <select name="estado_{{ fila.trabajador.id }}" class="attendance-select" {% if modo_solo_consulta %}disabled{% endif %}>
+                                                        <option value="NO_REGISTRADO" {% if fila.estado == "NO_REGISTRADO" %}selected{% endif %}>No registrado</option>
+                                                        <option value="PRESENTE" {% if fila.estado == "PRESENTE" %}selected{% endif %}>Presente</option>
+                                                        <option value="AUSENTE" {% if fila.estado == "AUSENTE" %}selected{% endif %}>Ausente</option>
+                                                        <option value="PERMISO" {% if fila.estado == "PERMISO" %}selected{% endif %}>Permiso</option>
+                                                        <option value="INCAPACIDAD" {% if fila.estado == "INCAPACIDAD" %}selected{% endif %}>Incapacidad</option>
+                                                        <option value="RETARDO" {% if fila.estado == "RETARDO" %}selected{% endif %}>Retardo</option>
+                                                    </select>
+                                                </td>
+                                                <td style="min-width:220px;">
+                                                    <textarea name="observaciones_{{ fila.trabajador.id }}" class="attendance-textarea" rows="1" placeholder="Opcional" {% if modo_solo_consulta %}disabled{% endif %}>{% if fila.asistencia %}{{ fila.asistencia.observaciones }}{% endif %}</textarea>
+                                                </td>
+                                                <td>
+                                                    {% if fila.esta_presente %}
+                                                        <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i> Presente</span>
+                                                    {% elif fila.permite_suplencia %}
+                                                        <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill px-3 py-2"><i class="bi bi-person-dash me-1"></i> Puede cubrirse</span>
+                                                    {% elif fila.sin_registrar %}
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i> Falta registrar</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2"><i class="bi bi-clock me-1"></i> Registrado</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5"><div class="empty-state">No hay personal operativo configurado para el pase de lista.</div></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="module-primary-btn" {% if modo_solo_consulta %}disabled{% endif %}>
+                                    <i class="bi bi-save"></i> Guardar pase de lista
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="director-card">
+                        <div class="director-card-header">
+                            <h2 class="director-card-title">
+                                <span class="title-icon"><i class="bi bi-shield-check"></i></span>
+                                Autorizar suplencia
+                            </h2>
+                        </div>
+                        <div class="director-card-body">
+                            {% if modo_solo_consulta %}
+                            <div class="readonly-note">
+                                <i class="bi bi-lock-fill fs-5"></i>
+                                <span>La autorización de suplencias está bloqueada en modo solo consulta.</span>
+                            </div>
+                            {% elif not pase_lista_completo %}
+                            <div class="substitution-alert warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>Completa y guarda el pase de lista antes de autorizar una suplencia.</div>
+                            </div>
+                            {% elif todo_personal_presente %}
+                            <div class="substitution-alert success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <div>Todas las trabajadoras están presentes. No se habilita autorización temporal.</div>
+                            </div>
+                            {% else %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion_directiva" value="crear_suplencia">
+                                {% if suplencia_form.errors %}
+                                <div class="substitution-alert danger mb-3">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <div>
+                                        <strong>No se pudo preparar la autorización.</strong><br>
+                                        Revisa que la titular esté ausente y que la suplente esté presente.
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <div class="coverage-form-grid">
+                                    <div>
+                                        <label for="id_titular_ausente">Titular ausente</label>
+                                        {{ suplencia_form.titular_ausente }}
+                                        <small class="text-muted fw-semibold d-block mt-1">Solo aparecen quienes están ausentes, con permiso o incapacidad.</small>
+                                    </div>
+                                    <div>
+                                        <label for="id_suplente">Persona que cubrirá</label>
+                                        {{ suplencia_form.suplente }}
+                                        <small class="text-muted fw-semibold d-block mt-1">Solo aparece personal presente o con retardo. No aparece quien faltó.</small>
+                                    </div>
+                                    <div>
+                                        <label for="id_tipo_cobertura">Tipo de cobertura</label>
+                                        {{ suplencia_form.tipo_cobertura }}
+                                    </div>
+                                    <div>
+                                        <label for="id_inicio">Inicio</label>
+                                        {{ suplencia_form.inicio }}
+                                    </div>
+                                    <div>
+                                        <label for="id_fin">Fin</label>
+                                        {{ suplencia_form.fin }}
+                                    </div>
+                                    <div class="full">
+                                        <label for="id_motivo">Motivo</label>
+                                        {{ suplencia_form.motivo }}
+                                    </div>
+                                    <div class="full">
+                                        <label for="id_observaciones">Observaciones</label>
+                                        {{ suplencia_form.observaciones }}
+                                    </div>
+                                </div>
+                                <div class="substitution-alert mt-3">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    <div>
+                                        Para Trabajo Social se maneja como cobertura completa del proceso social. Para Médica, Nutrición y Psicología puede ser incidencia, dictamen preliminar o ambas. Para Pedagógica se usa incidencia pedagógica.
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button type="submit" class="module-primary-btn"><i class="bi bi-shield-check"></i> Autorizar suplencia</button>
+                                </div>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-card-header">
+                            <h2 class="director-card-title">
+                                <span class="title-icon"><i class="bi bi-person-lines-fill"></i></span>
+                                Ausencias detectadas
+                            </h2>
+                        </div>
+                        <div class="director-card-body">
+                            {% for fila in ausencias_para_suplencia %}
+                            <div class="coverage-card mb-3">
+                                <h4>{{ fila.trabajador.nombre_completo|default:fila.trabajador.email }}</h4>
+                                <p>{{ fila.area_display }} · {{ fila.estado_display }}</p>
+                                <div class="coverage-meta">
+                                    <span><i class="bi bi-calendar-event me-1"></i>{{ fecha_pase_lista|date:"d/m/Y" }}</span>
+                                    <span><i class="bi bi-shield-check me-1"></i>Requiere suplencia</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">No hay ausencias que requieran suplencia.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="director-card">
+                    <div class="director-card-header">
+                        <h2 class="director-card-title">
+                            <span class="title-icon"><i class="bi bi-shield-lock"></i></span>
+                            Suplencias activas de hoy
+                        </h2>
+                    </div>
+                    <div class="director-card-body">
+                        <div class="row g-3">
+                            {% for sup in suplencias_activas_dia %}
+                            <div class="col-12 col-xl-6">
+                                <div class="coverage-card">
+                                    <h4>{{ sup.get_area_cubierta_display }}</h4>
+                                    <p><strong>Titular:</strong> {{ sup.titular_nombre }}<br><strong>Cubre:</strong> {{ sup.suplente_nombre }}</p>
+                                    <div class="coverage-meta">
+                                        <span>{{ sup.get_tipo_cobertura_display }}</span>
+                                        <span>Autorizó: {{ sup.autorizada_por_nombre }}</span>
+                                        {% if sup.fin %}<span>Hasta: {{ sup.fin|date:"d/m/Y H:i" }}</span>{% endif %}
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#cancelarSuplencia{{ sup.id }}">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="cancelarSuplencia{{ sup.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content modal-content-directiva">
+                                        <div class="modal-header modal-header-danger">
+                                            <h5 class="modal-title fw-bold"><i class="bi bi-x-octagon-fill me-2"></i>Cancelar suplencia</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion_directiva" value="cancelar_suplencia">
+                                            <input type="hidden" name="autorizacion_id" value="{{ sup.id }}">
+                                            <input type="hidden" name="confirmar" value="on">
+                                            <div class="modal-body p-4">
+                                                <p>Cancelarás la cobertura de <strong>{{ sup.get_area_cubierta_display }}</strong> realizada por <strong>{{ sup.suplente_nombre }}</strong>.</p>
+                                                <label class="form-label fw-bold">Motivo de cancelación</label>
+                                                <textarea name="motivo_cancelacion" class="form-control" rows="3" required placeholder="Escribe el motivo..."></textarea>
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Volver</button>
+                                                <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Cancelar suplencia</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12"><div class="empty-state">No hay suplencias activas para el día de hoy.</div></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="director-card">
+                    <div class="director-card-header">
+                        <h2 class="director-card-title">
+                            <span class="title-icon"><i class="bi bi-clock-history"></i></span>
+                            Bitácora reciente de movimientos
+                        </h2>
+                        <a href="{% url 'bitacora_suplencias' %}" class="module-soft-btn"><i class="bi bi-eye"></i> Ver bitácora</a>
+                    </div>
+                    <div class="director-card-body">
+                        <div class="substitution-card">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Área</th>
+                                            <th>Acción</th>
+                                            <th>Realizó</th>
+                                            <th>Alumno / expediente</th>
+                                            <th>Estado</th>
+                                            <th>Revisión</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for mov in movimientos_suplencia_recientes %}
+                                        <tr>
+                                            <td>{{ mov.creado_en|date:"d/m/Y H:i" }}</td>
+                                            <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2">{{ mov.get_area_cubierta_display }}</span></td>
+                                            <td>
+                                                <strong>{{ mov.get_accion_display }}</strong><br>
+                                                <small class="text-muted">{{ mov.descripcion|truncatechars:70 }}</small>
+                                            </td>
+                                            <td>{{ mov.usuario_nombre }}</td>
+                                            <td>{{ mov.alumno_nombre }}</td>
+                                            <td><span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2">{{ mov.get_estado_display }}</span></td>
+                                            <td>
+                                                <form method="post" class="movement-actions">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="accion_directiva" value="validar_movimiento_suplencia">
+                                                    <input type="hidden" name="movimiento_id" value="{{ mov.id }}">
+                                                    <select name="estado">
+                                                        <option value="PENDIENTE" {% if mov.estado == "PENDIENTE" %}selected{% endif %}>Pendiente</option>
+                                                        <option value="REVISADO" {% if mov.estado == "REVISADO" %}selected{% endif %}>Revisado</option>
+                                                        <option value="AJUSTADO" {% if mov.estado == "AJUSTADO" %}selected{% endif %}>Ajustado</option>
+                                                        <option value="VALIDADO" {% if mov.estado == "VALIDADO" %}selected{% endif %}>Validado</option>
+                                                    </select>
+                                                    <input type="text" name="observaciones_revision" value="{{ mov.observaciones_revision }}" placeholder="Observación">
+                                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill fw-bold"><i class="bi bi-check2"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="7"><div class="empty-state">Aún no hay movimientos registrados por suplencia.</div></td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view-section="sedes">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Sedes</h2>
+                        <p>Consulta el estado operativo de cada sede, sus salas configuradas y alumnos activos. Dirección visualiza, pero la configuración queda para el Administrador.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-building"></i></div>
+                </div>
+                <div class="module-grid">
+                    <div class="module-info-card"><div class="label">Sedes registradas</div><div class="value">{{ sedes_panel|length|default:"1" }}</div><div class="desc">Sedes disponibles para consulta directiva.</div></div>
+                    <div class="module-info-card"><div class="label">Salas configuradas</div><div class="value">{{ kpi_salas|default:"0" }}</div><div class="desc">Salas activas del semestre seleccionado.</div></div>
+                    <div class="module-info-card"><div class="label">Alumnos activos</div><div class="value">{{ kpi_alumnos|default:"0" }}</div><div class="desc">Niñas y niños registrados en operación.</div></div>
+                </div>
+                <div class="module-table-card">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead><tr><th>Sede</th><th>Dirección</th><th>Salas</th><th>Alumnos</th><th>Estado</th></tr></thead>
+                            <tbody>
+                                {% for sede in sedes_panel %}
+                                <tr>
+                                    <td><strong>{{ sede.nombre }}</strong><br><small class="text-muted">{{ sede.clave|default:"Sede" }}</small></td>
+                                    <td>{{ sede.direccion|default:"Sin dirección registrada" }}</td>
+                                    <td>{{ sede.total_salas|default:"0" }}</td>
+                                    <td>{{ sede.total_alumnos|default:"0" }}</td>
+                                    <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">Operativa</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center text-muted py-4">No hay sedes cargadas para mostrar.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view-section="ninos">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Niños</h2>
+                        <p>Consulta rápida de niñas y niños por sala, estado del día, tutor, entrada, salida e incidencias relacionadas.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-people"></i></div>
+                </div>
+                <div class="module-toolbar">
+                    <input type="search" class="module-search" placeholder="Buscar por nombre, sala o tutor..." data-table-search="tabla-ninos">
+                    <a href="?seccion=ninos" class="module-soft-btn"><i class="bi bi-arrow-repeat"></i> Actualizar</a>
+                </div>
+                <div class="module-table-card">
+                    <div class="table-responsive">
+                        <table class="table align-middle" id="tabla-ninos">
+                            <thead><tr><th>Niño/a</th><th>Sala</th><th>Tutor</th><th>Estado del día</th><th>Entrada</th><th>Salida</th><th>Incidencias</th></tr></thead>
+                            <tbody>
+                                {% for alumno in alumnos_panel %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ alumno.nombre|default:"Sin nombre" }}</strong><br>
+                                        <small class="text-muted">Folio {{ alumno.folio|default:"--" }}</small>
+                                    </td>
+                                    <td>{{ alumno.sala|default:"Sin sala" }}</td>
+                                    <td>{{ alumno.tutor|default:"Sin tutor" }}</td>
+                                    <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2">{{ alumno.estado_dia|default:"Consulta" }}</span></td>
+                                    <td>{{ alumno.hora_entrada|default:"--" }}</td>
+                                    <td>{{ alumno.hora_salida|default:"--" }}</td>
+                                    <td>{{ alumno.total_incidencias|default:"0" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" class="text-center text-muted py-4">No hay niños cargados para mostrar.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view-section="actividades">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Actividades</h2>
+                        <p>Seguimiento por sala de siesta, almuerzo, actividad pedagógica y observaciones del día.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-calendar2-check"></i></div>
+                </div>
+                <div class="module-grid two">
+                    {% for actividad in actividades_panel %}
+                    <div class="report-card">
+                        <h4>{{ actividad.titulo }}</h4>
+                        <p>{{ actividad.descripcion|default:"Actividad registrada para seguimiento directivo." }}</p>
+                        <div class="text-muted fw-bold small">{{ actividad.fecha|date:"d/m/Y" }}{% if actividad.sala %} · {{ actividad.sala }}{% endif %}</div>
+                    </div>
+                    {% empty %}
+                    <div class="report-card"><h4>Sin actividades cargadas</h4><p>Cuando las maestras o áreas registren actividades, aquí se mostrará el avance por sala.</p></div>
+                    <div class="report-card"><h4>Avance por sala</h4><p>Este espacio puede mostrar si los niños están en siesta, almuerzo o actividad pedagógica.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view-section="reportes">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Reportes</h2>
+                        <p>Consulta porcentajes generales y prepara descargas de reportes en PDF o Excel.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-file-earmark-text"></i></div>
+                </div>
+                <div class="module-grid">
+                    {% for reporte in reportes_panel %}
+                    <div class="report-card">
+                        <h4>{{ reporte.nombre }}</h4>
+                        <p>{{ reporte.descripcion }}</p>
+                        <div class="report-progress" style="--progress:{{ reporte.porcentaje|default:'0' }}%;"><span></span></div>
+                        <strong>{{ reporte.porcentaje|default:"0" }}%</strong>
+                        <div class="report-actions">
+                            <a class="module-soft-btn" href="?seccion=reportes&reporte={{ reporte.slug|default:forloop.counter }}#detalle-reporte">Ver reporte</a>
+                            <a class="module-soft-btn" href="?seccion=reportes&reporte={{ reporte.slug|default:forloop.counter }}&formato=pdf">PDF</a>
+                            <a class="module-soft-btn" href="?seccion=reportes&reporte={{ reporte.slug|default:forloop.counter }}&formato=xlsx">Excel</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="report-card"><h4>Asistencia</h4><p>Porcentaje de niñas y niños presentes, ausentes y fuera de estancia.</p><div class="report-progress" style="--progress:0%;"><span></span></div><strong>0%</strong><div class="report-actions"><a class="module-soft-btn" href="?seccion=reportes&reporte=asistencia#detalle-reporte">Ver reporte</a><a class="module-soft-btn" href="?seccion=reportes&reporte=asistencia&formato=pdf">PDF</a><a class="module-soft-btn" href="?seccion=reportes&reporte=asistencia&formato=xlsx">Excel</a></div></div>
+                    <div class="report-card"><h4>Incidencias</h4><p>Resumen por área, estado, riesgo y seguimiento.</p><div class="report-progress" style="--progress:0%;"><span></span></div><strong>0%</strong><div class="report-actions"><a class="module-soft-btn" href="?seccion=reportes&reporte=incidencias#detalle-reporte">Ver reporte</a><a class="module-soft-btn" href="?seccion=reportes&reporte=incidencias&formato=pdf">PDF</a><a class="module-soft-btn" href="?seccion=reportes&reporte=incidencias&formato=xlsx">Excel</a></div></div>
+                    <div class="report-card"><h4>Salas</h4><p>Cupo usado, maestras asignadas y alumnos por sala.</p><div class="report-progress" style="--progress:0%;"><span></span></div><strong>0%</strong><div class="report-actions"><a class="module-soft-btn" href="?seccion=reportes&reporte=salas#detalle-reporte">Ver reporte</a><a class="module-soft-btn" href="?seccion=reportes&reporte=salas&formato=pdf">PDF</a><a class="module-soft-btn" href="?seccion=reportes&reporte=salas&formato=xlsx">Excel</a></div></div>
+                    {% endfor %}
+                </div>
+
+                {% if reporte_actual %}
+                <div class="report-detail-card" id="detalle-reporte">
+                    <div class="report-detail-head">
+                        <div>
+                            <h3>{{ reporte_actual.titulo }}</h3>
+                            <p>{{ reporte_actual.descripcion }}</p>
+                        </div>
+                        <div class="report-actions">
+                            <a class="module-soft-btn" href="?seccion=reportes"><i class="bi bi-arrow-left"></i> Volver a reportes</a>
+                            <a class="module-soft-btn" href="?seccion=reportes&reporte={{ reporte_actual.slug }}&formato=pdf"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+                            <a class="module-soft-btn" href="?seccion=reportes&reporte={{ reporte_actual.slug }}&formato=xlsx"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+                        </div>
+                    </div>
+                    <div class="report-detail-body">
+                        <div class="report-detail-metrics">
+                            {% for metrica in reporte_actual.metricas %}
+                            <div class="report-detail-metric">
+                                <div class="m-label">{{ metrica.label }}</div>
+                                <div class="m-value">{{ metrica.value }}</div>
+                                <div class="m-hint">{{ metrica.hint }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="module-table-card shadow-none">
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            {% for columna in reporte_actual.columnas %}
+                                            <th>{{ columna }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for fila in reporte_actual.filas %}
+                                        <tr>
+                                            {% for celda in fila %}
+                                            <td>{{ celda }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="4"><div class="report-empty-note">No hay datos disponibles para este reporte.</div></td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="view-section" data-view-section="calendario">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Calendario</h2>
+                        <p>Visualiza días hábiles, festivos, suspensiones, eventos y actividades especiales. Dirección puede proponer una fecha si surge una actividad urgente.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-calendar3"></i></div>
+                </div>
+                <div class="calendar-shell">
+                    <div class="module-table-card p-3">
+                        <div class="calendar-grid">
+                            {% for dia in calendario_dias_panel %}
+                            <div class="calendar-cell {% if not dia.es_habil %}inactive{% endif %}">
+                                <div class="day">{{ dia.fecha|date:"d" }}</div>
+                                <small class="text-muted fw-bold">{{ dia.fecha|date:"M" }}</small>
+                                {% if dia.titulo %}<span class="event">{{ dia.titulo }}</span>{% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="calendar-cell"><div class="day">--</div><small class="text-muted fw-bold">Sin calendario cargado</small></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="quick-form">
+                        <h4><i class="bi bi-plus-circle me-1"></i> Agregar fecha al calendario</h4>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion_directiva" value="crear_evento_calendario">
+                            <div class="mb-3"><label class="form-label fw-bold">Fecha</label><input type="date" name="fecha" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Título</label><input type="text" name="titulo" class="form-control" placeholder="Ej. Reunión con tutores" required></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Tipo</label><select name="tipo" class="form-select"><option>Evento</option><option>Día festivo</option><option>Suspensión</option><option>Actividad especial</option></select></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Descripción</label><textarea name="descripcion" class="form-control" rows="3"></textarea></div>
+                            <button class="module-primary-btn" type="submit"><i class="bi bi-save"></i> Guardar fecha</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view-section="configuracion">
+            <div class="module-page">
+                <div class="module-hero">
+                    <div>
+                        <h2>Configuración</h2>
+                        <p>Consulta datos de la directora, información institucional y datos generales de la estancia.</p>
+                    </div>
+                    <div class="module-hero-icon"><i class="bi bi-gear"></i></div>
+                </div>
+                <div class="module-grid">
+                    <div class="module-info-card"><div class="label">Datos de la directora</div><div class="desc"><strong>{{ request.user.nombre|default:request.user.email|default:"Directora" }}</strong><br>{{ request.user.email|default:"Sin correo registrado" }}<br>Rol: Dirección General</div></div>
+                    <div class="module-info-card"><div class="label">Información institucional</div><div class="desc">Estancia Infantil UNACH<br>Universidad Autónoma de Chiapas<br>Semestre: {{ semestre_activo_operativo.nombre|default:"enero - junio 2026" }}</div></div>
+                    <div class="module-info-card"><div class="label">Datos de la estancia</div><div class="desc">Sede: Estancia Infantil UNACH Tuxtla Gutiérrez<br>Operación: {% if modo_solo_consulta %}Solo consulta{% else %}Activa{% endif %}<br>Actualización manual desde el panel.</div></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="manual-update-footer">
+            <span>Última carga: {% now "d/m/Y H:i" %}</span>
+            <button type="button" class="manual-update-btn" onclick="window.location.reload();">
+                <i class="bi bi-arrow-repeat"></i> Actualizar datos
+            </button>
         </div>
-    </div>
+    </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function(){
+        const body = document.body;
+        const menuBtn = document.getElementById('mobileMenuBtn');
+        const overlay = document.getElementById('mobileOverlay');
+
+        function closeSidebar(){ body.classList.remove('sidebar-open'); }
+        function toggleSidebar(){ body.classList.toggle('sidebar-open'); }
+
+        if(menuBtn){ menuBtn.addEventListener('click', toggleSidebar); }
+        if(overlay){ overlay.addEventListener('click', closeSidebar); }
+
+        const sectionTitles = {
+            inicio: ['Inicio', 'Resumen general por sede'],
+            sedes: ['Sedes', 'Consulta operativa por sede'],
+            ninos: ['Niños', 'Consulta y búsqueda de niñas y niños'],
+            actividades: ['Actividades', 'Seguimiento de actividades por sala'],
+            reportes: ['Reportes', 'Indicadores, porcentajes y descargas'],
+            suplencias: ['Suplencias', 'Pase de lista, autorizaciones y bitácora'],
+            calendario: ['Calendario', 'Eventos, días festivos y actividades'],
+            configuracion: ['Configuración', 'Datos institucionales y de Dirección']
+        };
+
+        const viewLinks = document.querySelectorAll('[data-view-link]');
+        const viewSections = document.querySelectorAll('[data-view-section]');
+        const pageTitle = document.querySelector('[data-page-title]');
+        const pageSubtitle = document.querySelector('[data-page-subtitle]');
+
+        function setActiveView(view, updateUrl){
+            if(!sectionTitles[view]){ view = 'inicio'; }
+
+            viewSections.forEach(section => {
+                section.classList.toggle('active', section.getAttribute('data-view-section') === view);
+            });
+
+            viewLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('data-view-link') === view);
+            });
+
+            if(pageTitle){ pageTitle.textContent = sectionTitles[view][0]; }
+            if(pageSubtitle){ pageSubtitle.textContent = sectionTitles[view][1]; }
+            closeSidebar();
+            window.scrollTo({top:0, behavior:'instant'});
+
+            if(updateUrl){
+                const newUrl = view === 'inicio' ? window.location.pathname : `${window.location.pathname}?seccion=${view}`;
+                window.history.replaceState({}, '', newUrl);
+            }
+        }
+
+        viewLinks.forEach(link => {
+            link.addEventListener('click', function(event){
+                event.preventDefault();
+                setActiveView(this.getAttribute('data-view-link'), true);
+            });
+        });
+
+        document.querySelectorAll('[data-table-search]').forEach(input => {
+            input.addEventListener('input', function(){
+                const table = document.getElementById(this.getAttribute('data-table-search'));
+                if(!table){ return; }
+                const query = this.value.toLowerCase().trim();
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+                });
+            });
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        setActiveView(params.get('seccion') || 'inicio', false);
+    })();
+</script>
 {% endblock %}

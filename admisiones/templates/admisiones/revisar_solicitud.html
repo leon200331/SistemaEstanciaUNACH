@@ -1,538 +1,1309 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revisión de Solicitud</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     :root{
       --brand:#1e3a8a;
+      --brand-2:#2563eb;
+      --brand-3:#0f766e;
       --ink:#0f172a;
       --muted:#64748b;
-      --bg:#f3f5f8;
+      --soft:#f8fafc;
+      --bg:#f4f7fb;
       --card:#ffffff;
-      --line:#e9edf2;
+      --line:#dbe5f3;
+      --blue-soft:#eff6ff;
+      --green:#16a34a;
+      --green-soft:#ecfdf5;
+      --red:#dc2626;
+      --red-soft:#fef2f2;
+      --orange:#f59e0b;
+      --orange-soft:#fffbeb;
+      --cyan:#0891b2;
+      --cyan-soft:#ecfeff;
+      --shadow:0 16px 35px rgba(15, 23, 42, .08);
+      --shadow-soft:0 8px 22px rgba(15, 23, 42, .06);
     }
-    body{ background:var(--bg); font-family:'Segoe UI',sans-serif; color:var(--ink); }
 
-    .navbar-ti{
-      background:var(--brand);
-      padding:.75rem 0;
-      box-shadow:0 4px 10px rgba(0,0,0,.12);
-    }
-    .ti-brand-text{ font-size:1.05rem; font-weight:900; color:#fff; letter-spacing:.4px; line-height:1.15; }
-    .ti-subtext{ color:rgba(255,255,255,.75); font-size:.85rem; }
+    *{ box-sizing:border-box; }
 
-    .container-page{ max-width:1200px; margin:0 auto; padding:22px 16px; margin-top:92px; }
-
-    .card-soft{
-      border:none;
-      border-radius:16px;
-      box-shadow:0 10px 25px rgba(0,0,0,.08);
-      background:var(--card);
-    }
-    .card-soft .card-header{
-      background:#fff;
-      border-bottom:1px solid var(--line);
-      border-top-left-radius:16px;
-      border-top-right-radius:16px;
-      padding:14px 16px;
-    }
-    .card-soft .card-body{ padding:16px; }
-
-    .page-title{ font-weight:900; margin:0; }
-    .small-muted{ color:var(--muted); font-size:.92rem; }
-
-    .badge-pill{ border-radius:999px; padding:.35rem .55rem; font-size:.75rem; font-weight:900; }
-    .b-captura{ background:#ffc107; color:#000; }
-    .b-recibida{ background:#198754; color:#fff; }
-    .b-aprobada{ background:#0d6efd; color:#fff; }
-    .b-rechazada{ background:#dc3545; color:#fff; }
-    .b-revision{ background:#6f42c1; color:#fff; }
-
-    .btn-soft{ border-radius:12px; font-weight:800; padding:.55rem .95rem; }
-    .btn-icon{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:12px; }
-
-    .kv{
-      display:grid;
-      grid-template-columns: 180px 1fr;
-      gap:8px 14px;
+    body{
       margin:0;
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,.10), transparent 34%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 48%, #f8fafc 100%);
+      font-family:'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color:var(--ink);
     }
-    .kv dt{ color:var(--muted); font-weight:800; font-size:.86rem; }
-    .kv dd{ margin:0; font-weight:600; color:#111827; }
 
-    .section-title{
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:1020;
+      background:linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 62%, #0f766e 100%);
+      color:#fff;
+      box-shadow:0 8px 24px rgba(30,58,138,.22);
+    }
+
+    .topbar-inner{
+      max-width:1440px;
+      margin:0 auto;
+      min-height:82px;
+      padding:0 28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand-area{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      min-width:0;
+      text-decoration:none;
+      color:#fff;
+    }
+
+    .brand-logo{
+      width:78px;
+      height:54px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      background:transparent;
+      border-radius:0;
+      overflow:visible;
+    }
+
+    .brand-logo img{
+      height:52px;
+      width:auto;
+      max-width:120px;
+      object-fit:contain;
+      display:block;
+      filter:drop-shadow(0 8px 12px rgba(0,0,0,.20));
+    }
+
+    .brand-title{
+      font-size:1.18rem;
+      font-weight:950;
+      letter-spacing:.02em;
+      line-height:1.1;
+      margin:0;
+      white-space:nowrap;
+    }
+
+    .brand-subtitle{
+      font-size:.86rem;
+      color:rgba(255,255,255,.82);
+      margin-top:3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:660px;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn-top{
+      min-height:43px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:14px;
+      padding:.62rem 1rem;
       font-weight:900;
-      font-size:.95rem;
-      letter-spacing:.3px;
-      margin:0;
+      text-decoration:none;
+      transition:.2s ease;
+      white-space:nowrap;
     }
-    .divider{ height:1px; background:var(--line); margin:14px 0; }
 
-    .callout{
+    .btn-back{
+      color:#fff;
+      border:1px solid rgba(255,255,255,.62);
+      background:rgba(255,255,255,.08);
+    }
+
+    .btn-back:hover{
+      color:#fff;
+      background:rgba(255,255,255,.16);
+      transform:translateY(-1px);
+    }
+
+    .user-chip{
+      min-height:43px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      border-radius:999px;
+      padding:.44rem .72rem .44rem .48rem;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24);
+      color:#fff;
+      font-weight:850;
+      max-width:290px;
+    }
+
+    .user-chip .user-icon{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      background:#fff;
+      color:var(--brand-2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.15rem;
+      flex:0 0 auto;
+    }
+
+    .user-chip .user-name{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:.9rem;
+    }
+
+    .page-shell{
+      max-width:1440px;
+      margin:0 auto;
+      padding:28px 28px 42px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:26px;
+      background:linear-gradient(135deg, #1e40af 0%, #2563eb 58%, #0891b2 100%);
+      color:#fff;
+      padding:30px 34px;
+      box-shadow:0 24px 45px rgba(37,99,235,.18);
+      margin-bottom:22px;
+      min-height:156px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+    }
+
+    .hero::before,
+    .hero::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      background:rgba(255,255,255,.13);
+      pointer-events:none;
+    }
+
+    .hero::before{ width:230px; height:230px; right:-44px; top:-72px; }
+    .hero::after{ width:150px; height:150px; right:114px; bottom:-72px; }
+
+    .hero-content{ position:relative; z-index:2; max-width:850px; }
+
+    .hero-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.42rem .74rem;
+      border-radius:999px;
+      background:rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.22);
+      color:#fff;
+      font-size:.78rem;
+      font-weight:950;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:14px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:2.05rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      margin:0;
+      font-size:1rem;
+      color:rgba(255,255,255,.90);
+      font-weight:650;
+      line-height:1.55;
+    }
+
+    .hero-icon{
+      position:relative;
+      z-index:2;
+      width:86px;
+      height:86px;
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(255,255,255,.13);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:2.6rem;
+      color:#fff;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+      flex:0 0 auto;
+    }
+
+    .grid-top{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .card-ui{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow-soft);
+      overflow:hidden;
+      backdrop-filter:blur(8px);
+    }
+
+    .card-head{
+      padding:18px 20px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background:linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .card-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:0;
+      font-size:1rem;
+      font-weight:950;
+      color:#082f63;
+      letter-spacing:-.01em;
+    }
+
+    .title-icon{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      background:var(--blue-soft);
+      color:var(--brand-2);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      font-size:1.15rem;
+    }
+
+    .card-body-ui{ padding:20px; }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .74rem;
+      font-size:.78rem;
+      font-weight:950;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .pill-blue{ background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
+    .pill-green{ background:#dcfce7; color:#166534; border-color:#86efac; }
+    .pill-yellow{ background:#fef3c7; color:#92400e; border-color:#fde68a; }
+    .pill-red{ background:#fee2e2; color:#991b1b; border-color:#fecaca; }
+    .pill-purple{ background:#ede9fe; color:#5b21b6; border-color:#ddd6fe; }
+    .pill-slate{ background:#f1f5f9; color:#475569; border-color:#e2e8f0; }
+
+    .dictamen-card{
+      border-left:7px solid var(--brand-2);
+    }
+
+    .dictamen-layout{
+      display:grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .mini-box{
       border:1px solid var(--line);
       background:#f8fafc;
+      border-radius:18px;
+      padding:16px;
+      height:100%;
+    }
+
+    .mini-label{
+      display:block;
+      font-size:.78rem;
+      font-weight:950;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:8px;
+    }
+
+    .mini-title{
+      font-size:1rem;
+      font-weight:950;
+      color:#0f172a;
+      margin:0 0 5px;
+    }
+
+    .mini-text{
+      color:#64748b;
+      font-size:.9rem;
+      font-weight:650;
+      line-height:1.5;
+      margin:0;
+    }
+
+    .action-panel{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .btn-action{
       border-radius:14px;
-      padding:12px 14px;
+      padding:.78rem 1rem;
+      font-weight:950;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:48px;
+      box-shadow:0 10px 18px rgba(15,23,42,.08);
     }
 
-    .sticky-actions{
+    .summary-card{
+      min-height:100%;
+      border-left:7px solid var(--cyan);
+    }
+
+    .summary-number{
+      font-size:2.2rem;
+      line-height:1;
+      font-weight:950;
+      color:#0f2a61;
+      margin:0;
+    }
+
+    .summary-name{
+      font-size:1rem;
+      font-weight:950;
+      color:#0f172a;
+      margin:0;
+    }
+
+    .summary-line{
+      color:#64748b;
+      font-size:.9rem;
+      font-weight:650;
+      margin:4px 0 0;
+    }
+
+    .main-grid{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 430px;
+      gap:18px;
+      align-items:start;
+    }
+
+    .section-stack{
+      display:grid;
+      gap:18px;
+    }
+
+    .data-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .data-item{
+      border:1px solid var(--line);
+      background:#fbfdff;
+      border-radius:16px;
+      padding:14px;
+      min-height:78px;
+    }
+
+    .data-item.full{ grid-column:1 / -1; }
+
+    .data-label{
+      color:#64748b;
+      font-size:.76rem;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      margin-bottom:5px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .data-value{
+      margin:0;
+      color:#0f172a;
+      font-size:.94rem;
+      font-weight:750;
+      line-height:1.35;
+      word-break:break-word;
+    }
+
+    .notice{
+      border:1px solid #c7d2fe;
+      background:linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+      border-radius:18px;
+      padding:15px 16px;
+      color:#334155;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      font-weight:650;
+    }
+
+    .notice i{
+      width:34px;
+      height:34px;
+      flex:0 0 auto;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#dbeafe;
+      color:#1d4ed8;
+      font-size:1.05rem;
+    }
+
+    .notice strong{ color:#0f172a; }
+
+    .sticky-panel{
       position:sticky;
-      top:92px;
+      top:102px;
     }
 
-    .doc-link-btn {
-        display: flex; align-items: center; justify-content: start; width: 100%;
-        background-color: #f8f9fa; border: 1px solid #dee2e6; color: #212529;
-        font-weight: 600; padding: 6px 12px; border-radius: 8px; text-decoration: none;
-        transition: all 0.2s; font-size: 0.85rem;
+    .expediente-card{
+      border:1px solid rgba(37,99,235,.35);
+      box-shadow:0 18px 36px rgba(37,99,235,.10);
     }
-    .doc-link-btn:hover { background-color: #e9ecef; border-color: #ced4da; }
-    .doc-link-btn i { font-size: 1.1rem; margin-right: 8px; }
 
-    .swal2-styled.swal2-confirm {
-      border-radius: 12px !important;
-      font-weight: 800 !important;
+    .expediente-head{
+      background:linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);
+      color:#fff;
+      border-bottom:0;
     }
-    .swal2-styled.swal2-cancel {
-      border-radius: 12px !important;
-      font-weight: 800 !important;
+
+    .expediente-head .card-title,
+    .expediente-head .title-icon{ color:#fff; }
+
+    .expediente-head .title-icon{
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
     }
+
+    .tutor-status{
+      border:1px solid #bfdbfe;
+      border-radius:18px;
+      background:#eff6ff;
+      padding:14px;
+      text-align:center;
+      margin-bottom:16px;
+    }
+
+    .tutor-status small{
+      display:block;
+      color:#64748b;
+      font-weight:850;
+      margin-bottom:4px;
+    }
+
+    .tutor-status strong{
+      color:#1d4ed8;
+      font-size:1rem;
+      font-weight:950;
+    }
+
+    .doc-box{
+      border:1px solid var(--line);
+      background:#f8fafc;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:16px;
+    }
+
+    .doc-title-main{
+      text-align:center;
+      color:#0f172a;
+      font-weight:950;
+      font-size:.92rem;
+      padding-bottom:11px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:13px;
+    }
+
+    .doc-group-title{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      font-size:.79rem;
+      font-weight:950;
+      color:#1d4ed8;
+      margin:12px 0 7px;
+    }
+
+    .doc-link-btn{
+      width:100%;
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:8px;
+      padding:8px 11px;
+      border-radius:12px;
+      border:1px solid #dbe4ef;
+      background:#fff;
+      color:#1f2937;
+      font-size:.84rem;
+      font-weight:750;
+      text-decoration:none;
+      transition:.18s ease;
+      box-shadow:0 4px 10px rgba(15,23,42,.025);
+    }
+
+    .doc-link-btn:hover{
+      color:#1d4ed8;
+      border-color:#93c5fd;
+      background:#f8fbff;
+      transform:translateY(-1px);
+    }
+
+    .doc-link-btn i{ font-size:1.08rem; flex:0 0 auto; }
+
+    .empty-doc{
+      border:1px dashed #cbd5e1;
+      color:#64748b;
+      background:#fff;
+      border-radius:12px;
+      padding:9px 10px;
+      font-size:.82rem;
+      font-weight:750;
+      text-align:center;
+    }
+
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:16px 0;
+    }
+
+    .field-note{
+      color:#64748b;
+      font-size:.86rem;
+      line-height:1.45;
+      font-weight:650;
+    }
+
+    .alert-clean{
+      border-radius:16px;
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-soft);
+    }
+
+    .modal-content{
+      border:0;
+      border-radius:24px;
+      box-shadow:0 26px 60px rgba(15,23,42,.24);
+      overflow:hidden;
+    }
+
+    .swal2-styled.swal2-confirm,
+    .swal2-styled.swal2-cancel{
+      border-radius:14px !important;
+      font-weight:900 !important;
+    }
+
+    @media (max-width:1100px){
+      .grid-top,
+      .main-grid,
+      .dictamen-layout{ grid-template-columns:1fr; }
+      .sticky-panel{ position:static; }
+    }
+
+    @media (max-width:768px){
+      .topbar-inner{ padding:14px 16px; flex-direction:column; align-items:flex-start; }
+      .top-actions{ width:100%; justify-content:space-between; }
+      .brand-title{ white-space:normal; }
+      .brand-subtitle{ white-space:normal; max-width:100%; }
+      .page-shell{ padding:20px 14px 34px; }
+      .hero{ padding:24px; border-radius:22px; align-items:flex-start; }
+      .hero-icon{ display:none; }
+      .hero h1{ font-size:1.62rem; }
+      .data-grid{ grid-template-columns:1fr; }
+      .data-item.full{ grid-column:auto; }
+      .btn-top{ flex:1; justify-content:center; }
+      .user-chip{ max-width:100%; }
+    }
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
   </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
-  <div class="container-fluid justify-content-center">
-    <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3"
-             style="height:44px; width:auto; object-fit:contain;">
-        <div class="text-white">
-          <div class="ti-brand-text">REVISIÓN DE SOLICITUD</div>
-          <div class="ti-subtext">Folio {{ s.folio|default:"-" }} · {{ s.nombre_tutor_completo|default:"" }}</div>
-        </div>
-      </a>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand-area" href="#">
+      <span class="brand-logo">
+        <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH"
+             onerror="this.onerror=null;this.src='{% static 'logo.png' %}';">
+      </span>
+      <span class="min-w-0">
+        <span class="brand-title d-block">Revisión de solicitud</span>
+        <span class="brand-subtitle d-block">Folio {{ s.folio|default:"-" }} · {{ s.nombre_tutor_completo|default:"Solicitud de admisión" }}</span>
+      </span>
+    </a>
 
-      <div class="ms-auto d-flex gap-2">
-        <a href="{% url 'panel_admisiones' %}" class="btn btn-outline-light btn-soft">
-          <i class="bi bi-arrow-left me-1"></i> Volver al panel
-        </a>
-      </div>
+    <div class="top-actions">
+      <a href="{% url 'panel_admisiones' %}" class="btn-top btn-back">
+        <i class="bi bi-arrow-left"></i>
+        Regresar
+      </a>
+      <span class="user-chip" title="Trabajadora Social">
+        <span class="user-icon"><i class="bi bi-person-heart"></i></span>
+        <span class="user-name">{{ request.user.nombre|default:request.user.username }}</span>
+      </span>
     </div>
   </div>
-</nav>
+</header>
 
-<div class="container-page">
+<main class="page-shell">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
 
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-3 shadow-sm border-0" role="alert">
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show alert-clean mb-3" role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     {% endfor %}
   {% endif %}
 
-  <div class="row g-3">
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-kicker"><i class="bi bi-clipboard2-check"></i> Trabajo Social · Revisión documental</span>
+      <h1>Solicitud de admisión</h1>
+      <p>
+        Consulta la información del tutor y del menor, revisa el expediente cargado y registra el dictamen correspondiente desde la parte superior.
+      </p>
+    </div>
+    <div class="hero-icon"><i class="bi bi-person-vcard"></i></div>
+  </section>
 
-    <div class="col-lg-8">
+  <section class="grid-top">
+    <div class="card-ui dictamen-card">
+      <div class="card-head">
+        <h2 class="card-title">
+          <span class="title-icon"><i class="bi bi-clipboard-check"></i></span>
+          Dictamen inicial
+        </h2>
+        {% if s.estado == "RECIBIDA" %}
+          <span class="status-pill pill-yellow"><i class="bi bi-hourglass-split"></i> Pendiente de dictaminar</span>
+        {% else %}
+          <span class="status-pill pill-slate"><i class="bi bi-check2-circle"></i> Estado registrado</span>
+        {% endif %}
+      </div>
 
-      <div class="card card-soft mb-3">
-        <div class="card-header d-flex align-items-center justify-content-between">
-          <div>
-            <h4 class="page-title">Solicitud (Folio: {{ s.folio|default:"-" }})</h4>
-            <div class="small-muted">
-              Creada: {{ s.created_at|date:"d/m/Y H:i" }}
-              {% if s.correo %} · Correo: {{ s.correo }}{% endif %}
-            </div>
+      <div class="card-body-ui">
+        <div class="dictamen-layout">
+          <div class="mini-box">
+            {% if s.dictaminado_por %}
+              <span class="mini-label">Último dictamen</span>
+              <h3 class="mini-title">{{ s.dictaminado_por }}</h3>
+              <p class="mini-text">
+                Fecha: {% if s.dictaminado_en %}{{ s.dictaminado_en|date:"d/m/Y H:i" }}{% else %}-{% endif %}
+              </p>
+            {% else %}
+              <span class="mini-label">Sin dictamen registrado</span>
+              <h3 class="mini-title">Revisión pendiente</h3>
+              <p class="mini-text">Aún no se ha aprobado ni rechazado esta solicitud.</p>
+            {% endif %}
           </div>
 
-          <div class="d-flex align-items-center gap-2">
-            {% if inscripcion and inscripcion.estado == "EN_REVISION" %}
-              <span class="badge-pill b-revision"><i class="bi bi-eye me-1"></i>REVISIÓN DE EXPEDIENTE</span>
-            {% elif s.estado == "CAPTURA" %}
-              <span class="badge-pill b-captura">CAPTURA</span>
-            {% elif s.estado == "RECIBIDA" %}
-              <span class="badge-pill b-recibida">RECIBIDA</span>
-            {% elif s.estado == "APROBADA" %}
-              <span class="badge-pill b-aprobada">APROBADA</span>
-            {% elif s.estado == "RECHAZADA" %}
-              <span class="badge-pill b-rechazada">RECHAZADA</span>
+          <div class="mini-box">
+            {% if s.estado == "RECIBIDA" %}
+              <span class="mini-label">Acciones disponibles</span>
+              <form method="post" action="{% url 'dictaminar_solicitud' s.id %}" id="formAprobarSolicitud" class="action-panel">
+                {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
+                <input type="hidden" name="accion" value="APROBAR">
+                <button class="btn btn-success btn-action" type="button" onclick="confirmarAprobacion()">
+                  <i class="bi bi-check2-circle"></i> Aprobar, generar PDF y enviar correo
+                </button>
+              </form>
+
+              <button class="btn btn-danger btn-action w-100 mt-2" type="button" data-bs-toggle="modal" data-bs-target="#modalRechazo">
+                <i class="bi bi-x-circle"></i> Rechazar solicitud
+              </button>
+
+              <p class="mini-text mt-2">
+                Al aprobar o rechazar se generará el PDF de dictamen y se enviará al correo del tutor.
+              </p>
             {% else %}
-              <span class="badge-pill b-captura">{{ s.estado }}</span>
+              <span class="mini-label">Acción completada</span>
+              <h3 class="mini-title">La solicitud está en otra etapa</h3>
+              <p class="mini-text">El dictamen inicial ya fue realizado o no corresponde operar esta solicitud desde esta sección.</p>
+              <a class="btn btn-outline-secondary btn-action w-100 mt-3" href="{% url 'editar_solicitud' solicitud_id=s.id %}">
+                <i class="bi bi-pencil-square"></i> Editar datos básicos
+              </a>
             {% endif %}
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="card-body">
-          <div class="callout">
-            <div class="d-flex align-items-start gap-2">
-              <i class="bi bi-info-circle" style="font-size:1.1rem;"></i>
-              <div>
-                <div class="fw-bold">Recomendación</div>
-                <div class="small-muted">
-                  Revisa los datos capturados por el tutor. Si procede, dictamina en el panel derecho.
-                  Al aceptar o rechazar se generará un PDF de dictamen y se enviará al correo del tutor.
-                </div>
-              </div>
+    <div class="card-ui summary-card">
+      <div class="card-head">
+        <h2 class="card-title">
+          <span class="title-icon"><i class="bi bi-file-earmark-person"></i></span>
+          Resumen de folio
+        </h2>
+        {% if inscripcion and inscripcion.estado == "EN_REVISION" %}
+          <span class="status-pill pill-purple"><i class="bi bi-eye"></i> Revisión</span>
+        {% elif s.estado == "CAPTURA" %}
+          <span class="status-pill pill-yellow"><i class="bi bi-clock-history"></i> Captura</span>
+        {% elif s.estado == "RECIBIDA" %}
+          <span class="status-pill pill-green"><i class="bi bi-inbox-fill"></i> Recibida</span>
+        {% elif s.estado == "APROBADA" %}
+          <span class="status-pill pill-blue"><i class="bi bi-check-circle-fill"></i> Aprobada</span>
+        {% elif s.estado == "RECHAZADA" %}
+          <span class="status-pill pill-red"><i class="bi bi-x-circle-fill"></i> Rechazada</span>
+        {% else %}
+          <span class="status-pill pill-slate">{{ s.estado }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body-ui d-flex align-items-center gap-3">
+        <div class="title-icon" style="width:58px;height:58px;font-size:1.65rem;"><i class="bi bi-hash"></i></div>
+        <div>
+          <p class="summary-number">{{ s.folio|default:"-" }}</p>
+          <p class="summary-name">{{ s.nombre_tutor_completo|default:"Tutor no registrado" }}</p>
+          <p class="summary-line">Creada: {{ s.created_at|date:"d/m/Y H:i" }}{% if s.correo %} · {{ s.correo }}{% endif %}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="main-grid">
+    <div class="section-stack">
+
+      <div class="card-ui">
+        <div class="card-head">
+          <h2 class="card-title">
+            <span class="title-icon"><i class="bi bi-info-circle"></i></span>
+            Recomendación de revisión
+          </h2>
+        </div>
+        <div class="card-body-ui">
+          <div class="notice">
+            <i class="bi bi-lightbulb"></i>
+            <div>
+              <strong>Verifica la información capturada por el tutor.</strong><br>
+              Si procede, utiliza el dictamen inicial ubicado en la parte superior. Al aceptar o rechazar se generará un PDF de dictamen y se enviará al correo del tutor.
             </div>
           </div>
 
           {% if s.estado == "RECHAZADA" and s.comentario_respuesta %}
-            <div class="divider"></div>
-            <div class="callout" style="background:#fff5f5;">
-              <div class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle me-1"></i> Motivo registrado</div>
-              <div class="small-muted" style="white-space:pre-wrap;">{{ s.comentario_respuesta }}</div>
+            <div class="notice mt-3" style="border-color:#fecaca;background:#fff5f5;">
+              <i class="bi bi-exclamation-triangle" style="background:#fee2e2;color:#dc2626;"></i>
+              <div>
+                <strong class="text-danger">Motivo registrado</strong><br>
+                <span style="white-space:pre-wrap;">{{ s.comentario_respuesta }}</span>
+              </div>
             </div>
           {% endif %}
         </div>
       </div>
 
-      <div class="card card-soft mb-3">
-        <div class="card-header">
-          <h6 class="section-title"><i class="bi bi-person-badge me-2"></i>Datos del tutor</h6>
+      <div class="card-ui">
+        <div class="card-head">
+          <h2 class="card-title">
+            <span class="title-icon"><i class="bi bi-person-badge"></i></span>
+            Datos del tutor
+          </h2>
         </div>
-        <div class="card-body">
-          <dl class="kv">
-            <dt>Nombre completo</dt>
-            <dd>{{ s.nombre_tutor_completo }}</dd>
+        <div class="card-body-ui">
+          <div class="data-grid">
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-person"></i> Nombre completo</div>
+              <p class="data-value">{{ s.nombre_tutor_completo|default:"-" }}</p>
+            </div>
 
-            <dt>Parentesco</dt>
-            <dd>
-              {{ s.get_parentesco_display }}
-              {% if s.parentesco == "OTRO" and s.parentesco_otro %}
-                ({{ s.parentesco_otro }})
-              {% endif %}
-            </dd>
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-people"></i> Parentesco</div>
+              <p class="data-value">
+                {{ s.get_parentesco_display|default:"-" }}
+                {% if s.parentesco == "OTRO" and s.parentesco_otro %}
+                  ({{ s.parentesco_otro }})
+                {% endif %}
+              </p>
+            </div>
 
-            <dt>Matrícula</dt>
-            <dd>{{ s.matricula|default:"-" }}</dd>
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-credit-card-2-front"></i> Matrícula</div>
+              <p class="data-value">{{ s.matricula|default:"-" }}</p>
+            </div>
 
-            <dt>Unidad académica</dt>
-            <dd>{{ s.unidad_academica|default:"-" }}</dd>
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-envelope"></i> Correo</div>
+              <p class="data-value">{{ s.correo|default:"-" }}</p>
+            </div>
 
-            <dt>Programa educativo</dt>
-            <dd>{{ s.programa_educativo|default:"-" }}</dd>
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-telephone"></i> Celular</div>
+              <p class="data-value">{{ s.celular|default:"-" }}</p>
+            </div>
 
-            <dt>Correo</dt>
-            <dd>{{ s.correo|default:"-" }}</dd>
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-mortarboard"></i> Programa educativo</div>
+              <p class="data-value">{{ s.programa_educativo|default:"-" }}</p>
+            </div>
 
-            <dt>Celular</dt>
-            <dd>{{ s.celular|default:"-" }}</dd>
+            <div class="data-item full">
+              <div class="data-label"><i class="bi bi-building"></i> Unidad académica</div>
+              <p class="data-value">{{ s.unidad_academica|default:"-" }}</p>
+            </div>
 
-            <dt>Domicilio</dt>
-            <dd>{{ s.estado_domicilio }} {{ s.ciudad }}, {{ s.calle }} {{ s.numero_exterior }}</dd>
-          </dl>
+            <div class="data-item full">
+              <div class="data-label"><i class="bi bi-geo-alt"></i> Domicilio</div>
+              <p class="data-value">{{ s.estado_domicilio }} {{ s.ciudad }}, {{ s.calle }} {{ s.numero_exterior }}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="card card-soft mb-3">
-        <div class="card-header">
-          <h6 class="section-title"><i class="bi bi-person-heart me-2"></i>Datos del menor</h6>
+      <div class="card-ui">
+        <div class="card-head">
+          <h2 class="card-title">
+            <span class="title-icon"><i class="bi bi-person-heart"></i></span>
+            Datos del menor
+          </h2>
         </div>
-        <div class="card-body">
-          <dl class="kv">
-            <dt>Nombre del menor</dt>
-            <dd>{{ s.nombre_menor_completo|default:"-" }}</dd>
+        <div class="card-body-ui">
+          <div class="data-grid">
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-person-vcard"></i> Nombre del menor</div>
+              <p class="data-value">{{ s.nombre_menor_completo|default:"-" }}</p>
+            </div>
 
-            <dt>Fecha de nacimiento</dt>
-            <dd>{% if s.fecha_nacimiento_menor %}{{ s.fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}-{% endif %}</dd>
+            <div class="data-item">
+              <div class="data-label"><i class="bi bi-calendar-event"></i> Fecha de nacimiento</div>
+              <p class="data-value">{% if s.fecha_nacimiento_menor %}{{ s.fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}-{% endif %}</p>
+            </div>
 
-            <dt>CURP</dt>
-            <dd>{{ s.curp_menor|default:"-" }}</dd>
-          </dl>
+            <div class="data-item full">
+              <div class="data-label"><i class="bi bi-fingerprint"></i> CURP</div>
+              <p class="data-value">{{ s.curp_menor|default:"-" }}</p>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
 
-    <div class="col-lg-4">
-      <div class="sticky-actions">
+    <aside class="sticky-panel">
+      {% if inscripcion %}
+      <div class="card-ui expediente-card mb-3">
+        <div class="card-head expediente-head">
+          <h2 class="card-title">
+            <span class="title-icon"><i class="bi bi-folder-check"></i></span>
+            Expediente de inscripción
+          </h2>
+        </div>
 
-        {% if inscripcion %}
-        <div class="card card-soft mb-3 border-primary" style="border: 2px solid var(--brand) !important;">
-          <div class="card-header bg-primary text-white">
-            <h6 class="section-title text-white"><i class="bi bi-folder-check me-2"></i>Expediente de Inscripción</h6>
+        <div class="card-body-ui">
+          <div class="tutor-status">
+            <small>Estatus del tutor</small>
+            <strong>{{ inscripcion.get_estado_display }}</strong>
           </div>
-          <div class="card-body">
 
-            <div class="mb-3 small bg-light p-2 rounded text-center border">
-                Estatus del tutor:<br>
-                <strong class="text-primary fs-6">{{ inscripcion.get_estado_display }}</strong>
+          <div class="doc-box">
+            <div class="doc-title-main">Documentos subidos</div>
+
+            <p class="doc-group-title"><i class="bi bi-person-hearts"></i> Del Menor</p>
+            <div class="d-grid gap-2 mb-3 doc-group">
+              {% if inscripcion.doc_menor_certificado_medico %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_certificado_medico' %}" class="doc-link-btn" data-doc="doc_menor_certificado_medico"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Certificado Médico</a>{% endif %}
+              {% if inscripcion.doc_menor_cartilla_vacunacion %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_cartilla_vacunacion' %}" class="doc-link-btn" data-doc="doc_menor_cartilla_vacunacion"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Cartilla de Vacunación</a>{% endif %}
+              {% if inscripcion.doc_menor_grupo_sanguineo %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_grupo_sanguineo' %}" class="doc-link-btn" data-doc="doc_menor_grupo_sanguineo"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Grupo Sanguíneo</a>{% endif %}
+              {% if inscripcion.doc_menor_acta_nacimiento %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_acta_nacimiento' %}" class="doc-link-btn" data-doc="doc_menor_acta_nacimiento"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
+              {% if inscripcion.doc_menor_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_fotos' %}" class="doc-link-btn" data-doc="doc_menor_fotos"><i class="bi bi-image-fill text-success"></i> Fotos del Menor</a>{% endif %}
+              {% if inscripcion.doc_menor_laboratorio %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_laboratorio' %}" class="doc-link-btn" data-doc="doc_menor_laboratorio"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Est. Laboratorio</a>{% endif %}
             </div>
 
-            <div class="bg-light p-3 rounded border mb-3">
-                <h6 class="fw-bold text-center mb-3 border-bottom pb-2" style="font-size: 0.9rem;">Documentos Subidos</h6>
-
-                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-hearts me-1"></i> Del Menor</p>
-                <div class="d-grid gap-1 mb-3">
-                    {% if inscripcion.doc_menor_certificado_medico %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_certificado_medico' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Certificado Médico</a>{% endif %}
-                    {% if inscripcion.doc_menor_cartilla_vacunacion %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_cartilla_vacunacion' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Cartilla de Vacunación</a>{% endif %}
-                    {% if inscripcion.doc_menor_grupo_sanguineo %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_grupo_sanguineo' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Grupo Sanguíneo</a>{% endif %}
-                    {% if inscripcion.doc_menor_acta_nacimiento %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_acta_nacimiento' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
-                    {% if inscripcion.doc_menor_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Menor</a>{% endif %}
-                    {% if inscripcion.doc_menor_laboratorio %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_menor_laboratorio' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Est. Laboratorio</a>{% endif %}
-                </div>
-
-                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-badge-fill me-1"></i> Del Beneficiario</p>
-                <div class="d-grid gap-1 mb-3">
-                    {% if inscripcion.doc_tutor_acta_nacimiento %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_acta_nacimiento' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
-                    {% if inscripcion.doc_tutor_ine %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_ine' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
-                    {% if inscripcion.doc_tutor_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos del Tutor</a>{% endif %}
-
-                    {% if inscripcion.doc_segundo_padre_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_segundo_padre_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Fotos de la Pareja</a>{% endif %}
-
-                    {% if inscripcion.doc_tutor_domicilio %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_domicilio' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Comp. Domicilio</a>{% endif %}
-                    {% if inscripcion.doc_tutor_pago %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_pago' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Recibo de Pago</a>{% endif %}
-                    {% if inscripcion.doc_tutor_historial %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_historial' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Historial Académico</a>{% endif %}
-                    {% if inscripcion.doc_tutor_horario %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_horario' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Horario de Clases</a>{% endif %}
-                </div>
-
-                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-person-check-fill me-1"></i> Familiares Autorizados</p>
-                <div class="d-grid gap-1 mb-3">
-                    {% if inscripcion.doc_autorizado_carta %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_autorizado_carta' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Carta Autorización</a>{% endif %}
-                    {% if inscripcion.doc_autorizado_ine %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_autorizado_ine' %}" class="doc-link-btn"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE (Todos)</a>{% endif %}
-
-                    {% if inscripcion.doc_contacto_1_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_1_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Foto Familiar 1</a>{% endif %}
-                    {% if inscripcion.doc_contacto_2_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_2_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Foto Familiar 2</a>{% endif %}
-                    {% if inscripcion.doc_contacto_3_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_3_fotos' %}" class="doc-link-btn"><i class="bi bi-image-fill text-success"></i> Foto Familiar 3</a>{% endif %}
-                </div>
-
-                <p class="mb-1 fw-bold text-primary" style="font-size: 0.8rem;"><i class="bi bi-file-earmark-check-fill me-1"></i> Oficial</p>
-                <div class="d-grid gap-1">
-                    {% if inscripcion.reglamento_firmado %}
-                    <a href="{% url 'descargar_archivo_expediente' inscripcion.id 'reglamento_firmado' %}" class="btn btn-primary btn-soft text-start fw-bold" style="font-size: 0.85rem;">
-                        <i class="bi bi-file-earmark-text-fill me-2 text-white"></i> Descargar Reglamento
-                    </a>
-                    {% else %}
-                    <div class="alert alert-warning py-2 small fw-bold text-center border-warning m-0"><i class="bi bi-hourglass-split me-1"></i> Esperando Reglamento</div>
-                    {% endif %}
-                </div>
+            <p class="doc-group-title"><i class="bi bi-person-badge-fill"></i> Del Beneficiario</p>
+            <div class="d-grid gap-2 mb-3 doc-group">
+              {% if inscripcion.doc_tutor_acta_nacimiento %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_acta_nacimiento' %}" class="doc-link-btn" data-doc="doc_tutor_acta_nacimiento"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Acta de Nacimiento</a>{% endif %}
+              {% if inscripcion.doc_tutor_ine %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_ine' %}" class="doc-link-btn" data-doc="doc_tutor_ine"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE</a>{% endif %}
+              {% if inscripcion.doc_tutor_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_fotos' %}" class="doc-link-btn" data-doc="doc_tutor_fotos"><i class="bi bi-image-fill text-success"></i> Fotos del Tutor</a>{% endif %}
+              {% if inscripcion.doc_segundo_padre_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_segundo_padre_fotos' %}" class="doc-link-btn" data-doc="doc_segundo_padre_fotos"><i class="bi bi-image-fill text-success"></i> Fotos de la Pareja</a>{% endif %}
+              {% if inscripcion.doc_tutor_domicilio %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_domicilio' %}" class="doc-link-btn" data-doc="doc_tutor_domicilio"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Comp. Domicilio</a>{% endif %}
+              {% if inscripcion.doc_tutor_pago %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_pago' %}" class="doc-link-btn" data-doc="doc_tutor_pago"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Recibo de Pago</a>{% endif %}
+              {% if inscripcion.doc_tutor_historial %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_historial' %}" class="doc-link-btn" data-doc="doc_tutor_historial"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Historial Académico</a>{% endif %}
+              {% if inscripcion.doc_tutor_horario %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_tutor_horario' %}" class="doc-link-btn" data-doc="doc_tutor_horario"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Horario de Clases</a>{% endif %}
             </div>
 
-            {% if inscripcion.comentario_tutor %}
-            <div class="alert alert-info py-2 small shadow-sm border-info mb-3">
-              <span class="fw-bold text-dark"><i class="bi bi-chat-left-text-fill me-1 text-primary"></i> Mensaje del Tutor:</span><br>
-              <span class="fst-italic text-secondary">"{{ inscripcion.comentario_tutor }}"</span>
+            <p class="doc-group-title"><i class="bi bi-person-check-fill"></i> Familiares Autorizados</p>
+            <div class="d-grid gap-2 mb-3 doc-group">
+              {% if inscripcion.doc_autorizado_carta %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_autorizado_carta' %}" class="doc-link-btn" data-doc="doc_autorizado_carta"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Carta Autorización</a>{% endif %}
+              {% if inscripcion.doc_autorizado_ine %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_autorizado_ine' %}" class="doc-link-btn" data-doc="doc_autorizado_ine"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Copia de INE (Todos)</a>{% endif %}
+              {% if inscripcion.doc_contacto_1_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_1_fotos' %}" class="doc-link-btn" data-doc="doc_contacto_1_fotos"><i class="bi bi-image-fill text-success"></i> Foto Familiar 1</a>{% endif %}
+              {% if inscripcion.doc_contacto_2_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_2_fotos' %}" class="doc-link-btn" data-doc="doc_contacto_2_fotos"><i class="bi bi-image-fill text-success"></i> Foto Familiar 2</a>{% endif %}
+              {% if inscripcion.doc_contacto_3_fotos %}<a href="{% url 'descargar_archivo_expediente' inscripcion.id 'doc_contacto_3_fotos' %}" class="doc-link-btn" data-doc="doc_contacto_3_fotos"><i class="bi bi-image-fill text-success"></i> Foto Familiar 3</a>{% endif %}
             </div>
-            {% endif %}
 
-            {% if inscripcion.estado == 'EN_REVISION' %}
+            <p class="doc-group-title"><i class="bi bi-file-earmark-check-fill"></i> Oficial</p>
+            <div class="d-grid gap-2 doc-group">
+              {% if inscripcion.reglamento_firmado %}
+                <a href="{% url 'descargar_archivo_expediente' inscripcion.id 'reglamento_firmado' %}" class="btn btn-primary btn-action justify-content-start text-start" data-doc="reglamento_firmado" style="font-size:.86rem;box-shadow:none;">
+                  <i class="bi bi-file-earmark-text-fill"></i> Descargar Reglamento
+                </a>
+              {% else %}
+                <div class="empty-doc"><i class="bi bi-hourglass-split me-1"></i> Esperando Reglamento</div>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if inscripcion.comentario_tutor %}
+            <div class="notice mb-3" style="border-color:#bae6fd;background:#f0f9ff;">
+              <i class="bi bi-chat-left-text-fill" style="background:#e0f2fe;color:#0284c7;"></i>
+              <div>
+                <strong>Mensaje del tutor</strong><br>
+                <span class="fst-italic">"{{ inscripcion.comentario_tutor }}"</span>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if inscripcion.estado == 'EN_REVISION' %}
             <div class="divider"></div>
-            <p class="small text-muted mb-2 lh-sm">Por favor, verifica que todos los documentos sean legibles y correctos antes de pasarlos a filtros.</p>
+            <p class="field-note mb-2">Verifica que todos los documentos sean legibles y correctos antes de pasarlos a filtros.</p>
 
             <form method="post" action="{% url 'revisar_solicitud' s.id %}" id="formRevisionInscripcion">
               {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
               <input type="hidden" name="docs_erroneos" id="docs_erroneos" value="">
               <input type="hidden" name="accion_inscripcion" id="input_accion_inscripcion" value="">
 
-              <div class="alert alert-warning small py-2 my-3 border-warning shadow-sm">
-                  <i class="bi bi-info-circle-fill me-1"></i> <strong>¿Falta o está mal un documento?</strong> Ponle una palomita roja a los documentos incorrectos en la lista de arriba y escribe el motivo abajo.
+              <div class="alert alert-warning small py-2 my-3 border-warning shadow-sm rounded-3">
+                <i class="bi bi-info-circle-fill me-1"></i>
+                <strong>¿Falta o está mal un documento?</strong> Marca los documentos incorrectos en la lista y escribe el motivo.
               </div>
 
               <div class="mb-3">
-                <label class="form-label fw-bold text-dark small">Observaciones (Obligatorio si devuelves):</label>
-                <textarea name="comentario_inscripcion" class="form-control border-danger" rows="2" placeholder="Ej: El Acta de Nacimiento está borrosa. Por favor corríjala."></textarea>
+                <label class="form-label fw-bold text-dark small">Observaciones</label>
+                <textarea name="comentario_inscripcion" class="form-control border-danger rounded-3" rows="3" placeholder="Ej: El Acta de Nacimiento está borrosa. Por favor corríjala."></textarea>
               </div>
 
               <div class="d-grid gap-2">
-                <button class="btn btn-success btn-soft w-100 shadow-sm" type="button" onclick="confirmarPaseFiltros()">
-                  <i class="bi bi-check-circle-fill me-1"></i> Validar y Pasar a Filtros
+                <button class="btn btn-success btn-action" type="button" onclick="confirmarPaseFiltros()">
+                  <i class="bi bi-check-circle-fill"></i> Validar y pasar a filtros
                 </button>
-
-                <button class="btn btn-outline-danger btn-soft w-100 border-2" type="button" onclick="confirmarDevolucion()">
-                  <i class="bi bi-arrow-counterclockwise me-1"></i> Devolver Documentos al Tutor
+                <button class="btn btn-outline-danger btn-action border-2" type="button" onclick="confirmarDevolucion()">
+                  <i class="bi bi-arrow-counterclockwise"></i> Devolver documentos al tutor
                 </button>
               </div>
             </form>
-
-            <script>
-                function confirmarPaseFiltros() {
-                    Swal.fire({
-                        title: '¿Pasar a filtros?',
-                        text: "Verifica que el expediente esté completo. Pasará a las áreas correspondientes.",
-                        icon: 'success',
-                        showCancelButton: true,
-                        confirmButtonColor: '#198754',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Sí, enviar',
-                        cancelButtonText: 'Revisar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('input_accion_inscripcion').value = 'APROBAR';
-                            document.getElementById('formRevisionInscripcion').submit();
-                        }
-                    });
-                }
-
-                function confirmarDevolucion() {
-                     Swal.fire({
-                        title: '¿Devolver documentos?',
-                        text: "Asegúrate de marcar los documentos erróneos y dejar una observación clara para el tutor.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc3545',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Sí, devolver',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('input_accion_inscripcion').value = 'DEVOLVER';
-                            document.getElementById('formRevisionInscripcion').submit();
-                        }
-                    });
-                }
-
-                document.addEventListener('DOMContentLoaded', function() {
-                    const form = document.getElementById('formRevisionInscripcion');
-                    const docLinks = document.querySelectorAll('.doc-link-btn, a.btn-primary.btn-soft');
-
-                    docLinks.forEach(link => {
-                        let docName = "";
-                        const text = link.innerText.toLowerCase();
-
-                        if(text.includes('certificado')) docName = 'doc_menor_certificado_medico';
-                        else if(text.includes('cartilla')) docName = 'doc_menor_cartilla_vacunacion';
-                        else if(text.includes('sanguíneo')) docName = 'doc_menor_grupo_sanguineo';
-                        else if(text.includes('acta de nacimiento') && link.closest('div').previousElementSibling.innerText.includes('Menor')) docName = 'doc_menor_acta_nacimiento';
-                        else if(text.includes('acta de nacimiento') && link.closest('div').previousElementSibling.innerText.includes('Beneficiario')) docName = 'doc_tutor_acta_nacimiento';
-                        else if(text.includes('fotos del menor')) docName = 'doc_menor_fotos';
-                        else if(text.includes('laboratorio')) docName = 'doc_menor_laboratorio';
-
-                        else if(text.includes('ine') && link.closest('div').previousElementSibling.innerText.includes('Beneficiario')) docName = 'doc_tutor_ine';
-                        else if(text.includes('ine') && link.closest('div').previousElementSibling.innerText.includes('Autorizados')) docName = 'doc_autorizado_ine';
-
-                        else if(text.includes('fotos del tutor') || text.includes('beneficiario')) docName = 'doc_tutor_fotos';
-
-                        else if(text.includes('pareja')) docName = 'doc_segundo_padre_fotos';
-                        else if(text.includes('foto familiar 1')) docName = 'doc_contacto_1_fotos';
-                        else if(text.includes('foto familiar 2')) docName = 'doc_contacto_2_fotos';
-                        else if(text.includes('foto familiar 3')) docName = 'doc_contacto_3_fotos';
-
-                        else if(text.includes('domicilio')) docName = 'doc_tutor_domicilio';
-                        else if(text.includes('recibo')) docName = 'doc_tutor_pago';
-                        else if(text.includes('historial')) docName = 'doc_tutor_historial';
-                        else if(text.includes('horario')) docName = 'doc_tutor_horario';
-                        else if(text.includes('carta')) docName = 'doc_autorizado_carta';
-                        else if(text.includes('reglamento')) docName = 'reglamento_firmado';
-
-                        if(docName) {
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'd-flex align-items-center mb-1';
-
-                            const checkbox = document.createElement('input');
-                            checkbox.type = 'checkbox';
-                            checkbox.className = 'form-check-input me-2 border-danger check-error-doc';
-                            checkbox.value = docName;
-                            checkbox.title = "Marcar como incorrecto/rechazado";
-                            checkbox.style.cursor = "pointer";
-                            checkbox.style.transform = "scale(1.2)";
-
-                            link.parentNode.insertBefore(wrapper, link);
-                            wrapper.appendChild(checkbox);
-                            wrapper.appendChild(link);
-                            link.classList.remove('mb-1');
-                        }
-                    });
-
-                    if(form) {
-                        form.addEventListener('submit', function() {
-                            const checks = document.querySelectorAll('.check-error-doc:checked');
-                            const valores = Array.from(checks).map(cb => cb.value);
-                            document.getElementById('docs_erroneos').value = valores.join(',');
-                        });
-                    }
-                });
-            </script>
-            {% endif %}
-          </div>
+          {% endif %}
         </div>
-        {% elif s.estado == 'APROBADA' %}
-        <div class="alert alert-secondary shadow-sm small border mb-3">
-            <i class="bi bi-info-circle-fill me-1"></i> Este folio fue aprobado antes de la actualización, por lo que no tiene panel de seguimiento de PDF. Para ver el nuevo panel, aprueba un folio nuevo.
-        </div>
-        {% endif %}
-
-        <div class="card card-soft">
-          <div class="card-header">
-            <h6 class="section-title"><i class="bi bi-clipboard-check me-2"></i>Dictamen Inicial</h6>
-          </div>
-
-          <div class="card-body">
-            {% if s.dictaminado_por %}
-              <div class="callout mb-3">
-                <div class="fw-bold">Último dictamen</div>
-                <div class="small-muted">
-                  Por: {{ s.dictaminado_por }}<br>
-                  Fecha: {% if s.dictaminado_en %}{{ s.dictaminado_en|date:"d/m/Y H:i" }}{% else %}-{% endif %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if s.estado == "RECIBIDA" %}
-
-              <form method="post" action="{% url 'dictaminar_solicitud' s.id %}" id="formAprobarSolicitud" class="d-grid gap-2">
-                {% csrf_token %}
-                <input type="hidden" name="accion" value="APROBAR">
-                <button class="btn btn-success btn-soft" type="button" onclick="confirmarAprobacion()">
-                  <i class="bi bi-check2-circle me-1"></i> Aprobar, generar PDF y enviar correo
-                </button>
-              </form>
-
-              <div class="divider"></div>
-
-              <button class="btn btn-danger btn-soft w-100" type="button" data-bs-toggle="modal" data-bs-target="#modalRechazo">
-                <i class="bi bi-x-circle me-1"></i> Rechazar solicitud
-              </button>
-
-              <div class="small-muted mt-2 text-center">
-                Al rechazar, el motivo se guardará, se generará el PDF y se enviará al correo del tutor.
-              </div>
-
-            {% else %}
-              <div class="callout bg-light border-0">
-                <div class="fw-bold text-secondary">Acción Completada</div>
-                <div class="small-muted">
-                  El dictamen inicial ya fue realizado o la solicitud está en otra etapa.
-                </div>
-              </div>
-            {% endif %}
-
-            <div class="divider"></div>
-
-            <div class="d-grid gap-2">
-              <a class="btn btn-outline-secondary btn-soft" href="{% url 'panel_admisiones' %}">
-                <i class="bi bi-arrow-left me-1"></i> Volver al panel principal
-              </a>
-
-              <a class="btn btn-outline-secondary btn-soft"
-                 href="{% url 'editar_solicitud' solicitud_id=s.id %}">
-                <i class="bi bi-pencil-square me-1"></i> Editar datos básicos
-              </a>
-            </div>
-
-          </div>
-        </div>
-
       </div>
-    </div>
-
-  </div>
-</div>
+      {% elif s.estado == 'APROBADA' %}
+        <div class="alert alert-secondary shadow-sm small border mb-3 rounded-4">
+          <i class="bi bi-info-circle-fill me-1"></i> Este folio fue aprobado antes de la actualización, por lo que no tiene panel de seguimiento de PDF. Para ver el nuevo panel, aprueba un folio nuevo.
+        </div>
+      {% endif %}
+    </aside>
+  </section>
+</main>
 
 <div class="modal fade" id="modalRechazo" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form class="modal-content" method="post" action="{% url 'dictaminar_solicitud' s.id %}">
       {% csrf_token %}
+
+        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+          <input type="hidden" name="es_suplencia" value="1">
+          <input type="hidden" name="area_suplencia" value="TRABAJO_SOCIAL">
+          {% if autorizacion_suplencia_id %}<input type="hidden" name="autorizacion_suplencia_id" value="{{ autorizacion_suplencia_id }}">{% endif %}
+          {% if suplencia_activa.id %}<input type="hidden" name="suplencia_activa_id" value="{{ suplencia_activa.id }}">{% endif %}
+        {% endif %}
+
       <input type="hidden" name="accion" value="RECHAZAR">
 
       <div class="modal-header border-0 pb-0">
@@ -542,7 +1313,7 @@
 
       <div class="modal-body">
         <label class="form-label fw-semibold text-muted">Escribe el motivo de rechazo de la solicitud</label>
-        <textarea name="comentario_respuesta" class="form-control bg-light" rows="5"
+        <textarea name="comentario_respuesta" class="form-control bg-light rounded-4" rows="5"
                   placeholder="Ej: Documentación incompleta / datos inconsistentes / fuera de convocatoria..."
                   required></textarea>
 
@@ -552,8 +1323,8 @@
       </div>
 
       <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-outline-secondary btn-soft px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-danger btn-soft px-4 rounded-pill shadow-sm">
+        <button type="button" class="btn btn-outline-secondary btn-action px-4" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger btn-action px-4 shadow-sm">
           Confirmar rechazo, generar PDF y enviar correo
         </button>
       </div>
@@ -582,6 +1353,106 @@
       }
     });
   }
+
+  function confirmarPaseFiltros() {
+    Swal.fire({
+      title: '¿Pasar a filtros?',
+      text: "Verifica que el expediente esté completo. Pasará a las áreas correspondientes.",
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonColor: '#198754',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Revisar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('input_accion_inscripcion').value = 'APROBAR';
+        document.getElementById('formRevisionInscripcion').submit();
+      }
+    });
+  }
+
+  function confirmarDevolucion() {
+    Swal.fire({
+      title: '¿Devolver documentos?',
+      text: "Asegúrate de marcar los documentos erróneos y dejar una observación clara para el tutor.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, devolver',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('input_accion_inscripcion').value = 'DEVOLVER';
+        document.getElementById('formRevisionInscripcion').submit();
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formRevisionInscripcion');
+    const docLinks = document.querySelectorAll('[data-doc]');
+
+    docLinks.forEach(link => {
+      const docName = link.dataset.doc;
+      if(!docName || link.dataset.checkboxReady === '1') return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'd-flex align-items-center gap-2 mb-1';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'form-check-input border-danger check-error-doc';
+      checkbox.value = docName;
+      checkbox.title = 'Marcar como incorrecto/rechazado';
+      checkbox.style.cursor = 'pointer';
+      checkbox.style.transform = 'scale(1.15)';
+
+      link.parentNode.insertBefore(wrapper, link);
+      wrapper.appendChild(checkbox);
+      wrapper.appendChild(link);
+      link.dataset.checkboxReady = '1';
+    });
+
+    if(form) {
+      form.addEventListener('submit', function() {
+        const checks = document.querySelectorAll('.check-error-doc:checked');
+        const valores = Array.from(checks).map(cb => cb.value);
+        document.getElementById('docs_erroneos').value = valores.join(',');
+      });
+    }
+  });
+</script>
+
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
 </script>
 
 </body>

@@ -11,560 +11,433 @@
 
     <style>
         :root{
-            --azul:#1d4ed8;
-            --azul-oscuro:#1e3a8a;
-            --gris-fondo:#f3f6fb;
-            --texto:#0f172a;
-            --muted:#64748b;
-            --borde:#dbe4ef;
+            --azul:#2563eb;
+            --azul-oscuro:#0b2d68;
             --morado:#7c3aed;
             --morado-oscuro:#5b21b6;
+            --morado-profundo:#4c1d95;
+            --morado-claro:#faf5ff;
+            --morado-borde:#ddd6fe;
+            --texto:#0b1f44;
+            --muted:#64748b;
+            --borde:#dbe4ef;
+            --fondo:#f4f7fb;
             --verde:#16a34a;
             --naranja:#f97316;
+            --rojo:#dc2626;
         }
+
+        *{box-sizing:border-box;}
 
         body{
             margin:0;
-            background:var(--gris-fondo);
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(124,58,237,.10), transparent 28%),
+                linear-gradient(180deg, #ffffff 0%, var(--fondo) 48%, #eef3f9 100%);
             color:var(--texto);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
+        /* =========================
+           BARRA SUPERIOR
+        ========================= */
         .topbar{
-            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
-            color:white;
-            box-shadow:0 8px 22px rgba(15,23,42,.18);
+            background:#ffffff;
+            border-bottom:1px solid #dfe8f5;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            position:sticky;
+            top:0;
+            z-index:100;
         }
 
         .topbar-inner{
-            max-width:1120px;
-            margin:auto;
-            padding:14px 18px;
+            max-width:1320px;
+            margin:0 auto;
+            padding:18px 28px;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:16px;
+            gap:18px;
         }
 
         .brand{
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
-        .brand img{
-            height:48px;
-            width:auto;
+        .brand-logo{
+            width:96px;
+            height:64px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--morado-oscuro), var(--morado));
+            padding:8px;
+            box-shadow:0 12px 26px rgba(124,58,237,.28);
+            flex:0 0 auto;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
             object-fit:contain;
-            background:rgba(255,255,255,.12);
-            border-radius:12px;
-            padding:4px;
+            display:block;
+            background:transparent !important;
+            border:none !important;
+            padding:0 !important;
+            box-shadow:none !important;
         }
 
         .brand-title{
-            font-size:1.02rem;
+            margin:0;
+            color:#0b1f44;
+            font-size:1.42rem;
             font-weight:950;
-            letter-spacing:.04em;
-            text-transform:uppercase;
-            line-height:1.1;
+            line-height:1.05;
+            letter-spacing:-.04em;
         }
 
         .brand-subtitle{
-            font-size:.82rem;
-            opacity:.9;
-            margin-top:2px;
+            margin-top:4px;
+            color:#50678f;
+            font-weight:650;
+            font-size:.92rem;
         }
 
-        .btn-top{
-            border-radius:12px;
+        .top-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .btn-return{
+            border:1px solid #d8e5f7;
+            background:#ffffff;
+            color:#0b1f44;
+            border-radius:14px;
+            padding:10px 16px;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            box-shadow:0 8px 18px rgba(15,23,42,.04);
+            transition:.2s ease;
+            white-space:nowrap;
+        }
+
+        .btn-return:hover{
+            transform:translateY(-1px);
+            color:var(--morado-oscuro);
+            border-color:var(--morado-borde);
+            background:#fbf8ff;
+        }
+
+        .admin-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0b1f44;
             font-weight:850;
-            padding:.55rem .9rem;
+            white-space:nowrap;
         }
 
-        .main{
-            max-width:1120px;
+        .admin-icon{
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background:linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color:var(--morado-oscuro);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.35rem;
+        }
+
+        /* =========================
+           CONTENIDO GENERAL
+        ========================= */
+        .page{
+            max-width:1320px;
             margin:28px auto 70px;
-            padding:0 18px;
+            padding:0 28px;
         }
 
         .hero{
+            position:relative;
+            overflow:hidden;
             background:linear-gradient(135deg, var(--morado-oscuro), var(--morado));
-            border-radius:24px;
+            border-radius:28px;
             color:white;
-            padding:30px 34px;
-            box-shadow:0 22px 50px rgba(124,58,237,.22);
+            padding:28px;
+            box-shadow:0 24px 48px rgba(124,58,237,.25);
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:20px;
-            align-items:center;
-            margin-bottom:22px;
+            grid-template-columns:minmax(0,1fr) 370px;
+            gap:22px;
+            align-items:stretch;
+            margin-bottom:24px;
         }
 
-        .hero h1{
-            font-size:1.9rem;
-            font-weight:950;
-            margin:0 0 8px;
-            letter-spacing:-.03em;
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:280px;
+            height:280px;
+            border-radius:50%;
+            right:-100px;
+            top:-110px;
+            background:rgba(255,255,255,.14);
         }
 
-        .hero p{
-            margin:0;
-            opacity:.94;
-            font-size:1rem;
+        .hero-main{
+            position:relative;
+            z-index:1;
+            display:flex;
+            align-items:flex-start;
+            gap:18px;
         }
 
         .hero-icon{
-            width:88px;
-            height:88px;
-            border-radius:22px;
+            width:72px;
+            height:72px;
+            border-radius:21px;
             background:rgba(255,255,255,.18);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:2.5rem;
+            font-size:2rem;
+            flex:0 0 auto;
+        }
+
+        .hero h1{
+            margin:0 0 8px;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:0;
+            max-width:760px;
+            font-size:1rem;
+            line-height:1.55;
+            opacity:.95;
+            font-weight:650;
+        }
+
+        .hero-rule{
+            position:relative;
+            z-index:1;
+            background:rgba(255,255,255,.16);
+            border:1px solid rgba(255,255,255,.34);
+            border-radius:22px;
+            padding:20px;
+            backdrop-filter:blur(4px);
+        }
+
+        .hero-rule h6{
+            margin:0 0 8px;
+            font-size:1rem;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .hero-rule p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.5;
+            font-weight:700;
+            color:white;
+            opacity:.96;
         }
 
         .layout{
             display:grid;
-            grid-template-columns:1fr 345px;
-            gap:20px;
+            grid-template-columns:minmax(0, 1fr) 360px;
+            gap:22px;
             align-items:start;
         }
 
         .panel{
-            background:white;
+            background:rgba(255,255,255,.95);
             border:1px solid var(--borde);
-            border-radius:22px;
-            overflow:hidden;
+            border-radius:24px;
             box-shadow:0 18px 38px rgba(15,23,42,.07);
+            overflow:hidden;
             margin-bottom:18px;
         }
 
         .panel-header{
             padding:18px 22px;
-            background:#f8fafc;
             border-bottom:1px solid var(--borde);
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:12px;
+            gap:14px;
         }
 
         .panel-title{
             margin:0;
-            color:#334155;
-            font-size:1rem;
+            font-size:1.05rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
+            color:#0b1f44;
+            display:flex;
+            align-items:center;
+            gap:10px;
         }
 
-        .panel-body{
-            padding:24px;
+        .title-icon{
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            background:#ede9fe;
+            color:var(--morado-oscuro);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.1rem;
+        }
+
+        .panel-body{padding:22px;}
+
+        .section-block{
+            background:#ffffff;
+            border:1px solid #dfe8f5;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:18px;
+        }
+
+        .section-head{
+            margin-bottom:14px;
         }
 
         .section-title{
-            font-size:.82rem;
+            margin:0;
+            font-size:.86rem;
             font-weight:950;
             color:var(--morado-oscuro);
             text-transform:uppercase;
             letter-spacing:.07em;
-            margin:5px 0 14px;
             display:flex;
             align-items:center;
             gap:8px;
         }
 
-        .field-card{
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
-            border-radius:18px;
-            padding:16px;
-            margin-bottom:16px;
-            height:calc(100% - 16px);
+        .section-help{
+            color:#64748b;
+            font-size:.86rem;
+            font-weight:650;
+            line-height:1.35;
+            margin-top:4px;
         }
 
+        .form-grid{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:16px;
+        }
+
+        .form-grid.wide-left{
+            grid-template-columns:minmax(0, 1.35fr) minmax(0, .9fr);
+        }
+
+        .field-card,
+        .range-row,
+        .time-field{
+            background:#f8fbff;
+            border:1px solid #dfe8f5;
+            border-radius:18px;
+            padding:15px;
+            min-width:0;
+            max-width:100%;
+            overflow:hidden;
+        }
+
+        .field-card.full{grid-column:1 / -1;}
+
         .form-label{
-            font-size:.78rem;
-            font-weight:950;
-            color:#334155;
-            text-transform:uppercase;
-            letter-spacing:.04em;
             margin-bottom:8px;
+            color:#0b1f44;
+            font-size:.76rem;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            font-weight:950;
+            line-height:1.25;
         }
 
         .form-control,
         .form-select{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+            border:1px solid #cbd8e8;
             border-radius:14px;
-            border:1px solid #cbd5e1;
-            padding:.72rem .9rem;
-            font-weight:650;
-            color:#0f172a;
-            background:white;
+            padding:.72rem .85rem;
+            color:#0b1f44;
+            font-weight:750;
+            background:#ffffff;
         }
 
         .form-control:focus,
         .form-select:focus{
             border-color:var(--morado);
-            box-shadow:0 0 0 .22rem rgba(124,58,237,.16);
+            box-shadow:0 0 0 .22rem rgba(124,58,237,.18);
         }
 
         .form-check{
-            background:white;
+            background:#ffffff;
             border:1px solid #dbe4ef;
-            border-radius:16px;
-            padding:14px 16px 14px 44px;
-            margin-top:6px;
+            border-radius:18px;
+            padding:16px 18px 16px 48px;
+            margin:0;
         }
 
         .form-check-input{
-            margin-left:-28px;
-            margin-top:.28rem;
+            margin-left:-30px;
+            margin-top:.3rem;
         }
 
         .form-check-label{
-            font-weight:850;
-            color:#0f172a;
+            color:#0b1f44;
+            font-weight:900;
         }
 
         .field-help{
-            color:var(--muted);
-            font-size:.84rem;
-            margin-top:6px;
+            margin-top:8px;
+            color:#64748b;
+            font-size:.82rem;
+            line-height:1.35;
+            font-weight:550;
         }
 
         .error-text{
             background:#fee2e2;
-            color:#991b1b;
             border:1px solid #fecaca;
+            color:#991b1b;
             border-radius:12px;
-            padding:8px 10px;
-            font-size:.85rem;
-            font-weight:700;
-            margin-top:8px;
+            padding:9px 11px;
+            margin-top:9px;
+            font-size:.84rem;
+            font-weight:750;
         }
 
-        .actions{
-            display:flex;
-            justify-content:flex-end;
-            gap:10px;
-            flex-wrap:wrap;
-            padding-top:16px;
-            border-top:1px solid #e5e7eb;
-            margin-top:12px;
-        }
-
-        .btn-main{
-            border-radius:14px;
-            font-weight:900;
-            padding:.72rem 1.1rem;
-        }
-
-        .side-note{
-            background:#f5f3ff;
-            border:1px solid #ddd6fe;
-            border-left:6px solid var(--morado);
-            border-radius:18px;
-            padding:18px;
-            color:#4c1d95;
-            margin-bottom:18px;
-        }
-
-        .side-note h6{
-            font-weight:950;
-            margin-bottom:8px;
-        }
-
-        .semestre-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-radius:18px;
-            padding:16px;
-            color:#1e3a8a;
-            margin-bottom:18px;
-        }
-
-        .semestre-card h6{
-            font-weight:950;
-            margin-bottom:8px;
-        }
-
-        .semestre-card p{
-            margin:0;
-            font-size:.9rem;
-            font-weight:650;
-        }
-
-        .sala-card{
-            background:#f0fdf4;
-            border:1px solid #bbf7d0;
-            border-radius:18px;
-            padding:16px;
-            color:#14532d;
-            margin-bottom:18px;
-        }
-
-        .sala-card h6{
-            font-weight:950;
-            margin-bottom:8px;
-        }
-
-        .sala-card p{
-            margin:0;
-            font-size:.9rem;
-            font-weight:650;
-        }
-
-        .info-card{
-            background:#f8fafc;
-            border:1px solid var(--borde);
-            border-radius:18px;
-            padding:16px;
-            margin-bottom:18px;
-        }
-
-        .info-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:8px;
-        }
-
-        .info-text{
-            color:#64748b;
-            font-size:.9rem;
-            margin:0;
-        }
-
-        .time-box{
-            background:#faf5ff;
-            border:1px solid #e9d5ff;
-            border-radius:16px;
-            padding:14px;
-            margin-bottom:16px;
-        }
-
-        .time-box-title{
-            color:#6b21a8;
-            font-size:.78rem;
-            font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.05em;
-            margin-bottom:10px;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
-
-        .check-list{
-            list-style:none;
-            padding:0;
-            margin:0;
-        }
-
-        .check-list li{
-            display:flex;
-            gap:10px;
-            padding:10px 0;
-            border-bottom:1px solid #edf2f7;
-            color:#475569;
-            font-weight:650;
-        }
-
-        .check-list li:last-child{
-            border-bottom:none;
-        }
-
-        .check-list i{
-            color:#7c3aed;
-            margin-top:2px;
-        }
-
-        .warning-box{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid var(--naranja);
-            border-radius:18px;
-            padding:16px;
-            color:#9a3412;
-        }
-
-        .warning-box h6{
-            font-weight:950;
-            margin-bottom:8px;
-        }
-
-        @media(max-width:900px){
-            .hero{grid-template-columns:1fr;}
-            .hero-icon{display:none;}
-            .layout{grid-template-columns:1fr;}
-        }
-
-        @media(max-width:576px){
-            .topbar-inner{flex-direction:column;align-items:flex-start;}
-            .hero{padding:24px 20px;}
-            .hero h1{font-size:1.55rem;}
-            .panel-body{padding:18px;}
-            .actions{justify-content:stretch;}
-            .actions .btn{width:100%;}
-        }
-
-
-
-        .compact-schedule-arrow{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#64748b;
-            font-size:1.05rem;
-            padding-top:26px;
-        }
-
-        .schedule-pair{
-            padding:12px !important;
-        }
-
-        .schedule-fields{
-            grid-template-columns:1fr auto 1fr !important;
-            gap:9px !important;
-            align-items:start;
-        }
-
-        .schedule-fields .form-label{
-            margin-bottom:5px;
-        }
-
-        .schedule-fields .form-control,
-        .schedule-fields .form-select{
-            padding:.62rem .75rem;
-        }
-
-        .schedule-section{
-            padding:15px !important;
-        }
-
-        .schedule-note,
-        .schedule-help,
-        .field-help{
-            font-size:.8rem;
-        }
-
-        @media(max-width:768px){
-            .schedule-fields{
-                grid-template-columns:1fr !important;
-            }
-            .compact-schedule-arrow{
-                display:none;
-            }
-        }
-
-        .schedule-section{
-            background:#faf5ff;
-            border:1px solid #e9d5ff;
-            border-radius:20px;
-            padding:18px;
-            margin-bottom:18px;
-        }
-
-        .schedule-header{
-            display:flex;
-            align-items:flex-start;
-            justify-content:space-between;
-            gap:12px;
-            flex-wrap:wrap;
-            margin-bottom:14px;
-        }
-
-        .schedule-title{
-            color:#6b21a8;
-            font-size:.82rem;
-            font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.07em;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin:0;
-        }
-
-        .schedule-help{
-            color:#64748b;
-            font-size:.86rem;
-            font-weight:650;
-            margin-top:4px;
-        }
-
-        .schedule-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
-        }
-
-        .schedule-pair{
-            background:white;
-            border:1px solid #ddd6fe;
-            border-radius:18px;
-            padding:15px;
-        }
-
-        .schedule-pair-title{
-            color:#0f172a;
-            font-size:.8rem;
-            font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin-bottom:12px;
-        }
-
-        .schedule-fields{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-        }
-
-        .schedule-note{
-            background:#f5f3ff;
-            border:1px solid #ddd6fe;
-            border-left:5px solid #7c3aed;
-            color:#4c1d95;
-            border-radius:15px;
-            padding:11px 13px;
-            font-size:.86rem;
-            font-weight:650;
-            margin-top:12px;
-        }
-
-        @media(max-width:768px){
-            .schedule-grid,
-            .schedule-fields{
-                grid-template-columns:1fr;
-            }
-        }
-
-
-        /* =========================================================
-           RANGOS DE HORARIO COMPACTOS
-           ========================================================= */
         .range-section{
             background:#faf5ff;
             border:1px solid #e9d5ff;
-            border-radius:20px;
-            padding:16px;
+            border-radius:22px;
+            padding:18px;
             margin-bottom:18px;
-        }
-
-        .range-section-title{
-            color:#6b21a8;
-            font-size:.82rem;
-            font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.07em;
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin-bottom:12px;
         }
 
         .range-list{
@@ -574,12 +447,10 @@
         }
 
         .range-row{
-            background:#fff;
-            border:1px solid #ddd6fe;
-            border-radius:16px;
-            padding:12px;
+            background:#ffffff;
+            border-color:#ddd6fe;
             display:grid;
-            grid-template-columns:155px minmax(0,1fr);
+            grid-template-columns:160px minmax(0, 1fr);
             gap:12px;
             align-items:center;
         }
@@ -593,20 +464,18 @@
             display:flex;
             align-items:center;
             gap:8px;
-            white-space:nowrap;
+            line-height:1.2;
         }
 
         .range-row-fields{
             display:grid;
-            grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+            grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);
             gap:8px;
-            align-items:center;
+            align-items:end;
             min-width:0;
         }
 
-        .range-mini-field{
-            min-width:0;
-        }
+        .range-mini-field{min-width:0;}
 
         .range-mini-field label{
             display:block;
@@ -629,47 +498,187 @@
         }
 
         .range-arrow{
+            width:28px;
             color:#64748b;
             font-size:1rem;
-            padding-top:18px;
-        }
-
-        .range-help{
-            color:#64748b;
-            font-size:.75rem;
-            font-weight:650;
-            margin-top:4px;
+            align-self:end;
+            padding-bottom:8px;
+            text-align:center;
         }
 
         .range-note{
             background:#f5f3ff;
             border:1px solid #ddd6fe;
-            border-left:5px solid #7c3aed;
+            border-left:5px solid var(--morado);
             color:#4c1d95;
             border-radius:14px;
-            padding:10px 12px;
-            font-size:.82rem;
+            padding:11px 13px;
+            font-size:.84rem;
             font-weight:650;
-            margin-top:12px;
+            margin-top:14px;
+            line-height:1.35;
         }
 
-        @media(max-width:768px){
-            .range-row{
-                grid-template-columns:1fr;
-            }
-
-            .range-row-fields{
-                grid-template-columns:1fr;
-            }
-
-            .range-arrow{
-                display:none;
-            }
+        .actions{
+            display:flex;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+            border-top:1px solid #e6edf7;
+            padding-top:18px;
+            margin-top:4px;
         }
 
-        /* =========================================================
+        .btn-main{
+            border-radius:14px;
+            padding:.78rem 1.15rem;
+            font-weight:950;
+        }
+
+        .btn-save{
+            background:linear-gradient(135deg, var(--morado-oscuro), var(--morado));
+            border:none;
+            color:white;
+            box-shadow:0 12px 24px rgba(124,58,237,.24);
+        }
+
+        .btn-save:hover{
+            color:white;
+            transform:translateY(-1px);
+            filter:brightness(.98);
+        }
+
+        /* =========================
+           COLUMNA DERECHA
+        ========================= */
+        .aside-stack{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+
+        .semestre-card{
+            background:#eef6ff;
+            border:1px solid #bfdbfe;
+            border-radius:22px;
+            padding:18px;
+            color:#18396f;
+            box-shadow:0 14px 28px rgba(37,99,235,.06);
+        }
+
+        .semestre-card h6,
+        .sala-card h6,
+        .side-note h6{
+            margin:0 0 10px;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .semestre-card h6{color:#0b3f91;}
+
+        .semestre-card p,
+        .sala-card p,
+        .side-note p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.45;
+            font-weight:750;
+        }
+
+        .sala-card{
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-radius:22px;
+            padding:18px;
+            color:#14532d;
+            box-shadow:0 14px 28px rgba(22,163,74,.05);
+        }
+
+        .side-note{
+            background:#faf5ff;
+            border:1px solid #e9d5ff;
+            border-left:7px solid var(--morado);
+            border-radius:22px;
+            padding:18px;
+            color:#4c1d95;
+        }
+
+        .role-card{
+            background:#f8fbff;
+            border:1px solid #dfe8f5;
+            border-radius:22px;
+            padding:18px;
+            color:#334155;
+        }
+
+        .role-card h6{
+            margin:0 0 8px;
+            font-weight:950;
+            color:#0b1f44;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .role-card p{
+            margin:0;
+            color:#64748b;
+            font-size:.9rem;
+            line-height:1.4;
+            font-weight:650;
+        }
+
+        .check-list{
+            list-style:none;
+            padding:0;
+            margin:0;
+        }
+
+        .check-list li{
+            display:grid;
+            grid-template-columns:28px 1fr;
+            gap:8px;
+            align-items:flex-start;
+            padding:13px 0;
+            border-bottom:1px solid #edf2f7;
+            color:#334155;
+            font-weight:750;
+            line-height:1.35;
+        }
+
+        .check-list li:first-child{padding-top:0;}
+        .check-list li:last-child{border-bottom:none;padding-bottom:0;}
+        .check-list i{color:var(--morado);margin-top:2px;}
+
+        .warning-box{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:7px solid var(--naranja);
+            border-radius:22px;
+            padding:18px;
+            color:#9a3412;
+        }
+
+        .warning-box h6{
+            margin:0 0 8px;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .warning-box p{
+            margin:0;
+            line-height:1.45;
+            font-weight:650;
+            font-size:.9rem;
+        }
+
+        /* =========================
            ALERTAS PERSONALIZADAS
-           ========================================================= */
+        ========================= */
         .swal2-toast.sistema-toast {
             border-radius: 18px !important;
             padding: 14px 16px !important;
@@ -684,164 +693,44 @@
             color: #0f172a !important;
         }
 
-        .swal2-toast.sistema-toast .swal2-icon {
-            margin: 0 .65rem 0 0 !important;
-        }
+        .swal2-toast.sistema-toast .swal2-icon {margin: 0 .65rem 0 0 !important;}
+        .swal2-timer-progress-bar {background: rgba(37, 99, 235, .45) !important;}
+        .sistema-toast-success {border-left: 7px solid #16a34a !important;background: #f0fdf4 !important;}
+        .sistema-toast-error {border-left: 7px solid #dc2626 !important;background: #fef2f2 !important;}
+        .sistema-toast-warning {border-left: 7px solid #f59e0b !important;background: #fffbeb !important;}
+        .sistema-toast-info {border-left: 7px solid #2563eb !important;background: #eff6ff !important;}
 
-        .swal2-timer-progress-bar {
-            background: rgba(37, 99, 235, .45) !important;
-        }
-
-        .sistema-toast-success {
-            border-left: 7px solid #16a34a !important;
-            background: #f0fdf4 !important;
-        }
-
-        .sistema-toast-error {
-            border-left: 7px solid #dc2626 !important;
-            background: #fef2f2 !important;
-        }
-
-        .sistema-toast-warning {
-            border-left: 7px solid #f59e0b !important;
-            background: #fffbeb !important;
-        }
-
-        .sistema-toast-info {
-            border-left: 7px solid #2563eb !important;
-            background: #eff6ff !important;
-        }
-
-
-        /* =========================================================
-           AJUSTE FINAL: RANGOS COMPACTOS SIN DESBORDES
-           ========================================================= */
-        *, *::before, *::after{
-            box-sizing:border-box;
-        }
-
-        .layout{
-            grid-template-columns:minmax(0, 1fr) 345px;
-        }
-
-        .row > [class*="col-"],
-        .panel,
-        .panel-body,
-        .field-card,
-        .range-section,
-        .range-row,
-        .range-row-fields,
-        .range-mini-field{
-            min-width:0;
-            max-width:100%;
-        }
-
-        .field-card,
-        .range-section,
-        .range-row{
-            overflow:hidden;
-        }
-
-        .form-control,
-        .form-select{
-            width:100%;
-            max-width:100%;
-            min-width:0;
-        }
-
-        .field-card{
-            padding:14px;
-            margin-bottom:14px;
-            height:calc(100% - 14px);
-        }
-
-        .range-section{
-            padding:14px;
-            margin-bottom:14px;
-        }
-
-        .range-section-title{
-            font-size:.78rem;
-            margin-bottom:10px;
-            line-height:1.25;
-        }
-
-        .range-list{
-            gap:8px;
-        }
-
-        .range-row{
-            grid-template-columns:145px minmax(0, 1fr);
-            gap:10px;
-            padding:10px;
-            align-items:center;
-        }
-
-        .range-row-label{
-            font-size:.74rem;
-            line-height:1.2;
-            white-space:normal;
-        }
-
-        .range-row-fields{
-            display:grid;
-            grid-template-columns:minmax(0, 1fr) 24px minmax(0, 1fr);
-            gap:6px;
-            align-items:end;
-        }
-
-        .range-row-fields > div{
-            min-width:0;
-            max-width:100%;
-        }
-
-        .range-mini-field label{
-            font-size:.66rem;
-            margin-bottom:4px;
-            white-space:nowrap;
-        }
-
-        .range-mini-field input,
-        .range-mini-field select{
-            width:100% !important;
-            max-width:100% !important;
-            min-width:0 !important;
-            height:40px;
-            padding:.5rem .62rem !important;
-            font-size:.9rem;
-            box-sizing:border-box;
-        }
-
-        .range-arrow{
-            width:24px;
-            min-width:24px;
-            max-width:24px;
-            align-self:end;
-            padding-top:0;
-            padding-bottom:8px;
-            text-align:center;
-        }
-
-        .range-note{
-            padding:10px 12px;
-            margin-top:10px;
-            line-height:1.35;
-        }
-
-        .field-help,
-        .info-text,
-        .schedule-help,
-        .range-help{
-            line-height:1.35;
-        }
-
-        @media(max-width:1100px){
-            .layout{
-                grid-template-columns:1fr;
-            }
+        @media(max-width:1120px){
+            .hero{grid-template-columns:1fr;}
+            .layout{grid-template-columns:1fr;}
         }
 
         @media(max-width:768px){
+            .topbar-inner{
+                align-items:flex-start;
+                flex-direction:column;
+                padding:16px 18px;
+            }
+
+            .top-actions{
+                width:100%;
+                justify-content:space-between;
+            }
+
+            .page{
+                padding:0 18px;
+                margin-top:20px;
+            }
+
+            .hero{padding:22px;}
+            .hero-main{flex-direction:column;}
+            .hero h1{font-size:1.55rem;}
+
+            .form-grid,
+            .form-grid.wide-left{
+                grid-template-columns:1fr;
+            }
+
             .range-row{
                 grid-template-columns:1fr;
             }
@@ -850,11 +739,25 @@
                 grid-template-columns:1fr;
             }
 
-            .range-arrow{
-                display:none;
-            }
+            .range-arrow{display:none;}
         }
 
+        @media(max-width:576px){
+            .top-actions{
+                flex-direction:column;
+                align-items:stretch;
+            }
+
+            .btn-return,
+            .admin-chip{
+                width:100%;
+                justify-content:center;
+            }
+
+            .panel-body{padding:18px;}
+            .actions{justify-content:stretch;}
+            .actions .btn{width:100%;}
+        }
     </style>
 </head>
 <body>
@@ -862,33 +765,55 @@
 <nav class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
             <div>
-                <div class="brand-title">Asignación de Maestras</div>
-                <div class="brand-subtitle">Maestras por sala · Administrador del sistema</div>
+                <h1 class="brand-title">Asignación de maestras</h1>
+                <div class="brand-subtitle">Maestras por sala · Configuración operativa</div>
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                <i class="bi bi-house-door-fill me-1"></i> Panel TI
+        <div class="top-actions">
+            <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn-return">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
             </a>
+
+            <div class="admin-chip">
+                <span class="admin-icon">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+                <span>Administrador(a)</span>
+            </div>
         </div>
     </div>
 </nav>
 
-<main class="main">
-
+<main class="page">
 
     <section class="hero">
-        <div>
-            <h1>{{ titulo|default:"Asignar maestra a sala" }}</h1>
-            <p>
-                Selecciona la maestra, define su rol y captura sus horarios de tal a tal.
-            </p>
+        <div class="hero-main">
+            <div class="hero-icon">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div>
+                <h1>{{ titulo|default:"Asignar maestra a sala" }}</h1>
+                <p>
+                    Selecciona la maestra, define su función dentro de la sala y captura sus rangos de horario
+                    para el semestre correspondiente.
+                </p>
+            </div>
         </div>
-        <div class="hero-icon">
-            <i class="bi bi-person-badge-fill"></i>
+
+        <div class="hero-rule">
+            <h6>
+                <i class="bi bi-info-circle-fill"></i>
+                Regla de asignación
+            </h6>
+            <p>
+                Una maestra puede asignarse a más de una sala. La asignación se controla por semestre y por sala.
+            </p>
         </div>
     </section>
 
@@ -896,14 +821,19 @@
         <section class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="bi bi-person-plus-fill me-2"></i>Datos de asignación
+                    <span class="title-icon">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </span>
+                    Datos de asignación
                 </h2>
             </div>
 
             <div class="panel-body">
                 <form method="POST" novalidate>
                     {% csrf_token %}
-                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}<input type="hidden" name="origen" value="ti">{% endif %}
+                    {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
+                        <input type="hidden" name="origen" value="ti">
+                    {% endif %}
 
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger rounded-4">
@@ -913,13 +843,18 @@
                         </div>
                     {% endif %}
 
-                    <div class="section-title">
-                        <i class="bi bi-person-badge-fill"></i>
-                        Maestra y rol
-                    </div>
+                    <div class="section-block">
+                        <div class="section-head">
+                            <h3 class="section-title">
+                                <i class="bi bi-person-badge-fill"></i>
+                                Maestra y rol
+                            </h3>
+                            <div class="section-help">
+                                Selecciona el personal que será asignado a esta sala y define su rol operativo.
+                            </div>
+                        </div>
 
-                    <div class="row">
-                        <div class="col-md-7">
+                        <div class="form-grid wide-left">
                             <div class="field-card">
                                 <label for="{{ form.maestra.id_for_label }}" class="form-label">
                                     Maestra / Asistente de sala <span class="text-danger">*</span>
@@ -934,9 +869,7 @@
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
 
-                        <div class="col-md-5">
                             <div class="field-card">
                                 <label for="{{ form.rol.id_for_label }}" class="form-label">
                                     Rol en la sala <span class="text-danger">*</span>
@@ -951,150 +884,153 @@
                                     </div>
                                 {% endif %}
                             </div>
+
+                            <div class="field-card full">
+                                <div class="form-check">
+                                    {{ form.activo }}
+                                    <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                        Asignación activa
+                                    </label>
+                                    <div class="field-help">
+                                        Si está activa, esta maestra contará para validar que la sala puede iniciar semestre.
+                                    </div>
+                                </div>
+                                {% if form.activo.errors %}
+                                    <div class="error-text">
+                                        {% for error in form.activo.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="field-card">
-                        <div class="form-check">
-                            {{ form.activo }}
-                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
-                                Asignación activa
-                            </label>
-                            <div class="field-help">
-                                Si está activa, esta maestra contará para validar que la sala puede iniciar semestre.
-                            </div>
-                        </div>
-                        {% if form.activo.errors %}
-                            <div class="error-text">
-                                {% for error in form.activo.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="section-title mt-2">
-                        <i class="bi bi-clock-fill"></i>
-                        Horario por maestra
-                    </div>
-
-                    <div class="range-section">
-                        <div class="range-section-title">
-                            <i class="bi bi-calendar-check-fill"></i>
-                            Rangos de horario de la maestra
-                        </div>
-
-                        <div class="range-list">
-                            <div class="range-row">
-                                <div class="range-row-label">
-                                    <i class="bi bi-person-workspace"></i>
-                                    Jornada laboral
-                                </div>
-
-                                <div class="range-row-fields">
-                                    <div class="range-mini-field">
-                                        <label for="{{ form.horario_entrada.id_for_label }}">Entrada</label>
-                                        {{ form.horario_entrada }}
-                                        {% if form.horario_entrada.errors %}
-                                            <div class="error-text">
-                                                {% for error in form.horario_entrada.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="range-arrow">
-                                        <i class="bi bi-arrow-right"></i>
-                                    </div>
-
-                                    <div class="range-mini-field">
-                                        <label for="{{ form.horario_salida.id_for_label }}">Salida</label>
-                                        {{ form.horario_salida }}
-                                        {% if form.horario_salida.errors %}
-                                            <div class="error-text">
-                                                {% for error in form.horario_salida.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="range-row">
-                                <div class="range-row-label">
-                                    <i class="bi bi-cup-hot-fill"></i>
-                                    Desayuno
-                                </div>
-
-                                <div class="range-row-fields">
-                                    <div class="range-mini-field">
-                                        <label for="{{ form.desayuno_inicio.id_for_label }}">Inicio</label>
-                                        {{ form.desayuno_inicio }}
-                                        {% if form.desayuno_inicio.errors %}
-                                            <div class="error-text">
-                                                {% for error in form.desayuno_inicio.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="range-arrow">
-                                        <i class="bi bi-arrow-right"></i>
-                                    </div>
-
-                                    <div class="range-mini-field">
-                                        <label for="{{ form.desayuno_fin.id_for_label }}">Fin</label>
-                                        {{ form.desayuno_fin }}
-                                        {% if form.desayuno_fin.errors %}
-                                            <div class="error-text">
-                                                {% for error in form.desayuno_fin.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="range-row">
-                                <div class="range-row-label">
-                                    <i class="bi bi-hourglass-split"></i>
-                                    Tiempo fuera
-                                </div>
-
-                                <div class="range-row-fields">
-                                    <div class="range-mini-field">
-                                        <label for="{{ form.tiempo_fuera_inicio.id_for_label }}">Inicio</label>
-                                        {{ form.tiempo_fuera_inicio }}
-                                        {% if form.tiempo_fuera_inicio.errors %}
-                                            <div class="error-text">
-                                                {% for error in form.tiempo_fuera_inicio.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="range-arrow">
-                                        <i class="bi bi-arrow-right"></i>
-                                    </div>
-
-                                    <div class="range-mini-field">
-                                        <label for="{{ form.tiempo_fuera_fin.id_for_label }}">Fin</label>
-                                        {{ form.tiempo_fuera_fin }}
-                                        {% if form.tiempo_fuera_fin.errors %}
-                                            <div class="error-text">
-                                                {% for error in form.tiempo_fuera_fin.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                    <div class="section-block">
+                        <div class="section-head">
+                            <h3 class="section-title">
+                                <i class="bi bi-clock-fill"></i>
+                                Horario por maestra
+                            </h3>
+                            <div class="section-help">
+                                Captura cada horario en formato de inicio y fin para controlar la jornada de la maestra.
                             </div>
                         </div>
 
-                        <div class="range-note">
-                            <i class="bi bi-info-circle-fill me-1"></i>
-                            Captura cada horario de tal a tal. La hora final debe ser posterior a la hora inicial.
+                        <div class="range-section">
+                            <div class="range-list">
+                                <div class="range-row">
+                                    <div class="range-row-label">
+                                        <i class="bi bi-person-workspace"></i>
+                                        Jornada laboral
+                                    </div>
+
+                                    <div class="range-row-fields">
+                                        <div class="range-mini-field">
+                                            <label for="{{ form.horario_entrada.id_for_label }}">Entrada</label>
+                                            {{ form.horario_entrada }}
+                                            {% if form.horario_entrada.errors %}
+                                                <div class="error-text">
+                                                    {% for error in form.horario_entrada.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="range-arrow">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </div>
+
+                                        <div class="range-mini-field">
+                                            <label for="{{ form.horario_salida.id_for_label }}">Salida</label>
+                                            {{ form.horario_salida }}
+                                            {% if form.horario_salida.errors %}
+                                                <div class="error-text">
+                                                    {% for error in form.horario_salida.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="range-row">
+                                    <div class="range-row-label">
+                                        <i class="bi bi-cup-hot-fill"></i>
+                                        Desayuno
+                                    </div>
+
+                                    <div class="range-row-fields">
+                                        <div class="range-mini-field">
+                                            <label for="{{ form.desayuno_inicio.id_for_label }}">Inicio</label>
+                                            {{ form.desayuno_inicio }}
+                                            {% if form.desayuno_inicio.errors %}
+                                                <div class="error-text">
+                                                    {% for error in form.desayuno_inicio.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="range-arrow">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </div>
+
+                                        <div class="range-mini-field">
+                                            <label for="{{ form.desayuno_fin.id_for_label }}">Fin</label>
+                                            {{ form.desayuno_fin }}
+                                            {% if form.desayuno_fin.errors %}
+                                                <div class="error-text">
+                                                    {% for error in form.desayuno_fin.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="range-row">
+                                    <div class="range-row-label">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        Tiempo fuera
+                                    </div>
+
+                                    <div class="range-row-fields">
+                                        <div class="range-mini-field">
+                                            <label for="{{ form.tiempo_fuera_inicio.id_for_label }}">Inicio</label>
+                                            {{ form.tiempo_fuera_inicio }}
+                                            {% if form.tiempo_fuera_inicio.errors %}
+                                                <div class="error-text">
+                                                    {% for error in form.tiempo_fuera_inicio.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="range-arrow">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </div>
+
+                                        <div class="range-mini-field">
+                                            <label for="{{ form.tiempo_fuera_fin.id_for_label }}">Fin</label>
+                                            {{ form.tiempo_fuera_fin }}
+                                            {% if form.tiempo_fuera_fin.errors %}
+                                                <div class="error-text">
+                                                    {% for error in form.tiempo_fuera_fin.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="range-note">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                Captura cada horario de inicio a fin. La hora final debe ser posterior a la hora inicial.
+                            </div>
                         </div>
                     </div>
 
                     <div class="actions">
-                        <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-secondary btn-main" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancelar
                         </a>
 
-                        <button type="submit" class="btn btn-primary btn-main">
+                        <button type="submit" class="btn btn-save btn-main">
                             <i class="bi bi-check-circle-fill me-1"></i>
                             {% if asignacion %}Guardar cambios{% else %}Asignar maestra{% endif %}
                         </button>
@@ -1103,10 +1039,10 @@
             </div>
         </section>
 
-        <aside>
+        <aside class="aside-stack">
             <div class="semestre-card">
                 <h6>
-                    <i class="bi bi-calendar2-week-fill me-1"></i>
+                    <i class="bi bi-calendar2-week-fill"></i>
                     Semestre
                 </h6>
                 <p>
@@ -1118,7 +1054,7 @@
             {% if sala_semestre %}
                 <div class="sala-card">
                     <h6>
-                        <i class="bi bi-door-open-fill me-1"></i>
+                        <i class="bi bi-door-open-fill"></i>
                         Sala
                     </h6>
                     <p>
@@ -1133,20 +1069,23 @@
                 </div>
             {% endif %}
 
-            <div class="side-note">
+            <div class="role-card">
                 <h6>
-                    <i class="bi bi-info-circle-fill me-1"></i>
-                    Regla de asignación
+                    <i class="bi bi-person-gear text-primary"></i>
+                    Rol de maestra
                 </h6>
-                <p class="mb-0">
-                    Una maestra puede asignarse a más de una sala. La asignación se controla por semestre y por sala.
+                <p>
+                    El empleado primero debe tener el rol <strong>Maestra / Asistente de Sala</strong> desde Asignación de Roles.
                 </p>
             </div>
 
             <div class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <i class="bi bi-list-check me-2"></i>Qué se valida
+                        <span class="title-icon">
+                            <i class="bi bi-list-check"></i>
+                        </span>
+                        Qué se valida
                     </h2>
                 </div>
                 <div class="panel-body">
@@ -1171,22 +1110,12 @@
                 </div>
             </div>
 
-            <div class="info-card">
-                <div class="info-title">
-                    <i class="bi bi-person-gear text-primary me-1"></i>
-                    Rol de maestra
-                </div>
-                <p class="info-text">
-                    El empleado primero debe tener el rol <strong>Maestra / Asistente de Sala</strong> desde Asignación de Roles.
-                </p>
-            </div>
-
             <div class="warning-box">
                 <h6>
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <i class="bi bi-exclamation-triangle-fill"></i>
                     No confundir
                 </h6>
-                <p class="mb-0 small fw-semibold">
+                <p>
                     En Asignación de Roles solo se define el tipo de empleado. Aquí se asigna a la sala, semestre y horarios.
                 </p>
             </div>
@@ -1196,7 +1125,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 {% if messages %}
@@ -1257,15 +1185,6 @@
     });
 </script>
 {% endif %}
-
-
-
-<script>
-    function volverPanelTI() {
-        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
-        window.location.href = "{% url 'panel_gobierno_ti' %}";
-    }
-</script>
 
 </body>
 </html>

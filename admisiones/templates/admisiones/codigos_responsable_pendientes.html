@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,31 +20,31 @@
             --slate:#0f172a;
             --muted:#64748b;
             --border:#e2e8f0;
+            --soft:#f8fafc;
         }
-
-        *{box-sizing:border-box;}
-
+        *{
+            box-sizing:border-box;
+        }
         body{
             min-height:100vh;
+            margin:0;
             background:
-                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
-                radial-gradient(circle at top right, rgba(22,163,74,.13), transparent 32%),
-                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
+            radial-gradient(circle at top right, rgba(22,163,74,.13), transparent 32%),
+            linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
         }
-
         .page{
             max-width:1280px;
             margin:0 auto;
             padding:24px;
         }
-
         .topbar{
             background:rgba(255,255,255,.94);
             backdrop-filter:blur(16px);
             border:1px solid rgba(226,232,240,.9);
-            border-radius:24px;
+            border-radius:26px;
             padding:18px 20px;
             display:flex;
             align-items:center;
@@ -53,28 +53,25 @@
             box-shadow:0 18px 45px rgba(15,23,42,.08);
             margin-bottom:22px;
         }
-
         .brand{
             display:flex;
             align-items:center;
             gap:14px;
             min-width:0;
         }
-
         .brand-logo{
-            width:98px;
-            height:66px;
-            border-radius:20px;
+            width:100px;
+            height:68px;
+            border-radius:22px;
             background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
             border:1px solid rgba(255,255,255,.28);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:6px;
+            padding:7px;
             box-shadow:0 16px 34px rgba(29,78,216,.28);
             flex-shrink:0;
         }
-
         .brand-logo img{
             width:100%;
             height:100%;
@@ -82,7 +79,6 @@
             transform:scale(1.12);
             filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
-
         .brand-title{
             margin:0;
             font-weight:950;
@@ -90,22 +86,20 @@
             font-size:1.35rem;
             color:#0f172a;
         }
-
         .brand-subtitle{
             margin:2px 0 0;
             color:var(--muted);
             font-weight:650;
             font-size:.92rem;
         }
-
         .top-actions{
             display:flex;
             flex-wrap:wrap;
             gap:10px;
             justify-content:flex-end;
+            align-items:center;
         }
-
-        .btn-soft{
+        .btn-soft,.user-chip{
             border-radius:999px;
             padding:.72rem 1rem;
             font-weight:850;
@@ -117,17 +111,46 @@
             align-items:center;
             justify-content:center;
             gap:8px;
-            transition:.18s ease;
             white-space:nowrap;
         }
-
+        .btn-soft{
+            transition:.18s ease;
+        }
         .btn-soft:hover{
             transform:translateY(-1px);
             color:#0f172a;
             background:#f8fafc;
             box-shadow:0 12px 25px rgba(15,23,42,.09);
         }
-
+        .user-chip{
+            background:#f8fbff;
+            box-shadow:0 10px 22px rgba(37,99,235,.08);
+        }
+        .user-avatar{
+            width:34px;
+            height:34px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#dbeafe;
+            color:#1d4ed8;
+        }
+        .user-name{
+            line-height:1.1;
+            text-align:left;
+        }
+        .user-name strong{
+            display:block;
+            color:#0f172a;
+            font-size:.9rem;
+        }
+        .user-name span{
+            display:block;
+            color:#64748b;
+            font-size:.75rem;
+            font-weight:800;
+        }
         .hero{
             background:linear-gradient(135deg,#2563eb,#16a34a,#0891b2);
             color:white;
@@ -138,18 +161,26 @@
             position:relative;
             overflow:hidden;
         }
-
         .hero:after{
             content:"";
             position:absolute;
-            width:270px;
-            height:270px;
+            width:280px;
+            height:280px;
             border-radius:50%;
             background:rgba(255,255,255,.14);
             right:-85px;
             top:-95px;
         }
-
+        .hero:before{
+            content:"";
+            position:absolute;
+            width:190px;
+            height:190px;
+            border-radius:50%;
+            background:rgba(255,255,255,.10);
+            right:70px;
+            bottom:-110px;
+        }
         .hero-content{
             position:relative;
             z-index:1;
@@ -158,7 +189,6 @@
             gap:18px;
             align-items:center;
         }
-
         .hero-kicker{
             display:inline-flex;
             align-items:center;
@@ -171,21 +201,18 @@
             font-weight:900;
             margin-bottom:12px;
         }
-
         .hero h1{
             margin:0;
             font-size:2rem;
             font-weight:950;
             letter-spacing:-.05em;
         }
-
         .hero p{
             margin:8px 0 0;
-            max-width:890px;
-            font-weight:600;
-            opacity:.94;
+            max-width:900px;
+            font-weight:650;
+            opacity:.95;
         }
-
         .hero-info{
             min-width:285px;
             background:rgba(255,255,255,.18);
@@ -194,7 +221,6 @@
             padding:16px;
             backdrop-filter:blur(12px);
         }
-
         .hero-label{
             font-size:.72rem;
             text-transform:uppercase;
@@ -203,27 +229,36 @@
             font-weight:950;
             margin-bottom:4px;
         }
-
         .hero-value{
             font-size:1.12rem;
             font-weight:950;
         }
-
-        .alert-custom{
+        .alert-custom,.warning-card,.help-card{
             border:none;
             border-radius:20px;
             padding:14px 16px;
             box-shadow:0 12px 26px rgba(15,23,42,.08);
             font-weight:650;
+            margin-bottom:16px;
         }
-
+        .warning-card{
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+        }
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+        }
         .summary-grid{
             display:grid;
             grid-template-columns:repeat(4,minmax(0,1fr));
             gap:14px;
             margin-bottom:20px;
         }
-
         .summary-card{
             background:white;
             border:1px solid var(--border);
@@ -234,7 +269,6 @@
             position:relative;
             overflow:hidden;
         }
-
         .summary-card:after{
             content:"";
             position:absolute;
@@ -245,7 +279,6 @@
             top:-28px;
             background:rgba(37,99,235,.08);
         }
-
         .summary-icon{
             width:42px;
             height:42px;
@@ -256,26 +289,34 @@
             font-size:1.25rem;
             margin-bottom:10px;
         }
-
-        .icon-blue{background:#dbeafe;color:#1d4ed8;}
-        .icon-green{background:#dcfce7;color:#15803d;}
-        .icon-yellow{background:#fef3c7;color:#b45309;}
-        .icon-purple{background:#ede9fe;color:#6d28d9;}
-
+        .icon-blue{
+            background:#dbeafe;
+            color:#1d4ed8;
+        }
+        .icon-green{
+            background:#dcfce7;
+            color:#15803d;
+        }
+        .icon-yellow{
+            background:#fef3c7;
+            color:#b45309;
+        }
+        .icon-purple{
+            background:#ede9fe;
+            color:#6d28d9;
+        }
         .summary-number{
             font-size:1.65rem;
             font-weight:950;
             letter-spacing:-.04em;
             line-height:1;
         }
-
         .summary-label{
             color:#64748b;
             font-weight:800;
             font-size:.82rem;
             margin-top:4px;
         }
-
         .panel{
             background:rgba(255,255,255,.95);
             border:1px solid var(--border);
@@ -283,7 +324,6 @@
             box-shadow:0 16px 38px rgba(15,23,42,.08);
             overflow:hidden;
         }
-
         .panel-header{
             padding:18px 20px;
             border-bottom:1px solid var(--border);
@@ -294,7 +334,6 @@
             flex-wrap:wrap;
             background:white;
         }
-
         .panel-title{
             margin:0;
             font-size:1.08rem;
@@ -305,47 +344,19 @@
             align-items:center;
             gap:8px;
         }
-
         .panel-body{
             padding:20px;
         }
-
-        .help-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .warning-card{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            color:#9a3412;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
         .tools-row{
             display:grid;
             grid-template-columns:minmax(0,1fr) auto;
             gap:12px;
             margin-bottom:16px;
         }
-
         .search-box{
             position:relative;
             min-width:0;
         }
-
         .search-box i{
             position:absolute;
             left:14px;
@@ -353,7 +364,6 @@
             transform:translateY(-50%);
             color:#94a3b8;
         }
-
         .search-input{
             width:100%;
             border:1px solid var(--border);
@@ -363,20 +373,17 @@
             font-weight:650;
             background:#f8fafc;
         }
-
         .search-input:focus{
             border-color:#93c5fd;
             box-shadow:0 0 0 4px rgba(59,130,246,.12);
             background:white;
         }
-
         .filter-pills{
             display:flex;
             gap:8px;
             flex-wrap:wrap;
             justify-content:flex-end;
         }
-
         .filter-pill{
             border:1px solid var(--border);
             background:white;
@@ -388,19 +395,15 @@
             cursor:pointer;
             transition:.16s ease;
         }
-
-        .filter-pill:hover,
-        .filter-pill.active{
+        .filter-pill:hover,.filter-pill.active{
             background:#0f172a;
             color:white;
             border-color:#0f172a;
         }
-
         .student-list{
             display:grid;
             gap:14px;
         }
-
         .student-card-row{
             border:1px solid var(--border);
             background:white;
@@ -408,7 +411,6 @@
             overflow:hidden;
             box-shadow:0 10px 24px rgba(15,23,42,.06);
         }
-
         .student-head{
             display:grid;
             grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;
@@ -418,14 +420,12 @@
             background:#f8fafc;
             border-bottom:1px solid var(--border);
         }
-
-        .student-main{
+        .student-main,.responsible-info{
             display:flex;
             gap:12px;
             align-items:center;
             min-width:0;
         }
-
         .avatar{
             width:48px;
             height:48px;
@@ -438,36 +438,29 @@
             font-size:1.25rem;
             flex-shrink:0;
         }
-
         .avatar.responsible{
             background:linear-gradient(135deg,#ede9fe,#dbeafe);
             color:#6d28d9;
         }
-
-        .student-name,
-        .responsible-name{
+        .student-name,.responsible-name{
             font-weight:950;
             color:#0f172a;
             line-height:1.2;
             overflow-wrap:anywhere;
         }
-
-        .student-meta,
-        .responsible-meta{
+        .student-meta,.responsible-meta{
             color:#64748b;
             font-size:.8rem;
             font-weight:650;
             margin-top:2px;
             overflow-wrap:anywhere;
         }
-
         .summary-mini{
             display:flex;
             align-items:center;
             gap:8px;
             flex-wrap:wrap;
         }
-
         .student-toggle{
             border:none;
             background:#0f172a;
@@ -480,21 +473,17 @@
             gap:7px;
             white-space:nowrap;
         }
-
         .student-toggle i{
             transition:.18s ease;
         }
-
         .student-toggle[aria-expanded="true"] i{
             transform:rotate(180deg);
         }
-
         .student-body{
             padding:16px;
             display:grid;
             gap:12px;
         }
-
         .responsible-section-label{
             color:#475569;
             font-size:.74rem;
@@ -503,7 +492,6 @@
             font-weight:950;
             margin:4px 0 0;
         }
-
         .responsible-row{
             border:1px solid var(--border);
             background:#fff;
@@ -514,25 +502,15 @@
             gap:12px;
             align-items:center;
         }
-
         .responsible-row.principal{
             border-color:#93c5fd;
             background:linear-gradient(135deg,#eff6ff,#ffffff);
         }
-
-        .responsible-info{
-            display:flex;
-            gap:12px;
-            align-items:center;
-            min-width:0;
-        }
-
         .status-stack{
             display:flex;
             flex-wrap:wrap;
             gap:7px;
         }
-
         .badge-soft{
             display:inline-flex;
             align-items:center;
@@ -543,21 +521,36 @@
             font-weight:950;
             white-space:nowrap;
         }
-
-        .badge-yellow{background:#fef3c7;color:#92400e;}
-        .badge-green{background:#dcfce7;color:#166534;}
-        .badge-blue{background:#dbeafe;color:#1e40af;}
-        .badge-gray{background:#e2e8f0;color:#334155;}
-        .badge-purple{background:#ede9fe;color:#5b21b6;}
-        .badge-red{background:#fee2e2;color:#991b1b;}
-
+        .badge-yellow{
+            background:#fef3c7;
+            color:#92400e;
+        }
+        .badge-green{
+            background:#dcfce7;
+            color:#166534;
+        }
+        .badge-blue{
+            background:#dbeafe;
+            color:#1e40af;
+        }
+        .badge-gray{
+            background:#e2e8f0;
+            color:#334155;
+        }
+        .badge-purple{
+            background:#ede9fe;
+            color:#5b21b6;
+        }
+        .badge-red{
+            background:#fee2e2;
+            color:#991b1b;
+        }
         .action-group{
             display:flex;
             gap:7px;
             flex-wrap:wrap;
             justify-content:flex-end;
         }
-
         .mini-btn{
             border-radius:999px;
             padding:.5rem .78rem;
@@ -573,146 +566,366 @@
             transition:.15s ease;
             white-space:nowrap;
         }
-
         .mini-btn:hover{
             background:#f8fafc;
             color:#0f172a;
             transform:translateY(-1px);
         }
-
         .mini-btn.primary{
             background:#eff6ff;
             color:#1d4ed8;
             border-color:#bfdbfe;
         }
-
         .mini-btn.success{
             background:#f0fdf4;
             color:#15803d;
             border-color:#bbf7d0;
         }
-
         .mini-btn.danger{
             background:#fef2f2;
             color:#b91c1c;
             border-color:#fecaca;
         }
-
         .mini-btn.disabled{
             pointer-events:none;
             opacity:.68;
             background:#f8fafc;
             color:#64748b;
         }
-
         .empty-state{
             text-align:center;
             padding:44px 20px;
             color:#64748b;
         }
-
         .empty-state i{
             font-size:2.8rem;
             color:#94a3b8;
             margin-bottom:10px;
         }
-
         .empty-state h5{
             color:#334155;
             font-weight:950;
             margin-bottom:6px;
         }
-
         .empty-state p{
             margin:0;
             font-weight:650;
         }
-
         @media(max-width:1100px){
             .hero-content{
                 grid-template-columns:1fr;
             }
-
             .hero-info{
                 min-width:0;
             }
-
             .summary-grid{
                 grid-template-columns:repeat(2,minmax(0,1fr));
             }
-
             .tools-row{
                 grid-template-columns:1fr;
             }
-
             .filter-pills{
                 justify-content:flex-start;
             }
-
             .student-head{
                 grid-template-columns:1fr;
             }
-
             .student-toggle{
                 width:100%;
                 justify-content:center;
             }
-
             .responsible-row{
                 grid-template-columns:1fr;
                 align-items:start;
             }
-
             .action-group{
                 justify-content:flex-start;
             }
         }
-
         @media(max-width:720px){
-            .page{padding:14px;}
-
+            .page{
+                padding:14px;
+            }
             .topbar{
                 flex-direction:column;
                 align-items:flex-start;
                 border-radius:20px;
             }
-
             .brand{
                 align-items:flex-start;
             }
-
             .brand-logo{
                 width:90px;
                 height:62px;
             }
-
-            .top-actions,
-            .btn-soft{
+            .top-actions,.btn-soft,.user-chip{
                 width:100%;
                 justify-content:center;
             }
-
             .hero{
                 padding:22px;
                 border-radius:22px;
             }
-
-            .hero h1{font-size:1.55rem;}
-
+            .hero h1{
+                font-size:1.55rem;
+            }
             .summary-grid{
                 grid-template-columns:1fr;
             }
-
             .filter-pill{
                 flex:1;
                 text-align:center;
             }
         }
-    </style>
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
+
+        .responsible-row.row-suplencia{
+            border-color:#bfdbfe;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+        }
+        .responsible-row.row-bloqueada{
+            opacity:.82;
+            background:#f8fafc;
+        }
+
+</style>
 </head>
 
 <body>
 <div class="page">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
 
     <header class="topbar">
         <div class="brand">
@@ -721,22 +934,22 @@
             </div>
             <div>
                 <h1 class="brand-title">Códigos de seguridad</h1>
-                <p class="brand-subtitle">
-                    Control de códigos individuales por tutor o familiar autorizado.
-                </p>
+                <p class="brand-subtitle">Control de códigos individuales por tutor o familiar autorizado.</p>
             </div>
         </div>
 
         <div class="top-actions">
             <a href="/panel-administrativo/" class="btn-soft">
                 <i class="bi bi-arrow-left-circle-fill"></i>
-                Panel Trabajo Social
+                Regresar
             </a>
-
-            <a href="{% url 'validacion_pagos_pendientes' %}" class="btn-soft">
-                <i class="bi bi-receipt-cutoff"></i>
-                Pagos
-            </a>
+            <div class="user-chip">
+                <div class="user-avatar"><i class="bi bi-person-badge-fill"></i></div>
+                <div class="user-name">
+                    <strong>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username|default:"Trabajo Social" }}{% endif %}</strong>
+                    <span>Trabajadora Social</span>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -753,17 +966,9 @@
     <section class="hero">
         <div class="hero-content">
             <div>
-                <div class="hero-kicker">
-                    <i class="bi bi-shield-lock-fill"></i>
-                    Trabajo Social
-                </div>
-
+                <div class="hero-kicker"><i class="bi bi-shield-lock-fill"></i> Trabajo Social</div>
                 <h1>Control de códigos por alumno</h1>
-
-                <p>
-                    Cada alumno se muestra una sola vez. Dentro de cada tarjeta aparecen sus responsables autorizados:
-                    primero el tutor principal, después tutor secundario y familiares autorizados.
-                </p>
+                <p>Cada alumno aparece una sola vez. Abre su tarjeta para gestionar los códigos individuales de su tutor principal, tutor secundario y familiares autorizados.</p>
             </div>
 
             <div class="hero-info">
@@ -791,33 +996,22 @@
 
     <section class="summary-grid">
         <div class="summary-card">
-            <div class="summary-icon icon-blue">
-                <i class="bi bi-people-fill"></i>
-            </div>
+            <div class="summary-icon icon-blue"><i class="bi bi-people-fill"></i></div>
             <div class="summary-number">{{ inscripciones|length }}</div>
             <div class="summary-label">Alumnos finalizados</div>
         </div>
-
         <div class="summary-card">
-            <div class="summary-icon icon-yellow">
-                <i class="bi bi-person-exclamation"></i>
-            </div>
+            <div class="summary-icon icon-yellow"><i class="bi bi-person-exclamation"></i></div>
             <div class="summary-number" id="contadorSinCodigo">0</div>
             <div class="summary-label">Responsables sin código</div>
         </div>
-
         <div class="summary-card">
-            <div class="summary-icon icon-green">
-                <i class="bi bi-key-fill"></i>
-            </div>
+            <div class="summary-icon icon-green"><i class="bi bi-key-fill"></i></div>
             <div class="summary-number" id="contadorConCodigo">0</div>
             <div class="summary-label">Responsables con código</div>
         </div>
-
         <div class="summary-card">
-            <div class="summary-icon icon-purple">
-                <i class="bi bi-person-check-fill"></i>
-            </div>
+            <div class="summary-icon icon-purple"><i class="bi bi-person-check-fill"></i></div>
             <div class="summary-number" id="contadorEntregados">0</div>
             <div class="summary-label">Códigos entregados</div>
         </div>
@@ -825,15 +1019,8 @@
 
     <section class="panel">
         <div class="panel-header">
-            <h2 class="panel-title">
-                <i class="bi bi-list-check"></i>
-                Alumnos y responsables autorizados
-            </h2>
-
-            <span class="badge-soft badge-blue">
-                <i class="bi bi-shield-lock-fill"></i>
-                Vista agrupada
-            </span>
+            <h2 class="panel-title"><i class="bi bi-list-check"></i> Alumnos y responsables autorizados</h2>
+            <span class="badge-soft badge-blue"><i class="bi bi-shield-lock-fill"></i> Vista agrupada</span>
         </div>
 
         <div class="panel-body">
@@ -859,32 +1046,13 @@
             {% if inscripciones %}
                 <div class="student-list" id="listaCodigos">
                     {% for inscripcion in inscripciones %}
-                        <article
-                            class="student-card-row"
-                            data-texto="
-                                {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
-                                {% for responsable in inscripcion.responsables_codigo %}
-                                    {{ responsable.nombre_completo }}
-                                    {{ responsable.parentesco }}
-                                    {{ responsable.get_tipo_responsable_display }}
-                                {% endfor %}
-                                {{ inscripcion.sala_semestre_asignada.sala.nombre }}
-                                {{ inscripcion.semestre.nombre }}
-                                {{ inscripcion.estado }}
-                            "
-                        >
+                        <article class="student-card-row" data-texto="{{ inscripcion.solicitud_ingreso.nombre_menor_completo }} {% for responsable in inscripcion.responsables_codigo %} {{ responsable.nombre_completo }} {{ responsable.parentesco }} {{ responsable.get_tipo_responsable_display }} {% endfor %} {{ inscripcion.sala_semestre_asignada.sala.nombre }} {{ inscripcion.semestre.nombre }} {{ inscripcion.estado }}">
                             <div class="student-head">
                                 <div class="student-main">
-                                    <div class="avatar">
-                                        <i class="bi bi-person-heart"></i>
-                                    </div>
+                                    <div class="avatar"><i class="bi bi-person-heart"></i></div>
                                     <div>
-                                        <div class="student-name">
-                                            {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
-                                        </div>
-                                        <div class="student-meta">
-                                            Estado: {{ inscripcion.estado }}
-                                        </div>
+                                        <div class="student-name">{{ inscripcion.solicitud_ingreso.nombre_menor_completo }}</div>
+                                        <div class="student-meta">Estado: {{ inscripcion.estado }}</div>
                                     </div>
                                 </div>
 
@@ -893,9 +1061,7 @@
                                     <div class="student-name" style="font-size:.95rem;">
                                         {% if inscripcion.sala_semestre_asignada and inscripcion.sala_semestre_asignada.sala %}
                                             {{ inscripcion.sala_semestre_asignada.sala.nombre }}
-                                            <span class="student-meta d-block">
-                                                {{ inscripcion.sala_semestre_asignada.sala.get_tipo_sala_display }}
-                                            </span>
+                                            <span class="student-meta d-block">{{ inscripcion.sala_semestre_asignada.sala.get_tipo_sala_display }}</span>
                                         {% else %}
                                             Sin sala
                                         {% endif %}
@@ -907,74 +1073,44 @@
                                     <div class="student-name" style="font-size:.95rem;">
                                         {% if inscripcion.semestre %}
                                             {{ inscripcion.semestre.nombre }}
-                                            <span class="student-meta d-block">
-                                                Sede: {{ inscripcion.semestre.sede_nombre }}
-                                            </span>
+                                            <span class="student-meta d-block">Sede: {{ inscripcion.semestre.sede_nombre }}</span>
                                         {% else %}
                                             Sin semestre
                                         {% endif %}
                                     </div>
                                 </div>
 
-                                <button
-                                    class="student-toggle"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#responsables{{ inscripcion.id }}"
-                                    aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
-                                    aria-controls="responsables{{ inscripcion.id }}"
-                                >
-                                    Ver responsables
-                                    <i class="bi bi-chevron-down"></i>
+                                <button class="student-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#responsables{{ inscripcion.id }}" aria-expanded="false" aria-controls="responsables{{ inscripcion.id }}">
+                                    Ver responsables <i class="bi bi-chevron-down"></i>
                                 </button>
                             </div>
 
-                            <div id="responsables{{ inscripcion.id }}" class="collapse {% if forloop.first %}show{% endif %}">
+                            <div id="responsables{{ inscripcion.id }}" class="collapse">
                                 <div class="student-body">
-
                                     <div class="summary-mini">
                                         {% if inscripcion.pago_validado or inscripcion.estado_pago == "VALIDADO" %}
-                                            <span class="badge-soft badge-green">
-                                                <i class="bi bi-check-circle-fill"></i>
-                                                Pago validado
-                                            </span>
+                                            <span class="badge-soft badge-green"><i class="bi bi-check-circle-fill"></i> Pago validado</span>
                                         {% else %}
-                                            <span class="badge-soft badge-yellow">
-                                                <i class="bi bi-clock-fill"></i>
-                                                Pago pendiente
-                                            </span>
+                                            <span class="badge-soft badge-yellow"><i class="bi bi-clock-fill"></i> Pago pendiente</span>
                                         {% endif %}
-
-                                        <span class="badge-soft badge-blue">
-                                            <i class="bi bi-person-vcard-fill"></i>
-                                            Responsables autorizados
-                                        </span>
+                                        <span class="badge-soft badge-blue"><i class="bi bi-person-vcard-fill"></i> Responsables autorizados</span>
                                     </div>
 
-                                    <div class="responsible-section-label">
-                                        Tutor principal
-                                    </div>
-
+                                    <div class="responsible-section-label">Tutor principal</div>
                                     {% for responsable in inscripcion.responsables_codigo %}
                                         {% if responsable.tipo_responsable == "TUTOR_PRINCIPAL" %}
                                             {% include "admisiones/partials/responsable_codigo_row.html" with responsable=responsable inscripcion=inscripcion principal=True %}
                                         {% endif %}
                                     {% endfor %}
 
-                                    <div class="responsible-section-label">
-                                        Tutor secundario y familiares autorizados
-                                    </div>
-
+                                    <div class="responsible-section-label">Tutor secundario y familiares autorizados</div>
                                     {% for responsable in inscripcion.responsables_codigo %}
                                         {% if responsable.tipo_responsable != "TUTOR_PRINCIPAL" %}
                                             {% include "admisiones/partials/responsable_codigo_row.html" with responsable=responsable inscripcion=inscripcion principal=False %}
                                         {% endif %}
                                     {% empty %}
                                         <div class="responsible-row">
-                                            <span class="badge-soft badge-red">
-                                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                                No se encontraron responsables autorizados para este alumno.
-                                            </span>
+                                            <span class="badge-soft badge-red"><i class="bi bi-exclamation-triangle-fill"></i> No se encontraron responsables autorizados para este alumno.</span>
                                         </div>
                                     {% endfor %}
                                 </div>
@@ -986,28 +1122,21 @@
                 <div class="empty-state">
                     <i class="bi bi-shield-lock"></i>
                     <h5>No hay alumnos listos para generar código</h5>
-                    <p>
-                        Deben tener inscripción finalizada, pago validado, semestre y sala asignados.
-                    </p>
+                    <p>Deben tener inscripción finalizada, pago validado, semestre y sala asignados.</p>
                 </div>
             {% endif %}
         </div>
     </section>
-
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     const inputBuscar = document.getElementById("buscarAlumno");
     const tarjetas = Array.from(document.querySelectorAll(".student-card-row"));
     const filtros = document.querySelectorAll(".filter-pill");
-
     const contadorSinCodigo = document.getElementById("contadorSinCodigo");
     const contadorConCodigo = document.getElementById("contadorConCodigo");
     const contadorEntregados = document.getElementById("contadorEntregados");
-
     let filtroActivo = "TODOS";
 
     function contarEstados(){
@@ -1015,13 +1144,11 @@
         let sinCodigo = 0;
         let conCodigo = 0;
         let entregados = 0;
-
         rows.forEach(row => {
             if((row.dataset.codigo || "") === "SIN_CODIGO"){ sinCodigo++; }
             if((row.dataset.codigo || "") === "CON_CODIGO"){ conCodigo++; }
             if((row.dataset.entrega || "") === "ENTREGADO"){ entregados++; }
         });
-
         if(contadorSinCodigo){ contadorSinCodigo.textContent = sinCodigo; }
         if(contadorConCodigo){ contadorConCodigo.textContent = conCodigo; }
         if(contadorEntregados){ contadorEntregados.textContent = entregados; }
@@ -1029,42 +1156,24 @@
 
     function tarjetaCumpleFiltro(tarjeta){
         const rows = Array.from(tarjeta.querySelectorAll(".responsible-row[data-codigo]"));
-
-        if(filtroActivo === "TODOS"){
-            return true;
-        }
-
-        if(filtroActivo === "SIN_CODIGO"){
-            return rows.some(row => row.dataset.codigo === "SIN_CODIGO");
-        }
-
-        if(filtroActivo === "CON_CODIGO"){
-            return rows.some(row => row.dataset.codigo === "CON_CODIGO");
-        }
-
-        if(filtroActivo === "ENTREGADO"){
-            return rows.some(row => row.dataset.entrega === "ENTREGADO");
-        }
-
+        if(filtroActivo === "TODOS"){ return true; }
+        if(filtroActivo === "SIN_CODIGO"){ return rows.some(row => row.dataset.codigo === "SIN_CODIGO"); }
+        if(filtroActivo === "CON_CODIGO"){ return rows.some(row => row.dataset.codigo === "CON_CODIGO"); }
+        if(filtroActivo === "ENTREGADO"){ return rows.some(row => row.dataset.entrega === "ENTREGADO"); }
         return true;
     }
 
     function aplicarFiltros(){
         const texto = (inputBuscar?.value || "").toLowerCase().trim();
-
         tarjetas.forEach(tarjeta => {
             const contenido = (tarjeta.dataset.texto || "").toLowerCase();
             const coincideTexto = !texto || contenido.includes(texto);
             const coincideFiltro = tarjetaCumpleFiltro(tarjeta);
-
             tarjeta.style.display = coincideTexto && coincideFiltro ? "" : "none";
         });
     }
 
-    if(inputBuscar){
-        inputBuscar.addEventListener("input", aplicarFiltros);
-    }
-
+    if(inputBuscar){ inputBuscar.addEventListener("input", aplicarFiltros); }
     filtros.forEach(btn => {
         btn.addEventListener("click", () => {
             filtros.forEach(b => b.classList.remove("active"));
@@ -1073,8 +1182,36 @@
             aplicarFiltros();
         });
     });
-
     contarEstados();
+</script>
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
 </script>
 
 </body>

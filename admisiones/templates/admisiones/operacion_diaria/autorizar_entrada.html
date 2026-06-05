@@ -1,0 +1,1196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Autorizar entrada | Correo o QR | Estancia Infantil UNACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue:#2563eb;
+            --blue-dark:#1e40af;
+            --cyan:#0891b2;
+            --green:#16a34a;
+            --red:#dc2626;
+            --orange:#f97316;
+            --yellow:#ca8a04;
+            --pink:#db2777;
+            --purple:#7c3aed;
+            --slate:#0f172a;
+            --muted:#64748b;
+            --border:#e2e8f0;
+            --soft:#f8fafc;
+            --hero-main:linear-gradient(135deg,#1d4ed8,#0891b2);
+            --hero-shadow:rgba(37,99,235,.24);
+            --student-soft:linear-gradient(135deg,#eff6ff,#ecfeff 58%,#ffffff);
+            --student-border:#bfdbfe;
+            --student-accent:#2563eb;
+            --student-accent-2:#0891b2;
+            --avatar-bg:linear-gradient(135deg,#dbeafe,#cffafe);
+        }
+
+        *{box-sizing:border-box;}
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.15), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.14), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color:var(--slate);
+        }
+
+        body.theme-girl{
+            --hero-main:linear-gradient(135deg,#be185d,#db2777,#7c3aed);
+            --hero-shadow:rgba(219,39,119,.22);
+            --student-soft:linear-gradient(135deg,#fff1f7,#fdf2ff 56%,#ffffff);
+            --student-border:#fbcfe8;
+            --student-accent:#db2777;
+            --student-accent-2:#7c3aed;
+            --avatar-bg:linear-gradient(135deg,#fce7f3,#ede9fe);
+            background:
+                radial-gradient(circle at top left, rgba(219,39,119,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(124,58,237,.13), transparent 32%),
+                linear-gradient(135deg,#fff7fb,#f3f7ff 45%,#f8fafc);
+        }
+
+        body.theme-boy{
+            --hero-main:linear-gradient(135deg,#1e40af,#2563eb,#0891b2);
+            --hero-shadow:rgba(37,99,235,.24);
+            --student-soft:linear-gradient(135deg,#eff6ff,#ecfeff 58%,#ffffff);
+            --student-border:#bfdbfe;
+            --student-accent:#2563eb;
+            --student-accent-2:#0891b2;
+            --avatar-bg:linear-gradient(135deg,#dbeafe,#cffafe);
+        }
+
+        .page{
+            max-width:1120px;
+            margin:0 auto;
+            padding:22px;
+        }
+
+        .topbar{
+            background:rgba(255,255,255,.95);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(226,232,240,.92);
+            border-radius:24px;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            box-shadow:0 18px 45px rgba(15,23,42,.08);
+            margin-bottom:22px;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            min-width:0;
+        }
+
+        .brand-logo{
+            width:98px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.28);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+            transform:scale(1.12);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+        }
+
+        .brand-title{
+            margin:0;
+            font-weight:950;
+            letter-spacing:-.04em;
+            font-size:1.35rem;
+            color:#0f172a;
+        }
+
+        .brand-subtitle{
+            margin:2px 0 0;
+            color:var(--muted);
+            font-weight:650;
+            font-size:.92rem;
+        }
+
+        .secure-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:9px 13px;
+            border:1px solid #bbf7d0;
+            border-radius:999px;
+            background:#f0fdf4;
+            color:#166534;
+            font-weight:900;
+            white-space:nowrap;
+            box-shadow:0 10px 22px rgba(22,101,52,.08);
+        }
+
+        .hero{
+            background:var(--hero-main);
+            color:white;
+            border-radius:30px;
+            padding:26px;
+            box-shadow:0 24px 60px var(--hero-shadow);
+            margin-bottom:22px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero:after{
+            content:"";
+            position:absolute;
+            width:280px;
+            height:280px;
+            border-radius:50%;
+            background:rgba(255,255,255,.14);
+            right:-90px;
+            top:-105px;
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:1;
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:18px;
+            align-items:center;
+        }
+
+        .hero-student{
+            display:flex;
+            align-items:center;
+            gap:18px;
+            min-width:0;
+        }
+
+        .hero-photo{
+            width:102px;
+            height:102px;
+            border-radius:30px;
+            border:3px solid rgba(255,255,255,.55);
+            background:rgba(255,255,255,.18);
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 16px 32px rgba(0,0,0,.16);
+            flex-shrink:0;
+        }
+
+        .hero-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .hero-photo i{
+            font-size:2.85rem;
+            color:white;
+        }
+
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.26);
+            border-radius:999px;
+            padding:.45rem .8rem;
+            font-size:.78rem;
+            font-weight:950;
+            margin-bottom:10px;
+        }
+
+        .hero h1{
+            margin:0;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+            text-shadow:0 8px 18px rgba(0,0,0,.12);
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            max-width:760px;
+            font-weight:650;
+            opacity:.95;
+        }
+
+        .status-box{
+            min-width:248px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:22px;
+            padding:16px;
+            backdrop-filter:blur(12px);
+        }
+
+        .status-label{
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            opacity:.82;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .status-value{
+            font-size:1.18rem;
+            font-weight:950;
+        }
+
+        .badge-soft{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:.42rem .68rem;
+            font-size:.76rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .badge-green{background:#dcfce7;color:#166534;}
+        .badge-blue{background:#dbeafe;color:#1e40af;}
+        .badge-yellow{background:#fef3c7;color:#92400e;}
+        .badge-red{background:#fee2e2;color:#991b1b;}
+        .badge-gray{background:#e2e8f0;color:#334155;}
+        .badge-pink{background:#fce7f3;color:#9d174d;}
+        .badge-orange{background:#ffedd5;color:#9a3412;}
+
+        .layout{
+            display:grid;
+            grid-template-columns:.88fr 1.12fr;
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:rgba(255,255,255,.96);
+            border:1px solid var(--border);
+            border-radius:26px;
+            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            overflow:hidden;
+            min-width:0;
+        }
+
+        .panel-header{
+            padding:18px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+            background:white;
+        }
+
+        .panel-title{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:950;
+            letter-spacing:-.03em;
+            color:#0f172a;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .panel-body{padding:20px;}
+
+        .summary-card{
+            background:var(--student-soft);
+            border:1px solid var(--student-border);
+            border-radius:24px;
+            padding:18px;
+            margin-bottom:16px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .summary-card:after{
+            content:"";
+            position:absolute;
+            width:120px;
+            height:120px;
+            border-radius:50%;
+            background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,0));
+            right:-42px;
+            top:-42px;
+        }
+
+        .student-top{
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+            position:relative;
+            z-index:1;
+        }
+
+        .student-avatar{
+            width:86px;
+            height:86px;
+            border-radius:24px;
+            background:var(--avatar-bg);
+            color:var(--student-accent);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2rem;
+            flex-shrink:0;
+            overflow:hidden;
+            border:3px solid rgba(255,255,255,.72);
+            box-shadow:0 12px 26px rgba(15,23,42,.10);
+        }
+
+        .student-avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .student-name{
+            font-weight:950;
+            font-size:1.22rem;
+            letter-spacing:-.04em;
+            margin-bottom:4px;
+            background:linear-gradient(135deg,var(--student-accent),var(--student-accent-2));
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+            overflow-wrap:anywhere;
+        }
+
+        .student-meta{
+            color:#475569;
+            font-size:.9rem;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            margin-top:16px;
+            position:relative;
+            z-index:1;
+        }
+
+        .info-item{
+            background:white;
+            border:1px solid rgba(148,163,184,.28);
+            border-radius:16px;
+            padding:12px;
+            min-width:0;
+        }
+
+        .info-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .info-value{
+            font-weight:900;
+            color:#0f172a;
+            overflow-wrap:anywhere;
+        }
+
+        .notice-card{
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:700;
+            margin-bottom:16px;
+            line-height:1.45;
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+        }
+
+        .warning-card{
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:700;
+            line-height:1.45;
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            color:#9a3412;
+        }
+
+        .method-card{
+            border-radius:20px;
+            padding:15px 16px;
+            font-weight:700;
+            margin-bottom:16px;
+            line-height:1.45;
+            background:#f8fafc;
+            border:1px solid var(--border);
+            border-left:6px solid #2563eb;
+            color:#334155;
+        }
+
+        .method-card.qr{
+            background:#fff7ed;
+            border-color:#fed7aa;
+            border-left-color:#f97316;
+            color:#9a3412;
+        }
+
+        .method-card.mail{
+            background:#eff6ff;
+            border-color:#bfdbfe;
+            border-left-color:#2563eb;
+            color:#1e3a8a;
+        }
+
+        .success-card{
+            border-radius:24px;
+            padding:22px;
+            background:linear-gradient(135deg,#dcfce7,#f0fdf4);
+            border:1px solid #bbf7d0;
+            color:#14532d;
+            box-shadow:0 14px 30px rgba(22,163,74,.10);
+        }
+
+        .error-card{
+            border-radius:24px;
+            padding:22px;
+            background:linear-gradient(135deg,#fee2e2,#fff7ed);
+            border:1px solid #fecaca;
+            color:#7f1d1d;
+            box-shadow:0 14px 30px rgba(220,38,38,.10);
+        }
+
+        .state-icon{
+            width:62px;
+            height:62px;
+            border-radius:22px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2rem;
+            margin-bottom:12px;
+            background:white;
+            box-shadow:0 12px 25px rgba(15,23,42,.08);
+        }
+
+        .form-section{
+            border:1px solid var(--border);
+            background:#f8fafc;
+            border-radius:22px;
+            padding:18px;
+            margin-bottom:16px;
+        }
+
+        .form-section-title{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-bottom:14px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.02em;
+        }
+
+        .form-label{
+            font-weight:900;
+            color:#334155;
+            margin-bottom:7px;
+            font-size:.88rem;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:16px;
+            border:1px solid #cbd5e1;
+            padding:.78rem .9rem;
+            font-weight:650;
+            color:#0f172a;
+            background:white;
+            width:100%;
+            max-width:100%;
+            min-width:0;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#93c5fd;
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        body.theme-girl .form-control:focus,
+        body.theme-girl .form-select:focus{
+            border-color:#f9a8d4;
+            box-shadow:0 0 0 4px rgba(219,39,119,.12);
+        }
+
+        .form-check{
+            background:white;
+            border:1px solid #cbd5e1;
+            border-radius:16px;
+            padding:14px 14px 14px 44px;
+            min-height:54px;
+            display:flex;
+            align-items:center;
+        }
+
+        .form-check-input{
+            margin-left:-28px;
+            width:1.15rem;
+            height:1.15rem;
+        }
+
+        .form-check-label{
+            font-weight:850;
+            color:#334155;
+        }
+
+        .password-wrap{position:relative;}
+
+        .password-toggle{
+            position:absolute;
+            right:12px;
+            top:50%;
+            transform:translateY(-50%);
+            border:none;
+            background:transparent;
+            color:#64748b;
+            font-size:1.1rem;
+        }
+
+        .pin-help{
+            font-size:.78rem;
+            color:#64748b;
+            font-weight:650;
+            margin-top:6px;
+        }
+
+        .errors{
+            margin-top:7px;
+            color:#b91c1c;
+            font-weight:750;
+            font-size:.84rem;
+        }
+
+        .errors ul{margin:0;padding-left:18px;}
+
+        .btn-main{
+            border-radius:999px;
+            padding:.86rem 1.18rem;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            border:none;
+            transition:.18s ease;
+            width:auto;
+        }
+
+        .btn-main:hover{
+            transform:translateY(-1px);
+            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        }
+
+        .btn-green{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;}
+        .btn-red{background:linear-gradient(135deg,#dc2626,#f97316);color:white;}
+        .btn-soft{
+            border-radius:999px;
+            padding:.82rem 1.15rem;
+            font-weight:900;
+            border:1px solid var(--border);
+            background:white;
+            color:#334155;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+        }
+
+        .btn-soft:hover{
+            transform:translateY(-1px);
+            color:#0f172a;
+            background:#f8fafc;
+            box-shadow:0 12px 25px rgba(15,23,42,.09);
+        }
+
+        .submit-note{
+            color:#64748b;
+            font-weight:650;
+            font-size:.86rem;
+            line-height:1.45;
+        }
+
+        .modal-content{
+            border:none;
+            border-radius:26px;
+            overflow:hidden;
+            box-shadow:0 30px 80px rgba(15,23,42,.22);
+        }
+
+        .modal-header{
+            border:none;
+            background:linear-gradient(135deg,#dc2626,#f97316);
+            color:white;
+            padding:18px 20px;
+        }
+
+        .modal-title{
+            font-weight:950;
+            letter-spacing:-.03em;
+        }
+
+        .modal-body{padding:20px;}
+
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        @media(max-width:980px){
+            .layout{grid-template-columns:1fr;}
+            .hero-content{grid-template-columns:1fr;}
+            .status-box{min-width:0;}
+        }
+
+        @media(max-width:680px){
+            .page{padding:14px;}
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+                border-radius:20px;
+            }
+            .secure-chip{width:100%;justify-content:center;}
+            .hero{padding:22px;border-radius:22px;}
+            .hero-student{flex-direction:column;align-items:flex-start;}
+            .hero h1{font-size:1.55rem;}
+            .info-grid{grid-template-columns:1fr;}
+            .student-top{flex-direction:column;}
+            .btn-main,.btn-soft{width:100%;}
+            .d-flex.actions-mobile{flex-direction:column;}
+        }
+    </style>
+</head>
+
+{% with sexo=autorizacion.registro_diario.alumno.sexo_menor|default:'' %}
+<body class="{% if sexo == 'F' or sexo == 'FEMENINO' %}theme-girl{% elif sexo == 'M' or sexo == 'MASCULINO' %}theme-boy{% else %}theme-neutral{% endif %}">
+{% endwith %}
+<div class="page">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Autorización de entrada</h1>
+                <p class="brand-subtitle">Estancia Infantil UNACH</p>
+            </div>
+        </div>
+
+        <div class="secure-chip">
+            {% if autorizacion.metodo_autorizacion == "QR" %}
+                <i class="bi bi-qr-code-scan"></i>
+                Acceso seguro por QR
+            {% elif autorizacion.metodo_autorizacion == "CORREO" %}
+                <i class="bi bi-envelope-check-fill"></i>
+                Acceso seguro por correo
+            {% else %}
+                <i class="bi bi-shield-lock-fill"></i>
+                Acceso seguro
+            {% endif %}
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if errores_operacion %}
+        <div class="alert alert-danger alert-custom mb-3">
+            <strong>No se pudo completar la operación.</strong>
+            <ul class="mb-0 mt-2">
+                {% for error in errores_operacion %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-student">
+                <div class="hero-photo">
+                    {% if autorizacion.registro_diario.alumno.doc_menor_fotos %}
+                        <img src="{{ autorizacion.registro_diario.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                    {% else %}
+                        <i class="bi bi-person-heart"></i>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="hero-kicker">
+                        {% if autorizacion.metodo_autorizacion == "QR" %}
+                            <i class="bi bi-qr-code-scan"></i>
+                            Solicitud abierta desde QR presencial
+                        {% elif autorizacion.metodo_autorizacion == "CORREO" %}
+                            <i class="bi bi-envelope-check-fill"></i>
+                            Solicitud enviada por correo institucional
+                        {% else %}
+                            <i class="bi bi-shield-check"></i>
+                            Solicitud enviada por la estancia
+                        {% endif %}
+                    </div>
+
+                    <h1>{{ alumno_nombre }}</h1>
+                    <p>
+                        Revisa la información capturada por la maestra. Esta solicitud puede haberse abierto desde correo institucional o desde QR presencial.
+                        Para autorizar la entrada, escribe tu código de seguridad de 4 dígitos y confirma la autorización.
+                    </p>
+                </div>
+            </div>
+
+            <div class="status-box">
+                <div class="status-label">Estado de solicitud</div>
+                <div class="status-value">{{ autorizacion.get_estado_display }}</div>
+                <div class="mt-2">
+                    {% if autorizacion.estado == "AUTORIZADA" or autorizada %}
+                        <span class="badge-soft badge-green"><i class="bi bi-check-circle-fill"></i> Autorizada</span>
+                    {% elif autorizacion.estado == "RECHAZADA" or rechazada %}
+                        <span class="badge-soft badge-red"><i class="bi bi-x-circle-fill"></i> Rechazada</span>
+                    {% elif autorizacion.estado == "EXPIRADA" %}
+                        <span class="badge-soft badge-orange"><i class="bi bi-hourglass-bottom"></i> Expirada</span>
+                    {% elif autorizacion.estado == "CANCELADA" %}
+                        <span class="badge-soft badge-gray"><i class="bi bi-slash-circle-fill"></i> Cancelada</span>
+                    {% elif autorizacion.estado == "ERROR" %}
+                        <span class="badge-soft badge-red"><i class="bi bi-exclamation-triangle-fill"></i> Error</span>
+                    {% else %}
+                        <span class="badge-soft badge-yellow"><i class="bi bi-clock-history"></i> Pendiente</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <aside>
+            <section class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-clipboard-check-fill"></i>
+                        Resumen capturado
+                    </h2>
+                </div>
+
+                <div class="panel-body">
+                    <div class="summary-card">
+                        <div class="student-top">
+                            <div class="student-avatar">
+                                {% if autorizacion.registro_diario.alumno.doc_menor_fotos %}
+                                    <img src="{{ autorizacion.registro_diario.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                                {% else %}
+                                    <i class="bi bi-person-heart"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="student-name">{{ alumno_nombre }}</div>
+                                <div class="student-meta">
+                                    Sala: <strong>{{ autorizacion.sala_nombre|default:"Sin sala" }}</strong><br>
+                                    Fecha: <strong>{{ autorizacion.fecha_operativa|date:"d/m/Y" }}</strong><br>
+                                    Maestra: <strong>{{ autorizacion.solicitada_por.get_full_name|default:autorizacion.solicitada_por.username }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Responsable</div>
+                                <div class="info-value">{{ autorizacion.responsable_nombre|default:"No especificado" }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Parentesco</div>
+                                <div class="info-value">{{ autorizacion.responsable_parentesco|default:"No especificado" }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Método</div>
+                                <div class="info-value">
+                                    {% if autorizacion.metodo_autorizacion == "QR" %}
+                                        QR presencial
+                                    {% elif autorizacion.metodo_autorizacion == "CORREO" %}
+                                        Correo institucional
+                                    {% else %}
+                                        Enlace seguro
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Contacto</div>
+                                <div class="info-value">
+                                    {% if autorizacion.metodo_autorizacion == "QR" %}
+                                        Escaneo presencial
+                                    {% elif autorizacion.correo_destino %}
+                                        {{ autorizacion.correo_destino }}
+                                    {% else %}
+                                        No registrado
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Credencial</div>
+                                <div class="info-value">
+                                    {% if autorizacion.credencial_entrada_validada %}
+                                        Verificada
+                                    {% else %}
+                                        No verificada
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Temperatura</div>
+                                <div class="info-value">
+                                    {% if autorizacion.temperatura_entrada %}
+                                        {{ autorizacion.temperatura_entrada }} °C
+                                    {% else %}
+                                        No capturada
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Solicitud</div>
+                                <div class="info-value">
+                                    {% if autorizacion.enviada_en %}
+                                        {{ autorizacion.enviada_en|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Expira</div>
+                                <div class="info-value">
+                                    {% if autorizacion.expira_en %}
+                                        {{ autorizacion.expira_en|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        Vigencia no definida
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if autorizacion.metodo_autorizacion == "QR" %}
+                        <div class="method-card qr">
+                            <i class="bi bi-qr-code-scan me-1"></i>
+                            Esta autorización se abrió mediante un QR mostrado por la maestra. Verifica que la información corresponda al menor antes de escribir tu código.
+                        </div>
+                    {% elif autorizacion.metodo_autorizacion == "CORREO" %}
+                        <div class="method-card mail">
+                            <i class="bi bi-envelope-check-fill me-1"></i>
+                            Esta autorización se abrió desde el enlace enviado al correo institucional registrado del responsable.
+                            {% if autorizacion.correo_destino %}
+                                <br><strong>Correo:</strong> {{ autorizacion.correo_destino }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="notice-card">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        El código de seguridad solo debe escribirlo el responsable autorizado desde su propio dispositivo. Si no reconoces esta solicitud, usa la opción de rechazar.
+                    </div>
+
+                    {% if autorizacion.observaciones_maestra %}
+                        <div class="warning-card">
+                            <i class="bi bi-chat-left-text-fill me-1"></i>
+                            <strong>Observaciones de la maestra:</strong><br>
+                            {{ autorizacion.observaciones_maestra }}
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </aside>
+
+        <main>
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="bi bi-shield-check"></i>
+                        Confirmación del responsable
+                    </h2>
+
+                    {% if autorizacion.esta_vigente %}
+                        {% if autorizacion.metodo_autorizacion == "QR" %}
+                            <span class="badge-soft badge-orange">
+                                <i class="bi bi-qr-code-scan"></i>
+                                QR presencial
+                            </span>
+                        {% elif autorizacion.metodo_autorizacion == "CORREO" %}
+                            <span class="badge-soft badge-blue">
+                                <i class="bi bi-envelope-check-fill"></i>
+                                Correo institucional
+                            </span>
+                        {% else %}
+                            <span class="badge-soft badge-blue">
+                                <i class="bi bi-phone-fill"></i>
+                                Autorizar desde celular
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="panel-body">
+                    {% if autorizacion.estado == "AUTORIZADA" or autorizada %}
+                        <div class="success-card">
+                            <div class="state-icon"><i class="bi bi-check-circle-fill"></i></div>
+                            <h3 class="fw-black mb-2" style="font-weight:950;letter-spacing:-.04em;">Entrada autorizada</h3>
+                            <p class="mb-0 fw-semibold">
+                                La entrada de {{ alumno_nombre }} fue autorizada correctamente. La pantalla de la maestra se actualizará para continuar con la bitácora de entrada en casa.
+                            </p>
+                            {% if autorizacion.autorizada_en %}
+                                <div class="mt-3">
+                                    <span class="badge-soft badge-green">
+                                        <i class="bi bi-clock-fill"></i>
+                                        {{ autorizacion.autorizada_en|date:"d/m/Y H:i" }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% elif autorizacion.estado == "RECHAZADA" or rechazada %}
+                        <div class="error-card">
+                            <div class="state-icon"><i class="bi bi-x-circle-fill"></i></div>
+                            <h3 class="fw-black mb-2" style="font-weight:950;letter-spacing:-.04em;">Solicitud rechazada</h3>
+                            <p class="mb-0 fw-semibold">
+                                La entrada no fue autorizada. La estancia revisará el caso con el responsable correspondiente.
+                            </p>
+                            {% if autorizacion.comentario_responsable %}
+                                <div class="mt-3">
+                                    <strong>Motivo:</strong><br>
+                                    {{ autorizacion.comentario_responsable }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% elif autorizacion.estado == "EXPIRADA" or not autorizacion.esta_vigente %}
+                        <div class="error-card">
+                            <div class="state-icon"><i class="bi bi-hourglass-bottom"></i></div>
+                            <h3 class="fw-black mb-2" style="font-weight:950;letter-spacing:-.04em;">Solicitud no disponible</h3>
+                            <p class="mb-0 fw-semibold">
+                                Esta solicitud expiró, fue cancelada o ya no se encuentra disponible. Comunícate con la Estancia Infantil UNACH para solicitar una nueva autorización.
+                            </p>
+                            {% if autorizacion.ultimo_error %}
+                                <div class="mt-3">
+                                    <strong>Detalle:</strong><br>
+                                    {{ autorizacion.ultimo_error }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="AUTORIZAR">
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger alert-custom">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-key-fill"></i>
+                                    Código de seguridad
+                                </div>
+
+                                <label for="{{ form.codigo_responsable.id_for_label }}" class="form-label">
+                                    Escribe tu código de 4 dígitos
+                                </label>
+                                <div class="password-wrap">
+                                    {{ form.codigo_responsable }}
+                                    <button type="button" class="password-toggle" onclick="togglePin()">
+                                        <i class="bi bi-eye-fill" id="pinIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="pin-help">
+                                    Este código fue generado y entregado por Trabajo Social. Escríbelo únicamente en esta pantalla y no lo compartas con otras personas.
+                                </div>
+                                {% if form.codigo_responsable.errors %}
+                                    <div class="errors">{{ form.codigo_responsable.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="bi bi-chat-left-text-fill"></i>
+                                    Comentario opcional
+                                </div>
+
+                                <label for="{{ form.comentario_responsable.id_for_label }}" class="form-label">
+                                    Comentario del responsable
+                                </label>
+                                {{ form.comentario_responsable }}
+                                {% if form.comentario_responsable.errors %}
+                                    <div class="errors">{{ form.comentario_responsable.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-section">
+                                <div class="form-check">
+                                    {{ form.confirmar }}
+                                    <label for="{{ form.confirmar.id_for_label }}" class="form-check-label">
+                                        Confirmo que autorizo la entrada de {{ alumno_nombre }} a la estancia
+                                    </label>
+                                </div>
+                                {% if form.confirmar.errors %}
+                                    <div class="errors">{{ form.confirmar.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="submit-note mb-3">
+                                Al autorizar, el sistema registrará la entrada del menor y notificará a la maestra para continuar el proceso.
+                            </div>
+
+                            <div class="d-flex actions-mobile gap-2 justify-content-between flex-wrap">
+                                <button type="button" class="btn-soft" data-bs-toggle="modal" data-bs-target="#rechazarModal">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Rechazar
+                                </button>
+
+                                <button type="submit" class="btn-main btn-green">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Autorizar entrada
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div class="modal fade" id="rechazarModal" tabindex="-1" aria-labelledby="rechazarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rechazarModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Rechazar autorización
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-semibold text-secondary mb-3">
+                    Usa esta opción únicamente si no reconoces la solicitud, si el enlace o QR no corresponde al menor, o si no autorizas la entrada.
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="RECHAZAR">
+
+                    {% if rechazo_form.non_field_errors %}
+                        <div class="alert alert-danger alert-custom">
+                            {{ rechazo_form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="{{ rechazo_form.comentario_responsable.id_for_label }}" class="form-label">
+                            Motivo del rechazo
+                        </label>
+                        {{ rechazo_form.comentario_responsable }}
+                        {% if rechazo_form.comentario_responsable.errors %}
+                            <div class="errors">{{ rechazo_form.comentario_responsable.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ rechazo_form.confirmar }}
+                        <label for="{{ rechazo_form.confirmar.id_for_label }}" class="form-check-label">
+                            Confirmo que deseo rechazar esta solicitud de entrada
+                        </label>
+                    </div>
+                    {% if rechazo_form.confirmar.errors %}
+                        <div class="errors mb-3">{{ rechazo_form.confirmar.errors }}</div>
+                    {% endif %}
+
+                    <div class="d-flex actions-mobile gap-2 justify-content-end flex-wrap">
+                        <button type="button" class="btn-soft" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-main btn-red">
+                            <i class="bi bi-x-circle-fill"></i>
+                            Rechazar solicitud
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function togglePin(){
+        const input = document.getElementById("{{ form.codigo_responsable.id_for_label }}");
+        const icon = document.getElementById("pinIcon");
+
+        if(!input){ return; }
+
+        if(input.type === "password"){
+            input.type = "text";
+            icon.classList.remove("bi-eye-fill");
+            icon.classList.add("bi-eye-slash-fill");
+        }else{
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash-fill");
+            icon.classList.add("bi-eye-fill");
+        }
+    }
+</script>
+</body>
+</html>

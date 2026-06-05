@@ -8,15 +8,18 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
     <style>
         :root{
             --blue:#2563eb;
+            --blue-dark:#1d4ed8;
             --cyan:#0891b2;
             --green:#16a34a;
-            --yellow:#ca8a04;
+            --orange:#f97316;
             --red:#dc2626;
             --purple:#7c3aed;
+            --pink:#db2777;
             --slate:#0f172a;
             --muted:#64748b;
             --border:#e2e8f0;
@@ -27,131 +30,199 @@
 
         body{
             min-height:100vh;
-            background:
-                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
-                radial-gradient(circle at top right, rgba(124,58,237,.12), transparent 32%),
-                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            margin:0;
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.13), transparent 28%),
+                radial-gradient(circle at top right, rgba(124,58,237,.12), transparent 30%),
+                linear-gradient(135deg,#f8fafc 0%,#eef6ff 48%,#f8fbff 100%);
         }
 
+        a{text-decoration:none;}
+
         .page{
-            max-width:1320px;
+            width:min(1420px, calc(100% - 48px));
             margin:0 auto;
-            padding:24px;
+            padding:24px 0 34px;
         }
 
         .topbar{
-            background:rgba(255,255,255,.94);
-            backdrop-filter:blur(16px);
-            border:1px solid rgba(226,232,240,.9);
-            border-radius:24px;
+            background:rgba(255,255,255,.92);
+            border:1px solid rgba(226,232,240,.95);
+            border-radius:26px;
+            box-shadow:0 18px 46px rgba(15,23,42,.08);
             padding:18px 20px;
             display:flex;
             align-items:center;
             justify-content:space-between;
             gap:18px;
-            box-shadow:0 18px 45px rgba(15,23,42,.08);
             margin-bottom:22px;
+            backdrop-filter:blur(16px);
         }
 
         .brand{
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:74px;
+            height:74px;
+            background:linear-gradient(135deg,#1d4ed8,#2563eb);
+            border:1px solid rgba(255,255,255,.35);
+            border-radius:20px;
+            box-shadow:0 18px 34px rgba(37,99,235,.24);
             display:flex;
             align-items:center;
             justify-content:center;
+            flex-shrink:0;
             padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            filter:drop-shadow(0 8px 14px rgba(0,0,0,.16));
         }
 
         .brand-title{
             margin:0;
+            color:#0b2559;
             font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.35rem;
-            color:#0f172a;
+            letter-spacing:-.05em;
+            font-size:1.45rem;
+            line-height:1.1;
         }
 
         .brand-subtitle{
-            margin:2px 0 0;
-            color:var(--muted);
-            font-weight:650;
+            margin:4px 0 0;
+            color:#49638f;
+            font-weight:700;
             font-size:.92rem;
         }
 
         .top-actions{
             display:flex;
-            flex-wrap:wrap;
+            align-items:center;
             gap:10px;
+            flex-wrap:wrap;
             justify-content:flex-end;
         }
 
-        .btn-soft{
-            border-radius:999px;
-            padding:.72rem 1rem;
-            font-weight:850;
-            border:1px solid var(--border);
-            background:white;
-            color:#334155;
-            text-decoration:none;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            transition:.18s ease;
-        }
-
-        .btn-soft:hover{
-            transform:translateY(-1px);
-            color:#0f172a;
-            background:#f8fafc;
-            box-shadow:0 12px 25px rgba(15,23,42,.09);
-        }
-
+        .btn-soft,
         .btn-main{
             border-radius:999px;
-            padding:.84rem 1.18rem;
-            font-weight:950;
             display:inline-flex;
             align-items:center;
             justify-content:center;
             gap:8px;
-            text-decoration:none;
-            border:none;
+            font-weight:950;
             transition:.18s ease;
+            white-space:nowrap;
         }
 
-        .btn-main:hover{
-            transform:translateY(-1px);
-            box-shadow:0 14px 28px rgba(15,23,42,.16);
+        .btn-soft{
+            padding:.74rem 1rem;
+            border:1px solid var(--border);
+            color:#334155;
+            background:white;
         }
 
-        .btn-blue{background:linear-gradient(135deg,#2563eb,#0891b2);color:white;}
-        .btn-green{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;}
-        .btn-purple{background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;}
-        .btn-red{background:linear-gradient(135deg,#dc2626,#f97316);color:white;}
+        .btn-soft:hover{color:#0f172a;background:#f8fafc;transform:translateY(-1px);box-shadow:0 12px 26px rgba(15,23,42,.08);}
+
+        .btn-main{
+            padding:.82rem 1.12rem;
+            border:1px solid transparent;
+            color:white;
+            background:linear-gradient(135deg,#16a34a,#22c55e);
+            box-shadow:0 16px 30px rgba(22,163,74,.20);
+        }
+
+        .btn-main:hover{color:white;transform:translateY(-1px);}
+
+        .type-icon{
+            width:54px;
+            height:54px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-size:1.35rem;
+            box-shadow:0 14px 28px rgba(37,99,235,.18);
+            flex-shrink:0;
+        }
+
+        .type-pedagogica{background:linear-gradient(135deg,#7c3aed,#2563eb);}
+        .type-nutricional{background:linear-gradient(135deg,#16a34a,#0891b2);}
+        .type-medica{background:linear-gradient(135deg,#dc2626,#f97316);}
+        .type-psicologica{background:linear-gradient(135deg,#2563eb,#db2777);}
+        .type-general{background:linear-gradient(135deg,#2563eb,#0891b2);}
+
+        .profile-area-pill{
+            min-height:54px;
+            border-radius:18px;
+            background:#fff;
+            border:1px solid var(--border);
+            box-shadow:0 14px 30px rgba(15,23,42,.08);
+            padding:8px 14px 8px 8px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            max-width:360px;
+        }
+
+        .profile-area-pill .type-icon{
+            width:42px;
+            height:42px;
+            border-radius:14px;
+            font-size:1.05rem;
+            box-shadow:none;
+        }
+
+        .profile-area-text{
+            min-width:0;
+            line-height:1.05;
+        }
+
+        .profile-area-role{
+            display:block;
+            color:#64748b;
+            font-size:.68rem;
+            font-weight:950;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            margin-bottom:3px;
+        }
+
+        .profile-area-name{
+            display:block;
+            color:#0f172a;
+            font-size:.92rem;
+            font-weight:950;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            max-width:250px;
+        }
+
+        .alert-custom{
+            border:none;
+            border-radius:18px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:700;
+        }
 
         .hero{
-            color:white;
             border-radius:30px;
-            padding:26px;
-            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            color:white;
+            padding:28px;
+            box-shadow:0 24px 60px rgba(37,99,235,.23);
             margin-bottom:22px;
             position:relative;
             overflow:hidden;
@@ -166,20 +237,20 @@
         .hero:after{
             content:"";
             position:absolute;
-            width:285px;
-            height:285px;
+            width:310px;
+            height:310px;
             border-radius:50%;
+            right:-100px;
+            top:-115px;
             background:rgba(255,255,255,.14);
-            right:-90px;
-            top:-100px;
         }
 
-        .hero-content{
+        .hero-grid{
             position:relative;
             z-index:1;
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:18px;
+            grid-template-columns:minmax(0,1fr) auto;
+            gap:22px;
             align-items:center;
         }
 
@@ -188,105 +259,141 @@
             align-items:center;
             gap:8px;
             background:rgba(255,255,255,.18);
-            border:1px solid rgba(255,255,255,.26);
+            border:1px solid rgba(255,255,255,.28);
             border-radius:999px;
-            padding:.45rem .8rem;
+            padding:.46rem .78rem;
             font-size:.78rem;
-            font-weight:900;
+            font-weight:950;
             margin-bottom:12px;
         }
 
         .hero h1{
             margin:0;
-            font-size:2rem;
+            font-size:2.05rem;
             font-weight:950;
-            letter-spacing:-.05em;
+            letter-spacing:-.06em;
         }
 
         .hero p{
             margin:8px 0 0;
-            max-width:860px;
-            font-weight:600;
+            max-width:900px;
+            font-weight:650;
+            line-height:1.55;
             opacity:.94;
         }
 
         .hero-info{
-            min-width:310px;
+            min-width:295px;
             background:rgba(255,255,255,.18);
             border:1px solid rgba(255,255,255,.28);
-            border-radius:22px;
-            padding:16px;
-            backdrop-filter:blur(12px);
+            border-radius:24px;
+            padding:18px;
+            backdrop-filter:blur(14px);
         }
 
-        .hero-label{
-            font-size:.72rem;
+        .hero-info small{
+            display:block;
             text-transform:uppercase;
             letter-spacing:.08em;
+            font-size:.72rem;
+            font-weight:950;
             opacity:.82;
-            font-weight:950;
-            margin-bottom:4px;
+            margin-bottom:5px;
         }
 
-        .hero-value{
-            font-size:1.12rem;
-            font-weight:950;
-        }
+        .hero-info strong{display:block;font-size:1.12rem;}
 
-        .alert-custom{
-            border:none;
+        .warning-card,
+        .help-card{
             border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
+            padding:15px 16px;
+            font-weight:700;
+            line-height:1.45;
+            margin-bottom:16px;
         }
 
-        .layout{
+        .warning-card{background:#fff7ed;border:1px solid #fed7aa;border-left:6px solid #f97316;color:#9a3412;}
+        .help-card{background:#eff6ff;border:1px solid #bfdbfe;border-left:6px solid #2563eb;color:#1e3a8a;}
+
+        .context-grid{
             display:grid;
-            grid-template-columns:.82fr 1.18fr;
-            gap:20px;
-            align-items:start;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:16px;
+            margin-bottom:18px;
         }
+
+        .context-card{
+            background:rgba(255,255,255,.94);
+            border:1px solid var(--border);
+            border-radius:24px;
+            padding:18px;
+            box-shadow:0 16px 34px rgba(15,23,42,.07);
+            display:flex;
+            align-items:flex-start;
+            gap:14px;
+            min-height:112px;
+        }
+
+        .context-icon{
+            width:48px;
+            height:48px;
+            border-radius:17px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.28rem;
+            flex-shrink:0;
+        }
+
+        .context-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b;font-weight:950;margin-bottom:4px;}
+        .context-value{color:#0b2559;font-weight:950;line-height:1.18;}
+        .context-text{color:#64748b;font-weight:700;font-size:.84rem;margin-top:4px;line-height:1.35;}
+
+        .bg-blue{background:#dbeafe;color:#2563eb;}
+        .bg-purple{background:#ede9fe;color:#7c3aed;}
+        .bg-green{background:#dcfce7;color:#16a34a;}
+        .bg-red{background:#fee2e2;color:#dc2626;}
+        .bg-orange{background:#ffedd5;color:#f97316;}
 
         .panel{
-            background:rgba(255,255,255,.96);
+            background:rgba(255,255,255,.94);
             border:1px solid var(--border);
-            border-radius:26px;
-            box-shadow:0 16px 38px rgba(15,23,42,.08);
+            border-radius:28px;
+            box-shadow:0 18px 42px rgba(15,23,42,.08);
             overflow:hidden;
         }
 
         .panel-header{
-            padding:18px 20px;
+            padding:18px 22px;
             border-bottom:1px solid var(--border);
             display:flex;
             align-items:center;
             justify-content:space-between;
             gap:14px;
             flex-wrap:wrap;
-            background:white;
+            background:rgba(255,255,255,.9);
         }
 
         .panel-title{
-            margin:0;
-            font-size:1.08rem;
-            font-weight:950;
-            letter-spacing:-.03em;
-            color:#0f172a;
             display:flex;
             align-items:center;
-            gap:8px;
+            gap:9px;
+            margin:0;
+            color:#0b2559;
+            font-weight:950;
+            font-size:1.1rem;
+            letter-spacing:-.03em;
         }
 
-        .panel-body{padding:20px;}
+        .panel-body{padding:22px;}
 
         .badge-soft{
             display:inline-flex;
             align-items:center;
-            gap:6px;
+            gap:7px;
             border-radius:999px;
-            padding:.42rem .68rem;
-            font-size:.76rem;
+            padding:.44rem .72rem;
+            font-size:.78rem;
             font-weight:950;
             white-space:nowrap;
         }
@@ -299,118 +406,10 @@
         .badge-red{background:#fee2e2;color:#991b1b;}
         .badge-cyan{background:#cffafe;color:#155e75;}
 
-        .help-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .warning-card{
-            background:#fff7ed;
-            border:1px solid #fed7aa;
-            border-left:6px solid #f97316;
-            color:#9a3412;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .student-card{
-            background:linear-gradient(135deg,#eff6ff,#f5f3ff);
-            border:1px solid #bfdbfe;
-            border-radius:24px;
-            padding:18px;
-            margin-bottom:16px;
-        }
-
-        .student-top{
-            display:flex;
-            gap:14px;
-            align-items:flex-start;
-        }
-
-        .student-avatar{
-            width:66px;
-            height:66px;
-            border-radius:22px;
-            background:linear-gradient(135deg,#dbeafe,#ede9fe);
-            color:#1d4ed8;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:1.9rem;
-            flex-shrink:0;
-        }
-
-        .student-name{
-            font-weight:950;
-            font-size:1.2rem;
-            color:#0f172a;
-            letter-spacing:-.03em;
-            margin-bottom:4px;
-        }
-
-        .student-meta{
-            color:#475569;
-            font-size:.9rem;
-            font-weight:700;
-            line-height:1.45;
-        }
-
-        .steps{
-            display:grid;
-            gap:12px;
-        }
-
-        .step{
-            display:flex;
-            gap:12px;
-            align-items:flex-start;
-            padding:13px;
-            border:1px solid var(--border);
-            background:white;
-            border-radius:18px;
-        }
-
-        .step-number{
-            width:32px;
-            height:32px;
-            border-radius:999px;
-            background:#dbeafe;
-            color:#1d4ed8;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:950;
-            flex-shrink:0;
-        }
-
-        .step-title{
-            font-weight:950;
-            color:#0f172a;
-            margin-bottom:2px;
-        }
-
-        .step-text{
-            color:#64748b;
-            font-size:.86rem;
-            margin:0;
-            font-weight:650;
-            line-height:1.4;
-        }
-
         .form-section{
             border:1px solid var(--border);
             background:#f8fafc;
-            border-radius:22px;
+            border-radius:24px;
             padding:18px;
             margin-bottom:16px;
         }
@@ -418,17 +417,17 @@
         .form-section-title{
             display:flex;
             align-items:center;
-            gap:8px;
-            margin-bottom:14px;
+            gap:9px;
+            margin-bottom:15px;
             font-weight:950;
-            color:#0f172a;
+            color:#0b2559;
             letter-spacing:-.02em;
         }
 
         .form-grid{
             display:grid;
             grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
+            gap:15px;
         }
 
         .form-group.full{grid-column:1 / -1;}
@@ -450,9 +449,7 @@
             background:white;
         }
 
-        textarea.form-control{
-            min-height:118px;
-        }
+        textarea.form-control{min-height:120px;}
 
         .form-control:focus,
         .form-select:focus{
@@ -463,52 +460,65 @@
         .form-check{
             background:white;
             border:1px solid #cbd5e1;
-            border-radius:16px;
-            padding:14px 14px 14px 44px;
-            min-height:54px;
+            border-radius:18px;
+            padding:15px 15px 15px 46px;
+            min-height:58px;
             display:flex;
             align-items:center;
         }
 
         .form-check-input{
-            margin-left:-28px;
-            width:1.15rem;
-            height:1.15rem;
+            margin-left:-30px;
+            width:1.18rem;
+            height:1.18rem;
+            cursor:pointer;
         }
 
         .form-check-label{
-            font-weight:850;
+            font-weight:900;
             color:#334155;
+            cursor:pointer;
         }
 
         .errors{
             margin-top:7px;
             color:#b91c1c;
-            font-weight:700;
+            font-weight:800;
             font-size:.82rem;
         }
 
-        .errors ul{
-            margin:0;
-            padding-left:18px;
-        }
+        .errors ul{margin:0;padding-left:18px;}
 
         .mini-help{
             color:#64748b;
             font-size:.82rem;
-            font-weight:650;
+            font-weight:700;
             margin-top:7px;
+            line-height:1.4;
         }
 
-        /* =========================================================
-           SPRINT 5 - TIPO FIJO POR ROL / ÁREA
-           ========================================================= */
+        .tipo-fijo-lock{
+            background:#eff6ff;
+            border:1px dashed #93c5fd;
+            border-radius:18px;
+            padding:13px 15px;
+            margin-bottom:16px;
+            color:#1e3a8a;
+            font-size:.88rem;
+            font-weight:750;
+            display:flex;
+            gap:10px;
+            align-items:flex-start;
+        }
+
+        .tipo-fijo-lock i{color:#2563eb;font-size:1.08rem;margin-top:1px;}
+
         .tipo-fijo-card{
             background:white;
             border:1px solid #cbd5e1;
             border-radius:18px;
             padding:14px 16px;
-            min-height:56px;
+            min-height:100%;
         }
 
         .tipo-fijo-title{
@@ -521,29 +531,9 @@
         .tipo-fijo-help{
             color:#64748b;
             font-size:.82rem;
-            font-weight:650;
+            font-weight:700;
             margin-top:8px;
             line-height:1.35;
-        }
-
-        .tipo-fijo-lock{
-            background:#f8fafc;
-            border:1px dashed #cbd5e1;
-            border-radius:16px;
-            padding:12px 14px;
-            margin-bottom:16px;
-            color:#475569;
-            font-size:.88rem;
-            font-weight:650;
-            display:flex;
-            gap:10px;
-            align-items:flex-start;
-        }
-
-        .tipo-fijo-lock i{
-            color:#2563eb;
-            font-size:1.05rem;
-            margin-top:1px;
         }
 
         .special-section{
@@ -561,14 +551,11 @@
         .file-card{
             background:white;
             border:1px dashed #94a3b8;
-            border-radius:20px;
+            border-radius:22px;
             padding:16px;
         }
 
-        .file-card i{
-            color:#2563eb;
-            font-size:1.35rem;
-        }
+        .file-card i{color:#2563eb;font-size:1.35rem;}
 
         .submit-bar{
             display:flex;
@@ -581,45 +568,200 @@
 
         .submit-note{
             color:#64748b;
-            font-weight:650;
+            font-weight:700;
             font-size:.86rem;
-            max-width:600px;
+            max-width:680px;
         }
 
-        @media(max-width:1060px){
-            .layout{grid-template-columns:1fr;}
-            .hero-content{grid-template-columns:1fr;}
+
+
+        .select2-container{width:100%!important;}
+        .select2-container--default .select2-selection--single{
+            height:52px;
+            border:1px solid #cbd5e1;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            background:#fff;
+            font-weight:750;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered{
+            color:#0f172a;
+            line-height:52px;
+            padding-left:14px;
+            padding-right:42px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow{height:52px;right:10px;}
+        .select2-dropdown{border:1px solid #bfdbfe;border-radius:16px;overflow:hidden;box-shadow:0 18px 34px rgba(15,23,42,.12);}
+        .select2-search__field{border-radius:12px!important;border:1px solid #cbd5e1!important;padding:.62rem .75rem!important;font-weight:700;}
+
+        .auto-card,
+        .autosave-card,
+        .otro-category-box,
+        .file-limit-card{
+            border:1px solid #bfdbfe;
+            background:#eff6ff;
+            color:#1e3a8a;
+            border-radius:18px;
+            padding:12px 14px;
+            font-weight:750;
+            line-height:1.45;
+            margin-top:8px;
+        }
+
+        .auto-card strong,
+        .autosave-card strong{font-weight:950;color:#0b2559;}
+        .registro-auto-hidden{display:none;}
+
+        .autosave-card{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:16px;
+            background:#f0fdf4;
+            border-color:#bbf7d0;
+            color:#14532d;
+        }
+
+        .autosave-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            padding:.38rem .65rem;
+            border-radius:999px;
+            background:#dcfce7;
+            color:#166534;
+            font-size:.78rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .otro-category-box{
+            display:none;
+            background:#fff7ed;
+            border-color:#fed7aa;
+            color:#9a3412;
+            margin-top:10px;
+        }
+        .otro-category-box.show{display:block;}
+        .otro-category-box .form-control{margin-top:8px;}
+
+        .file-limit-card{
+            background:#f8fafc;
+            border:1px dashed #94a3b8;
+            color:#475569;
+        }
+        .file-error{display:none;margin-top:10px;color:#b91c1c;font-weight:900;}
+        .file-error.show{display:block;}
+
+
+
+        /* CHECKLIST PROFESIONAL PARA SÍNTOMAS MÉDICOS */
+        .sintomas-original-wrap{
+            position:absolute;
+            width:1px;
+            height:1px;
+            padding:0;
+            margin:-1px;
+            overflow:hidden;
+            clip:rect(0,0,0,0);
+            white-space:nowrap;
+            border:0;
+        }
+
+        .symptom-check-grid{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:10px;
+            margin-top:8px;
+        }
+
+        .symptom-option{
+            min-height:48px;
+            background:#ffffff;
+            border:1px solid #dbe4ef;
+            border-radius:16px;
+            padding:10px 12px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            font-weight:850;
+            color:#334155;
+            cursor:pointer;
+            transition:.18s ease;
+            box-shadow:0 8px 18px rgba(15,23,42,.035);
+        }
+
+        .symptom-option:hover{
+            border-color:#93c5fd;
+            transform:translateY(-1px);
+            box-shadow:0 12px 24px rgba(15,23,42,.06);
+        }
+
+        .symptom-option input{
+            width:1.05rem;
+            height:1.05rem;
+            flex-shrink:0;
+            accent-color:#dc2626;
+        }
+
+        .symptom-option.is-checked{
+            background:#eff6ff;
+            border-color:#93c5fd;
+            color:#0b2559;
+        }
+
+        .symptom-option.is-other{
+            border-color:#fecaca;
+            background:#fff7f7;
+            color:#991b1b;
+        }
+
+        .otro-sintoma-box{
+            display:none;
+            margin-top:12px;
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            border-left:6px solid #f97316;
+            border-radius:18px;
+            padding:14px 16px;
+        }
+
+        .otro-sintoma-box.show{
+            display:block;
+        }
+
+        .otro-sintoma-box .form-label{
+            color:#9a3412;
+            font-weight:950;
+        }
+
+        @media(max-width:1100px){
+            .symptom-check-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+        }
+
+        @media(max-width:640px){
+            .symptom-check-grid{grid-template-columns:1fr;}
+        }
+
+        @media(max-width:1100px){
+            .hero-grid{grid-template-columns:1fr;}
             .hero-info{min-width:0;}
+            .context-grid{grid-template-columns:1fr;}
         }
 
-        @media(max-width:720px){
-            .page{padding:14px;}
-
-            .topbar{
-                flex-direction:column;
-                align-items:flex-start;
-                border-radius:20px;
-            }
-
-            .top-actions,
-            .btn-soft,
-            .btn-main{
-                width:100%;
-                justify-content:center;
-            }
-
-            .hero{
-                padding:22px;
-                border-radius:22px;
-            }
-
+        @media(max-width:760px){
+            .page{width:min(100% - 28px, 1420px);padding-top:14px;}
+            .topbar{flex-direction:column;align-items:flex-start;border-radius:22px;}
+            .top-actions,.btn-soft,.btn-main{width:100%;}
+            .type-icon{width:100%;}
+            .profile-area-pill{width:100%;max-width:100%;}
+            .profile-area-pill .type-icon{width:42px;}
+            .profile-area-name{max-width:100%;}
+            .hero{padding:22px;border-radius:24px;}
             .hero h1{font-size:1.55rem;}
-
-            .form-grid{
-                grid-template-columns:1fr;
-            }
-
-            .student-top{flex-direction:column;}
+            .form-grid{grid-template-columns:1fr;}
             .submit-bar{align-items:stretch;}
         }
     </style>
@@ -631,42 +773,120 @@
     <header class="topbar">
         <div class="brand">
             <div class="brand-logo">
-                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+                <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
             </div>
             <div>
                 <h1 class="brand-title">{{ titulo|default:"Crear incidencia" }}</h1>
-                <p class="brand-subtitle">
-                    Registro formal de una incidencia del menor, con intervención del personal y evidencias.
-                </p>
+                <p class="brand-subtitle">Registro formal de una incidencia del menor, con intervención del personal y evidencias.</p>
             </div>
         </div>
 
         <div class="top-actions">
-            {% if tipo_forzado %}
-                <a href="{% url 'panel_incidencias' %}?tipo={{ tipo_forzado }}" class="btn-soft">
-                    <i class="bi bi-arrow-left-circle-fill"></i>
-                    Panel de incidencias
-                </a>
+
+            {% if request.GET.next %}
+                <a href="{{ request.GET.next }}" class="btn-soft"><i class="bi bi-arrow-left-circle-fill"></i> Regresar</a>
+            {% elif tipo_forzado == "PSICOLOGICA" %}
+                <a href="{% url 'psicologia_pendientes' %}" class="btn-soft"><i class="bi bi-arrow-left-circle-fill"></i> Regresar</a>
+            {% elif tipo_forzado == "PEDAGOGICA" %}
+                <a href="/admisiones/dashboard-coordinadora/" class="btn-soft"><i class="bi bi-arrow-left-circle-fill"></i> Regresar</a>
+            {% elif tipo_forzado %}
+                <a href="{% url 'panel_incidencias' %}?tipo={{ tipo_forzado }}" class="btn-soft"><i class="bi bi-arrow-left-circle-fill"></i> Regresar</a>
             {% else %}
-                <a href="{% url 'panel_incidencias' %}" class="btn-soft">
-                    <i class="bi bi-arrow-left-circle-fill"></i>
-                    Panel de incidencias
-                </a>
+                <a href="{% url 'panel_incidencias' %}" class="btn-soft"><i class="bi bi-arrow-left-circle-fill"></i> Regresar</a>
             {% endif %}
 
-            <a href="/" class="btn-soft">
-                <i class="bi bi-house-door-fill"></i>
-                Panel principal
-            </a>
+            {% if tipo_forzado == "PEDAGOGICA" %}
+                <div class="profile-area-pill" title="Responsable del área pedagógica">
+                    <span class="type-icon type-pedagogica"><i class="bi bi-easel2-fill"></i></span>
+                    <span class="profile-area-text">
+                        <span class="profile-area-role">Área pedagógica</span>
+                        <span class="profile-area-name">
+                            {% if pedagogica_asignada %}
+                                {{ pedagogica_asignada }}
+                            {% elif maestra_asignada %}
+                                {{ maestra_asignada }}
+                            {% elif coordinadora_asignada %}
+                                {{ coordinadora_asignada }}
+                            {% elif request.user.get_full_name %}
+                                {{ request.user.get_full_name }}
+                            {% else %}
+                                {{ request.user.username }}
+                            {% endif %}
+                        </span>
+                    </span>
+                </div>
+            {% elif tipo_forzado == "NUTRICIONAL" %}
+                <div class="profile-area-pill" title="Nutrióloga responsable">
+                    <span class="type-icon type-nutricional"><i class="bi bi-egg-fried"></i></span>
+                    <span class="profile-area-text">
+                        <span class="profile-area-role">Nutrióloga</span>
+                        <span class="profile-area-name">
+                            {% if nutriologa_asignada %}
+                                {{ nutriologa_asignada }}
+                            {% elif request.user.get_full_name %}
+                                {{ request.user.get_full_name }}
+                            {% else %}
+                                {{ request.user.username }}
+                            {% endif %}
+                        </span>
+                    </span>
+                </div>
+            {% elif tipo_forzado == "MEDICA" %}
+                <div class="profile-area-pill" title="Médica responsable">
+                    <span class="type-icon type-medica"><i class="bi bi-heart-pulse-fill"></i></span>
+                    <span class="profile-area-text">
+                        <span class="profile-area-role">Médica</span>
+                        <span class="profile-area-name">
+                            {% if medica_asignada %}
+                                {{ medica_asignada }}
+                            {% elif medico_asignado %}
+                                {{ medico_asignado }}
+                            {% elif request.user.get_full_name %}
+                                {{ request.user.get_full_name }}
+                            {% else %}
+                                {{ request.user.username }}
+                            {% endif %}
+                        </span>
+                    </span>
+                </div>
+            {% elif tipo_forzado == "PSICOLOGICA" %}
+                <div class="profile-area-pill" title="Psicóloga responsable">
+                    <span class="type-icon type-psicologica"><i class="bi bi-person-hearts"></i></span>
+                    <span class="profile-area-text">
+                        <span class="profile-area-role">Psicóloga</span>
+                        <span class="profile-area-name">
+                            {% if psicologa_asignada %}
+                                {{ psicologa_asignada }}
+                            {% elif request.user.get_full_name %}
+                                {{ request.user.get_full_name }}
+                            {% else %}
+                                {{ request.user.username }}
+                            {% endif %}
+                        </span>
+                    </span>
+                </div>
+            {% else %}
+                <div class="profile-area-pill" title="Responsable del registro">
+                    <span class="type-icon type-general"><i class="bi bi-clipboard2-pulse-fill"></i></span>
+                    <span class="profile-area-text">
+                        <span class="profile-area-role">Responsable</span>
+                        <span class="profile-area-name">
+                            {% if request.user.get_full_name %}
+                                {{ request.user.get_full_name }}
+                            {% else %}
+                                {{ request.user.username }}
+                            {% endif %}
+                        </span>
+                    </span>
+                </div>
+            {% endif %}
         </div>
     </header>
 
     {% if messages %}
         <div class="mb-3">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
-                    {{ message }}
-                </div>
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">{{ message }}</div>
             {% endfor %}
         </div>
     {% endif %}
@@ -679,7 +899,7 @@
         {% elif tipo_forzado == 'PSICOLOGICA' %}hero-psicologica
         {% else %}hero-default{% endif %}"
     >
-        <div class="hero-content">
+        <div class="hero-grid">
             <div>
                 <div class="hero-kicker">
                     {% if tipo_forzado == "PEDAGOGICA" %}
@@ -710,571 +930,513 @@
                 </h1>
 
                 <p>
-                    Captura la información principal del formato: fecha y hora automática,
-                    nombre del niño/a, sala, tipo de incidencia, descripción, intervención del personal,
-                    seguimiento posterior y resolución al cierre.
+                    Captura los datos del menor, categoría, nivel de riesgo, descripción, intervención realizada,
+                    aviso al responsable y evidencias adjuntas. El tipo se mantiene fijo cuando el formulario se abre desde un rol o área específica.
                 </p>
             </div>
 
             <div class="hero-info">
-                <div class="hero-label">Semestre operativo</div>
-                <div class="hero-value">
-                    {% if semestre %}
-                        {{ semestre.nombre }}
-                    {% else %}
-                        Sin semestre activo
-                    {% endif %}
-                </div>
-                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:650;">
-                    {% if registro_diario %}
-                        Registro diario vinculado
-                    {% else %}
-                        Selecciona alumno y, si aplica, registro diario
-                    {% endif %}
+                <small>Semestre operativo</small>
+                <strong>{% if semestre %}{{ semestre.nombre }}{% else %}Sin semestre activo{% endif %}</strong>
+                <div class="mt-2" style="font-size:.84rem; opacity:.9; font-weight:700;">
+                    {% if registro_diario %}Registro diario vinculado{% else %}Selecciona alumno y, si aplica, registro diario{% endif %}
                 </div>
             </div>
         </div>
     </section>
 
     {% if aviso_semestre_operativo %}
-        <div class="warning-card">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i>
-            {{ aviso_semestre_operativo }}
+        <div class="warning-card"><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ aviso_semestre_operativo }}</div>
+    {% endif %}
+
+    <section class="context-grid">
+        <div class="context-card">
+            <div class="context-icon bg-blue"><i class="bi bi-calendar3"></i></div>
+            <div>
+                <div class="context-title">Semestre</div>
+                <div class="context-value">{% if semestre %}{{ semestre.nombre }}{% else %}Sin semestre activo{% endif %}</div>
+                <div class="context-text">La fecha y hora se registran automáticamente al guardar.</div>
+            </div>
+        </div>
+
+        <div class="context-card">
+            <div class="context-icon bg-purple"><i class="bi bi-shield-lock-fill"></i></div>
+            <div>
+                <div class="context-title">Tipo de registro</div>
+                <div class="context-value">
+                    {% if tipo_forzado == "PEDAGOGICA" %}Pedagógica
+                    {% elif tipo_forzado == "NUTRICIONAL" %}Nutricional
+                    {% elif tipo_forzado == "MEDICA" %}Médica
+                    {% elif tipo_forzado == "PSICOLOGICA" %}Psicológica
+                    {% else %}General{% endif %}
+                </div>
+                <div class="context-text">El tipo cambia según el área que está registrando la incidencia.</div>
+            </div>
+        </div>
+
+        <div class="context-card">
+            <div class="context-icon bg-green"><i class="bi bi-check2-circle"></i></div>
+            <div>
+                <div class="context-title">Estado inicial</div>
+                <div class="context-value">Abierta</div>
+                <div class="context-text">Después se podrá agregar seguimiento y cerrarla con resolución.</div>
+            </div>
+        </div>
+    </section>
+
+    {% if registro_diario %}
+        <div class="help-card">
+            <i class="bi bi-link-45deg me-1"></i>
+            Esta incidencia quedará vinculada automáticamente con el registro diario del día operativo.
+            <strong>
+                {% if registro_diario.dia_operativo %}
+                    Fecha: {{ registro_diario.dia_operativo.fecha|date:"d/m/Y" }}
+                {% else %}
+                    Fecha disponible al guardar
+                {% endif %}
+            </strong>
         </div>
     {% endif %}
 
-    <div class="layout">
+    <section class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title"><i class="bi bi-pencil-square"></i> Formulario de incidencia</h2>
 
-        <aside>
-            {% if registro_diario %}
-                <section class="panel mb-4">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <i class="bi bi-person-heart"></i>
-                            Registro diario vinculado
-                        </h2>
-                    </div>
-
-                    <div class="panel-body">
-                        <div class="student-card">
-                            <div class="student-top">
-                                <div class="student-avatar">
-                                    <i class="bi bi-person-heart"></i>
-                                </div>
-                                <div>
-                                    <div class="student-name">
-                                        {{ registro_diario.alumno.solicitud_ingreso.nombre_menor_completo }}
-                                    </div>
-                                    <div class="student-meta">
-                                        Fecha:
-                                        {% if registro_diario.dia_operativo %}
-                                            {{ registro_diario.dia_operativo.fecha|date:"d/m/Y" }}
-                                        {% else %}
-                                            Sin día
-                                        {% endif %}
-                                        <br>
-                                        Sala:
-                                        {% if registro_diario.sala_semestre and registro_diario.sala_semestre.sala %}
-                                            {{ registro_diario.sala_semestre.sala.nombre }}
-                                        {% else %}
-                                            Sin sala
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="help-card">
-                            <i class="bi bi-link-45deg me-1"></i>
-                            Esta incidencia quedará conectada con la bitácora del día y podrá aparecer en el informe diario del menor.
-                        </div>
-                    </div>
-                </section>
+            {% if tipo_forzado == "PEDAGOGICA" %}
+                <span class="badge-soft badge-purple"><i class="bi bi-easel2-fill"></i> Pedagógica</span>
+            {% elif tipo_forzado == "NUTRICIONAL" %}
+                <span class="badge-soft badge-green"><i class="bi bi-egg-fried"></i> Nutricional</span>
+            {% elif tipo_forzado == "MEDICA" %}
+                <span class="badge-soft badge-red"><i class="bi bi-heart-pulse-fill"></i> Médica</span>
+            {% elif tipo_forzado == "PSICOLOGICA" %}
+                <span class="badge-soft badge-blue"><i class="bi bi-person-hearts"></i> Psicológica</span>
+            {% else %}
+                <span class="badge-soft badge-gray"><i class="bi bi-clipboard2-pulse-fill"></i> General</span>
             {% endif %}
+        </div>
 
-            <section class="panel mb-4">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-list-check"></i>
-                        Proceso de la incidencia
-                    </h2>
+        <div class="panel-body">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                {% endif %}
+
+                {% if registro_diario %}
+                    <input type="hidden" name="registro_diario_inicial" value="{{ registro_diario.id }}">
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-custom">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="autosave-card" id="autosaveCard">
+                    <span><i class="bi bi-shield-check me-1"></i> Autoguardado local activo para recuperar el borrador si se cierra la página.</span>
+                    <span class="autosave-pill" id="autosaveStatus"><i class="bi bi-check-circle-fill"></i> Listo</span>
                 </div>
 
-                <div class="panel-body">
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-number">1</div>
-                            <div>
-                                <div class="step-title">Crear incidencia</div>
-                                <p class="step-text">
-                                    El área correspondiente registra descripción, intervención, riesgo y evidencias.
-                                </p>
+                {% if tipo_forzado %}
+                    <div class="tipo-fijo-lock">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <div>El tipo de incidencia está fijo por tu rol/área. No se puede cambiar desde este formulario.</div>
+                    </div>
+                {% endif %}
+
+                <div class="form-section">
+                    <div class="form-section-title"><i class="bi bi-person-vcard-fill"></i> Datos principales</div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="{{ form.alumno.id_for_label }}" class="form-label">{{ form.alumno.label }}</label>
+
+                            {% if alumnos_inscritos %}
+                                <select name="{{ form.alumno.html_name }}" id="{{ form.alumno.id_for_label }}" class="form-select">
+                                    <option value="">Buscar niño/a inscrito...</option>
+                                    {% for alumno_item in alumnos_inscritos %}
+                                        <option value="{{ alumno_item.id }}"
+                                            {% if form.alumno.value|stringformat:"s" == alumno_item.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ alumno_item.solicitud_ingreso.nombre_menor_completo }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                {{ form.alumno }}
+                            {% endif %}
+
+                            {% if form.alumno.errors %}<div class="errors">{{ form.alumno.errors }}</div>{% endif %}
+                            <div class="mini-help">Escribe una letra o parte del nombre para buscar más rápido al niño o niña inscrito.</div>
+                        </div>
+
+                        <div class="form-group full registro-auto-hidden" id="registroDiarioGroup">
+                            <label for="{{ form.registro_diario.id_for_label }}" class="form-label">{{ form.registro_diario.label }}</label>
+                            {{ form.registro_diario }}
+                            {% if form.registro_diario.errors %}<div class="errors">{{ form.registro_diario.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group full">
+                            <label class="form-label">Día / registro diario</label>
+                            <div class="auto-card">
+                                <i class="bi bi-calendar-check-fill me-1"></i>
+                                <strong>Automático:</strong> el sistema vinculará el registro diario disponible del día operativo actual cuando selecciones al menor.
+                                <div class="mini-help" id="registroAutoTexto">Primero selecciona el niño/a. Aquí solo se mostrará la fecha del día operativo.</div>
                             </div>
                         </div>
 
-                        <div class="step">
-                            <div class="step-number">2</div>
-                            <div>
-                                <div class="step-title">Agregar seguimiento</div>
-                                <p class="step-text">
-                                    Solo quien creó la incidencia puede registrar la nota de seguimiento.
-                                </p>
+                        <div>
+                            {% if tipo_forzado %}
+                                <input type="hidden" name="tipo" value="{{ tipo_forzado }}">
+                                <div class="tipo-fijo-card">
+                                    <div class="tipo-fijo-title">Tipo de incidencia</div>
+                                    {% if tipo_forzado == "PEDAGOGICA" %}
+                                        <span class="badge-soft badge-purple"><i class="bi bi-easel2-fill"></i> Pedagógica</span>
+                                    {% elif tipo_forzado == "NUTRICIONAL" %}
+                                        <span class="badge-soft badge-green"><i class="bi bi-egg-fried"></i> Nutricional</span>
+                                    {% elif tipo_forzado == "MEDICA" %}
+                                        <span class="badge-soft badge-red"><i class="bi bi-heart-pulse-fill"></i> Médica</span>
+                                    {% elif tipo_forzado == "PSICOLOGICA" %}
+                                        <span class="badge-soft badge-blue"><i class="bi bi-person-hearts"></i> Psicológica</span>
+                                    {% endif %}
+                                    <div class="tipo-fijo-help">Este tipo fue asignado automáticamente según el área que registra la incidencia.</div>
+                                </div>
+                                {% if form.tipo.errors %}<div class="errors">{{ form.tipo.errors }}</div>{% endif %}
+                            {% else %}
+                                <label for="{{ form.tipo.id_for_label }}" class="form-label">{{ form.tipo.label }}</label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}<div class="errors">{{ form.tipo.errors }}</div>{% endif %}
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}<div class="errors">{{ form.categoria.errors }}</div>{% endif %}
+
+                            <div class="otro-category-box" id="categoriaOtroBox">
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Seleccionaste <strong>Otro</strong>. Escribe el detalle para que quede guardado en el campo subtipo/detalle.
+                                <input type="text" id="categoriaOtroTexto" class="form-control" placeholder="Ej. describe la situación o categoría específica">
                             </div>
                         </div>
 
-                        <div class="step">
-                            <div class="step-number">3</div>
-                            <div>
-                                <div class="step-title">Cerrar con resolución</div>
-                                <p class="step-text">
-                                    Para cerrar debe existir mínimo un seguimiento y debe capturarse resolución.
-                                </p>
-                            </div>
+                        <div id="subtipoGroup">
+                            <label for="{{ form.subtipo.id_for_label }}" class="form-label">{{ form.subtipo.label }}</label>
+                            {{ form.subtipo }}
+                            {% if form.subtipo.errors %}<div class="errors">{{ form.subtipo.errors }}</div>{% endif %}
                         </div>
 
-                        <div class="step">
-                            <div class="step-number">4</div>
-                            <div>
-                                <div class="step-title">Informe diario</div>
-                                <p class="step-text">
-                                    La incidencia se muestra después de “En casa” y “Durante mi estancia”.
-                                </p>
+                        <div>
+                            <label for="{{ form.nivel.id_for_label }}" class="form-label">{{ form.nivel.label }}</label>
+                            {{ form.nivel }}
+                            {% if form.nivel.errors %}<div class="errors">{{ form.nivel.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title"><i class="bi bi-card-text"></i> Descripción e intervención</div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}<div class="errors">{{ form.descripcion.errors }}</div>{% endif %}
+                            <div class="mini-help">Describe claramente qué ocurrió, cómo se observó y en qué momento.</div>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="{{ form.intervencion_personal.id_for_label }}" class="form-label">{{ form.intervencion_personal.label }}</label>
+                            {{ form.intervencion_personal }}
+                            {% if form.intervencion_personal.errors %}<div class="errors">{{ form.intervencion_personal.errors }}</div>{% endif %}
+                            <div class="mini-help">Describe qué hizo el personal ante la incidencia.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section special-section" id="seccionMedica">
+                    <div class="form-section-title"><i class="bi bi-heart-pulse-fill"></i> Datos médicos específicos</div>
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="{{ form.sintomas_medicos.id_for_label }}" class="form-label">{{ form.sintomas_medicos.label }}</label>
+
+                            <div class="sintomas-original-wrap" id="sintomasMedicosOriginalWrap">
+                                {{ form.sintomas_medicos }}
+                            </div>
+
+                            <div class="symptom-check-grid" id="sintomasMedicosChecklist"></div>
+
+                            <div class="otro-sintoma-box" id="sintomasOtroBox">
+                                <label for="sintomasMedicosOtroTexto" class="form-label">
+                                    <i class="bi bi-pencil-square me-1"></i>
+                                    Especifica otro síntoma, signo o causa médica
+                                </label>
+                                <input type="text"
+                                       name="sintomas_medicos_otro_detalle"
+                                       id="sintomasMedicosOtroTexto"
+                                       class="form-control"
+                                       placeholder="Ej. reacción al medicamento, dolor específico, irritación, molestia no listada...">
+                                <div class="mini-help">Este detalle se envía junto con el formulario para que quede registrada la causa médica no contemplada en la lista.</div>
+                            </div>
+
+                            {% if form.sintomas_medicos.errors %}<div class="errors">{{ form.sintomas_medicos.errors }}</div>{% endif %}
+                            <div class="mini-help">Puedes marcar varios síntomas o signos observados. Usa <strong>Otro</strong> cuando la causa médica no aparezca en la lista.</div>
+                        </div>
+                        <div class="campo-diarrea">
+                            <label for="{{ form.consistencia_evacuacion.id_for_label }}" class="form-label">{{ form.consistencia_evacuacion.label }}</label>
+                            {{ form.consistencia_evacuacion }}
+                            {% if form.consistencia_evacuacion.errors %}<div class="errors">{{ form.consistencia_evacuacion.errors }}</div>{% endif %}
+                        </div>
+                        <div class="campo-diarrea">
+                            <label for="{{ form.numero_evacuaciones.id_for_label }}" class="form-label">{{ form.numero_evacuaciones.label }}</label>
+                            {{ form.numero_evacuaciones }}
+                            {% if form.numero_evacuaciones.errors %}<div class="errors">{{ form.numero_evacuaciones.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section special-section" id="seccionNutricional">
+                    <div class="form-section-title"><i class="bi bi-egg-fried"></i> Datos nutricionales específicos</div>
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="{{ form.alimento_relacionado.id_for_label }}" class="form-label">{{ form.alimento_relacionado.label }}</label>
+                            {{ form.alimento_relacionado }}
+                            {% if form.alimento_relacionado.errors %}<div class="errors">{{ form.alimento_relacionado.errors }}</div>{% endif %}
+                            <div class="mini-help">Útil para reacciones alérgicas, intolerancias, rechazo de alimento o restricción alimentaria.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section special-section" id="seccionPsicologica">
+                    <div class="form-section-title"><i class="bi bi-person-hearts"></i> Datos psicológicos específicos</div>
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="{{ form.conducta_observada.id_for_label }}" class="form-label">{{ form.conducta_observada.label }}</label>
+                            {{ form.conducta_observada }}
+                            {% if form.conducta_observada.errors %}<div class="errors">{{ form.conducta_observada.errors }}</div>{% endif %}
+                        </div>
+                        <div class="form-group full">
+                            <label for="{{ form.contexto_observacion.id_for_label }}" class="form-label">{{ form.contexto_observacion.label }}</label>
+                            {{ form.contexto_observacion }}
+                            {% if form.contexto_observacion.errors %}<div class="errors">{{ form.contexto_observacion.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title"><i class="bi bi-person-check-fill"></i> Aviso al responsable</div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <div class="form-check">
+                                {{ form.responsable_informado }}
+                                <label for="{{ form.responsable_informado.id_for_label }}" class="form-check-label">{{ form.responsable_informado.label }}</label>
+                            </div>
+                            {% if form.responsable_informado.errors %}<div class="errors">{{ form.responsable_informado.errors }}</div>{% endif %}
+                            <div class="mini-help">Si el riesgo es alto, el sistema solicitará completar el aviso al responsable, pero el campo ya no se marca automáticamente.</div>
+                        </div>
+
+                        <div class="aviso-responsable">
+                            <label for="{{ form.medio_aviso_responsable.id_for_label }}" class="form-label">{{ form.medio_aviso_responsable.label }}</label>
+                            {{ form.medio_aviso_responsable }}
+                            {% if form.medio_aviso_responsable.errors %}<div class="errors">{{ form.medio_aviso_responsable.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="aviso-responsable">
+                            <label for="{{ form.responsable_informado_nombre.id_for_label }}" class="form-label">{{ form.responsable_informado_nombre.label }}</label>
+                            {{ form.responsable_informado_nombre }}
+                            {% if form.responsable_informado_nombre.errors %}<div class="errors">{{ form.responsable_informado_nombre.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title"><i class="bi bi-paperclip"></i> Archivos adjuntos</div>
+
+                    <div class="file-card">
+                        <div class="d-flex gap-3 align-items-start">
+                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                            <div class="flex-grow-1">
+                                <label for="{{ form.archivos.id_for_label }}" class="form-label">{{ form.archivos.label }}</label>
+                                {{ form.archivos }}
+                                {% if form.archivos.errors %}<div class="errors">{{ form.archivos.errors }}</div>{% endif %}
+                                <div class="file-limit-card">
+                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                    Formatos permitidos: PDF, JPG, PNG, DOC y DOCX. Límite recomendado: <strong>10 MB por archivo</strong> y <strong>20 MB en total</strong>.
+                                </div>
+                                <div class="file-error" id="fileError"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-shield-exclamation"></i>
-                        Reglas importantes
-                    </h2>
-                </div>
-
-                <div class="panel-body">
-                    <div class="help-card">
-                        <i class="bi bi-info-circle-fill me-1"></i>
-                        Las maestras no crean incidencias. Ellas avisan al área correspondiente y el área registra la incidencia.
+                <div class="submit-bar">
+                    <div class="submit-note">
+                        Al guardar, la incidencia quedará abierta. Después podrás registrar seguimiento y cerrarla con resolución.
                     </div>
 
-                    <div class="warning-card">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                        Si la incidencia es de riesgo alto, debe marcarse que se informó al responsable.
+                    <div class="d-flex gap-2 flex-wrap">
+                        {# Usa el mismo regreso inteligente también para Cancelar. #}
+                        {% if request.GET.next %}
+                            <a href="{{ request.GET.next }}" class="btn-soft"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+                        {% elif tipo_forzado == "PSICOLOGICA" %}
+                            <a href="{% url 'psicologia_pendientes' %}" class="btn-soft"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+                        {% elif tipo_forzado == "PEDAGOGICA" %}
+                            <a href="/admisiones/dashboard-coordinadora/" class="btn-soft"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+                        {% elif tipo_forzado %}
+                            <a href="{% url 'panel_incidencias' %}?tipo={{ tipo_forzado }}" class="btn-soft"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+                        {% else %}
+                            <a href="{% url 'panel_incidencias' %}" class="btn-soft"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+                        {% endif %}
+
+                        <button type="submit" class="btn-main"><i class="bi bi-check-circle-fill"></i> Guardar incidencia</button>
                     </div>
                 </div>
-            </section>
-        </aside>
-
-        <main>
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-pencil-square"></i>
-                        Formulario de incidencia
-                    </h2>
-
-                    {% if tipo_forzado == "PEDAGOGICA" %}
-                        <span class="badge-soft badge-purple"><i class="bi bi-easel2-fill"></i> Pedagógica</span>
-                    {% elif tipo_forzado == "NUTRICIONAL" %}
-                        <span class="badge-soft badge-green"><i class="bi bi-egg-fried"></i> Nutricional</span>
-                    {% elif tipo_forzado == "MEDICA" %}
-                        <span class="badge-soft badge-red"><i class="bi bi-heart-pulse-fill"></i> Médica</span>
-                    {% elif tipo_forzado == "PSICOLOGICA" %}
-                        <span class="badge-soft badge-blue"><i class="bi bi-person-hearts"></i> Psicológica</span>
-                    {% else %}
-                        <span class="badge-soft badge-gray"><i class="bi bi-clipboard2-pulse-fill"></i> General</span>
-                    {% endif %}
-                </div>
-
-                <div class="panel-body">
-                    <form method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-
-                        {% if registro_diario %}
-                            <input type="hidden" name="registro_diario_inicial" value="{{ registro_diario.id }}">
-                        {% endif %}
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger alert-custom">
-                                {{ form.non_field_errors }}
-                            </div>
-                        {% endif %}
-
-                        {% if tipo_forzado %}
-                            <div class="tipo-fijo-lock">
-                                <i class="bi bi-shield-lock-fill"></i>
-                                <div>
-                                    El tipo de incidencia está fijo por tu rol/área. No se puede cambiar desde este formulario.
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-person-vcard-fill"></i>
-                                Datos principales
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.alumno.id_for_label }}" class="form-label">
-                                        {{ form.alumno.label }}
-                                    </label>
-                                    {{ form.alumno }}
-                                    {% if form.alumno.errors %}
-                                        <div class="errors">{{ form.alumno.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Selecciona el niño o niña al que corresponde la incidencia.
-                                    </div>
-                                </div>
-
-                                <div class="form-group full">
-                                    <label for="{{ form.registro_diario.id_for_label }}" class="form-label">
-                                        {{ form.registro_diario.label }}
-                                    </label>
-                                    {{ form.registro_diario }}
-                                    {% if form.registro_diario.errors %}
-                                        <div class="errors">{{ form.registro_diario.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Opcional, pero recomendable. Permite conectar la incidencia con la bitácora del día.
-                                    </div>
-                                </div>
-
-                                <div>
-                                    {% if tipo_forzado %}
-                                        <input type="hidden" name="tipo" value="{{ tipo_forzado }}">
-
-                                        <div class="tipo-fijo-card">
-                                            <div class="tipo-fijo-title">
-                                                Tipo de incidencia
-                                            </div>
-
-                                            {% if tipo_forzado == "PEDAGOGICA" %}
-                                                <span class="badge-soft badge-purple">
-                                                    <i class="bi bi-easel2-fill"></i>
-                                                    Pedagógica
-                                                </span>
-                                            {% elif tipo_forzado == "NUTRICIONAL" %}
-                                                <span class="badge-soft badge-green">
-                                                    <i class="bi bi-egg-fried"></i>
-                                                    Nutricional
-                                                </span>
-                                            {% elif tipo_forzado == "MEDICA" %}
-                                                <span class="badge-soft badge-red">
-                                                    <i class="bi bi-heart-pulse-fill"></i>
-                                                    Médica
-                                                </span>
-                                            {% elif tipo_forzado == "PSICOLOGICA" %}
-                                                <span class="badge-soft badge-blue">
-                                                    <i class="bi bi-person-hearts"></i>
-                                                    Psicológica
-                                                </span>
-                                            {% endif %}
-
-                                            <div class="tipo-fijo-help">
-                                                Este tipo fue asignado automáticamente según el área que registra la incidencia.
-                                            </div>
-                                        </div>
-
-                                        {% if form.tipo.errors %}
-                                            <div class="errors">{{ form.tipo.errors }}</div>
-                                        {% endif %}
-                                    {% else %}
-                                        <label for="{{ form.tipo.id_for_label }}" class="form-label">
-                                            {{ form.tipo.label }}
-                                        </label>
-                                        {{ form.tipo }}
-                                        {% if form.tipo.errors %}
-                                            <div class="errors">{{ form.tipo.errors }}</div>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-
-                                <div>
-                                    <label for="{{ form.categoria.id_for_label }}" class="form-label">
-                                        {{ form.categoria.label }}
-                                    </label>
-                                    {{ form.categoria }}
-                                    {% if form.categoria.errors %}
-                                        <div class="errors">{{ form.categoria.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div>
-                                    <label for="{{ form.subtipo.id_for_label }}" class="form-label">
-                                        {{ form.subtipo.label }}
-                                    </label>
-                                    {{ form.subtipo }}
-                                    {% if form.subtipo.errors %}
-                                        <div class="errors">{{ form.subtipo.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div>
-                                    <label for="{{ form.nivel.id_for_label }}" class="form-label">
-                                        {{ form.nivel.label }}
-                                    </label>
-                                    {{ form.nivel }}
-                                    {% if form.nivel.errors %}
-                                        <div class="errors">{{ form.nivel.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-card-text"></i>
-                                Descripción e intervención
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label">
-                                        {{ form.descripcion.label }}
-                                    </label>
-                                    {{ form.descripcion }}
-                                    {% if form.descripcion.errors %}
-                                        <div class="errors">{{ form.descripcion.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Describe claramente qué ocurrió, cómo se observó y en qué momento.
-                                    </div>
-                                </div>
-
-                                <div class="form-group full">
-                                    <label for="{{ form.intervencion_personal.id_for_label }}" class="form-label">
-                                        {{ form.intervencion_personal.label }}
-                                    </label>
-                                    {{ form.intervencion_personal }}
-                                    {% if form.intervencion_personal.errors %}
-                                        <div class="errors">{{ form.intervencion_personal.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Describe qué hizo el personal ante la incidencia.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section special-section" id="seccionMedica">
-                            <div class="form-section-title">
-                                <i class="bi bi-heart-pulse-fill"></i>
-                                Datos médicos específicos
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.sintomas_medicos.id_for_label }}" class="form-label">
-                                        {{ form.sintomas_medicos.label }}
-                                    </label>
-                                    {{ form.sintomas_medicos }}
-                                    {% if form.sintomas_medicos.errors %}
-                                        <div class="errors">{{ form.sintomas_medicos.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Puedes seleccionar varios síntomas o signos observados.
-                                    </div>
-                                </div>
-
-                                <div class="campo-diarrea">
-                                    <label for="{{ form.consistencia_evacuacion.id_for_label }}" class="form-label">
-                                        {{ form.consistencia_evacuacion.label }}
-                                    </label>
-                                    {{ form.consistencia_evacuacion }}
-                                    {% if form.consistencia_evacuacion.errors %}
-                                        <div class="errors">{{ form.consistencia_evacuacion.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="campo-diarrea">
-                                    <label for="{{ form.numero_evacuaciones.id_for_label }}" class="form-label">
-                                        {{ form.numero_evacuaciones.label }}
-                                    </label>
-                                    {{ form.numero_evacuaciones }}
-                                    {% if form.numero_evacuaciones.errors %}
-                                        <div class="errors">{{ form.numero_evacuaciones.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section special-section" id="seccionNutricional">
-                            <div class="form-section-title">
-                                <i class="bi bi-egg-fried"></i>
-                                Datos nutricionales específicos
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.alimento_relacionado.id_for_label }}" class="form-label">
-                                        {{ form.alimento_relacionado.label }}
-                                    </label>
-                                    {{ form.alimento_relacionado }}
-                                    {% if form.alimento_relacionado.errors %}
-                                        <div class="errors">{{ form.alimento_relacionado.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Útil para reacciones alérgicas, intolerancias, rechazo de alimento o restricción alimentaria.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section special-section" id="seccionPsicologica">
-                            <div class="form-section-title">
-                                <i class="bi bi-person-hearts"></i>
-                                Datos psicológicos específicos
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <label for="{{ form.conducta_observada.id_for_label }}" class="form-label">
-                                        {{ form.conducta_observada.label }}
-                                    </label>
-                                    {{ form.conducta_observada }}
-                                    {% if form.conducta_observada.errors %}
-                                        <div class="errors">{{ form.conducta_observada.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group full">
-                                    <label for="{{ form.contexto_observacion.id_for_label }}" class="form-label">
-                                        {{ form.contexto_observacion.label }}
-                                    </label>
-                                    {{ form.contexto_observacion }}
-                                    {% if form.contexto_observacion.errors %}
-                                        <div class="errors">{{ form.contexto_observacion.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-person-check-fill"></i>
-                                Aviso al responsable
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group full">
-                                    <div class="form-check">
-                                        {{ form.responsable_informado }}
-                                        <label for="{{ form.responsable_informado.id_for_label }}" class="form-check-label">
-                                            {{ form.responsable_informado.label }}
-                                        </label>
-                                    </div>
-                                    {% if form.responsable_informado.errors %}
-                                        <div class="errors">{{ form.responsable_informado.errors }}</div>
-                                    {% endif %}
-                                    <div class="mini-help">
-                                        Obligatorio si el nivel de riesgo es alto.
-                                    </div>
-                                </div>
-
-                                <div class="aviso-responsable">
-                                    <label for="{{ form.medio_aviso_responsable.id_for_label }}" class="form-label">
-                                        {{ form.medio_aviso_responsable.label }}
-                                    </label>
-                                    {{ form.medio_aviso_responsable }}
-                                    {% if form.medio_aviso_responsable.errors %}
-                                        <div class="errors">{{ form.medio_aviso_responsable.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="aviso-responsable">
-                                    <label for="{{ form.responsable_informado_nombre.id_for_label }}" class="form-label">
-                                        {{ form.responsable_informado_nombre.label }}
-                                    </label>
-                                    {{ form.responsable_informado_nombre }}
-                                    {% if form.responsable_informado_nombre.errors %}
-                                        <div class="errors">{{ form.responsable_informado_nombre.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <i class="bi bi-paperclip"></i>
-                                Archivos adjuntos
-                            </div>
-
-                            <div class="file-card">
-                                <div class="d-flex gap-3 align-items-start">
-                                    <i class="bi bi-cloud-arrow-up-fill"></i>
-                                    <div class="flex-grow-1">
-                                        <label for="{{ form.archivos.id_for_label }}" class="form-label">
-                                            {{ form.archivos.label }}
-                                        </label>
-                                        {{ form.archivos }}
-                                        {% if form.archivos.errors %}
-                                            <div class="errors">{{ form.archivos.errors }}</div>
-                                        {% endif %}
-                                        <div class="mini-help">
-                                            Puedes adjuntar PDF, imágenes o documentos Word. Máximo recomendado: 10 MB por archivo.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="submit-bar">
-                            <div class="submit-note">
-                                Al guardar, la incidencia quedará abierta. Después podrás registrar seguimiento y cerrarla con resolución.
-                            </div>
-
-                            <div class="d-flex gap-2 flex-wrap">
-                                {% if tipo_forzado %}
-                                    <a href="{% url 'panel_incidencias' %}?tipo={{ tipo_forzado }}" class="btn-soft">
-                                        <i class="bi bi-x-circle-fill"></i>
-                                        Cancelar
-                                    </a>
-                                {% else %}
-                                    <a href="{% url 'panel_incidencias' %}" class="btn-soft">
-                                        <i class="bi bi-x-circle-fill"></i>
-                                        Cancelar
-                                    </a>
-                                {% endif %}
-
-                                <button type="submit" class="btn-main btn-green">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                    Guardar incidencia
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </section>
-        </main>
-
-    </div>
+            </form>
+        </div>
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+(function(){
     const tipoForzado = "{{ tipo_forzado|default:'' }}";
     const tipoField = tipoForzado ? null : document.getElementById("{{ form.tipo.id_for_label }}");
+    const alumnoField = document.getElementById("{{ form.alumno.id_for_label }}");
+    const registroDiarioField = document.getElementById("{{ form.registro_diario.id_for_label }}");
+    const registroAutoTexto = document.getElementById("registroAutoTexto");
     const categoriaField = document.getElementById("{{ form.categoria.id_for_label }}");
+    const subtipoField = document.getElementById("{{ form.subtipo.id_for_label }}");
+    const subtipoGroup = document.getElementById("subtipoGroup");
+    const categoriaOtroBox = document.getElementById("categoriaOtroBox");
+    const categoriaOtroTexto = document.getElementById("categoriaOtroTexto");
     const nivelField = document.getElementById("{{ form.nivel.id_for_label }}");
     const responsableCheck = document.getElementById("{{ form.responsable_informado.id_for_label }}");
     const avisoFields = document.querySelectorAll(".aviso-responsable");
+    const archivosField = document.getElementById("{{ form.archivos.id_for_label }}");
+    const sintomasMedicosField = document.getElementById("{{ form.sintomas_medicos.id_for_label }}");
+    const sintomasChecklist = document.getElementById("sintomasMedicosChecklist");
+    const sintomasOtroBox = document.getElementById("sintomasOtroBox");
+    const sintomasOtroTexto = document.getElementById("sintomasMedicosOtroTexto");
+    const fileError = document.getElementById("fileError");
+    const form = document.querySelector('form[method="post"]');
+    const autosaveStatus = document.getElementById("autosaveStatus");
+    const autosaveKey = "crear_incidencia_autosave_" + (tipoForzado || "GENERAL") + "_" + window.location.pathname;
+
+    if(responsableCheck){
+        responsableCheck.removeAttribute("disabled");
+        responsableCheck.disabled = false;
+    }
+
+    function initSelect2(){
+        if(!window.jQuery || !jQuery.fn.select2){ return; }
+        const language = {
+            noResults:function(){ return "Sin resultados"; },
+            searching:function(){ return "Buscando..."; },
+            inputTooShort:function(){ return "Escribe para buscar"; }
+        };
+        if(alumnoField){
+            jQuery(alumnoField).select2({
+                width:"100%",
+                placeholder:"Buscar niño/a inscrito...",
+                allowClear:true,
+                language:language
+            });
+            jQuery(alumnoField).on("change select2:select", function(){
+                autoSeleccionarRegistroDiario();
+            });
+        }
+        if(categoriaField){
+            jQuery(categoriaField).select2({width:"100%", placeholder:"Selecciona categoría...", language:language});
+            jQuery(categoriaField).on("change select2:select", function(){
+                toggleSecciones();
+                syncCategoriaOtro();
+            });
+        }
+        if(nivelField){
+            jQuery(nivelField).select2({width:"100%", minimumResultsForSearch:Infinity, language:language});
+        }
+    }
 
     function valorTipo(){
-        if(tipoForzado){
-            return tipoForzado;
-        }
+        if(tipoForzado){ return tipoForzado; }
         return (tipoField?.value || "").trim();
+    }
+
+    function selectedOptionText(select){
+        if(!select){ return ""; }
+        return (select.options[select.selectedIndex]?.text || "").trim();
+    }
+
+    function normalizarTexto(txt){
+        return (txt || "")
+            .toString()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function extraerFecha(texto){
+        const matchIso = (texto || "").match(/\b\d{4}-\d{2}-\d{2}\b/);
+        if(matchIso){ return matchIso[0]; }
+
+        const matchMx = (texto || "").match(/\b\d{2}\/\d{2}\/\d{4}\b/);
+        if(matchMx){ return matchMx[0]; }
+
+        return "";
+    }
+
+    function autoSeleccionarRegistroDiario(){
+        if(!registroDiarioField){ return; }
+
+        const alumnoTexto = selectedOptionText(alumnoField);
+        const alumnoNorm = normalizarTexto(alumnoTexto);
+        const options = Array.from(registroDiarioField.options || []);
+        const validas = options.filter(opt => (opt.value || "").trim() !== "");
+
+        let seleccion = null;
+
+        /*
+          Se intenta vincular el registro diario por el nombre del menor.
+          Para que funcione bien, el campo alumno debe mostrar el nombre real del niño/a,
+          no "Expediente de inscripción". Ese ajuste se hace en forms.py.
+        */
+        if(alumnoNorm && !alumnoNorm.includes("expediente")){
+            seleccion = validas.find(opt => normalizarTexto(opt.text).includes(alumnoNorm));
+        }
+
+        if(seleccion){
+            registroDiarioField.value = seleccion.value;
+            registroDiarioField.dispatchEvent(new Event("change", {bubbles:true}));
+        }else{
+            registroDiarioField.value = "";
+            registroDiarioField.dispatchEvent(new Event("change", {bubbles:true}));
+        }
+
+        const textoBase = seleccion ? seleccion.text : (validas[0]?.text || "");
+        const fecha = extraerFecha(textoBase);
+
+        if(registroAutoTexto){
+            if(seleccion){
+                registroAutoTexto.textContent = fecha
+                    ? "Fecha del día operativo: " + fecha + ". Registro diario vinculado automáticamente."
+                    : "Registro diario vinculado automáticamente.";
+            }else{
+                registroAutoTexto.textContent = fecha
+                    ? "Fecha del día operativo: " + fecha + ". Selecciona el niño/a para vincular su registro diario."
+                    : "Selecciona el niño/a. Si existe registro diario del día, el sistema lo vinculará automáticamente.";
+            }
+        }
     }
 
     function toggleSecciones(){
         const tipo = valorTipo();
-        const categoria = (categoriaField?.value || "").trim();
+        const categoria = (categoriaField?.value || "").trim().toUpperCase();
+        const categoriaTexto = selectedOptionText(categoriaField).toUpperCase();
 
         const seccionMedica = document.getElementById("seccionMedica");
         const seccionNutricional = document.getElementById("seccionNutricional");
@@ -1285,55 +1447,306 @@
             if(sec){ sec.classList.remove("active"); }
         });
 
-        if(tipo === "MEDICA" && seccionMedica){
-            seccionMedica.classList.add("active");
-        }
-
-        if(tipo === "NUTRICIONAL" && seccionNutricional){
-            seccionNutricional.classList.add("active");
-        }
-
-        if(tipo === "PSICOLOGICA" && seccionPsicologica){
-            seccionPsicologica.classList.add("active");
-        }
+        if(tipo === "MEDICA" && seccionMedica){ seccionMedica.classList.add("active"); }
+        if(tipo === "NUTRICIONAL" && seccionNutricional){ seccionNutricional.classList.add("active"); }
+        if(tipo === "PSICOLOGICA" && seccionPsicologica){ seccionPsicologica.classList.add("active"); }
 
         camposDiarrea.forEach(campo => {
             campo.style.display = categoria === "DIARREA" ? "" : "none";
         });
+
+        const esOtro =
+            categoria === "OTRO" ||
+            categoria === "OTROS" ||
+            categoria === "OTRA" ||
+            categoria.includes("OTRO") ||
+            categoria.includes("OTRA") ||
+            categoriaTexto === "OTRO" ||
+            categoriaTexto === "OTROS" ||
+            categoriaTexto === "OTRA" ||
+            categoriaTexto.includes("OTRO") ||
+            categoriaTexto.includes("OTRA");
+        if(categoriaOtroBox){ categoriaOtroBox.classList.toggle("show", esOtro); }
+        if(subtipoGroup){ subtipoGroup.style.display = esOtro ? "none" : ""; }
+        if(categoriaOtroTexto){ categoriaOtroTexto.required = esOtro; }
+        if(subtipoField){
+            subtipoField.required = esOtro;
+            if(esOtro){ subtipoField.placeholder = "Detalle de la categoría Otro"; }
+        }
+        if(esOtro && categoriaOtroTexto && subtipoField && subtipoField.value && !categoriaOtroTexto.value){
+            categoriaOtroTexto.value = subtipoField.value;
+        }
+    }
+
+    function syncCategoriaOtro(){
+        if(categoriaOtroTexto && subtipoField){
+            subtipoField.value = categoriaOtroTexto.value;
+            subtipoField.dispatchEvent(new Event("input", {bubbles:true}));
+        }
     }
 
     function toggleAvisoResponsable(){
-        const riesgoAlto = (nivelField?.value || "").trim() === "ALTO";
+        const riesgoAlto = (nivelField?.value || "").trim().toUpperCase() === "ALTO";
+        const marcado = responsableCheck?.checked || false;
+        const mostrar = marcado || riesgoAlto;
 
-        if(riesgoAlto && responsableCheck){
-            responsableCheck.checked = true;
+        if(responsableCheck){
+            responsableCheck.required = riesgoAlto;
+            responsableCheck.disabled = false;
         }
-
-        const mostrar = responsableCheck?.checked || riesgoAlto;
 
         avisoFields.forEach(el => {
             el.style.display = mostrar ? "" : "none";
+            el.querySelectorAll("input, select, textarea").forEach(field => {
+                field.required = riesgoAlto && mostrar;
+            });
         });
     }
 
-    if(tipoField){
-        tipoField.addEventListener("change", toggleSecciones);
+
+    function normalizarOpcionMedica(txt){
+        return (txt || "")
+            .toString()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
     }
 
-    if(categoriaField){
-        categoriaField.addEventListener("change", toggleSecciones);
+    function getOrCreateOtroOption(select){
+        if(!select){ return null; }
+        const existing = Array.from(select.options || []).find(opt => {
+            const v = normalizarOpcionMedica(opt.value);
+            const t = normalizarOpcionMedica(opt.text);
+            return v === "otro" || v === "otros" || v === "otra" || t === "otro" || t === "otros" || t === "otra";
+        });
+        if(existing){ return existing; }
+
+        const option = new Option("Otro", "OTRO", false, false);
+        option.setAttribute("data-generated-other", "true");
+        select.appendChild(option);
+        return option;
     }
 
-    if(nivelField){
-        nivelField.addEventListener("change", toggleAvisoResponsable);
+    function syncSintomasMedicosChecklist(){
+        if(!sintomasMedicosField || !sintomasChecklist){ return; }
+        const checks = Array.from(sintomasChecklist.querySelectorAll('input[type="checkbox"][data-sintoma-value]'));
+        const otroCheck = sintomasChecklist.querySelector('input[type="checkbox"][data-sintoma-otro="true"]');
+
+        Array.from(sintomasMedicosField.options || []).forEach(opt => {
+            const esGeneradoOtro = opt.getAttribute("data-generated-other") === "true";
+            if(esGeneradoOtro){ opt.selected = false; }
+        });
+
+        checks.forEach(chk => {
+            const value = chk.getAttribute("data-sintoma-value");
+            const opt = Array.from(sintomasMedicosField.options || []).find(o => o.value === value);
+            if(opt){ opt.selected = chk.checked; }
+            chk.closest(".symptom-option")?.classList.toggle("is-checked", chk.checked);
+        });
+
+        if(otroCheck){
+            const marcado = otroCheck.checked;
+            sintomasOtroBox?.classList.toggle("show", marcado);
+            if(sintomasOtroTexto){
+                sintomasOtroTexto.required = marcado;
+                if(!marcado){ sintomasOtroTexto.value = ""; }
+            }
+
+            const otroOption = getOrCreateOtroOption(sintomasMedicosField);
+            if(otroOption){ otroOption.selected = marcado; }
+            otroCheck.closest(".symptom-option")?.classList.toggle("is-checked", marcado);
+        }
+
+        sintomasMedicosField.dispatchEvent(new Event("change", {bubbles:true}));
     }
 
-    if(responsableCheck){
-        responsableCheck.addEventListener("change", toggleAvisoResponsable);
+    function buildSintomasMedicosChecklist(){
+        if(!sintomasMedicosField || !sintomasChecklist){ return; }
+
+        if(sintomasMedicosField.tagName !== "SELECT"){
+            const originalWrap = document.getElementById("sintomasMedicosOriginalWrap");
+            if(originalWrap){ originalWrap.style.position = "static"; originalWrap.style.width = "auto"; originalWrap.style.height = "auto"; originalWrap.style.overflow = "visible"; originalWrap.style.clip = "auto"; }
+            return;
+        }
+
+        sintomasChecklist.innerHTML = "";
+
+        const options = Array.from(sintomasMedicosField.options || []).filter(opt => {
+            const value = (opt.value || "").trim();
+            const text = (opt.text || "").trim();
+            const normValue = normalizarOpcionMedica(value);
+            const normText = normalizarOpcionMedica(text);
+            return value && normValue !== "otro" && normValue !== "otros" && normValue !== "otra" && normText !== "otro" && normText !== "otros" && normText !== "otra";
+        });
+
+        options.forEach((opt, index) => {
+            const id = "sintoma_medico_chk_" + index;
+            const label = document.createElement("label");
+            label.className = "symptom-option";
+            label.setAttribute("for", id);
+
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = id;
+            input.checked = opt.selected;
+            input.setAttribute("data-sintoma-value", opt.value);
+
+            const span = document.createElement("span");
+            span.textContent = opt.text;
+
+            label.appendChild(input);
+            label.appendChild(span);
+            sintomasChecklist.appendChild(label);
+        });
+
+        const otroOption = getOrCreateOtroOption(sintomasMedicosField);
+        const otroId = "sintoma_medico_chk_otro";
+        const otroLabel = document.createElement("label");
+        otroLabel.className = "symptom-option is-other";
+        otroLabel.setAttribute("for", otroId);
+
+        const otroInput = document.createElement("input");
+        otroInput.type = "checkbox";
+        otroInput.id = otroId;
+        otroInput.checked = !!(otroOption && otroOption.selected);
+        otroInput.setAttribute("data-sintoma-otro", "true");
+
+        const otroSpan = document.createElement("span");
+        otroSpan.textContent = "Otro";
+
+        otroLabel.appendChild(otroInput);
+        otroLabel.appendChild(otroSpan);
+        sintomasChecklist.appendChild(otroLabel);
+
+        sintomasChecklist.addEventListener("change", function(event){
+            if(event.target && event.target.matches('input[type="checkbox"]')){
+                syncSintomasMedicosChecklist();
+                scheduleAutosave();
+            }
+        });
+
+        if(sintomasOtroTexto){
+            sintomasOtroTexto.addEventListener("input", function(){
+                syncSintomasMedicosChecklist();
+                scheduleAutosave();
+            });
+        }
+
+        syncSintomasMedicosChecklist();
     }
 
+    function validarArchivos(){
+        if(!archivosField){ return true; }
+        archivosField.setAttribute("accept", ".pdf,.jpg,.jpeg,.png,.doc,.docx");
+        const maxFile = 10 * 1024 * 1024;
+        const maxTotal = 20 * 1024 * 1024;
+        const allowed = ["pdf","jpg","jpeg","png","doc","docx"];
+        const files = Array.from(archivosField.files || []);
+        let total = 0;
+        let error = "";
+
+        for(const file of files){
+            total += file.size;
+            const ext = (file.name.split(".").pop() || "").toLowerCase();
+            if(!allowed.includes(ext)){
+                error = "Formato no permitido: " + file.name + ". Usa PDF, JPG, PNG, DOC o DOCX.";
+                break;
+            }
+            if(file.size > maxFile){
+                error = "El archivo " + file.name + " supera 10 MB. Reduce el tamaño antes de subirlo.";
+                break;
+            }
+        }
+        if(!error && total > maxTotal){
+            error = "El total de archivos supera 20 MB. Sube menos archivos o comprímelos.";
+        }
+
+        if(fileError){
+            fileError.textContent = error;
+            fileError.classList.toggle("show", !!error);
+        }
+        if(error){ archivosField.value = ""; }
+        return !error;
+    }
+
+    function setAutosaveStatus(text, icon){
+        if(!autosaveStatus){ return; }
+        autosaveStatus.innerHTML = '<i class="bi ' + (icon || 'bi-check-circle-fill') + '"></i> ' + text;
+    }
+
+    function saveDraft(){
+        if(!form){ return; }
+        const data = {};
+        form.querySelectorAll("input, select, textarea").forEach(field => {
+            if(!field.name || field.type === "file" || field.name === "csrfmiddlewaretoken"){ return; }
+            if(field.type === "checkbox"){ data[field.name] = field.checked; }
+            else if(field.type !== "hidden" || field.name !== "tipo"){ data[field.name] = field.value; }
+        });
+        try{
+            localStorage.setItem(autosaveKey, JSON.stringify({savedAt:Date.now(), data:data}));
+            setAutosaveStatus("Guardado", "bi-cloud-check-fill");
+        }catch(e){
+            setAutosaveStatus("Sin espacio", "bi-exclamation-triangle-fill");
+        }
+    }
+
+    function restoreDraft(){
+        if(!form){ return; }
+        try{
+            const raw = localStorage.getItem(autosaveKey);
+            if(!raw){ return; }
+            const parsed = JSON.parse(raw);
+            const data = parsed.data || {};
+            Object.entries(data).forEach(([name,value]) => {
+                const field = form.querySelector('[name="' + CSS.escape(name) + '"]');
+                if(!field || field.type === "file" || field.name === "tipo"){ return; }
+                if(field.type === "checkbox"){ field.checked = !!value; }
+                else { field.value = value; }
+                field.dispatchEvent(new Event("change", {bubbles:true}));
+                field.dispatchEvent(new Event("input", {bubbles:true}));
+            });
+            setAutosaveStatus("Borrador recuperado", "bi-arrow-counterclockwise");
+        }catch(e){/* no interrumpir */}
+    }
+
+    let autosaveTimer = null;
+    function scheduleAutosave(){
+        setAutosaveStatus("Guardando...", "bi-cloud-arrow-up-fill");
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(saveDraft, 700);
+    }
+
+    if(alumnoField){ alumnoField.addEventListener("change", autoSeleccionarRegistroDiario); }
+    if(tipoField){ tipoField.addEventListener("change", toggleSecciones); }
+    if(categoriaField){ categoriaField.addEventListener("change", toggleSecciones); }
+    if(categoriaOtroTexto){ categoriaOtroTexto.addEventListener("input", syncCategoriaOtro); }
+    if(nivelField){ nivelField.addEventListener("change", toggleAvisoResponsable); }
+    if(responsableCheck){ responsableCheck.addEventListener("change", toggleAvisoResponsable); }
+    if(archivosField){ archivosField.addEventListener("change", validarArchivos); }
+
+    if(form){
+        form.addEventListener("input", scheduleAutosave);
+        form.addEventListener("change", scheduleAutosave);
+        form.addEventListener("submit", function(event){
+            syncCategoriaOtro();
+            syncSintomasMedicosChecklist();
+            if(!validarArchivos()){
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            }
+            try{ localStorage.removeItem(autosaveKey); }catch(e){}
+        });
+    }
+
+    restoreDraft();
+    initSelect2();
+    buildSintomasMedicosChecklist();
+    autoSeleccionarRegistroDiario();
     toggleSecciones();
     toggleAvisoResponsable();
+})();
 </script>
 
 </body>

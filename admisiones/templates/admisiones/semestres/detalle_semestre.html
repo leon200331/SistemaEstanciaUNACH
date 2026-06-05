@@ -880,6 +880,769 @@
             background:#fff;
         }
 
+
+        /* =========================================================
+           REDISEÑO MODERNO - DETALLE DE SEMESTRE
+           ========================================================= */
+        :root{
+            --azul:#2563eb;
+            --azul-oscuro:#0b1f4d;
+            --azul-suave:#eff6ff;
+            --gris-fondo:#f5f7fb;
+            --texto:#0f2557;
+            --muted:#64748b;
+            --borde:#ccd7e7;
+            --verde:#16a34a;
+            --amarillo:#f59e0b;
+            --rojo:#ef4444;
+            --morado:#7c3aed;
+            --cyan:#0891b2;
+            --sombra:0 16px 36px rgba(15,23,42,.06);
+        }
+
+        body{
+            background:linear-gradient(180deg, #fdfefe 0%, var(--gris-fondo) 100%);
+            color:var(--texto);
+        }
+
+        .topbar{
+            background:rgba(252,253,255,.94);
+            color:var(--texto);
+            border-bottom:1px solid #e6edf7;
+            box-shadow:none;
+        }
+
+        .topbar-inner{
+            max-width:1280px;
+            padding:22px 24px;
+        }
+
+        .brand{
+            gap:18px;
+        }
+
+        .brand img{
+            height:50px;
+            max-width:130px;
+            width:auto;
+            object-fit:contain;
+            opacity:1;
+            filter:none;
+            background:linear-gradient(135deg, #1d4ed8, #2563eb);
+            border-radius:14px;
+            padding:8px 10px;
+            border:1px solid rgba(255,255,255,.18);
+            box-shadow:0 10px 22px rgba(37,99,235,.18);
+        }
+
+        .brand-title{
+            font-size:1.35rem;
+            font-weight:950;
+            color:#071d49;
+            letter-spacing:-.035em;
+            line-height:1.08;
+            text-transform:none;
+        }
+
+        .brand-subtitle{
+            font-size:.9rem;
+            color:#334b7a;
+            opacity:1;
+            margin-top:4px;
+            font-weight:500;
+        }
+
+        .topbar-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:28px;
+            flex-wrap:wrap;
+        }
+
+        .btn-top{
+            border-radius:9px;
+            font-weight:850;
+            padding:.72rem 1.18rem;
+            color:#2563eb;
+            border:1px solid #cfe0ff;
+            background:#ffffff;
+            box-shadow:0 8px 20px rgba(37,99,235,.04);
+        }
+
+        .btn-top:hover{
+            color:#1d4ed8;
+            background:#eff6ff;
+            border-color:#bcd4ff;
+        }
+
+        .user-menu{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0f2557;
+            font-size:.88rem;
+            font-weight:700;
+            white-space:nowrap;
+        }
+
+        .user-avatar{
+            width:38px;
+            height:38px;
+            border-radius:999px;
+            background:#eaf1ff;
+            color:#2563eb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.35rem;
+        }
+
+        .main{
+            max-width:1280px;
+            margin:20px auto 70px;
+            padding:0 24px;
+        }
+
+        .hero{
+            background:rgba(255,255,255,.88);
+            border:1px solid var(--borde);
+            border-radius:14px;
+            color:var(--texto);
+            padding:28px 36px;
+            box-shadow:var(--sombra);
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:22px;
+            align-items:center;
+            margin-bottom:20px;
+        }
+
+        .hero h1{
+            color:#061b49;
+            font-size:1.65rem;
+            font-weight:950;
+            margin:8px 0 8px;
+            letter-spacing:-.035em;
+        }
+
+        .hero p{
+            color:#53688e;
+            opacity:1;
+            font-size:.95rem;
+            line-height:1.45;
+            font-weight:500;
+        }
+
+        .hero-icon{
+            width:70px;
+            height:70px;
+            border-radius:18px;
+            background:#edf4ff;
+            color:#2563eb;
+            font-size:2.1rem;
+        }
+
+        .quick-actions{
+            gap:10px;
+            margin-bottom:18px;
+        }
+
+        .action-btn{
+            border-radius:10px;
+            font-weight:900;
+            padding:.72rem 1rem;
+            box-shadow:0 8px 18px rgba(15,23,42,.045);
+        }
+
+        .calendar-help{
+            background:rgba(239,246,255,.72);
+            border:1px solid #bdd4fb;
+            border-left:5px solid #2563eb;
+            border-radius:14px;
+            box-shadow:var(--sombra);
+            color:#1e3a8a;
+        }
+
+        .stats-grid{
+            gap:12px;
+        }
+
+        .stat-card,
+        .panel,
+        .calendar-status-card{
+            background:rgba(255,255,255,.9);
+            border:1px solid var(--borde);
+            border-radius:14px;
+            box-shadow:var(--sombra);
+        }
+
+        .stat-card{
+            padding:16px;
+        }
+
+        .stat-label{
+            color:#526b8b;
+        }
+
+        .stat-value{
+            color:#061b49;
+        }
+
+        .panel{
+            overflow:hidden;
+            margin-bottom:18px;
+        }
+
+        .panel-header{
+            background:rgba(252,253,255,.92);
+            border-bottom:1px solid #e1eaf6;
+            padding:18px 22px;
+        }
+
+        .panel-title{
+            color:#112b5f;
+            font-size:.94rem;
+            font-weight:950;
+            letter-spacing:.08em;
+        }
+
+        .panel-body{
+            padding:20px 22px;
+        }
+
+        .info-card,
+        .timeline-item,
+        .maestra-item,
+        .schedule-compact-card,
+        .section-note,
+        .calendar-mini,
+        .calendar-weekend-note{
+            background:rgba(255,255,255,.72);
+            border:1px solid #d2dceb;
+            border-radius:12px;
+        }
+
+        .info-label,
+        .schedule-compact-label,
+        .calendar-mini-label{
+            color:#526b8b;
+        }
+
+        .info-value,
+        .schedule-compact-value,
+        .timeline-date,
+        .maestra-name{
+            color:#061b49;
+        }
+
+        .table th{
+            background:#f5f8fc;
+            color:#526b8b;
+            border-bottom:1px solid #e1eaf6;
+        }
+
+        .table td{
+            border-bottom:1px solid #edf2f7;
+        }
+
+        .btn-mini{
+            border-radius:9px;
+            font-weight:850;
+        }
+
+        .success-box{
+            border-left:5px solid #16a34a;
+            border-radius:12px;
+        }
+
+        .error-box{
+            border-left:5px solid #f97316;
+            border-radius:12px;
+        }
+
+        .danger-zone{
+            border-radius:12px;
+        }
+
+        .side-panel{
+            top:96px;
+        }
+
+        .pill{
+            border-radius:999px;
+        }
+
+        .maestra-chip{
+            background:rgba(255,255,255,.82);
+            border:1px solid #d2dceb;
+        }
+
+        @media(max-width:768px){
+            .topbar-actions{
+                width:100%;
+                justify-content:space-between;
+                gap:12px;
+            }
+
+            .hero{
+                grid-template-columns:1fr;
+            }
+        }
+
+
+        /* =========================================================
+           REACOMODO ESTÉTICO - DETALLE DE SEMESTRE
+           ========================================================= */
+        .panel-subtitle{
+            color:#6d7fa4;
+            font-size:.82rem;
+            font-weight:650;
+            margin-top:6px;
+        }
+
+        .action-panel{
+            margin-bottom:18px;
+        }
+
+        .action-panel-header{
+            align-items:flex-start;
+        }
+
+        .action-panel-body{
+            padding:16px 20px 18px;
+        }
+
+        .action-panel .quick-actions{
+            margin-bottom:0;
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:10px;
+        }
+
+        .action-panel .quick-actions > a,
+        .action-panel .quick-actions > form,
+        .action-panel .quick-actions > span{
+            width:100%;
+        }
+
+        .action-panel .quick-actions form{
+            margin:0;
+        }
+
+        .action-panel .action-btn{
+            width:100%;
+            min-height:48px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+        }
+
+        .calendar-help{
+            margin-bottom:18px;
+        }
+
+        .stats-grid{
+            grid-template-columns:repeat(6, minmax(0, 1fr));
+            margin-bottom:18px;
+        }
+
+        .stat-card{
+            min-height:82px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .info-collapsible-panel .panel-header{
+            align-items:center;
+        }
+
+        .panel-toggle{
+            white-space:nowrap;
+            background:#fff;
+        }
+
+        .info-collapsible-panel .panel-body{
+            border-top:1px solid #e8eef7;
+        }
+
+        .layout{
+            grid-template-columns:minmax(0, 1fr) 370px;
+            gap:22px;
+            align-items:start;
+        }
+
+        .side-panel{
+            top:104px;
+        }
+
+        .side-panel .panel{
+            margin-bottom:18px;
+        }
+
+        .panel-header .btn-mini{
+            white-space:nowrap;
+        }
+
+        .info-grid{
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+        }
+
+        .schedule-compact-grid{
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:12px;
+        }
+
+        .panel:has(.schedule-compact-grid) .panel-body{
+            padding:22px;
+        }
+
+        .maestra-item{
+            padding:14px 16px;
+        }
+
+        .calendar-mini-grid{
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+        }
+
+        .timeline-list{
+            max-height:520px;
+            overflow:auto;
+            padding-right:4px;
+        }
+
+        .timeline-list::-webkit-scrollbar{
+            width:8px;
+        }
+
+        .timeline-list::-webkit-scrollbar-thumb{
+            background:#cbd5e1;
+            border-radius:999px;
+        }
+
+        .timeline-list::-webkit-scrollbar-track{
+            background:#f1f5f9;
+            border-radius:999px;
+        }
+
+        @media(max-width:1100px){
+            .action-panel .quick-actions{
+                grid-template-columns:repeat(2, minmax(0, 1fr));
+            }
+
+            .layout{
+                grid-template-columns:1fr;
+            }
+
+            .side-panel{
+                position:static;
+            }
+        }
+
+        @media(max-width:768px){
+            .action-panel .quick-actions{
+                grid-template-columns:1fr;
+            }
+
+            .stats-grid{
+                grid-template-columns:repeat(2, minmax(0, 1fr));
+            }
+
+            .info-collapsible-panel .panel-header{
+                align-items:flex-start;
+                flex-direction:column;
+            }
+
+            .panel-toggle{
+                width:100%;
+            }
+        }
+
+        @media(max-width:520px){
+            .stats-grid{
+                grid-template-columns:1fr;
+            }
+        }
+
+
+        /* =========================================================
+           REACOMODO COMPACTO Y MÁS ENTENDIBLE
+           ========================================================= */
+        .hero{
+            padding:26px 32px;
+        }
+
+        .action-panel{
+            margin-bottom:16px;
+        }
+
+        .action-panel-header{
+            padding:14px 18px;
+        }
+
+        .action-panel-header .panel-subtitle{
+            margin-top:4px;
+        }
+
+        .action-panel-body{
+            padding:14px 18px 16px;
+        }
+
+        .action-panel .quick-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin:0;
+        }
+
+        .action-panel .quick-actions > a,
+        .action-panel .quick-actions > form,
+        .action-panel .quick-actions > span{
+            width:auto;
+            flex:0 0 auto;
+            margin:0;
+        }
+
+        .action-panel .action-btn{
+            width:auto;
+            min-height:42px;
+            padding:.62rem .92rem;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:12px;
+            font-size:.93rem;
+            box-shadow:none;
+        }
+
+        .action-panel form .action-btn{
+            width:auto;
+        }
+
+        .calendar-help{
+            margin-bottom:16px;
+        }
+
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(6, minmax(0, 1fr));
+            gap:10px;
+            margin-bottom:16px;
+        }
+
+        .stat-card{
+            padding:14px 14px 12px;
+            min-height:72px;
+            border-radius:12px;
+            box-shadow:none;
+        }
+
+        .stat-label{
+            font-size:.69rem;
+            margin-bottom:6px;
+        }
+
+        .stat-value{
+            font-size:1.28rem;
+        }
+
+        .layout{
+            grid-template-columns:minmax(0, 1fr) 350px;
+            gap:18px;
+        }
+
+        .panel{
+            border-radius:14px;
+            box-shadow:none;
+            margin-bottom:16px;
+        }
+
+        .panel-header{
+            padding:15px 18px;
+        }
+
+        .panel-body{
+            padding:18px;
+        }
+
+        .info-collapsible-panel .panel-header{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:14px;
+        }
+
+        .header-pills{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:10px;
+        }
+
+        .header-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            background:#f8fbff;
+            border:1px solid #dbe8fb;
+            color:#35527f;
+            border-radius:999px;
+            padding:.42rem .7rem;
+            font-size:.78rem;
+            font-weight:700;
+            line-height:1.2;
+        }
+
+        .header-pill strong{
+            color:#0f2557;
+            font-weight:900;
+        }
+
+        .panel-toggle{
+            min-width:150px;
+            box-shadow:none;
+        }
+
+        .info-grid{
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:10px;
+        }
+
+        .info-card{
+            border-radius:12px;
+            padding:13px 14px;
+            background:#fbfdff;
+        }
+
+        .section-note{
+            border-radius:12px;
+        }
+
+        .schedule-compact-grid{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:10px;
+        }
+
+        .schedule-compact-card{
+            padding:10px 11px;
+            border-radius:12px;
+            background:#fbfdff;
+        }
+
+        .maestra-list{
+            gap:10px;
+        }
+
+        .maestra-item{
+            border-radius:12px;
+            padding:12px 14px;
+        }
+
+        .table th{
+            font-size:.71rem;
+        }
+
+        .calendar-status-card,
+        .danger-zone,
+        .success-box,
+        .error-box{
+            border-radius:12px;
+        }
+
+        .timeline-list{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            max-height:500px;
+            overflow:auto;
+            padding-right:2px;
+        }
+
+        .timeline-item{
+            border-radius:12px;
+            padding:12px;
+        }
+
+        .timeline-list::-webkit-scrollbar{
+            width:8px;
+        }
+
+        .timeline-list::-webkit-scrollbar-thumb{
+            background:#cfd8e8;
+            border-radius:999px;
+        }
+
+        .timeline-list::-webkit-scrollbar-track{
+            background:#eff4fb;
+            border-radius:999px;
+        }
+
+        @media(max-width:1180px){
+            .stats-grid{
+                grid-template-columns:repeat(3, minmax(0, 1fr));
+            }
+
+            .layout{
+                grid-template-columns:1fr;
+            }
+
+            .side-panel{
+                position:static;
+            }
+        }
+
+        @media(max-width:900px){
+            .schedule-compact-grid{
+                grid-template-columns:repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media(max-width:768px){
+            .info-collapsible-panel .panel-header{
+                flex-direction:column;
+            }
+
+            .panel-toggle{
+                width:100%;
+                min-width:0;
+            }
+
+            .info-grid{
+                grid-template-columns:1fr;
+            }
+
+            .stats-grid{
+                grid-template-columns:repeat(2, minmax(0, 1fr));
+            }
+
+            .schedule-compact-grid{
+                grid-template-columns:1fr;
+            }
+
+            .action-panel .quick-actions{
+                gap:8px;
+            }
+
+            .action-panel .quick-actions > a,
+            .action-panel .quick-actions > form,
+            .action-panel .quick-actions > span{
+                width:100%;
+            }
+
+            .action-panel .action-btn{
+                width:100%;
+            }
+        }
+
+        @media(max-width:520px){
+            .stats-grid{
+                grid-template-columns:1fr;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -895,10 +1658,18 @@
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                <i class="bi bi-house-door-fill me-1"></i> Panel TI
+        <div class="topbar-actions">
+            <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
+                <i class="bi bi-arrow-left me-2"></i> Regresar
             </a>
+
+            <div class="user-menu">
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <span>Administrador(a)</span>
+                <i class="bi bi-chevron-down small"></i>
+            </div>
         </div>
     </div>
 </nav>
@@ -930,7 +1701,19 @@
         </div>
     </section>
 
-    <div class="quick-actions">
+    <section class="panel action-panel">
+        <div class="panel-header action-panel-header">
+            <div>
+                <h2 class="panel-title">
+                    <i class="bi bi-lightning-charge-fill me-2"></i>Acciones rápidas
+                </h2>
+                <p class="panel-subtitle mb-0">
+                    Gestiona el semestre, salas, calendario y encuesta desde este apartado.
+                </p>
+            </div>
+        </div>
+        <div class="panel-body action-panel-body">
+            <div class="quick-actions">
         {% if semestre.estado != "CERRADO" %}
             <a href="{% url 'editar_semestre' semestre.id %}{% if request.GET.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-primary action-btn">
                 <i class="bi bi-pencil-square me-2"></i>Modificar semestre
@@ -972,7 +1755,9 @@
                 </button>
             </form>
         {% endif %}
-    </div>
+            </div>
+        </div>
+    </section>
 
     <div class="calendar-help">
         <div class="calendar-help-title">
@@ -1017,13 +1802,43 @@
     <div class="layout">
         <div>
 
-            <section class="panel">
+            <section class="panel info-collapsible-panel">
                 <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-info-circle-fill me-2"></i>Información general
-                    </h2>
+                    <div>
+                        <h2 class="panel-title">
+                            <i class="bi bi-info-circle-fill me-2"></i>Información general
+                        </h2>
+                        <p class="panel-subtitle mb-0">
+                            Datos generales del semestre. Puedes abrirlo cuando necesites revisar la información.
+                        </p>
+                        <div class="header-pills">
+                            <span class="header-pill">
+                                <strong>Sede:</strong> {{ semestre.sede_nombre }}
+                            </span>
+                            <span class="header-pill">
+                                <strong>Periodo:</strong> {{ semestre.fecha_inicio|date:"d/m/Y" }} al {{ semestre.fecha_fin|date:"d/m/Y" }}
+                            </span>
+                            <span class="header-pill">
+                                <strong>Encuesta B:</strong>
+                                {% if semestre.fecha_encuesta_satisfaccion %}
+                                    {{ semestre.fecha_encuesta_satisfaccion|date:"d/m/Y" }}
+                                {% else %}
+                                    Sin fecha
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-primary btn-mini panel-toggle"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#infoGeneralSemestre"
+                            aria-expanded="false"
+                            aria-controls="infoGeneralSemestre">
+                        <i class="bi bi-chevron-down me-1"></i> Ver información
+                    </button>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body collapse" id="infoGeneralSemestre">
                     <div class="info-grid">
                         <div class="info-card">
                             <div class="info-label">Sede</div>
@@ -1954,6 +2769,24 @@
         localStorage.setItem('activeTabID', 'tab-ciclos-btn');
         window.location.href = "{% url 'panel_gobierno_ti' %}";
     }
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const infoCollapse = document.getElementById("infoGeneralSemestre");
+        const infoToggle = document.querySelector('[data-bs-target="#infoGeneralSemestre"]');
+
+        if (infoCollapse && infoToggle) {
+            infoCollapse.addEventListener("shown.bs.collapse", function() {
+                infoToggle.innerHTML = '<i class="bi bi-chevron-up me-1"></i> Ocultar información';
+            });
+
+            infoCollapse.addEventListener("hidden.bs.collapse", function() {
+                infoToggle.innerHTML = '<i class="bi bi-chevron-down me-1"></i> Ver información';
+            });
+        }
+    });
 </script>
 
 </body>

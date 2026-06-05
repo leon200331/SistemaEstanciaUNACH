@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Asignación de Salas | Estancia Infantil UNACH</title>
+    <title>{{ titulo|default:"Asignación de Salas" }} | Estancia Infantil UNACH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,171 +11,342 @@
 
     <style>
         :root{
-            --azul:#1d4ed8;
-            --azul-oscuro:#1e3a8a;
-            --gris-fondo:#f3f6fb;
-            --texto:#0f172a;
+            --azul:#2563eb;
+            --azul-oscuro:#0b2d68;
+            --cyan:#0891b2;
+            --cyan-claro:#ecfeff;
+            --texto:#0b1f44;
             --muted:#64748b;
             --borde:#dbe4ef;
+            --fondo:#f4f7fb;
             --verde:#16a34a;
             --amarillo:#f59e0b;
             --rojo:#dc2626;
             --morado:#7c3aed;
-            --cyan:#0891b2;
+        }
+
+        *{
+            box-sizing:border-box;
         }
 
         body{
             margin:0;
-            background:var(--gris-fondo);
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.09), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.10), transparent 32%),
+                linear-gradient(180deg, #ffffff 0%, var(--fondo) 48%, #eef3f9 100%);
             color:var(--texto);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
+        /* =========================
+           BARRA SUPERIOR
+        ========================= */
         .topbar{
-            background:linear-gradient(90deg, var(--azul-oscuro), var(--azul));
-            color:white;
-            box-shadow:0 8px 22px rgba(15,23,42,.18);
+            background:#ffffff;
+            border-bottom:1px solid #dfe8f5;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            position:sticky;
+            top:0;
+            z-index:100;
         }
 
         .topbar-inner{
-            max-width:1240px;
-            margin:auto;
-            padding:14px 18px;
+            max-width:1320px;
+            margin:0 auto;
+            padding:18px 28px;
             display:flex;
             align-items:center;
             justify-content:space-between;
-            gap:16px;
+            gap:18px;
         }
 
         .brand{
             display:flex;
             align-items:center;
-            gap:14px;
+            gap:15px;
             min-width:0;
         }
 
-        .brand img{
-            height:48px;
-            width:auto;
+        .brand-logo{
+            width:98px;
+            height:64px;
+            border-radius:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg, var(--azul), var(--cyan));
+            padding:8px;
+            box-shadow:0 12px 26px rgba(37,99,235,.24);
+            flex:0 0 auto;
+        }
+
+        .brand-logo img{
+            width:100%;
+            height:100%;
             object-fit:contain;
-            background:rgba(255,255,255,.12);
-            border-radius:12px;
-            padding:4px;
+            display:block;
+            background:transparent !important;
+            border:none !important;
+            padding:0 !important;
+            box-shadow:none !important;
         }
 
         .brand-title{
-            font-size:1.02rem;
+            margin:0;
+            color:#0b1f44;
+            font-size:1.42rem;
             font-weight:950;
-            letter-spacing:.04em;
-            text-transform:uppercase;
-            line-height:1.1;
+            line-height:1.05;
+            letter-spacing:-.04em;
         }
 
         .brand-subtitle{
-            font-size:.82rem;
-            opacity:.9;
-            margin-top:2px;
+            margin-top:4px;
+            color:#50678f;
+            font-weight:650;
+            font-size:.92rem;
         }
 
-        .btn-top{
-            border-radius:12px;
+        .top-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .btn-nav{
+            border:1px solid #d8e5f7;
+            background:#ffffff;
+            color:#0b1f44;
+            border-radius:14px;
+            padding:10px 16px;
+            font-weight:900;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            box-shadow:0 8px 18px rgba(15,23,42,.04);
+            transition:.2s ease;
+            white-space:nowrap;
+        }
+
+        .btn-nav:hover{
+            transform:translateY(-1px);
+            color:var(--azul);
+            border-color:#bfdbfe;
+            background:#f8fbff;
+        }
+
+        .btn-nav.primary{
+            background:#eff6ff;
+            color:#1d4ed8;
+            border-color:#bfdbfe;
+        }
+
+        .admin-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0b1f44;
             font-weight:850;
-            padding:.55rem .9rem;
+            white-space:nowrap;
         }
 
-        .main{
-            max-width:1240px;
+        .admin-icon{
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background:linear-gradient(135deg, #dbeafe, #cffafe);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.35rem;
+        }
+
+        /* =========================
+           CONTENIDO GENERAL
+        ========================= */
+        .page{
+            max-width:1320px;
             margin:28px auto 70px;
-            padding:0 18px;
+            padding:0 28px;
         }
 
         .hero{
+            position:relative;
+            overflow:hidden;
             background:linear-gradient(135deg, #1d4ed8, #0891b2);
-            border-radius:24px;
+            border-radius:28px;
             color:white;
-            padding:30px 34px;
-            box-shadow:0 22px 50px rgba(29,78,216,.22);
+            padding:28px;
+            box-shadow:0 24px 48px rgba(37,99,235,.24);
             display:grid;
-            grid-template-columns:1fr auto;
-            gap:20px;
-            align-items:center;
+            grid-template-columns:minmax(0,1fr) 390px;
+            gap:22px;
+            align-items:stretch;
             margin-bottom:22px;
         }
 
-        .hero h1{
-            font-size:1.95rem;
-            font-weight:950;
-            margin:0 0 8px;
-            letter-spacing:-.03em;
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:285px;
+            height:285px;
+            border-radius:50%;
+            right:-110px;
+            top:-115px;
+            background:rgba(255,255,255,.14);
         }
 
-        .hero p{
-            margin:0;
-            opacity:.94;
-            font-size:1rem;
+        .hero-main{
+            position:relative;
+            z-index:1;
+            display:flex;
+            align-items:flex-start;
+            gap:18px;
         }
 
         .hero-icon{
-            width:88px;
-            height:88px;
-            border-radius:22px;
+            width:72px;
+            height:72px;
+            border-radius:21px;
             background:rgba(255,255,255,.18);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:2.5rem;
+            font-size:2rem;
+            flex:0 0 auto;
+        }
+
+        .hero h1{
+            margin:0 0 8px;
+            font-size:2rem;
+            font-weight:950;
+            letter-spacing:-.05em;
+        }
+
+        .hero p{
+            margin:0;
+            max-width:760px;
+            font-size:1rem;
+            line-height:1.55;
+            opacity:.95;
+            font-weight:650;
+        }
+
+        .hero-rule{
+            position:relative;
+            z-index:1;
+            background:rgba(255,255,255,.16);
+            border:1px solid rgba(255,255,255,.35);
+            border-radius:22px;
+            padding:20px;
+            backdrop-filter:blur(4px);
+        }
+
+        .hero-rule h6{
+            margin:0 0 8px;
+            font-size:1rem;
+            font-weight:950;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .hero-rule p{
+            margin:0;
+            font-size:.92rem;
+            line-height:1.5;
+            font-weight:700;
+            color:white;
+            opacity:.96;
+        }
+
+        .filter-panel,
+        .panel,
+        .stat-card{
+            background:rgba(255,255,255,.95);
+            border:1px solid var(--borde);
+            box-shadow:0 18px 38px rgba(15,23,42,.07);
         }
 
         .filter-panel{
-            background:white;
-            border:1px solid var(--borde);
-            border-radius:20px;
-            box-shadow:0 14px 30px rgba(15,23,42,.07);
-            padding:18px;
-            margin-bottom:20px;
+            border-radius:24px;
+            padding:20px;
+            margin-bottom:18px;
         }
 
         .filter-title{
-            font-size:.85rem;
+            font-size:.86rem;
             font-weight:950;
             text-transform:uppercase;
             letter-spacing:.07em;
-            color:#334155;
-            margin-bottom:12px;
+            color:#0b1f44;
+            margin-bottom:13px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .form-label{
+            margin-bottom:8px;
+            color:#0b1f44;
+            font-size:.78rem;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            font-weight:950;
         }
 
         .form-select{
+            width:100%;
+            max-width:100%;
+            border:1px solid #cbd8e8;
             border-radius:14px;
-            border:1px solid #cbd5e1;
-            padding:.72rem .9rem;
-            font-weight:650;
-            color:#0f172a;
-            background:white;
+            padding:.78rem .9rem;
+            color:#0b1f44;
+            font-weight:750;
+            background:#ffffff;
         }
 
         .form-select:focus{
-            border-color:#2563eb;
+            border-color:var(--azul);
             box-shadow:0 0 0 .22rem rgba(37,99,235,.15);
+        }
+
+        .filter-actions{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+
+        .btn-main{
+            border-radius:14px;
+            padding:.78rem 1.15rem;
+            font-weight:950;
         }
 
         .stats-grid{
             display:grid;
             grid-template-columns:repeat(4,minmax(0,1fr));
             gap:14px;
-            margin-bottom:20px;
+            margin-bottom:18px;
         }
 
         .stat-card{
-            background:#fff;
-            border:1px solid var(--borde);
-            border-radius:18px;
+            border-radius:20px;
             padding:16px;
-            box-shadow:0 10px 22px rgba(15,23,42,.06);
+            min-width:0;
         }
 
         .stat-label{
             color:var(--muted);
-            font-size:.74rem;
+            font-size:.72rem;
             font-weight:950;
             letter-spacing:.06em;
             text-transform:uppercase;
@@ -183,25 +354,23 @@
         }
 
         .stat-value{
-            font-size:1.5rem;
+            font-size:1.55rem;
             font-weight:950;
-            color:#0f172a;
-            line-height:1;
+            color:#0b1f44;
+            line-height:1.15;
+            word-break:break-word;
         }
 
         .panel{
-            background:white;
-            border:1px solid var(--borde);
-            border-radius:22px;
+            border-radius:24px;
             overflow:hidden;
-            box-shadow:0 18px 38px rgba(15,23,42,.07);
             margin-bottom:18px;
         }
 
         .panel-header{
             padding:18px 20px;
-            background:#f8fafc;
             border-bottom:1px solid var(--borde);
+            background:linear-gradient(180deg, #ffffff, #f8fbff);
             display:flex;
             align-items:center;
             justify-content:space-between;
@@ -211,11 +380,28 @@
 
         .panel-title{
             margin:0;
-            color:#334155;
-            font-size:1rem;
+            color:#0b1f44;
+            font-size:1.02rem;
             font-weight:950;
-            text-transform:uppercase;
-            letter-spacing:.06em;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .title-icon{
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            background:#eaf2ff;
+            color:var(--azul);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .table-wrap{
+            width:100%;
+            overflow-x:auto;
         }
 
         .table{
@@ -226,7 +412,7 @@
         .table th{
             background:#f8fafc;
             color:#475569;
-            font-size:.74rem;
+            font-size:.72rem;
             text-transform:uppercase;
             letter-spacing:.08em;
             font-weight:950;
@@ -236,19 +422,31 @@
         }
 
         .table td{
-            padding:15px 16px;
+            padding:16px;
             border-bottom:1px solid #edf2f7;
+        }
+
+        .table tbody tr:hover{
+            background:#f8fbff;
+        }
+
+        .folio-text{
+            color:#0b1f44;
+            font-weight:950;
         }
 
         .alumno-name{
             font-weight:950;
-            color:#0f172a;
+            color:#0b1f44;
             margin-bottom:3px;
+            line-height:1.25;
         }
 
-        .alumno-meta{
+        .alumno-meta,
+        .small-muted{
             color:#64748b;
-            font-size:.86rem;
+            font-size:.84rem;
+            font-weight:650;
         }
 
         .badge-soft{
@@ -262,41 +460,17 @@
             white-space:nowrap;
         }
 
-        .badge-green{
-            background:#dcfce7;
-            color:#166534;
-            border:1px solid #86efac;
-        }
-
-        .badge-yellow{
-            background:#fef3c7;
-            color:#92400e;
-            border:1px solid #fcd34d;
-        }
-
-        .badge-blue{
-            background:#dbeafe;
-            color:#1e40af;
-            border:1px solid #93c5fd;
-        }
-
-        .badge-purple{
-            background:#ede9fe;
-            color:#5b21b6;
-            border:1px solid #c4b5fd;
-        }
-
-        .badge-red{
-            background:#fee2e2;
-            color:#991b1b;
-            border:1px solid #fecaca;
-        }
+        .badge-green{ background:#dcfce7; color:#166534; border:1px solid #86efac; }
+        .badge-yellow{ background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+        .badge-blue{ background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+        .badge-purple{ background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
+        .badge-red{ background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
 
         .btn-mini{
-            border-radius:11px;
+            border-radius:12px;
             font-size:.82rem;
-            font-weight:850;
-            padding:.45rem .7rem;
+            font-weight:900;
+            padding:.48rem .78rem;
         }
 
         .btn-row{
@@ -307,7 +481,7 @@
         }
 
         .empty-state{
-            padding:40px 20px;
+            padding:44px 22px;
             text-align:center;
             color:var(--muted);
         }
@@ -324,43 +498,9 @@
             margin-bottom:6px;
         }
 
-        .notice{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid var(--azul);
-            border-radius:18px;
-            color:#1e3a8a;
-            padding:15px 16px;
-            margin-bottom:18px;
-            font-weight:650;
-        }
-
-        .notice strong{
-            font-weight:950;
-        }
-
-        .small-muted{
-            color:#64748b;
-            font-size:.84rem;
-        }
-
-        @media(max-width:992px){
-            .hero{grid-template-columns:1fr;}
-            .hero-icon{display:none;}
-            .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-        }
-
-        @media(max-width:576px){
-            .topbar-inner{flex-direction:column;align-items:flex-start;}
-            .hero{padding:24px 20px;}
-            .hero h1{font-size:1.55rem;}
-            .stats-grid{grid-template-columns:1fr;}
-            .btn-row{justify-content:flex-start;}
-        }
-
-        /* =========================================================
+        /* =========================
            ALERTAS PERSONALIZADAS
-           ========================================================= */
+        ========================= */
         .swal2-toast.sistema-toast {
             border-radius: 18px !important;
             padding: 14px 16px !important;
@@ -375,34 +515,68 @@
             color: #0f172a !important;
         }
 
-        .swal2-toast.sistema-toast .swal2-icon {
-            margin: 0 .65rem 0 0 !important;
+        .swal2-toast.sistema-toast .swal2-icon { margin: 0 .65rem 0 0 !important; }
+        .swal2-timer-progress-bar { background: rgba(37, 99, 235, .45) !important; }
+        .sistema-toast-success { border-left: 7px solid #16a34a !important; background: #f0fdf4 !important; }
+        .sistema-toast-error { border-left: 7px solid #dc2626 !important; background: #fef2f2 !important; }
+        .sistema-toast-warning { border-left: 7px solid #f59e0b !important; background: #fffbeb !important; }
+        .sistema-toast-info { border-left: 7px solid #2563eb !important; background: #eff6ff !important; }
+
+        @media(max-width:1100px){
+            .hero{grid-template-columns:1fr;}
+            .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
         }
 
-        .swal2-timer-progress-bar {
-            background: rgba(37, 99, 235, .45) !important;
+        @media(max-width:768px){
+            .topbar-inner{
+                align-items:flex-start;
+                flex-direction:column;
+                padding:16px 18px;
+            }
+
+            .top-actions{
+                width:100%;
+                justify-content:space-between;
+            }
+
+            .page{
+                padding:0 18px;
+                margin-top:20px;
+            }
+
+            .hero{
+                padding:22px;
+            }
+
+            .hero-main{
+                flex-direction:column;
+            }
+
+            .hero h1{
+                font-size:1.55rem;
+            }
+
+            .filter-actions{
+                width:100%;
+            }
         }
 
-        .sistema-toast-success {
-            border-left: 7px solid #16a34a !important;
-            background: #f0fdf4 !important;
-        }
+        @media(max-width:576px){
+            .top-actions{
+                flex-direction:column;
+                align-items:stretch;
+            }
 
-        .sistema-toast-error {
-            border-left: 7px solid #dc2626 !important;
-            background: #fef2f2 !important;
-        }
+            .btn-nav,
+            .admin-chip{
+                width:100%;
+                justify-content:center;
+            }
 
-        .sistema-toast-warning {
-            border-left: 7px solid #f59e0b !important;
-            background: #fffbeb !important;
+            .stats-grid{grid-template-columns:1fr;}
+            .btn-row{justify-content:flex-start;}
+            .filter-actions .btn{width:100%;}
         }
-
-        .sistema-toast-info {
-            border-left: 7px solid #2563eb !important;
-            background: #eff6ff !important;
-        }
-
     </style>
 </head>
 <body>
@@ -410,64 +584,79 @@
 <nav class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <img src="{% static 'img/logo.png' %}" alt="UNACH">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
+            </div>
             <div>
-                <div class="brand-title">Asignación de Salas</div>
-                <div class="brand-subtitle">Alumnos finalizados · Administrador del sistema</div>
+                <h1 class="brand-title">Asignación de Salas</h1>
+                <div class="brand-subtitle">Alumnos finalizados · Gestión por semestre</div>
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-            {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
-                <a href="{% url 'panel_gobierno_ti' %}" class="btn btn-outline-light btn-top" onclick="localStorage.setItem('activeTabID', 'tab-ciclos-btn')">
-                    <i class="bi bi-house-door-fill me-1"></i> Panel TI
-                </a>
-            {% endif %}
-            <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-light btn-top">
-                <i class="bi bi-arrow-left me-1"></i> Semestres
-            </a>
-
+        <div class="top-actions">
             {% if semestre %}
-                <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-light btn-top text-primary">
-                    <i class="bi bi-calendar2-week-fill me-1"></i> Detalle semestre
+                <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn-nav">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Regresar
+                </a>
+            {% else %}
+                <a href="{% url 'lista_semestres' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn-nav">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    Regresar
                 </a>
             {% endif %}
+
+            <div class="admin-chip">
+                <span class="admin-icon">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+                <span>Administrador(a)</span>
+            </div>
         </div>
     </div>
 </nav>
 
-<main class="main">
-
+<main class="page">
 
     <section class="hero">
-        <div>
-            <h1>Asignación de Salas</h1>
+        <div class="hero-main">
+            <div class="hero-icon">
+                <i class="bi bi-diagram-3-fill"></i>
+            </div>
+            <div>
+                <h1>Asignación de Salas</h1>
+                <p>
+                    Asigna alumnos con inscripción finalizada a un semestre y a una sala configurada.
+                    Desde esta vista puedes filtrar el semestre, revisar el estado y entrar al formulario de asignación.
+                </p>
+            </div>
+        </div>
+
+        <div class="hero-rule">
+            <h6>
+                <i class="bi bi-info-circle-fill"></i>
+                Regla de asignación
+            </h6>
             <p>
-                Asigna alumnos con inscripción finalizada a un semestre y a una sala configurada.
+                Solo se asignan alumnos que ya terminaron el flujo completo de inscripción y pago.
+                La sala se toma desde la configuración del semestre.
             </p>
         </div>
-        <div class="hero-icon">
-            <i class="bi bi-diagram-3-fill"></i>
-        </div>
-    </section>
-
-    <section class="notice">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        <strong>Regla de asignación:</strong>
-        solo se asignan alumnos que ya terminaron el flujo completo de inscripción y pago. La sala se toma desde la configuración del semestre.
     </section>
 
     <section class="filter-panel">
         <div class="filter-title">
-            <i class="bi bi-funnel-fill me-1"></i>Filtrar por semestre
+            <i class="bi bi-funnel-fill"></i>
+            Filtrar por semestre
         </div>
 
         <form method="GET" class="row g-3 align-items-end">
             {% if request.GET.origen == "ti" or request.POST.origen == "ti" %}
                 <input type="hidden" name="origen" value="ti">
             {% endif %}
-            <div class="col-md-8">
-                <label class="form-label fw-bold text-secondary small">Semestre</label>
+
+            <div class="col-lg-8">
+                <label class="form-label">Semestre</label>
                 <select name="semestre" class="form-select">
                     <option value="">-- Seleccionar semestre --</option>
                     {% for s in semestres %}
@@ -479,14 +668,18 @@
                 </select>
             </div>
 
-            <div class="col-md-4 d-flex gap-2 flex-wrap">
-                <button type="submit" class="btn btn-primary fw-bold rounded-4 px-4">
-                    <i class="bi bi-search me-1"></i> Filtrar
-                </button>
+            <div class="col-lg-4">
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary btn-main">
+                        <i class="bi bi-search me-1"></i>
+                        Filtrar
+                    </button>
 
-                <a href="{% url 'lista_asignacion_salas' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary fw-bold rounded-4 px-4">
-                    Limpiar
-                </a>
+                    <a href="{% url 'lista_asignacion_salas' %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-secondary btn-main">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Limpiar
+                    </a>
+                </div>
             </div>
         </form>
     </section>
@@ -494,7 +687,7 @@
     <section class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">Semestre seleccionado</div>
-            <div class="stat-value" style="font-size:1.1rem;">
+            <div class="stat-value" style="font-size:1.08rem;">
                 {% if semestre %}
                     {{ semestre.nombre }}
                 {% else %}
@@ -514,7 +707,7 @@
                 {% if semestre %}
                     {{ semestre.get_estado_display }}
                 {% else %}
-                    -
+                    —
                 {% endif %}
             </div>
         </div>
@@ -528,17 +721,21 @@
     <section class="panel">
         <div class="panel-header">
             <h2 class="panel-title">
-                <i class="bi bi-person-check-fill me-2"></i>Alumnos disponibles para asignación
+                <span class="title-icon">
+                    <i class="bi bi-person-check-fill"></i>
+                </span>
+                Alumnos disponibles para asignación
             </h2>
 
             {% if semestre %}
                 <a href="{% url 'detalle_semestre' semestre.id %}{% if request.GET.origen == 'ti' or request.POST.origen == 'ti' %}?origen=ti{% endif %}" class="btn btn-outline-primary btn-mini">
-                    <i class="bi bi-eye-fill me-1"></i> Ver semestre
+                    <i class="bi bi-eye-fill me-1"></i>
+                    Ver semestre
                 </a>
             {% endif %}
         </div>
 
-        <div class="table-responsive">
+        <div class="table-wrap">
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
@@ -555,7 +752,7 @@
                 {% for inscripcion in inscripciones %}
                     <tr>
                         <td>
-                            <strong>#{{ inscripcion.solicitud_ingreso.folio }}</strong>
+                            <div class="folio-text">#{{ inscripcion.solicitud_ingreso.folio }}</div>
                             <div class="small-muted">ID: {{ inscripcion.id }}</div>
                         </td>
 
@@ -679,7 +876,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 {% if messages %}
@@ -740,14 +936,6 @@
     });
 </script>
 {% endif %}
-
-<script>
-    function volverPanelTI() {
-        localStorage.setItem('activeTabID', 'tab-ciclos-btn');
-        window.location.href = "{% url 'panel_gobierno_ti' %}";
-    }
-</script>
-
 
 </body>
 </html>

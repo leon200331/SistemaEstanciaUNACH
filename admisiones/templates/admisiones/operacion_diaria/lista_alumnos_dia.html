@@ -65,22 +65,25 @@
         }
 
         .brand-logo{
-            width:64px;
+            width:96px;
             height:64px;
             border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            background:linear-gradient(135deg,#1e3a8a,#2563eb);
+            border:1px solid rgba(255,255,255,.28);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.26);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            transform:scale(1.12);
         }
 
         .brand-title{
@@ -590,6 +593,84 @@
             margin-bottom:16px;
         }
 
+
+        .floating-toast{
+            position:fixed;
+            top:22px;
+            right:22px;
+            z-index:1080;
+            min-width:320px;
+            max-width:430px;
+            background:rgba(255,255,255,.96);
+            border:1px solid #bbf7d0;
+            border-left:7px solid #16a34a;
+            border-radius:22px;
+            box-shadow:0 22px 55px rgba(15,23,42,.22);
+            padding:15px 16px;
+            display:flex;
+            align-items:flex-start;
+            gap:12px;
+            backdrop-filter:blur(14px);
+            animation:toastIn .28s ease-out, toastOut .45s ease-in 4.2s forwards;
+        }
+
+        .floating-toast-icon{
+            width:42px;
+            height:42px;
+            border-radius:15px;
+            background:#dcfce7;
+            color:#15803d;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            font-size:1.25rem;
+        }
+
+        .floating-toast-title{
+            font-weight:950;
+            color:#14532d;
+            margin-bottom:2px;
+            letter-spacing:-.02em;
+        }
+
+        .floating-toast-text{
+            color:#166534;
+            font-size:.88rem;
+            font-weight:650;
+            line-height:1.35;
+        }
+
+        .floating-toast-close{
+            border:none;
+            background:transparent;
+            color:#64748b;
+            font-size:1.05rem;
+            line-height:1;
+            padding:0;
+            margin-left:auto;
+            cursor:pointer;
+        }
+
+        @keyframes toastIn{
+            from{opacity:0; transform:translateY(-10px) translateX(18px) scale(.97);}
+            to{opacity:1; transform:translateY(0) translateX(0) scale(1);}
+        }
+
+        @keyframes toastOut{
+            to{opacity:0; transform:translateY(-8px) translateX(18px) scale(.97); pointer-events:none;}
+        }
+
+        @media(max-width:720px){
+            .floating-toast{
+                left:14px;
+                right:14px;
+                top:14px;
+                min-width:0;
+                max-width:none;
+            }
+        }
+
         .empty-state{
             text-align:center;
             padding:42px 20px;
@@ -779,9 +860,19 @@
 
     <!-- AVISO DE ESTADO -->
     {% if dia.estado == "ABIERTO" %}
-        <div class="open-note">
-            <i class="bi bi-check-circle-fill me-1"></i>
-            El día está abierto. Puedes registrar entradas, bitácoras y salidas.
+        <div class="floating-toast" id="estadoDiaToast" role="status" aria-live="polite">
+            <div class="floating-toast-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <div class="floating-toast-title">Día operativo abierto</div>
+                <div class="floating-toast-text">
+                    Captura habilitada para entradas, bitácoras y salidas.
+                </div>
+            </div>
+            <button type="button" class="floating-toast-close" onclick="cerrarEstadoDiaToast()" aria-label="Cerrar notificación">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
     {% elif dia.estado == "PROGRAMADO" %}
         <div class="pending-note">

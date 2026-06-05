@@ -10,145 +10,229 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <style>
-body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
-.navbar-ti{background:#a855f7;padding:.75rem 0;box-shadow:0 4px 10px rgba(0,0,0,.12);}
-.ti-brand-text{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:.5px;}
-.ti-subtext{color:rgba(255,255,255,.75);font-size:.85rem;}
-.container-panel{max-width:1250px;margin:0 auto;padding:22px 16px;margin-top:92px;}
-.card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
-.section-title{font-weight:800;margin-bottom:12px;color:#6b21a8;font-size:1.05rem;}
-.btn-soft{border-radius:10px;font-weight:700;padding:.55rem 1rem;}
 
-.sub-card{background:#faf5ff;border:1px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:18px;}
-
-.sub-card .row > div[class*="col-"] {
-    display: flex;
-    flex-direction: column;
-}
-
-.sub-card .row > div[class*="col-"] > label,
-label {
-    margin-bottom: 6px !important;
-    font-weight: normal;
-    color: #334155;
+:root{
+    --morado:#a855f7;
+    --morado-oscuro:#7c3aed;
+    --morado-suave:#faf5ff;
+    --morado-borde:#e9d5ff;
+    --azul:#2563eb;
+    --azul-suave:#eff6ff;
+    --verde:#16a34a;
+    --verde-suave:#f0fdf4;
+    --verde-borde:#bbf7d0;
+    --rojo:#ef4444;
+    --texto:#0f172a;
+    --gris:#64748b;
+    --fondo:#f3f6fb;
+    --borde:#e2e8f0;
+    --topbar:96px;
 }
 
-.sub-card .row > div[class*="col-"] > input,
-.sub-card .row > div[class*="col-"] > select,
-.sub-card .row > div[class*="col-"] > textarea,
-.sub-card .row > div[class*="col-"] > .select2-container {
-    margin-top: auto;
-    flex: 0 0 auto;
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top left, rgba(168,85,247,.12), transparent 32%),
+        radial-gradient(circle at top right, rgba(37,99,235,.11), transparent 30%),
+        linear-gradient(135deg,#f8fafc 0%,#eef4ff 50%,#f7f1ff 100%);
+    font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--texto);
+    padding-top:var(--topbar);
 }
 
-.select2-container .select2-selection--multiple {
-    min-height: 38px;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-}
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #a855f7;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    padding: 2px 8px 2px 24px;
-    margin-top: 5px;
-    position: relative;
-}
-.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-    color: white;
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-right: 0;
-    font-weight: bold;
-}
-.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-    color: #ffdddd;
-    background: transparent;
+a{text-decoration:none;}
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:var(--topbar);
+    z-index:1000;
+    background:rgba(255,255,255,.94);
+    border-bottom:1px solid rgba(226,232,240,.9);
+    box-shadow:0 16px 38px rgba(15,23,42,.08);
+    backdrop-filter:blur(16px);
 }
 
-.readonly-box {
-    background-color: #e9ecef !important;
-    pointer-events: none !important;
-    color: #495057 !important;
-}
-
-.info-card-grid{
-    margin-bottom: 28px;
-}
-.info-box{
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    border-radius:12px;
-    padding:10px 12px;
-    min-height:66px;
-}
-.info-label{
-    font-size:.78rem;
-    color:#64748b;
-    font-weight:700;
-    margin-bottom:5px;
-}
-.info-value{
-    font-size:.96rem;
-    font-weight:700;
-    color:#0f172a;
-}
-
-
-
-.estado-operativo{
-    background:#fff;
-    border-radius:16px;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
-    padding:16px 18px;
-    margin-bottom:20px;
+.topbar-inner{
+    width:min(1280px, calc(100% - 48px));
+    height:100%;
+    margin:0 auto;
     display:flex;
-    gap:14px;
-    align-items:flex-start;
-    border:1px solid transparent;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
 }
-.estado-operativo .status-icon{
-    width:46px;
-    height:46px;
-    border-radius:14px;
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:0;
+    color:var(--texto);
+}
+
+.brand-logo{
+    width:72px;
+    height:72px;
+    border-radius:20px;
+    padding:9px;
+    background:linear-gradient(135deg,var(--morado-oscuro),var(--morado),var(--azul));
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 18px 34px rgba(168,85,247,.22);
     display:flex;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
-    font-size:1.35rem;
 }
-.estado-operativo h5{
-    margin:0 0 4px;
-    font-weight:900;
+
+.brand-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    filter:drop-shadow(0 8px 14px rgba(0,0,0,.18));
 }
-.estado-operativo p{
+
+.brand-title{
     margin:0;
-    line-height:1.5;
-    font-size:.94rem;
+    color:#172554;
+    font-size:1.55rem;
+    line-height:1.05;
+    font-weight:950;
+    letter-spacing:-.04em;
 }
-.estado-activo{
-    background:#f0fdf4;
-    border-color:#bbf7d0;
-    border-left:7px solid #16a34a;
-    color:#14532d;
+
+.brand-subtitle{
+    margin:5px 0 0;
+    color:#52627c;
+    font-size:.92rem;
+    font-weight:750;
 }
-.estado-activo .status-icon{
-    background:#dcfce7;
-    color:#15803d;
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    flex-shrink:0;
 }
-.estado-consulta{
-    background:#fff7ed;
-    border-color:#fed7aa;
-    border-left:7px solid #f97316;
-    color:#9a3412;
+
+.btn-top{
+    min-height:48px;
+    border-radius:14px;
+    padding:.72rem 1.05rem;
+    border:1px solid var(--borde);
+    background:#fff;
+    color:#334155;
+    font-weight:900;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    box-shadow:0 10px 24px rgba(15,23,42,.05);
+    transition:.18s ease;
 }
-.estado-consulta .status-icon{
-    background:#ffedd5;
-    color:#c2410c;
+
+.btn-top:hover{
+    color:var(--morado-oscuro);
+    transform:translateY(-1px);
+    box-shadow:0 14px 28px rgba(15,23,42,.08);
 }
+
+.profile-pill{
+    min-height:50px;
+    max-width:330px;
+    border-radius:16px;
+    background:#fff;
+    border:1px solid #dbeafe;
+    box-shadow:0 10px 24px rgba(15,23,42,.06);
+    padding:8px 14px 8px 9px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.profile-pill .profile-icon{
+    width:38px;
+    height:38px;
+    border-radius:13px;
+    background:linear-gradient(135deg,var(--morado),var(--azul));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.15rem;
+}
+
+.profile-role{
+    display:block;
+    color:#64748b;
+    font-size:.68rem;
+    line-height:1;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:950;
+}
+
+.profile-name{
+    display:block;
+    color:#0f172a;
+    font-weight:950;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.container-panel{
+    width:min(1260px, calc(100% - 56px));
+    margin:0 auto;
+    padding:26px 0 42px;
+}
+
+.card-panel,
+.main-card{
+    border:none;
+    border-radius:28px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 24px 60px rgba(15,23,42,.09);
+}
+
+.main-card{
+    padding:24px;
+}
+
+.estado-operativo{
+    border-radius:22px;
+    padding:18px 20px;
+    margin-bottom:22px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    border:1px solid transparent;
+    box-shadow:0 14px 34px rgba(15,23,42,.06);
+}
+.estado-operativo .status-icon{
+    width:48px;
+    height:48px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.3rem;
+}
+.estado-operativo h5{margin:0 0 4px;font-weight:950;letter-spacing:-.02em;}
+.estado-operativo p{margin:0;line-height:1.5;font-size:.94rem;font-weight:650;}
+.estado-activo{background:#f0fdf4;border-color:#bbf7d0;border-left:7px solid #16a34a;color:#14532d;}
+.estado-activo .status-icon{background:#dcfce7;color:#15803d;}
+.estado-consulta{background:#fff7ed;border-color:#fed7aa;border-left:7px solid #f97316;color:#9a3412;}
+.estado-consulta .status-icon{background:#ffedd5;color:#c2410c;}
 .modo-badge{
     display:inline-flex;
     align-items:center;
@@ -156,219 +240,749 @@ label {
     border-radius:999px;
     padding:.38rem .7rem;
     font-size:.76rem;
-    font-weight:900;
+    font-weight:950;
     margin-top:8px;
 }
-.modo-badge-activo{
-    background:#dcfce7;
-    color:#166534;
-    border:1px solid #86efac;
-}
-.modo-badge-consulta{
-    background:#ffedd5;
-    color:#9a3412;
-    border:1px solid #fed7aa;
-}
-.readonly-warning{
-    background:#fff7ed;
-    border:1px solid #fed7aa;
-    border-left:6px solid #f97316;
-    border-radius:14px;
-    padding:14px 16px;
-    margin-bottom:18px;
-    color:#9a3412;
-}
-.readonly-warning .title{
-    font-weight:900;
-    margin-bottom:3px;
-}
+.modo-badge-activo{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+.modo-badge-consulta{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
 
-.lock-banner{
-    background:#f8fafc;
-    border:1px solid #cbd5e1;
-    border-left:6px solid #64748b;
-    border-radius:14px;
-    padding:14px 16px;
-    margin-bottom:18px;
-}
-.lock-banner .title{
-    font-weight:800;
-    color:#334155;
-    margin-bottom:3px;
-}
-
-/* =========================================================
-   SPRINT 5 - INCIDENCIAS NUTRICIONALES
-   ========================================================= */
-.incidencias-card{
-    background:linear-gradient(135deg,#f0fdf4,#ecfeff);
-    border:1px solid #bbf7d0;
-    border-left:7px solid #16a34a;
-    border-radius:16px;
-    padding:16px 18px;
-    margin-bottom:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:16px;
-}
-.incidencias-card .icon-box{
-    width:48px;
-    height:48px;
-    border-radius:15px;
-    background:#dcfce7;
-    color:#15803d;
+.section-title{
     display:flex;
     align-items:center;
-    justify-content:center;
-    font-size:1.45rem;
+    gap:10px;
+    color:#0b2559;
+    font-size:1.08rem;
+    font-weight:950;
+    letter-spacing:-.02em;
+    margin:0 0 16px;
+}
+
+.section-title::before{
+    content:"";
+    width:34px;
+    height:34px;
+    border-radius:12px;
+    background:#eef2ff;
+    border:1px solid #dbeafe;
+    box-shadow:inset 0 0 0 4px rgba(255,255,255,.55);
     flex-shrink:0;
 }
-.incidencias-card h5{
-    margin:0 0 4px;
+
+.info-card-grid{margin-bottom:28px;}
+.info-box{
+    background:#f8fafc;
+    border:1px solid #dbe4ef;
+    border-radius:15px;
+    padding:13px 14px;
+    min-height:74px;
+    box-shadow:0 8px 20px rgba(15,23,42,.03);
+}
+.info-label{
+    font-size:.72rem;
+    color:#526b8b;
+    font-weight:950;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-bottom:7px;
+}
+.info-value{
+    font-size:.98rem;
     font-weight:900;
-    color:#14532d;
+    color:#001b3f;
+    word-break:break-word;
 }
-.incidencias-card p{
-    margin:0;
-    color:#166534;
-    line-height:1.45;
-    font-size:.94rem;
-}
-.incidencias-actions{
+
+.form-header{
     display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    justify-content:flex-end;
     align-items:center;
-    min-width:260px;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:8px 0 18px;
 }
-.btn-incidencia{
-    border-radius:999px;
-    font-weight:800;
-    padding:.62rem .92rem;
+
+.form-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#5b21b6;
+    font-size:1.18rem;
+    font-weight:950;
+    letter-spacing:-.03em;
+}
+
+.autosave-pill{
     display:inline-flex;
     align-items:center;
     gap:7px;
-    text-decoration:none;
-    white-space:nowrap;
-}
-.btn-incidencia-create{
-    background:#16a34a;
-    color:white;
-    border:1px solid #16a34a;
-}
-.btn-incidencia-create:hover{
-    background:#15803d;
-    color:white;
-}
-.btn-incidencia-list{
-    background:white;
-    color:#14532d;
-    border:1px solid #86efac;
-}
-.btn-incidencia-list:hover{
-    background:#f0fdf4;
-    color:#14532d;
-}
-@media(max-width:768px){
-    .incidencias-card{
-        flex-direction:column;
-    }
-    .incidencias-actions,
-    .btn-incidencia{
-        width:100%;
-        justify-content:center;
-    }
+    border-radius:999px;
+    padding:.48rem .75rem;
+    font-size:.78rem;
+    font-weight:950;
+    color:#166534;
+    background:#dcfce7;
+    border:1px solid #bbf7d0;
 }
 
-/* =========================================================
-   ACLARACIÓN: DICTAMEN DE INSCRIPCIÓN, NO OPERACIÓN DIARIA
-   ========================================================= */
-.dictamen-incidencias-note{
-    background:#f0fdf4;
-    border:1px solid #bbf7d0;
-    border-left:6px solid #16a34a;
-    color:#14532d;
-    border-radius:16px;
-    padding:14px 16px;
-    margin-bottom:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,.05);
+.sub-card{
+    background:linear-gradient(180deg,#ffffff 0%,#fbf7ff 100%);
+    border:1px solid #e9d5ff;
+    border-radius:24px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 14px 34px rgba(15,23,42,.055);
+}
+
+.sub-card .section-title{
+    color:#5b21b6;
+    font-size:1.05rem;
+    margin-bottom:16px;
+}
+.sub-card .section-title::before{display:none;}
+
+.sub-card .row > div[class*="col-"]{
     display:flex;
-    align-items:flex-start;
+    flex-direction:column;
+}
+
+.sub-card .row > div[class*="col-"] > label,
+label,
+.form-label{
+    margin-bottom:7px !important;
+    font-weight:750;
+    color:#334155;
+    font-size:.9rem;
+}
+
+.sub-card .row > div[class*="col-"] > input,
+.sub-card .row > div[class*="col-"] > select,
+.sub-card .row > div[class*="col-"] > textarea,
+.sub-card .row > div[class*="col-"] > .select2-container{
+    margin-top:auto;
+    flex:0 0 auto;
+}
+
+.form-control,
+.form-select{
+    border-radius:14px;
+    border:1px solid #cbd5e1;
+    padding:.72rem .85rem;
+    min-height:44px;
+    color:#0f172a;
+    font-weight:650;
+    background:#fff;
+}
+
+textarea.form-control{min-height:112px;}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#c084fc;
+    box-shadow:0 0 0 4px rgba(168,85,247,.13);
+}
+
+.readonly-box{
+    background:#eef2f7 !important;
+    pointer-events:none !important;
+    color:#334155 !important;
+}
+
+.select2-container{width:100%!important;}
+.select2-container .select2-selection--multiple{
+    min-height:44px;
+    border:1px solid #cbd5e1;
+    border-radius:14px;
+    padding:2px 6px;
+    display:flex;
+    align-items:center;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+    background:linear-gradient(135deg,var(--morado),var(--azul));
+    border:none;
+    color:#fff;
+    border-radius:999px;
+    padding:3px 9px 3px 24px;
+    margin-top:5px;
+    position:relative;
+    font-weight:800;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+    color:#fff;
+    position:absolute;
+    left:7px;
+    top:50%;
+    transform:translateY(-50%);
+    margin-right:0;
+    font-weight:bold;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover{color:#ffe4e6;background:transparent;}
+
+.readonly-warning,
+.lock-banner{
+    border-radius:20px;
+    padding:15px 16px;
+    margin-bottom:18px;
+    font-weight:700;
+    line-height:1.45;
+}
+.readonly-warning{background:#fff7ed;border:1px solid #fed7aa;border-left:6px solid #f97316;color:#9a3412;}
+.lock-banner{background:#f8fafc;border:1px solid #cbd5e1;border-left:6px solid #64748b;}
+.readonly-warning .title,.lock-banner .title{font-weight:950;margin-bottom:3px;}
+
+.action-footer{
+    position:sticky;
+    bottom:14px;
+    z-index:20;
+    background:rgba(255,255,255,.94);
+    border:1px solid var(--borde);
+    border-radius:24px;
+    box-shadow:0 18px 44px rgba(15,23,42,.10);
+    padding:14px 16px;
+    margin-top:18px;
+    display:flex;
+    align-items:center;
     justify-content:space-between;
     gap:14px;
+    backdrop-filter:blur(16px);
 }
-.dictamen-incidencias-note .note-left{
+
+.action-note{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#334155;
+    font-size:.88rem;
+    font-weight:750;
+}
+.action-note .note-icon{
+    width:38px;
+    height:38px;
+    border-radius:13px;
+    background:#ede9fe;
+    color:#7c3aed;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+.action-note strong{display:block;color:#0b2559;font-weight:950;}
+.action-buttons{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+
+.btn-soft{
+    border-radius:14px;
+    font-weight:900;
+    padding:.72rem 1rem;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+.btn-primary-nutri{
+    color:#fff;
+    background:linear-gradient(135deg,var(--morado),var(--azul));
+    border:0;
+    box-shadow:0 14px 28px rgba(168,85,247,.20);
+}
+.btn-primary-nutri:hover{color:#fff;transform:translateY(-1px);}
+
+
+/* =========================================================
+   Datos compartidos entre filtros
+   Nutrición puede consultar o capturar datos comunes según origen
+   ========================================================= */
+.shared-summary-box{
+    background:rgba(255,255,255,.96);
+    border:1px solid #e9d5ff;
+    border-left:7px solid var(--morado);
+    border-radius:26px;
+    box-shadow:0 18px 44px rgba(15,23,42,.075);
+    padding:20px;
+    margin:0 0 22px;
+}
+.shared-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+.shared-summary-box .section-title{
+    margin:0;
+    color:#4c1d95;
+}
+.shared-summary-box .section-title::before{display:none;}
+.shared-summary-box .section-title i{
+    width:36px;
+    height:36px;
+    border-radius:13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    background:linear-gradient(135deg,var(--morado),var(--azul));
+    box-shadow:0 10px 20px rgba(168,85,247,.18);
+}
+.shared-help{
+    color:#52627c;
+    font-size:.92rem;
+    font-weight:700;
+    line-height:1.48;
+    margin:0 0 15px;
+}
+.shared-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+}
+.shared-card{
+    min-height:116px;
+    border-radius:20px;
+    padding:15px 16px;
+    border:1px solid #dbe4ef;
+    background:#f8fafc;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:9px;
+}
+.shared-card.shared-locked{background:#eff6ff;border-color:#bfdbfe;}
+.shared-card.shared-owned{background:#f0fdf4;border-color:#bbf7d0;}
+.shared-card.shared-empty{background:#fff7ed;border-color:#fed7aa;}
+.shared-label{
+    color:#64748b;
+    font-size:.70rem;
+    font-weight:950;
+    letter-spacing:.075em;
+    text-transform:uppercase;
+}
+.shared-value{
+    color:#0b2559;
+    font-size:1rem;
+    font-weight:950;
+    line-height:1.2;
+    word-break:break-word;
+}
+.shared-note{
+    color:#475569;
+    font-size:.75rem;
+    font-weight:750;
+    line-height:1.35;
+}
+.shared-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border-radius:999px;
+    padding:.32rem .62rem;
+    font-size:.72rem;
+    font-weight:950;
+    white-space:nowrap;
+    margin-bottom:5px;
+}
+.shared-chip.locked{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;}
+.shared-chip.owned{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+.shared-chip.empty{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
+.shared-mini-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    border-radius:999px;
+    padding:.46rem .75rem;
+    color:#5b21b6;
+    background:#f3e8ff;
+    border:1px solid #e9d5ff;
+    font-size:.78rem;
+    font-weight:950;
+}
+.shared-field-hint{
+    margin-top:7px;
+    border-radius:12px;
+    padding:8px 10px;
+    font-size:.78rem;
+    font-weight:750;
+    line-height:1.35;
+    border:1px solid #e2e8f0;
+    background:#fff;
+    color:#475569;
+}
+.shared-field-hint i{margin-right:6px;}
+.shared-field-hint.shared-lock{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}
+.shared-field-hint.shared-own{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
+.shared-field-hint.shared-open{background:#fff7ed;border-color:#fed7aa;color:#9a3412;}
+.shared-locked-field{
+    background:#e9eef6!important;
+    border-color:#cbd5e1!important;
+    color:#334155!important;
+    pointer-events:none!important;
+}
+
+
+
+/* =========================================================
+   SUPLENCIAS - Dictamen nutricional preliminar por cobertura temporal
+   ========================================================= */
+.suplencia-dictamen-banner{
+    background:linear-gradient(135deg,#faf5ff,#eef4ff);
+    border:1px solid var(--morado-borde);
+    border-left:7px solid var(--morado);
+    border-radius:22px;
+    box-shadow:0 16px 36px rgba(168,85,247,.12);
+    padding:17px 19px;
+    margin-bottom:18px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
+.suplencia-dictamen-icon{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    background:linear-gradient(135deg,var(--morado),var(--azul));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.25rem;
+    box-shadow:0 10px 20px rgba(168,85,247,.18);
+}
+.suplencia-dictamen-banner h5{margin:0 0 5px;color:#5b21b6;font-weight:950;}
+.suplencia-dictamen-banner p{margin:0;color:#52627c;font-weight:700;line-height:1.48;}
+.suplencia-dictamen-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.suplencia-dictamen-pill{
+    border-radius:999px;
+    background:#f3e8ff;
+    color:#6d28d9;
+    border:1px solid #ddd6fe;
+    padding:.36rem .68rem;
+    font-size:.76rem;
+    font-weight:950;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+.suplencia-stamp{
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-left:6px solid #2563eb;
+    color:#1e3a8a;
+    border-radius:18px;
+    padding:14px 16px;
+    margin-bottom:18px;
+    font-weight:750;
     display:flex;
     gap:12px;
     align-items:flex-start;
 }
-.dictamen-incidencias-note .note-icon{
-    width:40px;
-    height:40px;
-    border-radius:13px;
-    background:#dcfce7;
-    color:#15803d;
+.suplencia-stamp i{font-size:1.25rem;}
+@media(max-width:900px){.suplencia-dictamen-banner{flex-direction:column;}}
+
+@media(max-width:1100px){
+    .shared-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
+@media(max-width:900px){
+    body{padding-top:0;}
+    .topbar{position:relative;height:auto;}
+    .topbar-inner{width:min(100% - 28px,1280px);padding:14px 0;align-items:flex-start;flex-direction:column;}
+    .top-actions{width:100%;align-items:stretch;flex-direction:column;}
+    .profile-pill,.btn-top{width:100%;max-width:100%;}
+    .container-panel{width:min(100% - 28px,1260px);padding-top:18px;}
+    .main-card{padding:16px;}
+    .action-footer{position:relative;bottom:auto;align-items:stretch;flex-direction:column;}
+    .action-buttons,.action-buttons .btn{width:100%;}
+    .shared-grid{grid-template-columns:1fr;}
+}
+
+
+
+/* =========================================================
+   AJUSTE COMPACTO - Datos compartidos entre filtros
+   Se quita la tarjeta de edad porque la edad ya viene de inscripción.
+   ========================================================= */
+.shared-summary-box{
+    padding:14px 16px!important;
+    border-radius:20px!important;
+    margin-bottom:16px!important;
+    box-shadow:0 14px 34px rgba(15,23,42,.065)!important;
+}
+.shared-summary-box .section-head,
+.shared-summary-box .shared-head{
+    margin-bottom:4px!important;
+}
+.shared-summary-box .section-title{
+    font-size:1rem!important;
+    margin-bottom:0!important;
+}
+.shared-summary-box p,
+.shared-summary-box .shared-help{
+    display:none!important;
+}
+.shared-summary-grid,
+.shared-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:8px!important;
+}
+.shared-card{
+    min-height:64px!important;
+    border-radius:15px!important;
+    padding:10px 98px 10px 12px!important;
+    display:block!important;
+    position:relative!important;
+    box-shadow:0 8px 18px rgba(15,23,42,.035)!important;
+}
+.shared-label{
+    font-size:.61rem!important;
+    line-height:1.1!important;
+    margin-bottom:4px!important;
+}
+.shared-value{
+    font-size:.86rem!important;
+    line-height:1.18!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+}
+.shared-note{
+    position:absolute!important;
+    right:9px!important;
+    top:9px!important;
+    font-size:0!important;
+    line-height:1!important;
+    max-width:86px!important;
+    text-align:right!important;
+}
+.shared-note br{display:none!important;}
+.shared-chip{
+    font-size:.61rem!important;
+    padding:.22rem .44rem!important;
+    margin:0!important;
+    gap:4px!important;
+}
+.shared-chip.empty{
+    background:#f3e8ff!important;
+    color:var(--morado-oscuro)!important;
+    border-color:var(--morado-borde)!important;
+}
+.shared-card.shared-empty{
+    background:linear-gradient(180deg,#fff,#faf5ff)!important;
+    border-color:var(--morado-borde)!important;
+}
+.shared-card.shared-locked{
+    background:linear-gradient(180deg,#fff,#eff6ff)!important;
+    border-color:#bfdbfe!important;
+}
+.shared-card.shared-owned{
+    background:linear-gradient(180deg,#fff,#f0fdf4)!important;
+    border-color:#bbf7d0!important;
+}
+.fixed-inscription-note,
+.shared-field-note.fixed-inscription{
+    margin-top:7px;
+    border-radius:12px;
+    padding:8px 10px;
+    font-size:.78rem;
+    font-weight:800;
+    line-height:1.35;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1d4ed8;
+}
+
+
+/* =========================================================
+   SUPLENCIAS - Dictamen nutricional preliminar por cobertura temporal
+   ========================================================= */
+.suplencia-dictamen-banner{
+    background:linear-gradient(135deg,#faf5ff,#eef4ff);
+    border:1px solid var(--morado-borde);
+    border-left:7px solid var(--morado);
+    border-radius:22px;
+    box-shadow:0 16px 36px rgba(168,85,247,.12);
+    padding:17px 19px;
+    margin-bottom:18px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
+.suplencia-dictamen-icon{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    background:linear-gradient(135deg,var(--morado),var(--azul));
+    color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
-    font-size:1.18rem;
+    font-size:1.25rem;
+    box-shadow:0 10px 20px rgba(168,85,247,.18);
 }
-.dictamen-incidencias-note .note-title{
-    font-weight:900;
-    margin-bottom:3px;
+.suplencia-dictamen-banner h5{margin:0 0 5px;color:#5b21b6;font-weight:950;}
+.suplencia-dictamen-banner p{margin:0;color:#52627c;font-weight:700;line-height:1.48;}
+.suplencia-dictamen-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.suplencia-dictamen-pill{
+    border-radius:999px;
+    background:#f3e8ff;
+    color:#6d28d9;
+    border:1px solid #ddd6fe;
+    padding:.36rem .68rem;
+    font-size:.76rem;
+    font-weight:950;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
 }
-.dictamen-incidencias-note p{
-    margin:0;
-    font-size:.9rem;
-    line-height:1.4;
+.suplencia-stamp{
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-left:6px solid #2563eb;
+    color:#1e3a8a;
+    border-radius:18px;
+    padding:14px 16px;
+    margin-bottom:18px;
+    font-weight:750;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
 }
-.dictamen-incidencias-note .note-actions{
-    flex-shrink:0;
+.suplencia-stamp i{font-size:1.25rem;}
+@media(max-width:900px){.suplencia-dictamen-banner{flex-direction:column;}}
+
+@media(max-width:1100px){
+    .shared-summary-grid,
+    .shared-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
 }
-@media(max-width:768px){
-    .dictamen-incidencias-note{
-        flex-direction:column;
-    }
-    .dictamen-incidencias-note .note-actions,
-    .dictamen-incidencias-note .note-actions a{
-        width:100%;
-    }
+@media(max-width:760px){
+    .shared-summary-grid,
+    .shared-grid{grid-template-columns:1fr!important;}
+    .shared-card{padding-right:96px!important;}
 }
+
+
+/* =========================================================
+   Ajuste final: datos compartidos compactos y simétricos
+   Edad, sexo y fecha de nacimiento vienen de inscripción.
+   ========================================================= */
+.fixed-inscription-note,
+.shared-field-note.fixed-inscription{display:none!important;}
+.shared-summary-box{
+    padding:12px 15px!important;
+    border-radius:18px!important;
+    border-left-width:6px!important;
+}
+.shared-grid,.shared-summary-grid{gap:7px!important;}
+.shared-card{
+    min-height:56px!important;
+    padding:8px 82px 8px 10px!important;
+    border-radius:14px!important;
+}
+.shared-label{font-size:.58rem!important;margin-bottom:3px!important;}
+.shared-value{font-size:.82rem!important;line-height:1.14!important;}
+.shared-note{right:8px!important;top:8px!important;max-width:74px!important;}
+.shared-chip{font-size:.58rem!important;padding:.18rem .40rem!important;}
+.shared-chip.empty{
+    background:#f3e8ff!important;
+    color:var(--morado-oscuro)!important;
+    border-color:var(--morado-borde)!important;
+}
+.shared-card.shared-empty{
+    background:linear-gradient(180deg,#fff,#faf5ff)!important;
+    border-color:var(--morado-borde)!important;
+}
+.shared-field-hint,
+.shared-field-note.editable,
+.shared-field-note.available,
+.shared-field-note.locked{
+    display:inline-flex!important;
+    align-items:center!important;
+    width:auto!important;
+    max-width:max-content!important;
+    min-height:22px!important;
+    margin-top:6px!important;
+    padding:.22rem .50rem!important;
+    border-radius:999px!important;
+    font-size:0!important;
+    line-height:1!important;
+    font-weight:950!important;
+    white-space:nowrap!important;
+}
+.shared-field-hint > *,
+.shared-field-note.editable > *,
+.shared-field-note.available > *,
+.shared-field-note.locked > *{display:none!important;}
+.shared-field-hint.shared-open,
+.shared-field-note.editable{
+    background:#f3e8ff!important;
+    border:1px solid var(--morado-borde)!important;
+    color:var(--morado-oscuro)!important;
+}
+.shared-field-hint.shared-open::after,
+.shared-field-note.editable::after{content:'Pendiente';font-size:.66rem;}
+.shared-field-hint.shared-own,
+.shared-field-note.available{
+    background:#f0fdf4!important;
+    border:1px solid #bbf7d0!important;
+    color:#166534!important;
+}
+.shared-field-hint.shared-own::after,
+.shared-field-note.available::after{content:'Compartido';font-size:.66rem;}
+.shared-field-hint.shared-lock,
+.shared-field-note.locked{
+    background:#eff6ff!important;
+    border:1px solid #bfdbfe!important;
+    color:#1d4ed8!important;
+}
+.shared-field-hint.shared-lock::after,
+.shared-field-note.locked::after{content:'Solo lectura';font-size:.66rem;}
 
 </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
-<div class="container-fluid justify-content-center">
-<div class="d-flex align-items-center" style="width:100%; max-width:1250px; padding:0 18px;">
-<a class="navbar-brand d-flex align-items-center" href="{% url 'nutricion_pendientes' %}">
-<img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
-<div class="text-white">
-<div class="ti-brand-text">VALORACIÓN NUTRICIONAL</div>
-<div class="ti-subtext">Entrevista presencial y dictamen</div>
-</div>
-</a>
 
-<div class="ms-auto d-flex gap-2 align-items-center">
-<a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn btn-outline-light btn-soft">
-<i class="bi bi-clipboard2-pulse me-1"></i> Incidencias
-</a>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="{% url 'nutricion_pendientes' %}">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Valoración nutricional</h1>
+                <p class="brand-subtitle">Entrevista presencial y dictamen del área de nutrición</p>
+            </div>
+        </a>
 
-<a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-light btn-soft">
-<i class="bi bi-arrow-left me-1"></i> Volver
-</a>
-</div>
-</div>
-</div>
-</nav>
+        <div class="top-actions">
+            <a href="{% url 'nutricion_pendientes' %}" class="btn-top">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
+            </a>
 
-<div class="container-panel">
-<div class="card card-panel p-4">
+            <div class="profile-pill" title="Nutrióloga responsable">
+                <div class="profile-icon"><i class="bi bi-person-badge-fill"></i></div>
+                <div class="min-w-0">
+                    <span class="profile-role">Nutrióloga</span>
+                    <span class="profile-name">
+                        {% if nutriologa_asignada %}
+                            {{ nutriologa_asignada }}
+                        {% elif request.user.get_full_name %}
+                            {{ request.user.get_full_name }}
+                        {% else %}
+                            {{ request.user.username }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<main class="container-panel">
+<section class="card-panel main-card">
 
 {% if modo_solo_consulta %}
 <div class="estado-operativo estado-consulta">
@@ -402,29 +1016,43 @@ label {
     </div>
 </div>
 {% endif %}
-<div class="dictamen-incidencias-note">
-    <div class="note-left">
-        <div class="note-icon">
-            <i class="bi bi-info-circle-fill"></i>
-        </div>
-        <div>
-            <div class="note-title">Este formulario es un dictamen de inscripción</div>
-            <p>
-                Aquí no se crean incidencias porque la solicitud todavía pertenece al proceso de admisión.
-                Las incidencias nutricionales se registran solo para niñas y niños ya inscritos en operación diaria.
-            </p>
-        </div>
-    </div>
 
-    <div class="note-actions">
-        <a href="{% url 'panel_incidencias' %}?tipo=NUTRICIONAL" class="btn-incidencia btn-incidencia-list">
-            <i class="bi bi-eye-fill"></i>
-            Ver incidencias
-        </a>
+
+{% if tiene_suplencia_activa %}
+<div class="suplencia-dictamen-banner">
+    <div class="suplencia-dictamen-icon"><i class="bi bi-person-badge-fill"></i></div>
+    <div>
+        <h5>Cubriendo temporalmente</h5>
+        <p>
+            Estás trabajando con una autorización temporal de Dirección. Este formulario corresponde al área de Nutrición; si la cobertura autorizada coincide con esta área, el registro quedará marcado como suplencia y pendiente de revisión por la titular.
+        </p>
+        <div class="suplencia-dictamen-list">
+            {% for sup in suplencias_activas_usuario %}
+            <span class="suplencia-dictamen-pill">
+                <i class="bi bi-shield-check"></i>
+                {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · {{ sup.get_tipo_cobertura_display|default:sup.tipo_cobertura }}
+            </span>
+            {% endfor %}
+        </div>
     </div>
 </div>
+{% endif %}
 
-<div class="section-title" style="color:#64748b;">Información de la solicitud</div>
+{% if sol.nutricion_es_suplencia %}
+<div class="suplencia-stamp">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>
+        <strong>Dictamen nutricional registrado por suplencia.</strong><br>
+        {% if sol.nutricion_pendiente_revision_titular %}
+            Está pendiente de revisión por la nutrióloga titular.
+        {% else %}
+            Ya fue revisado o validado por el área titular.
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="section-title"><i class="bi bi-folder2-open"></i> Información de la solicitud</div>
 <!-- DATOS DEL MENOR: se toman automáticamente del expediente; no se capturan en Nutrición. -->
 
 <div class="row g-3 info-card-grid">
@@ -522,6 +1150,208 @@ label {
     </div>
 </div>
 
+<section class="shared-summary-box">
+    <div class="shared-head">
+        <div class="section-title"><i class="bi bi-diagram-3-fill"></i> Datos compartidos entre filtros</div>
+        <span class="shared-mini-pill"><i class="bi bi-shield-check"></i> Sin duplicar captura</span>
+    </div>
+    <p class="shared-help">
+        Estos datos pueden usarse por Psicología, Nutrición y Médico. Si otro filtro ya capturó el dato, Nutrición lo verá como referencia; si todavía no existe, puede registrarlo desde esta valoración.
+    </p>
+    <div class="shared-grid">
+        {% with dato=datos_compartidos_por_clave.peso_nacer %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Peso al nacer</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_peso_nacer" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.talla_nacer %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Talla al nacer</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_talla_nacer" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.peso_actual %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Peso actual</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_peso_actual" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.talla_actual %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Talla actual</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_talla_actual" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.tipo_alimentacion_inicio %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Alimentación inicial</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_tipo_alimentacion_inicio" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.seno_materno %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Seno materno</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_seno_materno" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.tiempo_seno_materno %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Tiempo de seno materno</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_tiempo_seno_materno" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.formula_infantil %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Fórmula infantil</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_formula_infantil" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% with dato=datos_compartidos_por_clave.alergia_alimentos %}
+        <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+            <div>
+                <div class="shared-label">Alergia a alimentos</div>
+                <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+            </div>
+            <div class="shared-note">
+                {% if dato.bloqueado_por_otra_area %}
+                    <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+                    Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+                    <input type="hidden" name="dato_compartido_alergia_alimentos" value="{{ dato.valor }}">
+                {% elif dato.tiene_valor %}
+                    <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+                    Dato registrado para compartir entre filtros.
+                {% else %}
+                    <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+                    Si Nutrición lo captura primero, Psicología o Médico lo verán como referencia.
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+    </div>
+</section>
+
+
 {% if modo_solo_consulta %}
 <div class="readonly-warning">
     <div class="d-flex align-items-start">
@@ -550,7 +1380,10 @@ label {
 </div>
 {% endif %}
 
-<div class="section-title" style="color:#6b21a8; font-size:1.1rem; margin-bottom:20px;">Formulario de valoración nutricional</div>
+<div class="form-header">
+    <div class="form-title"><i class="bi bi-clipboard2-pulse-fill"></i> Formulario de valoración nutricional</div>
+    <span class="autosave-pill"><i class="bi bi-cloud-check-fill"></i> Autoguardado local activo</span>
+</div>
 
 <form method="post" id="formDictamenNutricion">
 {% csrf_token %}
@@ -586,23 +1419,121 @@ label {
     </div>
 
     <div class="row mt-2">
-        <div class="col-md-4 mb-3">{{ form.edad_nutricion.label_tag }}{{ form.edad_nutricion }}</div>
-        <div class="col-md-4 mb-3">{{ form.sexo_nutricion.label_tag }}{{ form.sexo_nutricion }}</div>
-        <div class="col-md-4 mb-3">{{ form.fecha_nacimiento_nutricion.label_tag }}{{ form.fecha_nacimiento_nutricion }}</div>
-        <div class="col-md-3 mb-3">{{ form.peso_nacer.label_tag }}{{ form.peso_nacer }}</div>
-        <div class="col-md-3 mb-3">{{ form.talla_nacer.label_tag }}{{ form.talla_nacer }}</div>
-        <div class="col-md-3 mb-3">{{ form.peso_actual.label_tag }}{{ form.peso_actual }}</div>
-        <div class="col-md-3 mb-3">{{ form.talla_actual.label_tag }}{{ form.talla_actual }}</div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label" for="id_edad_nutricion_inscripcion">Edad del menor</label>
+            <input type="text" name="edad_nutricion" id="id_edad_nutricion_inscripcion" class="form-control readonly-box fw-bold" value="{% if insc.edad_anios_menor or insc.edad_meses_menor %}{{ insc.edad_anios_menor|default:'0' }} años, {{ insc.edad_meses_menor|default:'0' }} meses{% elif form.edad_nutricion.value %}{{ form.edad_nutricion.value }}{% else %}0 años, 0 meses{% endif %}" readonly>
+            <div class="fixed-inscription-note">
+                <i class="bi bi-info-circle-fill me-1"></i> Edad tomada automáticamente de la inscripción. No se captura entre filtros.
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label" for="id_sexo_nutricion_inscripcion">Sexo nutrición</label>
+            <input type="text" id="id_sexo_nutricion_inscripcion" class="form-control readonly-box fw-bold" value="{% firstof sexo_menor sol.sexo_menor insc.sexo_menor form.sexo_nutricion.value '-' %}" readonly>
+            <input type="hidden" name="sexo_nutricion" value="{% firstof sexo_menor sol.sexo_menor insc.sexo_menor form.sexo_nutricion.value '' %}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label" for="id_fecha_nacimiento_nutricion_inscripcion">Fecha nacimiento nutrición</label>
+            <input type="text" id="id_fecha_nacimiento_nutricion_inscripcion" class="form-control readonly-box fw-bold" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'d/m/Y' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'d/m/Y' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'d/m/Y' }}{% elif form.fecha_nacimiento_nutricion.value %}{{ form.fecha_nacimiento_nutricion.value }}{% else %}-{% endif %}" readonly>
+            <input type="hidden" name="fecha_nacimiento_nutricion" value="{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:'Y-m-d' }}{% elif sol.fecha_nacimiento_menor %}{{ sol.fecha_nacimiento_menor|date:'Y-m-d' }}{% elif insc.fecha_nacimiento_menor %}{{ insc.fecha_nacimiento_menor|date:'Y-m-d' }}{% elif form.fecha_nacimiento_nutricion.value %}{{ form.fecha_nacimiento_nutricion.value }}{% endif %}">
+        </div>
+        <div class="col-md-3 mb-3" data-shared-key="peso_nacer">{{ form.peso_nacer.label_tag }}{{ form.peso_nacer }}
+            {% with dato=datos_compartidos_por_clave.peso_nacer %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-md-3 mb-3" data-shared-key="talla_nacer">{{ form.talla_nacer.label_tag }}{{ form.talla_nacer }}
+            {% with dato=datos_compartidos_por_clave.talla_nacer %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-md-3 mb-3" data-shared-key="peso_actual">{{ form.peso_actual.label_tag }}{{ form.peso_actual }}
+            {% with dato=datos_compartidos_por_clave.peso_actual %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-md-3 mb-3" data-shared-key="talla_actual">{{ form.talla_actual.label_tag }}{{ form.talla_actual }}
+            {% with dato=datos_compartidos_por_clave.talla_actual %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
     </div>
 </div>
 
 <div class="sub-card">
     <div class="section-title">2. Lactancia y fórmula</div>
     <div class="row">
-        <div class="col-md-3 mb-3">{{ form.seno_materno.label_tag }}{{ form.seno_materno }}</div>
-        <div class="col-md-3 mb-3">{{ form.tiempo_seno_materno.label_tag }}{{ form.tiempo_seno_materno }}</div>
+        <div class="col-md-3 mb-3" data-shared-key="seno_materno">{{ form.seno_materno.label_tag }}{{ form.seno_materno }}
+            {% with dato=datos_compartidos_por_clave.seno_materno %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-md-3 mb-3" data-shared-key="tiempo_seno_materno">{{ form.tiempo_seno_materno.label_tag }}{{ form.tiempo_seno_materno }}
+            {% with dato=datos_compartidos_por_clave.tiempo_seno_materno %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
         <div class="col-md-3 mb-3">{{ form.acude_lactancia.label_tag }}{{ form.acude_lactancia }}</div>
-        <div class="col-md-3 mb-3">{{ form.tipo_alimentacion_lactante.label_tag }}{{ form.tipo_alimentacion_lactante }}</div>
+        <div class="col-md-3 mb-3" data-shared-key="tipo_alimentacion_inicio">{{ form.tipo_alimentacion_lactante.label_tag }}{{ form.tipo_alimentacion_lactante }}
+            {% with dato=datos_compartidos_por_clave.tipo_alimentacion_inicio %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
     </div>
 
     <div class="row">
@@ -610,8 +1541,32 @@ label {
     </div>
 
     <div class="row">
-        <div class="col-md-4 mb-3">{{ form.formula_infantil.label_tag }}{{ form.formula_infantil }}</div>
-        <div class="col-md-4 mb-3" id="box_cual_formula" style="display: none;">{{ form.cual_formula.label_tag }}{{ form.cual_formula }}</div>
+        <div class="col-md-4 mb-3" data-shared-key="formula_infantil">{{ form.formula_infantil.label_tag }}{{ form.formula_infantil }}
+            {% with dato=datos_compartidos_por_clave.formula_infantil %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-md-4 mb-3" id="box_cual_formula" style="display: none;" data-shared-key="formula_infantil">{{ form.cual_formula.label_tag }}{{ form.cual_formula }}
+            {% with dato=datos_compartidos_por_clave.formula_infantil %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
         <div class="col-md-4 mb-3" id="box_edad_inicio_formula" style="display: none;">{{ form.edad_inicio_formula.label_tag }}{{ form.edad_inicio_formula }}</div>
     </div>
 
@@ -665,8 +1620,32 @@ label {
 <div class="sub-card">
     <div class="section-title">4. Alergias y restricciones</div>
     <div class="row">
-        <div class="col-md-3 mb-3">{{ form.alergia_alimentos.label_tag }}{{ form.alergia_alimentos }}</div>
-        <div class="col-md-3 mb-3" id="box_cual_alergia" style="display: none;">{{ form.cual_alergia.label_tag }}{{ form.cual_alergia }}</div>
+        <div class="col-md-3 mb-3" data-shared-key="alergia_alimentos">{{ form.alergia_alimentos.label_tag }}{{ form.alergia_alimentos }}
+            {% with dato=datos_compartidos_por_clave.alergia_alimentos %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-md-3 mb-3" id="box_cual_alergia" style="display: none;" data-shared-key="alergia_alimentos">{{ form.cual_alergia.label_tag }}{{ form.cual_alergia }}
+            {% with dato=datos_compartidos_por_clave.alergia_alimentos %}
+            <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}">
+                {% if dato.bloqueado_por_otra_area %}
+                    <i class="bi bi-lock-fill"></i>Dato capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}. Se muestra como solo lectura.
+                {% elif dato.tiene_valor %}
+                    <i class="bi bi-check-circle-fill"></i>Dato disponible para compartir entre filtros.
+                {% else %}
+                    <i class="bi bi-pencil-square"></i>Dato pendiente. Nutrición puede capturarlo si aún no existe en otro filtro.
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
         <div class="col-md-3 mb-3">{{ form.restriccion_alimentaria_actual.label_tag }}{{ form.restriccion_alimentaria_actual }}</div>
     </div>
     <div class="row">
@@ -765,7 +1744,12 @@ label {
 <div class="sub-card" style="border-color: #a855f7;">
     <div class="section-title">10. Cierre y dictamen</div>
     <div class="row">
-        <div class="col-md-12 mb-3">{{ form.observaciones_nutricion_clinica.label_tag }}{{ form.observaciones_nutricion_clinica }}</div>
+        <div class="d-none" aria-hidden="true">{{ form.observaciones_nutricion_clinica }}</div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Nutrióloga responsable</label>
+            <input type="text" class="form-control readonly-box fw-bold" value="{% if nutriologa_asignada %}{{ nutriologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}" readonly>
+        </div>
 
         <div class="col-md-4 mb-3">
             <label for="fecha_automatica" class="form-label">Fecha de elaboración:</label>
@@ -777,29 +1761,44 @@ label {
     </div>
 </div>
 
-<div class="d-flex gap-2 mt-4">
-    {% if modo_solo_consulta %}
-        <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
-            <i class="bi bi-eye-fill me-1"></i> Solo consulta
-        </button>
-    {% elif bloqueado %}
-        <button type="button" class="btn btn-secondary btn-soft" disabled>
-            <i class="bi bi-lock me-1"></i> Evaluación finalizada
-        </button>
-    {% else %}
-        <button type="submit" class="btn btn-success btn-soft">
-            <i class="bi bi-save me-1"></i> Guardar valoración
-        </button>
-    {% endif %}
 
-    <a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-secondary btn-soft">
-        <i class="bi bi-arrow-left me-1"></i> Regresar
-    </a>
+<div class="action-footer">
+    <div class="action-note">
+        <div class="note-icon"><i class="bi bi-shield-check"></i></div>
+        <div>
+            <strong>Dictamen nutricional</strong>
+            {% if tiene_suplencia_activa %}
+                La fecha se asigna automáticamente. El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.
+            {% else %}
+                La fecha se asigna automáticamente y el registro queda firmado por la nutrióloga en sesión.
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'nutricion_pendientes' %}" class="btn btn-outline-secondary btn-soft">
+            <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+
+        {% if modo_solo_consulta %}
+            <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
+                <i class="bi bi-eye-fill"></i> Solo consulta
+            </button>
+        {% elif bloqueado %}
+            <button type="button" class="btn btn-secondary btn-soft" disabled>
+                <i class="bi bi-lock"></i> Evaluación finalizada
+            </button>
+        {% else %}
+            <button type="submit" class="btn btn-primary-nutri btn-soft">
+                <i class="bi bi-save"></i> Guardar
+            </button>
+        {% endif %}
+    </div>
 </div>
 
 </form>
-</div>
-</div>
+</section>
+</main>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -923,6 +1922,75 @@ document.addEventListener("DOMContentLoaded", function() {
         const dia = String(hoy.getDate()).padStart(2, '0');
         fechaInput.value = `${año}-${mes}-${dia}`;
     }
+});
+</script>
+
+
+
+<script>
+// ====================================================================
+// BLOQUEO VISUAL DE DATOS COMPARTIDOS ENTRE FILTROS
+// ====================================================================
+document.addEventListener("DOMContentLoaded", function(){
+    const datosCompartidosNutricion = {
+        peso_nacer: {valor: "{{ datos_compartidos_por_clave.peso_nacer.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.peso_nacer.bloqueado_por_otra_area|yesno:"true,false" }}},
+        talla_nacer: {valor: "{{ datos_compartidos_por_clave.talla_nacer.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.talla_nacer.bloqueado_por_otra_area|yesno:"true,false" }}},
+        peso_actual: {valor: "{{ datos_compartidos_por_clave.peso_actual.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.peso_actual.bloqueado_por_otra_area|yesno:"true,false" }}},
+        talla_actual: {valor: "{{ datos_compartidos_por_clave.talla_actual.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.talla_actual.bloqueado_por_otra_area|yesno:"true,false" }}},
+        tipo_alimentacion_inicio: {valor: "{{ datos_compartidos_por_clave.tipo_alimentacion_inicio.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.tipo_alimentacion_inicio.bloqueado_por_otra_area|yesno:"true,false" }}},
+        seno_materno: {valor: "{{ datos_compartidos_por_clave.seno_materno.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.seno_materno.bloqueado_por_otra_area|yesno:"true,false" }}},
+        tiempo_seno_materno: {valor: "{{ datos_compartidos_por_clave.tiempo_seno_materno.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.tiempo_seno_materno.bloqueado_por_otra_area|yesno:"true,false" }}},
+        formula_infantil: {valor: "{{ datos_compartidos_por_clave.formula_infantil.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.formula_infantil.bloqueado_por_otra_area|yesno:"true,false" }}},
+        alergia_alimentos: {valor: "{{ datos_compartidos_por_clave.alergia_alimentos.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.alergia_alimentos.bloqueado_por_otra_area|yesno:"true,false" }}},
+    };
+
+    const camposPorDato = {
+        peso_nacer: ["id_peso_nacer"],
+        talla_nacer: ["id_talla_nacer"],
+        peso_actual: ["id_peso_actual"],
+        talla_actual: ["id_talla_actual"],
+        tipo_alimentacion_inicio: ["id_tipo_alimentacion_lactante"],
+        seno_materno: ["id_seno_materno"],
+        tiempo_seno_materno: ["id_tiempo_seno_materno"],
+        formula_infantil: ["id_formula_infantil", "id_cual_formula"],
+        alergia_alimentos: ["id_alergia_alimentos", "id_cual_alergia"],
+    };
+
+    function intentarColocarValor(el, valor){
+        if(!el || !valor || el.value) return;
+        const normalizado = String(valor).trim();
+        if(!normalizado) return;
+
+        if(el.tagName === "SELECT"){
+            let exacta = Array.from(el.options).find(opt => opt.value === normalizado);
+            if(exacta){ el.value = exacta.value; return; }
+
+            let porTexto = Array.from(el.options).find(opt => opt.text.trim().toLowerCase() === normalizado.toLowerCase());
+            if(porTexto){ el.value = porTexto.value; return; }
+            return;
+        }
+
+        el.value = normalizado;
+    }
+
+    Object.entries(camposPorDato).forEach(([clave, ids]) => {
+        const dato = datosCompartidosNutricion[clave] || {};
+        ids.forEach(id => {
+            const campo = document.getElementById(id);
+            if(!campo) return;
+
+            intentarColocarValor(campo, dato.valor);
+
+            if(dato.bloqueado){
+                campo.classList.add("shared-locked-field");
+                campo.setAttribute("readonly", "readonly");
+                campo.setAttribute("data-solo-lectura", "true");
+                campo.setAttribute("title", "Dato compartido capturado por otro filtro. No se modifica desde Nutrición.");
+                campo.style.pointerEvents = "none";
+                campo.tabIndex = -1;
+            }
+        });
+    });
 });
 </script>
 
@@ -1053,5 +2121,38 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 </script>
 
+
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+      const obsFinal = document.getElementById("id_observaciones_nutricion");
+      const obsClinica = document.getElementById("id_observaciones_nutricion_clinica");
+      function syncObservacionesClinicas(){
+          if(!obsFinal || !obsClinica) return;
+          obsClinica.value = obsFinal.value || obsClinica.value || "Sin observaciones clínicas adicionales";
+      }
+      if(obsFinal){
+          obsFinal.addEventListener("input", syncObservacionesClinicas);
+          obsFinal.addEventListener("change", syncObservacionesClinicas);
+      }
+      const form = document.getElementById("formDictamenNutricion");
+      if(form){ form.addEventListener("submit", syncObservacionesClinicas); }
+      syncObservacionesClinicas();
+  });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.shared-field-hint.shared-open, .shared-field-note.editable').forEach(function(el){
+    el.setAttribute('title','Dato pendiente. Esta área puede capturarlo si aún no existe en otro filtro.');
+  });
+  document.querySelectorAll('.shared-field-hint.shared-lock, .shared-field-note.locked').forEach(function(el){
+    el.setAttribute('title','Dato capturado por otro filtro. Se muestra en solo lectura para evitar duplicidad.');
+  });
+  document.querySelectorAll('.shared-field-hint.shared-own, .shared-field-note.available').forEach(function(el){
+    el.setAttribute('title','Dato disponible para compartir entre filtros.');
+  });
+});
+</script>
 </body>
 </html>

@@ -12,14 +12,26 @@
     <style>
         :root{
             --blue:#2563eb;
+            --blue-dark:#1e40af;
             --cyan:#0891b2;
             --green:#16a34a;
             --yellow:#ca8a04;
+            --orange:#f97316;
             --red:#dc2626;
+            --pink:#db2777;
             --purple:#7c3aed;
             --slate:#0f172a;
             --muted:#64748b;
             --border:#e2e8f0;
+            --soft:#f8fafc;
+
+            --hero-main:linear-gradient(135deg,#1d4ed8,#2563eb,#0891b2);
+            --hero-shadow:rgba(37,99,235,.24);
+            --student-soft:linear-gradient(135deg,#eff6ff,#ecfeff 58%,#ffffff);
+            --student-border:#bfdbfe;
+            --student-accent:#2563eb;
+            --student-accent-2:#0891b2;
+            --avatar-bg:linear-gradient(135deg,#dbeafe,#cffafe);
         }
 
         *{box-sizing:border-box;}
@@ -27,15 +39,39 @@
         body{
             min-height:100vh;
             background:
-                radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 30%),
-                radial-gradient(circle at top right, rgba(124,58,237,.13), transparent 32%),
+                radial-gradient(circle at top left, rgba(37,99,235,.15), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.14), transparent 32%),
                 linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
         }
 
+        body.theme-girl{
+            --hero-main:linear-gradient(135deg,#be185d,#db2777,#7c3aed);
+            --hero-shadow:rgba(219,39,119,.22);
+            --student-soft:linear-gradient(135deg,#fff1f7,#fdf2ff 56%,#ffffff);
+            --student-border:#fbcfe8;
+            --student-accent:#db2777;
+            --student-accent-2:#7c3aed;
+            --avatar-bg:linear-gradient(135deg,#fce7f3,#ede9fe);
+            background:
+                radial-gradient(circle at top left, rgba(219,39,119,.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(124,58,237,.13), transparent 32%),
+                linear-gradient(135deg,#fff7fb,#f3f7ff 45%,#f8fafc);
+        }
+
+        body.theme-boy{
+            --hero-main:linear-gradient(135deg,#1e40af,#2563eb,#0891b2);
+            --hero-shadow:rgba(37,99,235,.24);
+            --student-soft:linear-gradient(135deg,#eff6ff,#ecfeff 58%,#ffffff);
+            --student-border:#bfdbfe;
+            --student-accent:#2563eb;
+            --student-accent-2:#0891b2;
+            --avatar-bg:linear-gradient(135deg,#dbeafe,#cffafe);
+        }
+
         .page{
-            max-width:1320px;
+            max-width:1420px;
             margin:0 auto;
             padding:24px;
         }
@@ -43,7 +79,7 @@
         .topbar{
             background:rgba(255,255,255,.94);
             backdrop-filter:blur(16px);
-            border:1px solid rgba(226,232,240,.9);
+            border:1px solid rgba(226,232,240,.92);
             border-radius:24px;
             padding:18px 20px;
             display:flex;
@@ -58,32 +94,36 @@
             display:flex;
             align-items:center;
             gap:14px;
+            min-width:0;
         }
 
         .brand-logo{
-            width:64px;
-            height:64px;
-            border-radius:18px;
-            background:white;
-            border:1px solid var(--border);
+            width:98px;
+            height:66px;
+            border-radius:20px;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            border:1px solid rgba(255,255,255,.28);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:8px;
-            box-shadow:0 10px 24px rgba(15,23,42,.08);
+            padding:6px;
+            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            flex-shrink:0;
         }
 
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
+            transform:scale(1.12);
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
         }
 
         .brand-title{
             margin:0;
             font-weight:950;
             letter-spacing:-.04em;
-            font-size:1.35rem;
+            font-size:1.42rem;
             color:#0f172a;
         }
 
@@ -99,59 +139,83 @@
             flex-wrap:wrap;
             gap:10px;
             justify-content:flex-end;
+            align-items:center;
         }
 
-        .btn-soft{
+        .teacher-chip{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 12px;
+            border:1px solid var(--border);
+            border-radius:999px;
+            background:#fff;
+            box-shadow:0 10px 22px rgba(15,23,42,.05);
+            color:#0f172a;
+            font-weight:850;
+            max-width:300px;
+        }
+
+        .teacher-icon{
+            width:34px;
+            height:34px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#dbeafe,#eef2ff);
+            color:#2563eb;
+            flex-shrink:0;
+            font-size:1.05rem;
+        }
+
+        .teacher-name{
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:.9rem;
+        }
+
+        .btn-soft,
+        .btn-main{
             border-radius:999px;
             padding:.72rem 1rem;
             font-weight:850;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s ease;
+            white-space:nowrap;
+        }
+
+        .btn-soft{
             border:1px solid var(--border);
             background:white;
             color:#334155;
-            text-decoration:none;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            transition:.18s ease;
         }
 
-        .btn-soft:hover{
+        .btn-soft:hover,
+        .btn-main:hover{
             transform:translateY(-1px);
-            color:#0f172a;
-            background:#f8fafc;
-            box-shadow:0 12px 25px rgba(15,23,42,.09);
+            box-shadow:0 12px 25px rgba(15,23,42,.11);
         }
 
         .btn-main{
-            border-radius:999px;
-            padding:.84rem 1.16rem;
-            font-weight:950;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            text-decoration:none;
             border:none;
-            transition:.18s ease;
-        }
-
-        .btn-main:hover{
-            transform:translateY(-1px);
-            box-shadow:0 14px 28px rgba(15,23,42,.16);
-        }
-
-        .btn-blue{
             background:linear-gradient(135deg,#2563eb,#0891b2);
             color:white;
+            padding:.84rem 1.12rem;
+            font-weight:950;
         }
 
         .hero{
-            background:linear-gradient(135deg,#2563eb,#7c3aed,#0891b2);
+            background:var(--hero-main);
             color:white;
             border-radius:30px;
             padding:26px;
-            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            box-shadow:0 24px 60px var(--hero-shadow);
             margin-bottom:22px;
             position:relative;
             overflow:hidden;
@@ -160,12 +224,12 @@
         .hero:after{
             content:"";
             position:absolute;
-            width:270px;
-            height:270px;
+            width:280px;
+            height:280px;
             border-radius:50%;
             background:rgba(255,255,255,.14);
-            right:-85px;
-            top:-95px;
+            right:-90px;
+            top:-105px;
         }
 
         .hero-content{
@@ -173,8 +237,40 @@
             z-index:1;
             display:grid;
             grid-template-columns:1fr auto;
-            gap:18px;
+            gap:20px;
             align-items:center;
+        }
+
+        .hero-student{
+            display:flex;
+            align-items:center;
+            gap:18px;
+            min-width:0;
+        }
+
+        .hero-photo{
+            width:102px;
+            height:102px;
+            border-radius:30px;
+            border:3px solid rgba(255,255,255,.55);
+            background:rgba(255,255,255,.18);
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 16px 32px rgba(0,0,0,.16);
+            flex-shrink:0;
+        }
+
+        .hero-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .hero-photo i{
+            font-size:2.85rem;
+            color:white;
         }
 
         .hero-kicker{
@@ -186,26 +282,27 @@
             border-radius:999px;
             padding:.45rem .8rem;
             font-size:.78rem;
-            font-weight:900;
-            margin-bottom:12px;
+            font-weight:950;
+            margin-bottom:10px;
         }
 
         .hero h1{
             margin:0;
-            font-size:2rem;
+            font-size:2.08rem;
             font-weight:950;
             letter-spacing:-.05em;
+            text-shadow:0 8px 18px rgba(0,0,0,.12);
         }
 
         .hero p{
             margin:8px 0 0;
-            max-width:820px;
-            font-weight:600;
-            opacity:.94;
+            max-width:850px;
+            font-weight:650;
+            opacity:.95;
         }
 
         .hero-info{
-            min-width:270px;
+            min-width:260px;
             background:rgba(255,255,255,.18);
             border:1px solid rgba(255,255,255,.28);
             border-radius:22px;
@@ -223,23 +320,18 @@
         }
 
         .hero-value{
-            font-size:1.12rem;
+            font-size:1.14rem;
             font-weight:950;
         }
 
-        .layout{
-            display:grid;
-            grid-template-columns:.82fr 1.18fr;
-            gap:20px;
-            align-items:start;
-        }
-
         .panel{
-            background:rgba(255,255,255,.95);
+            background:rgba(255,255,255,.96);
             border:1px solid var(--border);
             border-radius:26px;
             box-shadow:0 16px 38px rgba(15,23,42,.08);
             overflow:hidden;
+            min-width:0;
+            margin-bottom:22px;
         }
 
         .panel-header{
@@ -255,7 +347,7 @@
 
         .panel-title{
             margin:0;
-            font-size:1.08rem;
+            font-size:1.1rem;
             font-weight:950;
             letter-spacing:-.03em;
             color:#0f172a;
@@ -264,72 +356,97 @@
             gap:8px;
         }
 
-        .panel-body{
-            padding:20px;
+        .panel-body{padding:20px;}
+
+        .student-horizontal{
+            display:grid;
+            grid-template-columns:1.4fr repeat(4,minmax(0,1fr));
+            gap:12px;
+            align-items:stretch;
         }
 
-        .alert-custom{
-            border:none;
-            border-radius:20px;
-            padding:14px 16px;
-            box-shadow:0 12px 26px rgba(15,23,42,.08);
-            font-weight:650;
-        }
-
-        .student-card{
-            background:linear-gradient(135deg,#eff6ff,#f5f3ff);
-            border:1px solid #bfdbfe;
-            border-radius:24px;
-            padding:18px;
-            margin-bottom:16px;
-        }
-
-        .student-top{
+        .student-main{
+            background:var(--student-soft);
+            border:1px solid var(--student-border);
+            border-radius:22px;
+            padding:16px;
             display:flex;
+            align-items:center;
             gap:14px;
-            align-items:flex-start;
+            min-width:0;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .student-main:after{
+            content:"";
+            position:absolute;
+            width:110px;
+            height:110px;
+            border-radius:50%;
+            background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,0));
+            right:-34px;
+            top:-42px;
         }
 
         .student-avatar{
-            width:66px;
-            height:66px;
-            border-radius:22px;
-            background:linear-gradient(135deg,#dbeafe,#ede9fe);
-            color:#2563eb;
+            width:84px;
+            height:84px;
+            border-radius:24px;
+            background:var(--avatar-bg);
+            color:var(--student-accent);
             display:flex;
             align-items:center;
             justify-content:center;
-            font-size:1.9rem;
+            font-size:2rem;
             flex-shrink:0;
+            overflow:hidden;
+            border:3px solid rgba(255,255,255,.78);
+            box-shadow:0 12px 26px rgba(15,23,42,.10);
+            position:relative;
+            z-index:1;
+        }
+
+        .student-avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .student-text{
+            position:relative;
+            z-index:1;
+            min-width:0;
         }
 
         .student-name{
             font-weight:950;
-            font-size:1.22rem;
-            color:#0f172a;
-            letter-spacing:-.03em;
+            font-size:1.18rem;
+            letter-spacing:-.04em;
             margin-bottom:4px;
+            background:linear-gradient(135deg,var(--student-accent),var(--student-accent-2));
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+            overflow-wrap:anywhere;
         }
 
         .student-meta{
             color:#475569;
-            font-size:.9rem;
+            font-size:.88rem;
             font-weight:700;
             line-height:1.45;
         }
 
-        .info-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-            margin-top:16px;
-        }
-
         .info-item{
-            background:white;
+            background:#fff;
             border:1px solid rgba(148,163,184,.28);
-            border-radius:16px;
-            padding:12px;
+            border-radius:20px;
+            padding:14px;
+            min-width:0;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
         }
 
         .info-label{
@@ -338,12 +455,91 @@
             text-transform:uppercase;
             letter-spacing:.06em;
             font-weight:950;
-            margin-bottom:4px;
+            margin-bottom:5px;
         }
 
         .info-value{
-            font-weight:900;
+            font-weight:950;
             color:#0f172a;
+            overflow-wrap:anywhere;
+        }
+
+        .quick-summary{
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:12px;
+        }
+
+        .summary-card{
+            background:white;
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:15px;
+            display:flex;
+            align-items:center;
+            gap:14px;
+            box-shadow:0 10px 24px rgba(15,23,42,.05);
+            min-width:0;
+        }
+
+        .summary-icon{
+            width:46px;
+            height:46px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.25rem;
+            flex-shrink:0;
+        }
+
+        .icon-blue{background:#dbeafe;color:#1d4ed8;}
+        .icon-green{background:#dcfce7;color:#15803d;}
+        .icon-yellow{background:#fef3c7;color:#b45309;}
+        .icon-purple{background:#ede9fe;color:#6d28d9;}
+
+        .summary-number{
+            font-size:1.55rem;
+            font-weight:950;
+            letter-spacing:-.04em;
+            line-height:1;
+            color:#0f172a;
+        }
+
+        .summary-label{
+            color:#64748b;
+            font-weight:800;
+            font-size:.82rem;
+            margin-top:4px;
+        }
+
+        .notice-row{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+            margin-top:16px;
+        }
+
+        .help-card,
+        .readonly-card{
+            border-radius:20px;
+            padding:14px 16px;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .help-card{
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+        }
+
+        .readonly-card{
+            background:#f8fafc;
+            border:1px solid #cbd5e1;
+            border-left:6px solid #64748b;
+            color:#334155;
         }
 
         .badge-soft{
@@ -363,81 +559,15 @@
         .badge-gray{background:#e2e8f0;color:#334155;}
         .badge-purple{background:#ede9fe;color:#5b21b6;}
         .badge-red{background:#fee2e2;color:#991b1b;}
-
-        .help-card{
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-left:6px solid #2563eb;
-            color:#1e3a8a;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .readonly-card{
-            background:#f8fafc;
-            border:1px solid #cbd5e1;
-            border-left:6px solid #64748b;
-            color:#334155;
-            border-radius:20px;
-            padding:15px 16px;
-            font-weight:650;
-            margin-bottom:16px;
-            line-height:1.45;
-        }
-
-        .summary-grid{
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:12px;
-            margin-bottom:16px;
-        }
-
-        .summary-card{
-            background:white;
-            border:1px solid var(--border);
-            border-radius:20px;
-            padding:15px;
-            box-shadow:0 10px 24px rgba(15,23,42,.05);
-        }
-
-        .summary-icon{
-            width:42px;
-            height:42px;
-            border-radius:15px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:1.25rem;
-            margin-bottom:10px;
-        }
-
-        .icon-blue{background:#dbeafe;color:#1d4ed8;}
-        .icon-green{background:#dcfce7;color:#15803d;}
-        .icon-yellow{background:#fef3c7;color:#b45309;}
-        .icon-purple{background:#ede9fe;color:#6d28d9;}
-
-        .summary-number{
-            font-size:1.55rem;
-            font-weight:950;
-            letter-spacing:-.04em;
-            line-height:1;
-        }
-
-        .summary-label{
-            color:#64748b;
-            font-weight:800;
-            font-size:.82rem;
-            margin-top:4px;
-        }
+        .badge-pink{background:#fce7f3;color:#9d174d;}
+        .badge-orange{background:#ffedd5;color:#9a3412;}
 
         .tools-row{
             display:grid;
             grid-template-columns:1fr auto;
             gap:12px;
             margin-bottom:16px;
+            align-items:center;
         }
 
         .search-box{
@@ -466,6 +596,11 @@
             border-color:#93c5fd;
             box-shadow:0 0 0 4px rgba(59,130,246,.12);
             background:white;
+        }
+
+        body.theme-girl .search-input:focus{
+            border-color:#f9a8d4;
+            box-shadow:0 0 0 4px rgba(219,39,119,.12);
         }
 
         .filter-pills{
@@ -503,7 +638,7 @@
             background:white;
             border:1px solid var(--border);
             border-radius:22px;
-            padding:16px;
+            padding:16px 16px 16px 20px;
             box-shadow:0 10px 26px rgba(15,23,42,.05);
             position:relative;
             overflow:hidden;
@@ -569,9 +704,9 @@
         }
 
         .step-value{
-            font-weight:900;
+            font-weight:950;
             color:#0f172a;
-            font-size:.9rem;
+            font-size:.92rem;
         }
 
         .step-value.ok{color:#166534;}
@@ -655,9 +790,25 @@
             font-weight:650;
         }
 
-        @media(max-width:1100px){
-            .layout{
-                grid-template-columns:1fr;
+        .alert-custom{
+            border:none;
+            border-radius:20px;
+            padding:14px 16px;
+            box-shadow:0 12px 26px rgba(15,23,42,.08);
+            font-weight:650;
+        }
+
+        @media(max-width:1180px){
+            .student-horizontal{
+                grid-template-columns:1fr 1fr;
+            }
+
+            .student-main{
+                grid-column:1 / -1;
+            }
+
+            .quick-summary{
+                grid-template-columns:repeat(2,minmax(0,1fr));
             }
 
             .hero-content{
@@ -666,10 +817,6 @@
 
             .hero-info{
                 min-width:0;
-            }
-
-            .record-grid{
-                grid-template-columns:repeat(2,minmax(0,1fr));
             }
 
             .tools-row{
@@ -681,7 +828,7 @@
             }
         }
 
-        @media(max-width:720px){
+        @media(max-width:760px){
             .page{
                 padding:14px;
             }
@@ -693,6 +840,7 @@
             }
 
             .top-actions,
+            .teacher-chip,
             .btn-soft,
             .btn-main{
                 width:100%;
@@ -704,18 +852,25 @@
                 border-radius:22px;
             }
 
+            .hero-student{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+
             .hero h1{
                 font-size:1.55rem;
             }
 
-            .info-grid,
-            .summary-grid,
-            .record-grid{
+            .student-horizontal,
+            .quick-summary,
+            .record-grid,
+            .notice-row{
                 grid-template-columns:1fr;
             }
 
-            .student-top{
+            .student-main{
                 flex-direction:column;
+                align-items:flex-start;
             }
 
             .record-top{
@@ -730,7 +885,9 @@
     </style>
 </head>
 
-<body>
+{% with sexo=alumno.sexo_menor|default:'' %}
+<body class="{% if sexo == 'F' or sexo == 'FEMENINO' %}theme-girl{% elif sexo == 'M' or sexo == 'MASCULINO' %}theme-boy{% else %}theme-neutral{% endif %}">
+{% endwith %}
 <div class="page">
 
     <header class="topbar">
@@ -747,19 +904,15 @@
         </div>
 
         <div class="top-actions">
-            <a href="{% url 'dashboard_maestra' %}" class="btn-soft">
-                <i class="bi bi-house-door-fill"></i>
-                Panel maestra
-            </a>
+            <div class="teacher-chip" title="Maestra">
+                <span class="teacher-icon"><i class="bi bi-person-workspace"></i></span>
+                <span class="teacher-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+            </div>
 
-            {% if registros %}
-                {% with ultimo=registros.0 %}
-                    <a href="{% url 'lista_alumnos_dia_maestra' ultimo.dia_operativo.id %}" class="btn-soft">
-                        <i class="bi bi-arrow-left-circle-fill"></i>
-                        Volver al día
-                    </a>
-                {% endwith %}
-            {% endif %}
+            <a href="{% url 'dashboard_maestra' %}#alumnos-dia" class="btn-soft">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
+            </a>
         </div>
     </header>
 
@@ -775,18 +928,28 @@
 
     <section class="hero">
         <div class="hero-content">
-            <div>
-                <div class="hero-kicker">
-                    <i class="bi bi-clock-history"></i>
-                    Historial diario
+            <div class="hero-student">
+                <div class="hero-photo">
+                    {% if alumno.doc_menor_fotos %}
+                        <img src="{{ alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                    {% else %}
+                        <i class="bi bi-person-heart"></i>
+                    {% endif %}
                 </div>
 
-                <h1>{{ alumno.solicitud_ingreso.nombre_menor_completo }}</h1>
+                <div>
+                    <div class="hero-kicker">
+                        <i class="bi bi-clock-history"></i>
+                        Historial diario
+                    </div>
 
-                <p>
-                    Aquí puedes consultar el historial de los días en que el menor tuvo operación registrada:
-                    entrada, bitácora en casa, bitácora durante estancia y salida. Los días cerrados quedan solo en consulta.
-                </p>
+                    <h1>{{ alumno.solicitud_ingreso.nombre_menor_completo }}</h1>
+
+                    <p>
+                        Consulta los días con operación registrada: entrada, bitácora en casa,
+                        bitácora durante estancia y salida. Los días cerrados quedan únicamente como consulta.
+                    </p>
+                </div>
             </div>
 
             <div class="hero-info">
@@ -805,356 +968,358 @@
         </div>
     </section>
 
-    <div class="layout">
+    <section class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <i class="bi bi-person-heart"></i>
+                Datos del menor
+            </h2>
 
-        <aside>
-            <section class="panel mb-4">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-person-heart"></i>
-                        Datos del menor
-                    </h2>
-                </div>
+            {% with sexo=alumno.sexo_menor|default:'' %}
+                {% if sexo == "F" or sexo == "FEMENINO" %}
+                    <span class="badge-soft badge-pink"><i class="bi bi-gender-female"></i> Niña</span>
+                {% elif sexo == "M" or sexo == "MASCULINO" %}
+                    <span class="badge-soft badge-blue"><i class="bi bi-gender-male"></i> Niño</span>
+                {% else %}
+                    <span class="badge-soft badge-gray"><i class="bi bi-person"></i> Menor</span>
+                {% endif %}
+            {% endwith %}
+        </div>
 
-                <div class="panel-body">
-                    <div class="student-card">
-                        <div class="student-top">
-                            <div class="student-avatar">
-                                <i class="bi bi-person-heart"></i>
-                            </div>
-                            <div>
-                                <div class="student-name">
-                                    {{ alumno.solicitud_ingreso.nombre_menor_completo }}
-                                </div>
-                                <div class="student-meta">
-                                    {% if alumno.sala_semestre_asignada and alumno.sala_semestre_asignada.sala %}
-                                        Sala actual: <strong>{{ alumno.sala_semestre_asignada.sala.nombre }}</strong><br>
-                                        Tipo: <strong>{{ alumno.sala_semestre_asignada.sala.get_tipo_sala_display }}</strong>
-                                    {% else %}
-                                        Sala actual no asignada
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Estado inscripción</div>
-                                <div class="info-value">{{ alumno.estado }}</div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Semestre</div>
-                                <div class="info-value">
-                                    {% if alumno.semestre %}
-                                        {{ alumno.semestre.nombre }}
-                                    {% else %}
-                                        Sin semestre
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Registros diarios</div>
-                                <div class="info-value">{{ registros.count }}</div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Modo</div>
-                                <div class="info-value">Consulta histórica</div>
-                            </div>
-                        </div>
+        <div class="panel-body">
+            <div class="student-horizontal">
+                <div class="student-main">
+                    <div class="student-avatar">
+                        {% if alumno.doc_menor_fotos %}
+                            <img src="{{ alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                        {% else %}
+                            <i class="bi bi-person-heart"></i>
+                        {% endif %}
                     </div>
 
-                    <div class="help-card">
-                        <i class="bi bi-info-circle-fill me-1"></i>
-                        Cada registro corresponde a un día operativo. Si el día ya fue cerrado,
-                        la información debe permanecer como solo consulta.
-                    </div>
-
-                    <div class="readonly-card">
-                        <i class="bi bi-lock-fill me-1"></i>
-                        El historial sirve para revisar lo capturado en días anteriores.
-                        No debe usarse para modificar días cerrados.
-                    </div>
-                </div>
-            </section>
-
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-bar-chart-fill"></i>
-                        Resumen
-                    </h2>
-                </div>
-
-                <div class="panel-body">
-                    <div class="summary-grid">
-                        <div class="summary-card">
-                            <div class="summary-icon icon-blue">
-                                <i class="bi bi-calendar-check-fill"></i>
-                            </div>
-                            <div class="summary-number">{{ registros.count }}</div>
-                            <div class="summary-label">Días registrados</div>
+                    <div class="student-text">
+                        <div class="student-name">
+                            {{ alumno.solicitud_ingreso.nombre_menor_completo }}
                         </div>
-
-                        <div class="summary-card">
-                            <div class="summary-icon icon-purple">
-                                <i class="bi bi-journal-check"></i>
-                            </div>
-                            <div class="summary-number">
-                                {% with total=0 %}
-                                    {{ total }}
-                                {% endwith %}
-                            </div>
-                            <div class="summary-label">Completos</div>
-                        </div>
-                    </div>
-
-                    <div class="summary-grid">
-                        <div class="summary-card">
-                            <div class="summary-icon icon-green">
-                                <i class="bi bi-box-arrow-right"></i>
-                            </div>
-                            <div class="summary-number">
-                                {% with total=0 %}
-                                    {{ total }}
-                                {% endwith %}
-                            </div>
-                            <div class="summary-label">Con salida</div>
-                        </div>
-
-                        <div class="summary-card">
-                            <div class="summary-icon icon-yellow">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                            </div>
-                            <div class="summary-number">
-                                {% with total=0 %}
-                                    {{ total }}
-                                {% endwith %}
-                            </div>
-                            <div class="summary-label">Pendientes</div>
+                        <div class="student-meta">
+                            {% if alumno.sala_semestre_asignada and alumno.sala_semestre_asignada.sala %}
+                                Sala actual: <strong>{{ alumno.sala_semestre_asignada.sala.nombre }}</strong><br>
+                                Tipo: <strong>{{ alumno.sala_semestre_asignada.sala.get_tipo_sala_display }}</strong>
+                            {% else %}
+                                Sala actual no asignada
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-            </section>
-        </aside>
 
-        <main>
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i class="bi bi-list-check"></i>
-                        Registros diarios
-                    </h2>
-
-                    <span class="badge-soft badge-blue">
-                        <i class="bi bi-clock-history"></i>
-                        Historial
-                    </span>
+                <div class="info-item">
+                    <div class="info-label">Estado inscripción</div>
+                    <div class="info-value">{{ alumno.estado }}</div>
                 </div>
 
-                <div class="panel-body">
-                    <div class="tools-row">
-                        <div class="search-box">
-                            <i class="bi bi-search"></i>
-                            <input type="text" id="buscarRegistro" class="search-input" placeholder="Buscar por fecha, sala o estado...">
-                        </div>
+                <div class="info-item">
+                    <div class="info-label">Semestre</div>
+                    <div class="info-value">
+                        {% if alumno.semestre %}
+                            {{ alumno.semestre.nombre }}
+                        {% else %}
+                            Sin semestre
+                        {% endif %}
+                    </div>
+                </div>
 
-                        <div class="filter-pills">
-                            <button type="button" class="filter-pill active" data-filter="TODOS">Todos</button>
-                            <button type="button" class="filter-pill" data-filter="COMPLETO">Completos</button>
-                            <button type="button" class="filter-pill" data-filter="ABIERTO">Abiertos</button>
-                            <button type="button" class="filter-pill" data-filter="CERRADO">Días cerrados</button>
-                        </div>
+                <div class="info-item">
+                    <div class="info-label">Registros diarios</div>
+                    <div class="info-value">{{ registros.count }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Modo</div>
+                    <div class="info-value">Consulta histórica</div>
+                </div>
+            </div>
+
+            <div class="notice-row">
+                <div class="help-card">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    Cada registro corresponde a un día operativo. Si el día ya fue cerrado,
+                    la información debe permanecer como solo consulta.
+                </div>
+
+                <div class="readonly-card">
+                    <i class="bi bi-lock-fill me-1"></i>
+                    El historial sirve para revisar lo capturado en días anteriores.
+                    No debe usarse para modificar días cerrados.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <i class="bi bi-bar-chart-fill"></i>
+                Resumen general
+            </h2>
+
+            <span class="badge-soft badge-blue">
+                <i class="bi bi-graph-up-arrow"></i>
+                Indicadores históricos
+            </span>
+        </div>
+
+        <div class="panel-body">
+            <div class="quick-summary">
+                <div class="summary-card">
+                    <div class="summary-icon icon-blue">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <div>
+                        <div class="summary-number" id="resumenDias">{{ registros.count }}</div>
+                        <div class="summary-label">Días registrados</div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon icon-purple">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                    <div>
+                        <div class="summary-number" id="resumenCompletos">0</div>
+                        <div class="summary-label">Completos</div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon icon-green">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </div>
+                    <div>
+                        <div class="summary-number" id="resumenSalidas">0</div>
+                        <div class="summary-label">Con salida</div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon icon-yellow">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <div class="summary-number" id="resumenPendientes">0</div>
+                        <div class="summary-label">Pendientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="bi bi-list-check"></i>
+                    Registros diarios
+                </h2>
+
+                <span class="badge-soft badge-blue">
+                    <i class="bi bi-clock-history"></i>
+                    Historial
+                </span>
+            </div>
+
+            <div class="panel-body">
+                <div class="tools-row">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="buscarRegistro" class="search-input" placeholder="Buscar por fecha, sala o estado...">
                     </div>
 
-                    {% if registros %}
-                        <div class="timeline" id="timelineRegistros">
-                            {% for registro in registros %}
-                                <article
-                                    class="record-card
-                                        {% if registro.estado == 'COMPLETO' %}complete
-                                        {% elif registro.dia_operativo.estado == 'ABIERTO' %}open
-                                        {% elif registro.estado == 'SALIDA_POR_INCIDENCIA' or registro.estado == 'SALIDA_ANTICIPADA' %}special
-                                        {% else %}pending{% endif %}
-                                    "
-                                    data-texto="
-                                        {{ registro.dia_operativo.fecha|date:'d/m/Y' }}
-                                        {{ registro.estado }}
-                                        {{ registro.get_estado_display }}
-                                        {{ registro.sala_semestre.sala.nombre }}
-                                        {{ registro.dia_operativo.estado }}
-                                    "
-                                    data-estado="
-                                        {% if registro.estado == 'COMPLETO' %}
-                                            COMPLETO
-                                        {% elif registro.dia_operativo.estado == 'ABIERTO' %}
-                                            ABIERTO
-                                        {% elif registro.dia_operativo.estado == 'CERRADO' %}
-                                            CERRADO
+                    <div class="filter-pills">
+                        <button type="button" class="filter-pill active" data-filter="TODOS">Todos</button>
+                        <button type="button" class="filter-pill" data-filter="COMPLETO">Completos</button>
+                        <button type="button" class="filter-pill" data-filter="ABIERTO">Abiertos</button>
+                        <button type="button" class="filter-pill" data-filter="CERRADO">Días cerrados</button>
+                    </div>
+                </div>
+
+                {% if registros %}
+                    <div class="timeline" id="timelineRegistros">
+                        {% for registro in registros %}
+                            <article
+                                class="record-card
+                                    {% if registro.estado == 'COMPLETO' %}complete
+                                    {% elif registro.dia_operativo.estado == 'ABIERTO' %}open
+                                    {% elif registro.estado == 'SALIDA_POR_INCIDENCIA' or registro.estado == 'SALIDA_ANTICIPADA' %}special
+                                    {% else %}pending{% endif %}
+                                "
+                                data-texto="
+                                    {{ registro.dia_operativo.fecha|date:'d/m/Y' }}
+                                    {{ registro.estado }}
+                                    {{ registro.get_estado_display }}
+                                    {{ registro.sala_semestre.sala.nombre }}
+                                    {{ registro.dia_operativo.estado }}
+                                "
+                                data-estado="{% if registro.estado == 'COMPLETO' %}COMPLETO{% elif registro.dia_operativo.estado == 'ABIERTO' %}ABIERTO{% elif registro.dia_operativo.estado == 'CERRADO' %}CERRADO{% else %}TODOS{% endif %}"
+                                data-completo="{% if registro.estado == 'COMPLETO' %}1{% else %}0{% endif %}"
+                                data-salida="{% if registro.salida_en %}1{% else %}0{% endif %}"
+                                data-pendiente="{% if registro.estado != 'COMPLETO' %}1{% else %}0{% endif %}"
+                            >
+                                <div class="record-top">
+                                    <div>
+                                        <div class="record-date">
+                                            {{ registro.dia_operativo.fecha|date:"d/m/Y" }}
+                                        </div>
+                                        <div class="record-room">
+                                            {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                                                {{ registro.sala_semestre.sala.nombre }}
+                                                · {{ registro.sala_semestre.sala.get_tipo_sala_display }}
+                                            {% else %}
+                                                Sin sala registrada
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        {% if registro.dia_operativo.estado == "CERRADO" %}
+                                            <span class="badge-soft badge-gray">
+                                                <i class="bi bi-lock-fill"></i>
+                                                Día cerrado
+                                            </span>
+                                        {% elif registro.dia_operativo.estado == "ABIERTO" %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-unlock-fill"></i>
+                                                Día abierto
+                                            </span>
                                         {% else %}
-                                            TODOS
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-clock-history"></i>
+                                                Programado
+                                            </span>
                                         {% endif %}
-                                    "
-                                >
-                                    <div class="record-top">
-                                        <div>
-                                            <div class="record-date">
-                                                {{ registro.dia_operativo.fecha|date:"d/m/Y" }}
-                                            </div>
-                                            <div class="record-room">
-                                                {% if registro.sala_semestre and registro.sala_semestre.sala %}
-                                                    {{ registro.sala_semestre.sala.nombre }}
-                                                    · {{ registro.sala_semestre.sala.get_tipo_sala_display }}
-                                                {% else %}
-                                                    Sin sala registrada
-                                                {% endif %}
-                                            </div>
-                                        </div>
 
-                                        <div class="d-flex gap-2 flex-wrap">
-                                            {% if registro.dia_operativo.estado == "CERRADO" %}
-                                                <span class="badge-soft badge-gray">
-                                                    <i class="bi bi-lock-fill"></i>
-                                                    Día cerrado
-                                                </span>
-                                            {% elif registro.dia_operativo.estado == "ABIERTO" %}
-                                                <span class="badge-soft badge-green">
-                                                    <i class="bi bi-unlock-fill"></i>
-                                                    Día abierto
-                                                </span>
-                                            {% else %}
-                                                <span class="badge-soft badge-yellow">
-                                                    <i class="bi bi-clock-history"></i>
-                                                    Programado
-                                                </span>
-                                            {% endif %}
+                                        {% if registro.estado == "COMPLETO" %}
+                                            <span class="badge-soft badge-green">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Completo
+                                            </span>
+                                        {% elif registro.estado == "SALIDA_POR_INCIDENCIA" %}
+                                            <span class="badge-soft badge-red">
+                                                <i class="bi bi-exclamation-octagon-fill"></i>
+                                                Salida especial
+                                            </span>
+                                        {% elif registro.estado == "SALIDA_ANTICIPADA" %}
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                                Salida anticipada
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-soft badge-blue">
+                                                {{ registro.get_estado_display }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
 
-                                            {% if registro.estado == "COMPLETO" %}
-                                                <span class="badge-soft badge-green">
-                                                    <i class="bi bi-check-circle-fill"></i>
-                                                    Completo
-                                                </span>
-                                            {% elif registro.estado == "SALIDA_POR_INCIDENCIA" %}
-                                                <span class="badge-soft badge-red">
-                                                    <i class="bi bi-exclamation-octagon-fill"></i>
-                                                    Salida especial
-                                                </span>
-                                            {% elif registro.estado == "SALIDA_ANTICIPADA" %}
-                                                <span class="badge-soft badge-yellow">
-                                                    <i class="bi bi-exclamation-triangle-fill"></i>
-                                                    Salida anticipada
-                                                </span>
+                                <div class="record-grid">
+                                    <div class="record-step">
+                                        <div class="step-label">Entrada</div>
+                                        <div class="step-value {% if registro.entrada_en %}ok{% else %}missing{% endif %}">
+                                            {% if registro.entrada_en %}
+                                                {{ registro.entrada_en|date:"H:i" }}
                                             {% else %}
-                                                <span class="badge-soft badge-blue">
-                                                    {{ registro.get_estado_display }}
-                                                </span>
+                                                Sin entrada
                                             {% endif %}
                                         </div>
                                     </div>
 
-                                    <div class="record-grid">
-                                        <div class="record-step">
-                                            <div class="step-label">Entrada</div>
-                                            <div class="step-value {% if registro.entrada_en %}ok{% else %}missing{% endif %}">
-                                                {% if registro.entrada_en %}
-                                                    {{ registro.entrada_en|date:"H:i" }}
-                                                {% else %}
-                                                    Sin entrada
-                                                {% endif %}
-                                            </div>
-                                        </div>
-
-                                        <div class="record-step">
-                                            <div class="step-label">En casa</div>
-                                            <div class="step-value {% if registro.tiene_bitacora_entrada_completa %}ok{% else %}pending{% endif %}">
-                                                {% if registro.tiene_bitacora_entrada_completa %}
-                                                    Completa
-                                                {% elif registro.entrada_en %}
-                                                    Pendiente
-                                                {% else %}
-                                                    No aplica
-                                                {% endif %}
-                                            </div>
-                                        </div>
-
-                                        <div class="record-step">
-                                            <div class="step-label">En estancia</div>
-                                            <div class="step-value {% if registro.tiene_bitacora_estancia_completa %}ok{% else %}pending{% endif %}">
-                                                {% if registro.tiene_bitacora_estancia_completa %}
-                                                    Completa
-                                                {% elif registro.entrada_en %}
-                                                    Pendiente
-                                                {% else %}
-                                                    No aplica
-                                                {% endif %}
-                                            </div>
-                                        </div>
-
-                                        <div class="record-step">
-                                            <div class="step-label">Salida</div>
-                                            <div class="step-value {% if registro.salida_en %}ok{% else %}pending{% endif %}">
-                                                {% if registro.salida_en %}
-                                                    {{ registro.salida_en|date:"H:i" }}
-                                                {% elif registro.entrada_en %}
-                                                    Pendiente
-                                                {% else %}
-                                                    No aplica
-                                                {% endif %}
-                                            </div>
+                                    <div class="record-step">
+                                        <div class="step-label">En casa</div>
+                                        <div class="step-value {% if registro.tiene_bitacora_entrada_completa %}ok{% else %}pending{% endif %}">
+                                            {% if registro.tiene_bitacora_entrada_completa %}
+                                                Completa
+                                            {% elif registro.entrada_en %}
+                                                Pendiente
+                                            {% else %}
+                                                No aplica
+                                            {% endif %}
                                         </div>
                                     </div>
 
-                                    <div class="record-actions">
-                                        <a href="{% url 'lista_alumnos_dia_maestra' registro.dia_operativo.id %}" class="mini-btn primary">
-                                            <i class="bi bi-eye-fill"></i>
-                                            Ver día
+                                    <div class="record-step">
+                                        <div class="step-label">En estancia</div>
+                                        <div class="step-value {% if registro.tiene_bitacora_estancia_completa %}ok{% else %}pending{% endif %}">
+                                            {% if registro.tiene_bitacora_estancia_completa %}
+                                                Completa
+                                            {% elif registro.entrada_en %}
+                                                Pendiente
+                                            {% else %}
+                                                No aplica
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="record-step">
+                                        <div class="step-label">Salida</div>
+                                        <div class="step-value {% if registro.salida_en %}ok{% else %}pending{% endif %}">
+                                            {% if registro.salida_en %}
+                                                {{ registro.salida_en|date:"H:i" }}
+                                            {% elif registro.entrada_en %}
+                                                Pendiente
+                                            {% else %}
+                                                No aplica
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="record-actions">
+                                    <a href="{% url 'lista_alumnos_dia_maestra' registro.dia_operativo.id %}" class="mini-btn primary">
+                                        <i class="bi bi-eye-fill"></i>
+                                        Ver día
+                                    </a>
+
+                                    {% with tipo_pdf=registro.formulario_bitacora|default:"diaria" %}
+                                        <a href="{% url 'descargar_pdf_bitacora' registro.id tipo_pdf %}" class="mini-btn danger">
+                                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            Descargar PDF
+                                        </a>
+                                    {% endwith %}
+
+                                    {% if registro.entrada_en %}
+                                        <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}?modo=consulta&desde=historial" class="mini-btn">
+                                            <i class="bi bi-house-heart-fill"></i>
+                                            En casa
                                         </a>
 
-                                        {% with tipo_pdf=registro.formulario_bitacora|default:"diaria" %}
-                                            <a href="{% url 'descargar_pdf_bitacora' registro.id tipo_pdf %}" class="mini-btn danger">
-                                                <i class="bi bi-file-earmark-pdf-fill"></i>
-                                                Descargar PDF
-                                            </a>
-                                        {% endwith %}
+                                        <a href="{% url 'bitacora_estancia_maestra' registro.id %}?modo=consulta&desde=historial" class="mini-btn">
+                                            <i class="bi bi-journal-text"></i>
+                                            Estancia
+                                        </a>
 
-                                        {% if registro.entrada_en %}
-                                            <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}" class="mini-btn">
-                                                <i class="bi bi-house-heart-fill"></i>
-                                                En casa
+                                        {% if not registro.salida_en and registro.dia_operativo.estado == "ABIERTO" %}
+                                            <a href="{% url 'registrar_salida_alumno' registro.id %}" class="mini-btn warning">
+                                                <i class="bi bi-box-arrow-right"></i>
+                                                Registrar salida
                                             </a>
-
-                                            <a href="{% url 'bitacora_estancia_maestra' registro.id %}" class="mini-btn">
-                                                <i class="bi bi-journal-text"></i>
-                                                Estancia
-                                            </a>
-
-                                            {% if not registro.salida_en and registro.dia_operativo.estado == "ABIERTO" %}
-                                                <a href="{% url 'registrar_salida_alumno' registro.id %}" class="mini-btn warning">
-                                                    <i class="bi bi-box-arrow-right"></i>
-                                                    Registrar salida
-                                                </a>
-                                            {% endif %}
                                         {% endif %}
-                                    </div>
-                                </article>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <i class="bi bi-clock-history"></i>
-                            <h5>Sin historial diario</h5>
-                            <p>
-                                Todavía no existen registros diarios para este menor.
-                            </p>
-                        </div>
-                    {% endif %}
-                </div>
-            </section>
-        </main>
+                                    {% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-clock-history"></i>
+                        <h5>Sin historial diario</h5>
+                        <p>
+                            Todavía no existen registros diarios para este menor.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
 
-    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1180,6 +1345,23 @@
         });
     }
 
+    function actualizarResumen(){
+        const dias = tarjetas.length;
+        const completos = tarjetas.filter(card => card.dataset.completo === "1").length;
+        const salidas = tarjetas.filter(card => card.dataset.salida === "1").length;
+        const pendientes = tarjetas.filter(card => card.dataset.pendiente === "1").length;
+
+        const resumenDias = document.getElementById("resumenDias");
+        const resumenCompletos = document.getElementById("resumenCompletos");
+        const resumenSalidas = document.getElementById("resumenSalidas");
+        const resumenPendientes = document.getElementById("resumenPendientes");
+
+        if(resumenDias){ resumenDias.textContent = dias; }
+        if(resumenCompletos){ resumenCompletos.textContent = completos; }
+        if(resumenSalidas){ resumenSalidas.textContent = salidas; }
+        if(resumenPendientes){ resumenPendientes.textContent = pendientes; }
+    }
+
     if(inputBuscar){
         inputBuscar.addEventListener("input", aplicarFiltros);
     }
@@ -1192,6 +1374,8 @@
             aplicarFiltros();
         });
     });
+
+    actualizarResumen();
 </script>
 
 </body>

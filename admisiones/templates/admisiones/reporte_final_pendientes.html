@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,208 +10,1289 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f3f5f8;
-            font-family: 'Segoe UI', sans-serif;
+        :root {
+            --azul-unach: #1e3f91;
+            --azul-profundo: #06245f;
+            --azul-vivo: #1677ff;
+            --morado-ts: #7c3aed;
+            --morado-oscuro: #5b21b6;
+            --verde: #13a85b;
+            --amarillo: #f59e0b;
+            --rojo: #ef4444;
+            --texto: #08245c;
+            --muted: #64748b;
+            --borde: #dbe6f6;
+            --fondo: #f3f7fc;
+            --card: #ffffff;
         }
 
-        .navbar-ts {
-            background: #7c3aed;
-            padding: .75rem 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,.12);
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(circle at top right, rgba(124, 58, 237, .12), transparent 34%),
+                radial-gradient(circle at top left, rgba(22, 119, 255, .10), transparent 30%),
+                var(--fondo);
+            color: var(--texto);
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .topbar-ts {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, .84);
+            border-bottom: 1px solid rgba(219, 230, 246, .95);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
+        }
+
+        .topbar-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .logo-box {
+            width: 74px;
+            height: 58px;
+            flex: 0 0 auto;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--azul-unach), var(--azul-vivo));
+            box-shadow: 0 12px 26px rgba(22, 119, 255, .22);
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .18));
+        }
+
+        .brand-kicker {
+            font-size: .72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--morado-ts);
         }
 
         .brand-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: .5px;
-            line-height: 1.15;
+            margin: 0;
+            color: var(--azul-profundo);
+            font-weight: 950;
+            line-height: 1.05;
+            font-size: clamp(1.15rem, 2vw, 1.55rem);
         }
 
         .brand-subtitle {
-            color: rgba(255,255,255,.78);
-            font-size: .85rem;
+            margin-top: 4px;
+            color: #526b9e;
+            font-size: .92rem;
+            font-weight: 650;
         }
 
-        .container-panel {
-            max-width: 1200px;
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn-dashboard {
+            border: 1px solid rgba(6, 36, 95, .16);
+            background: #ffffff;
+            color: var(--azul-profundo);
+            border-radius: 14px;
+            padding: .72rem 1rem;
+            font-weight: 850;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, .06);
+            transition: .2s ease;
+        }
+
+        .btn-dashboard:hover {
+            transform: translateY(-1px);
+            background: #f8fbff;
+            color: var(--azul-vivo);
+            border-color: rgba(22, 119, 255, .35);
+        }
+
+        .user-chip {
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: .45rem .72rem .45rem .45rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(124, 58, 237, .10), rgba(22, 119, 255, .10));
+            border: 1px solid rgba(124, 58, 237, .14);
+            color: var(--azul-profundo);
+            font-weight: 850;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--morado-ts), var(--azul-vivo));
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(124, 58, 237, .22);
+        }
+
+        .page-shell {
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 22px 16px;
-            margin-top: 92px;
+            padding: 28px 22px 46px;
         }
 
-        .card-panel {
+        .hero-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 26px;
+            padding: 30px;
+            color: #fff;
+            background:
+                radial-gradient(circle at 90% 10%, rgba(255,255,255,.23), transparent 22%),
+                radial-gradient(circle at 78% 100%, rgba(255,255,255,.16), transparent 26%),
+                linear-gradient(135deg, var(--morado-oscuro), var(--morado-ts) 52%, var(--azul-vivo));
+            box-shadow: 0 24px 52px rgba(91, 33, 182, .22);
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -80px -120px auto;
+            width: 330px;
+            height: 330px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.14);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 26px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255,255,255,.24);
+            background: rgba(255,255,255,.14);
+            border-radius: 999px;
+            padding: .45rem .78rem;
+            font-size: .78rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            margin-bottom: 14px;
+        }
+
+        .hero-card h2 {
+            margin: 0;
+            font-size: clamp(1.7rem, 3vw, 2.55rem);
+            font-weight: 950;
+            letter-spacing: -.04em;
+        }
+
+        .hero-card p {
+            max-width: 760px;
+            margin: 10px 0 0;
+            color: rgba(255,255,255,.88);
+            font-size: 1.02rem;
+            font-weight: 600;
+            line-height: 1.55;
+        }
+
+        .hero-icon {
+            width: 98px;
+            height: 98px;
+            border-radius: 28px;
+            display: grid;
+            place-items: center;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.22);
+            font-size: 2.9rem;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+        }
+
+        .stats-grid {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--borde);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: 0 16px 34px rgba(15, 23, 42, .07);
+            min-height: 142px;
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--azul-vivo);
+        }
+
+        .stat-card.purple::before { background: var(--morado-ts); }
+        .stat-card.green::before { background: var(--verde); }
+        .stat-card.orange::before { background: var(--amarillo); }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,.08);
-            border: none;
+            display: grid;
+            place-items: center;
+            font-size: 1.35rem;
+            color: var(--azul-vivo);
+            background: rgba(22, 119, 255, .10);
+        }
+
+        .stat-card.purple .stat-icon {
+            color: var(--morado-ts);
+            background: rgba(124, 58, 237, .10);
+        }
+
+        .stat-card.green .stat-icon {
+            color: var(--verde);
+            background: rgba(19, 168, 91, .10);
+        }
+
+        .stat-card.orange .stat-icon {
+            color: var(--amarillo);
+            background: rgba(245, 158, 11, .12);
+        }
+
+        .stat-label {
+            color: #6680ad;
+            font-size: .76rem;
+            font-weight: 950;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .stat-number {
+            margin-top: 14px;
+            font-size: 2.15rem;
+            line-height: 1;
+            font-weight: 950;
+            color: var(--azul-profundo);
+            letter-spacing: -.04em;
+        }
+
+        .stat-hint {
+            margin-top: 8px;
+            color: #526b9e;
+            font-weight: 650;
+            font-size: .88rem;
+            line-height: 1.35;
+        }
+
+        .main-grid {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel-card {
+            background: var(--card);
+            border: 1px solid var(--borde);
+            border-radius: 24px;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, .07);
+            overflow: hidden;
+        }
+
+        .panel-head {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--borde);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: linear-gradient(180deg, #ffffff, #f9fbff);
+        }
+
+        .panel-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-title-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: rgba(124, 58, 237, .10);
+            color: var(--morado-ts);
+            font-size: 1.2rem;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-weight: 950;
+            color: var(--azul-profundo);
+            font-size: 1.2rem;
+        }
+
+        .panel-subtitle {
+            margin: 3px 0 0;
+            color: #6680ad;
+            font-weight: 650;
+            font-size: .9rem;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 260px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7c90b2;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: 1px solid var(--borde);
+            border-radius: 15px;
+            padding: .72rem .9rem .72rem 2.45rem;
+            color: var(--azul-profundo);
+            font-weight: 650;
+            outline: none;
             background: #fff;
         }
 
-        .table-card {
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
+        .search-box input:focus {
+            border-color: rgba(124, 58, 237, .45);
+            box-shadow: 0 0 0 .2rem rgba(124, 58, 237, .10);
         }
 
-        .btn-soft {
-            border-radius: 10px;
-            font-weight: 700;
-            padding: .5rem .9rem;
-        }
-
-        .badge-state {
+        .soft-chip {
             border-radius: 999px;
-            padding: .45rem .75rem;
-            font-weight: 700;
+            padding: .55rem .8rem;
+            background: rgba(22, 119, 255, .09);
+            color: var(--azul-vivo);
+            font-weight: 900;
+            font-size: .85rem;
+            border: 1px solid rgba(22, 119, 255, .14);
         }
-    </style>
+
+        .report-list {
+            padding: 16px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .report-card {
+            border: 1px solid var(--borde);
+            border-radius: 20px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 86px minmax(0, 1.3fr) minmax(0, 1fr) auto;
+            gap: 16px;
+            align-items: center;
+            background: #ffffff;
+            transition: .2s ease;
+        }
+
+        .report-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(124, 58, 237, .26);
+            box-shadow: 0 16px 32px rgba(15, 23, 42, .08);
+        }
+
+        .folio-badge {
+            width: 70px;
+            min-height: 70px;
+            border-radius: 20px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(124, 58, 237, .12), rgba(22, 119, 255, .12));
+            border: 1px solid rgba(124, 58, 237, .13);
+            color: var(--azul-profundo);
+            text-align: center;
+        }
+
+        .folio-badge small {
+            display: block;
+            font-size: .68rem;
+            font-weight: 950;
+            color: #6680ad;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+        }
+
+        .folio-badge strong {
+            font-size: 1.35rem;
+            font-weight: 950;
+        }
+
+        .person-title {
+            font-weight: 950;
+            color: var(--azul-profundo);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .person-meta {
+            color: #6680ad;
+            font-size: .87rem;
+            font-weight: 650;
+            line-height: 1.35;
+        }
+
+        .filter-stack {
+            display: grid;
+            gap: 8px;
+        }
+
+        .filter-pill {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            border-radius: 999px;
+            padding: .45rem .65rem;
+            background: #f7faff;
+            border: 1px solid #e4ecfa;
+            color: #526b9e;
+            font-weight: 800;
+            font-size: .82rem;
+        }
+
+        .filter-pill strong {
+            color: var(--verde);
+            font-weight: 950;
+        }
+
+        .state-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            width: max-content;
+            border-radius: 999px;
+            padding: .5rem .74rem;
+            background: rgba(245, 158, 11, .12);
+            color: #a16207;
+            font-size: .83rem;
+            font-weight: 950;
+        }
+
+        .btn-primary-soft {
+            border: 0;
+            border-radius: 15px;
+            padding: .82rem 1rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--morado-ts), var(--azul-vivo));
+            box-shadow: 0 12px 24px rgba(124, 58, 237, .22);
+            font-weight: 950;
+            white-space: nowrap;
+            transition: .2s ease;
+        }
+
+        .btn-primary-soft:hover {
+            transform: translateY(-1px);
+            color: #fff;
+            box-shadow: 0 16px 28px rgba(124, 58, 237, .30);
+        }
+
+        .side-card {
+            padding: 20px;
+        }
+
+        .workflow-title {
+            font-weight: 950;
+            color: var(--azul-profundo);
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .workflow-subtitle {
+            color: #6680ad;
+            margin: 4px 0 0;
+            font-weight: 650;
+            font-size: .88rem;
+        }
+
+        .step-list {
+            margin-top: 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .step-item {
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+        }
+
+        .step-number {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #f1f6ff;
+            color: var(--azul-vivo);
+            font-weight: 950;
+        }
+
+        .step-item strong {
+            display: block;
+            color: var(--azul-profundo);
+            font-size: .93rem;
+            line-height: 1.25;
+        }
+
+        .step-item span {
+            display: block;
+            margin-top: 2px;
+            color: #6680ad;
+            font-size: .84rem;
+            line-height: 1.35;
+            font-weight: 650;
+        }
+
+        .info-callout {
+            margin-top: 16px;
+            border-radius: 18px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(19, 168, 91, .10), rgba(22, 119, 255, .08));
+            border: 1px solid rgba(19, 168, 91, .16);
+        }
+
+        .info-callout strong {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #087443;
+            font-weight: 950;
+        }
+
+        .info-callout p {
+            margin: 6px 0 0;
+            color: #526b9e;
+            font-weight: 650;
+            font-size: .86rem;
+            line-height: 1.4;
+        }
+
+        .empty-state {
+            padding: 68px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 86px;
+            height: 86px;
+            margin: 0 auto 16px;
+            border-radius: 28px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(124, 58, 237, .10), rgba(22, 119, 255, .10));
+            color: var(--morado-ts);
+            font-size: 2.45rem;
+            border: 1px solid rgba(124, 58, 237, .12);
+        }
+
+        .empty-state h4 {
+            color: var(--azul-profundo);
+            font-weight: 950;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #6680ad;
+            font-weight: 650;
+            margin: 0 auto;
+            max-width: 520px;
+            line-height: 1.55;
+        }
+
+        .empty-actions {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-outline-soft {
+            border: 1px solid var(--borde);
+            color: var(--azul-profundo);
+            background: #fff;
+            border-radius: 14px;
+            padding: .7rem .9rem;
+            font-weight: 900;
+        }
+
+        .btn-outline-soft:hover {
+            color: var(--azul-vivo);
+            border-color: rgba(22, 119, 255, .34);
+            background: #f8fbff;
+        }
+
+        .mobile-table {
+            display: none;
+        }
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .topbar-inner,
+            .hero-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .top-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .hero-icon {
+                display: none;
+            }
+
+            .report-card {
+                grid-template-columns: 1fr;
+            }
+
+            .folio-badge {
+                width: 100%;
+                min-height: auto;
+                padding: 12px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .search-box {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .page-shell {
+                padding: 22px 14px 34px;
+            }
+
+            .topbar-inner {
+                padding: 14px;
+            }
+
+            .logo-box {
+                width: 62px;
+                height: 52px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-card {
+                padding: 22px;
+                border-radius: 22px;
+            }
+
+            .panel-head {
+                padding: 18px;
+            }
+        }
+
+
+    /* =========================================================
+       Cobertura temporal de Trabajo Social
+       Se muestra solo cuando views.py envía una suplencia activa.
+       ========================================================= */
+    .suplencia-ts-panel{
+      margin:0 0 20px;
+      border-radius:24px;
+      padding:18px;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 54%,#ffffff 100%);
+      border:1px solid #dbeafe;
+      border-left:7px solid #2563eb;
+      box-shadow:0 16px 36px rgba(37,99,235,.11);
+      color:#0f172a;
+    }
+    .suplencia-ts-panel.suplencia-ts-locked{
+      border-left-color:#f97316;
+      background:linear-gradient(135deg,#fff7ed 0%,#eff6ff 60%,#ffffff 100%);
+    }
+    .suplencia-ts-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .suplencia-ts-title{
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#0b2559;
+      font-size:1.08rem;
+      font-weight:950;
+      letter-spacing:-.03em;
+    }
+    .suplencia-ts-title i{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff;
+      background:linear-gradient(135deg,#2563eb,#0891b2);
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+      flex:0 0 auto;
+    }
+    .suplencia-ts-subtitle{
+      margin:5px 0 0 52px;
+      color:#475569;
+      font-weight:700;
+      line-height:1.45;
+      font-size:.92rem;
+    }
+    .suplencia-ts-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:.44rem .75rem;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      font-weight:950;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+    .suplencia-ts-chip.warning{
+      background:#ffedd5;
+      color:#9a3412;
+      border-color:#fed7aa;
+    }
+    .suplencia-ts-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px;
+    }
+    .suplencia-ts-card{
+      background:#ffffff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(15,23,42,.045);
+    }
+    .suplencia-ts-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#0b2559;
+      font-weight:950;
+      margin-bottom:8px;
+    }
+    .suplencia-ts-card-title i{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      color:#2563eb;
+      flex:0 0 auto;
+    }
+    .suplencia-ts-meta{
+      color:#475569;
+      font-size:.86rem;
+      font-weight:700;
+      line-height:1.46;
+    }
+    .suplencia-ts-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      font-weight:750;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-note strong{color:#0b2559;}
+    .suplencia-ts-lock-note{
+      margin-top:13px;
+      border-radius:17px;
+      padding:12px 14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-weight:800;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+    .suplencia-ts-origin{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:.32rem .58rem;
+      background:#ede9fe;
+      border:1px solid #ddd6fe;
+      color:#5b21b6;
+      font-size:.72rem;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .suplencia-ts-muted-action{
+      opacity:.64!important;
+      pointer-events:none!important;
+      filter:grayscale(.15);
+    }
+    @media(max-width:760px){
+      .suplencia-ts-subtitle{margin-left:0;}
+      .suplencia-ts-title{align-items:flex-start;}
+    }
+
+  </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ts fixed-top">
-    <div class="container-fluid justify-content-center">
-        <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'reporte_final_pendientes' %}">
-                <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
-                <div>
-                    <div class="brand-title">REPORTE FINAL DE INGRESO</div>
-                    <div class="brand-subtitle">Trabajo Social · FO-301-02-18</div>
-                </div>
+<header class="topbar-ts">
+    <div class="topbar-inner">
+        <div class="brand-wrap">
+            <a href="{% url 'reporte_final_pendientes' %}" class="logo-box" aria-label="Estancia Infantil UNACH">
+                <img src="{% static 'img/logo.png' %}" alt="Estancia Infantil UNACH">
             </a>
+            <div>
+                <div class="brand-kicker">Trabajo Social · FO-301-02-18</div>
+                <h1 class="brand-title">Reportes Finales de Ingreso</h1>
+                <div class="brand-subtitle">Expedientes pendientes de dictamen final</div>
+            </div>
+        </div>
 
-            <div class="ms-auto d-flex gap-2 align-items-center">
-                <a href="{% url 'dashboard_admin' %}" class="btn btn-light btn-soft">
-                    <i class="bi bi-arrow-left me-1"></i> Panel Trabajo Social
-                </a>
-
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-light btn-soft">
-                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
-                    </button>
-                </form>
+        <div class="top-actions">
+            <a href="{% url 'dashboard_admin' %}" class="btn-dashboard">
+                <i class="bi bi-arrow-left me-1"></i> Regresar
+            </a>
+            <div class="user-chip" title="Usuario activo">
+                <span class="user-avatar"><i class="bi bi-person-hearts"></i></span>
+                <span>{% firstof request.user.get_full_name request.user.username request.user.email "Trabajadora Social" %}</span>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
-<div class="container-panel">
+<main class="page-shell">
+
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
+    <div class="suplencia-ts-head">
+      <div>
+        <h2 class="suplencia-ts-title">
+          <i class="bi bi-person-check-fill"></i>
+          Cubriendo temporalmente Trabajo Social
+        </h2>
+        <p class="suplencia-ts-subtitle">
+          Dirección autorizó una cobertura temporal del proceso de Trabajo Social. El rol real del usuario no cambia; cada acción queda registrada con usuario, fecha, área cubierta y autorización.
+        </p>
+      </div>
+      {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+        <span class="suplencia-ts-chip warning"><i class="bi bi-eye-fill"></i> Solo consulta</span>
+      {% else %}
+        <span class="suplencia-ts-chip"><i class="bi bi-clock-history"></i> Cobertura activa</span>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-grid">
+      {% if suplencias_activas %}
+        {% for suplencia in suplencias_activas %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% elif suplencias_usuario %}
+        {% for suplencia in suplencias_usuario %}
+          {% if suplencia.area_cubierta == "TRABAJO_SOCIAL" or suplencia.area == "TRABAJO_SOCIAL" %}
+          <article class="suplencia-ts-card">
+            <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+            <div class="suplencia-ts-meta">
+              <div><strong>Área:</strong> {% if suplencia.area_cubierta %}{{ suplencia.get_area_cubierta_display|default:suplencia.area_cubierta }}{% elif suplencia.area %}{{ suplencia.get_area_display|default:suplencia.area }}{% else %}Trabajo Social{% endif %}</div>
+              <div><strong>Titular:</strong> {{ suplencia.titular_ausente.nombre_visible|default:suplencia.titular_ausente|default:"Trabajadora Social" }}</div>
+              <div><strong>Autoriza:</strong> {{ suplencia.autorizada_por_nombre|default:suplencia.autorizada_por|default:suplencia.autorizo|default:"Dirección" }}</div>
+              {% if suplencia.fin %}<div><strong>Vigencia:</strong> hasta {{ suplencia.fin|date:"d/m/Y H:i" }}</div>{% endif %}
+              {% if suplencia.motivo %}<div><strong>Motivo:</strong> {{ suplencia.motivo }}</div>{% endif %}
+            </div>
+          </article>
+                  {% endif %}
+        {% endfor %}
+      {% else %}
+        <article class="suplencia-ts-card">
+          <div class="suplencia-ts-card-title"><i class="bi bi-diagram-3-fill"></i> Proceso social autorizado</div>
+          <div class="suplencia-ts-meta">
+            <div><strong>Área:</strong> Trabajo Social</div>
+            <div><strong>Autoriza:</strong> Dirección</div>
+            <div><strong>Alcance:</strong> solicitud, revisión documental, responsables, pagos, códigos y reporte final.</div>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="suplencia-ts-note">
+      <i class="bi bi-shield-check"></i>
+      <strong>Regla de control:</strong> los expedientes en proceso pueden continuarse; los expedientes finalizados, validados o cerrados deben quedar solo en consulta salvo autorización de ajuste registrada por Dirección.
+    </div>
+    {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}
+      <div class="suplencia-ts-lock-note">
+        <i class="bi bi-lock-fill"></i>
+        Este registro ya está finalizado, validado o cerrado. La cobertura temporal solo permite visualizar la información.
+      </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
 
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <div class="card card-panel p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <section class="hero-card">
+        <div class="hero-content">
             <div>
-                <h3 class="fw-bold mb-1">
-                    <i class="bi bi-file-earmark-check-fill me-2 text-primary"></i>
-                    Reportes Finales Pendientes
-                </h3>
-                <p class="text-muted mb-0">
-                    Expedientes que terminaron los filtros de Psicología, Nutrición y Médico.
+                <div class="hero-badge">
+                    <i class="bi bi-clipboard2-check"></i>
+                    Bandeja de revisión final
+                </div>
+                <h2>Reportes finales pendientes</h2>
+                <p>
+                    Aquí se concentran los expedientes que ya terminaron Psicología, Nutrición y Médico.
+                    Desde esta vista Trabajo Social registra el Reporte Final de Ingreso y define el siguiente avance del proceso.
                 </p>
             </div>
-
-            <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2">
-                Pendientes: {{ inscripciones|length }}
-            </span>
+            <div class="hero-icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card card-panel p-0 table-card">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Folio</th>
-                        <th>Menor</th>
-                        <th>Tutor</th>
-                        <th>Filtros</th>
-                        <th>Estado</th>
-                        <th class="text-end">Acción</th>
-                    </tr>
-                </thead>
+    <section class="stats-grid" aria-label="Resumen de reportes finales">
+        <article class="stat-card purple">
+            <div class="stat-top">
+                <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-number">{{ inscripciones|length }}</div>
+            <div class="stat-hint">Expedientes listos para que Trabajo Social registre reporte final.</div>
+        </article>
 
-                <tbody>
-                    {% for inscripcion in inscripciones %}
-                    <tr>
-                        <td class="fw-bold">
-                            #{{ inscripcion.solicitud_ingreso.folio }}
-                        </td>
+        <article class="stat-card green">
+            <div class="stat-top">
+                <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+                <div class="stat-label">Filtros completos</div>
+            </div>
+            <div class="stat-number">{{ inscripciones|length }}</div>
+            <div class="stat-hint">Los tres filtros institucionales ya terminaron su revisión.</div>
+        </article>
 
-                        <td>
-                            <div class="fw-bold">
+        <article class="stat-card orange">
+            <div class="stat-top">
+                <div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div>
+                <div class="stat-label">Documento</div>
+            </div>
+            <div class="stat-number">FO</div>
+            <div class="stat-hint">Formato FO-301-02-18 para cierre de ingreso.</div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-top">
+                <div class="stat-icon"><i class="bi bi-arrow-right-circle"></i></div>
+                <div class="stat-label">Siguiente paso</div>
+            </div>
+            <div class="stat-number">TS</div>
+            <div class="stat-hint">Registrar reporte y enviar el expediente a la etapa correspondiente.</div>
+        </article>
+    </section>
+
+    <section class="main-grid">
+        <div class="panel-card">
+            <div class="panel-head">
+                <div class="panel-title-wrap">
+                    <div class="panel-title-icon"><i class="bi bi-folder2-open"></i></div>
+                    <div>
+                        <h3 class="panel-title">Bandeja de reportes</h3>
+                        <p class="panel-subtitle">Consulta, localiza y registra los reportes pendientes.</p>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="search" id="buscadorReportes" placeholder="Buscar por folio, menor o tutor...">
+                    </div>
+                    <span class="soft-chip">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>
+                        Pendientes: {{ inscripciones|length }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="report-list" id="listaReportes">
+                {% for inscripcion in inscripciones %}
+                    <article class="report-card reporte-item" data-search="{{ inscripcion.solicitud_ingreso.folio }} {{ inscripcion.solicitud_ingreso.nombre_menor_completo }} {{ inscripcion.solicitud_ingreso.nombre_tutor_completo }} {{ inscripcion.solicitud_ingreso.correo }}">
+                        <div class="folio-badge">
+                            <div>
+                                <small>Folio</small>
+                                <strong>#{{ inscripcion.solicitud_ingreso.folio }}</strong>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="person-title">
+                                <i class="bi bi-person-badge me-1 text-primary"></i>
                                 {{ inscripcion.solicitud_ingreso.nombre_menor_completo }}
                             </div>
-                            <div class="text-muted small">
-                                CURP: {{ inscripcion.solicitud_ingreso.curp_menor|default:"No capturada" }}
+                            <div class="person-meta">
+                                CURP: {{ inscripcion.solicitud_ingreso.curp_menor|default:"No capturada" }}<br>
+                                Estado actual: <strong>{{ inscripcion.get_estado_display }}</strong>
                             </div>
-                        </td>
+                        </div>
 
-                        <td>
-                            <div class="fw-bold">
+                        <div>
+                            <div class="person-title">
+                                <i class="bi bi-person-check me-1 text-success"></i>
                                 {{ inscripcion.solicitud_ingreso.nombre_tutor_completo }}
                             </div>
-                            <div class="text-muted small">
-                                {{ inscripcion.solicitud_ingreso.correo }}
+                            <div class="person-meta">
+                                {{ inscripcion.solicitud_ingreso.correo|default:"Sin correo registrado" }}
                             </div>
-                        </td>
 
-                        <td>
-                            <div class="d-flex flex-column gap-1 small">
-                                <span>
-                                    Psicología:
+                            <div class="filter-stack mt-3">
+                                <div class="filter-pill">
+                                    <span><i class="bi bi-heart-pulse me-1"></i> Psicología</span>
                                     <strong>{{ inscripcion.solicitud_ingreso.get_estado_psicologia_display }}</strong>
-                                </span>
-                                <span>
-                                    Nutrición:
+                                </div>
+                                <div class="filter-pill">
+                                    <span><i class="bi bi-egg-fried me-1"></i> Nutrición</span>
                                     <strong>{{ inscripcion.solicitud_ingreso.get_estado_nutricion_display }}</strong>
-                                </span>
-                                <span>
-                                    Médico:
+                                </div>
+                                <div class="filter-pill">
+                                    <span><i class="bi bi-hospital me-1"></i> Médico</span>
                                     <strong>{{ inscripcion.solicitud_ingreso.get_estado_medico_display }}</strong>
-                                </span>
+                                </div>
                             </div>
-                        </td>
+                        </div>
 
-                        <td>
-                            <span class="badge bg-warning-subtle text-warning-emphasis badge-state">
-                                {{ inscripcion.get_estado_display }}
-                            </span>
-                        </td>
-
-                        <td class="text-end">
-                            <a href="{% url 'dictaminar_reporte_final' inscripcion.id %}" class="btn btn-primary btn-soft">
+                        <div class="text-lg-end">
+                            <div class="state-badge mb-3">
+                                <i class="bi bi-clock-history"></i>
+                                En espera
+                            </div>
+                            <br>
+                            <a href="{% url 'dictaminar_reporte_final' inscripcion.id %}" class="btn btn-primary-soft">
                                 <i class="bi bi-pencil-square me-1"></i>
                                 Registrar reporte
                             </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <i class="bi bi-inbox fs-1 text-muted"></i>
-                            <h5 class="fw-bold mt-3">No hay reportes finales pendientes</h5>
-                            <p class="text-muted mb-0">
-                                Cuando los tres filtros terminen, aparecerán aquí.
-                            </p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                        <h4>No hay reportes finales pendientes</h4>
+                        <p>
+                            Cuando Psicología, Nutrición y Médico terminen los filtros de un expediente,
+                            aparecerá aquí para que Trabajo Social registre el Reporte Final de Ingreso.
+                        </p>
+                        <div class="empty-actions">
+                            <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-soft">
+                                <i class="bi bi-arrow-left me-1"></i> Volver al panel
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
-    </div>
 
-</div>
+        <aside class="panel-card side-card">
+            <h3 class="workflow-title">
+                <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                Flujo recomendado
+            </h3>
+            <p class="workflow-subtitle">
+                Este bloque ayuda a que la bandeja se entienda mejor durante la operación diaria.
+            </p>
+
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div>
+                        <strong>Revisar filtros terminados</strong>
+                        <span>Confirma que Psicología, Nutrición y Médico tengan dictamen final.</span>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div>
+                        <strong>Registrar reporte final</strong>
+                        <span>Captura la conclusión de Trabajo Social en el formato FO-301-02-18.</span>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div>
+                        <strong>Enviar a resolución</strong>
+                        <span>El expediente continúa hacia Dirección o se marca con observaciones según corresponda.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-callout">
+                <strong><i class="bi bi-shield-check"></i> Control operativo</strong>
+                <p>
+                    Los documentos no se editan desde esta vista. Solo se registra la conclusión final de Trabajo Social.
+                </p>
+            </div>
+        </aside>
+    </section>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const buscador = document.getElementById('buscadorReportes');
+    const items = document.querySelectorAll('.reporte-item');
+
+    if (buscador && items.length) {
+        buscador.addEventListener('input', function () {
+            const valor = this.value.toLowerCase().trim();
+
+            items.forEach(function (item) {
+                const texto = (item.getAttribute('data-search') || '').toLowerCase();
+                item.style.display = texto.includes(valor) ? '' : 'none';
+            });
+        });
+    }
+</script>
+
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const soloConsultaSuplencia = {{ solo_consulta_suplencia|yesno:"true,false" }};
+    const registroBloqueadoPorEstado = {{ registro_bloqueado_por_estado|yesno:"true,false" }};
+    if(!(soloConsultaSuplencia || registroBloqueadoPorEstado)){ return; }
+
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el){
+      const type = (el.getAttribute('type') || '').toLowerCase();
+      if(type === 'hidden' || type === 'csrfmiddlewaretoken' || el.name === 'csrfmiddlewaretoken') return;
+      el.setAttribute('disabled','disabled');
+      el.classList.add('suplencia-ts-muted-action');
+    });
+
+    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+      btn.setAttribute('disabled','disabled');
+      btn.classList.add('suplencia-ts-muted-action');
+      if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }
+      if(btn.tagName.toLowerCase() === 'button'){
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i> Solo consulta';
+      }else{
+        btn.value = 'Solo consulta';
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

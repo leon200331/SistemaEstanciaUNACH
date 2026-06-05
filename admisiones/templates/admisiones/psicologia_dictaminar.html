@@ -3,174 +3,308 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Filtro Psicología</title>
+<title>Dictamen Psicología | EIU UNACH</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
-body{background:#f3f5f8;font-family:'Segoe UI',sans-serif;}
-.navbar-ti{background:#2563eb;padding:.75rem 0;box-shadow:0 4px 10px rgba(0,0,0,.12);}
-.ti-brand-text{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:.5px;line-height:1.15;}
-.ti-subtext{color:rgba(255,255,255,.75);font-size:.85rem;}
-.container-panel{max-width:1200px;margin:0 auto;padding:22px 16px;margin-top:92px;}
-.card-panel{border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);border:none;background:#fff;}
-.info-box{
-    background:#fff;
-    border-radius:16px;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
-    padding:22px 24px;
-    margin-bottom:20px;
+:root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-soft:#eff6ff;
+    --blue-border:#bfdbfe;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --card:#ffffff;
+    --bg:#f3f6fb;
+    --shadow:0 18px 42px rgba(15,23,42,.08);
+    --radius:22px;
+    --accent:#2563eb;
+    --accent-2:#38bdf8;
+    --accent-soft:#e0f2fe;
+    --accent-border:#bae6fd;
 }
-.solicitud-title{
-    color:#526b8b;
-    font-size:1rem;
-    font-weight:800;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    margin-bottom:14px;
+body.theme-girl{
+    --accent:#a855f7;
+    --accent-2:#ec4899;
+    --accent-soft:#f5e8ff;
+    --accent-border:#e9d5ff;
 }
-.solicitud-grid{
-    display:grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap:12px;
+body.theme-boy{
+    --accent:#2563eb;
+    --accent-2:#06b6d4;
+    --accent-soft:#e0f2fe;
+    --accent-border:#bae6fd;
 }
-.solicitud-card{
-    background:#f8fafc;
-    border:1px solid #dbe4ef;
-    border-radius:13px;
-    padding:13px 14px;
-    min-height:68px;
+*{box-sizing:border-box;}
+body{
+    margin:0;
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    background:
+        radial-gradient(circle at 18% 8%, rgba(37,99,235,.10), transparent 26%),
+        radial-gradient(circle at 88% 5%, rgba(168,85,247,.10), transparent 30%),
+        linear-gradient(180deg,#f8fbff 0%,#eef3f9 100%);
 }
-.solicitud-card.card-wide-2{
-    grid-column: span 2;
+a{text-decoration:none;}
+.app-topbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    height:94px;
+    background:rgba(255,255,255,.95);
+    border-bottom:1px solid var(--border);
+    backdrop-filter:blur(14px);
+    box-shadow:0 8px 26px rgba(15,23,42,.06);
 }
-.solicitud-card.card-wide-3{
-    grid-column: span 3;
+.topbar-inner{
+    width:min(1500px, calc(100% - 56px));
+    height:100%;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:22px;
 }
-.solicitud-label{
-    color:#526b8b;
-    font-size:.76rem;
-    font-weight:800;
-    margin-bottom:7px;
-    letter-spacing:.03em;
+.brand-area{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    min-width:0;
 }
-.solicitud-value{
-    color:#001b3f;
-    font-size:.95rem;
-    font-weight:800;
-    word-break:break-word;
+.logo-box{
+    width:68px;
+    height:68px;
+    border-radius:20px;
+    background:linear-gradient(135deg,#1d4ed8,#2563eb);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:9px;
+    box-shadow:0 16px 28px rgba(37,99,235,.22);
+    flex-shrink:0;
 }
-.solicitud-value.normal{
+.logo-box img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    filter:drop-shadow(0 8px 12px rgba(0,0,0,.16));
+}
+.brand-title{
+    margin:0;
+    font-size:1.62rem;
+    line-height:1.05;
+    font-weight:950;
+    letter-spacing:-.045em;
+    color:#0b2559;
+}
+.brand-subtitle{
+    margin:.28rem 0 0;
+    color:#50698f;
+    font-size:.93rem;
     font-weight:700;
 }
-@media (max-width: 992px){
-    .solicitud-grid{grid-template-columns: repeat(2, minmax(0, 1fr));}
-    .solicitud-card.card-wide-2,
-    .solicitud-card.card-wide-3{grid-column: span 2;}
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-shrink:0;
 }
-@media (max-width: 576px){
-    .solicitud-grid{grid-template-columns: 1fr;}
-    .solicitud-card.card-wide-2,
-    .solicitud-card.card-wide-3{grid-column: span 1;}
-}
-.btn-soft{border-radius:10px;font-weight:700;padding:.5rem .9rem;}
-
-/* Letras sin negritas resaltadas */
-.form-label{font-weight:500;color:#334155;font-size:.9rem;}
-
-textarea.form-control{min-height:90px;}
-.readonly-box{background:#eef2f7 !important;}
-.accordion-item{border:none;border-radius:14px !important;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-bottom:14px;}
-
-/* Fondos Azules Pastel */
-.accordion-button{font-weight:800;color:#1e3a8a;background:#eff6ff;}
-.accordion-button:not(.collapsed){background:#dbeafe;color:#1e3a8a;box-shadow:none;}
-.accordion-body{background:#eff6ff; border-top: 1px solid #bfdbfe;}
-
-.sticky-actions{position:sticky;bottom:16px;z-index:10;}
-.hidden-by-rule{display:none !important;}
-
-/* Estilos de tiempo */
-.time-combo { display: flex; align-items: center; gap: 4px; }
-.sel-time { width: 65px; padding: 0.375rem 0.5rem; }
-.sel-ampm { width: 75px; padding: 0.375rem 0.5rem; }
-
-.is-invalid-custom { border: 2px solid #dc3545 !important; background-color: #fff8f8 !important; }
-
-/* ALINEACIÓN SIMÉTRICA SEGURA */
-.accordion-body .row > div[class*="col-"] {
-    display: flex;
-    flex-direction: column;
-}
-
-.accordion-body .row > div[class*="col-"] > label.form-label {
-    margin-bottom: 6px !important;
-}
-
-.accordion-body .row > div[class*="col-"] > input:not([type="checkbox"]):not([type="radio"]),
-.accordion-body .row > div[class*="col-"] > select,
-.accordion-body .row > div[class*="col-"] > textarea,
-.accordion-body .row > div[class*="col-"] > .d-flex,
-.accordion-body .row > div[class*="col-"] > .time-combo,
-.accordion-body .row > div[class*="col-"] > .input-group,
-.accordion-body .row > div[class*="col-"] > .d-none {
-    margin-top: auto;
-    flex: 0 0 auto;
-}
-
-
-.estado-operativo{
-    background:#fff;
+.back-btn,
+.profile-pill{
+    height:48px;
     border-radius:16px;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
-    padding:16px 18px;
-    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:900;
+    white-space:nowrap;
+}
+.back-btn{
+    padding:0 18px;
+    color:#334155;
+    background:#fff;
+    border:1px solid #cbd5e1;
+    box-shadow:0 10px 20px rgba(15,23,42,.05);
+}
+.back-btn:hover{
+    color:#0f172a;
+    transform:translateY(-1px);
+    box-shadow:0 16px 28px rgba(15,23,42,.08);
+}
+.profile-pill{
+    padding:0 14px 0 8px;
+    color:#0f172a;
+    background:#fff;
+    border:1px solid #dbeafe;
+    box-shadow:0 12px 26px rgba(37,99,235,.08);
+    max-width:360px;
+}
+.profile-pill .avatar{
+    width:36px;
+    height:36px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    flex-shrink:0;
+}
+.profile-pill small{
+    display:block;
+    line-height:1;
+    color:#64748b;
+    font-size:.62rem;
+    font-weight:950;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+.profile-pill span{
+    display:block;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    max-width:250px;
+}
+.page{
+    width:min(1420px, calc(100% - 56px));
+    margin:0 auto;
+    padding:26px 0 40px;
+}
+.hero-panel{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 360px;
+    gap:18px;
+    align-items:stretch;
+    margin-bottom:18px;
+}
+.hero-main{
+    border-radius:28px;
+    padding:28px;
+    color:#fff;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 24px 60px rgba(37,99,235,.22);
+    overflow:hidden;
+    position:relative;
+}
+body.theme-girl .hero-main{box-shadow:0 24px 60px rgba(168,85,247,.22);}
+.hero-main:after{
+    content:"";
+    position:absolute;
+    width:290px;
+    height:290px;
+    border-radius:50%;
+    right:-90px;
+    top:-110px;
+    background:rgba(255,255,255,.16);
+}
+.hero-content{position:relative;z-index:1;}
+.hero-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    border-radius:999px;
+    padding:.42rem .75rem;
+    font-size:.78rem;
+    font-weight:950;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.28);
+    margin-bottom:12px;
+}
+.hero-title{
+    margin:0;
+    font-size:2rem;
+    font-weight:950;
+    letter-spacing:-.055em;
+    line-height:1.08;
+}
+.hero-text{
+    max-width:850px;
+    margin:10px 0 0;
+    font-weight:650;
+    opacity:.94;
+    line-height:1.5;
+}
+.hero-side{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+}
+.meta-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:22px;
+    box-shadow:0 16px 36px rgba(15,23,42,.07);
+    padding:17px 18px;
     display:flex;
     gap:14px;
-    align-items:flex-start;
-    border:1px solid transparent;
+    align-items:center;
 }
-.estado-operativo .status-icon{
-    width:46px;
-    height:46px;
-    border-radius:14px;
+.meta-icon{
+    width:48px;
+    height:48px;
+    border-radius:17px;
     display:flex;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
-    font-size:1.35rem;
+    color:var(--accent);
+    background:var(--accent-soft);
+    font-size:1.25rem;
 }
-.estado-operativo h5{
-    margin:0 0 4px;
-    font-weight:900;
+.meta-label{
+    color:#64748b;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:.70rem;
+    font-weight:950;
+    margin-bottom:3px;
 }
-.estado-operativo p{
-    margin:0;
-    line-height:1.5;
-    font-size:.94rem;
+.meta-value{
+    color:#0b2559;
+    font-weight:950;
+    line-height:1.15;
 }
+.status-strip{
+    border-radius:24px;
+    padding:16px 18px;
+    margin-bottom:18px;
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    box-shadow:0 16px 34px rgba(15,23,42,.07);
+}
+.status-strip .status-icon{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    font-size:1.25rem;
+}
+.status-strip h5{margin:0 0 4px;font-weight:950;letter-spacing:-.03em;}
+.status-strip p{margin:0;color:inherit;font-weight:650;line-height:1.45;}
 .estado-activo{
     background:#f0fdf4;
-    border-color:#bbf7d0;
+    border:1px solid #bbf7d0;
     border-left:7px solid #16a34a;
     color:#14532d;
 }
-.estado-activo .status-icon{
-    background:#dcfce7;
-    color:#15803d;
-}
+.estado-activo .status-icon{background:#dcfce7;color:#15803d;}
 .estado-consulta{
     background:#fff7ed;
-    border-color:#fed7aa;
+    border:1px solid #fed7aa;
     border-left:7px solid #f97316;
     color:#9a3412;
 }
-.estado-consulta .status-icon{
-    background:#ffedd5;
-    color:#c2410c;
-}
+.estado-consulta .status-icon{background:#ffedd5;color:#c2410c;}
 .modo-badge{
     display:inline-flex;
     align-items:center;
@@ -181,222 +315,628 @@ textarea.form-control{min-height:90px;}
     font-weight:900;
     margin-top:8px;
 }
-.modo-badge-activo{
-    background:#dcfce7;
+.modo-badge-activo{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+.modo-badge-consulta{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
+.info-box{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:26px;
+    box-shadow:var(--shadow);
+    padding:22px;
+    margin-bottom:18px;
+}
+.section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+}
+.section-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0;
+    color:#0b2559;
+    font-size:1.1rem;
+    font-weight:950;
+    letter-spacing:-.03em;
+}
+.section-title i{
+    width:34px;
+    height:34px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    background:var(--blue-soft);
+    color:var(--blue);
+}
+.autosave-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    border-radius:999px;
+    padding:.42rem .72rem;
     color:#166534;
-    border:1px solid #86efac;
-}
-.modo-badge-consulta{
-    background:#ffedd5;
-    color:#9a3412;
-    border:1px solid #fed7aa;
-}
-.readonly-warning{
-    background:#fff7ed;
-    border:1px solid #fed7aa;
-    border-left:6px solid #f97316;
-    border-radius:14px;
-    padding:14px 16px;
-    margin-bottom:18px;
-    color:#9a3412;
-}
-.readonly-warning .title{
+    background:#dcfce7;
+    border:1px solid #bbf7d0;
     font-weight:900;
-    margin-bottom:3px;
+    font-size:.78rem;
 }
-
-.lock-banner{
+.solicitud-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+}
+.solicitud-card{
+    min-height:78px;
     background:#f8fafc;
-    border:1px solid #cbd5e1;
-    border-left:6px solid #64748b;
-    border-radius:14px;
-    padding:14px 16px;
-    margin-bottom:18px;
+    border:1px solid #dbe4ef;
+    border-radius:18px;
+    padding:14px 15px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
-.lock-banner .title{
-    font-weight:800;
+.solicitud-card.card-wide-2{grid-column:span 2;}
+.solicitud-card.card-wide-3{grid-column:span 3;}
+.solicitud-label{
+    color:#64748b;
+    font-size:.72rem;
+    font-weight:950;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    margin-bottom:6px;
+}
+.solicitud-value{
+    color:#0b2559;
+    font-size:.98rem;
+    font-weight:950;
+    word-break:break-word;
+}
+.solicitud-value.normal{font-weight:750;color:#1e293b;}
+.readonly-warning,
+.lock-banner{
+    border-radius:20px;
+    padding:16px 18px;
+    margin-bottom:18px;
+    box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+.readonly-warning{background:#fff7ed;border:1px solid #fed7aa;border-left:6px solid #f97316;color:#9a3412;}
+.lock-banner{background:#f8fafc;border:1px solid #cbd5e1;border-left:6px solid #64748b;}
+.readonly-warning .title,.lock-banner .title{font-weight:950;margin-bottom:3px;}
+#formDictamen{
+    margin-top:4px;
+}
+.accordion{
+    display:grid;
+    gap:12px;
+}
+.accordion-item{
+    overflow:hidden;
+    border:1px solid var(--border)!important;
+    border-radius:22px!important;
+    box-shadow:0 14px 30px rgba(15,23,42,.06);
+    background:#fff;
+}
+.accordion-button{
+    min-height:58px;
+    padding:17px 22px;
+    font-weight:950;
+    color:#0b2559;
+    background:#fff;
+    border:0;
+    letter-spacing:-.02em;
+}
+.accordion-button{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.accordion-button .acc-icon{
+    width:34px;
+    height:34px;
+    border-radius:13px;
+    background:var(--accent-soft);
+    border:1px solid var(--accent-border);
+    color:var(--accent);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.05rem;
+    flex-shrink:0;
+}
+.accordion-button .acc-title{
+    flex:1;
+    min-width:0;
+}
+.accordion-button:not(.collapsed) .acc-icon{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 10px 22px rgba(37,99,235,.18);
+}
+.accordion-button:not(.collapsed){
+    color:#0b2559;
+    background:linear-gradient(90deg,var(--accent-soft),#fff);
+    box-shadow:none;
+}
+.accordion-body{
+    background:#f8fbff;
+    border-top:1px solid #e2e8f0;
+    padding:22px;
+}
+.accordion-body .row > div[class*="col-"]{
+    display:flex;
+    flex-direction:column;
+}
+.form-label{
     color:#334155;
-    margin-bottom:3px;
+    font-weight:850;
+    font-size:.86rem;
+    margin-bottom:7px!important;
+}
+.form-control,.form-select{
+    border:1px solid #cbd5e1;
+    border-radius:14px;
+    min-height:44px;
+    color:#0f172a;
+    font-weight:650;
+    background:#fff;
+}
+.form-control:focus,.form-select:focus{
+    border-color:#93c5fd;
+    box-shadow:0 0 0 4px rgba(59,130,246,.12);
+}
+textarea.form-control{min-height:100px;}
+.readonly-box{
+    background:#eef2f7!important;
+    border-color:#dbe4ef!important;
+    color:#334155!important;
+}
+.form-check{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.time-combo{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.sel-time{width:72px;padding:.5rem .55rem;}
+.sel-ampm{width:84px;padding:.5rem .55rem;}
+.input-group .form-control{border-radius:14px 0 0 14px;}
+.input-group .input-group-text{border-radius:0 14px 14px 0;}
+.hidden-by-rule{display:none!important;}
+.is-invalid-custom{border:2px solid #dc3545!important;background-color:#fff8f8!important;}
+.card-panel{
+    border:1px solid var(--border)!important;
+    border-radius:24px!important;
+    box-shadow:var(--shadow)!important;
+    background:#fff!important;
+}
+.card-panel h5{
+    color:#0b2559!important;
+    font-weight:950!important;
+    letter-spacing:-.035em;
+}
+.sticky-actions{
+    position:sticky;
+    bottom:14px;
+    z-index:20;
+}
+.action-card{
+    background:rgba(255,255,255,.96);
+    border:1px solid var(--border);
+    border-radius:24px;
+    box-shadow:0 20px 44px rgba(15,23,42,.12);
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    backdrop-filter:blur(12px);
+}
+.action-info{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#475569;
+    font-size:.84rem;
+    font-weight:700;
+}
+.action-info strong{display:block;color:#0b2559;font-weight:950;font-size:.96rem;}
+.action-info span:not(.action-icon){display:block;}
+.action-icon{
+    width:42px;
+    height:42px;
+    border-radius:15px;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+    color:#16a34a;
+    background:#dcfce7;
+    flex-shrink:0;
+}
+.btn-outline-soft,.btn-primary-soft,.btn-disabled-soft,.btn-soft{
+    border-radius:14px!important;
+    min-height:44px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-weight:950!important;
+    padding:.62rem .95rem!important;
+    transition:.18s ease;
+    text-decoration:none;
+}
+.btn-outline-soft{
+    background:#fff;
+    color:#334155;
+    border:1px solid #cbd5e1;
+}
+.btn-outline-soft:hover{color:#0f172a;background:#f8fafc;transform:translateY(-1px);}
+.btn-primary-soft{
+    color:#fff;
+    border:1px solid transparent;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 14px 26px rgba(37,99,235,.20);
+}
+.btn-primary-soft:hover{color:#fff;transform:translateY(-1px);}
+.btn-disabled-soft{
+    color:#475569;
+    border:1px solid #cbd5e1;
+    background:#e2e8f0;
+}
+.alert{
+    border-radius:18px;
+    box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+#autosave-indicator{
+    font-family:'Segoe UI',system-ui,sans-serif;
 }
 
 /* =========================================================
-   SPRINT 5 - INCIDENCIAS PSICOLÓGICAS
+   Datos compartidos entre filtros
+   Psicología puede consultar o capturar datos comunes según origen
    ========================================================= */
-.incidencias-card{
-    background:linear-gradient(135deg,#eff6ff,#f5f3ff);
-    border:1px solid #bfdbfe;
-    border-left:7px solid #2563eb;
-    border-radius:16px;
-    padding:16px 18px;
-    margin-bottom:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:16px;
+.shared-summary-box{
+    border-left:7px solid var(--accent);
 }
-.incidencias-card .icon-box{
-    width:48px;
-    height:48px;
-    border-radius:15px;
-    background:#dbeafe;
-    color:#1d4ed8;
+.shared-summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+}
+.shared-card{
+    min-height:112px;
+    border-radius:20px;
+    padding:15px 16px;
+    border:1px solid #dbe4ef;
+    background:#f8fafc;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:8px;
+}
+.shared-card.shared-locked{background:#eff6ff;border-color:#bfdbfe;}
+.shared-card.shared-owned{background:#f0fdf4;border-color:#bbf7d0;}
+.shared-card.shared-empty{background:#fff7ed;border-color:#fed7aa;}
+.shared-label{color:#64748b;font-size:.70rem;font-weight:950;letter-spacing:.075em;text-transform:uppercase;}
+.shared-value{color:#0b2559;font-size:1.02rem;font-weight:950;line-height:1.18;word-break:break-word;}
+.shared-note{color:#475569;font-size:.76rem;font-weight:750;line-height:1.35;}
+.shared-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:.32rem .62rem;font-size:.72rem;font-weight:950;white-space:nowrap;}
+.shared-chip.locked{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;}
+.shared-chip.owned{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+.shared-chip.empty{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa;}
+.shared-field-hint{margin-top:7px;border-radius:12px;padding:8px 10px;font-size:.78rem;font-weight:750;line-height:1.35;border:1px solid #e2e8f0;background:#fff;color:#475569;}
+.shared-field-hint i{margin-right:6px;}
+.shared-field-hint.shared-lock{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}
+.shared-field-hint.shared-own{background:#f0fdf4;border-color:#bbf7d0;color:#166534;}
+.shared-field-hint.shared-open{background:#fff7ed;border-color:#fed7aa;color:#9a3412;}
+.shared-locked-field{background:#e9eef6!important;border-color:#cbd5e1!important;color:#334155!important;pointer-events:none!important;}
+.shared-readonly-label{color:#1d4ed8;font-weight:950;}
+
+
+/* =========================================================
+   SUPLENCIAS - Dictamen psicológico preliminar por cobertura temporal
+   ========================================================= */
+.suplencia-dictamen-banner{
+    background:linear-gradient(135deg,#eff6ff,#f8fbff);
+    border:1px solid var(--blue-border);
+    border-left:7px solid var(--blue);
+    border-radius:22px;
+    box-shadow:0 16px 36px rgba(37,99,235,.12);
+    padding:17px 19px;
+    margin-bottom:18px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
+.suplencia-dictamen-icon{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    background:linear-gradient(135deg,var(--blue),var(--accent-2));
+    color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:1.45rem;
     flex-shrink:0;
+    font-size:1.25rem;
+    box-shadow:0 10px 20px rgba(37,99,235,.18);
 }
-.incidencias-card h5{
-    margin:0 0 4px;
-    font-weight:900;
-    color:#1e3a8a;
-}
-.incidencias-card p{
-    margin:0;
-    color:#1e40af;
-    line-height:1.45;
-    font-size:.94rem;
-}
-.incidencias-actions{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    justify-content:flex-end;
-    align-items:center;
-    min-width:260px;
-}
-.btn-incidencia{
+.suplencia-dictamen-banner h5{margin:0 0 5px;color:#1e3a8a;font-weight:950;}
+.suplencia-dictamen-banner p{margin:0;color:#52627c;font-weight:700;line-height:1.48;}
+.suplencia-dictamen-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.suplencia-dictamen-pill{
     border-radius:999px;
-    font-weight:800;
-    padding:.62rem .92rem;
+    background:#dbeafe;
+    color:#1d4ed8;
+    border:1px solid #bfdbfe;
+    padding:.36rem .68rem;
+    font-size:.76rem;
+    font-weight:950;
     display:inline-flex;
     align-items:center;
-    gap:7px;
-    text-decoration:none;
-    white-space:nowrap;
+    gap:6px;
 }
-.btn-incidencia-create{
-    background:#2563eb;
-    color:white;
-    border:1px solid #2563eb;
-}
-.btn-incidencia-create:hover{
-    background:#1d4ed8;
-    color:white;
-}
-.btn-incidencia-list{
-    background:white;
-    color:#1e3a8a;
-    border:1px solid #bfdbfe;
-}
-.btn-incidencia-list:hover{
-    background:#eff6ff;
-    color:#1e3a8a;
-}
-@media(max-width:768px){
-    .incidencias-card{
-        flex-direction:column;
-    }
-    .incidencias-actions,
-    .btn-incidencia{
-        width:100%;
-        justify-content:center;
-    }
-}
-
-/* =========================================================
-   ACLARACIÓN: DICTAMEN DE INSCRIPCIÓN, NO OPERACIÓN DIARIA
-   ========================================================= */
-.dictamen-incidencias-note{
+.suplencia-stamp{
     background:#eff6ff;
     border:1px solid #bfdbfe;
     border-left:6px solid #2563eb;
     color:#1e3a8a;
-    border-radius:16px;
+    border-radius:18px;
     padding:14px 16px;
-    margin-bottom:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,.05);
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:14px;
-}
-.dictamen-incidencias-note .note-left{
+    margin-bottom:18px;
+    font-weight:750;
     display:flex;
     gap:12px;
     align-items:flex-start;
 }
-.dictamen-incidencias-note .note-icon{
-    width:40px;
-    height:40px;
-    border-radius:13px;
-    background:#dbeafe;
+.suplencia-stamp i{font-size:1.25rem;}
+@media(max-width:900px){.suplencia-dictamen-banner{flex-direction:column;}}
+
+@media(max-width:1100px){
+    .hero-panel{grid-template-columns:1fr;}
+    .hero-side{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .solicitud-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .shared-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .solicitud-card.card-wide-2,.solicitud-card.card-wide-3{grid-column:span 2;}
+}
+@media(max-width:760px){
+    .app-topbar{height:auto;position:relative;}
+    .topbar-inner{width:min(100% - 28px, 1500px);padding:14px 0;flex-direction:column;align-items:stretch;}
+    .top-actions{justify-content:space-between;}
+    .profile-pill{max-width:100%;}
+    .profile-pill span{max-width:190px;}
+    .page{width:min(100% - 28px, 1420px);padding-top:18px;}
+    .hero-title{font-size:1.5rem;}
+    .hero-side{grid-template-columns:1fr;}
+    .solicitud-grid{grid-template-columns:1fr;}
+    .shared-summary-grid{grid-template-columns:1fr;}
+    .solicitud-card.card-wide-2,.solicitud-card.card-wide-3{grid-column:span 1;}
+    .action-card{flex-direction:column;align-items:stretch;}
+    .action-info{align-items:flex-start;}
+    .btn-outline-soft,.btn-primary-soft,.btn-disabled-soft{width:100%;}
+}
+
+
+/* =========================================================
+   AJUSTE COMPACTO - Datos compartidos entre filtros
+   Se quita la tarjeta de edad porque la edad ya viene de inscripción.
+   ========================================================= */
+.shared-summary-box{
+    padding:14px 16px!important;
+    border-radius:20px!important;
+    margin-bottom:16px!important;
+    box-shadow:0 14px 34px rgba(15,23,42,.065)!important;
+}
+.shared-summary-box .section-head,
+.shared-summary-box .shared-head{
+    margin-bottom:4px!important;
+}
+.shared-summary-box .section-title{
+    font-size:1rem!important;
+    margin-bottom:0!important;
+}
+.shared-summary-box p,
+.shared-summary-box .shared-help{
+    display:none!important;
+}
+.shared-summary-grid,
+.shared-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:8px!important;
+}
+.shared-card{
+    min-height:64px!important;
+    border-radius:15px!important;
+    padding:10px 98px 10px 12px!important;
+    display:block!important;
+    position:relative!important;
+    box-shadow:0 8px 18px rgba(15,23,42,.035)!important;
+}
+.shared-label{
+    font-size:.61rem!important;
+    line-height:1.1!important;
+    margin-bottom:4px!important;
+}
+.shared-value{
+    font-size:.86rem!important;
+    line-height:1.18!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+}
+.shared-note{
+    position:absolute!important;
+    right:9px!important;
+    top:9px!important;
+    font-size:0!important;
+    line-height:1!important;
+    max-width:86px!important;
+    text-align:right!important;
+}
+.shared-note br{display:none!important;}
+.shared-chip{
+    font-size:.61rem!important;
+    padding:.22rem .44rem!important;
+    margin:0!important;
+    gap:4px!important;
+}
+.shared-chip.empty{
+    background:var(--accent-soft)!important;
+    color:var(--accent)!important;
+    border-color:var(--accent-border)!important;
+}
+.shared-card.shared-empty{
+    background:linear-gradient(180deg,#fff,var(--accent-soft))!important;
+    border-color:var(--accent-border)!important;
+}
+.shared-card.shared-locked{
+    background:linear-gradient(180deg,#fff,#eff6ff)!important;
+    border-color:#bfdbfe!important;
+}
+.shared-card.shared-owned{
+    background:linear-gradient(180deg,#fff,#f0fdf4)!important;
+    border-color:#bbf7d0!important;
+}
+.fixed-inscription-note,
+.shared-field-note.fixed-inscription{
+    margin-top:7px;
+    border-radius:12px;
+    padding:8px 10px;
+    font-size:.78rem;
+    font-weight:800;
+    line-height:1.35;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
     color:#1d4ed8;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-    font-size:1.18rem;
 }
-.dictamen-incidencias-note .note-title{
-    font-weight:900;
-    margin-bottom:3px;
+
+@media(max-width:1100px){
+    .shared-summary-grid,
+    .shared-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
 }
-.dictamen-incidencias-note p{
-    margin:0;
-    font-size:.9rem;
-    line-height:1.4;
+@media(max-width:760px){
+    .shared-summary-grid,
+    .shared-grid{grid-template-columns:1fr!important;}
+    .shared-card{padding-right:96px!important;}
 }
-.dictamen-incidencias-note .note-actions{
-    flex-shrink:0;
+
+
+/* =========================================================
+   Ajuste final: datos compartidos compactos y simétricos
+   Edad, sexo y fecha de nacimiento vienen de inscripción.
+   ========================================================= */
+.fixed-inscription-note,
+.shared-field-note.fixed-inscription{display:none!important;}
+.shared-summary-box{
+    padding:12px 15px!important;
+    border-radius:18px!important;
+    border-left-width:6px!important;
 }
-@media(max-width:768px){
-    .dictamen-incidencias-note{
-        flex-direction:column;
-    }
-    .dictamen-incidencias-note .note-actions,
-    .dictamen-incidencias-note .note-actions a{
-        width:100%;
-    }
+.shared-summary-grid,
+.shared-grid{gap:7px!important;}
+.shared-card{
+    min-height:56px!important;
+    padding:8px 82px 8px 10px!important;
+    border-radius:14px!important;
 }
+.shared-label{font-size:.58rem!important;margin-bottom:3px!important;}
+.shared-value{font-size:.82rem!important;line-height:1.14!important;}
+.shared-note{right:8px!important;top:8px!important;max-width:74px!important;}
+.shared-chip{font-size:.58rem!important;padding:.18rem .40rem!important;}
+.shared-chip.empty{
+    background:var(--accent-soft)!important;
+    color:var(--accent)!important;
+    border-color:var(--accent-border)!important;
+}
+.shared-card.shared-empty{
+    background:linear-gradient(180deg,#fff,var(--accent-soft))!important;
+    border-color:var(--accent-border)!important;
+}
+.shared-field-hint,
+.shared-field-note.editable,
+.shared-field-note.available,
+.shared-field-note.locked{
+    display:inline-flex!important;
+    align-items:center!important;
+    width:auto!important;
+    max-width:max-content!important;
+    min-height:22px!important;
+    margin-top:6px!important;
+    padding:.22rem .50rem!important;
+    border-radius:999px!important;
+    font-size:0!important;
+    line-height:1!important;
+    font-weight:950!important;
+    white-space:nowrap!important;
+}
+.shared-field-hint > *,
+.shared-field-note.editable > *,
+.shared-field-note.available > *,
+.shared-field-note.locked > *{display:none!important;}
+.shared-field-hint.shared-open,
+.shared-field-note.editable{
+    background:var(--accent-soft)!important;
+    border:1px solid var(--accent-border)!important;
+    color:var(--accent)!important;
+}
+.shared-field-hint.shared-open::after,
+.shared-field-note.editable::after{content:'Pendiente';font-size:.66rem;}
+.shared-field-hint.shared-own,
+.shared-field-note.available{
+    background:#f0fdf4!important;
+    border:1px solid #bbf7d0!important;
+    color:#166534!important;
+}
+.shared-field-hint.shared-own::after,
+.shared-field-note.available::after{content:'Compartido';font-size:.66rem;}
+.shared-field-hint.shared-lock,
+.shared-field-note.locked{
+    background:#eff6ff!important;
+    border:1px solid #bfdbfe!important;
+    color:#1d4ed8!important;
+}
+.shared-field-hint.shared-lock::after,
+.shared-field-note.locked::after{content:'Solo lectura';font-size:.66rem;}
 
 </style>
+
 </head>
-<body>
+<body class="{% if sexo_menor == 'FEMENINO' or sexo_menor == 'F' or sexo_menor == 'NIÑA' or sexo_menor == 'NINA' or sol.sexo_menor == 'FEMENINO' or sol.sexo_menor == 'F' or insc.sexo_menor == 'FEMENINO' or insc.sexo_menor == 'F' %}theme-girl{% else %}theme-boy{% endif %}">
 
-<nav class="navbar navbar-expand-lg navbar-ti fixed-top">
-  <div class="container-fluid justify-content-center">
-    <div class="d-flex align-items-center" style="width:100%; max-width:1200px; padding:0 18px;">
-      <a class="navbar-brand d-flex align-items-center" href="{% url 'psicologia_pendientes' %}">
-        <img src="{% static 'img/logo.png' %}" alt="UNACH" class="me-3" style="height:44px;">
-        <div class="text-white">
-          <div class="ti-brand-text">FILTRO PSICOLOGÍA</div>
-          <div class="ti-subtext">Cuestionario familiar y entorno psicosocial del menor</div>
+<header class="app-topbar">
+    <div class="topbar-inner">
+        <div class="brand-area">
+            <div class="logo-box">
+                <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Dictamen psicológico</h1>
+                <p class="brand-subtitle">Cuestionario familiar y entorno psicosocial del menor</p>
+            </div>
         </div>
-      </a>
 
-      <div class="ms-auto d-flex gap-2 align-items-center">
-        <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn btn-outline-light btn-soft">
-          <i class="bi bi-clipboard2-pulse me-1"></i> Incidencias
-        </a>
+        <div class="top-actions">
+            <a href="{% url 'psicologia_pendientes' %}" class="back-btn">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
+            </a>
 
-        <a href="{% url 'psicologia_pendientes' %}" class="btn btn-light btn-soft">
-          <i class="bi bi-arrow-left me-1"></i> Pendientes
-        </a>
-
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-light btn-soft">
-            <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
-          </button>
-        </form>
-      </div>
+            <div class="profile-pill" title="Psicóloga responsable">
+                <div class="avatar"><i class="bi bi-person-heart"></i></div>
+                <div>
+                    <small>{% if tiene_suplencia_activa %}Psicóloga / suplencia{% else %}Psicóloga{% endif %}</small>
+                    <span>{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</nav>
+</header>
 
-<div class="container-panel">
+<main class="page">
 
   {% if messages %}
     {% for message in messages %}
@@ -408,7 +948,7 @@ textarea.form-control{min-height:90px;}
   {% endif %}
 
   {% if form.errors %}
-  <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 12px;" id="error-summary-box">
+  <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" id="error-summary-box">
       <h5 class="alert-heading fw-bold"><i class="bi bi-exclamation-octagon-fill me-2"></i>No se pudo guardar la información</h5>
       <p>Por favor, revisa que no falte ningún campo obligatorio. El sistema te redirigirá a los campos faltantes:</p>
       <ul class="mb-0">
@@ -425,124 +965,299 @@ textarea.form-control{min-height:90px;}
   </div>
   {% endif %}
 
-  {% if modo_solo_consulta %}
-  <div class="estado-operativo estado-consulta">
-    <div class="status-icon">
-      <i class="bi bi-lock-fill"></i>
-    </div>
+
+  {% if tiene_suplencia_activa %}
+  <div class="suplencia-dictamen-banner">
+    <div class="suplencia-dictamen-icon"><i class="bi bi-person-badge-fill"></i></div>
     <div>
-      <h5>Modo solo consulta</h5>
+      <h5>Cubriendo temporalmente</h5>
       <p>
-        {{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar este dictamen, pero no puedes guardar, modificar ni registrar evaluaciones hasta que el Administrador inicie un nuevo semestre." }}
+        Estás trabajando con una autorización temporal de Dirección. Este formulario corresponde al área de Psicología; si la cobertura autorizada coincide con esta área, el registro quedará marcado como suplencia y pendiente de revisión por la titular.
       </p>
-      <span class="modo-badge modo-badge-consulta">
-        <i class="bi bi-eye-fill"></i> Consulta histórica habilitada
-      </span>
-    </div>
-  </div>
-  {% else %}
-  <div class="estado-operativo estado-activo">
-    <div class="status-icon">
-      <i class="bi bi-check-circle-fill"></i>
-    </div>
-    <div>
-      <h5>Semestre activo</h5>
-      <p>
-        Psicología puede operar normalmente en el semestre:
-        <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.
-      </p>
-      <span class="modo-badge modo-badge-activo">
-        <i class="bi bi-pencil-square"></i> Operación activa
-      </span>
+      <div class="suplencia-dictamen-list">
+        {% for sup in suplencias_activas_usuario %}
+        <span class="suplencia-dictamen-pill">
+          <i class="bi bi-shield-check"></i>
+          {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · hasta {{ sup.fin|date:"d/m/Y H:i" }}
+        </span>
+        {% endfor %}
+      </div>
     </div>
   </div>
   {% endif %}
-  <div class="dictamen-incidencias-note">
-    <div class="note-left">
-      <div class="note-icon">
-        <i class="bi bi-info-circle-fill"></i>
-      </div>
-      <div>
-        <div class="note-title">Este formulario es un dictamen de inscripción</div>
-        <p>
-          Aquí no se crean incidencias porque la solicitud todavía pertenece al proceso de admisión.
-          Las incidencias psicológicas se registran solo para niñas y niños ya inscritos en operación diaria.
+
+  {% if sol.psicologia_es_suplencia %}
+  <div class="suplencia-stamp">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>
+      <strong>Dictamen psicológico registrado por suplencia.</strong><br>
+      Este registro fue elaborado durante una cobertura temporal. La psicóloga titular podrá revisarlo, ajustarlo y validarlo posteriormente.
+    </div>
+  </div>
+  {% endif %}
+
+  <section class="hero-panel">
+    <div class="hero-main">
+      <div class="hero-content">
+        <div class="hero-kicker">
+          <i class="bi bi-clipboard2-pulse-fill"></i>
+          Evaluación de inscripción
+        </div>
+        <h2 class="hero-title">{{ nombre_nino|default:"Menor" }} {{ paterno_nino|default:"" }} {{ materno_nino|default:"" }}</h2>
+        <p class="hero-text">
+          Revisa la información familiar, registra observaciones psicológicas y emite la resolución final.
+          Las secciones para niñas y niños mayores se muestran automáticamente según la edad registrada.
         </p>
       </div>
     </div>
 
-    <div class="note-actions">
-      <a href="{% url 'panel_incidencias' %}?tipo=PSICOLOGICA" class="btn-incidencia btn-incidencia-list">
-        <i class="bi bi-eye-fill"></i>
-        Ver incidencias
-      </a>
+    <div class="hero-side">
+      <div class="meta-card">
+        <div class="meta-icon"><i class="bi bi-calendar-check-fill"></i></div>
+        <div>
+          <div class="meta-label">Fecha de aplicación</div>
+          <div class="meta-value">Se asigna automáticamente hoy</div>
+        </div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-icon"><i class="bi bi-person-badge-fill"></i></div>
+        <div>
+          <div class="meta-label">Responsable</div>
+          <div class="meta-value">{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if modo_solo_consulta %}
+  <div class="status-strip estado-consulta">
+    <div class="status-icon"><i class="bi bi-lock-fill"></i></div>
+    <div>
+      <h5>Modo solo consulta</h5>
+      <p>{{ aviso_semestre_operativo|default:"No hay semestre activo/iniciado. Puedes consultar este dictamen, pero no puedes guardar, modificar ni registrar evaluaciones hasta que el Administrador inicie un nuevo semestre." }}</p>
+      <span class="modo-badge modo-badge-consulta"><i class="bi bi-eye-fill"></i> Consulta histórica habilitada</span>
     </div>
   </div>
+  {% else %}
+  <div class="status-strip estado-activo">
+    <div class="status-icon"><i class="bi bi-check-circle-fill"></i></div>
+    <div>
+      <h5>Semestre activo</h5>
+      <p>Psicología puede operar normalmente en el semestre: <strong>{{ semestre_activo_operativo.nombre|default:"Semestre activo" }}</strong>.</p>
+      <span class="modo-badge modo-badge-activo"><i class="bi bi-pencil-square"></i> Operación activa</span>
+    </div>
+  </div>
+  {% endif %}
 
-<div class="info-box">
-    <div class="solicitud-title">Información de la solicitud</div>
+  <section class="info-box">
+    <div class="section-head">
+      <h3 class="section-title"><i class="bi bi-folder2-open"></i> Información de la solicitud</h3>
+      <span class="autosave-badge"><i class="bi bi-cloud-check-fill"></i> Autoguardado local activo</span>
+    </div>
 
     <div class="solicitud-grid">
       <div class="solicitud-card">
         <div class="solicitud-label">Folio</div>
         <div class="solicitud-value">#{{ sol.folio }}</div>
       </div>
-
       <div class="solicitud-card">
         <div class="solicitud-label">Estado general</div>
         <div class="solicitud-value">{{ sol.get_estado_display }}</div>
       </div>
-
       <div class="solicitud-card">
         <div class="solicitud-label">Estado psicología</div>
         <div class="solicitud-value">{{ sol.get_estado_psicologia_display }}</div>
       </div>
-
       <div class="solicitud-card">
         <div class="solicitud-label">Fecha de registro</div>
-        <div class="solicitud-value">
-          {% if sol.created_at %}{{ sol.created_at|date:"d/m/Y" }}{% else %}-{% endif %}
-        </div>
+        <div class="solicitud-value">{% if sol.created_at %}{{ sol.created_at|date:"d/m/Y" }}{% else %}-{% endif %}</div>
       </div>
-
       <div class="solicitud-card card-wide-2">
         <div class="solicitud-label">Tutor</div>
         <div class="solicitud-value normal">{{ sol.nombre_tutor_completo }}</div>
       </div>
-
       <div class="solicitud-card card-wide-2">
         <div class="solicitud-label">Correo</div>
         <div class="solicitud-value normal">{{ sol.correo|default:"-" }}</div>
       </div>
-
       <div class="solicitud-card">
         <div class="solicitud-label">Nombre(s) del menor</div>
         <div class="solicitud-value">{{ nombre_nino|default:"-" }}</div>
       </div>
-
       <div class="solicitud-card">
-        <div class="solicitud-label">Apellido paterno del menor</div>
+        <div class="solicitud-label">Apellido paterno</div>
         <div class="solicitud-value">{{ paterno_nino|default:"-" }}</div>
       </div>
-
       <div class="solicitud-card">
-        <div class="solicitud-label">Apellido materno del menor</div>
+        <div class="solicitud-label">Apellido materno</div>
         <div class="solicitud-value">{{ materno_nino|default:"-" }}</div>
       </div>
-
       <div class="solicitud-card">
-        <div class="solicitud-label">Fecha de nacimiento</div>
-        <div class="solicitud-value">
-          {% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}-{% endif %}
-        </div>
+        <div class="solicitud-label">Nacimiento</div>
+        <div class="solicitud-value">{% if fecha_nacimiento_menor %}{{ fecha_nacimiento_menor|date:"d/m/Y" }}{% else %}-{% endif %}</div>
       </div>
-
       <div class="solicitud-card">
         <div class="solicitud-label">CURP menor</div>
         <div class="solicitud-value">{{ curp_menor|default:"-" }}</div>
       </div>
+      <div class="solicitud-card">
+        <div class="solicitud-label">Edad</div>
+        <div class="solicitud-value">{{ insc.edad_anios_menor|default:"0" }} años, {{ insc.edad_meses_menor|default:"0" }} meses</div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="info-box shared-summary-box">
+    <div class="section-head">
+      <h3 class="section-title"><i class="bi bi-diagram-3-fill"></i> Datos compartidos entre filtros</h3>
+      <span class="autosave-badge"><i class="bi bi-shield-check"></i> Sin duplicar captura</span>
+    </div>
+    <p class="text-muted fw-semibold mb-3">
+      Estos datos pueden ser usados por Psicología, Nutrición y Médico. Si otro filtro ya capturó el dato, aquí se muestra como referencia; si todavía no existe, Psicología puede registrarlo.
+    </p>
+    <div class="shared-summary-grid">
+      {% with dato=datos_compartidos_por_clave.numero_gestas %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Número de gestas</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% with dato=datos_compartidos_por_clave.semanas_gestacion %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Semanas de gestación</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% with dato=datos_compartidos_por_clave.tipo_nacimiento %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Tipo de nacimiento</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% with dato=datos_compartidos_por_clave.peso_nacer %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Peso al nacer</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% with dato=datos_compartidos_por_clave.talla_nacer %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Talla al nacer</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% with dato=datos_compartidos_por_clave.complicaciones_embarazo %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Complicaciones embarazo</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% with dato=datos_compartidos_por_clave.tipo_alimentacion_inicio %}
+      <div class="shared-card {% if dato.bloqueado_por_otra_area %}shared-locked{% elif dato.tiene_valor %}shared-owned{% else %}shared-empty{% endif %}">
+        <div>
+          <div class="shared-label">Alimentación inicial</div>
+          <div class="shared-value">{% if dato.tiene_valor %}{{ dato.valor }}{% else %}Pendiente de captura{% endif %}</div>
+        </div>
+        <div class="shared-note">
+          {% if dato.bloqueado_por_otra_area %}
+            <span class="shared-chip locked"><i class="bi bi-lock-fill"></i> Solo lectura</span><br>
+            Capturado por {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}{% if dato.capturado_por %} · {{ dato.capturado_por }}{% endif %}.
+          {% elif dato.tiene_valor %}
+            <span class="shared-chip owned"><i class="bi bi-check-circle-fill"></i> Disponible</span><br>
+            Dato registrado para compartir entre filtros.
+          {% else %}
+            <span class="shared-chip empty"><i class="bi bi-pencil-square"></i> Pendiente</span><br>
+            Si Psicología lo captura primero, Nutrición o Médico lo verán como referencia.
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+    </div>
+  </section>
 
   {% if modo_solo_consulta %}
   <div class="readonly-warning">
@@ -550,10 +1265,7 @@ textarea.form-control{min-height:90px;}
       <i class="bi bi-eye-fill fs-4 me-3"></i>
       <div>
         <div class="title">Evaluación psicológica en solo lectura</div>
-        <div>
-          El semestre está cerrado o no hay semestre activo. Puedes revisar la información existente,
-          pero no se permite guardar cambios ni emitir nuevos dictámenes.
-        </div>
+        <div>El semestre está cerrado o no hay semestre activo. Puedes revisar la información existente, pero no se permite guardar cambios ni emitir nuevos dictámenes.</div>
       </div>
     </div>
   </div>
@@ -563,24 +1275,25 @@ textarea.form-control{min-height:90px;}
       <i class="bi bi-lock-fill fs-4 me-3 text-secondary"></i>
       <div>
         <div class="title">Evaluación psicológica finalizada</div>
-        <div class="text-muted">
-          Este dictamen ya fue enviado y no puede modificarse.
-          Solo Administrador o Directora pueden realizar correcciones.
-        </div>
+        <div class="text-muted">Este dictamen ya fue enviado y no puede modificarse. Solo Administrador o Directora pueden realizar correcciones.</div>
       </div>
     </div>
   </div>
   {% endif %}
 
-  <form method="post" id="formDictamen">
+<form method="post" id="formDictamen">
     {% csrf_token %}
+
+    <div class="d-none">
+      {{ form.edad_psicologia }}
+    </div>
 
     <div class="accordion" id="accordionPsicologia">
 
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#sec1">
-            Ficha de identidad
+            <i class="bi bi-person-vcard acc-icon"></i><span class="acc-title">Ficha de identidad</span>
           </button>
         </h2>
         <div id="sec1" class="accordion-collapse collapse show" data-bs-parent="#accordionPsicologia">
@@ -607,15 +1320,15 @@ textarea.form-control{min-height:90px;}
 
               <div class="col-md-4">
                 <label class="form-label">Nombre(s) del niño</label>
-                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ nombre_nino|default:'⚠️ Faltan datos' }}" readonly>
+                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ nombre_nino|default:'Dato pendiente' }}" readonly>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Apellido paterno</label>
-                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ paterno_nino|default:'⚠️ Faltan datos' }}" readonly>
+                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ paterno_nino|default:'Dato pendiente' }}" readonly>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Apellido materno</label>
-                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ materno_nino|default:'⚠️ Faltan datos' }}" readonly>
+                <input type="text" class="form-control readonly-box text-primary fw-bold" value="{{ materno_nino|default:'Dato pendiente' }}" readonly>
               </div>
 
               <div class="col-md-6">
@@ -634,7 +1347,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item">
         <h2 class="accordion-header position-relative">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec2">
-            Información del padre
+            <i class="bi bi-person-badge acc-icon"></i><span class="acc-title">Información del padre</span>
           </button>
 
           <div id="check_habilitar_padre_wrap" style="position: absolute; right: 55px; top: 50%; transform: translateY(-50%); z-index: 10; display: none;" onclick="event.stopPropagation();">
@@ -727,7 +1440,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item">
         <h2 class="accordion-header position-relative">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec3">
-            Información de la madre
+            <i class="bi bi-person-heart acc-icon"></i><span class="acc-title">Información de la madre</span>
           </button>
 
           <div id="check_habilitar_madre_wrap" style="position: absolute; right: 55px; top: 50%; transform: translateY(-50%); z-index: 10; display: none;" onclick="event.stopPropagation();">
@@ -820,7 +1533,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec4">
-            Prenatales, perinatales y posnatales
+            <i class="bi bi-clipboard2-pulse acc-icon"></i><span class="acc-title">Prenatales, perinatales y posnatales</span>
           </button>
         </h2>
         <div id="sec4" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -837,10 +1550,32 @@ textarea.form-control{min-height:90px;}
                       <option value="4° o más">4° o más</option>
                   </select>
                   <div class="d-none">{{ form.numero_gesta_psicologia }}</div>
+{% with dato=datos_compartidos_por_clave.numero_gestas %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="numero_gestas">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}
               </div>
 
               <div class="col-md-3"><label class="form-label">Embarazo planeado</label>{{ form.embarazo_planeado_psicologia }}</div>
-              <div class="col-md-6"><label class="form-label">Dificultad embarazo</label>{{ form.dificultad_embarazo_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Dificultad embarazo</label>{{ form.dificultad_embarazo_psicologia }}
+{% with dato=datos_compartidos_por_clave.complicaciones_embarazo %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="complicaciones_embarazo">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}</div>
               <div class="col-md-6"><label class="form-label">Estado de animo de la madre</label>{{ form.estado_animo_madre_embarazo_psicologia }}</div>
               <div class="col-md-6"><label class="form-label">Momento en que supieron el sexo del bebe</label>{{ form.momento_supieron_sexo_bebe_psicologia }}</div>
 
@@ -860,7 +1595,18 @@ textarea.form-control{min-height:90px;}
               </div>
 
               <div class="col-md-6"><label class="form-label">Motivo del nombre</label>{{ form.motivo_nombre_bebe_psicologia }}</div>
-              <div class="col-md-3"><label class="form-label">Tipo de nacimiento</label>{{ form.tipo_nacimiento_psicologia }}</div>
+              <div class="col-md-3"><label class="form-label">Tipo de nacimiento</label>{{ form.tipo_nacimiento_psicologia }}
+{% with dato=datos_compartidos_por_clave.tipo_nacimiento %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="tipo_nacimiento">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}</div>
 
               <div class="col-md-3">
                   <label class="form-label">Semanas de gestacion</label>
@@ -872,6 +1618,17 @@ textarea.form-control{min-height:90px;}
                       <option value="Desconoce / No recuerda">Desconoce / No recuerda</option>
                   </select>
                   <div class="d-none">{{ form.semanas_gestacion_psicologia }}</div>
+{% with dato=datos_compartidos_por_clave.semanas_gestacion %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="semanas_gestacion">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}
               </div>
 
               <div class="col-md-3">
@@ -881,6 +1638,17 @@ textarea.form-control{min-height:90px;}
                       <span class="input-group-text fw-bold text-secondary">kg</span>
                   </div>
                   <div class="d-none">{{ form.peso_al_nacer_psicologia }}</div>
+{% with dato=datos_compartidos_por_clave.peso_nacer %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="peso_nacer">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}
               </div>
               <div class="col-md-3">
                   <label class="form-label">Talla al nacer</label>
@@ -889,6 +1657,17 @@ textarea.form-control{min-height:90px;}
                       <span class="input-group-text fw-bold text-secondary">cm</span>
                   </div>
                   <div class="d-none">{{ form.talla_al_nacer_psicologia }}</div>
+{% with dato=datos_compartidos_por_clave.talla_nacer %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="talla_nacer">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}
               </div>
 
               <div class="col-md-6"><label class="form-label">Dificultad nacimiento</label>{{ form.dificultad_nacimiento_psicologia }}</div>
@@ -901,7 +1680,18 @@ textarea.form-control{min-height:90px;}
                   <div class="d-none">{{ form.apego_inmediato_psicologia }}</div>
               </div>
 
-              <div class="col-md-6"><label class="form-label">Metodo alimentacion inicial</label>{{ form.metodo_alimentacion_inicio_psicologia }}</div>
+              <div class="col-md-6"><label class="form-label">Metodo alimentacion inicial</label>{{ form.metodo_alimentacion_inicio_psicologia }}
+{% with dato=datos_compartidos_por_clave.tipo_alimentacion_inicio %}
+                  <div class="shared-field-hint {% if dato.bloqueado_por_otra_area %}shared-lock{% elif dato.tiene_valor %}shared-own{% else %}shared-open{% endif %}" data-shared-hint="tipo_alimentacion_inicio">
+                    {% if dato.bloqueado_por_otra_area %}
+                      <i class="bi bi-lock-fill"></i><span class="shared-readonly-label">Dato tomado de {% if dato.area_origen %}{{ dato.area_origen }}{% else %}otro filtro{% endif %}</span>. Se muestra en solo lectura para evitar duplicidad.
+                    {% elif dato.tiene_valor %}
+                      <i class="bi bi-check-circle-fill"></i>Dato compartido disponible. Puedes usarlo como referencia en este dictamen.
+                    {% else %}
+                      <i class="bi bi-pencil-square"></i>Dato aún no capturado por otro filtro. Psicología puede registrarlo aquí.
+                    {% endif %}
+                  </div>
+                  {% endwith %}</div>
 
               <div class="col-md-6">
                   <label class="form-label">Edad del destete</label>
@@ -926,7 +1716,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec5">
-            Lenguaje y motricidad
+            <i class="bi bi-chat-square-text acc-icon"></i><span class="acc-title">Lenguaje y motricidad</span>
           </button>
         </h2>
         <div id="sec5" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -952,7 +1742,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec6">
-            Comportamiento
+            <i class="bi bi-emoji-smile acc-icon"></i><span class="acc-title">Comportamiento</span>
           </button>
         </h2>
         <div id="sec6" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -970,7 +1760,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item hide-if-under-2">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec7">
-            Autonomía
+            <i class="bi bi-person-check acc-icon"></i><span class="acc-title">Autonomía</span>
           </button>
         </h2>
         <div id="sec7" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -997,7 +1787,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item hide-if-under-2">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec8">
-            Descanso y actividades
+            <i class="bi bi-moon-stars acc-icon"></i><span class="acc-title">Descanso y actividades</span>
           </button>
         </h2>
         <div id="sec8" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -1074,7 +1864,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item hide-if-under-2">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec9">
-            Control de esfínteres
+            <i class="bi bi-shield-check acc-icon"></i><span class="acc-title">Control de esfínteres</span>
           </button>
         </h2>
         <div id="sec9" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -1099,7 +1889,7 @@ textarea.form-control{min-height:90px;}
       <div class="accordion-item hide-if-under-2">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sec10">
-            Dinámica familiar
+            <i class="bi bi-house-heart acc-icon"></i><span class="acc-title">Dinámica familiar</span>
           </button>
         </h2>
         <div id="sec10" class="accordion-collapse collapse" data-bs-parent="#accordionPsicologia">
@@ -1126,36 +1916,48 @@ textarea.form-control{min-height:90px;}
     </div>
 
     <div class="card card-panel mt-4 mb-2 p-4 border border-primary border-opacity-25" style="background-color: #f8fafc;">
-      <h5 class="fw-bold text-primary mb-3"><i class="bi bi-file-earmark-medical-fill me-2"></i>Resolución y Dictamen Final</h5>
+      <h5 class="fw-bold text-primary mb-3"><i class="bi bi-file-earmark-medical-fill me-2"></i>Resolución y dictamen final</h5>
       <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Psicóloga responsable</label>
+          <input type="text" class="form-control readonly-box" value="{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}" readonly>
+        </div>
         <div class="col-md-4">
           <label class="form-label">Estado de la evaluación</label>
           {{ form.estado_psicologia }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-4">
           <label class="form-label">Observaciones finales</label>
           {{ form.observaciones_psicologia }}
         </div>
       </div>
     </div>
 
-    <div class="sticky-actions mt-3">
-      <div class="card card-panel p-3">
-        <div class="d-flex justify-content-end gap-2">
-          <a href="{% url 'psicologia_pendientes' %}" class="btn btn-outline-secondary btn-soft">
-            Cancelar
+    <div class="sticky-actions mt-4">
+      <div class="action-card">
+        <div class="action-info">
+          <span class="action-icon"><i class="bi bi-shield-check"></i></span>
+          <div>
+            <strong>Dictamen psicológico</strong>
+            <span>{% if tiene_suplencia_activa %}La fecha se asigna automáticamente. El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.{% else %}La fecha se asigna automáticamente y el registro queda firmado por la psicóloga en sesión.{% endif %}</span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 flex-wrap">
+          <a href="{% url 'psicologia_pendientes' %}" class="btn-outline-soft">
+            <i class="bi bi-x-circle"></i> Cancelar
           </a>
           {% if modo_solo_consulta %}
-          <button type="button" class="btn btn-warning btn-soft text-dark" disabled>
-            <i class="bi bi-eye-fill me-1"></i> Solo consulta
+          <button type="button" class="btn-disabled-soft" disabled>
+            <i class="bi bi-eye-fill"></i> Solo consulta
           </button>
           {% elif bloqueado %}
-          <button type="button" class="btn btn-secondary btn-soft" disabled>
-            <i class="bi bi-lock me-1"></i> Evaluación finalizada
+          <button type="button" class="btn-disabled-soft" disabled>
+            <i class="bi bi-lock-fill"></i> Finalizado
           </button>
           {% else %}
-          <button type="submit" class="btn btn-primary btn-soft">
-            <i class="bi bi-save me-1"></i> Guardar dictamen
+          <button type="submit" class="btn-primary-soft">
+            <i class="bi bi-save2-fill"></i> Guardar
           </button>
           {% endif %}
         </div>
@@ -1163,7 +1965,8 @@ textarea.form-control{min-height:90px;}
     </div>
 
   </form>
-</div>
+
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -1171,6 +1974,97 @@ textarea.form-control{min-height:90px;}
 document.addEventListener("DOMContentLoaded", function () {
   const evaluacionBloqueada = {{ bloqueado|yesno:"true,false" }};
   const modoSoloConsulta = {{ modo_solo_consulta|yesno:"true,false" }};
+
+
+  // ==========================================================================
+  // DATOS COMPARTIDOS ENTRE FILTROS
+  // Si ya existen desde Nutrición o Médico, se muestran y se protegen visualmente.
+  // Si no existen, Psicología puede capturarlos y views.py registrará el origen.
+  // ==========================================================================
+  const datosCompartidosFiltro = {
+      edad_menor: {valor: "{{ datos_compartidos_por_clave.edad_menor.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.edad_menor.bloqueado_por_otra_area|yesno:"true,false" }}},
+      numero_gestas: {valor: "{{ datos_compartidos_por_clave.numero_gestas.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.numero_gestas.bloqueado_por_otra_area|yesno:"true,false" }}},
+      semanas_gestacion: {valor: "{{ datos_compartidos_por_clave.semanas_gestacion.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.semanas_gestacion.bloqueado_por_otra_area|yesno:"true,false" }}},
+      tipo_nacimiento: {valor: "{{ datos_compartidos_por_clave.tipo_nacimiento.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.tipo_nacimiento.bloqueado_por_otra_area|yesno:"true,false" }}},
+      peso_nacer: {valor: "{{ datos_compartidos_por_clave.peso_nacer.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.peso_nacer.bloqueado_por_otra_area|yesno:"true,false" }}},
+      talla_nacer: {valor: "{{ datos_compartidos_por_clave.talla_nacer.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.talla_nacer.bloqueado_por_otra_area|yesno:"true,false" }}},
+      complicaciones_embarazo: {valor: "{{ datos_compartidos_por_clave.complicaciones_embarazo.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.complicaciones_embarazo.bloqueado_por_otra_area|yesno:"true,false" }}},
+      tipo_alimentacion_inicio: {valor: "{{ datos_compartidos_por_clave.tipo_alimentacion_inicio.valor|default:''|escapejs }}", bloqueado: {{ datos_compartidos_por_clave.tipo_alimentacion_inicio.bloqueado_por_otra_area|yesno:"true,false" }}}
+  };
+
+  function normalizarTextoShared(valor) {
+      return (valor || "").toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
+  function bloquearCampoCompartido(el) {
+      if (!el) return;
+      el.classList.add("shared-locked-field");
+      el.setAttribute("readonly", "readonly");
+      el.setAttribute("data-solo-lectura", "true");
+      el.setAttribute("tabindex", "-1");
+      el.title = "Dato capturado por otro filtro. Solo lectura.";
+  }
+
+  function setSelectValueSmart(select, valor) {
+      if (!select || !valor) return;
+      const vNorm = normalizarTextoShared(valor);
+      let found = false;
+      Array.from(select.options).forEach(opt => {
+          const optValueNorm = normalizarTextoShared(opt.value);
+          const optTextNorm = normalizarTextoShared(opt.textContent);
+          if (!found && (opt.value === valor || opt.textContent.trim() === valor || optValueNorm === vNorm || optTextNorm === vNorm || optTextNorm.includes(vNorm) || vNorm.includes(optTextNorm))) {
+              select.value = opt.value;
+              found = true;
+          }
+      });
+      if (!found) {
+          const option = new Option(valor, valor, true, true);
+          select.appendChild(option);
+          select.value = valor;
+      }
+  }
+
+  function aplicarCampoCompartidoDirecto(clave, fieldId) {
+      const info = datosCompartidosFiltro[clave];
+      const field = document.getElementById(fieldId);
+      if (!info || !field) return;
+      if (info.valor && (info.bloqueado || !field.value)) {
+          if (field.tagName === "SELECT") setSelectValueSmart(field, info.valor);
+          else field.value = info.valor;
+      }
+      if (info.bloqueado) bloquearCampoCompartido(field);
+  }
+
+  function aplicarCampoCompartidoVisibleHidden(clave, visibleId, hiddenId, tipo="texto") {
+      const info = datosCompartidosFiltro[clave];
+      const visible = document.getElementById(visibleId);
+      const hidden = document.getElementById(hiddenId);
+      if (!info || !visible || !hidden) return;
+      if (info.valor && (info.bloqueado || !hidden.value)) hidden.value = info.valor;
+      const valorFinal = hidden.value || info.valor || "";
+      if (valorFinal) {
+          if (tipo === "select") setSelectValueSmart(visible, valorFinal);
+          else visible.value = valorFinal.replace(/\s*(kg|cm)\s*$/i, "");
+      }
+      if (info.bloqueado) bloquearCampoCompartido(visible);
+  }
+
+  function aplicarDatosCompartidosEnFormulario() {
+      const edadInfo = datosCompartidosFiltro.edad_menor;
+      const edadVisible = "{{ insc.edad_anios_menor|default:'0' }} años, {{ insc.edad_meses_menor|default:'0' }} meses";
+      const edadValor = edadInfo.valor || edadVisible;
+      const edadForm = document.getElementById("id_edad_psicologia");
+      const edadHidden = document.getElementById("id_dato_compartido_edad_menor");
+      if (edadForm && !edadForm.value) edadForm.value = edadValor;
+      if (edadHidden && !edadHidden.value) edadHidden.value = edadValor;
+      aplicarCampoCompartidoVisibleHidden("numero_gestas", "gesta_sel", "id_numero_gesta_psicologia", "select");
+      aplicarCampoCompartidoDirecto("complicaciones_embarazo", "id_dificultad_embarazo_psicologia");
+      aplicarCampoCompartidoDirecto("tipo_nacimiento", "id_tipo_nacimiento_psicologia");
+      aplicarCampoCompartidoVisibleHidden("semanas_gestacion", "semanas_gestacion_sel", "id_semanas_gestacion_psicologia", "select");
+      aplicarCampoCompartidoVisibleHidden("peso_nacer", "peso_txt", "id_peso_al_nacer_psicologia", "texto");
+      aplicarCampoCompartidoVisibleHidden("talla_nacer", "talla_txt", "id_talla_al_nacer_psicologia", "texto");
+      aplicarCampoCompartidoDirecto("tipo_alimentacion_inicio", "id_metodo_alimentacion_inicio_psicologia");
+  }
 
   if (evaluacionBloqueada || modoSoloConsulta) {
       document.querySelectorAll('#formDictamen input, #formDictamen select, #formDictamen textarea').forEach(function(el) {
@@ -1561,6 +2455,8 @@ const camposNumericos = document.querySelectorAll('.solo-numeros, input[name*="e
   setupNumericInput('peso_txt', 'id_peso_al_nacer_psicologia');
   setupNumericInput('talla_txt', 'id_talla_al_nacer_psicologia');
 
+  aplicarDatosCompartidosEnFormulario();
+
   const edadMenorAnios = parseInt("{{ insc.edad_anios_menor|default:'0' }}", 10);
 
   if (edadMenorAnios < 2) {
@@ -1810,6 +2706,20 @@ const camposNumericos = document.querySelectorAll('.solo-numeros, input[name*="e
       });
 
   });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.shared-field-hint.shared-open, .shared-field-note.editable').forEach(function(el){
+    el.setAttribute('title','Dato pendiente. Esta área puede capturarlo si aún no existe en otro filtro.');
+  });
+  document.querySelectorAll('.shared-field-hint.shared-lock, .shared-field-note.locked').forEach(function(el){
+    el.setAttribute('title','Dato capturado por otro filtro. Se muestra en solo lectura para evitar duplicidad.');
+  });
+  document.querySelectorAll('.shared-field-hint.shared-own, .shared-field-note.available').forEach(function(el){
+    el.setAttribute('title','Dato disponible para compartir entre filtros.');
+  });
+});
 </script>
 </body>
 </html>
