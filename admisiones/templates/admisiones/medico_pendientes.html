@@ -26,8 +26,8 @@
     --verde-oscuro:#16a34a;
     --amarillo:#f59e0b;
     --rojo:#ef4444;
-    --sidebar:286px;
-    --topbar:94px;
+    --sidebar:320px;
+    --topbar:98px;
 }
 
 *{box-sizing:border-box;}
@@ -57,51 +57,58 @@ body{
     z-index:50;
     display:flex;
     flex-direction:column;
-    padding:24px 22px;
+    padding:22px 22px;
 }
 
 .sidebar-brand{
     display:flex;
-    align-items:center;
-    gap:14px;
-    padding-bottom:24px;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+    padding-bottom:20px;
     border-bottom:1px solid #edf1f7;
     text-decoration:none;
     color:var(--texto);
 }
 
 .logo-frame{
-    width:78px;
-    height:62px;
-    border-radius:20px;
-    background:linear-gradient(135deg,#2563eb 0%,#0f5f59 54%,#0f766e 100%);
+    width:276px;
+    height:112px;
+    border-radius:28px;
+    background:linear-gradient(135deg,#1d4ed8 0%,#0f5f59 56%,#0f766e 120%);
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:9px;
-    box-shadow:0 14px 28px rgba(124,58,237,.22);
+    padding:10px 14px;
+    box-shadow:0 18px 36px rgba(15,118,110,.24);
     flex-shrink:0;
+    overflow:hidden;
 }
 
 .logo-frame img{
-    width:100%;
-    height:100%;
+    width:125%;
+    height:125%;
     object-fit:contain;
     display:block;
+    filter:none;
 }
 
 .brand-title{
-    font-size:1.28rem;
-    line-height:1.05;
-    font-weight:900;
+    font-size:1.05rem;
+    line-height:1.08;
+    font-weight:950;
     letter-spacing:-.03em;
+    white-space:nowrap;
+    color:#0b1b3a;
+    text-align:left;
 }
 
 .brand-subtitle{
-    margin-top:4px;
+    margin-top:3px;
     font-size:.82rem;
     color:var(--muted);
-    font-weight:700;
+    font-weight:800;
+    text-align:left;
 }
 
 .menu-label{
@@ -208,9 +215,8 @@ body{
     top:0;
     left:var(--sidebar);
     right:0;
-    height:var(--topbar);
-    background:rgba(255,255,255,.92);
-    backdrop-filter:blur(14px);
+    min-height:var(--topbar);
+    background:rgba(255,255,255,.96);
     border-bottom:1px solid var(--borde);
     z-index:40;
     display:flex;
@@ -242,29 +248,64 @@ body{
 }
 
 .profile-pill{
-    min-height:50px;
-    border-radius:16px;
+    min-height:58px;
+    border-radius:20px;
     background:#f0fdfa;
     border:1px solid var(--morado-borde);
-    padding:0 15px;
+    padding:8px 16px 8px 10px;
     display:flex;
     align-items:center;
-    gap:11px;
-    box-shadow:0 10px 22px rgba(15,23,42,.05);
-    max-width:360px;
+    gap:12px;
+    box-shadow:0 12px 26px rgba(15,23,42,.06);
+    max-width:410px;
+    cursor:pointer;
+    transition:.18s ease;
+    text-align:left;
+}
+
+.profile-pill:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 32px rgba(15,118,110,.13);
 }
 
 .profile-icon{
-    width:38px;
-    height:38px;
-    border-radius:50%;
+    width:48px;
+    height:48px;
+    border-radius:18px;
     background:linear-gradient(135deg,#2563eb,#0f766e);
     color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:1.4rem;
+    font-size:1.35rem;
     flex-shrink:0;
+    overflow:hidden;
+    border:3px solid #ecfeff;
+    box-shadow:0 10px 20px rgba(15,118,110,.16);
+    position:relative;
+}
+
+.profile-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.profile-camera-dot{
+    position:absolute;
+    right:-4px;
+    bottom:-4px;
+    width:22px;
+    height:22px;
+    border-radius:999px;
+    background:#0f766e;
+    color:#fff;
+    border:2px solid #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.72rem;
 }
 
 .profile-text{min-width:0;}
@@ -520,8 +561,25 @@ body{
     font-weight:800;
 }
 
-.legend{display:flex;flex-direction:column;gap:12px;}
-.legend-item{display:flex;align-items:center;gap:10px;color:#334155;font-weight:750;}
+.legend{display:flex;flex-direction:column;gap:12px;min-width:230px;}
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#334155;
+    font-weight:800;
+    flex-wrap:wrap;
+}
+.legend-percent{
+    margin-left:auto;
+    padding:4px 9px;
+    border-radius:999px;
+    background:#f1f5f9;
+    border:1px solid #e2e8f0;
+    color:#134e4a;
+    font-size:.78rem;
+    font-weight:950;
+}
 .legend-color{width:14px;height:14px;border-radius:5px;display:inline-block;}
 .legend-color.green{background:#22c55e;}
 .legend-color.orange{background:#f59e0b;}
@@ -733,6 +791,197 @@ body{
 .btn-review{margin-top:4px;}
 @media(max-width:900px){.bloqueos-grid{grid-template-columns:1fr;}}
 
+
+/* =========================================================
+   FOTO DE PERFIL MÉDICO - Modal atractivo
+   ========================================================= */
+.profile-modal .modal-content{
+    border:0;
+    border-radius:30px;
+    overflow:hidden;
+    box-shadow:0 28px 90px rgba(15,23,42,.28);
+}
+.profile-modal-head{
+    background:linear-gradient(135deg,#1d4ed8,#0f5f59 58%,#0f766e);
+    color:#fff;
+    padding:24px 26px 72px;
+    position:relative;
+    overflow:hidden;
+}
+.profile-modal-head::after{
+    content:"";
+    position:absolute;
+    right:-45px;
+    top:-45px;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:rgba(255,255,255,.16);
+}
+.profile-modal-head .badge{
+    border-radius:999px;
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.25);
+    color:#fff;
+    padding:.45rem .75rem;
+    font-weight:950;
+}
+.profile-modal-title{
+    margin:16px 0 5px;
+    font-size:1.55rem;
+    font-weight:950;
+    letter-spacing:-.04em;
+}
+.profile-modal-subtitle{
+    margin:0;
+    color:rgba(255,255,255,.88);
+    font-weight:750;
+}
+.profile-modal-body{
+    padding:0 26px 22px;
+    background:#fff;
+}
+.profile-summary-card{
+    margin-top:-48px;
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:26px;
+    padding:18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    box-shadow:0 18px 48px rgba(15,23,42,.12);
+    position:relative;
+    z-index:2;
+}
+.profile-preview{
+    width:112px;
+    height:112px;
+    border-radius:28px;
+    background:#ccfbf1;
+    border:5px solid #ecfeff;
+    overflow:hidden;
+    color:#0f766e;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:3rem;
+    flex-shrink:0;
+    position:relative;
+}
+.profile-preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+.profile-preview-camera{
+    position:absolute;
+    right:7px;
+    bottom:7px;
+    width:34px;
+    height:34px;
+    border-radius:999px;
+    background:#0f766e;
+    color:#fff;
+    border:3px solid #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1rem;
+}
+.profile-upload-zone{
+    margin-top:16px;
+    border:1px dashed #5eead4;
+    background:linear-gradient(180deg,#f0fdfa,#fff);
+    border-radius:24px;
+    padding:16px;
+}
+.profile-file-row{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.profile-choose-btn{
+    min-height:44px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid #99f6e4;
+    color:#0f5f59;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:0 16px;
+    font-weight:950;
+    cursor:pointer;
+}
+.profile-rules{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    margin-top:14px;
+}
+.profile-rule{
+    border:1px solid #e2e8f0;
+    background:#fff;
+    border-radius:15px;
+    padding:10px;
+    color:#334155;
+    font-weight:850;
+    font-size:.82rem;
+}
+.profile-rule i{color:#0f766e;margin-right:6px;}
+.profile-modal-actions{
+    padding-top:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.profile-alert{
+    display:none;
+    margin-top:12px;
+    border-radius:16px;
+    padding:10px 12px;
+    font-weight:800;
+}
+.profile-alert.show{display:block;}
+.profile-alert.error{
+    background:#fff1f2;
+    color:#be123c;
+    border:1px solid #fecdd3;
+}
+.profile-alert.ok{
+    background:#f0fdf4;
+    color:#166534;
+    border:1px solid #bbf7d0;
+}
+.delete-confirm-box{
+    display:none;
+    margin-top:14px;
+    border-radius:20px;
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    padding:14px;
+    color:#9a3412;
+    font-weight:800;
+}
+.delete-confirm-box.show{display:block;}
+.delete-confirm-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+}
+@media(max-width:860px){
+    .logo-frame{width:240px;height:96px;border-radius:24px;}
+    .profile-summary-card{flex-direction:column;align-items:flex-start;}
+    .profile-rules{grid-template-columns:1fr;}
+}
+
 </style>
 </head>
 
@@ -744,7 +993,7 @@ body{
             <img src="{% static 'img/logo.png' %}" alt="Logo EIU">
         </div>
         <div>
-            <div class="brand-title">Estancia<br>Infantil</div>
+            <div class="brand-title">Estancia Infantil UNACH</div>
             <div class="brand-subtitle">Área Médica</div>
         </div>
     </a>
@@ -791,11 +1040,27 @@ body{
             <p class="page-subtitle">Vista general del proceso y solicitudes pendientes por dictaminar</p>
         </div>
 
-        <div class="profile-pill" title="Médico asignada">
-            <div class="profile-icon"><i class="bi bi-person-circle"></i></div>
+        <button type="button" class="profile-pill border-0" title="Personalizar foto de perfil" data-bs-toggle="modal" data-bs-target="#modalFotoMedico">
+            <div class="profile-icon">
+                {% if tiene_suplencia_medica %}
+                    <i class="bi bi-person-check-fill"></i>
+                {% elif foto_perfil_medico_url %}
+                    <img src="{{ foto_perfil_medico_url }}" alt="Foto de perfil médico">
+                {% else %}
+                    <i class="bi bi-heart-pulse-fill"></i>
+                {% endif %}
+                <span class="profile-camera-dot"><i class="bi bi-camera-fill"></i></span>
+            </div>
             <div class="profile-text">
-                <div class="profile-role">Médico(a)</div>
+                <div class="profile-role">
+                    {% if tiene_suplencia_medica %}
+                        Cobertura temporal
+                    {% else %}
+                        Médico(a)
+                    {% endif %}
+                </div>
                 <div class="profile-name">
+                    {% if tiene_suplencia_medica %}Cubriendo área médica · {% endif %}
                     {% if medico_asignado %}
                         {{ medico_asignado }}
                     {% elif request.user.get_full_name %}
@@ -805,7 +1070,7 @@ body{
                     {% endif %}
                 </div>
             </div>
-        </div>
+        </button>
     </div>
 </header>
 
@@ -813,16 +1078,17 @@ body{
     <div class="content-wrap">
 
 
-        {% if tiene_suplencia_activa %}
+        {% if tiene_suplencia_medica %}
         <div class="suplencia-panel">
             <div class="suplencia-head">
                 <div>
                     <h2 class="suplencia-title">
                         <span class="suplencia-icon"><i class="bi bi-person-badge-fill"></i></span>
-                        Cubriendo temporalmente
+                        Cobertura temporal del área médica
                     </h2>
                     <p class="suplencia-subtitle">
-                        Dirección te autorizó a realizar acciones temporales sin cambiar tu rol real. Todo registro quedará firmado con tu usuario y será visible en la bitácora de Supervisión.
+                        Esta viñeta solo aparece cuando otra persona está autorizada por Dirección para cubrir el área médica.
+                        Suplente activo: <strong>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</strong>.
                     </p>
                 </div>
                 <span class="suplencia-badge-main">
@@ -897,7 +1163,7 @@ body{
 
 
 
-        {% if bloqueos_edicion_activos %}
+        {% if bloqueos_edicion_activos and tiene_suplencia_medica %}
         <div class="bloqueos-panel">
             <div class="bloqueos-head">
                 <div>
@@ -1028,17 +1294,34 @@ body{
                         </div>
 
                         <div class="donut-wrap">
-                            <div class="donut" data-donut-proceso data-pending="{{ solicitudes|length }}" data-done="{{ total_registros|default:0 }}">
+                            <div class="donut"
+                                 data-donut-proceso
+                                 data-pending="{{ total_pendientes|default:0 }}"
+                                 data-aprobados="{{ total_aprobados|default:0 }}"
+                                 data-rechazados="{{ total_rechazados|default:0 }}">
                                 <div class="donut-center">
                                     <div class="donut-percent" data-donut-percent>0%</div>
-                                    <div class="donut-label">completado</div>
+                                    <div class="donut-label">dictaminado</div>
+                                    <div class="donut-label" data-total-proceso>Total: {{ total_proceso|default:0 }}</div>
                                 </div>
                             </div>
 
                             <div class="legend">
-                                <div class="legend-item"><span class="legend-color green"></span> Dictaminados: {{ total_registros|default:0 }}</div>
-                                <div class="legend-item"><span class="legend-color orange"></span> Pendientes: {{ solicitudes|length }}</div>
-                                <div class="legend-item"><span class="legend-color red"></span> Rechazados: {{ rechazados|length }}</div>
+                                <div class="legend-item">
+                                    <span class="legend-color green"></span>
+                                    Aprobados: {{ total_aprobados|default:0 }}
+                                    <span class="legend-percent" data-aprobados-percent>0%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color red"></span>
+                                    Rechazados: {{ total_rechazados|default:0 }}
+                                    <span class="legend-percent" data-rechazados-percent>0%</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color orange"></span>
+                                    Pendientes: {{ total_pendientes|default:0 }}
+                                    <span class="legend-percent" data-pending-percent>0%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1086,7 +1369,7 @@ body{
                                             </div>
                                             {% endif %}
                                         {% endfor %}
-                                        <a href="{% url 'medico_dictaminar' sol.pk %}" class="btn btn-primary btn-sm btn-review">
+                                        <a href="{% url 'medico_dictaminar' sol.id %}" class="btn btn-primary btn-sm btn-review">
                                             <i class="bi bi-clipboard2-pulse me-1"></i> Dictaminar
                                         </a>
                                     </td>
@@ -1111,6 +1394,111 @@ body{
     </div>
 </main>
 
+
+<div class="modal fade profile-modal" id="modalFotoMedico" tabindex="-1" aria-labelledby="modalFotoMedicoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="profile-modal-head">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <span class="badge"><i class="bi bi-stars me-1"></i> Perfil visible del área médica</span>
+                <h2 class="profile-modal-title" id="modalFotoMedicoLabel">Personaliza tu foto de perfil</h2>
+                <p class="profile-modal-subtitle">Esta imagen aparecerá únicamente en tu usuario y en tus vistas del área médica.</p>
+            </div>
+
+            <div class="profile-modal-body">
+                <div class="profile-summary-card">
+                    <div class="profile-preview" id="profilePreviewMedico">
+                        {% if foto_perfil_medico_url and not tiene_suplencia_medica %}
+                            <img src="{{ foto_perfil_medico_url }}" alt="Foto actual del área médica">
+                        {% else %}
+                            <i class="bi bi-heart-pulse-fill"></i>
+                        {% endif %}
+                        <span class="profile-preview-camera"><i class="bi bi-camera-fill"></i></span>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 fw-black">
+                            {% if medico_asignado %}
+                                {{ medico_asignado }}
+                            {% elif request.user.get_full_name %}
+                                {{ request.user.get_full_name }}
+                            {% else %}
+                                {{ request.user.username }}
+                            {% endif %}
+                        </h5>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            <i class="bi bi-heart-pulse-fill me-1"></i>
+                            Médico(a) / área médica
+                        </span>
+                        <p class="mt-3 mb-0 text-muted fw-semibold">
+                            Puedes subir una foto clara de rostro. Si no agregas imagen, el sistema seguirá usando el icono profesional de perfil.
+                        </p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="formFotoMedico" class="profile-upload-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="actualizar_foto_medico">
+                    <input type="file" name="foto_perfil_medico" id="fotoPerfilMedicoInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="d-none">
+
+                    <div class="profile-upload-zone">
+                        <div class="profile-file-row">
+                            <div>
+                                <div class="fw-black text-dark">Selecciona una foto para tu perfil</div>
+                                <div class="text-muted small fw-semibold" id="fotoPerfilMedicoName">Arrastra o selecciona una imagen desde tu equipo.</div>
+                            </div>
+                            <label for="fotoPerfilMedicoInput" class="profile-choose-btn">
+                                <i class="bi bi-image-fill"></i>
+                                Elegir foto
+                            </label>
+                        </div>
+
+                        <div class="profile-rules">
+                            <div class="profile-rule"><i class="bi bi-filetype-jpg"></i> JPG o JPEG</div>
+                            <div class="profile-rule"><i class="bi bi-filetype-png"></i> PNG / WEBP</div>
+                            <div class="profile-rule"><i class="bi bi-hdd-fill"></i> Máximo 3 MB</div>
+                        </div>
+
+                        <div class="profile-alert" id="fotoPerfilMedicoAlert"></div>
+                    </div>
+
+                    <div class="profile-modal-actions">
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% if foto_perfil_medico_url %}
+                            <button type="button" class="btn btn-outline-danger rounded-pill fw-bold" id="btnMostrarEliminarMedico">
+                                <i class="bi bi-trash3-fill me-1"></i> Eliminar foto
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success rounded-pill fw-bold">
+                                <i class="bi bi-check-circle-fill me-1"></i> Guardar foto
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if foto_perfil_medico_url %}
+                <div class="delete-confirm-box" id="confirmEliminarFotoMedico">
+                    <div class="fw-black"><i class="bi bi-exclamation-triangle-fill me-1"></i> ¿Deseas eliminar tu foto de perfil?</div>
+                    <div class="small mt-1">Se quitará la imagen actual y volverá a mostrarse el icono profesional.</div>
+                    <form method="post" class="delete-confirm-actions">
+                        {% csrf_token %}
+                        <input type="hidden" name="action_type" value="eliminar_foto_medico">
+                        <button type="button" class="btn btn-light rounded-pill fw-bold" id="btnCancelarEliminarMedico">Conservar foto</button>
+                        <button type="submit" class="btn btn-danger rounded-pill fw-bold">
+                            <i class="bi bi-trash3-fill me-1"></i> Sí, eliminar
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -1118,18 +1506,29 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if(donut){
         const pending = parseInt(donut.dataset.pending || '0', 10);
-        const done = parseInt(donut.dataset.done || '0', 10);
+        const aprobados = parseInt(donut.dataset.aprobados || '0', 10);
+        const rechazados = parseInt(donut.dataset.rechazados || '0', 10);
+        const done = aprobados + rechazados;
         const total = pending + done;
+
         const donePercent = total > 0 ? Math.round((done / total) * 100) : 0;
         const pendingPercent = total > 0 ? Math.round((pending / total) * 100) : 0;
+        const aprobadosPercent = total > 0 ? Math.round((aprobados / total) * 100) : 0;
+        const rechazadosPercent = total > 0 ? Math.round((rechazados / total) * 100) : 0;
+        const corteAprobados = aprobadosPercent;
+        const corteRechazados = aprobadosPercent + rechazadosPercent;
 
-        donut.style.background = `conic-gradient(#22c55e 0 ${donePercent}%, #f59e0b ${donePercent}% 100%)`;
+        if(total > 0){
+            donut.style.background = `conic-gradient(#22c55e 0 ${corteAprobados}%, #ef4444 ${corteAprobados}% ${corteRechazados}%, #f59e0b ${corteRechazados}% 100%)`;
+        }else{
+            donut.style.background = `conic-gradient(#e5e7eb 0 100%)`;
+        }
 
         const percentText = document.querySelector('[data-donut-percent]');
         if(percentText) percentText.textContent = donePercent + '%';
 
         const totalText = document.querySelector('[data-total-proceso]');
-        if(totalText) totalText.textContent = total;
+        if(totalText) totalText.textContent = 'Total: ' + total;
 
         const pendingBar = document.querySelector('[data-bar="pending"]');
         const doneBar = document.querySelector('[data-bar="done"]');
@@ -1138,6 +1537,13 @@ document.addEventListener('DOMContentLoaded', function(){
         if(pendingBar) pendingBar.style.width = pendingPercent + '%';
         if(doneBar) doneBar.style.width = donePercent + '%';
         if(totalBar) totalBar.style.width = total > 0 ? '100%' : '0%';
+
+        const approvedBadge = document.querySelector('[data-aprobados-percent]');
+        const rejectedBadge = document.querySelector('[data-rechazados-percent]');
+        const pendingBadge = document.querySelector('[data-pending-percent]');
+        if(approvedBadge) approvedBadge.textContent = aprobadosPercent + '%';
+        if(rejectedBadge) rejectedBadge.textContent = rechazadosPercent + '%';
+        if(pendingBadge) pendingBadge.textContent = pendingPercent + '%';
     }
 
     const tabInicio = document.getElementById('tab-inicio');
@@ -1166,5 +1572,72 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const input = document.getElementById('fotoPerfilMedicoInput');
+    const preview = document.getElementById('profilePreviewMedico');
+    const nameBox = document.getElementById('fotoPerfilMedicoName');
+    const alertBox = document.getElementById('fotoPerfilMedicoAlert');
+    const btnDelete = document.getElementById('btnMostrarEliminarMedico');
+    const confirmDelete = document.getElementById('confirmEliminarFotoMedico');
+    const btnCancelDelete = document.getElementById('btnCancelarEliminarMedico');
+
+    function showProfileAlert(message, type){
+        if(!alertBox) return;
+        alertBox.className = 'profile-alert show ' + (type || 'error');
+        alertBox.textContent = message;
+    }
+
+    if(input){
+        input.addEventListener('change', function(){
+            const file = input.files && input.files[0];
+            if(!file) return;
+
+            const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            const maxBytes = 3 * 1024 * 1024;
+
+            if(!allowed.includes(file.type)){
+                input.value = '';
+                showProfileAlert('Formato no permitido. Usa JPG, JPEG, PNG o WEBP.', 'error');
+                return;
+            }
+
+            if(file.size > maxBytes){
+                input.value = '';
+                showProfileAlert('La foto no debe superar 3 MB. Selecciona una imagen más ligera.', 'error');
+                return;
+            }
+
+            if(nameBox){
+                nameBox.textContent = file.name + ' · ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            showProfileAlert('Imagen lista para guardar.', 'ok');
+
+            if(preview){
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    preview.innerHTML = '<img src="' + e.target.result + '" alt="Vista previa"><span class="profile-preview-camera"><i class="bi bi-camera-fill"></i></span>';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if(btnDelete && confirmDelete){
+        btnDelete.addEventListener('click', function(){
+            confirmDelete.classList.add('show');
+        });
+    }
+
+    if(btnCancelDelete && confirmDelete){
+        btnCancelDelete.addEventListener('click', function(){
+            confirmDelete.classList.remove('show');
+        });
+    }
+});
+</script>
+
 </body>
 </html>

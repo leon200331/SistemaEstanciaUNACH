@@ -3697,6 +3697,94 @@ class DiaOperativoSemestre(models.Model):
     def esta_programado(self):
         return self.estado == self.EstadoDia.PROGRAMADO
 
+    @property
+    def tiene_operacion_ninos(self):
+        """
+        True solo cuando la operación diaria de menores ya existe para el día.
+
+        Regla para paneles de Dirección/Supervisión:
+        - Semestre activo + día hábil + día ABIERTO o CERRADO = hay operación real.
+        - Día PROGRAMADO = todavía no hay operación; no se deben contar menores
+          como dentro, fuera ni ausentes, aunque existan alumnos inscritos.
+        """
+        return bool(
+            self.es_dia_operativo_real
+            and self.estado in [self.EstadoDia.ABIERTO, self.EstadoDia.CERRADO]
+            and self.semestre
+            and self.semestre.estado == Semestre.EstadoSemestre.ACTIVO
+        )
+
+    @property
+    def operacion_diaria_iniciada(self):
+        """Alias legible para templates y vistas."""
+        return self.tiene_operacion_ninos
+
+    def hora_limite_recepcion_ninos(self, salas=None):
+        """
+        Devuelve la hora límite de recepción configurada por el Administrador.
+
+        Importante:
+        - No existe una hora fija en código.
+        - Se usa SalaSemestre.recepcion_fin.
+        - Si hay varias salas, se toma la hora más tarde para no marcar
+          ausencias antes de que termine la recepción de todas las salas.
+        - Si no hay horario configurado, devuelve None y no se activa el
+          chequeo automático de ausencias por hora.
+        """
+        if not self.semestre_id:
+            return None
+
+        qs = self.semestre.salas_activas.filter(activa=True).exclude(recepcion_fin__isnull=True)
+
+        if salas is not None:
+            try:
+                sala_ids = [s.id for s in salas if getattr(s, "id", None)]
+            except Exception:
+                sala_ids = []
+
+            if sala_ids:
+                qs = qs.filter(id__in=sala_ids)
+
+        horas = list(qs.values_list("recepcion_fin", flat=True))
+        return max(horas) if horas else None
+
+    def chequeo_ausencias_activado(self, salas=None):
+        """
+        Indica si el sistema ya puede considerar como ausente al menor que no
+        pasó por el código de entrada.
+
+        El chequeo se activa solamente cuando:
+        - El día ya fue abierto/cerrado por la maestra, y
+        - El día está cerrado, o la fecha ya pasó, o ya se superó la hora
+          de recepción configurada por el Administrador.
+
+        Si la recepción no tiene hora configurada, no se marcan ausencias
+        automáticas mientras el día esté abierto.
+        """
+        if not self.tiene_operacion_ninos:
+            return False
+
+        if self.estado == self.EstadoDia.CERRADO:
+            return True
+
+        hoy = timezone.localdate()
+
+        if self.fecha and self.fecha < hoy:
+            return True
+
+        if self.fecha and self.fecha > hoy:
+            return False
+
+        hora_limite = self.hora_limite_recepcion_ninos(salas=salas)
+
+        if not hora_limite:
+            return False
+
+        try:
+            return timezone.localtime(timezone.now()).time() >= hora_limite
+        except Exception:
+            return False
+
     def abrir(self, usuario=None, observaciones=""):
         """
         Abre el día operativo de la sede/semestre.
@@ -3959,12 +4047,123 @@ class RegistroDiarioAlumno(models.Model):
             return False
 
     @property
+    def dia_tiene_operacion_ninos(self):
+        """True si el día ya fue iniciado/cerrado y puede tener conteos reales."""
+        try:
+            return bool(self.dia_operativo and self.dia_operativo.tiene_operacion_ninos)
+        except Exception:
+            return False
+
+    @property
     def esta_dentro(self):
-        return bool(self.entrada_en and not self.salida_en)
+        """
+        True únicamente cuando el menor tiene entrada real por operación diaria
+        y todavía no tiene salida.
+
+        Si el día está PROGRAMADO, siempre devuelve False para evitar que
+        Dirección vea niños dentro antes de que la maestra abra el día.
+        """
+        return bool(
+            self.dia_tiene_operacion_ninos
+            and self.entrada_en
+            and not self.salida_en
+            and self.estado not in [self.EstadoRegistro.NO_ASISTIO]
+        )
 
     @property
     def tiene_salida(self):
         return bool(self.salida_en)
+
+    @property
+    def esta_marcado_no_asistio(self):
+        """Ausencia explícita capturada o sincronizada en el registro diario."""
+        return self.estado == self.EstadoRegistro.NO_ASISTIO
+
+    @property
+    def tiene_incidencia_mayor_con_retiro(self):
+        """
+        True cuando existe una incidencia mayor/alta vinculada al registro y
+        el menor fue retirado de la estancia.
+
+        Incidencias bajas o leves NO modifican asistencia.
+        """
+        incidencias = []
+
+        if self.incidencia_relacionada_id:
+            try:
+                incidencias.append(self.incidencia_relacionada)
+            except Exception:
+                pass
+
+        try:
+            incidencias.extend(list(self.incidencias.all()))
+        except Exception:
+            pass
+
+        for incidencia in incidencias:
+            try:
+                es_mayor = bool(getattr(incidencia, "es_mayor_para_asistencia", False))
+            except Exception:
+                es_mayor = False
+
+            if not es_mayor:
+                continue
+
+            try:
+                if bool(getattr(incidencia, "implica_retiro_menor", False)):
+                    return True
+            except Exception:
+                pass
+
+            if self.salida_en:
+                return True
+
+        return False
+
+    @property
+    def esta_ausente_operativo(self):
+        """
+        Ausencia real para paneles operativos.
+
+        Reglas:
+        - Antes de abrir el día no hay ausentes.
+        - NO_ASISTIO cuenta como ausente explícito.
+        - Si ya se activó el chequeo de ausencias y no tuvo entrada, cuenta
+          como ausente.
+        - Incidencia mayor con retiro cuenta como ausencia/retiro operativo.
+        - Incidencia baja/leve no cuenta como ausencia.
+        """
+        if not self.dia_tiene_operacion_ninos:
+            return False
+
+        if self.esta_dentro:
+            return False
+
+        if self.esta_marcado_no_asistio:
+            return True
+
+        if self.tiene_incidencia_mayor_con_retiro:
+            return True
+
+        try:
+            if self.dia_operativo.chequeo_ausencias_activado(salas=[self.sala_semestre] if self.sala_semestre_id else None):
+                return not bool(self.entrada_en)
+        except Exception:
+            pass
+
+        return False
+
+    @property
+    def esta_fuera_estancia_operativo(self):
+        """
+        True cuando el menor no está dentro ni ausente en una operación ya iniciada.
+        Incluye pendientes de entrada antes del chequeo y alumnos que ya salieron.
+        """
+        return bool(
+            self.dia_tiene_operacion_ninos
+            and not self.esta_dentro
+            and not self.esta_ausente_operativo
+        )
 
     @property
     def esta_completo_para_cierre(self):
@@ -3976,6 +4175,29 @@ class RegistroDiarioAlumno(models.Model):
             self.tiene_bitacora_entrada_completa,
             self.tiene_bitacora_estancia_completa,
         ])
+
+    def marcar_no_asistio(self, usuario=None, observacion=""):
+        """
+        Marca al menor como no asistió sin inventar una entrada o salida.
+        Debe usarse después del chequeo real de ausencias.
+        """
+        if not self.dia_tiene_operacion_ninos:
+            return False, ["No se puede marcar ausencia porque el día aún no ha sido iniciado."]
+
+        if self.entrada_en:
+            return False, ["No se puede marcar como ausente a un menor que ya tiene entrada registrada."]
+
+        self.estado = self.EstadoRegistro.NO_ASISTIO
+
+        if observacion:
+            self.observacion_salida = observacion
+
+        campos = ["estado", "updated_at"]
+        if observacion:
+            campos.append("observacion_salida")
+
+        self.save(update_fields=campos)
+        return True, []
 
     def registrar_entrada(
         self,
@@ -6437,6 +6659,88 @@ class Incidencia(models.Model):
     @property
     def esta_cerrada(self):
         return self.estado == self.EstadoIncidencia.CERRADA
+
+    @property
+    def es_mayor_para_asistencia(self):
+        """
+        True solo para incidencias que pueden afectar la asistencia del menor.
+        Las incidencias bajas/leves no marcan ausencia ni retiro.
+        """
+        nivel = str(self.nivel or "").strip().upper()
+        return nivel in {
+            self.NivelChoices.ALTO,
+            "ALTO",
+            "ALTA",
+            "MAYOR",
+            "GRAVE",
+            "URGENTE",
+            "CRITICO",
+            "CRÍTICO",
+        }
+
+    @property
+    def implica_retiro_menor(self):
+        """
+        Detecta si la incidencia mayor implicó retiro/salida del menor.
+
+        Se hace de forma defensiva porque distintas pantallas pueden guardar
+        la señal de retiro en campos diferentes o en texto de resolución.
+        """
+        if not self.es_mayor_para_asistencia:
+            return False
+
+        registro = getattr(self, "registro_diario", None)
+
+        if registro and getattr(registro, "salida_en", None):
+            return True
+
+        campos_booleanos = [
+            "requiere_retiro",
+            "retiro_del_menor",
+            "menor_retirado",
+            "retirado",
+            "retiro_inmediato",
+            "salida_por_incidencia",
+            "requiere_salida",
+            "traslado_medico",
+            "canalizacion_urgente",
+        ]
+
+        for campo in campos_booleanos:
+            if hasattr(self, campo):
+                try:
+                    if bool(getattr(self, campo)):
+                        return True
+                except Exception:
+                    pass
+
+        campos_texto = [
+            "motivo_retiro",
+            "motivo_salida",
+            "observaciones_retiro",
+            "resolucion",
+            "intervencion_personal",
+            "descripcion",
+        ]
+        palabras_retiro = [
+            "retiro",
+            "retirado",
+            "retirada",
+            "salida por incidencia",
+            "se entrego",
+            "se entregó",
+            "se lo llevaron",
+            "lo recogieron",
+            "la recogieron",
+        ]
+
+        for campo in campos_texto:
+            if hasattr(self, campo):
+                valor = normalizar_texto_rol(getattr(self, campo, ""))
+                if valor and any(palabra in valor for palabra in palabras_retiro):
+                    return True
+
+        return False
 
     def marcar_revisada_por_titular(self, usuario=None, observacion=""):
         """

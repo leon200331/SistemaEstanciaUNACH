@@ -41,12 +41,12 @@
             padding:24px;
         }
         .topbar{
-            background:rgba(255,255,255,.94);
-            backdrop-filter:blur(16px);
-            border:1px solid rgba(226,232,240,.9);
+            background:rgba(255,255,255,.96);
+                        border:1px solid rgba(226,232,240,.9);
             border-radius:26px;
-            padding:18px 20px;
+            padding:14px 20px;
             display:flex;
+            min-height:132px;
             align-items:center;
             justify-content:space-between;
             gap:18px;
@@ -56,28 +56,30 @@
         .brand{
             display:flex;
             align-items:center;
-            gap:14px;
+            gap:18px;
             min-width:0;
         }
         .brand-logo{
-            width:100px;
-            height:68px;
-            border-radius:22px;
-            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
-            border:1px solid rgba(255,255,255,.28);
+            width:276px;
+            height:112px;
+            border-radius:28px;
+            background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);
+            border:1px solid rgba(255,255,255,.35);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:7px;
-            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            padding:10px 14px;
+            box-shadow:0 18px 36px rgba(37,99,235,.24);
             flex-shrink:0;
+            overflow:hidden;
         }
         .brand-logo img{
-            width:100%;
-            height:100%;
+            width:125%;
+            height:125%;
             object-fit:contain;
-            transform:scale(1.12);
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            transform:none;
+            filter:none;
+            display:block;
         }
         .brand-title{
             margin:0;
@@ -127,14 +129,24 @@
             box-shadow:0 10px 22px rgba(37,99,235,.08);
         }
         .user-avatar{
-            width:34px;
-            height:34px;
-            border-radius:50%;
+            width:42px;
+            height:42px;
+            border-radius:16px;
             display:flex;
             align-items:center;
             justify-content:center;
             background:#dbeafe;
             color:#1d4ed8;
+            overflow:hidden;
+            flex:0 0 auto;
+            box-shadow:inset 0 0 0 1px rgba(37,99,235,.08);
+        }
+
+        .user-avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
         }
         .user-name{
             line-height:1.1;
@@ -219,8 +231,7 @@
             border:1px solid rgba(255,255,255,.28);
             border-radius:22px;
             padding:16px;
-            backdrop-filter:blur(12px);
-        }
+                    }
         .hero-label{
             font-size:.72rem;
             text-transform:uppercase;
@@ -654,10 +665,7 @@
             .brand{
                 align-items:flex-start;
             }
-            .brand-logo{
-                width:90px;
-                height:62px;
-            }
+            .brand-logo{width:220px;height:88px;border-radius:24px;padding:8px 12px;}
             .top-actions,.btn-soft,.user-chip{
                 width:100%;
                 justify-content:center;
@@ -1071,8 +1079,52 @@
 
 <body>
 <div class="page">
+<header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
+            </div>
+            <div>
+                <h1 class="brand-title">Códigos de seguridad</h1>
+                <p class="brand-subtitle">Control de códigos individuales por tutor o familiar autorizado.</p>
+            </div>
+        </div>
 
-{% if coberturas_trabajo_social_activas or cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social or bloqueos_edicion_activos %}
+        <div class="top-actions">
+            <a href="/panel-administrativo/" class="btn-soft">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                Regresar
+            </a>
+            <div class="user-chip" title="Usuario activo">
+                <div class="user-avatar">
+                    {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+                        <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                    {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% else %}
+                        <i class="bi bi-person-badge-fill"></i>
+                    {% endif %}
+                </div>
+                <div class="user-name">
+                    <strong>
+                        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            Cubriendo TS ·
+                        {% endif %}
+                        {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username|default:"Trabajo Social" }}{% endif %}
+                    </strong>
+                    <span>
+                        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            Cobertura temporal
+                        {% else %}
+                            Trabajadora Social
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+{% if cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social %}
 <section class="ts-live-coverage-panel" id="trabajo-social-coberturas-tiempo-real">
   <div class="ts-live-head">
     <div>
@@ -1129,8 +1181,7 @@
 </section>
 {% endif %}
 
-
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+{% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>
@@ -1205,32 +1256,6 @@
   </section>
   {% endif %}
 
-
-    <header class="topbar">
-        <div class="brand">
-            <div class="brand-logo">
-                <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
-            </div>
-            <div>
-                <h1 class="brand-title">Códigos de seguridad</h1>
-                <p class="brand-subtitle">Control de códigos individuales por tutor o familiar autorizado.</p>
-            </div>
-        </div>
-
-        <div class="top-actions">
-            <a href="/panel-administrativo/" class="btn-soft">
-                <i class="bi bi-arrow-left-circle-fill"></i>
-                Regresar
-            </a>
-            <div class="user-chip">
-                <div class="user-avatar"><i class="bi bi-person-badge-fill"></i></div>
-                <div class="user-name">
-                    <strong>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username|default:"Trabajo Social" }}{% endif %}</strong>
-                    <span>Trabajadora Social</span>
-                </div>
-            </div>
-        </div>
-    </header>
 
     {% if messages %}
         <div class="mb-3">

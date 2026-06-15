@@ -1056,6 +1056,12 @@
         align-items: flex-start;
         flex-direction: column;
       }
+
+      .admin-topbar-actions-modern {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
     }
 
 
@@ -1571,6 +1577,633 @@
       .inc-ti-alert { flex-direction: column; }
     }
 
+
+    /* =========================================================
+       AJUSTES SOLICITADOS - LOGO GRANDE Y FOTO DE PERFIL ADMIN
+       ========================================================= */
+    .sidebar-brand-modern {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 8px 22px;
+      text-align: center;
+    }
+
+    .sidebar-logo-modern {
+      width: 230px;
+      height: 92px;
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, #1d4ed8 0%, #2563eb 48%, #1e40af 100%);
+      box-shadow: 0 18px 34px rgba(37,99,235,.24);
+      border: 1px solid rgba(255,255,255,.28);
+      position: relative;
+    }
+
+    .sidebar-logo-modern::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.22);
+      pointer-events: none;
+    }
+
+    .sidebar-logo-modern img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px 14px;
+      position: relative;
+      z-index: 1;
+      filter: none;
+      background: transparent !important;
+    }
+
+    .sidebar-title-modern {
+      font-size: 1.16rem;
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      text-align: center;
+    }
+
+    .sidebar-subtitle-modern {
+      font-size: .74rem;
+      text-align: center;
+    }
+
+
+
+    .admin-topbar-actions-modern {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .admin-home-btn-modern {
+      min-height: 52px;
+      border: 1px solid #dbeafe;
+      background: #ffffff;
+      color: #1455e7;
+      border-radius: 18px;
+      padding: 10px 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      font-weight: 950;
+      box-shadow: 0 10px 22px rgba(37,99,235,.08);
+      transition: .18s ease;
+      white-space: nowrap;
+    }
+
+    .admin-home-btn-modern i {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: #e8f0ff;
+      color: #2563eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+    }
+
+    .admin-home-btn-modern:hover {
+      color: #0f3fc4;
+      border-color: #bfdbfe;
+      background: #f8fbff;
+      transform: translateY(-1px);
+    }
+
+    .admin-user-pill-modern.admin-profile-trigger {
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 18px;
+      padding: 8px 10px;
+      transition: .18s ease;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .admin-user-pill-modern.admin-profile-trigger:hover {
+      background: #f1f6ff;
+      border-color: #dbeafe;
+      transform: translateY(-1px);
+    }
+
+    .user-avatar-modern {
+      overflow: hidden;
+      border: 3px solid #eaf2ff;
+      box-shadow: 0 10px 22px rgba(37,99,235,.12);
+    }
+
+    .user-avatar-modern img,
+    .admin-profile-preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .admin-profile-chevron {
+      color: #64748b;
+      font-size: .95rem;
+      margin-left: 2px;
+    }
+
+    .profile-admin-modal .modal-content {
+      border: 0;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 28px 70px rgba(15,23,42,.24);
+      background: #fff;
+    }
+
+    .profile-admin-hero {
+      position: relative;
+      padding: 30px 32px 44px;
+      color: #fff;
+      background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+      overflow: hidden;
+    }
+
+    .profile-admin-hero::before,
+    .profile-admin-hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255,255,255,.20);
+    }
+
+    .profile-admin-hero::before {
+      width: 160px;
+      height: 160px;
+      right: -34px;
+      top: -58px;
+    }
+
+    .profile-admin-hero::after {
+      width: 118px;
+      height: 118px;
+      right: 72px;
+      top: -46px;
+      background: rgba(255,255,255,.16);
+    }
+
+    .profile-admin-badge {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.34);
+      background: rgba(255,255,255,.12);
+      font-size: .82rem;
+      font-weight: 950;
+      margin-bottom: 18px;
+    }
+
+    .profile-admin-hero h2 {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 8px;
+      font-weight: 950;
+      letter-spacing: -.04em;
+      font-size: clamp(1.45rem, 2.4vw, 2rem);
+    }
+
+    .profile-admin-hero p {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-weight: 750;
+      color: rgba(255,255,255,.92);
+    }
+
+    .profile-admin-close {
+      position: absolute;
+      z-index: 2;
+      right: 22px;
+      top: 20px;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(255,255,255,.18);
+      font-size: 1.45rem;
+      display: grid;
+      place-items: center;
+      transition: .18s ease;
+    }
+
+    .profile-admin-close:hover {
+      background: rgba(255,255,255,.28);
+      transform: rotate(90deg);
+    }
+
+    .profile-admin-body {
+      padding: 0 32px 30px;
+      margin-top: -26px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .profile-admin-card {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+      padding: 22px;
+      border: 1px solid #dbe7fb;
+      border-radius: 26px;
+      background: #fff;
+      box-shadow: 0 18px 38px rgba(15,23,42,.08);
+    }
+
+    .admin-profile-preview {
+      position: relative;
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      padding: 7px;
+      background: #eff6ff;
+      box-shadow: inset 0 0 0 1px #dbeafe;
+      flex-shrink: 0;
+    }
+
+    .admin-profile-preview-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #dbeafe;
+      display: grid;
+      place-items: center;
+      color: #2563eb;
+      font-size: 3rem;
+    }
+
+    .admin-profile-camera {
+      position: absolute;
+      right: 4px;
+      bottom: 7px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      color: #fff;
+      border: 4px solid #fff;
+      box-shadow: 0 10px 20px rgba(37,99,235,.25);
+      font-size: 1.15rem;
+    }
+
+    .profile-admin-card h3 {
+      margin: 0 0 5px;
+      font-weight: 950;
+      color: #0f172a;
+      letter-spacing: -.03em;
+    }
+
+    .profile-admin-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: #eaf2ff;
+      color: #1d4ed8;
+      font-weight: 900;
+      font-size: .82rem;
+      margin-bottom: 12px;
+    }
+
+    .profile-admin-card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.45;
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .profile-admin-upload {
+      margin-top: 22px;
+      padding: 22px;
+      border: 1.8px dashed #93c5fd;
+      border-radius: 24px;
+      background: #fbfdff;
+    }
+
+    .profile-admin-upload-row {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .profile-admin-upload-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      background: #eaf2ff;
+      color: #2563eb;
+      font-size: 2rem;
+    }
+
+    .profile-admin-upload-title {
+      margin: 0 0 4px;
+      color: #0f172a;
+      font-weight: 950;
+    }
+
+    .profile-admin-upload-text {
+      color: #31507d;
+      font-weight: 800;
+      font-size: .9rem;
+    }
+
+    .profile-admin-file-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 999px;
+      color: #2563eb;
+      border: 1px solid #93c5fd;
+      background: #fff;
+      font-weight: 950;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: .18s ease;
+    }
+
+    .profile-admin-file-btn:hover {
+      background: #eff6ff;
+      transform: translateY(-1px);
+    }
+
+    .profile-admin-rules {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .profile-admin-rule {
+      min-height: 58px;
+      border: 1px solid #dbe7fb;
+      border-radius: 16px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #0b1b44;
+      font-weight: 950;
+    }
+
+    .profile-admin-rule i {
+      color: #2563eb;
+    }
+
+    .profile-admin-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .profile-admin-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: #475569;
+      font-weight: 850;
+      line-height: 1.25;
+    }
+
+    .profile-admin-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .profile-admin-btn {
+      min-height: 46px;
+      border-radius: 999px;
+      padding: 0 20px;
+      border: 1px solid transparent;
+      font-weight: 950;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: .18s ease;
+    }
+
+    .profile-admin-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .profile-admin-btn-cancel {
+      color: #0b1b44;
+      background: #fff;
+      border-color: #dbe7fb;
+    }
+
+    .profile-admin-btn-save {
+      color: #fff;
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      box-shadow: 0 14px 28px rgba(37,99,235,.20);
+    }
+
+    .profile-admin-btn-delete {
+      color: #dc2626;
+      background: #fff1f2;
+      border-color: #fecaca;
+    }
+
+    .profile-admin-selected {
+      margin-top: 12px;
+      color: #1d4ed8;
+      font-size: .86rem;
+      font-weight: 850;
+      display: none;
+    }
+
+    @media(max-width: 768px) {
+      .profile-admin-card,
+      .profile-admin-upload-row {
+        grid-template-columns: 1fr;
+        text-align: center;
+        justify-items: center;
+      }
+      .profile-admin-rules {
+        grid-template-columns: 1fr;
+      }
+      .profile-admin-footer {
+        align-items: stretch;
+      }
+      .profile-admin-actions,
+      .profile-admin-actions form,
+      .profile-admin-actions button,
+      .profile-admin-actions label {
+        width: 100%;
+      }
+      .sidebar-logo-modern {
+        width: 220px;
+      }
+    }
+
+
+    /* =========================================================
+       AJUSTE FINAL SOLICITADO: LOGO DEL PANEL TI MÁS VISIBLE
+       Mantiene la casilla, pero aumenta el tamaño real de la imagen.
+       ========================================================= */
+    .sidebar-brand-modern{
+      padding-left:0 !important;
+      padding-right:0 !important;
+    }
+
+    .sidebar-logo-modern{
+      width:230px !important;
+      height:96px !important;
+      max-width:100% !important;
+      border-radius:24px !important;
+      overflow:hidden !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:0 !important;
+    }
+
+    .sidebar-logo-modern::after{
+      inset:7px !important;
+      border-radius:18px !important;
+    }
+
+    .sidebar-logo-modern img{
+      width:100% !important;
+      height:100% !important;
+      object-fit:contain !important;
+      object-position:center !important;
+      padding:4px 8px !important;
+      margin:0 !important;
+      display:block !important;
+      background:transparent !important;
+      box-shadow:none !important;
+    }
+
+    @media(max-width:768px){
+      .sidebar-logo-modern{
+        width:220px !important;
+        height:92px !important;
+      }
+
+      .sidebar-logo-modern img{
+        padding:4px 8px !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       AJUSTE FINAL: MISMO TAMAÑO DEL LOGO DEL PANEL DIRECTORA
+       Panel directivo usa logo de 300px y barra lateral de 340px.
+       ========================================================= */
+    .admin-shell{
+      background:linear-gradient(90deg, #f8fbff 0%, #f8fbff 340px, #f6f9ff 340px, #f6f9ff 100%) !important;
+    }
+
+    .admin-sidebar{
+      width:340px !important;
+      padding:18px 18px 20px !important;
+    }
+
+    .admin-main-modern{
+      margin-left:340px !important;
+      width:calc(100% - 340px) !important;
+    }
+
+    .sidebar-brand-modern{
+      padding-left:0 !important;
+      padding-right:0 !important;
+      gap:8px !important;
+    }
+
+    .sidebar-logo-modern{
+      width:300px !important;
+      height:auto !important;
+      max-width:100% !important;
+      border-radius:24px !important;
+      overflow:hidden !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:0 !important;
+      background:linear-gradient(135deg,#2c62df,#133fba) !important;
+      box-shadow:0 14px 28px rgba(39,87,215,.28) !important;
+      border:0 !important;
+    }
+
+    .sidebar-logo-modern::after{
+      inset:0 !important;
+      border:0 !important;
+    }
+
+    .sidebar-logo-modern img{
+      width:300px !important;
+      height:auto !important;
+      max-width:none !important;
+      object-fit:contain !important;
+      object-position:center center !important;
+      padding:0 !important;
+      margin:0 !important;
+      display:block !important;
+      background:transparent !important;
+      box-shadow:none !important;
+    }
+
+    @media(max-width:992px){
+      .admin-shell{
+        background:#f6f9ff !important;
+      }
+
+      .admin-sidebar{
+        width:100% !important;
+      }
+
+      .admin-main-modern{
+        margin-left:0 !important;
+        width:100% !important;
+      }
+    }
+
+    @media(max-width:420px){
+      .sidebar-logo-modern,
+      .sidebar-logo-modern img{
+        width:100% !important;
+        max-width:300px !important;
+      }
+    }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
@@ -1580,10 +2213,10 @@
     <aside class="admin-sidebar">
         <div class="sidebar-brand-modern">
             <div class="sidebar-logo-modern">
-                <img src="{% static 'img/logo.png' %}" alt="EIU UNACH">
+                <img src="{% static 'img/logo.png' %}" alt="Logo Estancia Infantil UNACH">
             </div>
             <div>
-                <h1 class="sidebar-title-modern">Estancia<br>Infantil</h1>
+                <h1 class="sidebar-title-modern">Estancia Infantil<br>UNACH</h1>
                 <div class="sidebar-subtitle-modern">Panel de sistema</div>
             </div>
         </div>
@@ -1633,14 +2266,21 @@
                 <p>Gestión central del sistema</p>
             </div>
 
-            <div class="admin-user-pill-modern">
-                <div class="user-avatar-modern">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <div>
-                    <div class="small text-muted fw-bold">Administrador(a)</div>
-                    <div class="fw-bold">{{ user.username }}</div>
-                </div>
+            <div class="admin-topbar-actions-modern">
+                <button class="admin-user-pill-modern admin-profile-trigger" type="button" data-bs-toggle="modal" data-bs-target="#modalFotoAdmin" title="Personalizar foto de perfil">
+                    <div class="user-avatar-modern">
+                        {% if request.user.foto_perfil_url %}
+                            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil de {{ request.user.nombre_visible|default:request.user.username }}">
+                        {% else %}
+                            <i class="bi bi-person-fill"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="small text-muted fw-bold">Administrador(a)</div>
+                        <div class="fw-bold">{{ request.user.nombre_visible|default:user.username }}</div>
+                    </div>
+                    <i class="bi bi-chevron-down admin-profile-chevron"></i>
+                </button>
             </div>
         </div>
 
@@ -2517,6 +3157,100 @@
     </main>
 </div>
 
+
+
+<div class="modal fade profile-admin-modal" id="modalFotoAdmin" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="profile-admin-hero">
+                <button type="button" class="profile-admin-close" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="profile-admin-badge">
+                    <i class="bi bi-person-vcard-fill"></i> Perfil visible de administrador
+                </div>
+                <h2>Personaliza tu foto de perfil</h2>
+                <p>Esta imagen aparecerá únicamente en tu usuario y en tus vistas del panel administrativo.</p>
+            </div>
+
+            <div class="profile-admin-body">
+                <div class="profile-admin-card">
+                    <div class="admin-profile-preview">
+                        <div class="admin-profile-preview-inner" id="adminProfilePreview">
+                            {% if request.user.foto_perfil_url %}
+                                <img class="admin-profile-preview-img" src="{{ request.user.foto_perfil_url }}" alt="Foto actual de {{ request.user.nombre_visible|default:request.user.username }}">
+                            {% else %}
+                                <i class="bi bi-person-fill"></i>
+                            {% endif %}
+                        </div>
+                        <div class="admin-profile-camera"><i class="bi bi-camera-fill"></i></div>
+                    </div>
+
+                    <div>
+                        <h3>{{ request.user.nombre_visible|default:request.user.username }}</h3>
+                        <div class="profile-admin-role"><i class="bi bi-shield-check"></i> Administrador(a)</div>
+                        <p>
+                            Puedes subir una foto clara de rostro. Si no agregas imagen, el sistema seguirá usando el icono profesional de perfil.
+                        </p>
+                    </div>
+                </div>
+
+                <form id="formFotoAdmin" enctype="multipart/form-data" onsubmit="guardarFotoAdmin(event)">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="actualizar_foto_admin">
+
+                    <div class="profile-admin-upload">
+                        <div class="profile-admin-upload-row">
+                            <div class="profile-admin-upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                            <div>
+                                <h4 class="profile-admin-upload-title">Selecciona una foto para tu perfil</h4>
+                                <div class="profile-admin-upload-text">Arrastra o selecciona una imagen desde tu equipo.</div>
+                                <div class="profile-admin-selected" id="adminSelectedFile"></div>
+                            </div>
+                            <div>
+                                <input id="fotoPerfilAdminInput" type="file" name="foto_perfil_admin" accept="image/jpeg,image/png,image/webp" hidden>
+                                <label class="profile-admin-file-btn" for="fotoPerfilAdminInput">
+                                    <i class="bi bi-image-fill"></i> Elegir foto
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="profile-admin-rules">
+                            <div class="profile-admin-rule"><i class="bi bi-filetype-jpg"></i> JPG o JPEG</div>
+                            <div class="profile-admin-rule"><i class="bi bi-filetype-png"></i> PNG / WEBP</div>
+                            <div class="profile-admin-rule"><i class="bi bi-hdd-stack-fill"></i> Máximo 3 MB</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-admin-footer">
+                        <div class="profile-admin-note">
+                            <i class="bi bi-shield-check text-primary"></i>
+                            <span>Tu foto es opcional y tiene límite para proteger el servidor.</span>
+                        </div>
+
+                        <div class="profile-admin-actions">
+                            {% if request.user.foto_perfil_url %}
+                            <button type="button" class="profile-admin-btn profile-admin-btn-delete" onclick="confirmarEliminarFotoAdmin()">
+                                <i class="bi bi-trash-fill"></i> Eliminar foto
+                            </button>
+                            {% endif %}
+                            <button type="button" class="profile-admin-btn profile-admin-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="profile-admin-btn profile-admin-btn-save">
+                                <i class="bi bi-check-circle-fill"></i> Guardar foto
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="formEliminarFotoAdmin" enctype="multipart/form-data" style="display:none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="eliminar_foto_admin">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalCrearUser" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
@@ -2741,6 +3475,14 @@
         }
     }
 
+
+
+    function irHomePanelTi(event) {
+        localStorage.removeItem('activeTabID');
+        limpiarFiltrosIncidenciasDeUrl();
+        // El enlace continúa hacia panel_gobierno_ti para volver al inicio del Panel TI.
+    }
+
     function cargarDatosEdicion(boton) {
         document.getElementById('edit_user_id').value = boton.getAttribute('data-id');
         document.getElementById('edit_nombre').value = boton.getAttribute('data-nombre');
@@ -2937,5 +3679,159 @@
             }
         });
     }
+
+    function archivoAdminValido(file) {
+        if (!file) {
+            Swal.fire('Aviso', 'Selecciona una imagen para tu foto de perfil.', 'warning');
+            return false;
+        }
+
+        const formatos = ['image/jpeg', 'image/png', 'image/webp'];
+        const nombre = (file.name || '').toLowerCase();
+        const extensionValida = nombre.endsWith('.jpg') || nombre.endsWith('.jpeg') || nombre.endsWith('.png') || nombre.endsWith('.webp');
+        const tipoValido = formatos.includes(file.type) || extensionValida;
+        const maxBytes = 3 * 1024 * 1024;
+
+        if (!tipoValido) {
+            Swal.fire('Formato no permitido', 'Usa una imagen JPG, JPEG, PNG o WEBP.', 'warning');
+            return false;
+        }
+
+        if (file.size > maxBytes) {
+            const peso = (file.size / (1024 * 1024)).toFixed(2);
+            Swal.fire('Imagen demasiado pesada', `La foto pesa ${peso} MB. El máximo permitido es 3 MB.`, 'warning');
+            return false;
+        }
+
+        if (file.size <= 0) {
+            Swal.fire('Imagen no válida', 'El archivo está vacío. Selecciona otra imagen.', 'warning');
+            return false;
+        }
+
+        return true;
+    }
+
+    const fotoPerfilAdminInput = document.getElementById('fotoPerfilAdminInput');
+    if (fotoPerfilAdminInput) {
+        fotoPerfilAdminInput.addEventListener('change', function() {
+            const file = this.files && this.files[0] ? this.files[0] : null;
+            if (!file) return;
+
+            if (!archivoAdminValido(file)) {
+                this.value = '';
+                return;
+            }
+
+            const selected = document.getElementById('adminSelectedFile');
+            if (selected) {
+                selected.style.display = 'block';
+                selected.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' + file.name;
+            }
+
+            const preview = document.getElementById('adminProfilePreview');
+            if (preview) {
+                const url = URL.createObjectURL(file);
+                preview.innerHTML = `<img class="admin-profile-preview-img" src="${url}" alt="Vista previa de foto de perfil">`;
+            }
+        });
+    }
+
+    function guardarFotoAdmin(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const input = document.getElementById('fotoPerfilAdminInput');
+        const file = input && input.files && input.files[0] ? input.files[0] : null;
+
+        if (!archivoAdminValido(file)) {
+            return;
+        }
+
+        const btn = form.querySelector('button[type="submit"]');
+        const original = btn ? btn.innerHTML : '';
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+        }
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.status === 'success') {
+                Swal.fire({
+                    title: 'Foto actualizada',
+                    text: d.msg || 'Tu foto de perfil se actualizó correctamente.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => window.location.reload());
+            } else {
+                Swal.fire('Aviso', d.msg || 'No se pudo actualizar la foto de perfil.', 'warning');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            }
+        })
+        .catch(() => {
+            Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        });
+    }
+
+    function confirmarEliminarFotoAdmin() {
+        Swal.fire({
+            title: '¿Deseas eliminar tu foto?',
+            html: '<div style="color:#475569;font-weight:650;line-height:1.45;">El panel volverá a mostrar el icono profesional de administrador. Esta acción no elimina tu usuario ni tus permisos.</div>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, eliminar foto',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            background: '#ffffff',
+            buttonsStyling: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarFotoAdmin();
+            }
+        });
+    }
+
+    function eliminarFotoAdmin() {
+        const form = document.getElementById('formEliminarFotoAdmin');
+        if (!form) return;
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.status === 'success') {
+                Swal.fire({
+                    title: 'Foto eliminada',
+                    text: d.msg || 'La foto de perfil se eliminó correctamente.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => window.location.reload());
+            } else {
+                Swal.fire('Aviso', d.msg || 'No se pudo eliminar la foto de perfil.', 'warning');
+            }
+        })
+        .catch(() => Swal.fire('Error', 'Ocurrió un error en el servidor.', 'error'));
+    }
+
 </script>
 {% endblock %}

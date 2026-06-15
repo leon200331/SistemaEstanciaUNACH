@@ -1,6 +1,79 @@
-from django.urls import path
+from django.urls import path, reverse
+from django.shortcuts import redirect
+import re
 from . import views
 from usuarios import views as user_views  # Vistas de la directora
+from .models import Semestre, SalaSemestre
+
+
+
+def redirigir_salas_semestre_a_detalle(request):
+    """
+    Corrige enlaces antiguos o botones de regreso que apuntan a:
+        /admisiones/semestres/salas-semestre/?origen=ti
+
+    Esa URL no muestra una sala específica; por eso se redirige al detalle
+    del semestre correcto. Primero intenta detectar la sala desde la pantalla
+    anterior, después usa semestre_id si viene en la URL y, como respaldo,
+    manda al semestre activo o al último semestre creado.
+    """
+    origen = (request.GET.get("origen") or "").strip()
+    semestre_id = (
+        request.GET.get("semestre_id")
+        or request.GET.get("semestre")
+        or request.GET.get("id")
+        or ""
+    )
+
+    if not semestre_id:
+        referencia = request.META.get("HTTP_REFERER", "") or ""
+        coincidencia = re.search(r"/semestres/salas-semestre/(\d+)/editar", referencia)
+
+        if coincidencia:
+            sala_semestre = (
+                SalaSemestre.objects
+                .select_related("semestre")
+                .filter(pk=coincidencia.group(1))
+                .first()
+            )
+            if sala_semestre:
+                semestre_id = sala_semestre.semestre_id
+
+    semestre = None
+
+    if semestre_id:
+        try:
+            semestre = Semestre.objects.filter(pk=int(semestre_id)).first()
+        except (TypeError, ValueError):
+            semestre = None
+
+    if semestre is None:
+        try:
+            estado_activo = Semestre.EstadoSemestre.ACTIVO
+        except Exception:
+            estado_activo = "ACTIVO"
+
+        semestre = (
+            Semestre.objects
+            .filter(estado=estado_activo)
+            .order_by("-fecha_inicio", "-id")
+            .first()
+        )
+
+    if semestre is None:
+        semestre = Semestre.objects.order_by("-fecha_inicio", "-id").first()
+
+    if semestre:
+        url = reverse("detalle_semestre", kwargs={"semestre_id": semestre.id})
+    else:
+        url = reverse("lista_semestres")
+
+    if origen:
+        separador = "&" if "?" in url else "?"
+        url = f"{url}{separador}origen={origen}"
+
+    return redirect(url)
+
 
 urlpatterns = [
     # =========================================================
@@ -294,6 +367,12 @@ urlpatterns = [
         "semestres/<int:semestre_id>/salas/agregar/",
         views.agregar_sala_semestre,
         name="agregar_sala_semestre",
+    ),
+
+    path(
+        "semestres/salas-semestre/",
+        redirigir_salas_semestre_a_detalle,
+        name="redirigir_salas_semestre_a_detalle",
     ),
     path(
         "semestres/salas-semestre/<int:sala_semestre_id>/editar/",

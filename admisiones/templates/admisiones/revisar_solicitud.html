@@ -57,8 +57,8 @@
     .topbar-inner{
       max-width:1440px;
       margin:0 auto;
-      min-height:82px;
-      padding:0 28px;
+      min-height:132px;
+      padding:14px 28px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -75,30 +75,39 @@
     }
 
     .brand-logo{
-      width:78px;
-      height:54px;
+      width:276px;
+      height:112px;
       display:flex;
       align-items:center;
       justify-content:center;
       flex:0 0 auto;
-      background:transparent;
-      border-radius:0;
-      overflow:visible;
+      background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);
+      border:1px solid rgba(255,255,255,.42);
+      border-radius:28px;
+      overflow:hidden;
+      padding:10px 14px;
+      box-shadow:0 18px 36px rgba(11,36,84,.25);
+      position:relative;
+    }
+
+    .brand-logo::after{
+      content:none;
     }
 
     .brand-logo img{
-      height:52px;
-      width:auto;
-      max-width:120px;
+      width:112%;
+      height:112%;
       object-fit:contain;
       display:block;
-      filter:drop-shadow(0 8px 12px rgba(0,0,0,.20));
+      position:relative;
+      z-index:1;
+      filter:none;
     }
 
     .brand-title{
-      font-size:1.18rem;
+      font-size:1.32rem;
       font-weight:950;
-      letter-spacing:.02em;
+      letter-spacing:-.02em;
       line-height:1.1;
       margin:0;
       white-space:nowrap;
@@ -162,16 +171,25 @@
     }
 
     .user-chip .user-icon{
-      width:34px;
-      height:34px;
-      border-radius:50%;
+      width:42px;
+      height:42px;
+      border-radius:16px;
       background:#fff;
       color:var(--brand-2);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:1.15rem;
+      font-size:1.2rem;
       flex:0 0 auto;
+      overflow:hidden;
+      box-shadow:0 8px 18px rgba(15,23,42,.12);
+    }
+
+    .user-chip .user-icon img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .user-chip .user-name{
@@ -652,10 +670,14 @@
       .main-grid,
       .dictamen-layout{ grid-template-columns:1fr; }
       .sticky-panel{ position:static; }
+      .brand-logo{ width:248px; height:100px; }
+      .topbar-inner{ min-height:auto; }
     }
 
     @media (max-width:768px){
       .topbar-inner{ padding:14px 16px; flex-direction:column; align-items:flex-start; }
+      .brand-area{ width:100%; align-items:center; }
+      .brand-logo{ width:220px; height:88px; border-radius:24px; padding:8px 12px; }
       .top-actions{ width:100%; justify-content:space-between; }
       .brand-title{ white-space:normal; }
       .brand-subtitle{ white-space:normal; max-width:100%; }
@@ -1070,9 +1092,22 @@
         <i class="bi bi-arrow-left"></i>
         Regresar
       </a>
-      <span class="user-chip" title="Trabajadora Social">
-        <span class="user-icon"><i class="bi bi-person-heart"></i></span>
-        <span class="user-name">{{ request.user.nombre|default:request.user.username }}</span>
+      <span class="user-chip" title="Usuario activo">
+        <span class="user-icon">
+          {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+          {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+            <i class="bi bi-person-check-fill"></i>
+          {% else %}
+            <i class="bi bi-person-heart"></i>
+          {% endif %}
+        </span>
+        <span class="user-name">
+          {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+            Cubriendo TS ·
+          {% endif %}
+          {{ request.user.nombre|default:request.user.username }}
+        </span>
       </span>
     </div>
   </div>
@@ -1107,7 +1142,7 @@
     </a>
   </div>
 </section>
-{% elif bloqueo_edicion_temporal %}
+{% elif bloqueo_edicion_temporal and suplencia_trabajo_social_activa or bloqueo_edicion_temporal and cobertura_trabajo_social_activa or bloqueo_edicion_temporal and modo_suplencia_trabajo_social or bloqueo_edicion_temporal and solo_consulta_suplencia %}
 <section class="ts-edit-lock-panel mine" id="bloqueo-edicion-trabajo-social" data-bloqueo-id="{{ bloqueo_edicion_temporal.id }}">
   <div class="ts-lock-head">
     <div>
@@ -1150,7 +1185,7 @@
 {% endif %}
 
 
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>

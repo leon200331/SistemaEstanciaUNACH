@@ -22,18 +22,83 @@
             --muted:#64748b;
             --border:#e2e8f0;
             --soft:#f8fafc;
+
+            /* Colores dinámicos según sexo del menor */
+            --accent-main:#2563eb;
+            --accent-alt:#0891b2;
+            --accent-third:#1e40af;
+            --hero-main:linear-gradient(135deg,#1e40af,#2563eb,#0891b2);
+            --hero-shadow:rgba(37,99,235,.24);
+            --page-bg:
+                radial-gradient(circle at top left, rgba(37,99,235,.13), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.14), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            --brand-bg:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            --brand-shadow:rgba(29,78,216,.28);
+            --avatar-bg:linear-gradient(135deg,#dbeafe,#cffafe);
+            --student-soft:linear-gradient(135deg,#eff6ff,#ecfeff 60%,#ffffff);
+            --student-border:#bfdbfe;
+            --chip-soft:#dbeafe;
+            --chip-active:linear-gradient(135deg,#eff6ff,#ffffff);
+            --button-main:linear-gradient(135deg,#2563eb,#0891b2);
+            --focus-color:#93c5fd;
+            --focus-shadow:rgba(59,130,246,.12);
+            --accent-rgb:37,99,235;
         }
 
         *{box-sizing:border-box;}
 
         body{
             min-height:100vh;
-            background:
-                radial-gradient(circle at top left, rgba(124,58,237,.13), transparent 30%),
-                radial-gradient(circle at top right, rgba(8,145,178,.14), transparent 32%),
-                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            background:var(--page-bg);
             font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color:var(--slate);
+        }
+
+        body.theme-girl{
+            --accent-main:#db2777;
+            --accent-alt:#7c3aed;
+            --accent-third:#be185d;
+            --hero-main:linear-gradient(135deg,#be185d,#db2777,#7c3aed);
+            --hero-shadow:rgba(219,39,119,.24);
+            --page-bg:
+                radial-gradient(circle at top left, rgba(219,39,119,.15), transparent 30%),
+                radial-gradient(circle at top right, rgba(124,58,237,.14), transparent 32%),
+                linear-gradient(135deg,#fff7fb,#f3f7ff 45%,#f8fafc);
+            --brand-bg:linear-gradient(135deg,#be185d,#db2777,#7c3aed);
+            --brand-shadow:rgba(219,39,119,.25);
+            --avatar-bg:linear-gradient(135deg,#fce7f3,#ede9fe);
+            --student-soft:linear-gradient(135deg,#fff1f7,#fdf2ff 60%,#ffffff);
+            --student-border:#fbcfe8;
+            --chip-soft:#fce7f3;
+            --chip-active:linear-gradient(135deg,#fff1f7,#f5f3ff);
+            --button-main:linear-gradient(135deg,#db2777,#7c3aed);
+            --focus-color:#f9a8d4;
+            --focus-shadow:rgba(219,39,119,.13);
+            --accent-rgb:219,39,119;
+        }
+
+        body.theme-boy{
+            --accent-main:#2563eb;
+            --accent-alt:#0891b2;
+            --accent-third:#1e40af;
+            --hero-main:linear-gradient(135deg,#1e40af,#2563eb,#0891b2);
+            --hero-shadow:rgba(37,99,235,.24);
+            --page-bg:
+                radial-gradient(circle at top left, rgba(37,99,235,.13), transparent 30%),
+                radial-gradient(circle at top right, rgba(8,145,178,.14), transparent 32%),
+                linear-gradient(135deg,#f8fafc,#eef6ff 45%,#f1f5f9);
+            --brand-bg:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
+            --brand-shadow:rgba(29,78,216,.28);
+            --avatar-bg:linear-gradient(135deg,#dbeafe,#cffafe);
+            --student-soft:linear-gradient(135deg,#eff6ff,#ecfeff 60%,#ffffff);
+            --student-border:#bfdbfe;
+            --chip-soft:#dbeafe;
+            --chip-active:linear-gradient(135deg,#eff6ff,#ffffff);
+            --button-main:linear-gradient(135deg,#2563eb,#0891b2);
+            --focus-color:#93c5fd;
+            --focus-shadow:rgba(59,130,246,.12);
+            --accent-rgb:37,99,235;
         }
 
         .page{
@@ -55,49 +120,62 @@
             box-shadow:0 18px 45px rgba(15,23,42,.08);
             margin-bottom:22px;
         }
-
         .brand{
             display:flex;
+            flex-direction:row;
             align-items:center;
-            gap:14px;
+            justify-content:flex-start;
+            gap:18px;
             min-width:0;
+            text-align:left;
         }
-
         .brand-logo{
-            width:96px;
-            height:64px;
-            border-radius:20px;
-            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
-            border:1px solid rgba(255,255,255,.32);
+            width:232px;
+            max-width:100%;
+            height:116px;
+            border-radius:28px;
+            background:var(--brand-bg, var(--hero-main, var(--hero, linear-gradient(135deg,#0b2a67 0%,#1d4ed8 54%,#0ea5e9 100%))));
+            border:1px solid rgba(255,255,255,.42);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:6px;
-            box-shadow:0 16px 34px rgba(29,78,216,.28);
-            flex-shrink:0;
+            padding:10px 16px;
+            box-shadow:0 26px 58px var(--brand-shadow, var(--hero-shadow, rgba(37,99,235,.36)));
+            flex:0 0 auto;
         }
-
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
             transform:scale(1.1);
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            filter:drop-shadow(0 6px 12px rgba(0,0,0,.28));
         }
 
+        .brand > div:last-child{
+            min-width:0;
+            max-width:360px;
+            padding-left:0;
+        }
         .brand-title{
             margin:0;
+            max-width:360px;
             font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.35rem;
-            color:#0f172a;
+            letter-spacing:-.05em;
+            font-size:1.55rem;
+            line-height:1.02;
+            color:#09215d;
+            text-align:left;
         }
-
         .brand-subtitle{
-            margin:2px 0 0;
+            margin:7px 0 0;
+            display:block;
+            max-width:360px;
             color:var(--muted);
-            font-weight:650;
-            font-size:.92rem;
+            font-weight:850;
+            font-size:.86rem;
+            letter-spacing:.02em;
+            line-height:1.28;
+            text-align:left;
         }
 
         .top-actions{
@@ -129,10 +207,19 @@
             display:flex;
             align-items:center;
             justify-content:center;
-            background:linear-gradient(135deg,#ede9fe,#dbeafe);
-            color:#6d28d9;
+            background:var(--avatar-bg);
+            color:var(--accent-main);
             flex-shrink:0;
             font-size:1.05rem;
+            overflow:hidden;
+        }
+
+
+        .teacher-icon img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
         }
 
         .teacher-name{
@@ -189,16 +276,16 @@
         }
 
         .btn-purple{
-            background:linear-gradient(135deg,#7c3aed,#2563eb);
+            background:var(--button-main);
             color:white;
         }
 
         .hero{
-            background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);
+            background:var(--hero-main);
             color:white;
             border-radius:30px;
             padding:26px;
-            box-shadow:0 24px 60px rgba(37,99,235,.24);
+            box-shadow:0 24px 60px var(--hero-shadow);
             margin-bottom:20px;
             position:relative;
             overflow:hidden;
@@ -341,8 +428,8 @@
         }
 
         .student-summary{
-            background:linear-gradient(135deg,#f5f3ff,#eff6ff 60%,#ffffff);
-            border:1px solid #c4b5fd;
+            background:var(--student-soft);
+            border:1px solid var(--student-border);
             border-radius:22px;
             padding:14px;
             display:flex;
@@ -356,8 +443,8 @@
             width:66px;
             height:66px;
             border-radius:20px;
-            background:linear-gradient(135deg,#ede9fe,#dbeafe);
-            color:#6d28d9;
+            background:var(--avatar-bg);
+            color:var(--accent-main);
             display:flex;
             align-items:center;
             justify-content:center;
@@ -501,8 +588,8 @@
 
         .form-control:focus,
         .form-select:focus{
-            border-color:#a78bfa;
-            box-shadow:0 0 0 4px rgba(124,58,237,.12);
+            border-color:var(--focus-color);
+            box-shadow:0 0 0 4px var(--focus-shadow);
         }
 
         .native-multi-select select{
@@ -534,16 +621,16 @@
 
         .choice-chip:hover{
             transform:translateY(-1px);
-            border-color:#a78bfa;
-            box-shadow:0 10px 22px rgba(124,58,237,.10);
+            border-color:var(--focus-color);
+            box-shadow:0 10px 22px rgba(var(--accent-rgb),.10);
         }
 
         .choice-chip .check{
             width:28px;
             height:28px;
             border-radius:999px;
-            background:#ede9fe;
-            color:#7c3aed;
+            background:var(--chip-soft);
+            color:var(--accent-main);
             display:flex;
             align-items:center;
             justify-content:center;
@@ -552,13 +639,13 @@
         }
 
         .choice-chip.is-selected{
-            border-color:#7c3aed;
-            background:linear-gradient(135deg,#f5f3ff,#eff6ff);
-            box-shadow:0 12px 24px rgba(124,58,237,.13);
+            border-color:var(--accent-main);
+            background:var(--chip-active);
+            box-shadow:0 12px 24px rgba(var(--accent-rgb),.13);
         }
 
         .choice-chip.is-selected .check{
-            background:linear-gradient(135deg,#7c3aed,#2563eb);
+            background:var(--button-main);
             color:white;
         }
 
@@ -623,8 +710,8 @@
             width:34px;
             height:34px;
             border-radius:12px;
-            background:#ede9fe;
-            color:#6d28d9;
+            background:var(--chip-soft);
+            color:var(--accent-main);
             display:flex;
             align-items:center;
             justify-content:center;
@@ -701,8 +788,8 @@
             width:34px;
             height:34px;
             border-radius:12px;
-            background:#ede9fe;
-            color:#6d28d9;
+            background:var(--chip-soft);
+            color:var(--accent-main);
             display:flex;
             align-items:center;
             justify-content:center;
@@ -739,8 +826,8 @@
             width:34px;
             height:34px;
             border-radius:12px;
-            background:#ede9fe;
-            color:#6d28d9;
+            background:var(--chip-soft);
+            color:var(--accent-main);
             display:flex;
             align-items:center;
             justify-content:center;
@@ -942,10 +1029,122 @@
             .apoyo-mini-btn{width:100%;}
         }
 
+
+        /* ===== Colores dinámicos por sexo del menor ===== */
+        .brand-logo{
+            background:var(--brand-bg);
+            box-shadow:0 16px 34px var(--brand-shadow);
+        }
+
+        .teacher-chip .teacher-icon,
+        .student-avatar,
+        .amount-row .amount-icon,
+        .hygiene-select-wrap i,
+        .input-icon i{
+            background:var(--avatar-bg);
+            color:var(--accent-main);
+        }
+
+        .hero{
+            background:var(--hero-main);
+            box-shadow:0 24px 60px var(--hero-shadow);
+        }
+
+        .student-summary{
+            background:var(--student-soft);
+            border-color:var(--student-border);
+        }
+
+        .btn-purple,
+        .apoyo-mini-btn.apoyo-start{
+            background:var(--button-main);
+            color:#fff;
+        }
+
+        .choice-chip:hover{
+            border-color:var(--focus-color);
+            box-shadow:0 10px 22px rgba(var(--accent-rgb),.10);
+        }
+
+        .choice-chip .check{
+            background:var(--chip-soft);
+            color:var(--accent-main);
+        }
+
+        .choice-chip.is-selected{
+            border-color:var(--accent-main);
+            background:var(--chip-active);
+            box-shadow:0 12px 24px rgba(var(--accent-rgb),.13);
+        }
+
+        .choice-chip.is-selected .check{
+            background:var(--button-main);
+            color:white;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:var(--focus-color);
+            box-shadow:0 0 0 4px var(--focus-shadow);
+        }
+
+        body.theme-girl .badge-blue,
+        body.theme-girl .badge-purple{
+            background:#fce7f3;
+            color:#9d174d;
+        }
+
+        body.theme-girl .hero-kicker{
+            background:rgba(255,255,255,.20);
+            border-color:rgba(255,255,255,.30);
+        }
+
+        body.theme-girl .apoyo-sala-card:not(.active):not(.warning){
+            border-color:#fbcfe8;
+            border-left-color:#db2777;
+            background:linear-gradient(135deg,#fff1f7,#ffffff);
+            box-shadow:0 14px 34px rgba(219,39,119,.10);
+        }
+
+        body.theme-girl .apoyo-sala-card:not(.active):not(.warning) .apoyo-sala-icon{
+            background:#fce7f3;
+            color:#db2777;
+        }
+
+        body.theme-girl .apoyo-sala-pill{
+            border-color:#fbcfe8;
+            color:#9d174d;
+        }
+
+        body.theme-boy .badge-purple{
+            background:#dbeafe;
+            color:#1e40af;
+        }
+
+
+
+        @media(max-width:760px){
+            .brand{
+                flex-direction:column;
+                align-items:flex-start;
+                gap:10px;
+            }
+            .brand-logo{
+                width:204px;
+                height:102px;
+                border-radius:25px;
+            }
+            .brand-title,
+            .brand-subtitle{
+                max-width:240px;
+            }
+        }
     </style>
 </head>
 
-<body>
+{% with sexo=registro.alumno.sexo_menor|default:''|upper %}
+<body class="{% if sexo == 'F' or sexo == 'FEMENINO' %}theme-girl{% elif sexo == 'M' or sexo == 'MASCULINO' %}theme-boy{% else %}theme-boy{% endif %}">
+{% endwith %}
 <div class="page">
 
     <header class="topbar">
@@ -975,18 +1174,24 @@
                 </span>
             {% endif %}
 
-            <a href="{% url 'dashboard_maestra' %}#alumnos-dia" class="btn-soft">
+            <a href="{{ url_regresar_bitacora|default:'#' }}" class="btn-soft">
                 <i class="bi bi-arrow-left-circle-fill"></i>
-                Regresar
+                {% if origen_historial %}Volver al historial{% else %}Regresar{% endif %}
             </a>
 
-            <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}?origen=estancia" class="btn-soft">
+            <a href="{{ url_ver_casa_bitacora|default:'#' }}" class="btn-soft">
                 <i class="bi bi-house-heart-fill"></i>
                 Ver en casa
             </a>
 
-            <div class="teacher-chip" title="Maestra">
-                <span class="teacher-icon"><i class="bi bi-person-workspace"></i></span>
+            <div class="teacher-chip" title="{{ request.user.get_full_name|default:request.user.username }}">
+                <span class="teacher-icon">
+                    {% if foto_perfil_maestra_url %}
+                        <img src="{{ foto_perfil_maestra_url }}" alt="Foto de {{ request.user.get_full_name|default:request.user.username }}">
+                    {% else %}
+                        <i class="bi bi-person-workspace"></i>
+                    {% endif %}
+                </span>
                 <span class="teacher-name">{{ request.user.get_full_name|default:request.user.username }}</span>
             </div>
         </div>
@@ -1178,6 +1383,13 @@
                 <form method="post" novalidate id="bitacoraForm">
                     {% csrf_token %}
 
+                    {% if origen_bitacora %}
+                        <input type="hidden" name="origen" value="{{ origen_bitacora }}">
+                    {% endif %}
+                    {% if next_bitacora %}
+                        <input type="hidden" name="next" value="{{ next_bitacora }}">
+                    {% endif %}
+
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger alert-custom">{{ form.non_field_errors }}</div>
                     {% endif %}
@@ -1228,15 +1440,15 @@
                             <div class="milk-card">
                                 <div class="milk-title"><i class="bi bi-1-circle-fill"></i> Toma 1</div>
                                 <div class="milk-fields">
-                                    <input type="time" name="leche_1_hora" class="form-control" placeholder="Hora">
+                                    <input type="time" name="leche_1_hora" class="form-control" placeholder="Hora" value="{{ leche_1_hora_val|default_if_none:'' }}">
                                     <input type="hidden" name="leche_1_cantidad" id="leche_1_cantidad">
                                     <div class="amount-row">
                                         <span class="amount-icon"><i class="bi bi-cup-straw"></i></span>
-                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_1_numero" data-milk-number="1" placeholder="Cantidad">
+                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_1_numero" data-milk-number="1" placeholder="Cantidad" value="{{ leche_1_cantidad_numero|default_if_none:'' }}">
                                         <select class="form-select" id="leche_1_unidad" data-milk-unit="1" aria-label="Unidad toma 1">
-                                            <option value="oz">oz</option>
-                                            <option value="ml">ml</option>
-                                            <option value="L">L</option>
+                                            <option value="oz" {% if leche_1_unidad == "oz" %}selected{% endif %}>oz</option>
+                                            <option value="ml" {% if leche_1_unidad == "ml" %}selected{% endif %}>ml</option>
+                                            <option value="L" {% if leche_1_unidad == "L" %}selected{% endif %}>L</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1245,15 +1457,15 @@
                             <div class="milk-card">
                                 <div class="milk-title"><i class="bi bi-2-circle-fill"></i> Toma 2</div>
                                 <div class="milk-fields">
-                                    <input type="time" name="leche_2_hora" class="form-control" placeholder="Hora">
+                                    <input type="time" name="leche_2_hora" class="form-control" placeholder="Hora" value="{{ leche_2_hora_val|default_if_none:'' }}">
                                     <input type="hidden" name="leche_2_cantidad" id="leche_2_cantidad">
                                     <div class="amount-row">
                                         <span class="amount-icon"><i class="bi bi-cup-straw"></i></span>
-                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_2_numero" data-milk-number="2" placeholder="Cantidad">
+                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_2_numero" data-milk-number="2" placeholder="Cantidad" value="{{ leche_2_cantidad_numero|default_if_none:'' }}">
                                         <select class="form-select" id="leche_2_unidad" data-milk-unit="2" aria-label="Unidad toma 2">
-                                            <option value="oz">oz</option>
-                                            <option value="ml">ml</option>
-                                            <option value="L">L</option>
+                                            <option value="oz" {% if leche_2_unidad == "oz" %}selected{% endif %}>oz</option>
+                                            <option value="ml" {% if leche_2_unidad == "ml" %}selected{% endif %}>ml</option>
+                                            <option value="L" {% if leche_2_unidad == "L" %}selected{% endif %}>L</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1262,15 +1474,15 @@
                             <div class="milk-card">
                                 <div class="milk-title"><i class="bi bi-3-circle-fill"></i> Toma 3</div>
                                 <div class="milk-fields">
-                                    <input type="time" name="leche_3_hora" class="form-control" placeholder="Hora">
+                                    <input type="time" name="leche_3_hora" class="form-control" placeholder="Hora" value="{{ leche_3_hora_val|default_if_none:'' }}">
                                     <input type="hidden" name="leche_3_cantidad" id="leche_3_cantidad">
                                     <div class="amount-row">
                                         <span class="amount-icon"><i class="bi bi-cup-straw"></i></span>
-                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_3_numero" data-milk-number="3" placeholder="Cantidad">
+                                        <input type="number" min="0" step="0.1" class="form-control" id="leche_3_numero" data-milk-number="3" placeholder="Cantidad" value="{{ leche_3_cantidad_numero|default_if_none:'' }}">
                                         <select class="form-select" id="leche_3_unidad" data-milk-unit="3" aria-label="Unidad toma 3">
-                                            <option value="oz">oz</option>
-                                            <option value="ml">ml</option>
-                                            <option value="L">L</option>
+                                            <option value="oz" {% if leche_3_unidad == "oz" %}selected{% endif %}>oz</option>
+                                            <option value="ml" {% if leche_3_unidad == "ml" %}selected{% endif %}>ml</option>
+                                            <option value="L" {% if leche_3_unidad == "L" %}selected{% endif %}>L</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1553,6 +1765,7 @@
 
     restoreDraft();
     syncCustomFields();
+    [1,2,3].forEach(syncMilkAmount);
     createMultiSelectChips("{{ form.estado_durante_dia_multiple.id_for_label }}", "estadoDuranteChips");
 
     document.querySelectorAll("[data-milk-number], [data-milk-unit]").forEach(element => {

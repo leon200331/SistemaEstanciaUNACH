@@ -26,7 +26,7 @@
     --gris:#64748b;
     --fondo:#f3f6fb;
     --borde:#e2e8f0;
-    --topbar:96px;
+    --topbar:142px;
 }
 
 *{box-sizing:border-box;}
@@ -50,18 +50,18 @@ a{text-decoration:none;}
     top:0;
     left:0;
     right:0;
-    height:var(--topbar);
+    min-height:var(--topbar);
     z-index:1000;
-    background:rgba(255,255,255,.94);
+    background:rgba(255,255,255,.96);
     border-bottom:1px solid rgba(226,232,240,.9);
     box-shadow:0 16px 38px rgba(15,23,42,.08);
-    backdrop-filter:blur(16px);
 }
 
 .topbar-inner{
     width:min(1280px, calc(100% - 48px));
-    height:100%;
+    min-height:var(--topbar);
     margin:0 auto;
+    padding:14px 0;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -71,30 +71,32 @@ a{text-decoration:none;}
 .brand{
     display:flex;
     align-items:center;
-    gap:14px;
+    gap:18px;
     min-width:0;
     color:var(--texto);
 }
 
 .brand-logo{
-    width:72px;
-    height:72px;
-    border-radius:20px;
-    padding:9px;
-    background:linear-gradient(135deg,var(--morado-oscuro),var(--morado),var(--azul));
+    width:276px;
+    height:112px;
+    border-radius:28px;
+    padding:10px 14px;
+    background:linear-gradient(135deg,#1d4ed8 0%,#7c3aed 58%,#0f766e 130%);
     border:1px solid rgba(255,255,255,.55);
-    box-shadow:0 18px 34px rgba(168,85,247,.22);
+    box-shadow:0 18px 36px rgba(124,58,237,.24);
     display:flex;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
+    overflow:hidden;
 }
 
 .brand-logo img{
-    width:100%;
-    height:100%;
+    width:125%;
+    height:125%;
     object-fit:contain;
-    filter:drop-shadow(0 8px 14px rgba(0,0,0,.18));
+    display:block;
+    filter:none;
 }
 
 .brand-title{
@@ -144,29 +146,39 @@ a{text-decoration:none;}
 }
 
 .profile-pill{
-    min-height:50px;
-    max-width:330px;
-    border-radius:16px;
+    min-height:58px;
+    max-width:410px;
+    border-radius:20px;
     background:#fff;
     border:1px solid #dbeafe;
-    box-shadow:0 10px 24px rgba(15,23,42,.06);
-    padding:8px 14px 8px 9px;
+    box-shadow:0 12px 26px rgba(15,23,42,.06);
+    padding:8px 16px 8px 10px;
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:12px;
 }
 
 .profile-pill .profile-icon{
-    width:38px;
-    height:38px;
-    border-radius:13px;
+    width:48px;
+    height:48px;
+    border-radius:18px;
     background:linear-gradient(135deg,var(--morado),var(--azul));
     color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
-    font-size:1.15rem;
+    font-size:1.18rem;
+    overflow:hidden;
+    border:3px solid #eff6ff;
+    box-shadow:0 10px 20px rgba(124,58,237,.13);
+}
+
+.profile-pill .profile-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
 }
 
 .profile-role{
@@ -951,6 +963,16 @@ textarea.form-control{min-height:112px;}
 .btn-release-lock:hover{background:#dbeafe;color:#1e40af;}
 @media(max-width:760px){.edit-lock-banner{flex-direction:column;}.btn-release-lock{width:100%;}}
 
+
+@media(max-width:900px){
+    .brand-logo{
+        width:220px;
+        height:88px;
+        border-radius:24px;
+        padding:8px 12px;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -974,7 +996,7 @@ textarea.form-control{min-height:112px;}
                 Regresar
             </a>
 
-            {% if bloqueo_edicion_temporal %}
+            {% if bloqueo_edicion_temporal and tiene_suplencia_nutricion %}
             <form method="post" action="{% url 'liberar_bloqueo_edicion' bloqueo_edicion_temporal.id %}" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{% url 'nutricion_pendientes' %}">
@@ -984,10 +1006,25 @@ textarea.form-control{min-height:112px;}
 
 
             <div class="profile-pill" title="Nutrióloga responsable">
-                <div class="profile-icon"><i class="bi bi-person-badge-fill"></i></div>
+                <div class="profile-icon">
+                    {% if tiene_suplencia_nutricion %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% elif foto_perfil_nutricion_url %}
+                        <img src="{{ foto_perfil_nutricion_url }}" alt="Foto de perfil de Nutrición">
+                    {% else %}
+                        <i class="bi bi-person-badge-fill"></i>
+                    {% endif %}
+                </div>
                 <div class="min-w-0">
-                    <span class="profile-role">Nutrióloga</span>
+                    <span class="profile-role">
+                        {% if tiene_suplencia_nutricion %}
+                            Cobertura temporal
+                        {% else %}
+                            Nutrióloga
+                        {% endif %}
+                    </span>
                     <span class="profile-name">
+                        {% if tiene_suplencia_nutricion %}Cubriendo Nutrición · {% endif %}
                         {% if nutriologa_asignada %}
                             {{ nutriologa_asignada }}
                         {% elif request.user.get_full_name %}
@@ -1040,20 +1077,27 @@ textarea.form-control{min-height:112px;}
 {% endif %}
 
 
-{% if tiene_suplencia_activa %}
+{% if tiene_suplencia_nutricion %}
 <div class="suplencia-dictamen-banner">
     <div class="suplencia-dictamen-icon"><i class="bi bi-person-badge-fill"></i></div>
     <div>
-        <h5>Cubriendo temporalmente</h5>
+        <h5>Cobertura temporal de Nutrición</h5>
         <p>
-            Estás trabajando con una autorización temporal de Dirección. Este formulario corresponde al área de Nutrición; si la cobertura autorizada coincide con esta área, el registro quedará marcado como suplencia y pendiente de revisión por la titular.
+            Esta viñeta solo aparece cuando otra persona está autorizada por Dirección para cubrir el área de Nutrición.
+            El dictamen quedará firmado por el usuario suplente y pendiente de revisión por la nutrióloga titular.
         </p>
         <div class="suplencia-dictamen-list">
-            {% for sup in suplencias_activas_usuario %}
             <span class="suplencia-dictamen-pill">
-                <i class="bi bi-shield-check"></i>
-                {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · {{ sup.get_tipo_cobertura_display|default:sup.tipo_cobertura }}
+                <i class="bi bi-person-check-fill"></i>
+                Suplente: {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
             </span>
+            {% for sup in suplencias_activas_usuario %}
+                {% if sup.area_cubierta == "NUTRICION" %}
+                <span class="suplencia-dictamen-pill">
+                    <i class="bi bi-shield-check"></i>
+                    {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · {{ sup.get_tipo_cobertura_display|default:sup.tipo_cobertura }}
+                </span>
+                {% endif %}
             {% endfor %}
         </div>
     </div>
@@ -1790,7 +1834,7 @@ textarea.form-control{min-height:112px;}
         <div>
             <strong>Dictamen nutricional</strong>
 
-  {% if bloqueo_edicion_temporal %}
+  {% if bloqueo_edicion_temporal and tiene_suplencia_nutricion %}
   <div class="edit-lock-banner">
     <div class="lock-icon"><i class="bi bi-lock-fill"></i></div>
     <div>
@@ -1800,8 +1844,8 @@ textarea.form-control{min-height:112px;}
   </div>
   {% endif %}
 
-  {% if tiene_suplencia_activa %}
-                La fecha se asigna automáticamente. El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.
+  {% if tiene_suplencia_nutricion %}
+                La fecha se asigna automáticamente. El registro queda firmado por el usuario suplente y se marcará como preliminar por cobertura temporal de Nutrición.
             {% else %}
                 La fecha se asigna automáticamente y el registro queda firmado por la nutrióloga en sesión.
             {% endif %}

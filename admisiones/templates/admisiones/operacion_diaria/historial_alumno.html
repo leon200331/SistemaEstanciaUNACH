@@ -89,49 +89,62 @@
             box-shadow:0 18px 45px rgba(15,23,42,.08);
             margin-bottom:22px;
         }
-
         .brand{
             display:flex;
+            flex-direction:row;
             align-items:center;
-            gap:14px;
+            justify-content:flex-start;
+            gap:18px;
             min-width:0;
+            text-align:left;
         }
-
         .brand-logo{
-            width:98px;
-            height:66px;
-            border-radius:20px;
-            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
-            border:1px solid rgba(255,255,255,.28);
+            width:214px;
+            max-width:100%;
+            height:106px;
+            border-radius:26px;
+            background:var(--brand-bg, var(--hero-main, var(--hero, linear-gradient(135deg,#0b2a67 0%,#1d4ed8 54%,#0ea5e9 100%))));
+            border:1px solid rgba(255,255,255,.40);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:6px;
-            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            padding:10px 14px;
+            box-shadow:0 22px 48px var(--brand-shadow, var(--hero-shadow, rgba(37,99,235,.34)));
             flex-shrink:0;
         }
-
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
-            transform:scale(1.12);
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            transform:scale(1.08);
+            filter:drop-shadow(0 6px 12px rgba(0,0,0,.28));
         }
 
+        .brand > div:last-child{
+            width:auto;
+            min-width:0;
+            padding-left:0;
+        }
         .brand-title{
             margin:0;
+            max-width:none;
             font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.42rem;
-            color:#0f172a;
+            letter-spacing:-.05em;
+            font-size:1.62rem;
+            line-height:1.05;
+            color:#09215d;
+            text-align:left;
         }
-
         .brand-subtitle{
-            margin:2px 0 0;
+            margin:6px 0 0;
+            display:block;
+            max-width:420px;
             color:var(--muted);
-            font-weight:650;
-            font-size:.92rem;
+            font-weight:850;
+            font-size:.86rem;
+            letter-spacing:.02em;
+            line-height:1.35;
+            text-align:left;
         }
 
         .top-actions{
@@ -167,6 +180,14 @@
             color:#2563eb;
             flex-shrink:0;
             font-size:1.05rem;
+            overflow:hidden;
+        }
+
+        .teacher-icon img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
         }
 
         .teacher-name{
@@ -1004,6 +1025,27 @@
             .apoyo-mini-btn{width:100%;}
         }
 
+
+
+        @media(max-width:760px){
+            .brand{
+                width:100%;
+                flex-direction:row;
+                gap:14px;
+            }
+            .brand-logo{
+                width:154px;
+                height:78px;
+                border-radius:22px;
+            }
+            .brand-title{
+                font-size:1.22rem;
+            }
+            .brand-subtitle{
+                max-width:100%;
+                font-size:.78rem;
+            }
+        }
     </style>
 </head>
 
@@ -1037,12 +1079,18 @@
                 </a>
             {% endif %}
 
-            <div class="teacher-chip" title="Maestra">
-                <span class="teacher-icon"><i class="bi bi-person-workspace"></i></span>
+            <div class="teacher-chip" title="{{ request.user.get_full_name|default:request.user.username }}">
+                <span class="teacher-icon">
+                    {% if foto_perfil_maestra_url %}
+                        <img src="{{ foto_perfil_maestra_url }}" alt="Foto de {{ request.user.get_full_name|default:request.user.username }}">
+                    {% else %}
+                        <i class="bi bi-person-workspace"></i>
+                    {% endif %}
+                </span>
                 <span class="teacher-name">{{ request.user.get_full_name|default:request.user.username }}</span>
             </div>
 
-            <a href="{% url 'dashboard_maestra' %}#alumnos-dia" class="btn-soft">
+            <a href="{{ url_regresar_historial }}" class="btn-soft">
                 <i class="bi bi-arrow-left-circle-fill"></i>
                 Regresar
             </a>
@@ -1239,7 +1287,7 @@
                     </div>
                     <div>
                         <div class="summary-number" id="resumenPendientes">0</div>
-                        <div class="summary-label">Pendientes</div>
+                        <div class="summary-label">Por completar</div>
                     </div>
                 </div>
             </div>
@@ -1280,7 +1328,7 @@
                         {% for registro in registros %}
                             <article
                                 class="record-card
-                                    {% if registro.estado == 'COMPLETO' %}complete
+                                    {% if registro.salida_en and registro.tiene_bitacora_entrada_completa and registro.tiene_bitacora_estancia_completa %}complete
                                     {% elif registro.dia_operativo.estado == 'ABIERTO' %}open
                                     {% elif registro.estado == 'SALIDA_POR_INCIDENCIA' or registro.estado == 'SALIDA_ANTICIPADA' %}special
                                     {% else %}pending{% endif %}
@@ -1292,10 +1340,10 @@
                                     {{ registro.sala_semestre.sala.nombre }}
                                     {{ registro.dia_operativo.estado }}
                                 "
-                                data-estado="{% if registro.estado == 'COMPLETO' %}COMPLETO{% elif registro.dia_operativo.estado == 'ABIERTO' %}ABIERTO{% elif registro.dia_operativo.estado == 'CERRADO' %}CERRADO{% else %}TODOS{% endif %}"
-                                data-completo="{% if registro.estado == 'COMPLETO' %}1{% else %}0{% endif %}"
+                                data-estado="{% if registro.salida_en and registro.tiene_bitacora_entrada_completa and registro.tiene_bitacora_estancia_completa %}COMPLETO{% elif registro.dia_operativo.estado == 'ABIERTO' %}ABIERTO{% elif registro.dia_operativo.estado == 'CERRADO' %}CERRADO{% else %}TODOS{% endif %}"
+                                data-completo="{% if registro.salida_en and registro.tiene_bitacora_entrada_completa and registro.tiene_bitacora_estancia_completa %}1{% else %}0{% endif %}"
                                 data-salida="{% if registro.salida_en %}1{% else %}0{% endif %}"
-                                data-pendiente="{% if registro.estado != 'COMPLETO' %}1{% else %}0{% endif %}"
+                                data-pendiente="{% if registro.salida_en and registro.tiene_bitacora_entrada_completa and registro.tiene_bitacora_estancia_completa %}0{% else %}1{% endif %}"
                             >
                                 <div class="record-top">
                                     <div>
@@ -1330,24 +1378,25 @@
                                             </span>
                                         {% endif %}
 
-                                        {% if registro.estado == "COMPLETO" %}
+                                        {% if registro.salida_en and registro.tiene_bitacora_entrada_completa and registro.tiene_bitacora_estancia_completa %}
                                             <span class="badge-soft badge-green">
                                                 <i class="bi bi-check-circle-fill"></i>
                                                 Completo
                                             </span>
-                                        {% elif registro.estado == "SALIDA_POR_INCIDENCIA" %}
-                                            <span class="badge-soft badge-red">
-                                                <i class="bi bi-exclamation-octagon-fill"></i>
-                                                Salida especial
+                                        {% elif registro.salida_en %}
+                                            <span class="badge-soft badge-purple">
+                                                <i class="bi bi-box-arrow-right"></i>
+                                                Con salida
                                             </span>
-                                        {% elif registro.estado == "SALIDA_ANTICIPADA" %}
-                                            <span class="badge-soft badge-yellow">
-                                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                                Salida anticipada
+                                        {% elif registro.entrada_en %}
+                                            <span class="badge-soft badge-blue">
+                                                <i class="bi bi-person-walking"></i>
+                                                En estancia
                                             </span>
                                         {% else %}
-                                            <span class="badge-soft badge-blue">
-                                                {{ registro.get_estado_display }}
+                                            <span class="badge-soft badge-yellow">
+                                                <i class="bi bi-hourglass-split"></i>
+                                                Pendiente de entrada
                                             </span>
                                         {% endif %}
                                     </div>
@@ -1406,12 +1455,7 @@
                                 </div>
 
                                 <div class="record-actions">
-                                    <a href="{% url 'lista_alumnos_dia_maestra' registro.dia_operativo.id %}" class="mini-btn primary">
-                                        <i class="bi bi-eye-fill"></i>
-                                        Ver día
-                                    </a>
-
-                                    {% with tipo_pdf=registro.formulario_bitacora|default:"diaria" %}
+{% with tipo_pdf=registro.formulario_bitacora|default:"diaria" %}
                                         <a href="{% url 'descargar_pdf_bitacora' registro.id tipo_pdf %}" class="mini-btn danger">
                                             <i class="bi bi-file-earmark-pdf-fill"></i>
                                             Descargar PDF
@@ -1419,18 +1463,18 @@
                                     {% endwith %}
 
                                     {% if registro.entrada_en %}
-                                        <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}?modo=consulta&desde=historial" class="mini-btn">
+                                        <a href="{% url 'bitacora_entrada_casa_maestra' registro.id %}?origen=historial&next={{ request.get_full_path|urlencode }}" class="mini-btn">
                                             <i class="bi bi-house-heart-fill"></i>
                                             En casa
                                         </a>
 
-                                        <a href="{% url 'bitacora_estancia_maestra' registro.id %}?modo=consulta&desde=historial" class="mini-btn">
+                                        <a href="{% url 'bitacora_estancia_maestra' registro.id %}?origen=historial&next={{ request.get_full_path|urlencode }}" class="mini-btn">
                                             <i class="bi bi-journal-text"></i>
                                             Estancia
                                         </a>
 
                                         {% if not registro.salida_en and registro.dia_operativo.estado == "ABIERTO" %}
-                                            <a href="{% url 'registrar_salida_alumno' registro.id %}" class="mini-btn warning">
+                                            <a href="{% url 'registrar_salida_alumno' registro.id %}?next={{ request.get_full_path|urlencode }}" class="mini-btn warning">
                                                 <i class="bi bi-box-arrow-right"></i>
                                                 Registrar salida
                                             </a>

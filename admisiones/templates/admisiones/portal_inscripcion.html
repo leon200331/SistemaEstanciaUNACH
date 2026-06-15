@@ -681,6 +681,63 @@
     .page-shell { margin-top:18px !important; }
     .autosave-pill { left:14px; right:14px; justify-content:center; }
   }
+
+  /* =========================================================
+     AJUSTE PORTAL DE INSCRIPCIÓN - LOGO Y FOTO DE PERFIL
+     ========================================================= */
+  .brand-logo-box {
+    width:132px !important;
+    height:78px !important;
+    border-radius:24px !important;
+    padding:8px 12px !important;
+    background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%) !important;
+    box-shadow:0 18px 36px rgba(37,99,235,.22), inset 0 0 0 1px rgba(255,255,255,.14) !important;
+  }
+
+  .brand-logo-box img {
+    max-width:none !important;
+    max-height:none !important;
+    width:125% !important;
+    height:125% !important;
+    object-fit:contain !important;
+    filter:none !important;
+  }
+
+  .brand-wrap {
+    gap:14px !important;
+  }
+
+  .beneficiary-chip {
+    border-radius:22px !important;
+    padding:8px 16px 8px 9px !important;
+    min-height:62px !important;
+  }
+
+  .beneficiary-avatar {
+    width:50px !important;
+    height:50px !important;
+    border-radius:18px !important;
+    overflow:hidden !important;
+    border:3px solid #eff6ff !important;
+    box-shadow:0 10px 20px rgba(37,99,235,.14) !important;
+    flex-shrink:0 !important;
+  }
+
+  .beneficiary-avatar img {
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+    display:block !important;
+  }
+
+  @media(max-width:768px) {
+    .brand-logo-box {
+      width:112px !important;
+      height:68px !important;
+      border-radius:22px !important;
+    }
+  }
+
 </style>
 {% endblock %}
 
@@ -702,9 +759,13 @@
         <i class="bi bi-arrow-left me-1"></i> Regresar
       </a>
 
-      <div class="beneficiary-chip">
+      <div class="beneficiary-chip" title="Perfil del beneficiario">
         <div class="beneficiary-avatar">
-          <i class="bi bi-person-heart"></i>
+          {% if foto_perfil_beneficiario_url %}
+            <img src="{{ foto_perfil_beneficiario_url }}" alt="Foto de perfil del beneficiario">
+          {% else %}
+            <i class="bi bi-person-heart"></i>
+          {% endif %}
         </div>
         <div class="min-width-0">
           <div class="beneficiary-name">

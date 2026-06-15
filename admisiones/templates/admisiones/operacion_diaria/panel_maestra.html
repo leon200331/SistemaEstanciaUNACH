@@ -75,22 +75,27 @@
 
         .brand{
             display:flex;
-            align-items:center;
-            gap:14px;
-            min-height:76px;
+            flex-direction:column;
+            align-items:flex-start;
+            justify-content:flex-start;
+            gap:12px;
+            min-height:178px;
+            padding:2px 0 14px;
+            text-align:left;
         }
 
         .brand-logo{
-            width:78px;
-            height:62px;
-            border-radius:18px;
-            background:linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%);
-            box-shadow:0 16px 34px rgba(37,99,235,.32);
-            border:1px solid rgba(255,255,255,.24);
+            width:214px;
+            max-width:100%;
+            height:106px;
+            border-radius:26px;
+            background:linear-gradient(135deg, #0b2a67 0%, #1d4ed8 54%, #0ea5e9 100%);
+            box-shadow:0 24px 52px rgba(37,99,235,.36);
+            border:1px solid rgba(255,255,255,.40);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:7px;
+            padding:10px 14px;
             flex:0 0 auto;
         }
 
@@ -98,26 +103,33 @@
             width:100%;
             height:100%;
             object-fit:contain;
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
-            transform:scale(1.12);
+            filter:drop-shadow(0 6px 12px rgba(0,0,0,.28));
+            transform:scale(1.08);
+        }
+
+        .brand > div:last-child{
+            width:100%;
+            padding-left:4px;
         }
 
         .brand-name{
             margin:0;
-            font-size:1.38rem;
+            font-size:1.48rem;
             line-height:.98;
             font-weight:950;
             letter-spacing:-.05em;
             color:#09215d;
+            text-align:left;
         }
 
         .brand-subtitle{
             display:block;
-            margin-top:5px;
+            margin-top:6px;
             color:var(--muted);
-            font-size:.78rem;
-            font-weight:800;
+            font-size:.82rem;
+            font-weight:850;
             letter-spacing:.02em;
+            text-align:left;
         }
 
         .nav-title{
@@ -261,6 +273,356 @@
             box-shadow:0 10px 22px rgba(37,99,235,.12);
             border:1px solid rgba(255,255,255,.8);
             flex:0 0 auto;
+            overflow:hidden;
+        }
+
+        .teacher-icon img,
+        .profile-avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+
+        .teacher-profile-btn{
+            border:1px solid #d5e1f3;
+            background:rgba(255,255,255,.84);
+            border-radius:999px;
+            min-height:50px;
+            padding:5px 13px 5px 6px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#0f2f67;
+            font-weight:900;
+            box-shadow:0 10px 28px rgba(15,23,42,.05);
+            transition:.18s ease;
+        }
+
+        .teacher-profile-btn:hover{
+            transform:translateY(-1px);
+            background:white;
+            border-color:#bfdbfe;
+            color:#1d4ed8;
+        }
+
+        .teacher-profile-text{
+            display:flex;
+            flex-direction:column;
+            align-items:flex-start;
+            line-height:1.1;
+        }
+
+        .teacher-profile-name{
+            max-width:210px;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:.88rem;
+        }
+
+        .teacher-profile-label{
+            margin-top:2px;
+            color:#64748b;
+            font-size:.68rem;
+            font-weight:850;
+            letter-spacing:.03em;
+            text-transform:uppercase;
+        }
+
+        .profile-dialog{
+            max-width:720px;
+        }
+
+        .profile-modal-card{
+            border:0;
+            border-radius:30px;
+            overflow:hidden;
+            box-shadow:0 30px 90px rgba(15,23,42,.26);
+            background:#ffffff;
+        }
+
+        .profile-modal-header{
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(135deg,#1d4ed8,#2563eb 45%,#0891b2);
+            color:white;
+            border-bottom:0;
+            padding:24px 26px 74px;
+        }
+
+        .profile-modal-header:after{
+            content:"";
+            position:absolute;
+            width:220px;
+            height:220px;
+            border-radius:999px;
+            right:-70px;
+            top:-90px;
+            background:rgba(255,255,255,.16);
+        }
+
+        .profile-modal-header .btn-close{
+            position:relative;
+            z-index:2;
+            filter:brightness(0) invert(1);
+            opacity:.88;
+        }
+
+        .profile-kicker{
+            position:relative;
+            z-index:1;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:.42rem .75rem;
+            border-radius:999px;
+            background:rgba(255,255,255,.18);
+            border:1px solid rgba(255,255,255,.25);
+            font-size:.76rem;
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .profile-modal-title{
+            position:relative;
+            z-index:1;
+            margin:0;
+            font-size:1.45rem;
+            font-weight:950;
+            letter-spacing:-.04em;
+        }
+
+        .profile-modal-subtitle{
+            position:relative;
+            z-index:1;
+            margin:4px 0 0;
+            color:rgba(255,255,255,.88);
+            font-weight:700;
+            font-size:.9rem;
+        }
+
+        .profile-modal-body{
+            padding:0 24px 24px;
+        }
+
+        .profile-main-card{
+            position:relative;
+            z-index:3;
+            margin-top:-54px;
+            padding:18px;
+            border:1px solid rgba(226,232,240,.95);
+            border-radius:26px;
+            background:linear-gradient(135deg,#ffffff,#f8fbff);
+            box-shadow:0 18px 42px rgba(15,23,42,.12);
+            margin-bottom:16px;
+        }
+
+        .profile-preview{
+            display:grid;
+            grid-template-columns:auto minmax(0,1fr);
+            gap:18px;
+            align-items:center;
+        }
+
+        .profile-avatar-wrap{
+            position:relative;
+            width:118px;
+            height:118px;
+            flex:0 0 auto;
+        }
+
+        .profile-avatar{
+            width:118px;
+            height:118px;
+            border-radius:32px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            background:linear-gradient(135deg,#dbeafe,#bfdbfe,#ecfeff);
+            color:#2563eb;
+            font-size:3.2rem;
+            border:5px solid #ffffff;
+            box-shadow:0 16px 34px rgba(37,99,235,.18);
+            flex:0 0 auto;
+        }
+
+        .profile-avatar-badge{
+            position:absolute;
+            right:-2px;
+            bottom:-2px;
+            width:38px;
+            height:38px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:white;
+            border:3px solid #ffffff;
+            box-shadow:0 10px 20px rgba(37,99,235,.22);
+        }
+
+        .profile-name{
+            margin:0;
+            font-size:1.12rem;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.03em;
+        }
+
+        .profile-role{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            margin-top:7px;
+            border-radius:999px;
+            padding:.42rem .7rem;
+            background:#eff6ff;
+            color:#1d4ed8;
+            font-weight:900;
+            font-size:.78rem;
+        }
+
+        .profile-help{
+            margin:10px 0 0;
+            color:#475569;
+            font-size:.86rem;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .profile-upload-card{
+            border:1px dashed #93c5fd;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            border-radius:24px;
+            padding:16px;
+            margin-bottom:16px;
+        }
+
+        .profile-upload-label{
+            display:grid;
+            grid-template-columns:auto minmax(0,1fr) auto;
+            gap:14px;
+            align-items:center;
+            cursor:pointer;
+            margin:0;
+        }
+
+        .profile-upload-icon{
+            width:54px;
+            height:54px;
+            border-radius:19px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#2563eb,#0891b2);
+            color:white;
+            font-size:1.35rem;
+            box-shadow:0 14px 28px rgba(37,99,235,.18);
+        }
+
+        .profile-upload-title{
+            margin:0;
+            font-size:.98rem;
+            font-weight:950;
+            color:#0f172a;
+        }
+
+        .profile-upload-text{
+            margin:3px 0 0;
+            color:#64748b;
+            font-size:.82rem;
+            font-weight:700;
+            line-height:1.35;
+        }
+
+        .profile-file-pill{
+            border-radius:999px;
+            padding:.58rem .78rem;
+            background:white;
+            border:1px solid #bfdbfe;
+            color:#1d4ed8;
+            font-size:.78rem;
+            font-weight:950;
+            white-space:nowrap;
+        }
+
+        .profile-file-input{
+            position:absolute;
+            opacity:0;
+            pointer-events:none;
+            width:1px;
+            height:1px;
+        }
+
+        .profile-format-row{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:9px;
+            margin-top:12px;
+        }
+
+        .profile-format-chip{
+            border-radius:16px;
+            background:#fff;
+            border:1px solid #dbeafe;
+            color:#334155;
+            padding:10px 11px;
+            font-size:.76rem;
+            font-weight:900;
+            display:flex;
+            align-items:center;
+            gap:7px;
+        }
+
+        .profile-format-chip i{color:#2563eb;}
+
+        .profile-actions{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+
+        .profile-actions-right{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+
+        .profile-remove-form{margin:0;}
+
+        .profile-danger-btn{
+            border-radius:999px;
+            padding:.62rem .9rem;
+            border:1px solid #fecaca;
+            background:#fff5f5;
+            color:#b91c1c;
+            font-weight:950;
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            transition:.16s ease;
+        }
+
+        .profile-danger-btn:hover{
+            transform:translateY(-1px);
+            box-shadow:0 10px 20px rgba(185,28,28,.10);
+        }
+
+        @media(max-width:640px){
+            .profile-dialog{max-width:calc(100% - 22px);}
+            .profile-modal-header{padding:22px 20px 68px;}
+            .profile-modal-body{padding:0 16px 18px;}
+            .profile-preview{grid-template-columns:1fr;text-align:center;justify-items:center;}
+            .profile-upload-label{grid-template-columns:1fr;text-align:center;justify-items:center;}
+            .profile-format-row{grid-template-columns:1fr;}
+            .profile-actions,.profile-actions-right{width:100%;}
+            .profile-actions-right .mini-btn,.profile-danger-btn{width:100%;justify-content:center;}
         }
 
         .message-list{margin-bottom:18px;}
@@ -725,19 +1087,128 @@
 
         .rooms-grid{
             display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
+            grid-template-columns:minmax(0,1fr);
+            gap:16px;
+            width:100%;
         }
 
         .room-card{
+            width:100%;
             border:1px solid var(--border);
             background:white;
             border-radius:21px;
-            padding:16px;
+            padding:18px;
+            min-height:118px;
+        }
+
+        .room-main{
             display:flex;
             gap:14px;
             align-items:flex-start;
-            min-height:118px;
+        }
+
+        .room-main-content{
+            flex:1;
+            min-width:0;
+        }
+
+        .room-toggle{
+            margin-top:12px;
+            min-height:38px;
+            border-radius:999px;
+            border:1px solid #bfdbfe;
+            background:#eff6ff;
+            color:#1d4ed8;
+            padding:0 12px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            font-size:.78rem;
+            font-weight:950;
+            transition:.18s ease;
+        }
+
+        .room-toggle:hover{
+            background:#dbeafe;
+            color:#1e40af;
+            transform:translateY(-1px);
+        }
+
+        .room-toggle .toggle-icon{
+            transition:.18s ease;
+        }
+
+        .room-toggle[aria-expanded="true"] .toggle-icon{
+            transform:rotate(180deg);
+        }
+
+        .room-children-wrap{
+            margin-top:16px;
+            border:1px solid #dbeafe;
+            border-radius:18px;
+            padding:14px;
+            background:linear-gradient(135deg,#f8fbff,#ffffff);
+            width:100%;
+        }
+
+        .room-children-list{
+            display:grid;
+            grid-template-columns:minmax(0,1fr);
+            gap:10px;
+            width:100%;
+        }
+
+        .room-child-item{
+            width:100%;
+            display:flex;
+            align-items:center;
+            justify-content:flex-start;
+            gap:12px;
+            padding:12px 14px;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            background:#fff;
+        }
+
+        .room-child-main{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:0;
+            flex:1;
+        }
+
+        .room-child-avatar{
+            width:34px;
+            height:34px;
+            border-radius:12px;
+            background:linear-gradient(135deg,#dbeafe,#cffafe);
+            color:#1d4ed8;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+        }
+
+        .room-child-name{
+            font-weight:950;
+            color:#09215d;
+            line-height:1.15;
+            overflow-wrap:anywhere;
+        }
+
+        .room-child-meta{
+            margin-top:2px;
+            color:#64748b;
+            font-size:.76rem;
+            font-weight:800;
+        }
+
+        .room-child-actions{
+            display:flex;
+            gap:6px;
+            flex-shrink:0;
         }
 
         .room-icon{
@@ -971,7 +1442,7 @@
 
 
 
-        /* Alumnos por día unificado: misma estructura visual de lista_alumnos_dia dentro del panel */
+        /* Alumnos del día unificado: misma estructura visual de lista_alumnos_dia dentro del panel */
         .daily-status-strip{
             display:grid;
             grid-template-columns:repeat(4,minmax(0,1fr));
@@ -1139,8 +1610,9 @@
         }
 
         @media(max-width:640px){
-            .brand-logo{width:70px;height:58px;}
-            .brand-name{font-size:1.18rem;}
+            .brand{min-height:auto;align-items:center;}
+            .brand-logo{width:132px;height:92px;}
+            .brand-name{font-size:1.28rem;}
             .topbar{flex-direction:column;}
             .topbar-right{width:100%;justify-content:space-between;}
             .semester-pill{flex:1;min-width:0;}
@@ -1153,6 +1625,160 @@
             .quick-actions{width:100%;}
             .rooms-grid{grid-template-columns:1fr;}
             .daily-status-strip{grid-template-columns:1fr;}
+        }
+
+
+        /* ===== Secciones nuevas: historial, ausencias e incidencias ===== */
+        .section-intro{
+            display:flex;
+            align-items:flex-start;
+            gap:13px;
+            padding:14px 16px;
+            border-radius:18px;
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            color:#1e3a8a;
+            font-weight:740;
+            line-height:1.45;
+            margin-bottom:16px;
+        }
+
+        .section-intro.warning{
+            background:#fff7ed;
+            border-color:#fed7aa;
+            border-left-color:#f97316;
+            color:#9a3412;
+        }
+
+        .section-intro.success{
+            background:#f0fdf4;
+            border-color:#bbf7d0;
+            border-left-color:#16a34a;
+            color:#14532d;
+        }
+
+        .section-intro i{
+            font-size:1.15rem;
+            margin-top:2px;
+            flex-shrink:0;
+        }
+
+        .history-grid{
+            display:grid;
+            grid-template-columns:minmax(0,1fr);
+            gap:14px;
+            width:100%;
+        }
+
+        .history-card{
+            width:100%;
+            border:1px solid var(--border);
+            border-left:6px solid #2563eb;
+            background:linear-gradient(135deg,#ffffff 0%,#f8fbff 100%);
+            border-radius:22px;
+            padding:20px 24px;
+            display:grid;
+            grid-template-columns:auto minmax(0,1fr) auto;
+            gap:18px;
+            align-items:center;
+            box-shadow:0 14px 32px rgba(15,23,42,.06);
+            min-height:104px;
+        }
+
+        .history-card:hover{
+            border-color:#bfdbfe;
+            border-left-color:#1d4ed8;
+            box-shadow:0 16px 36px rgba(37,99,235,.10);
+        }
+
+        .history-avatar{
+            width:62px;
+            height:62px;
+            border-radius:21px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#dbeafe,#ecfeff);
+            color:#1d4ed8;
+            font-size:1.56rem;
+            flex-shrink:0;
+        }
+
+        .history-name{
+            margin:0;
+            color:#09215d;
+            font-weight:950;
+            line-height:1.2;
+            overflow-wrap:anywhere;
+            font-size:1.24rem;
+        }
+
+        .history-meta{
+            margin-top:6px;
+            color:#64748b;
+            font-size:.88rem;
+            font-weight:760;
+            line-height:1.35;
+        }
+
+        .situation-list{
+            display:grid;
+            gap:12px;
+        }
+
+        .situation-card{
+            border:1px solid var(--border);
+            background:#fff;
+            border-radius:20px;
+            padding:15px;
+            display:grid;
+            grid-template-columns:auto minmax(0,1fr) auto;
+            gap:13px;
+            align-items:center;
+        }
+
+        .situation-icon{
+            width:48px;
+            height:48px;
+            border-radius:17px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.25rem;
+            flex-shrink:0;
+        }
+
+        .situation-icon.normal{background:#dcfce7;color:#15803d;}
+        .situation-icon.pending{background:#fef3c7;color:#b45309;}
+        .situation-icon.alert{background:#fee2e2;color:#b91c1c;}
+        .situation-icon.out{background:#e0f2fe;color:#0369a1;}
+
+        .situation-title{
+            color:#09215d;
+            font-weight:950;
+            margin-bottom:4px;
+        }
+
+        .situation-text{
+            color:#64748b;
+            font-weight:720;
+            font-size:.84rem;
+            line-height:1.35;
+        }
+
+        .situation-actions{
+            display:flex;
+            gap:7px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+
+        @media(max-width:900px){
+            .history-grid{grid-template-columns:1fr;}
+            .history-card,.situation-card{grid-template-columns:1fr;align-items:flex-start;}
+            .history-card{padding:18px;}
+            .situation-actions{justify-content:flex-start;}
         }
 
 
@@ -1276,6 +1902,144 @@
             .apoyo-mini-btn{width:100%;}
         }
 
+
+
+        /* ===== Notificaciones flotantes del sistema ===== */
+        .notification-stack{
+            position:fixed;
+            top:22px;
+            right:22px;
+            z-index:2200;
+            display:grid;
+            gap:12px;
+            width:min(430px, calc(100vw - 28px));
+            pointer-events:none;
+        }
+
+        .app-toast{
+            pointer-events:auto;
+            display:grid;
+            grid-template-columns:auto minmax(0,1fr) auto;
+            gap:12px;
+            align-items:flex-start;
+            padding:15px 15px;
+            border-radius:22px;
+            background:rgba(255,255,255,.97);
+            border:1px solid #dbeafe;
+            border-left:7px solid #2563eb;
+            box-shadow:0 24px 60px rgba(15,23,42,.22);
+            backdrop-filter:blur(16px);
+            animation:appToastIn .28s ease-out both;
+        }
+
+        .app-toast.success{
+            border-color:#bbf7d0;
+            border-left-color:#16a34a;
+            background:linear-gradient(135deg,rgba(240,253,244,.98),rgba(255,255,255,.98));
+        }
+
+        .app-toast.error,
+        .app-toast.danger{
+            border-color:#fecaca;
+            border-left-color:#dc2626;
+            background:linear-gradient(135deg,rgba(254,242,242,.98),rgba(255,255,255,.98));
+        }
+
+        .app-toast.warning{
+            border-color:#fed7aa;
+            border-left-color:#f97316;
+            background:linear-gradient(135deg,rgba(255,247,237,.98),rgba(255,255,255,.98));
+        }
+
+        .app-toast.info{
+            border-color:#bfdbfe;
+            border-left-color:#2563eb;
+            background:linear-gradient(135deg,rgba(239,246,255,.98),rgba(255,255,255,.98));
+        }
+
+        .app-toast-icon{
+            width:44px;
+            height:44px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            font-size:1.25rem;
+            background:#dbeafe;
+            color:#1d4ed8;
+        }
+
+        .app-toast.success .app-toast-icon{background:#dcfce7;color:#15803d;}
+        .app-toast.error .app-toast-icon,
+        .app-toast.danger .app-toast-icon{background:#fee2e2;color:#dc2626;}
+        .app-toast.warning .app-toast-icon{background:#ffedd5;color:#c2410c;}
+        .app-toast.info .app-toast-icon{background:#dbeafe;color:#1d4ed8;}
+
+        .app-toast-title{
+            margin:0 0 3px;
+            color:#0f172a;
+            font-size:.96rem;
+            font-weight:950;
+            letter-spacing:-.02em;
+        }
+
+        .app-toast-text{
+            color:#475569;
+            font-size:.88rem;
+            font-weight:720;
+            line-height:1.38;
+            overflow-wrap:anywhere;
+        }
+
+        .app-toast.success .app-toast-text{color:#166534;}
+        .app-toast.error .app-toast-text,
+        .app-toast.danger .app-toast-text{color:#991b1b;}
+        .app-toast.warning .app-toast-text{color:#9a3412;}
+        .app-toast.info .app-toast-text{color:#1e3a8a;}
+
+        .app-toast-close{
+            border:0;
+            background:transparent;
+            color:#64748b;
+            width:28px;
+            height:28px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition:.15s ease;
+            padding:0;
+            margin-top:2px;
+        }
+
+        .app-toast-close:hover{
+            background:#f1f5f9;
+            color:#0f172a;
+        }
+
+        .app-toast.is-hiding{
+            animation:appToastOut .38s ease-in forwards;
+        }
+
+        @keyframes appToastIn{
+            from{opacity:0; transform:translateY(-10px) translateX(18px) scale(.97);}
+            to{opacity:1; transform:translateY(0) translateX(0) scale(1);}
+        }
+
+        @keyframes appToastOut{
+            to{opacity:0; transform:translateY(-8px) translateX(18px) scale(.97);}
+        }
+
+        @media(max-width:720px){
+            .notification-stack{
+                top:14px;
+                left:14px;
+                right:14px;
+                width:auto;
+            }
+        }
+
     </style>
 </head>
 
@@ -1309,7 +2073,17 @@
 
                 <a href="#alumnos-dia" class="nav-item-link" data-view="alumnos-dia">
                     <i class="bi bi-people"></i>
-                    <span>Alumnos por día</span>
+                    <span>Alumnos del día</span>
+                </a>
+
+                <a href="#historial-alumnos" class="nav-item-link" data-view="historial-alumnos">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Historial de alumnos</span>
+                </a>
+
+                <a href="#ausencias-incidencias" class="nav-item-link" data-view="ausencias-incidencias">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Ausencias e incidencias</span>
                 </a>
 
                 {% if tiene_apoyo_sala_activo %}
@@ -1377,18 +2151,55 @@
                 </span>
             {% endif %}
 
-                <div class="teacher-icon" title="{{ request.user.get_full_name|default:request.user.username }}">
-                    <i class="bi bi-person-fill"></i>
-                </div>
+                <button type="button" class="teacher-profile-btn" data-bs-toggle="modal" data-bs-target="#perfilMaestraModal" title="Perfil de maestra">
+                    <span class="teacher-icon">
+                        {% if foto_perfil_maestra_url %}
+                            <img src="{{ foto_perfil_maestra_url }}" alt="Foto de {{ request.user.get_full_name|default:request.user.username }}">
+                        {% else %}
+                            <i class="bi bi-person-fill"></i>
+                        {% endif %}
+                    </span>
+                    <span class="teacher-profile-text">
+                        <span class="teacher-profile-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                        <span class="teacher-profile-label">Maestra</span>
+                    </span>
+                </button>
             </div>
         </header>
 
-        <!-- MENSAJES -->
+        <!-- NOTIFICACIONES FLOTANTES -->
         {% if messages %}
-            <div class="message-list">
+            <div class="notification-stack" id="notificationStack" aria-live="polite" aria-atomic="true">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">
-                        {{ message }}
+                    <div class="app-toast {{ message.tags|default:'info' }}" role="status" data-auto-dismiss="true">
+                        <div class="app-toast-icon">
+                            {% if 'success' in message.tags %}
+                                <i class="bi bi-check-circle-fill"></i>
+                            {% elif 'error' in message.tags or 'danger' in message.tags %}
+                                <i class="bi bi-x-octagon-fill"></i>
+                            {% elif 'warning' in message.tags %}
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 class="app-toast-title">
+                                {% if 'success' in message.tags %}
+                                    Operación realizada
+                                {% elif 'error' in message.tags or 'danger' in message.tags %}
+                                    No se pudo completar
+                                {% elif 'warning' in message.tags %}
+                                    Aviso importante
+                                {% else %}
+                                    Notificación
+                                {% endif %}
+                            </h3>
+                            <div class="app-toast-text">{{ message }}</div>
+                        </div>
+                        <button type="button" class="app-toast-close" aria-label="Cerrar notificación">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
                 {% endfor %}
             </div>
@@ -1478,14 +2289,20 @@
             </div>
         {% endif %}
 
-        <!-- DATOS OCULTOS PARA CALCULAR BITÁCORAS Y CONTEO POR SALA -->
-        <div id="metricsSource" class="d-none" data-total="{{ resumen_dia.total|default:0 }}">
-            {% for registro in registros %}
-                <span class="metric-source"
-                      data-room="{% if registro.sala_semestre and registro.sala_semestre.sala %}{{ registro.sala_semestre.sala.nombre }}{% else %}Sin sala{% endif %}"
-                      data-casa="{% if registro.tiene_bitacora_entrada_completa %}1{% else %}0{% endif %}"
-                      data-estancia="{% if registro.tiene_bitacora_estancia_completa %}1{% else %}0{% endif %}"></span>
-            {% endfor %}
+        <!-- DATOS OCULTOS PARA CALCULAR BITÁCORAS Y CONTEO OPERATIVO.
+             Antes de abrir el día no se envían registros al cálculo,
+             aunque existan alumnos asignados. Así no se confunden alumnos inscritos
+             con niños realmente dentro de la estancia. -->
+        <div id="metricsSource" class="d-none"
+             data-total="{% if dia_actual and dia_actual.es_habil and dia_actual.estado != 'PROGRAMADO' %}{{ resumen_dia.total|default:0 }}{% else %}0{% endif %}">
+            {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                {% for registro in registros %}
+                    <span class="metric-source"
+                          data-room="{% if registro.sala_semestre and registro.sala_semestre.sala %}{{ registro.sala_semestre.sala.nombre }}{% else %}Sin sala{% endif %}"
+                          data-casa="{% if registro.tiene_bitacora_entrada_completa %}1{% else %}0{% endif %}"
+                          data-estancia="{% if registro.tiene_bitacora_estancia_completa %}1{% else %}0{% endif %}"></span>
+                {% endfor %}
+            {% endif %}
         </div>
 
         <!-- INICIO -->
@@ -1513,7 +2330,7 @@
                             {% elif dia_actual and dia_actual.es_habil and dia_actual.estado == "ABIERTO" %}
                                 <a href="#alumnos-dia" class="btn-action btn-green">
                                     <i class="bi bi-list-check"></i>
-                                    Ver alumnos por día
+                                    Ver alumnos del día
                                 </a>
                                 <a href="{% url 'cerrar_dia_maestra' dia_actual.id %}" class="btn-action btn-red">
                                     <i class="bi bi-lock-fill"></i>
@@ -1668,29 +2485,48 @@
                     </div>
 
                     <div class="panel-body">
+                        {% if not dia_actual or not dia_actual.es_habil or dia_actual.estado == "PROGRAMADO" %}
+                            <div class="pending-note">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                La operación diaria aún no está activa. Ningún niño está dentro ni ausente; los niños asignados se consideran fuera de estancia hasta que se registre su entrada con código.
+                            </div>
+                        {% endif %}
+
                         <div class="indicator-grid">
                             <div class="indicator-card">
                                 <div class="indicator-top">
                                     <div class="indicator-icon icon-green"><i class="bi bi-person-check-fill"></i></div>
                                     <div class="indicator-label">Niños en sala</div>
                                 </div>
-                                <div class="indicator-number">{{ resumen_dia.en_estancia|default:0 }}</div>
-                                <div class="indicator-percent txt-green">
-                                    {% if resumen_dia.total %}{% widthratio resumen_dia.en_estancia resumen_dia.total 100 %}{% else %}0{% endif %}%
+                                <div class="indicator-number">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                        {{ resumen_dia.en_estancia|default:0 }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
                                 </div>
-                                <div class="progress-soft"><span class="bar-green" style="width:{% if resumen_dia.total %}{% widthratio resumen_dia.en_estancia resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
+                                <div class="indicator-percent txt-green">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_dia.en_estancia resumen_dia.total 100 %}{% else %}0{% endif %}%
+                                </div>
+                                <div class="progress-soft"><span class="bar-green" style="width:{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_dia.en_estancia resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
                             </div>
 
                             <div class="indicator-card">
                                 <div class="indicator-top">
                                     <div class="indicator-icon icon-yellow"><i class="bi bi-person-dash-fill"></i></div>
-                                    <div class="indicator-label">Niños ausentes</div>
+                                    <div class="indicator-label">Pendientes de entrada</div>
                                 </div>
-                                <div class="indicator-number">{{ resumen_dia.sin_entrada|default:0 }}</div>
+                                <div class="indicator-number">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                        {{ resumen_dia.sin_entrada|default:0 }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </div>
                                 <div class="indicator-percent txt-yellow">
-                                    {% if resumen_dia.total %}{% widthratio resumen_dia.sin_entrada resumen_dia.total 100 %}{% else %}0{% endif %}%
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_dia.sin_entrada resumen_dia.total 100 %}{% else %}0{% endif %}%
                                 </div>
-                                <div class="progress-soft"><span class="bar-yellow" style="width:{% if resumen_dia.total %}{% widthratio resumen_dia.sin_entrada resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
+                                <div class="progress-soft"><span class="bar-yellow" style="width:{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_dia.sin_entrada resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
                             </div>
 
                             <div class="indicator-card">
@@ -1698,18 +2534,30 @@
                                     <div class="indicator-icon icon-red"><i class="bi bi-person-x-fill"></i></div>
                                     <div class="indicator-label">Niños fuera de estancia</div>
                                 </div>
-                                <div class="indicator-number">{{ resumen_dia.con_salida|default:0 }}</div>
-                                <div class="indicator-percent txt-red">
-                                    {% if resumen_dia.total %}{% widthratio resumen_dia.con_salida resumen_dia.total 100 %}{% else %}0{% endif %}%
+                                <div class="indicator-number">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                        {{ resumen_dia.fuera_estancia|default:0 }}
+                                    {% else %}
+                                        {{ alumnos_asignados|length }}
+                                    {% endif %}
                                 </div>
-                                <div class="progress-soft"><span class="bar-red" style="width:{% if resumen_dia.total %}{% widthratio resumen_dia.con_salida resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
+                                <div class="indicator-percent txt-red">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}
+                                        {% widthratio resumen_dia.fuera_estancia resumen_dia.total 100 %}
+                                    {% elif alumnos_asignados|length %}
+                                        100
+                                    {% else %}
+                                        0
+                                    {% endif %}%
+                                </div>
+                                <div class="progress-soft"><span class="bar-red" style="width:{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_dia.fuera_estancia resumen_dia.total 100 %}{% elif alumnos_asignados|length %}100{% else %}0{% endif %}%"></span></div>
                             </div>
 
                             <div class="indicator-card total-card">
                                 <div>
-                                    <div class="indicator-label">Total de niños en tus salas</div>
-                                    <div class="indicator-number">{{ resumen_dia.total|default:0 }}</div>
-                                    <div class="indicator-percent txt-blue">100%</div>
+                                    <div class="indicator-label">Niños asignados a tus salas</div>
+                                    <div class="indicator-number">{{ alumnos_asignados|length }}</div>
+                                    <div class="indicator-percent txt-blue">Dato administrativo</div>
                                 </div>
                                 <div class="indicator-icon icon-blue"><i class="bi bi-person-hearts"></i></div>
                             </div>
@@ -1735,11 +2583,17 @@
                                         <span>Bitácora en casa</span>
                                     </div>
                                     <div class="bitacora-score">
-                                        <strong id="bitacoraCasaCount">{{ resumen_bitacoras.casa|default:0 }}</strong>
-                                        <span id="bitacoraCasaPct">{% if resumen_dia.total %}{% widthratio resumen_bitacoras.casa resumen_dia.total 100 %}{% else %}0{% endif %}%</span>
+                                        <strong id="bitacoraCasaCount">
+                                            {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                                {{ resumen_bitacoras.casa|default:0 }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </strong>
+                                        <span id="bitacoraCasaPct">{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_bitacoras.casa resumen_dia.total 100 %}{% else %}0{% endif %}%</span>
                                     </div>
                                 </div>
-                                <div class="progress-soft"><span id="bitacoraCasaBar" class="bar-purple" style="width:{% if resumen_dia.total %}{% widthratio resumen_bitacoras.casa resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
+                                <div class="progress-soft"><span id="bitacoraCasaBar" class="bar-purple" style="width:{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_bitacoras.casa resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
                             </div>
 
                             <div class="bitacora-card">
@@ -1749,11 +2603,17 @@
                                         <span>Bitácora dentro de estancia</span>
                                     </div>
                                     <div class="bitacora-score">
-                                        <strong id="bitacoraEstanciaCount">{{ resumen_bitacoras.estancia|default:0 }}</strong>
-                                        <span id="bitacoraEstanciaPct">{% if resumen_dia.total %}{% widthratio resumen_bitacoras.estancia resumen_dia.total 100 %}{% else %}0{% endif %}%</span>
+                                        <strong id="bitacoraEstanciaCount">
+                                            {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                                {{ resumen_bitacoras.estancia|default:0 }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </strong>
+                                        <span id="bitacoraEstanciaPct">{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_bitacoras.estancia resumen_dia.total 100 %}{% else %}0{% endif %}%</span>
                                     </div>
                                 </div>
-                                <div class="progress-soft"><span id="bitacoraEstanciaBar" class="bar-blue" style="width:{% if resumen_dia.total %}{% widthratio resumen_bitacoras.estancia resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
+                                <div class="progress-soft"><span id="bitacoraEstanciaBar" class="bar-blue" style="width:{% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" and resumen_dia.total %}{% widthratio resumen_bitacoras.estancia resumen_dia.total 100 %}{% else %}0{% endif %}%"></span></div>
                             </div>
                         </div>
                     </div>
@@ -1777,16 +2637,51 @@
                         <div class="rooms-grid">
                             {% for sala_semestre in salas %}
                                 <article class="room-card" data-room-card="{{ sala_semestre.sala.nombre }}">
-                                    <div class="room-icon"><i class="bi bi-house-heart-fill"></i></div>
-                                    <div>
-                                        <h4 class="room-name">{{ sala_semestre.sala.nombre }}</h4>
-                                        <div class="room-meta">
-                                            {{ sala_semestre.sala.get_tipo_sala_display }} · Cupo: {{ sala_semestre.cupo_real|default:"Sin definir" }}
+                                    <div class="room-main">
+                                        <div class="room-icon"><i class="bi bi-house-heart-fill"></i></div>
+                                        <div class="room-main-content">
+                                            <h4 class="room-name">{{ sala_semestre.sala.nombre }}</h4>
+                                            <div class="room-meta">
+                                                {{ sala_semestre.sala.get_tipo_sala_display }} · Cupo: {{ sala_semestre.cupo_real|default:"Sin definir" }}
+                                            </div>
+                                            <div class="room-count">
+                                                <i class="bi bi-people-fill"></i>
+                                                <span><span class="room-counter">{{ sala_semestre.total_alumnos_asignados|default:0 }}</span> niños asignados</span>
+                                            </div>
+
+                                            <button class="room-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#salaNinos{{ sala_semestre.id }}" aria-expanded="false" aria-controls="salaNinos{{ sala_semestre.id }}">
+                                                <i class="bi bi-list-ul"></i>
+                                                Ver lista de niños
+                                                <i class="bi bi-chevron-down toggle-icon"></i>
+                                            </button>
                                         </div>
-                                        <div class="room-count">
-                                            <i class="bi bi-people-fill"></i>
-                                            <span><span class="room-counter">{{ sala_semestre.total_alumnos_asignados|default:0 }}</span> niños asignados</span>
-                                        </div>
+                                    </div>
+
+                                    <div class="collapse room-children-wrap" id="salaNinos{{ sala_semestre.id }}">
+                                        {% if sala_semestre.alumnos_asignados_lista %}
+                                            <div class="student-meta mb-2" style="font-weight:900;color:#1e40af;">
+                                                <i class="bi bi-people-fill me-1"></i> Lista de niños asignados a {{ sala_semestre.sala.nombre }}
+                                            </div>
+                                            <div class="room-children-list">
+                                                {% for alumno_sala in sala_semestre.alumnos_asignados_lista %}
+                                                    <div class="room-child-item">
+                                                        <div class="room-child-main">
+                                                            <span class="room-child-avatar"><i class="bi bi-person-heart"></i></span>
+                                                            <div>
+                                                                <div class="room-child-name">{{ alumno_sala.solicitud_ingreso.nombre_menor_completo }}</div>
+                                                                <div class="room-child-meta">{{ sala_semestre.sala.get_tipo_sala_display }}</div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="read-only-note mb-0">
+                                                <i class="bi bi-info-circle-fill me-1"></i>
+                                                Esta sala todavía no tiene niños asignados en el semestre activo.
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </article>
                             {% endfor %}
@@ -1803,12 +2698,12 @@
         </section>
 
         <!-- ALUMNOS POR DÍA -->
-        <section id="alumnos-dia" class="section" data-title="Alumnos por día" data-subtitle="Entrada, bitácoras, salida e historial diario de tus alumnos.">
+        <section id="alumnos-dia" class="section" data-title="Alumnos del día" data-subtitle="Entrada, bitácoras, salida e historial diario de tus alumnos.">
             <section class="panel">
                 <div class="panel-header">
                     <h3 class="panel-title">
                         <span class="title-icon"><i class="bi bi-people-fill"></i></span>
-                        Alumnos por día
+                        Alumnos del día
                     </h3>
 
                     <div class="student-panel-actions student-panel-actions-clean">
@@ -1853,8 +2748,8 @@
                                 <i class="bi bi-people-fill"></i>
                             </div>
                             <div>
-                                <div class="daily-status-number">{{ resumen_dia.total|default:registros.count }}</div>
-                                <div class="daily-status-label">Alumnos</div>
+                                <div class="daily-status-number">{{ alumnos_asignados|length }}</div>
+                                <div class="daily-status-label">Asignados a tus salas</div>
                             </div>
                         </div>
 
@@ -1863,7 +2758,13 @@
                                 <i class="bi bi-door-open-fill"></i>
                             </div>
                             <div>
-                                <div class="daily-status-number">{{ registros|length }}</div>
+                                <div class="daily-status-number">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                        {{ registros|length }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </div>
                                 <div class="daily-status-label">Registros del día</div>
                             </div>
                         </div>
@@ -1873,7 +2774,13 @@
                                 <i class="bi bi-check-circle-fill"></i>
                             </div>
                             <div>
-                                <div class="daily-status-number">{{ resumen_dia.completos|default:0 }}</div>
+                                <div class="daily-status-number">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                        {{ resumen_dia.completos|default:0 }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </div>
                                 <div class="daily-status-label">Completos</div>
                             </div>
                         </div>
@@ -1883,7 +2790,13 @@
                                 <i class="bi bi-exclamation-triangle-fill"></i>
                             </div>
                             <div>
-                                <div class="daily-status-number">{{ resumen_dia.sin_entrada|default:0 }}</div>
+                                <div class="daily-status-number">
+                                    {% if dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                                        {{ resumen_dia.sin_entrada|default:0 }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </div>
                                 <div class="daily-status-label">Pendientes</div>
                             </div>
                         </div>
@@ -1904,7 +2817,7 @@
                         </div>
                     </div>
 
-                    {% if registros %}
+                    {% if registros and dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
                         <div class="table-wrap">
                             <table class="table align-middle daily-table">
                                 <thead>
@@ -2094,7 +3007,7 @@
                                                         {% endif %}
                                                     {% endif %}
 
-                                                    <a href="{% url 'historial_alumno_maestra' registro.alumno.id %}" class="mini-btn dark">
+                                                    <a href="{% url 'historial_alumno_maestra' registro.alumno.id %}?next={% url 'dashboard_maestra' %}%23alumnos-dia" class="mini-btn dark">
                                                         <i class="bi bi-clock-history"></i>
                                                         Historial
                                                     </a>
@@ -2115,7 +3028,7 @@
                         {% if alumnos_asignados %}
                             <div class="info-alert" style="margin-bottom:16px;">
                                 <i class="bi bi-info-circle-fill me-1"></i>
-                                Estos son los alumnos reales asignados a tus salas. Cuando abras el día se crearán los registros diarios para entrada, bitácoras y salida.
+                                Estos son los alumnos reales asignados a tus salas, pero todavía no cuentan como registros operativos del día. Cuando abras el día se habilitará la entrada con código, bitácoras y salida.
                             </div>
 
                             <div class="table-wrap">
@@ -2160,7 +3073,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a href="{% url 'historial_alumno_maestra' alumno.id %}" class="mini-btn dark">
+                                                    <a href="{% url 'historial_alumno_maestra' alumno.id %}?next={% url 'dashboard_maestra' %}%23alumnos-dia" class="mini-btn dark">
                                                         <i class="bi bi-clock-history"></i>
                                                         Historial
                                                     </a>
@@ -2187,7 +3100,278 @@
                 </div>
             </section>
         </section>
+
+        <!-- HISTORIAL DE ALUMNOS -->
+        <section id="historial-alumnos" class="section" data-title="Historial de alumnos" data-subtitle="Consulta el historial de cada menor aunque el día operativo no esté abierto.">
+            <section class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="title-icon"><i class="bi bi-clock-history"></i></span>
+                        Historial de alumnos
+                    </h3>
+                    <span class="badge-soft badge-blue">
+                        <i class="bi bi-search-heart"></i>
+                        Consulta permanente
+                    </span>
+                </div>
+
+                <div class="panel-body">
+                    <div class="section-intro">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <div>
+                            Esta sección queda disponible aunque el día no esté abierto. Sirve para consultar registros anteriores,
+                            bitácoras, entradas, salidas y PDF histórico del menor sin depender de la operación del día actual.
+                        </div>
+                    </div>
+
+                    {% if tiene_apoyo_sala_activo and sala_apoyada_actual %}
+                        <div class="section-intro warning">
+                            <i class="bi bi-door-open-fill"></i>
+                            <div>
+                                Modo apoyo activo: se muestran únicamente alumnos de <strong>{{ sala_apoyada_actual }}</strong> para evitar mezclar tu sala original con la sala apoyada.
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if alumnos_asignados %}
+                        <div class="history-grid">
+                            {% for alumno in alumnos_asignados %}
+                                <article class="history-card">
+                                    <div class="history-avatar"><i class="bi bi-person-heart"></i></div>
+                                    <div>
+                                        <h4 class="history-name">{{ alumno.solicitud_ingreso.nombre_menor_completo }}</h4>
+                                        <div class="history-meta">
+                                            {% if alumno.sala_semestre_asignada and alumno.sala_semestre_asignada.sala %}
+                                                Sala: <strong>{{ alumno.sala_semestre_asignada.sala.nombre }}</strong> · {{ alumno.sala_semestre_asignada.sala.get_tipo_sala_display }}
+                                            {% else %}
+                                                Sin sala asignada
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="mini-actions">
+                                        <a href="{% url 'historial_alumno_maestra' alumno.id %}?next={% url 'dashboard_maestra' %}%23historial-alumnos" class="mini-btn dark">
+                                            <i class="bi bi-clock-history"></i>
+                                            Ver historial
+                                        </a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% elif registros %}
+                        <div class="history-grid">
+                            {% for registro in registros %}
+                                <article class="history-card">
+                                    <div class="history-avatar"><i class="bi bi-person-heart"></i></div>
+                                    <div>
+                                        <h4 class="history-name">{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</h4>
+                                        <div class="history-meta">
+                                            {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                                                Sala: <strong>{{ registro.sala_semestre.sala.nombre }}</strong> · {{ registro.sala_semestre.sala.get_tipo_sala_display }}
+                                            {% else %}
+                                                Sin sala
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="mini-actions">
+                                        <a href="{% url 'historial_alumno_maestra' registro.alumno.id %}?next={% url 'dashboard_maestra' %}%23historial-alumnos" class="mini-btn dark">
+                                            <i class="bi bi-clock-history"></i>
+                                            Ver historial
+                                        </a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-clock-history"></i>
+                            <h5>No hay alumnos para consultar</h5>
+                            <p>Verifica que existan alumnos finalizados y asignados a tus salas en el semestre activo.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </section>
+
+        <!-- AUSENCIAS E INCIDENCIAS -->
+        <section id="ausencias-incidencias" class="section" data-title="Ausencias e incidencias" data-subtitle="Seguimiento de ausencias confirmadas, pendientes de entrada y salidas especiales.">
+            <section class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="title-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                        Ausencias e incidencias
+                    </h3>
+                    <span class="badge-soft badge-yellow">
+                        <i class="bi bi-shield-exclamation"></i>
+                        Seguimiento
+                    </span>
+                </div>
+
+
+
+                    {% if tiene_apoyo_sala_activo and sala_apoyada_actual %}
+                        <div class="section-intro">
+                            <i class="bi bi-door-open-fill"></i>
+                            <div>
+                                Modo apoyo activo: se revisan únicamente situaciones de <strong>{{ sala_apoyada_actual }}</strong>.
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if registros and dia_actual and dia_actual.es_habil and dia_actual.estado != "PROGRAMADO" %}
+                        <div class="situation-list">
+                            {% for registro in registros %}
+                                <article class="situation-card">
+                                    {% if not registro.entrada_en %}
+                                        <div class="situation-icon pending"><i class="bi bi-hourglass-split"></i></div>
+                                    {% elif registro.estado == "SALIDA_POR_INCIDENCIA" %}
+                                        <div class="situation-icon alert"><i class="bi bi-exclamation-octagon-fill"></i></div>
+                                    {% elif registro.estado == "SALIDA_ANTICIPADA" %}
+                                        <div class="situation-icon alert"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                                    {% elif registro.salida_en %}
+                                        <div class="situation-icon out"><i class="bi bi-box-arrow-right"></i></div>
+                                    {% else %}
+                                        <div class="situation-icon normal"><i class="bi bi-check-circle-fill"></i></div>
+                                    {% endif %}
+
+                                    <div>
+                                        <div class="situation-title">{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</div>
+                                        <div class="situation-text">
+                                            {% if registro.sala_semestre and registro.sala_semestre.sala %}
+                                                Sala {{ registro.sala_semestre.sala.nombre }} ·
+                                            {% endif %}
+
+                                            {% if not registro.entrada_en %}
+                                                {% if dia_actual and dia_actual.estado == "CERRADO" %}
+                                                    Posible ausencia del día: no se registró entrada antes del cierre.
+                                                {% elif dia_actual and dia_actual.estado == "ABIERTO" %}
+                                                    Pendiente de entrada. Aún no debe considerarse ausencia confirmada.
+                                                {% else %}
+                                                    Pendiente de apertura o sin registro diario.
+                                                {% endif %}
+                                            {% elif registro.estado == "SALIDA_POR_INCIDENCIA" %}
+                                                Salida por incidencia registrada{% if registro.salida_en %} a las {{ registro.salida_en|date:"H:i" }}{% endif %}.
+                                            {% elif registro.estado == "SALIDA_ANTICIPADA" %}
+                                                Salida anticipada registrada{% if registro.salida_en %} a las {{ registro.salida_en|date:"H:i" }}{% endif %}.
+                                            {% elif registro.salida_en %}
+                                                Salida registrada a las {{ registro.salida_en|date:"H:i" }}.
+                                            {% else %}
+                                                Menor en estancia sin alerta registrada.
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="situation-actions">
+                                        <a href="{% url 'historial_alumno_maestra' registro.alumno.id %}?next={% url 'dashboard_maestra' %}%23ausencias-incidencias" class="mini-btn dark">
+                                            <i class="bi bi-clock-history"></i>
+                                            Historial
+                                        </a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-shield-check"></i>
+                            <h5>No hay situaciones operativas del día para mostrar</h5>
+                            <p>Antes de abrir el día no se consideran ausencias. Cuando existan registros diarios reales, aquí aparecerán pendientes de entrada, ausencias confirmadas, salidas anticipadas o salidas por incidencia.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </section>
     </main>
+</div>
+
+<!-- MODAL PERFIL MAESTRA -->
+<div class="modal fade" id="perfilMaestraModal" tabindex="-1" aria-labelledby="perfilMaestraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered profile-dialog">
+        <div class="modal-content profile-modal-card">
+            <div class="modal-header profile-modal-header">
+                <div>
+                    <div class="profile-kicker"><i class="bi bi-stars"></i> Perfil visible de maestra</div>
+                    <h5 class="modal-title profile-modal-title" id="perfilMaestraModalLabel">Personaliza tu foto de perfil</h5>
+                    <p class="profile-modal-subtitle">Esta imagen aparecerá únicamente en tu usuario y en tus vistas de operación diaria.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body profile-modal-body">
+                <div class="profile-main-card">
+                    <div class="profile-preview">
+                        <div class="profile-avatar-wrap">
+                            <div class="profile-avatar js-profile-avatar">
+                                {% if foto_perfil_maestra_url %}
+                                    <img src="{{ foto_perfil_maestra_url }}" alt="Foto de perfil">
+                                {% else %}
+                                    <i class="bi bi-person-fill"></i>
+                                {% endif %}
+                            </div>
+                            <div class="profile-avatar-badge"><i class="bi bi-camera-fill"></i></div>
+                        </div>
+
+                        <div>
+                            <h6 class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</h6>
+                            <div class="profile-role"><i class="bi bi-person-workspace"></i> Maestra / asistente de sala</div>
+                            <p class="profile-help">
+                                Puedes subir una foto clara de rostro. Si no agregas imagen, el sistema seguirá usando el icono profesional de perfil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" action="{% url 'dashboard_maestra' %}" class="mb-0">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion_perfil_maestra" value="actualizar_foto">
+                    <input type="hidden" name="next" class="js-profile-next" value="{% url 'dashboard_maestra' %}#inicio">
+
+                    <div class="profile-upload-card">
+                        <label class="profile-upload-label" for="id_foto_perfil_maestra">
+                            <span class="profile-upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></span>
+                            <span>
+                                <span class="profile-upload-title">Selecciona una foto para tu perfil</span>
+                                <span class="profile-upload-text js-profile-file-name">Arrastra o selecciona una imagen desde tu equipo.</span>
+                            </span>
+                            <span class="profile-file-pill"><i class="bi bi-image-fill me-1"></i> Elegir foto</span>
+                        </label>
+
+                        <input id="id_foto_perfil_maestra" type="file" name="foto_perfil_maestra" accept="image/png,image/jpeg,image/webp" class="profile-file-input js-profile-file">
+
+                        <div class="profile-format-row">
+                            <div class="profile-format-chip"><i class="bi bi-filetype-jpg"></i> JPG o JPEG</div>
+                            <div class="profile-format-chip"><i class="bi bi-filetype-png"></i> PNG / WEBP</div>
+                            <div class="profile-format-chip"><i class="bi bi-hdd-fill"></i> Máximo 3 MB</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        {% if foto_perfil_maestra_url %}
+                            <span></span>
+                        {% else %}
+                            <span class="text-muted fw-semibold small">Tu foto es opcional.</span>
+                        {% endif %}
+
+                        <div class="profile-actions-right">
+                            <button type="button" class="mini-btn" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="mini-btn primary">
+                                <i class="bi bi-check-circle-fill"></i> Guardar foto
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if foto_perfil_maestra_url %}
+                    <form method="POST" action="{% url 'dashboard_maestra' %}" class="profile-remove-form mt-3 d-flex justify-content-end">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion_perfil_maestra" value="eliminar_foto">
+                        <input type="hidden" name="next" class="js-profile-next" value="{% url 'dashboard_maestra' %}#inicio">
+                        <button type="submit" class="profile-danger-btn">
+                            <i class="bi bi-trash3-fill"></i> Quitar foto actual
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -2308,6 +3492,66 @@
         });
 
         showSection((location.hash || '#inicio').replace('#',''), false);
+
+        function updateProfileNext(){
+            const currentHash = location.hash || '#inicio';
+            document.querySelectorAll('.js-profile-next').forEach(input => {
+                input.value = "{% url 'dashboard_maestra' %}" + currentHash;
+            });
+        }
+
+        document.querySelectorAll('[data-bs-target="#perfilMaestraModal"]').forEach(btn => {
+            btn.addEventListener('click', updateProfileNext);
+        });
+        document.querySelectorAll('#perfilMaestraModal form').forEach(form => {
+            form.addEventListener('submit', updateProfileNext);
+        });
+
+
+
+        const notificationToasts = Array.from(document.querySelectorAll('.app-toast'));
+        notificationToasts.forEach((toast, index) => {
+            toast.style.animationDelay = (index * 80) + 'ms';
+
+            const closeButton = toast.querySelector('.app-toast-close');
+            let closed = false;
+
+            function hideToast(){
+                if(closed){ return; }
+                closed = true;
+                toast.classList.add('is-hiding');
+                window.setTimeout(() => toast.remove(), 420);
+            }
+
+            if(closeButton){
+                closeButton.addEventListener('click', hideToast);
+            }
+
+            window.setTimeout(hideToast, 4600 + (index * 650));
+        });
+
+        const profileFileInput = document.querySelector('.js-profile-file');
+        const profileAvatar = document.querySelector('.js-profile-avatar');
+        const profileFileName = document.querySelector('.js-profile-file-name');
+        if(profileFileInput && profileAvatar && profileFileName){
+            profileFileInput.addEventListener('change', function(){
+                const file = this.files && this.files[0];
+                if(!file){
+                    profileFileName.textContent = 'Arrastra o selecciona una imagen desde tu equipo.';
+                    return;
+                }
+
+                profileFileName.textContent = file.name;
+
+                if(file.type && file.type.startsWith('image/')){
+                    const reader = new FileReader();
+                    reader.onload = function(event){
+                        profileAvatar.innerHTML = '<img src="' + event.target.result + '" alt="Vista previa de foto">';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
     });
 </script>
 </body>

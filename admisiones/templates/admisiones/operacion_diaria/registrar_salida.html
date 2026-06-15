@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Solicitar autorización de salida | Operación diaria</title>
+    <title>Registrar salida | Operación diaria</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,6 @@
             --orange:#f97316;
             --red:#dc2626;
             --pink:#db2777;
-            --rose:#f43f5e;
             --purple:#7c3aed;
             --slate:#0f172a;
             --muted:#64748b;
@@ -89,49 +88,60 @@
             box-shadow:0 18px 45px rgba(15,23,42,.08);
             margin-bottom:22px;
         }
-
         .brand{
             display:flex;
-            align-items:center;
-            gap:14px;
+            flex-direction:column;
+            align-items:flex-start;
+            justify-content:flex-start;
+            gap:10px;
             min-width:0;
+            text-align:left;
         }
-
         .brand-logo{
-            width:98px;
-            height:66px;
-            border-radius:20px;
-            background:linear-gradient(135deg,#1e3a8a,#2563eb,#0891b2);
-            border:1px solid rgba(255,255,255,.28);
+            width:214px;
+            max-width:100%;
+            height:106px;
+            border-radius:26px;
+            background:var(--brand-bg, var(--hero-main, var(--hero, linear-gradient(135deg,#0b2a67 0%,#1d4ed8 54%,#0ea5e9 100%))));
+            border:1px solid rgba(255,255,255,.40);
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:6px;
-            box-shadow:0 16px 34px rgba(29,78,216,.28);
+            padding:10px 14px;
+            box-shadow:0 24px 52px var(--brand-shadow, var(--hero-shadow, rgba(37,99,235,.36)));
             flex-shrink:0;
         }
-
         .brand-logo img{
             width:100%;
             height:100%;
             object-fit:contain;
-            transform:scale(1.12);
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));
+            transform:scale(1.08);
+            filter:drop-shadow(0 6px 12px rgba(0,0,0,.28));
         }
 
+        .brand > div:last-child{
+            width:100%;
+            padding-left:4px;
+        }
         .brand-title{
             margin:0;
+            max-width:214px;
             font-weight:950;
-            letter-spacing:-.04em;
-            font-size:1.35rem;
-            color:#0f172a;
+            letter-spacing:-.05em;
+            font-size:1.45rem;
+            line-height:1;
+            color:#09215d;
+            text-align:left;
         }
-
         .brand-subtitle{
-            margin:2px 0 0;
+            margin:6px 0 0;
+            display:block;
+            max-width:214px;
             color:var(--muted);
-            font-weight:650;
-            font-size:.92rem;
+            font-weight:850;
+            font-size:.82rem;
+            letter-spacing:.02em;
+            text-align:left;
         }
 
         .top-actions{
@@ -167,6 +177,15 @@
             color:#2563eb;
             flex-shrink:0;
             font-size:1.05rem;
+            overflow:hidden;
+        }
+
+
+        .teacher-icon img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
         }
 
         .teacher-name{
@@ -219,11 +238,6 @@
             cursor:not-allowed;
             transform:none;
             box-shadow:none;
-        }
-
-        .btn-blue{
-            background:linear-gradient(135deg,#2563eb,#0891b2);
-            color:white;
         }
 
         .btn-warning-soft{
@@ -517,8 +531,7 @@
             padding:12px;
         }
 
-        .info-label,
-        .status-label{
+        .info-label{
             color:#64748b;
             font-size:.72rem;
             text-transform:uppercase;
@@ -527,8 +540,7 @@
             margin-bottom:4px;
         }
 
-        .info-value,
-        .status-value{
+        .info-value{
             font-weight:900;
             color:#0f172a;
             overflow-wrap:anywhere;
@@ -552,12 +564,10 @@
         .badge-gray{background:#e2e8f0;color:#334155;}
         .badge-pink{background:#fce7f3;color:#9d174d;}
         .badge-red{background:#fee2e2;color:#991b1b;}
-        .badge-purple{background:#ede9fe;color:#5b21b6;}
 
         .help-card,
         .security-card,
-        .mail-card,
-        .success-card{
+        .mail-card{
             border-radius:20px;
             padding:15px 16px;
             font-weight:650;
@@ -586,43 +596,100 @@
             color:#14532d;
         }
 
-        .success-card{
-            background:#f0fdf4;
-            border:1px solid #bbf7d0;
-            border-left:6px solid #16a34a;
-            color:#14532d;
-        }
 
-        body.theme-girl .success-card{
-            background:#fff1f7;
-            border-color:#fbcfe8;
-            border-left-color:#db2777;
-            color:#9d174d;
-        }
 
-        .validation-grid{
+        .qr-panel{
+            border:1px solid #bfdbfe;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            border-radius:24px;
+            padding:18px;
+            margin:16px 0;
             display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-            margin-bottom:16px;
+            grid-template-columns:auto 1fr;
+            gap:18px;
+            align-items:center;
+            box-shadow:0 14px 34px rgba(37,99,235,.10);
         }
 
-        .validation-item{
-            background:white;
-            border:1px solid var(--border);
-            border-radius:16px;
+        .qr-image{
+            width:178px;
+            height:178px;
+            border-radius:22px;
+            background:#fff;
+            border:1px solid #dbeafe;
             padding:12px;
             display:flex;
             align-items:center;
-            gap:10px;
-            color:#334155;
-            font-weight:850;
-            min-width:0;
+            justify-content:center;
+            flex-shrink:0;
         }
 
-        .validation-item.ok i{color:#16a34a;}
-        .validation-item.pending i{color:#ca8a04;}
-        body.theme-girl .validation-item.ok i{color:#db2777;}
+        .qr-image img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .qr-fallback{
+            width:100%;
+            height:100%;
+            border-radius:18px;
+            background:#f8fafc;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
+            color:#2563eb;
+            text-align:center;
+            font-weight:900;
+        }
+
+        .qr-fallback i{font-size:2rem;}
+
+        .qr-title{
+            margin:0 0 6px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.03em;
+        }
+
+        .qr-text{
+            margin:0 0 12px;
+            color:#475569;
+            font-weight:650;
+            line-height:1.45;
+        }
+
+        .qr-link-box{
+            border:1px dashed #93c5fd;
+            background:#ffffff;
+            border-radius:16px;
+            padding:10px 12px;
+            color:#1e3a8a;
+            font-size:.82rem;
+            font-weight:750;
+            overflow-wrap:anywhere;
+            margin-bottom:10px;
+        }
+
+        .method-note{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            border-radius:999px;
+            padding:.45rem .7rem;
+            background:#eef2ff;
+            color:#3730a3;
+            font-weight:900;
+            font-size:.78rem;
+            margin-bottom:10px;
+        }
+
+        @media(max-width:760px){
+            .qr-panel{grid-template-columns:1fr;text-align:center;}
+            .qr-image{margin:0 auto;}
+        }
 
         .mini-process{
             display:grid;
@@ -750,9 +817,7 @@
             color:#334155;
         }
 
-        .field-help,
-        .pin-help,
-        .mini-help{
+        .field-help{
             font-size:.78rem;
             color:#64748b;
             font-weight:650;
@@ -867,92 +932,19 @@
             padding:12px;
         }
 
-        .qr-panel{
-            border:1px solid #bfdbfe;
-            background:linear-gradient(135deg,#eff6ff,#ffffff);
-            border-radius:24px;
-            padding:18px;
-            margin:16px 0;
-            display:grid;
-            grid-template-columns:auto 1fr;
-            gap:18px;
-            align-items:center;
-            box-shadow:0 14px 34px rgba(37,99,235,.10);
-        }
-
-        .qr-image{
-            width:178px;
-            height:178px;
-            border-radius:22px;
-            background:#fff;
-            border:1px solid #dbeafe;
-            padding:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-shrink:0;
-        }
-
-        .qr-image img{
-            width:100%;
-            height:100%;
-            object-fit:contain;
-        }
-
-        .qr-fallback{
-            width:100%;
-            height:100%;
-            border-radius:18px;
-            background:#f8fafc;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            gap:6px;
-            color:#2563eb;
-            text-align:center;
-            font-weight:900;
-        }
-
-        .qr-fallback i{font-size:2rem;}
-
-        .qr-title{
-            margin:0 0 6px;
+        .status-label{
+            color:#64748b;
+            font-size:.72rem;
+            text-transform:uppercase;
+            letter-spacing:.06em;
             font-weight:950;
-            color:#0f172a;
-            letter-spacing:-.03em;
+            margin-bottom:4px;
         }
 
-        .qr-text{
-            margin:0 0 12px;
-            color:#475569;
-            font-weight:650;
-            line-height:1.45;
-        }
-
-        .qr-link-box{
-            border:1px dashed #93c5fd;
-            background:#ffffff;
-            border-radius:16px;
-            padding:10px 12px;
-            color:#1e3a8a;
-            font-size:.82rem;
-            font-weight:750;
-            overflow-wrap:anywhere;
-            margin-bottom:10px;
-        }
-
-        .method-note{
-            display:inline-flex;
-            align-items:center;
-            gap:7px;
-            border-radius:999px;
-            padding:.45rem .7rem;
-            background:#eef2ff;
-            color:#3730a3;
+        .status-value{
             font-weight:900;
-            font-size:.78rem;
-            margin-bottom:10px;
+            color:#0f172a;
+            overflow-wrap:anywhere;
         }
 
         .history-list{
@@ -1054,7 +1046,14 @@
             color:#fff;
         }
 
-        .btn-cancel-confirm:hover{color:#fff;}
+        .btn-cancel-confirm:hover{
+            color:#fff;
+        }
+
+        @media(max-width:760px){
+            .cancel-summary-grid{grid-template-columns:1fr;}
+            .cancel-warning-box{flex-direction:column;}
+        }
 
         .summary-box{
             border:1px solid var(--border);
@@ -1075,11 +1074,290 @@
         .summary-label{font-weight:950;color:#475569;}
         .summary-value{font-weight:750;color:#0f172a;overflow-wrap:anywhere;}
 
+        .notice-header{
+            background:linear-gradient(135deg,#7c3aed,#db2777);
+        }
+
+        .notice-box{
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+            background:linear-gradient(135deg,#faf5ff,#fff1f2);
+            border:1px solid #e9d5ff;
+            border-left:6px solid #a855f7;
+            border-radius:22px;
+            padding:16px;
+            color:#4c1d95;
+        }
+
+        .notice-box h6{
+            margin:0 0 4px;
+            font-weight:950;
+            color:#581c87;
+            letter-spacing:-.02em;
+        }
+
+        .notice-box p{
+            margin:0;
+            font-weight:650;
+            line-height:1.5;
+        }
+
+        .notice-icon{
+            width:58px;
+            height:58px;
+            border-radius:20px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#f3e8ff;
+            color:#9333ea;
+            font-size:1.7rem;
+            flex-shrink:0;
+            box-shadow:0 14px 28px rgba(147,51,234,.16);
+        }
+
+        .notice-button{
+            min-width:160px;
+            justify-content:center;
+        }
+
+        .tablet-code-card{
+            margin-top:16px;
+            border:1px solid #bbf7d0;
+            border-left:6px solid #22c55e;
+            background:linear-gradient(135deg,#f0fdf4,#ffffff);
+            border-radius:22px;
+            padding:16px;
+            color:#14532d;
+        }
+
+        .tablet-code-title{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin:0 0 6px;
+            color:#14532d;
+            font-weight:950;
+            letter-spacing:-.02em;
+        }
+
+        .tablet-code-text{
+            margin:0 0 12px;
+            color:#166534;
+            font-weight:700;
+            line-height:1.45;
+        }
+
+        .tablet-code-input{
+            max-width:260px;
+            text-align:center;
+            font-size:2rem;
+            letter-spacing:.42rem;
+            font-weight:950;
+            padding:.7rem .9rem;
+            border-color:#86efac;
+        }
+
+        .tablet-code-input:focus{
+            border-color:#22c55e;
+            box-shadow:0 0 0 4px rgba(34,197,94,.14);
+        }
+
+        .tablet-privacy-note{
+            margin-top:9px;
+            color:#166534;
+            font-size:.8rem;
+            font-weight:750;
+        }
+
+        .compact-code-note{
+            min-height:54px;
+            display:flex;
+            align-items:center;
+            color:#1e3a8a;
+        }
+
+        body.theme-girl .compact-code-note{color:#9d174d;}
+
+        .modal-student-card{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            border:1px solid var(--student-border);
+            background:linear-gradient(135deg,var(--student-soft),#ffffff);
+            border-radius:22px;
+            padding:14px 16px;
+            margin-bottom:16px;
+        }
+
+        .modal-student-photo{
+            width:74px;
+            height:74px;
+            border-radius:22px;
+            background:var(--avatar-bg);
+            color:var(--student-accent);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.8rem;
+            overflow:hidden;
+            border:3px solid rgba(255,255,255,.78);
+            box-shadow:0 12px 24px rgba(15,23,42,.10);
+            flex-shrink:0;
+        }
+
+        .modal-student-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .modal-student-name{
+            margin:0 0 3px;
+            font-weight:950;
+            font-size:1.08rem;
+            color:#0f172a;
+            letter-spacing:-.03em;
+        }
+
+        .modal-student-meta{
+            color:#475569;
+            font-size:.86rem;
+            font-weight:750;
+            line-height:1.4;
+        }
+
+        .modal-credential-card{
+            margin-top:16px;
+            border:1px solid #bfdbfe;
+            border-left:6px solid #2563eb;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            border-radius:22px;
+            padding:14px 16px;
+        }
+
+        body.theme-girl .modal-credential-card{
+            border-color:#fbcfe8;
+            border-left-color:#db2777;
+            background:linear-gradient(135deg,#fdf2f8,#ffffff);
+        }
+
+        .modal-credential-card .form-check{
+            margin:0;
+            border-color:rgba(148,163,184,.28);
+        }
+
+
+        .bitacora-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:-6px 0 22px;}
+        .bitacora-check-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 12px 28px rgba(15,23,42,.06)}
+        .bitacora-check-info{display:flex;align-items:center;gap:12px;min-width:0}
+        .bitacora-check-icon{width:42px;height:42px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.15rem}
+        .bitacora-check-card.done .bitacora-check-icon{background:#dcfce7;color:#15803d}.bitacora-check-card.pending .bitacora-check-icon{background:#fff7ed;color:#c2410c}
+        .bitacora-check-title{font-weight:950;color:#0f172a;line-height:1.2}.bitacora-check-text{font-size:.8rem;color:#64748b;font-weight:750;margin-top:2px}
+        .bitacora-mini-link{border-radius:999px;padding:.5rem .75rem;font-weight:950;text-decoration:none;white-space:nowrap;border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;font-size:.78rem}
+        @media(max-width:760px){.bitacora-check-grid{grid-template-columns:1fr}.bitacora-check-card{align-items:flex-start;flex-direction:column}.bitacora-mini-link{width:100%;text-align:center}}
+
         @media(max-width:1120px){
             .layout{grid-template-columns:1fr;}
             .hero-content{grid-template-columns:1fr;}
             .day-info{min-width:0;}
-            .mini-process{grid-template-columns:repeat(2,minmax(0,1fr));}
+
+
+        .qr-panel{
+            border:1px solid #bfdbfe;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            border-radius:24px;
+            padding:18px;
+            margin:16px 0;
+            display:grid;
+            grid-template-columns:auto 1fr;
+            gap:18px;
+            align-items:center;
+            box-shadow:0 14px 34px rgba(37,99,235,.10);
+        }
+
+        .qr-image{
+            width:178px;
+            height:178px;
+            border-radius:22px;
+            background:#fff;
+            border:1px solid #dbeafe;
+            padding:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+        }
+
+        .qr-image img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+        }
+
+        .qr-fallback{
+            width:100%;
+            height:100%;
+            border-radius:18px;
+            background:#f8fafc;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
+            color:#2563eb;
+            text-align:center;
+            font-weight:900;
+        }
+
+        .qr-fallback i{font-size:2rem;}
+
+        .qr-title{
+            margin:0 0 6px;
+            font-weight:950;
+            color:#0f172a;
+            letter-spacing:-.03em;
+        }
+
+        .qr-text{
+            margin:0 0 12px;
+            color:#475569;
+            font-weight:650;
+            line-height:1.45;
+        }
+
+        .qr-link-box{
+            border:1px dashed #93c5fd;
+            background:#ffffff;
+            border-radius:16px;
+            padding:10px 12px;
+            color:#1e3a8a;
+            font-size:.82rem;
+            font-weight:750;
+            overflow-wrap:anywhere;
+            margin-bottom:10px;
+        }
+
+        .method-note{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            border-radius:999px;
+            padding:.45rem .7rem;
+            background:#eef2ff;
+            color:#3730a3;
+            font-weight:900;
+            font-size:.78rem;
+            margin-bottom:10px;
+        }
+
+        @media(max-width:760px){
+            .qr-panel{grid-template-columns:1fr;text-align:center;}
+            .qr-image{margin:0 auto;}
+        }
+
+        .mini-process{grid-template-columns:repeat(2,minmax(0,1fr));}
             .quick-strip{grid-template-columns:repeat(2,minmax(0,1fr));}
             .status-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
         }
@@ -1091,13 +1369,10 @@
             .hero{padding:22px;border-radius:22px;}
             .hero-student{flex-direction:column;align-items:flex-start;}
             .hero h1{font-size:1.55rem;}
-            .form-grid,.info-grid,.mini-process,.quick-strip,.status-grid,.validation-grid,.cancel-summary-grid{grid-template-columns:1fr;}
+            .form-grid,.info-grid,.mini-process,.quick-strip,.status-grid{grid-template-columns:1fr;}
             .student-top{flex-direction:column;}
             .submit-bar{align-items:stretch;}
             .summary-row{grid-template-columns:1fr;gap:2px;}
-            .qr-panel{grid-template-columns:1fr;text-align:center;}
-            .qr-image{margin:0 auto;}
-            .cancel-warning-box{flex-direction:column;}
         }
 
 
@@ -1221,6 +1496,19 @@
             .apoyo-mini-btn{width:100%;}
         }
 
+
+
+        @media(max-width:760px){
+            .brand-logo{
+                width:184px;
+                height:92px;
+                border-radius:24px;
+            }
+            .brand-title,
+            .brand-subtitle{
+                max-width:184px;
+            }
+        }
     </style>
 </head>
 
@@ -1235,15 +1523,14 @@
                 <img src="{% static 'img/logo.png' %}" alt="Logo UNACH">
             </div>
             <div>
-                <h1 class="brand-title">Solicitar autorización de salida</h1>
+                <h1 class="brand-title">Registrar salida</h1>
                 <p class="brand-subtitle">
-                    La maestra captura la salida y el responsable autoriza desde su celular por correo institucional o QR presencial.
+                    La salida se autoriza en esta tableta con el código de 4 dígitos del responsable.
                 </p>
             </div>
         </div>
 
         <div class="top-actions">
-
             {% if tiene_apoyo_sala_activo %}
                 <a href="{% url 'finalizar_apoyo_sala' %}" class="apoyo-mini-btn apoyo-end">
                     <i class="bi bi-check-circle-fill"></i> Finalizar apoyo
@@ -1258,8 +1545,14 @@
                 </span>
             {% endif %}
 
-            <div class="teacher-chip" title="Maestra">
-                <span class="teacher-icon"><i class="bi bi-person-workspace"></i></span>
+            <div class="teacher-chip" title="{{ request.user.get_full_name|default:request.user.username }}">
+                <span class="teacher-icon">
+                    {% if foto_perfil_maestra_url %}
+                        <img src="{{ foto_perfil_maestra_url }}" alt="Foto de {{ request.user.get_full_name|default:request.user.username }}">
+                    {% else %}
+                        <i class="bi bi-person-workspace"></i>
+                    {% endif %}
+                </span>
                 <span class="teacher-name">{{ request.user.get_full_name|default:request.user.username }}</span>
             </div>
 
@@ -1280,8 +1573,6 @@
         </div>
     {% endif %}
 
-
-    <!-- AVISO DE APOYO TEMPORAL DE SALA -->
     {% if tiene_apoyo_sala_activo or apoyo_sala_bloqueado_mensaje or puede_iniciar_apoyo_sala %}
         {% if tiene_apoyo_sala_activo %}
             <div class="apoyo-sala-card active">
@@ -1339,7 +1630,8 @@
             </div>
         {% endif %}
     {% endif %}
-<section class="hero">
+
+    <section class="hero">
         <div class="hero-content">
             <div class="hero-student">
                 <div class="hero-photo">
@@ -1352,15 +1644,14 @@
 
                 <div>
                     <div class="hero-kicker">
-                        <i class="bi bi-qr-code-scan"></i>
-                        Autorización de salida por correo o QR
+                        <i class="bi bi-tablet-landscape-fill"></i>
+                        Autorización de salida en tableta
                     </div>
 
                     <h1>{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</h1>
 
                     <p>
-                        Selecciona quién recoge al menor, verifica la credencial física y captura el tipo de salida.
-                        Si el responsable tiene correo institucional UNACH, recibirá el enlace por correo; si no tiene correo institucional, el sistema mostrará un QR para autorizar presencialmente.
+                        Selecciona al responsable que recoge al menor. Después revisa el resumen, verifica la credencial y entrega la tableta para que el responsable escriba su código.
                     </p>
                 </div>
             </div>
@@ -1430,8 +1721,20 @@
         </div>
     </section>
 
-    <div class="layout">
 
+
+    <section class="bitacora-check-grid">
+        <div class="bitacora-check-card {% if bitacora_casa and bitacora_casa.completa %}done{% else %}pending{% endif %}">
+            <div class="bitacora-check-info"><div class="bitacora-check-icon"><i class="bi {% if bitacora_casa and bitacora_casa.completa %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"></i></div><div><div class="bitacora-check-title">Bitácora en casa</div><div class="bitacora-check-text">{% if bitacora_casa and bitacora_casa.completa %}Completa / lista{% else %}Falta completar antes de cerrar el proceso{% endif %}</div></div></div>
+            {% if not bitacora_casa or not bitacora_casa.completa %}<a class="bitacora-mini-link" href="{% url 'bitacora_entrada_casa_maestra' registro.id %}"><i class="bi bi-pencil-square"></i> Completar</a>{% endif %}
+        </div>
+        <div class="bitacora-check-card {% if bitacora_estancia and bitacora_estancia.completa %}done{% else %}pending{% endif %}">
+            <div class="bitacora-check-info"><div class="bitacora-check-icon"><i class="bi {% if bitacora_estancia and bitacora_estancia.completa %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"></i></div><div><div class="bitacora-check-title">Bitácora estancia</div><div class="bitacora-check-text">{% if bitacora_estancia and bitacora_estancia.completa %}Completa / lista{% else %}Falta completar antes de registrar salida{% endif %}</div></div></div>
+            {% if not bitacora_estancia or not bitacora_estancia.completa %}<a class="bitacora-mini-link" href="{% url 'bitacora_estancia_maestra' registro.id %}"><i class="bi bi-pencil-square"></i> Completar</a>{% endif %}
+        </div>
+    </section>
+
+    <div class="layout">
         <aside>
             <section class="panel mb-4">
                 <div class="panel-header">
@@ -1461,7 +1764,6 @@
                                     <i class="bi bi-person-heart"></i>
                                 {% endif %}
                             </div>
-
                             <div>
                                 <div class="student-name">
                                     {{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}
@@ -1478,6 +1780,19 @@
                         </div>
 
                         <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Formulario</div>
+                                <div class="info-value">
+                                    {% if tipo_formulario == "LACTANTES" %}
+                                        Lactantes
+                                    {% elif tipo_formulario == "MATERNAL" %}
+                                        Maternal
+                                    {% else %}
+                                        General
+                                    {% endif %}
+                                </div>
+                            </div>
+
                             <div class="info-item">
                                 <div class="info-label">Entrada</div>
                                 <div class="info-value">
@@ -1501,53 +1816,21 @@
                             </div>
 
                             <div class="info-item">
-                                <div class="info-label">Estado</div>
-                                <div class="info-value">{{ registro.get_estado_display }}</div>
+                                <div class="info-label">Captura</div>
+                                <div class="info-value">Hora automática al autorizar</div>
                             </div>
-
-                            <div class="info-item">
-                                <div class="info-label">Formulario</div>
-                                <div class="info-value">
-                                    {% if tipo_formulario == "LACTANTES" %}
-                                        Lactantes
-                                    {% elif tipo_formulario == "MATERNAL" %}
-                                        Maternal
-                                    {% else %}
-                                        General
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="validation-grid">
-                        <div class="validation-item {% if registro.tiene_bitacora_entrada_completa %}ok{% else %}pending{% endif %}">
-                            {% if registro.tiene_bitacora_entrada_completa %}
-                                <i class="bi bi-check-circle-fill"></i>
-                                Bitácora en casa completa
-                            {% else %}
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                Bitácora en casa pendiente
-                            {% endif %}
-                        </div>
-
-                        <div class="validation-item {% if registro.tiene_bitacora_estancia_completa %}ok{% else %}pending{% endif %}">
-                            {% if registro.tiene_bitacora_estancia_completa %}
-                                <i class="bi bi-check-circle-fill"></i>
-                                Bitácora de estancia completa
-                            {% else %}
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                Bitácora de estancia pendiente
-                            {% endif %}
                         </div>
                     </div>
 
                     <div class="help-card">
                         <i class="bi bi-info-circle-fill me-1"></i>
-                        La salida quedará registrada automáticamente cuando el responsable autorice desde su celular.
+                        La salida se registrará cuando el responsable autorizado escriba correctamente su código en esta tableta.
                     </div>
 
-
+                    <div class="security-card mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        La maestra verifica la credencial física y supervisa el proceso.
+                    </div>
                 </div>
             </section>
 
@@ -1564,25 +1847,25 @@
                         <div class="step">
                             <div class="step-number">1</div>
                             <div class="step-title">Captura</div>
-                            <p class="step-text">La maestra selecciona al responsable y registra datos de salida.</p>
+                            <p class="step-text">La maestra selecciona al responsable y registra los datos de salida.</p>
                         </div>
 
                         <div class="step">
                             <div class="step-number">2</div>
                             <div class="step-title">Resumen</div>
-                            <p class="step-text">Se muestra una ventana compacta antes de enviar o generar QR.</p>
+                            <p class="step-text">Se muestra una ventana con la información antes de continuar.</p>
                         </div>
 
                         <div class="step">
                             <div class="step-number">3</div>
-                            <div class="step-title">Correo o QR</div>
-                            <p class="step-text">Si tiene correo institucional se envía enlace; si no, se muestra QR.</p>
+                            <div class="step-title">Código</div>
+                            <p class="step-text">El responsable escribe su código de 4 dígitos en la tableta.</p>
                         </div>
 
                         <div class="step">
                             <div class="step-number">4</div>
                             <div class="step-title">Salida</div>
-                            <p class="step-text">Al validar su código, la salida queda registrada.</p>
+                            <p class="step-text">Si el código es correcto, la salida queda registrada.</p>
                         </div>
                     </div>
                 </div>
@@ -1597,17 +1880,10 @@
                         Información de salida
                     </h2>
 
-                    {% if autorizacion_pendiente %}
-                        <span class="badge-soft badge-yellow" id="statusBadge">
-                            <i class="bi bi-hourglass-split"></i>
-                            {{ autorizacion_pendiente.get_estado_display }}
-                        </span>
-                    {% else %}
-                        <span class="badge-soft badge-blue">
-                            <i class="bi bi-qr-code-scan"></i>
-                            Correo institucional / QR
-                        </span>
-                    {% endif %}
+                    <span class="badge-soft badge-blue">
+                        <i class="bi bi-tablet-landscape-fill"></i>
+                        Autorización en tableta
+                    </span>
                 </div>
 
                 <div class="panel-body">
@@ -1624,135 +1900,33 @@
                                 </span>
                             </div>
                             <p class="mb-3 text-secondary fw-semibold">
-                                La autorización fue completada y el menor ya tiene salida registrada.
+                                La salida fue autorizada en la tableta y el menor ya aparece fuera de la estancia.
                             </p>
                             <a href="{% url 'dashboard_maestra' %}#alumnos-dia" class="btn-main">
                                 <i class="bi bi-arrow-left-circle-fill"></i>
-                                Volver al panel de maestra
+                                Volver al panel
                             </a>
                         </div>
 
-                    {% elif autorizacion_pendiente %}
-                        <div class="pending-card" id="pendingCard">
+                    {% elif not registro.entrada_en %}
+                        <div class="pending-card is-error">
                             <div class="pending-head">
                                 <div class="pending-title">
-                                    <span class="pulse-dot" id="pulseDot"></span>
-                                    Esperando autorización del responsable
+                                    <span class="pulse-dot" style="background:#dc2626;"></span>
+                                    No se puede registrar salida
                                 </div>
-
-                                <span class="badge-soft badge-yellow" id="estadoAutorizacionBadge">
-                                    <i class="bi bi-hourglass-split"></i>
-                                    {{ autorizacion_pendiente.get_estado_display }}
+                                <span class="badge-soft badge-red">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    Sin entrada
                                 </span>
                             </div>
-
-                            <p class="mb-3 text-secondary fw-semibold" id="statusText">
-                                La solicitud ya está activa. Esta pantalla revisará automáticamente si el responsable autorizó la salida desde su celular.
+                            <p class="mb-3 text-secondary fw-semibold">
+                                Primero debe registrarse la entrada del menor para poder registrar su salida.
                             </p>
-
-                            <div class="status-grid mb-3">
-                                <div class="status-item">
-                                    <div class="status-label">Responsable</div>
-                                    <div class="status-value">{{ autorizacion_pendiente.responsable_nombre|default:"Responsable autorizado" }}</div>
-                                </div>
-                                <div class="status-item">
-                                    <div class="status-label">Método</div>
-                                    <div class="status-value">
-                                        {% if autorizacion_pendiente.usa_qr %}
-                                            QR presencial
-                                        {% elif autorizacion_pendiente.usa_correo %}
-                                            Correo institucional
-                                        {% else %}
-                                            Autorización pendiente
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="status-item">
-                                    <div class="status-label">Expira</div>
-                                    <div class="status-value">
-                                        {% if autorizacion_pendiente.expira_en %}
-                                            {{ autorizacion_pendiente.expira_en|date:"d/m/Y H:i" }}
-                                        {% else %}
-                                            Vigencia limitada
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="status-item">
-                                    <div class="status-label">Credencial</div>
-                                    <div class="status-value">
-                                        {% if autorizacion_pendiente.credencial_salida_validada %}Verificada{% else %}No verificada{% endif %}
-                                    </div>
-                                </div>
-                                <div class="status-item">
-                                    <div class="status-label">Tipo de salida</div>
-                                    <div class="status-value">{{ autorizacion_pendiente.tipo_salida|default:"Salida normal" }}</div>
-                                </div>
-                                <div class="status-item">
-                                    <div class="status-label">Solicitó</div>
-                                    <div class="status-value">
-                                        {{ autorizacion_pendiente.solicitada_por.get_full_name|default:autorizacion_pendiente.solicitada_por.username }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {% if autorizacion_pendiente.usa_qr %}
-                                <div class="qr-panel" id="qrPanel">
-                                    <div class="qr-image" id="qrImageBox">
-                                        {% if qr_data_uri %}
-                                            <img src="{{ qr_data_uri }}" alt="QR de autorización de salida">
-                                        {% else %}
-                                            <div class="qr-fallback">
-                                                <i class="bi bi-qr-code-scan"></i>
-                                                QR no disponible
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    <div>
-                                        <span class="method-note">
-                                            <i class="bi bi-phone-fill"></i>
-                                            Autorización presencial por QR
-                                        </span>
-                                        <h3 class="qr-title">Pide al responsable escanear este QR</h3>
-                                        <p class="qr-text">
-                                            Este QR abre la pantalla de autorización de salida. El responsable revisa la información desde su celular, escribe su código de 4 dígitos y confirma la salida.
-                                        </p>
-                                        {% if autorizacion_pendiente_url %}
-                                            <div class="qr-link-box" id="qrLinkText">{{ autorizacion_pendiente_url }}</div>
-                                            <button type="button" class="btn-soft" id="btnCopiarQrLink">
-                                                <i class="bi bi-clipboard-check-fill"></i>
-                                                Copiar enlace
-                                            </button>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% elif autorizacion_pendiente.usa_correo %}
-                                <div class="mail-card">
-                                    <i class="bi bi-envelope-check-fill me-1"></i>
-                                    Se envió el enlace al correo institucional del responsable: <strong>{{ autorizacion_pendiente.correo_destino|default:"correo no disponible" }}</strong>.
-                                </div>
-                            {% endif %}
-
-                            {% if autorizacion_pendiente.motivo_salida or autorizacion_pendiente.observacion_salida %}
-                                <div class="mail-card">
-                                    <i class="bi bi-chat-left-text-fill me-1"></i>
-                                    {% if autorizacion_pendiente.motivo_salida %}<strong>Motivo:</strong> {{ autorizacion_pendiente.motivo_salida }}{% endif %}
-                                    {% if autorizacion_pendiente.observacion_salida %}<br><strong>Comentario:</strong> {{ autorizacion_pendiente.observacion_salida }}{% endif %}
-                                </div>
-                            {% endif %}
-
-                            <form method="post" action="{% url 'cancelar_autorizacion_salida_maestra' autorizacion_pendiente.id %}" class="mt-2" id="cancelarAutorizacionForm">
-                                {% csrf_token %}
-                                <input type="hidden" name="motivo" value="Cancelada por la maestra para corregir o reenviar la solicitud de salida.">
-                                <button type="button" class="btn-danger-soft" data-bs-toggle="modal" data-bs-target="#cancelarAutorizacionModal">
-                                    <i class="bi bi-x-circle-fill"></i>
-                                    Cancelar solicitud
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="help-card mb-0">
-                            <i class="bi bi-phone-fill me-1"></i>
-                            Cuando el responsable abra el enlace o escanee el QR, escriba su código y autorice, esta pantalla te avisará y registrará la salida.
+                            <a href="{% url 'registrar_entrada_alumno' registro.id %}" class="btn-main">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                Registrar entrada
+                            </a>
                         </div>
 
                     {% else %}
@@ -1783,7 +1957,7 @@
 
                                         <div class="selected-preview" id="responsablePreview">
                                             <i class="bi bi-info-circle-fill me-1"></i>
-                                            Selecciona la persona que recoge al menor. Si tiene correo institucional se enviará el enlace; si no, se generará un QR presencial.
+                                            Selecciona la persona que recoge al menor. Después se mostrará el resumen y el responsable escribirá su código en la tableta.
                                         </div>
                                     </div>
                                 </div>
@@ -1792,7 +1966,7 @@
                             <div class="form-section">
                                 <div class="form-section-title">
                                     <i class="bi bi-shield-check"></i>
-                                    Validación física y datos de salida
+                                    Datos de salida
                                 </div>
 
                                 <div class="form-grid">
@@ -1808,41 +1982,17 @@
 
                                     <div class="form-group">
                                         <label class="form-label">Código de seguridad</label>
-                                        <div class="selected-preview mt-0">
-                                            <i class="bi bi-phone-fill me-1"></i>
-                                            El código no se captura aquí. Lo escribirá el responsable desde su celular usando el enlace enviado por correo o el QR presencial.
+                                        <div class="selected-preview compact-code-note mt-0">
+                                            <i class="bi bi-tablet-landscape-fill me-1"></i>
+                                            Se captura en la ventana final.
                                         </div>
                                     </div>
 
-                                    <div class="form-group full">
-                                        <div class="form-check">
-                                            {{ form.credencial_salida_validada }}
-                                            <label for="{{ form.credencial_salida_validada.id_for_label }}" class="form-check-label">
-                                                Confirmo que la credencial del adulto responsable fue verificada <span class="required">*</span>
-                                            </label>
-                                        </div>
-                                        {% if form.credencial_salida_validada.errors %}
-                                            <div class="errors">{{ form.credencial_salida_validada.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-section">
-                                <div class="form-section-title">
-                                    <i class="bi bi-chat-left-text-fill"></i>
-                                    Motivo y comentario de salida
-                                </div>
-
-                                <div class="form-grid">
                                     <div class="form-group full">
                                         <label for="{{ form.motivo_salida.id_for_label }}" class="form-label">
                                             Motivo de salida
                                         </label>
                                         {{ form.motivo_salida }}
-                                        <div class="pin-help">
-                                            Obligatorio si es salida anticipada o salida por incidencia.
-                                        </div>
                                         {% if form.motivo_salida.errors %}
                                             <div class="errors">{{ form.motivo_salida.errors }}</div>
                                         {% endif %}
@@ -1853,9 +2003,6 @@
                                             Comentario de salida
                                         </label>
                                         {{ form.observacion_salida }}
-                                        <div class="pin-help">
-                                            Este comentario aparecerá en el resumen que verá el responsable antes de autorizar.
-                                        </div>
                                         {% if form.observacion_salida.errors %}
                                             <div class="errors">{{ form.observacion_salida.errors }}</div>
                                         {% endif %}
@@ -1865,12 +2012,12 @@
 
                             <div class="submit-bar">
                                 <div class="submit-note">
-                                    Antes de procesar, se mostrará una ventana con el resumen capturado. La salida se registrará hasta que el responsable autorice desde su celular.
+                                    Antes de registrar la salida, se mostrará una ventana con el resumen. En esa ventana se confirma la credencial y el responsable escribe su código.
                                 </div>
 
                                 <button type="button" class="btn-main" id="btnAbrirResumen">
-                                    <i class="bi bi-send-check-fill"></i>
-                                    Revisar y solicitar autorización
+                                    <i class="bi bi-clipboard-check-fill"></i>
+                                    Revisar y autorizar salida
                                 </button>
                             </div>
                         </form>
@@ -1883,7 +2030,7 @@
                     <div class="panel-header">
                         <h2 class="panel-title">
                             <i class="bi bi-clock-history"></i>
-                            Últimas solicitudes de salida
+                            Últimas salidas registradas
                         </h2>
                     </div>
                     <div class="panel-body">
@@ -1904,7 +2051,6 @@
                                     </div>
                                     <div class="text-secondary small fw-semibold">
                                         Creada: {{ autorizacion.created_at|date:"d/m/Y H:i" }}
-                                        {% if autorizacion.usa_qr %} · Método: QR presencial{% elif autorizacion.correo_destino %} · Correo: {{ autorizacion.correo_destino }}{% endif %}
                                         {% if autorizacion.ultimo_error %} · Nota: {{ autorizacion.ultimo_error }}{% endif %}
                                     </div>
                                 </div>
@@ -1914,42 +2060,47 @@
                 </section>
             {% endif %}
         </main>
-
     </div>
 </div>
 
-{% if not autorizacion_pendiente and not registro.salida_en %}
+{% if registro.entrada_en and not registro.salida_en %}
 <div class="modal fade" id="resumenSalidaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-clipboard-check-fill"></i>
-                    Confirmar solicitud de autorización de salida
+                    Confirmar salida en tableta
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <div class="mail-card">
-                    <i class="bi bi-qr-code-scan me-1"></i>
-                    El sistema decidirá el método de autorización: correo institucional UNACH o QR presencial. No se registrará la salida hasta que el responsable autorice desde su celular con su código de 4 dígitos.
+                    <i class="bi bi-tablet-landscape-fill me-1"></i>
+                    Revisa el resumen. Después entrega la tableta al responsable autorizado para que escriba su código de 4 dígitos.
                 </div>
 
-                <div class="summary-box">
-                    <div class="summary-row">
-                        <div class="summary-label">Menor</div>
-                        <div class="summary-value">{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</div>
+                <div class="modal-student-card">
+                    <div class="modal-student-photo">
+                        {% if registro.alumno.doc_menor_fotos %}
+                            <img src="{{ registro.alumno.doc_menor_fotos.url }}" alt="Foto del menor">
+                        {% else %}
+                            <i class="bi bi-person-heart"></i>
+                        {% endif %}
                     </div>
-                    <div class="summary-row">
-                        <div class="summary-label">Sala</div>
-                        <div class="summary-value">
+                    <div>
+                        <h6 class="modal-student-name">{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</h6>
+                        <div class="modal-student-meta">
                             {% if registro.sala_semestre and registro.sala_semestre.sala %}
-                                {{ registro.sala_semestre.sala.nombre }}
+                                Sala {{ registro.sala_semestre.sala.nombre }} · {{ registro.sala_semestre.sala.get_tipo_sala_display }}
                             {% else %}
-                                Sin sala
+                                Sala no asignada
                             {% endif %}
                         </div>
                     </div>
+                </div>
+
+                <div class="summary-box">
                     <div class="summary-row">
                         <div class="summary-label">Fecha</div>
                         <div class="summary-value">{{ dia.fecha|date:"d/m/Y" }}</div>
@@ -1957,10 +2108,6 @@
                     <div class="summary-row">
                         <div class="summary-label">Responsable</div>
                         <div class="summary-value" id="modalResponsable">No seleccionado</div>
-                    </div>
-                    <div class="summary-row">
-                        <div class="summary-label">Credencial</div>
-                        <div class="summary-value" id="modalCredencial">No confirmada</div>
                     </div>
                     <div class="summary-row">
                         <div class="summary-label">Tipo de salida</div>
@@ -1976,7 +2123,48 @@
                     </div>
                     <div class="summary-row">
                         <div class="summary-label">Código</div>
-                        <div class="summary-value">Lo capturará el responsable desde su celular.</div>
+                        <div class="summary-value">Lo escribirá el responsable autorizado en esta tableta.</div>
+                    </div>
+                </div>
+
+                <div class="modal-credential-card">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="credencialSalidaModal" name="credencial_salida_validada" form="salidaAuthForm">
+                        <label for="credencialSalidaModal" class="form-check-label">
+                            Confirmo que la credencial del adulto responsable fue verificada <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="tablet-code-card">
+                    <h6 class="tablet-code-title">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        Código de autorización del responsable
+                    </h6>
+                    <p class="tablet-code-text">
+                        El responsable escribe aquí su código de 4 dígitos.
+                    </p>
+
+                    <label for="codigoSeguridadTablet" class="form-label mb-2">
+                        Código de 4 dígitos <span class="required">*</span>
+                    </label>
+                    <input
+                        type="password"
+                        class="form-control tablet-code-input"
+                        id="codigoSeguridadTablet"
+                        name="codigo_seguridad"
+                        form="salidaAuthForm"
+                        maxlength="4"
+                        minlength="4"
+                        inputmode="numeric"
+                        pattern="[0-9]{4}"
+                        autocomplete="one-time-code"
+                        placeholder="••••"
+                        required
+                    >
+                    <div class="tablet-privacy-note">
+                        <i class="bi bi-eye-slash-fill me-1"></i>
+                        Por seguridad, el código se oculta mientras se escribe.
                     </div>
                 </div>
             </div>
@@ -1986,8 +2174,8 @@
                     Editar captura
                 </button>
                 <button type="submit" form="salidaAuthForm" class="btn-main" id="btnProcesarAutorizacion">
-                    <i class="bi bi-send-check-fill"></i>
-                    Aceptar y procesar autorización
+                    <i class="bi bi-check2-circle"></i>
+                    Autorizar y registrar salida
                 </button>
             </div>
         </div>
@@ -1995,71 +2183,94 @@
 </div>
 {% endif %}
 
-{% if autorizacion_pendiente and not registro.salida_en %}
-<div class="modal fade" id="cancelarAutorizacionModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="customNoticeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header cancel-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    Cancelar solicitud de autorización de salida
+            <div class="modal-header notice-header">
+                <h5 class="modal-title" id="customNoticeTitle">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    Aviso importante
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <div class="cancel-warning-box">
-                    <div class="cancel-icon">
-                        <i class="bi bi-x-octagon-fill"></i>
+                <div class="notice-box">
+                    <div class="notice-icon">
+                        <i class="bi bi-shield-exclamation" id="customNoticeIcon"></i>
                     </div>
                     <div>
-                        <h6>¿Deseas cancelar esta solicitud?</h6>
-                        <p>
-                            El enlace o QR dejará de ser válido. Después podrás corregir la información y generar una nueva solicitud de autorización de salida.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="cancel-summary-grid">
-                    <div class="cancel-summary-item">
-                        <div class="status-label">Menor</div>
-                        <div class="status-value">{{ registro.alumno.solicitud_ingreso.nombre_menor_completo }}</div>
-                    </div>
-                    <div class="cancel-summary-item">
-                        <div class="status-label">Responsable</div>
-                        <div class="status-value">{{ autorizacion_pendiente.responsable_nombre|default:"Responsable autorizado" }}</div>
-                    </div>
-                    <div class="cancel-summary-item">
-                        <div class="status-label">Método</div>
-                        <div class="status-value">{% if autorizacion_pendiente.usa_qr %}QR presencial{% else %}{{ autorizacion_pendiente.correo_destino|default:"Sin correo" }}{% endif %}</div>
-                    </div>
-                    <div class="cancel-summary-item">
-                        <div class="status-label">Estado actual</div>
-                        <div class="status-value">{{ autorizacion_pendiente.get_estado_display }}</div>
+                        <h6 id="customNoticeHeading">Revisa la información antes de continuar</h6>
+                        <p id="customNoticeMessage">Debes completar correctamente la captura para continuar con el proceso.</p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer d-flex justify-content-between flex-wrap gap-2">
-                <button type="button" class="btn-soft" data-bs-dismiss="modal">
-                    <i class="bi bi-arrow-left-circle-fill"></i>
-                    Seguir esperando
-                </button>
-                <button type="submit" form="cancelarAutorizacionForm" class="btn-main btn-cancel-confirm" id="btnConfirmarCancelacion">
-                    <i class="bi bi-x-circle-fill"></i>
-                    Sí, cancelar solicitud
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn-main notice-button" data-bs-dismiss="modal" id="customNoticeAccept">
+                    <i class="bi bi-check2-circle"></i>
+                    Entendido
                 </button>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    let focoDespuesDeNotificacion = null;
+
+    function mostrarNotificacionDiseno(mensaje, opciones = {}){
+        const modalElement = document.getElementById("customNoticeModal");
+        const mensajeElement = document.getElementById("customNoticeMessage");
+        const headingElement = document.getElementById("customNoticeHeading");
+        const titleElement = document.getElementById("customNoticeTitle");
+        const iconElement = document.getElementById("customNoticeIcon");
+
+        if(!modalElement || !mensajeElement){
+            window.alert(mensaje);
+            if(opciones.focusElement){ opciones.focusElement.focus(); }
+            return;
+        }
+
+        mensajeElement.textContent = mensaje || "Revisa la información capturada.";
+        if(headingElement){ headingElement.textContent = opciones.heading || "Revisa la información antes de continuar"; }
+        if(titleElement){ titleElement.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i> ' + (opciones.title || 'Aviso importante'); }
+        if(iconElement){ iconElement.className = opciones.icon || 'bi bi-shield-exclamation'; }
+
+        focoDespuesDeNotificacion = opciones.focusElement || null;
+        bootstrap.Modal.getOrCreateInstance(modalElement).show();
+    }
+
+    const customNoticeModal = document.getElementById("customNoticeModal");
+    if(customNoticeModal){
+        customNoticeModal.addEventListener("hidden.bs.modal", function(){
+            if(focoDespuesDeNotificacion){
+                try{ focoDespuesDeNotificacion.focus(); }catch(error){}
+            }
+            focoDespuesDeNotificacion = null;
+        });
+    }
+
+    function limpiarTextoResponsable(texto){
+        return (texto || "")
+            .replace(/\s*\((?=[^)]*(correo|qr))[^)]*\)/gi, "")
+            .replace(/\s*,?\s*(correo institucional|qr presencial)/gi, "")
+            .replace(/\s{2,}/g, " ")
+            .trim();
+    }
+
+    function limpiarOpcionesResponsable(select){
+        if(!select){ return; }
+        Array.from(select.options || []).forEach(function(option){
+            option.textContent = limpiarTextoResponsable(option.textContent);
+            option.label = limpiarTextoResponsable(option.label || option.textContent);
+        });
+    }
+
     function textoSeleccionado(select){
         if(!select){ return ""; }
         const option = select.options[select.selectedIndex];
-        return (option?.text || "").trim();
+        return limpiarTextoResponsable((option?.text || "").trim());
     }
 
     function actualizarResponsablePreview(){
@@ -2068,10 +2279,11 @@
 
         if(!select || !preview){ return; }
 
+        limpiarOpcionesResponsable(select);
         const texto = textoSeleccionado(select);
 
         if(!select.value || !texto){
-            preview.innerHTML = '<i class="bi bi-info-circle-fill me-1"></i> Selecciona la persona que recoge al menor. Si tiene correo institucional se enviará el enlace; si no, se generará un QR presencial.';
+            preview.innerHTML = '<i class="bi bi-info-circle-fill me-1"></i> Selecciona la persona que recoge al menor. Después se mostrará el resumen y el responsable escribirá su código directamente en la tableta.';
             return;
         }
 
@@ -2080,172 +2292,102 @@
 
     const responsableSelect = document.getElementById("{{ form.responsable_autorizado.id_for_label }}");
     if(responsableSelect){
+        limpiarOpcionesResponsable(responsableSelect);
         responsableSelect.addEventListener("change", actualizarResponsablePreview);
         actualizarResponsablePreview();
+    }
+
+    const codigoSeguridadTablet = document.getElementById("codigoSeguridadTablet");
+    const credencialSalidaModal = document.getElementById("credencialSalidaModal");
+
+    if(codigoSeguridadTablet){
+        codigoSeguridadTablet.addEventListener("input", function(){
+            this.value = this.value.replace(/\D/g, "").slice(0, 4);
+        });
     }
 
     const btnAbrirResumen = document.getElementById("btnAbrirResumen");
     if(btnAbrirResumen){
         btnAbrirResumen.addEventListener("click", function(){
             const responsable = document.getElementById("{{ form.responsable_autorizado.id_for_label }}");
-            const credencial = document.getElementById("{{ form.credencial_salida_validada.id_for_label }}");
             const tipoSalida = document.getElementById("{{ form.tipo_salida.id_for_label }}");
             const motivoSalida = document.getElementById("{{ form.motivo_salida.id_for_label }}");
             const observacionSalida = document.getElementById("{{ form.observacion_salida.id_for_label }}");
 
             if(!responsable || !responsable.value){
-                alert("Selecciona el tutor o familiar autorizado antes de continuar.");
-                responsable?.focus();
+                mostrarNotificacionDiseno("Selecciona el tutor o familiar autorizado antes de continuar.", {
+                    heading:"Falta seleccionar un responsable",
+                    focusElement:responsable
+                });
                 return;
             }
 
             if(!tipoSalida || !tipoSalida.value){
-                alert("Selecciona el tipo de salida antes de continuar.");
-                tipoSalida?.focus();
+                mostrarNotificacionDiseno("Selecciona el tipo de salida antes de continuar.", {
+                    heading:"Falta seleccionar el tipo de salida",
+                    focusElement:tipoSalida
+                });
                 return;
             }
 
-            if(credencial && !credencial.checked){
-                alert("Confirma que la credencial del adulto responsable fue verificada.");
-                credencial.focus();
-                return;
-            }
+            const modalResponsable = document.getElementById("modalResponsable");
+            const modalTipoSalida = document.getElementById("modalTipoSalida");
+            const modalMotivoSalida = document.getElementById("modalMotivoSalida");
+            const modalObservacionSalida = document.getElementById("modalObservacionSalida");
 
-            document.getElementById("modalResponsable").textContent = textoSeleccionado(responsable) || "No seleccionado";
-            document.getElementById("modalCredencial").textContent = credencial && credencial.checked ? "Verificada por la maestra" : "No confirmada";
-            document.getElementById("modalTipoSalida").textContent = textoSeleccionado(tipoSalida) || "No seleccionado";
-            document.getElementById("modalMotivoSalida").textContent = motivoSalida && motivoSalida.value.trim() ? motivoSalida.value.trim() : "Sin motivo especial";
-            document.getElementById("modalObservacionSalida").textContent = observacionSalida && observacionSalida.value.trim() ? observacionSalida.value.trim() : "Sin comentarios";
+            if(modalResponsable){ modalResponsable.textContent = textoSeleccionado(responsable) || "No seleccionado"; }
+            if(modalTipoSalida){ modalTipoSalida.textContent = textoSeleccionado(tipoSalida) || "No seleccionado"; }
+            if(modalMotivoSalida){ modalMotivoSalida.textContent = motivoSalida && motivoSalida.value.trim() ? motivoSalida.value.trim() : "Sin motivo especial"; }
+            if(modalObservacionSalida){ modalObservacionSalida.textContent = observacionSalida && observacionSalida.value.trim() ? observacionSalida.value.trim() : "Sin comentarios"; }
 
-            const modal = new bootstrap.Modal(document.getElementById("resumenSalidaModal"));
+            if(codigoSeguridadTablet){ codigoSeguridadTablet.value = ""; }
+            if(credencialSalidaModal){ credencialSalidaModal.checked = false; }
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("resumenSalidaModal"));
             modal.show();
+        });
+    }
+
+    const resumenSalidaModalElement = document.getElementById("resumenSalidaModal");
+    if(resumenSalidaModalElement){
+        resumenSalidaModalElement.addEventListener("shown.bs.modal", function(){
+            if(codigoSeguridadTablet){ codigoSeguridadTablet.focus(); }
         });
     }
 
     const salidaAuthForm = document.getElementById("salidaAuthForm");
     if(salidaAuthForm){
-        salidaAuthForm.addEventListener("submit", function(){
-            const btnProcesar = document.getElementById("btnProcesarAutorizacion");
-            if(btnProcesar){
-                btnProcesar.disabled = true;
-                btnProcesar.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Procesando autorización...';
-            }
-        });
-    }
-
-    const cancelarAutorizacionForm = document.getElementById("cancelarAutorizacionForm");
-    if(cancelarAutorizacionForm){
-        cancelarAutorizacionForm.addEventListener("submit", function(){
-            const btnCancelar = document.getElementById("btnConfirmarCancelacion");
-            if(btnCancelar){
-                btnCancelar.disabled = true;
-                btnCancelar.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Cancelando...';
-            }
-        });
-    }
-
-    const btnCopiarQrLink = document.getElementById("btnCopiarQrLink");
-    if(btnCopiarQrLink){
-        btnCopiarQrLink.addEventListener("click", async function(){
-            const linkBox = document.getElementById("qrLinkText");
-            const texto = linkBox ? linkBox.textContent.trim() : "";
-            if(!texto){ return; }
-
-            try{
-                await navigator.clipboard.writeText(texto);
-                btnCopiarQrLink.innerHTML = '<i class="bi bi-check-circle-fill"></i> Enlace copiado';
-                setTimeout(function(){
-                    btnCopiarQrLink.innerHTML = '<i class="bi bi-clipboard-check-fill"></i> Copiar enlace';
-                }, 1800);
-            }catch(error){
-                btnCopiarQrLink.innerHTML = '<i class="bi bi-info-circle-fill"></i> Copia manualmente el enlace';
-            }
-        });
-    }
-
-    {% if autorizacion_pendiente and not registro.salida_en %}
-    async function revisarEstadoAutorizacion(){
-        try{
-            const response = await fetch("{% url 'estado_autorizacion_salida_maestra' registro.id %}", {
-                headers:{"X-Requested-With":"XMLHttpRequest"}
-            });
-
-            if(!response.ok){ return; }
-
-            const data = await response.json();
-            const badge = document.getElementById("estadoAutorizacionBadge");
-            const statusText = document.getElementById("statusText");
-            const pendingCard = document.getElementById("pendingCard");
-            const pulseDot = document.getElementById("pulseDot");
-
-            if(badge && data.estado_display){
-                let icon = "bi-hourglass-split";
-                let clase = "badge-soft badge-yellow";
-
-                if(data.estado === "AUTORIZADA"){
-                    icon = "bi-check-circle-fill";
-                    clase = "badge-soft badge-green";
-                }else if(data.estado === "RECHAZADA" || data.estado === "ERROR"){
-                    icon = "bi-x-circle-fill";
-                    clase = "badge-soft badge-red";
-                }else if(data.estado === "EXPIRADA" || data.estado === "CANCELADA"){
-                    icon = "bi-slash-circle-fill";
-                    clase = "badge-soft badge-gray";
-                }
-
-                badge.className = clase;
-                badge.innerHTML = '<i class="bi ' + icon + '"></i> ' + data.estado_display;
-            }
-
-            if(data.qr_data_uri){
-                const qrBox = document.getElementById("qrImageBox");
-                if(qrBox && !qrBox.querySelector("img")){
-                    qrBox.innerHTML = '<img src="' + data.qr_data_uri + '" alt="QR de autorización de salida">';
-                }
-            }
-
-            if(data.enlace_autorizacion){
-                const linkBox = document.getElementById("qrLinkText");
-                if(linkBox){ linkBox.textContent = data.enlace_autorizacion; }
-            }
-
-            if(data.salida_registrada){
-                if(statusText){
-                    statusText.textContent = "Autorización recibida. La salida fue registrada a las " + (data.salida_en || "") + ".";
-                }
-                if(pulseDot){ pulseDot.style.background = "#22c55e"; }
-
-                setTimeout(function(){
-                    if(data.redirect_url){
-                        window.location.href = data.redirect_url;
-                    }else{
-                        window.location.href = "{% url 'dashboard_maestra' %}#alumnos-dia";
-                    }
-                }, 1600);
+        salidaAuthForm.addEventListener("submit", function(event){
+            if(credencialSalidaModal && !credencialSalidaModal.checked){
+                event.preventDefault();
+                mostrarNotificacionDiseno("Confirma que la credencial del adulto responsable fue verificada.", {
+                    heading:"Falta validar la credencial",
+                    focusElement:credencialSalidaModal
+                });
                 return;
             }
 
-            if(data.estado === "RECHAZADA"){
-                if(statusText){ statusText.textContent = "El responsable rechazó la solicitud. Cancela esta solicitud para volver a capturar o revisa la situación."; }
-                if(pendingCard){ pendingCard.classList.add("is-error"); }
-                if(pulseDot){ pulseDot.style.background = "#dc2626"; }
-            }else if(data.estado === "EXPIRADA"){
-                if(statusText){ statusText.textContent = "La solicitud expiró. Cancélala y genera una nueva autorización si corresponde."; }
-                if(pendingCard){ pendingCard.classList.add("is-error"); }
-                if(pulseDot){ pulseDot.style.background = "#64748b"; }
-            }else if(data.estado === "ERROR"){
-                if(statusText){ statusText.textContent = data.ultimo_error || "Ocurrió un error al enviar o procesar la autorización."; }
-                if(pendingCard){ pendingCard.classList.add("is-error"); }
-                if(pulseDot){ pulseDot.style.background = "#dc2626"; }
-            }
-        }catch(error){
-            console.warn("No se pudo revisar el estado de autorización de salida", error);
-        }
-    }
+            if(codigoSeguridadTablet){
+                codigoSeguridadTablet.value = codigoSeguridadTablet.value.replace(/\D/g, "").slice(0, 4);
 
-    revisarEstadoAutorizacion();
-    setInterval(revisarEstadoAutorizacion, 5000);
-    {% endif %}
+                if(codigoSeguridadTablet.value.length !== 4){
+                    event.preventDefault();
+                    mostrarNotificacionDiseno("El responsable debe escribir su código de 4 dígitos para registrar la salida.", {
+                        heading:"Falta el código de autorización",
+                        focusElement:codigoSeguridadTablet,
+                        title:"Código requerido"
+                    });
+                    return;
+                }
+            }
+
+            const btnProcesar = document.getElementById("btnProcesarAutorizacion");
+            if(btnProcesar){
+                btnProcesar.disabled = true;
+                btnProcesar.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Registrando salida...';
+            }
+        });
+    }
 </script>
 
 </body>

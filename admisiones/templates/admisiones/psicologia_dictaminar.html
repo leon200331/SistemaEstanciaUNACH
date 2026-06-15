@@ -55,16 +55,16 @@ a{text-decoration:none;}
     position:sticky;
     top:0;
     z-index:1000;
-    height:94px;
-    background:rgba(255,255,255,.95);
+    min-height:148px;
+    background:rgba(255,255,255,.96);
     border-bottom:1px solid var(--border);
-    backdrop-filter:blur(14px);
     box-shadow:0 8px 26px rgba(15,23,42,.06);
 }
 .topbar-inner{
     width:min(1500px, calc(100% - 56px));
-    height:100%;
+    min-height:148px;
     margin:0 auto;
+    padding:14px 0;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -77,22 +77,24 @@ a{text-decoration:none;}
     min-width:0;
 }
 .logo-box{
-    width:68px;
-    height:68px;
-    border-radius:20px;
-    background:linear-gradient(135deg,#1d4ed8,#2563eb);
+    width:276px;
+    height:112px;
+    border-radius:28px;
+    background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:9px;
-    box-shadow:0 16px 28px rgba(37,99,235,.22);
+    padding:10px 14px;
+    box-shadow:0 18px 36px rgba(37,99,235,.24);
     flex-shrink:0;
+    overflow:hidden;
 }
 .logo-box img{
-    width:100%;
-    height:100%;
+    width:125%;
+    height:125%;
     object-fit:contain;
-    filter:drop-shadow(0 8px 12px rgba(0,0,0,.16));
+    display:block;
+    filter:none;
 }
 .brand-title{
     margin:0;
@@ -137,23 +139,33 @@ a{text-decoration:none;}
     box-shadow:0 16px 28px rgba(15,23,42,.08);
 }
 .profile-pill{
-    padding:0 14px 0 8px;
+    min-height:58px;
+    padding:8px 16px 8px 10px;
     color:#0f172a;
     background:#fff;
     border:1px solid #dbeafe;
     box-shadow:0 12px 26px rgba(37,99,235,.08);
-    max-width:360px;
+    max-width:410px;
 }
 .profile-pill .avatar{
-    width:36px;
-    height:36px;
-    border-radius:13px;
+    width:48px;
+    height:48px;
+    border-radius:18px;
     display:flex;
     align-items:center;
     justify-content:center;
     color:#fff;
     background:linear-gradient(135deg,var(--accent),var(--accent-2));
     flex-shrink:0;
+    overflow:hidden;
+    border:3px solid #eff6ff;
+    box-shadow:0 10px 20px rgba(37,99,235,.13);
+}
+.profile-pill .avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
 }
 .profile-pill small{
     display:block;
@@ -915,6 +927,20 @@ textarea.form-control{min-height:100px;}
 .btn-release-lock:hover{background:#dbeafe;color:#1e40af;}
 @media(max-width:760px){.edit-lock-banner{flex-direction:column;}.btn-release-lock{width:100%;}}
 
+
+@media(max-width:980px){
+    .logo-box{
+        width:220px;
+        height:88px;
+        border-radius:24px;
+        padding:8px 12px;
+    }
+    .app-topbar,
+    .topbar-inner{
+        min-height:auto;
+    }
+}
+
 </style>
 
 </head>
@@ -938,7 +964,7 @@ textarea.form-control{min-height:100px;}
                 Regresar
             </a>
 
-            {% if bloqueo_edicion_temporal %}
+            {% if bloqueo_edicion_temporal and tiene_suplencia_psicologia %}
             <form method="post" action="{% url 'liberar_bloqueo_edicion' bloqueo_edicion_temporal.id %}" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{% url 'psicologia_pendientes' %}">
@@ -948,10 +974,21 @@ textarea.form-control{min-height:100px;}
 
 
             <div class="profile-pill" title="Psicóloga responsable">
-                <div class="avatar"><i class="bi bi-person-heart"></i></div>
+                <div class="avatar">
+                    {% if tiene_suplencia_psicologia %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% elif request.user.foto_perfil_url %}
+                        <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil de Psicología">
+                    {% else %}
+                        <i class="bi bi-person-heart"></i>
+                    {% endif %}
+                </div>
                 <div>
-                    <small>{% if tiene_suplencia_activa %}Psicóloga / suplencia{% else %}Psicóloga{% endif %}</small>
-                    <span>{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</span>
+                    <small>{% if tiene_suplencia_psicologia %}Cobertura temporal{% else %}Psicóloga{% endif %}</small>
+                    <span>
+                        {% if tiene_suplencia_psicologia %}Cubriendo Psicología · {% endif %}
+                        {% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
+                    </span>
                 </div>
             </div>
         </div>
@@ -989,7 +1026,7 @@ textarea.form-control{min-height:100px;}
 
 
 
-  {% if bloqueo_edicion_temporal %}
+  {% if bloqueo_edicion_temporal and tiene_suplencia_psicologia %}
   <div class="edit-lock-banner">
     <div class="lock-icon"><i class="bi bi-lock-fill"></i></div>
     <div>
@@ -999,20 +1036,27 @@ textarea.form-control{min-height:100px;}
   </div>
   {% endif %}
 
-  {% if tiene_suplencia_activa %}
+  {% if tiene_suplencia_psicologia %}
   <div class="suplencia-dictamen-banner">
     <div class="suplencia-dictamen-icon"><i class="bi bi-person-badge-fill"></i></div>
     <div>
-      <h5>Cubriendo temporalmente</h5>
+      <h5>Cobertura temporal de Psicología</h5>
       <p>
-        Estás trabajando con una autorización temporal de Dirección. Este formulario corresponde al área de Psicología; si la cobertura autorizada coincide con esta área, el registro quedará marcado como suplencia y pendiente de revisión por la titular.
+        Esta viñeta solo aparece cuando otra persona está autorizada por Dirección para cubrir el área de Psicología.
+        El dictamen quedará marcado como suplencia y pendiente de revisión por la psicóloga titular.
       </p>
       <div class="suplencia-dictamen-list">
-        {% for sup in suplencias_activas_usuario %}
         <span class="suplencia-dictamen-pill">
-          <i class="bi bi-shield-check"></i>
-          {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · hasta {{ sup.fin|date:"d/m/Y H:i" }}
+          <i class="bi bi-person-check-fill"></i>
+          Suplente: {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
         </span>
+        {% for sup in suplencias_activas_usuario %}
+          {% if sup.area_cubierta == "PSICOLOGIA" %}
+          <span class="suplencia-dictamen-pill">
+            <i class="bi bi-shield-check"></i>
+            {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · hasta {{ sup.fin|date:"d/m/Y H:i" }}
+          </span>
+          {% endif %}
         {% endfor %}
       </div>
     </div>
@@ -1055,8 +1099,11 @@ textarea.form-control{min-height:100px;}
       <div class="meta-card">
         <div class="meta-icon"><i class="bi bi-person-badge-fill"></i></div>
         <div>
-          <div class="meta-label">Responsable</div>
-          <div class="meta-value">{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</div>
+          <div class="meta-label">{% if tiene_suplencia_psicologia %}Suplente autorizado{% else %}Responsable{% endif %}</div>
+          <div class="meta-value">
+            {% if tiene_suplencia_psicologia %}Cubriendo Psicología · {% endif %}
+            {% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
+          </div>
         </div>
       </div>
     </div>
@@ -1953,7 +2000,7 @@ textarea.form-control{min-height:100px;}
       <div class="row g-3">
         <div class="col-md-4">
           <label class="form-label">Psicóloga responsable</label>
-          <input type="text" class="form-control readonly-box" value="{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}" readonly>
+          <input type="text" class="form-control readonly-box" value="{% if tiene_suplencia_psicologia %}Cubriendo Psicología · {% endif %}{% if psicologa_asignada %}{{ psicologa_asignada }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}" readonly>
         </div>
         <div class="col-md-4">
           <label class="form-label">Estado de la evaluación</label>
@@ -1972,7 +2019,7 @@ textarea.form-control{min-height:100px;}
           <span class="action-icon"><i class="bi bi-shield-check"></i></span>
           <div>
             <strong>Dictamen psicológico</strong>
-            <span>{% if tiene_suplencia_activa %}La fecha se asigna automáticamente. El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.{% else %}La fecha se asigna automáticamente y el registro queda firmado por la psicóloga en sesión.{% endif %}</span>
+            <span>{% if tiene_suplencia_psicologia %}La fecha se asigna automáticamente. El registro queda firmado por el usuario suplente y se marcará como preliminar por cobertura temporal de Psicología.{% else %}La fecha se asigna automáticamente y el registro queda firmado por la psicóloga en sesión.{% endif %}</span>
           </div>
         </div>
 

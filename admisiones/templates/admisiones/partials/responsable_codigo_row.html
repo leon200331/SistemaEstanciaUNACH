@@ -12,16 +12,19 @@
                 <i class="bi bi-person-vcard-fill"></i>
             {% endif %}
         </div>
+
         <div>
             <div class="responsible-name">
                 {{ responsable.nombre_completo }}
             </div>
+
             <div class="responsible-meta">
                 {{ responsable.get_tipo_responsable_display }}
                 {% if responsable.parentesco %}
                     · {{ responsable.parentesco }}
                 {% endif %}
             </div>
+
             {% if responsable.telefono %}
                 <div class="responsible-meta">
                     <i class="bi bi-telephone-fill me-1"></i>{{ responsable.telefono }}
@@ -37,7 +40,6 @@
                 </div>
             {% endif %}
 
-
             {% if inscripcion.bloqueo_edicion_activo or inscripcion.bloqueo_por_otro_usuario or bloqueo_edicion_activo %}
                 <div class="responsible-meta mt-1">
                     <span class="badge-soft badge-yellow">
@@ -46,7 +48,7 @@
                     </span>
                 </div>
             {% endif %}
-</div>
+        </div>
     </div>
 
     <div class="status-stack">
@@ -119,7 +121,11 @@
                 <i class="bi bi-lock-fill"></i>
                 Solo consulta
             </span>
-
+        {% elif inscripcion.bloqueo_edicion_activo or inscripcion.bloqueo_por_otro_usuario or bloqueo_edicion_activo %}
+            <span class="mini-btn disabled" title="Este expediente está siendo atendido por otra persona.">
+                <i class="bi bi-lock-fill"></i>
+                En atención
+            </span>
         {% else %}
             {% if not responsable.tiene_codigo %}
                 <a

@@ -45,8 +45,7 @@
             position: sticky;
             top: 0;
             z-index: 1040;
-            background: rgba(255,255,255,.88);
-            backdrop-filter: blur(16px);
+            background: rgba(255,255,255,.94);
             border-bottom: 1px solid rgba(219, 229, 246, .9);
             box-shadow: 0 8px 25px rgba(15, 23, 42, .05);
         }
@@ -54,7 +53,8 @@
         .topbar-inner {
             max-width: 1420px;
             margin: 0 auto;
-            padding: 16px 22px;
+            min-height: 132px;
+            padding: 14px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -64,28 +64,30 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 18px;
             min-width: 0;
         }
 
         .brand-logo {
-            width: 72px;
-            height: 58px;
-            border-radius: 18px;
+            width: 276px;
+            height: 112px;
+            border-radius: 28px;
             display: grid;
             place-items: center;
-            background: linear-gradient(135deg, #1e40af, #2563eb 52%, #0f766e);
-            box-shadow: 0 14px 26px rgba(37, 99, 235, .22);
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #0f766e 130%);
+            box-shadow: 0 18px 36px rgba(37, 99, 235, .24);
             border: 1px solid rgba(255,255,255,.35);
             overflow: hidden;
+            padding: 10px 14px;
             flex: 0 0 auto;
         }
 
         .brand-logo img {
-            width: 88%;
-            height: 88%;
+            width: 125%;
+            height: 125%;
             object-fit: contain;
-            filter: drop-shadow(0 6px 10px rgba(0,0,0,.18));
+            filter: none;
+            display: block;
         }
 
         .brand-title {
@@ -148,15 +150,24 @@
         }
 
         .user-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 14px;
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
             background: linear-gradient(135deg, #dbeafe, #ecfeff);
             display: grid;
             place-items: center;
             color: var(--azul-vivo);
             font-size: 1.15rem;
             flex: 0 0 auto;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(37,99,235,.08);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .user-name {
@@ -795,6 +806,8 @@
 
         @media (max-width: 768px) {
             .topbar-inner { align-items: flex-start; flex-direction: column; }
+            .brand { width: 100%; align-items: center; }
+            .brand-logo { width: 220px; height: 88px; border-radius: 24px; padding: 8px 12px; }
             .top-actions { width: 100%; justify-content: space-between; }
             .hero { align-items: flex-start; flex-direction: column; padding: 28px 22px; }
             .hero-visual { width: 120px; height: 105px; }
@@ -1208,11 +1221,30 @@
                 Regresar
             </a>
 
-            <div class="user-pill">
-                <div class="user-avatar"><i class="bi bi-person-badge"></i></div>
+            <div class="user-pill" title="Usuario activo">
+                <div class="user-avatar">
+                    {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+                        <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                    {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% else %}
+                        <i class="bi bi-person-badge"></i>
+                    {% endif %}
+                </div>
                 <div class="min-w-0">
-                    <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
-                    <div class="user-role">Trabajadora Social</div>
+                    <div class="user-name">
+                        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            Cubriendo TS ·
+                        {% endif %}
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </div>
+                    <div class="user-role">
+                        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            Cobertura temporal
+                        {% else %}
+                            Trabajadora Social
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1225,7 +1257,7 @@
       data-validados="{{ resumen_pagos.validados|default:0 }}"
       data-presenciales="{{ resumen_pagos.presenciales|default:0 }}">
 
-{% if coberturas_trabajo_social_activas or cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social or bloqueos_edicion_activos %}
+{% if cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social %}
 <section class="ts-live-coverage-panel" id="trabajo-social-coberturas-tiempo-real">
   <div class="ts-live-head">
     <div>
@@ -1283,7 +1315,7 @@
 {% endif %}
 
 
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>

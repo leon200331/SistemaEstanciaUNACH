@@ -40,8 +40,7 @@
       position:sticky;
       top:0;
       z-index:1000;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(14px);
+      background:rgba(255,255,255,.94);
       border-bottom:1px solid var(--line);
       box-shadow:0 10px 30px rgba(15,23,42,.05);
     }
@@ -64,25 +63,26 @@
     }
 
     .logo-box{
-      width:74px;
-      height:58px;
-      border-radius:18px;
+      width:276px;
+      height:112px;
+      border-radius:28px;
       display:flex;
       align-items:center;
       justify-content:center;
-      background:linear-gradient(135deg,#1746ad,#2563eb);
-      box-shadow:0 16px 34px rgba(37,99,235,.22);
+      background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);
+      box-shadow:0 18px 36px rgba(37,99,235,.24);
       overflow:hidden;
       flex:0 0 auto;
-      padding:8px;
+      padding:10px 14px;
     }
 
     .logo-box img{
-      width:100%;
-      height:100%;
+      width:125%;
+      height:125%;
       object-fit:contain;
       display:block;
       background:transparent !important;
+      filter:none;
     }
 
     .brand-title{
@@ -122,16 +122,26 @@
       white-space:nowrap;
     }
 
-    .user-chip i{
-      width:34px;
-      height:34px;
-      border-radius:12px;
+    .user-avatar{
+      width:42px;
+      height:42px;
+      border-radius:16px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       background:#dbeafe;
       color:#2563eb;
-      font-size:1.1rem;
+      font-size:1.15rem;
+      overflow:hidden;
+      flex:0 0 auto;
+      box-shadow:inset 0 0 0 1px rgba(37,99,235,.08);
+    }
+
+    .user-avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .btn-dashboard{
@@ -474,6 +484,106 @@
       line-height:1.35;
     }
 
+    /* ===== Combos buscables personalizados ===== */
+    .combo-field{
+      position:relative;
+    }
+
+    .combo-input{
+      width:100%;
+      border-radius:14px;
+      border:1px solid #cdd9ec;
+      background:#fff;
+      padding:.78rem 2.55rem .78rem .9rem;
+      color:#0b1f4d;
+      font-weight:650;
+      min-height:49px;
+      outline:none;
+      transition:.18s ease;
+    }
+
+    .combo-input:focus{
+      border-color:#2563eb;
+      box-shadow:0 0 0 .2rem rgba(37,99,235,.14);
+    }
+
+    .combo-trigger{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      width:30px;
+      height:30px;
+      border:0;
+      border-radius:10px;
+      background:#eef5ff;
+      color:#2563eb;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+    }
+
+    .combo-panel{
+      position:absolute;
+      top:calc(100% + 8px);
+      left:0;
+      right:0;
+      z-index:1050;
+      display:none;
+      max-height:260px;
+      overflow:auto;
+      background:#fff;
+      border:1px solid #bfdbfe;
+      border-radius:18px;
+      box-shadow:0 18px 38px rgba(15,23,42,.16);
+      padding:8px;
+    }
+
+    .combo-field.is-open .combo-panel{ display:block; }
+
+    .combo-option{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:#0b1f4d;
+      text-align:left;
+      border-radius:13px;
+      padding:10px 11px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+    }
+
+    .combo-option:hover,
+    .combo-option.is-active{
+      background:#eff6ff;
+      color:#1d4ed8;
+    }
+
+    .combo-option small{
+      color:#64748b;
+      font-weight:700;
+    }
+
+    .combo-empty{
+      padding:12px;
+      color:#64748b;
+      font-weight:750;
+      text-align:center;
+      background:#f8fafc;
+      border-radius:14px;
+    }
+
+    .combo-empty.loading{
+      color:#1d4ed8;
+      background:#eff6ff;
+      border:1px solid #dbeafe;
+    }
+
     .alert-clean{
       border:1px solid #bbf7d0;
       background:#f0fdf4;
@@ -499,6 +609,8 @@
 
     @media (max-width: 768px){
       .topbar-inner{ align-items:flex-start; flex-direction:column; }
+      .brand-area{ width:100%; align-items:center; }
+      .logo-box{ width:220px; height:88px; border-radius:24px; padding:8px 12px; }
       .top-actions{ justify-content:flex-start; width:100%; }
       .user-chip{ white-space:normal; }
       .hero{ padding:22px; }
@@ -906,9 +1018,22 @@
         <a href="{% url 'panel_admisiones' %}" class="btn-dashboard">
           <i class="bi bi-arrow-left"></i> Regresar
         </a>
-        <div class="user-chip" title="Trabajadora Social">
-          <i class="bi bi-person-heart"></i>
-          <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+        <div class="user-chip" title="Usuario activo">
+          <span class="user-avatar">
+            {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+              <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+            {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+              <i class="bi bi-person-check-fill"></i>
+            {% else %}
+              <i class="bi bi-person-heart"></i>
+            {% endif %}
+          </span>
+          <span>
+            {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+              Cubriendo TS ·
+            {% endif %}
+            {{ request.user.get_full_name|default:request.user.username }}
+          </span>
         </div>
       </div>
     </div>
@@ -943,7 +1068,7 @@
     </a>
   </div>
 </section>
-{% elif bloqueo_edicion_temporal %}
+{% elif bloqueo_edicion_temporal and suplencia_trabajo_social_activa or bloqueo_edicion_temporal and cobertura_trabajo_social_activa or bloqueo_edicion_temporal and modo_suplencia_trabajo_social or bloqueo_edicion_temporal and solo_consulta_suplencia %}
 <section class="ts-edit-lock-panel mine" id="bloqueo-edicion-trabajo-social" data-bloqueo-id="{{ bloqueo_edicion_temporal.id }}">
   <div class="ts-lock-head">
     <div>
@@ -986,7 +1111,7 @@
 {% endif %}
 
 
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>
@@ -1165,14 +1290,24 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Programa educativo</label>
-              <input type="text" name="programa_educativo" class="form-control" placeholder="Ej. Licenciatura en Gerontología" value="{{ solicitud.programa_educativo|default:'' }}">
-              <div class="hint">Carrera o programa del beneficiario.</div>
+              <div class="combo-field" data-combo="programa">
+                <input type="hidden" name="programa_educativo" value="{{ solicitud.programa_educativo|default:'' }}" data-combo-hidden>
+                <input type="text" class="combo-input" placeholder="Buscar programa educativo..." value="{{ solicitud.programa_educativo|default:'' }}" autocomplete="off" data-combo-input>
+                <span class="combo-trigger"><i class="bi bi-chevron-down"></i></span>
+                <div class="combo-panel" data-combo-panel></div>
+              </div>
+              <div class="hint">Selecciona la carrera o programa del beneficiario.</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Unidad académica</label>
-              <input type="text" name="unidad_academica" class="form-control" placeholder="Ej. Facultad de Medicina Humana..." value="{{ solicitud.unidad_academica|default:'' }}">
-              <div class="hint">Facultad, escuela o campus correspondiente.</div>
+              <div class="combo-field" data-combo="unidad">
+                <input type="hidden" name="unidad_academica" value="{{ solicitud.unidad_academica|default:'' }}" data-combo-hidden>
+                <input type="text" class="combo-input" placeholder="Buscar facultad, escuela o campus..." value="{{ solicitud.unidad_academica|default:'' }}" autocomplete="off" data-combo-input>
+                <span class="combo-trigger"><i class="bi bi-chevron-down"></i></span>
+                <div class="combo-panel" data-combo-panel></div>
+              </div>
+              <div class="hint">Selecciona la facultad, escuela o campus correspondiente.</div>
             </div>
           </div>
 
@@ -1183,14 +1318,24 @@
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label">Estado</label>
-              <input type="text" name="estado_domicilio" class="form-control text-name" placeholder="Ej. Chiapas" value="{{ solicitud.estado_domicilio|default:'' }}">
-              <div class="hint">Estado del domicilio.</div>
+              <div class="combo-field" data-combo="estado">
+                <input type="hidden" name="estado_domicilio" value="{{ solicitud.estado_domicilio|default:'' }}" data-combo-hidden>
+                <input type="text" class="combo-input" placeholder="Buscar estado..." value="{{ solicitud.estado_domicilio|default:'' }}" autocomplete="off" data-combo-input>
+                <span class="combo-trigger"><i class="bi bi-chevron-down"></i></span>
+                <div class="combo-panel" data-combo-panel></div>
+              </div>
+              <div class="hint">Selecciona el estado del domicilio.</div>
             </div>
 
             <div class="col-md-4">
               <label class="form-label">Ciudad / municipio</label>
-              <input type="text" name="ciudad" class="form-control text-name" placeholder="Ej. Tuxtla Gutiérrez" value="{{ solicitud.ciudad|default:'' }}">
-              <div class="hint">Ciudad o municipio.</div>
+              <div class="combo-field" data-combo="municipio">
+                <input type="hidden" name="ciudad" value="{{ solicitud.ciudad|default:'' }}" data-combo-hidden>
+                <input type="text" class="combo-input" placeholder="Primero selecciona estado..." value="{{ solicitud.ciudad|default:'' }}" autocomplete="off" data-combo-input>
+                <span class="combo-trigger"><i class="bi bi-chevron-down"></i></span>
+                <div class="combo-panel" data-combo-panel></div>
+              </div>
+              <div class="hint">Selecciona ciudad o municipio.</div>
             </div>
 
             <div class="col-md-4">
@@ -1254,7 +1399,284 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
+    const programasBackend = [
+      {% for programa in programas_educativos %}
+        "{{ programa|escapejs }}",
+      {% endfor %}
+    ];
+
+    const unidadesBackend = [
+      {% for unidad in unidades_academicas %}
+        "{{ unidad|escapejs }}",
+      {% endfor %}
+    ];
+
+    const catalogosSolicitud = {
+      programa: programasBackend.length ? programasBackend : [
+        "Arquitectura",
+        "Contaduría",
+        "Derecho",
+        "Enfermería",
+        "Ingeniería Civil",
+        "Ingeniería en Desarrollo y Tecnologías de Software",
+        "Ingeniería en Sistemas Computacionales",
+        "Licenciatura en Administración",
+        "Licenciatura en Comunicación",
+        "Licenciatura en Economía",
+        "Licenciatura en Educación Física",
+        "Licenciatura en Gerontología",
+        "Licenciatura en Médico Cirujano",
+        "Licenciatura en Pedagogía",
+        "Licenciatura en Psicología",
+        "Licenciatura en Trabajo Social",
+        "Médico Veterinario Zootecnista"
+      ],
+      unidad: unidadesBackend.length ? unidadesBackend : [
+        "Centro Mesoamericano de Estudios en Salud Pública y Desastres",
+        "Escuela de Ciencias Administrativas Istmo Costa",
+        "Escuela de Ciencias Administrativas Campus VII",
+        "Escuela de Lenguas San Cristóbal",
+        "Escuela de Lenguas Tapachula",
+        "Facultad de Arquitectura",
+        "Facultad de Ciencias Agrícolas",
+        "Facultad de Ciencias Administrativas",
+        "Facultad de Ciencias de la Administración",
+        "Facultad de Ciencias en Física y Matemáticas",
+        "Facultad de Ciencias Humanas",
+        "Facultad de Ciencias Sociales",
+        "Facultad de Ciencias Químicas",
+        "Facultad de Contaduría y Administración",
+        "Facultad de Derecho",
+        "Facultad de Humanidades",
+        "Facultad de Ingeniería",
+        "Facultad de Lenguas",
+        "Facultad de Medicina Humana",
+        "Facultad de Medicina Veterinaria y Zootecnia",
+        "Facultad de Negocios",
+        "Facultad de Odontología"
+      ]
+    };
+
+    const estadosFallback = [
+      { clave:"01", nombre:"Aguascalientes" },
+      { clave:"02", nombre:"Baja California" },
+      { clave:"03", nombre:"Baja California Sur" },
+      { clave:"04", nombre:"Campeche" },
+      { clave:"05", nombre:"Coahuila" },
+      { clave:"06", nombre:"Colima" },
+      { clave:"07", nombre:"Chiapas" },
+      { clave:"08", nombre:"Chihuahua" },
+      { clave:"09", nombre:"Ciudad de México" },
+      { clave:"10", nombre:"Durango" },
+      { clave:"11", nombre:"Guanajuato" },
+      { clave:"12", nombre:"Guerrero" },
+      { clave:"13", nombre:"Hidalgo" },
+      { clave:"14", nombre:"Jalisco" },
+      { clave:"15", nombre:"Estado de México" },
+      { clave:"16", nombre:"Michoacán" },
+      { clave:"17", nombre:"Morelos" },
+      { clave:"18", nombre:"Nayarit" },
+      { clave:"19", nombre:"Nuevo León" },
+      { clave:"20", nombre:"Oaxaca" },
+      { clave:"21", nombre:"Puebla" },
+      { clave:"22", nombre:"Querétaro" },
+      { clave:"23", nombre:"Quintana Roo" },
+      { clave:"24", nombre:"San Luis Potosí" },
+      { clave:"25", nombre:"Sinaloa" },
+      { clave:"26", nombre:"Sonora" },
+      { clave:"27", nombre:"Tabasco" },
+      { clave:"28", nombre:"Tamaulipas" },
+      { clave:"29", nombre:"Tlaxcala" },
+      { clave:"30", nombre:"Veracruz" },
+      { clave:"31", nombre:"Yucatán" },
+      { clave:"32", nombre:"Zacatecas" }
+    ];
+
+    const municipiosFallback = {
+      "04": ["Calakmul","Calkiní","Campeche","Candelaria","Carmen","Champotón","Dzitbalché","Escárcega","Hecelchakán","Hopelchén","Palizada","Seybaplaya","Tenabo"],
+      "07": ["Acala","Berriozábal","Chiapa de Corzo","Comitán de Domínguez","Ocosingo","Palenque","San Cristóbal de las Casas","Tapachula","Tonalá","Tuxtla Gutiérrez","Villaflores"],
+      "31": ["Abalá","Acanceh","Akil","Baca","Bokobá","Buctzotz","Cacalchén","Calotmul","Cansahcab","Cantamayec","Celestún","Cenotillo","Conkal","Cuncunul","Cuzamá","Chacsinkín","Chankom","Chapab","Chemax","Chicxulub Pueblo","Chichimilá","Chikindzonot","Chocholá","Chumayel","Dzán","Dzemul","Dzidzantún","Dzilam de Bravo","Dzilam González","Dzitás","Dzoncauich","Espita","Halachó","Hocabá","Hoctún","Homún","Huhí","Hunucmá","Ixil","Izamal","Kanasín","Kantunil","Kaua","Kinchil","Kopomá","Mama","Maní","Maxcanú","Mayapán","Mérida","Mocochá","Motul","Muna","Muxupip","Opichén","Oxkutzcab","Panabá","Peto","Progreso","Quintana Roo","Río Lagartos","Sacalum","Samahil","Sanahcat","San Felipe","Santa Elena","Seyé","Sinanché","Sotuta","Sucilá","Sudzal","Suma","Tahdziú","Tahmek","Teabo","Tecoh","Tekal de Venegas","Tekantó","Tekax","Tekit","Tekom","Telchac Pueblo","Telchac Puerto","Temax","Temozón","Tepakán","Tetiz","Teya","Ticul","Timucuy","Tinum","Tixcacalcupul","Tixkokob","Tixmehuac","Tixpéhual","Tizimín","Tunkás","Tzucacab","Uayma","Ucú","Umán","Valladolid","Xocchel","Yaxcabá","Yaxkukul","Yobaín"],
+      "30": ["Boca del Río","Coatzacoalcos","Córdoba","Minatitlán","Orizaba","Poza Rica de Hidalgo","Tuxpan","Veracruz","Xalapa"]
+    };
+
+    let estadosCache = null;
+    const municipiosCache = {};
+    const claveEstadoPorNombre = {};
+
+    function normalizaTexto(valor){
+      return String(valor || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function nombreEstadoAmigable(nombreOficial){
+      const nombre = String(nombreOficial || '').trim();
+      const equivalencias = {
+        "México": "Estado de México",
+        "Coahuila de Zaragoza": "Coahuila",
+        "Michoacán de Ocampo": "Michoacán",
+        "Veracruz de Ignacio de la Llave": "Veracruz"
+      };
+      return equivalencias[nombre] || nombre;
+    }
+
+    function registrarClaveEstado(nombre, clave){
+      if(!nombre || !clave) return;
+      claveEstadoPorNombre[normalizaTexto(nombre)] = clave;
+      if(nombre === "Estado de México") claveEstadoPorNombre[normalizaTexto("México")] = clave;
+      if(nombre === "Veracruz") claveEstadoPorNombre[normalizaTexto("Veracruz de Ignacio de la Llave")] = clave;
+      if(nombre === "Coahuila") claveEstadoPorNombre[normalizaTexto("Coahuila de Zaragoza")] = clave;
+      if(nombre === "Michoacán") claveEstadoPorNombre[normalizaTexto("Michoacán de Ocampo")] = clave;
+    }
+
+    async function cargarEstados(){
+      if(estadosCache) return estadosCache;
+
+      try{
+        const respuesta = await fetch("https://gaia.inegi.org.mx/wscatgeo/v2/mgee/", { cache:"force-cache" });
+        if(!respuesta.ok) throw new Error("No se pudo consultar INEGI.");
+        const data = await respuesta.json();
+        estadosCache = (data.datos || []).map(function(item){
+          const nombre = nombreEstadoAmigable(item.nomgeo);
+          registrarClaveEstado(nombre, item.cve_ent || item.cvegeo);
+          return nombre;
+        }).sort(function(a,b){ return a.localeCompare(b, "es"); });
+      }catch(error){
+        estadosCache = estadosFallback.map(function(item){
+          registrarClaveEstado(item.nombre, item.clave);
+          return item.nombre;
+        });
+      }
+
+      return estadosCache;
+    }
+
+    async function cargarMunicipiosPorEstado(nombreEstado){
+      await cargarEstados();
+      const clave = claveEstadoPorNombre[normalizaTexto(nombreEstado)];
+      if(!clave) return [];
+      if(municipiosCache[clave]) return municipiosCache[clave];
+
+      try{
+        const respuesta = await fetch("https://gaia.inegi.org.mx/wscatgeo/v2/mgem/" + clave, { cache:"force-cache" });
+        if(!respuesta.ok) throw new Error("No se pudieron consultar municipios.");
+        const data = await respuesta.json();
+        municipiosCache[clave] = (data.datos || []).map(function(item){
+          return item.nomgeo;
+        }).sort(function(a,b){ return a.localeCompare(b, "es"); });
+      }catch(error){
+        municipiosCache[clave] = municipiosFallback[clave] || [];
+      }
+
+      return municipiosCache[clave];
+    }
+
+    async function opcionesParaCombo(tipo){
+      if(tipo === "estado") return await cargarEstados();
+
+      if(tipo === "municipio"){
+        const estado = document.querySelector('[data-combo="estado"] [data-combo-hidden]')?.value || "";
+        return await cargarMunicipiosPorEstado(estado);
+      }
+
+      return catalogosSolicitud[tipo] || [];
+    }
+
+    function mostrarMensaje(panel, texto, cargando=false){
+      panel.innerHTML = "";
+      const vacio = document.createElement("div");
+      vacio.className = "combo-empty" + (cargando ? " loading" : "");
+      vacio.textContent = texto;
+      panel.appendChild(vacio);
+    }
+
+    function inicializarCombo(campo){
+      const tipo = campo.dataset.combo;
+      const input = campo.querySelector("[data-combo-input]");
+      const hidden = campo.querySelector("[data-combo-hidden]");
+      const panel = campo.querySelector("[data-combo-panel]");
+      if(!input || !hidden || !panel) return;
+
+      let ultimaBusqueda = 0;
+
+      async function pintarOpciones(){
+        const busquedaActual = ++ultimaBusqueda;
+        const filtro = normalizaTexto(input.value);
+
+        campo.classList.add("is-open");
+        mostrarMensaje(panel, tipo === "municipio" ? "Cargando municipios..." : "Cargando opciones...", true);
+
+        const opcionesOriginales = await opcionesParaCombo(tipo);
+        if(busquedaActual !== ultimaBusqueda) return;
+
+        const opciones = opcionesOriginales
+          .filter(function(op){ return normalizaTexto(op).includes(filtro); })
+          .slice(0, 120);
+
+        panel.innerHTML = "";
+
+        if(!opciones.length){
+          mostrarMensaje(panel, tipo === "municipio" ? "Selecciona un estado válido o no hay municipios disponibles." : "Sin resultados.");
+          return;
+        }
+
+        opciones.forEach(function(opcion){
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "combo-option";
+          btn.innerHTML = "<span>" + opcion + "</span><small>Seleccionar</small>";
+          btn.addEventListener("click", async function(){
+            input.value = opcion;
+            hidden.value = opcion;
+            campo.classList.remove("is-open");
+
+            if(tipo === "estado"){
+              const municipioCampo = document.querySelector('[data-combo="municipio"]');
+              if(municipioCampo){
+                const municipioInput = municipioCampo.querySelector("[data-combo-input]");
+                const municipioHidden = municipioCampo.querySelector("[data-combo-hidden]");
+                if(municipioInput){
+                  municipioInput.value = "";
+                  municipioInput.placeholder = "Buscar municipio...";
+                }
+                if(municipioHidden) municipioHidden.value = "";
+                await cargarMunicipiosPorEstado(opcion);
+              }
+            }
+          });
+          panel.appendChild(btn);
+        });
+      }
+
+      input.addEventListener("focus", pintarOpciones);
+
+      input.addEventListener("input", function(){
+        hidden.value = input.value;
+        pintarOpciones();
+      });
+
+      input.addEventListener("click", pintarOpciones);
+
+      document.addEventListener("click", function(ev){
+        if(!campo.contains(ev.target)){
+          campo.classList.remove("is-open");
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", async function(){
+      await cargarEstados();
+      document.querySelectorAll("[data-combo]").forEach(inicializarCombo);
+
+      const estadoActual = document.querySelector('[data-combo="estado"] [data-combo-hidden]')?.value || "";
+      if(estadoActual){
+        cargarMunicipiosPorEstado(estadoActual);
+      }
+    });
+  </script>
+
+
+<script>
     document.addEventListener('DOMContentLoaded', function(){
       const textInputs = document.querySelectorAll('.text-name');
       textInputs.forEach(function(input){

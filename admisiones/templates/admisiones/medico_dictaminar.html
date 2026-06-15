@@ -22,7 +22,7 @@
       --bg:#f3f6fb;
       --border:#e2e8f0;
       --shadow:0 18px 40px rgba(15,23,42,.09);
-      --topbar:92px;
+      --topbar:142px;
     }
 
     *{box-sizing:border-box;}
@@ -47,14 +47,13 @@
       left:0;
       right:0;
       z-index:1000;
-      backdrop-filter:blur(12px);
     }
 
     .topbar-inner{
-      max-width:1180px;
+      max-width:1280px;
       min-height:var(--topbar);
       margin:0 auto;
-      padding:12px 18px;
+      padding:14px 18px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -64,30 +63,32 @@
     .brand-medico{
       display:flex;
       align-items:center;
-      gap:14px;
+      gap:18px;
       text-decoration:none;
       min-width:0;
     }
 
     .logo-box{
-      width:74px;
-      height:60px;
-      border-radius:18px;
-      background:linear-gradient(135deg,var(--medico),#14b8a6,var(--accent));
+      width:276px;
+      height:112px;
+      border-radius:28px;
+      background:linear-gradient(135deg,#1d4ed8 0%,#0f5f59 56%,#0f766e 120%);
       display:flex;
       align-items:center;
       justify-content:center;
-      box-shadow:0 14px 28px rgba(15,118,110,.22);
+      box-shadow:0 18px 36px rgba(15,118,110,.24);
       flex-shrink:0;
       overflow:hidden;
+      padding:10px 14px;
     }
 
     .logo-box img{
-      width:58px;
-      height:auto;
-      max-height:48px;
+      width:125%;
+      height:125%;
+      max-height:none;
       object-fit:contain;
-      filter:drop-shadow(0 2px 3px rgba(0,0,0,.12));
+      filter:none;
+      display:block;
     }
 
     .brand-title{
@@ -137,29 +138,39 @@
     }
 
     .profile-pill{
-      min-height:48px;
-      border-radius:16px;
+      min-height:58px;
+      border-radius:20px;
       background:#fff;
       border:1px solid #dbeafe;
       display:flex;
       align-items:center;
-      gap:10px;
-      padding:7px 14px;
-      box-shadow:0 8px 18px rgba(15,23,42,.06);
-      max-width:330px;
+      gap:12px;
+      padding:8px 16px 8px 10px;
+      box-shadow:0 12px 26px rgba(15,23,42,.06);
+      max-width:410px;
     }
 
     .profile-icon{
-      width:36px;
-      height:36px;
-      border-radius:14px;
+      width:48px;
+      height:48px;
+      border-radius:18px;
       background:linear-gradient(135deg,var(--medico),#14b8a6);
       color:#fff;
       display:flex;
       align-items:center;
       justify-content:center;
       flex-shrink:0;
-      font-size:1rem;
+      font-size:1.08rem;
+      overflow:hidden;
+      border:3px solid #ecfeff;
+      box-shadow:0 10px 20px rgba(15,118,110,.16);
+    }
+
+    .profile-icon img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .profile-role{
@@ -966,6 +977,16 @@
 .btn-release-lock:hover{background:#dbeafe;color:#1e40af;}
 @media(max-width:760px){.edit-lock-banner{flex-direction:column;}.btn-release-lock{width:100%;}}
 
+
+@media(max-width:900px){
+    .logo-box{
+        width:220px;
+        height:88px;
+        border-radius:24px;
+        padding:8px 12px;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -989,7 +1010,7 @@
         Regresar
       </a>
 
-            {% if bloqueo_edicion_temporal %}
+            {% if bloqueo_edicion_temporal and tiene_suplencia_medica %}
             <form method="post" action="{% url 'liberar_bloqueo_edicion' bloqueo_edicion_temporal.id %}" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{% url 'medico_pendientes' %}">
@@ -999,10 +1020,25 @@
 
 
       <div class="profile-pill" title="Médico responsable">
-        <div class="profile-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+        <div class="profile-icon">
+          {% if tiene_suplencia_medica %}
+            <i class="bi bi-person-check-fill"></i>
+          {% elif foto_perfil_medico_url %}
+            <img src="{{ foto_perfil_medico_url }}" alt="Foto de perfil médico">
+          {% else %}
+            <i class="bi bi-heart-pulse-fill"></i>
+          {% endif %}
+        </div>
         <div class="min-w-0">
-          <span class="profile-role">Médica</span>
+          <span class="profile-role">
+            {% if tiene_suplencia_medica %}
+              Cobertura temporal
+            {% else %}
+              Médico(a)
+            {% endif %}
+          </span>
           <span class="profile-name">
+            {% if tiene_suplencia_medica %}Cubriendo área médica · {% endif %}
             {% if medico_asignado %}
               {{ medico_asignado }}
             {% elif request.user.get_full_name %}
@@ -1054,7 +1090,7 @@
   {% endif %}
 
 
-  {% if bloqueo_edicion_temporal %}
+  {% if bloqueo_edicion_temporal and tiene_suplencia_medica %}
   <div class="edit-lock-banner">
     <div class="lock-icon"><i class="bi bi-lock-fill"></i></div>
     <div>
@@ -1064,20 +1100,27 @@
   </div>
   {% endif %}
 
-  {% if tiene_suplencia_activa %}
+  {% if tiene_suplencia_medica %}
   <div class="suplencia-dictamen-banner">
     <div class="suplencia-dictamen-icon"><i class="bi bi-person-badge-fill"></i></div>
     <div>
-      <h5>Cubriendo temporalmente</h5>
+      <h5>Cobertura temporal del área médica</h5>
       <p>
-        Estás trabajando con una autorización temporal de Dirección. Si esta autorización corresponde al área médica, el dictamen se registrará como preliminar por suplencia y quedará pendiente de revisión por la médica titular.
+        Esta viñeta solo aparece cuando otra persona está autorizada por Dirección para cubrir el área médica.
+        El dictamen quedará firmado por el usuario suplente y pendiente de revisión por la médica titular.
       </p>
       <div class="suplencia-dictamen-list">
-        {% for sup in suplencias_activas_usuario %}
         <span class="suplencia-dictamen-pill">
-          <i class="bi bi-shield-check"></i>
-          {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · {{ sup.get_tipo_cobertura_display|default:sup.tipo_cobertura }}
+          <i class="bi bi-person-check-fill"></i>
+          Suplente: {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
         </span>
+        {% for sup in suplencias_activas_usuario %}
+          {% if sup.area_cubierta == "MEDICA" %}
+          <span class="suplencia-dictamen-pill">
+            <i class="bi bi-shield-check"></i>
+            {{ sup.get_area_cubierta_display|default:sup.area_cubierta }} · {{ sup.get_tipo_cobertura_display|default:sup.tipo_cobertura }}
+          </span>
+          {% endif %}
         {% endfor %}
       </div>
     </div>
@@ -1733,7 +1776,7 @@
       <div class="actions-bar">
         <div class="actions-caption">
           <i class="bi bi-shield-check"></i>
-          {% if tiene_suplencia_activa %}
+          {% if tiene_suplencia_medica %}
           <span>El registro queda firmado por tu usuario y se marcará como preliminar por suplencia cuando aplique.</span>
           {% else %}
           <span>El registro queda firmado por el médico en sesión.</span>

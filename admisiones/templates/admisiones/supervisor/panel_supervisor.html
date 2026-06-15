@@ -1222,6 +1222,353 @@
         }
         @media(max-width:1100px){.live-control-grid{grid-template-columns:1fr;}}
 
+
+
+        /* ===== Ajustes solicitados para panel de supervisora ===== */
+        .brand{
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            min-height:154px;
+            padding:8px 0 2px;
+            text-align:center;
+        }
+        .brand-logo-wrap{
+            width:240px;
+            height:112px;
+            border-radius:24px;
+            background:linear-gradient(135deg,#245bdc 0%,#2563eb 48%,#113b88 100%);
+            box-shadow:0 22px 42px rgba(37,99,235,.26);
+        }
+        .brand-logo-wrap::before{
+            inset:9px;
+            border-radius:18px;
+            background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.05));
+        }
+        .brand-logo{
+            width:216px;
+            height:94px;
+            object-fit:contain;
+        }
+        .brand-text strong{font-size:17px;color:#0b1f47;}
+        .brand-text span{font-size:12px;line-height:1.35;}
+
+        .user-card{
+            position:relative;
+            align-items:center;
+            overflow:hidden;
+        }
+        .user-card::after{
+            content:"";
+            position:absolute;
+            width:96px;
+            height:96px;
+            right:-44px;
+            top:-48px;
+            border-radius:999px;
+            background:rgba(61,116,183,.12);
+            pointer-events:none;
+        }
+        .user-avatar{
+            overflow:hidden;
+            border-radius:18px;
+            box-shadow:0 12px 22px rgba(37,76,124,.18);
+        }
+        .avatar-img{
+            width:100% !important;
+            height:100% !important;
+            max-width:none !important;
+            max-height:none !important;
+            object-fit:cover !important;
+            object-position:center center;
+            display:block;
+        }
+        .profile-open-btn{
+            margin-left:auto;
+            width:34px;
+            height:34px;
+            border:1px solid rgba(61,116,183,.18);
+            border-radius:13px;
+            background:var(--brand-soft);
+            color:var(--brand);
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+            position:relative;
+            z-index:1;
+            transition:.18s ease;
+        }
+        .profile-open-btn:hover{transform:translateY(-1px);background:#dbeafe;}
+
+        .supervisor-main-kpis{grid-template-columns:repeat(3,minmax(220px,1fr));margin-bottom:18px;}
+        .inicio-top-grid{grid-template-columns:minmax(520px,1.25fr) minmax(340px,.75fr);align-items:stretch;}
+        .general-dashboard{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin:16px 0;}
+        .general-metric{
+            padding:15px;
+            border:1px solid var(--line);
+            border-radius:20px;
+            background:linear-gradient(180deg,#fff,#f8fbff);
+            min-height:92px;
+        }
+        .general-metric span{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:850;}
+        .general-metric strong{display:block;margin-top:10px;font-size:27px;line-height:1;font-weight:950;letter-spacing:-.04em;color:var(--ink);}
+        .general-metric small{display:block;margin-top:7px;color:#98a3b8;font-size:11px;font-weight:750;}
+        .semester-box{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+            margin-top:12px;
+        }
+        .semester-info,.month-events,.room-summary-box{
+            border:1px solid var(--line);
+            border-radius:20px;
+            background:#fff;
+            padding:14px;
+        }
+        .semester-info h4,.month-events h4,.room-summary-box h4,.requests-card h4{margin:0 0 10px;font-size:14px;letter-spacing:-.02em;}
+        .info-lines{display:grid;gap:8px;color:var(--muted);font-size:12px;font-weight:750;}
+        .info-lines strong{color:var(--ink);}
+        .events-list,.requests-list{display:grid;gap:10px;}
+        .event-item,.request-item{
+            display:grid;
+            grid-template-columns:38px 1fr auto;
+            align-items:center;
+            gap:10px;
+            padding:10px;
+            border-radius:16px;
+            background:#f8fbff;
+            border:1px solid #edf2f8;
+        }
+        .event-icon,.request-icon{
+            width:38px;
+            height:38px;
+            border-radius:14px;
+            display:grid;
+            place-items:center;
+            color:var(--brand);
+            background:var(--brand-soft);
+            font-size:18px;
+        }
+        .event-item strong,.request-item strong{display:block;font-size:13px;color:var(--ink);}
+        .event-item span,.request-item span{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:750;}
+        .room-mini-list{display:grid;gap:10px;}
+        .room-mini-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
+        .room-mini-row span{font-size:12px;color:var(--muted);font-weight:850;}
+        .room-mini-row strong{font-size:12px;color:var(--ink);}
+        .requests-card{height:100%;}
+        .requests-head{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+        }
+        .requests-head h2{margin:0;font-size:20px;letter-spacing:-.03em;}
+        .requests-head p{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.4;}
+        .request-item{grid-template-columns:42px 1fr;position:relative;overflow:hidden;}
+        .request-item::after{
+            content:"";
+            position:absolute;
+            inset:0 0 0 auto;
+            width:5px;
+            background:linear-gradient(180deg,var(--brand),var(--brand-2));
+        }
+        .request-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;}
+        .request-meta .mini-tag{min-height:0;padding:5px 8px;font-size:11px;}
+
+        .profile-modal-backdrop{
+            position:fixed;
+            inset:0;
+            z-index:90;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:18px;
+            background:rgba(15,23,42,.48);
+            backdrop-filter:blur(8px);
+        }
+        .profile-modal-backdrop.show{display:flex;}
+        .profile-modal{
+            width:min(940px,96vw);
+            max-height:92vh;
+            overflow:auto;
+            border-radius:32px;
+            background:#fff;
+            box-shadow:0 30px 90px rgba(15,23,42,.28);
+        }
+        .profile-hero{
+            position:relative;
+            overflow:hidden;
+            padding:28px 34px 36px;
+            color:#fff;
+            background:linear-gradient(135deg,#2d5be3 0%,#0ea5e9 100%);
+        }
+        .profile-hero::before,.profile-hero::after{
+            content:"";
+            position:absolute;
+            border-radius:999px;
+            background:rgba(255,255,255,.18);
+        }
+        .profile-hero::before{width:210px;height:210px;right:-40px;top:-90px;}
+        .profile-hero::after{width:150px;height:150px;right:70px;top:-70px;background:rgba(255,255,255,.12);}
+        .profile-visible-pill{
+            position:relative;
+            z-index:1;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:9px 14px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.35);
+            background:rgba(255,255,255,.14);
+            font-size:13px;
+            font-weight:900;
+        }
+        .profile-hero h2{position:relative;z-index:1;margin:22px 0 6px;font-size:31px;letter-spacing:-.04em;}
+        .profile-hero p{position:relative;z-index:1;margin:0;font-size:14px;font-weight:800;opacity:.95;}
+        .profile-close{
+            position:absolute;
+            z-index:2;
+            right:26px;
+            top:22px;
+            width:48px;
+            height:48px;
+            border:0;
+            border-radius:999px;
+            display:grid;
+            place-items:center;
+            background:rgba(255,255,255,.18);
+            color:#fff;
+            cursor:pointer;
+            font-size:26px;
+        }
+        .profile-body{padding:0 34px 30px;}
+        .profile-preview-card{
+            position:relative;
+            z-index:2;
+            margin-top:-26px;
+            display:grid;
+            grid-template-columns:138px 1fr;
+            gap:22px;
+            align-items:center;
+            padding:24px;
+            border:1px solid var(--line);
+            border-radius:28px;
+            background:#fff;
+            box-shadow:var(--shadow-soft);
+        }
+        .profile-big-avatar{
+            position:relative;
+            width:124px;
+            height:124px;
+            min-width:124px;
+            min-height:124px;
+            border-radius:999px;
+            background:#dbeafe;
+            border:8px solid #fff;
+            box-shadow:0 0 0 7px #eaf2ff,0 18px 35px rgba(37,76,124,.16);
+            display:grid;
+            place-items:center;
+            color:#2d5be3;
+            font-size:64px;
+            overflow:visible;
+            isolation:isolate;
+        }
+        .profile-big-avatar img,
+        .profile-big-avatar #profilePreviewImg{
+            position:absolute;
+            inset:0;
+            width:100% !important;
+            height:100% !important;
+            max-width:none !important;
+            max-height:none !important;
+            min-width:100% !important;
+            min-height:100% !important;
+            object-fit:cover !important;
+            object-position:center center;
+            border-radius:999px !important;
+            z-index:1;
+        }
+        .profile-big-avatar #profilePreviewIcon{
+            position:relative;
+            z-index:1;
+        }
+        .profile-camera{
+            position:absolute;
+            right:-3px;
+            bottom:7px;
+            width:42px;
+            height:42px;
+            border-radius:999px;
+            display:grid;
+            place-items:center;
+            color:#fff;
+            background:linear-gradient(135deg,#2563eb,#0ea5e9);
+            border:4px solid #fff;
+            box-shadow:0 10px 22px rgba(37,99,235,.25);
+            font-size:17px;
+            z-index:3;
+        }
+        .profile-name h3{margin:0;font-size:23px;letter-spacing:-.03em;}
+        .profile-name p{margin:13px 0 0;color:#42526e;font-size:14px;line-height:1.65;font-weight:750;}
+        .upload-panel{
+            margin-top:22px;
+            padding:24px;
+            border:1.5px dashed #9cc2ff;
+            border-radius:28px;
+            background:linear-gradient(180deg,#fff,#f8fbff);
+        }
+        .upload-row{display:grid;grid-template-columns:70px 1fr auto;gap:16px;align-items:center;}
+        .upload-icon{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;background:#eaf2ff;color:#2563eb;font-size:30px;}
+        .upload-title strong{display:block;font-size:16px;}
+        .upload-title span{display:block;margin-top:5px;color:var(--brand);font-size:13px;font-weight:850;}
+        .file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
+        .choose-file-btn{
+            min-height:48px;
+            display:inline-flex;
+            align-items:center;
+            gap:9px;
+            padding:0 20px;
+            border-radius:999px;
+            border:1px solid #b9cffd;
+            color:#245bdc;
+            background:#fff;
+            font-weight:950;
+            cursor:pointer;
+        }
+        .upload-rules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px;}
+        .rule-card{padding:14px;border:1px solid var(--line);border-radius:18px;background:#fff;display:flex;align-items:center;gap:10px;color:#0b1f47;font-weight:950;}
+        .rule-card i{color:#2563eb;}
+        .profile-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:26px;}
+        .profile-note{display:flex;align-items:center;gap:8px;color:#4b6291;font-weight:900;}
+        .profile-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+        .btn-danger-soft{border:1px solid rgba(220,38,38,.18);background:#fff1f2;color:#dc2626;border-radius:999px;min-height:46px;padding:0 16px;font-weight:950;cursor:pointer;}
+        .profile-feedback{margin-top:12px;display:none;padding:11px 13px;border-radius:16px;background:#fff1f2;color:#dc2626;font-size:13px;font-weight:850;}
+        .profile-feedback.show{display:block;}
+        .confirm-modal{width:min(460px,94vw);background:#fff;border-radius:28px;box-shadow:0 30px 90px rgba(15,23,42,.28);padding:26px;text-align:center;}
+        .confirm-icon{width:66px;height:66px;border-radius:24px;margin:0 auto 14px;display:grid;place-items:center;background:#fff1f2;color:#dc2626;font-size:32px;}
+        .confirm-modal h3{margin:0;font-size:22px;letter-spacing:-.03em;}
+        .confirm-modal p{margin:10px 0 22px;color:var(--muted);line-height:1.55;font-weight:750;}
+        .confirm-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+        .toast-stack{position:fixed;right:24px;top:96px;z-index:120;display:grid;gap:10px;max-width:420px;}
+        .toast-item{border:1px solid var(--line);border-left:6px solid var(--brand-2);border-radius:18px;background:#fff;box-shadow:var(--shadow);padding:14px 16px;color:var(--ink);font-size:13px;font-weight:800;}
+
+        @media(max-width:1440px){.general-dashboard{grid-template-columns:repeat(2,minmax(160px,1fr));}.inicio-top-grid{grid-template-columns:1fr;}}
+        @media(max-width:760px){
+            .brand-logo-wrap{width:220px;height:104px;}
+            .brand-logo{width:200px;height:88px;}
+            .supervisor-main-kpis,.general-dashboard,.semester-box,.upload-rules{grid-template-columns:1fr;}
+            .profile-modal{border-radius:24px;}
+            .profile-hero{padding:24px 22px 32px;}
+            .profile-body{padding:0 20px 24px;}
+            .profile-preview-card{grid-template-columns:1fr;text-align:center;justify-items:center;}
+            .upload-row{grid-template-columns:1fr;justify-items:start;}
+            .profile-footer{align-items:stretch;flex-direction:column;}
+            .profile-actions{justify-content:stretch;}
+            .profile-actions .btn-soft,.profile-actions .btn-primary,.profile-actions .btn-danger-soft{width:100%;justify-content:center;}
+        }
+
     </style>
 </head>
 <body>
@@ -1240,11 +1587,22 @@
             </div>
 
             <div class="user-card">
-                <div class="user-avatar"><i class="bi bi-person-vcard-fill"></i></div>
+                <div class="user-avatar">
+                    {% if request.user.foto_perfil %}
+                        <img class="avatar-img" src="{{ request.user.foto_perfil.url }}" alt="Foto de perfil de supervisora">
+                    {% elif request.user.perfil.foto %}
+                        <img class="avatar-img" src="{{ request.user.perfil.foto.url }}" alt="Foto de perfil de supervisora">
+                    {% else %}
+                        <i class="bi bi-person-vcard-fill"></i>
+                    {% endif %}
+                </div>
                 <div class="user-info">
                     <strong>{{ request.user.get_full_name|default:request.user.email|default:request.user.username }}</strong>
                     <span>{{ rol_panel|default:"Supervisora General" }}</span>
                 </div>
+                <button class="profile-open-btn" type="button" data-open-profile title="Personalizar foto de perfil">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
             </div>
 
             <div class="menu-label">Viñeta de consulta</div>
@@ -1253,20 +1611,11 @@
                 <button class="nav-item active" type="button" data-target="inicio">
                     <span class="nav-icon"><i class="bi bi-house-door-fill"></i></span><span>Inicio</span>
                 </button>
-                <button class="nav-item" type="button" data-target="asistencia">
-                    <span class="nav-icon"><i class="bi bi-people-fill"></i></span><span>Asistencia</span>
-                </button>
                 <button class="nav-item" type="button" data-target="salas">
                     <span class="nav-icon"><i class="bi bi-building-fill-check"></i></span><span>Salas</span>
                 </button>
                 <button class="nav-item" type="button" data-target="incidencias">
                     <span class="nav-icon"><i class="bi bi-exclamation-triangle-fill"></i></span><span>Incidencias</span>
-                </button>
-                <button class="nav-item" type="button" data-target="suplencias">
-                    <span class="nav-icon"><i class="bi bi-arrow-left-right"></i></span><span>Suplencias</span>
-                </button>
-                <button class="nav-item" type="button" data-target="apoyos-sala">
-                    <span class="nav-icon"><i class="bi bi-door-open-fill"></i></span><span>Apoyos de sala</span>
                 </button>
                 <button class="nav-item" type="button" data-target="personal">
                     <span class="nav-icon"><i class="bi bi-person-badge-fill"></i></span><span>Personal</span>
@@ -1338,171 +1687,178 @@
                         <span class="mini-tag">{{ sede_seleccionada.nombre|default:"Sede general" }}</span>
                     </form>
 
-                    <div class="grid kpi-grid">
+                    <div class="grid kpi-grid supervisor-main-kpis">
                         <article class="card kpi-card green">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-people-fill"></i></span><span class="mini-tag">{{ porcentaje_ninos_estancia|default:0 }}%</span></div>
+                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-people-fill"></i></span><span class="mini-tag"><span data-live="porcentaje_ninos_estancia">{{ porcentaje_ninos_estancia|default:0 }}</span>%</span></div>
                             <div class="kpi-value" data-live="ninos_en_estancia">{{ ninos_en_estancia|default:0 }}</div>
                             <div class="kpi-label">Niños en estancia</div>
                             <div class="kpi-note">Con entrada registrada y sin salida.</div>
                         </article>
 
                         <article class="card kpi-card amber">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-clock-history"></i></span><span class="mini-tag">{{ porcentaje_ninos_ausentes|default:0 }}%</span></div>
+                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-box-arrow-right"></i></span><span class="mini-tag"><span data-live="porcentaje_ninos_ausentes">{{ porcentaje_ninos_ausentes|default:0 }}</span>%</span></div>
                             <div class="kpi-value" data-live="ninos_ausentes">{{ ninos_ausentes|default:0 }}</div>
-                            <div class="kpi-label">Niños ausentes</div>
-                            <div class="kpi-note">Sin entrada registrada en el día.</div>
+                            <div class="kpi-label">Niños con salida anticipada</div>
+                            <div class="kpi-note">Menores que salieron antes del horario normal o fueron retirados por autorización.</div>
                         </article>
 
                         <article class="card kpi-card">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-door-open-fill"></i></span><span class="mini-tag">{{ porcentaje_ninos_fuera|default:0 }}%</span></div>
+                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-door-open-fill"></i></span><span class="mini-tag"><span data-live="porcentaje_ninos_fuera">{{ porcentaje_ninos_fuera|default:0 }}</span>%</span></div>
                             <div class="kpi-value" data-live="ninos_entregados">{{ ninos_entregados|default:0 }}</div>
-                            <div class="kpi-label">Niños entregados</div>
-                            <div class="kpi-note">Ya registraron salida.</div>
-                        </article>
-
-                        <article class="card kpi-card red">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-exclamation-triangle-fill"></i></span><span class="mini-tag">Abiertas</span></div>
-                            <div class="kpi-value" data-live="incidencias_abiertas">{{ incidencias_abiertas|default:0 }}</div>
-                            <div class="kpi-label">Incidencias abiertas</div>
-                            <div class="kpi-note">Casos pendientes de cierre.</div>
-                        </article>
-
-                        <article class="card kpi-card purple">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-arrow-left-right"></i></span><span class="mini-tag">Auditoría</span></div>
-                            <div class="kpi-value" data-live="total_movimientos_suplencia">{{ total_movimientos_suplencia|default:0 }}</div>
-                            <div class="kpi-label">Movimientos por suplencia</div>
-                            <div class="kpi-note">Acciones realizadas por cobertura temporal.</div>
-                        </article>
-
-
-                        <article class="card kpi-card green">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-door-open-fill"></i></span><span class="mini-tag">Sala</span></div>
-                            <div class="kpi-value" data-live="total_apoyos_sala_activos">{{ total_apoyos_sala_activos|default:0 }}</div>
-                            <div class="kpi-label">Apoyos de sala activos</div>
-                            <div class="kpi-note">Maestras apoyando temporalmente otra sala.</div>
-                        </article>
-
-                        <article class="card kpi-card amber">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-person-lock"></i></span><span class="mini-tag">Tiempo real</span></div>
-                            <div class="kpi-value" data-live="total_bloqueos_edicion_activos">{{ total_bloqueos_edicion_activos|default:0 }}</div>
-                            <div class="kpi-label">Expedientes en atención</div>
-                            <div class="kpi-note">Bloqueos temporales por edición activa.</div>
-                        </article>
-
-                        <article class="card kpi-card">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-person-badge-fill"></i></span><span class="mini-tag">Activo</span></div>
-                            <div class="kpi-value" data-live="kpi_personal">{{ kpi_personal|default:0 }}</div>
-                            <div class="kpi-label">Personal registrado</div>
-                            <div class="kpi-note">Usuarios activos del sistema.</div>
+                            <div class="kpi-label">Niños fuera de la estancia</div>
+                            <div class="kpi-note">Menores que ya registraron salida del día.</div>
                         </article>
                     </div>
 
-
-                    <div class="live-control-grid">
-                        <article class="live-control-card">
-                            <div class="live-control-head">
-                                <h3 class="live-control-title"><i class="bi bi-shield-check"></i> Coberturas activas</h3>
-                                <span class="live-control-count"><i class="bi bi-arrow-left-right"></i>{{ suplencias_activas|length }}</span>
-                            </div>
-                            <div class="live-control-body">
-                                {% for sup in suplencias_activas|slice:":4" %}
-                                <div class="live-item">
-                                    <div class="live-item-top">
-                                        <div class="live-item-title">{% firstof sup.get_area_cubierta_display sup.area_cubierta "Área cubierta" %}</div>
-                                        <span class="live-chip green"><i class="bi bi-person-check-fill"></i> Activa</span>
-                                    </div>
-                                    <div class="live-item-meta">
-                                        <strong>Cubre:</strong> {% firstof sup.suplente_nombre sup.suplente "Suplente" %} ·
-                                        <strong>Titular:</strong> {% firstof sup.titular_nombre sup.titular_ausente "Titular" %}<br>
-                                        <strong>Autorizó:</strong> {% firstof sup.autorizada_por_nombre sup.autorizada_por "Dirección" %}
-                                    </div>
-                                </div>
-                                {% empty %}
-                                    {% for sup in suplencias_activas_dia|slice:":4" %}
-                                    <div class="live-item">
-                                        <div class="live-item-top">
-                                            <div class="live-item-title">{% firstof sup.get_area_cubierta_display sup.area_cubierta "Área cubierta" %}</div>
-                                            <span class="live-chip green"><i class="bi bi-person-check-fill"></i> Activa</span>
-                                        </div>
-                                        <div class="live-item-meta"><strong>Cubre:</strong> {% firstof sup.suplente_nombre sup.suplente "Suplente" %} · <strong>Titular:</strong> {% firstof sup.titular_nombre sup.titular_ausente "Titular" %}</div>
-                                    </div>
-                                    {% empty %}
-                                    <div class="live-empty"><i class="bi bi-check-circle me-1"></i>No hay coberturas activas.</div>
-                                    {% endfor %}
-                                {% endfor %}
-                            </div>
-                        </article>
-
-                        <article class="live-control-card">
-                            <div class="live-control-head">
-                                <h3 class="live-control-title"><i class="bi bi-person-lock"></i> Expedientes en atención</h3>
-                                <span class="live-control-count"><i class="bi bi-clock-history"></i>{{ bloqueos_edicion_activos|length }}</span>
-                            </div>
-                            <div class="live-control-body">
-                                {% for bloqueo in bloqueos_edicion_activos|slice:":4" %}
-                                <div class="live-item">
-                                    <div class="live-item-top">
-                                        <div class="live-item-title">{% firstof bloqueo.objeto_label bloqueo.alumno_nombre bloqueo.expediente_nombre bloqueo.modelo "Expediente" %}</div>
-                                        <span class="live-chip orange"><i class="bi bi-lock-fill"></i> En uso</span>
-                                    </div>
-                                    <div class="live-item-meta">
-                                        <strong>Área:</strong> {% firstof bloqueo.get_area_display bloqueo.get_area_cubierta_display bloqueo.area_display bloqueo.area bloqueo.area_cubierta "Área" %}<br>
-                                        <strong>Usuario:</strong> {% firstof bloqueo.usuario_nombre bloqueo.usuario.nombre_completo bloqueo.usuario.email bloqueo.usuario "Usuario" %}
-                                        {% if bloqueo.ultimo_ping %} · <strong>Actividad:</strong> {{ bloqueo.ultimo_ping|timesince }}{% endif %}
-                                    </div>
-                                </div>
-                                {% empty %}
-                                <div class="live-empty"><i class="bi bi-unlock me-1"></i>No hay expedientes bloqueados temporalmente.</div>
-                                {% endfor %}
-                            </div>
-                        </article>
-                    </div>
-
-                    <article class="card pad general-report-card" style="margin-top:18px;">
-                        <div class="card-title">
-                            <div>
-                                <h2><i class="bi bi-file-earmark-bar-graph-fill"></i> Reporte general de la estancia</h2>
-                                <p>Concentrado histórico con datos reales del sistema para comparar semestres, asistencia, incidencias, salas, personal y movimientos por suplencia.</p>
-                            </div>
-                            <a class="download-link" href="{% url 'descargar_reporte_supervisor' 'general' %}?semestre_id={{ semestre_seleccionado.id|default:'' }}&sede_id={{ sede_seleccionada.id|default:'' }}">
-                                <i class="bi bi-download"></i> Descargar reporte general CSV
-                            </a>
-                        </div>
-                        <div class="legend">
-                            <div class="legend-row"><span class="dot blue"></span><span>Semestre con mayor número de niñas y niños</span><strong>{{ mejor_semestre.nombre|default:"Sin datos" }}</strong></div>
-                            <div class="legend-row"><span class="dot green"></span><span>Niñas y niños en ese semestre</span><strong>{{ mejor_semestre.total_ninos|default:0 }}</strong></div>
-                            <div class="legend-row"><span class="dot amber"></span><span>Semestre consultado</span><strong>{{ semestre_seleccionado.nombre|default:"--" }}</strong></div>
-                            <div class="legend-row"><span class="dot red"></span><span>Incidencias del semestre consultado</span><strong>{{ incidencias_total|default:0 }}</strong></div>
-                            <div class="legend-row"><span class="dot purple"></span><span>Movimientos por suplencia registrados</span><strong>{{ total_movimientos_suplencia|default:0 }}</strong></div>
-                        </div>
-                    </article>
-
-                    <div class="grid two-col" style="margin-top:18px;">
-                        <article class="card pad">
+                    <div class="grid inicio-top-grid" style="margin-top:18px;">
+                        <article class="card pad general-report-card">
                             <div class="card-title">
                                 <div>
-                                    <h2>Asistencia general</h2>
-                                    <p>Distribución de niñas y niños durante el día operativo actual.</p>
+                                    <h2><i class="bi bi-file-earmark-bar-graph-fill"></i> Reporte general de la estancia</h2>
+                                    <p>Concentrado por sede y semestre. La información se muestra solo de la sede consultada para evitar mezclar datos entre sedes.</p>
                                 </div>
-                                <span class="mini-tag">Total: <strong data-live="total_ninos">{{ total_ninos|default:0 }}</strong></span>
+                                <a class="download-link" href="{% url 'descargar_reporte_supervisor' 'general' %}?semestre_id={{ semestre_seleccionado.id|default:'' }}&sede_id={{ sede_seleccionada.id|default:'' }}">
+                                    <i class="bi bi-download"></i> Descargar reporte general CSV
+                                </a>
                             </div>
 
-                            <div class="donut-layout">
-                                <div class="donut" id="donutAsistencia" style="--p1: {{ porcentaje_ninos_estancia|default:0 }}; --p2: {{ porcentaje_ninos_ausentes|default:0 }};">
-                                    <div class="donut-center">
-                                        <strong data-live="porcentaje_ninos_estancia">{{ porcentaje_ninos_estancia|default:0 }}</strong>
-                                        <span>% en estancia</span>
+                            <div class="general-dashboard">
+                                <div class="general-metric">
+                                    <span><i class="bi bi-person-lines-fill"></i> Niñas y niños inscritos</span>
+                                    <strong>{% firstof total_inscritos_sede total_alumnos_inscritos total_ninos 0 %}</strong>
+                                    <small>Total registrado en la sede seleccionada.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-gender-male"></i> Total niños</span>
+                                    <strong>{% firstof total_ninos_inscritos total_ninos_masculino total_varones alumnos_masculino 0 %}</strong>
+                                    <small>Conteo masculino del semestre consultado.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-gender-female"></i> Total niñas</span>
+                                    <strong>{% firstof total_ninas_inscritas total_ninas_femenino total_mujeres alumnos_femenino 0 %}</strong>
+                                    <small>Conteo femenino del semestre consultado.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-clipboard2-check-fill"></i> Asistencia del día</span>
+                                    <strong>{% firstof porcentaje_asistencia_dia asistencia_dia_porcentaje porcentaje_ninos_estancia 0 %}%</strong>
+                                    <small>Asistencias del día contra inscritos activos.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-graph-up-arrow"></i> Promedio mensual</span>
+                                    <strong>{% firstof promedio_asistencia_mes porcentaje_asistencia_mensual asistencia_mensual_promedio 0 %}%</strong>
+                                    <small>Promedio de días hábiles/cerrados del mes consultado.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-calendar-check-fill"></i> Días considerados</span>
+                                    <strong>{% firstof dias_asistencia_mensual dias_cerrados_mes dias_cerrados_operativos 0 %}</strong>
+                                    <small>Solo días válidos para el cálculo mensual.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-building-fill-check"></i> Salas activas</span>
+                                    <strong>{{ salas_resumen|length|default:0 }}</strong>
+                                    <small>Salas operativas de la sede seleccionada.</small>
+                                </div>
+                                <div class="general-metric">
+                                    <span><i class="bi bi-calendar3"></i> Semestre</span>
+                                    <strong style="font-size:18px;line-height:1.15;">{{ semestre_seleccionado.nombre|default:"Sin semestre" }}</strong>
+                                    <small>Configuración actualmente consultada.</small>
+                                </div>
+                            </div>
+
+                            <div class="semester-box">
+                                <div class="semester-info">
+                                    <h4><i class="bi bi-sliders"></i> Datos del semestre configurado</h4>
+                                    <div class="info-lines">
+                                        <div>Sede: <strong>{{ sede_seleccionada.nombre|default:"Sede general" }}</strong></div>
+                                        <div>Periodo: <strong>{{ semestre_seleccionado.nombre|default:"--" }}</strong></div>
+                                        <div>Inicio: <strong>{{ semestre_seleccionado.fecha_inicio|date:"d/m/Y"|default:"--" }}</strong></div>
+                                        <div>Fin: <strong>{{ semestre_seleccionado.fecha_fin|date:"d/m/Y"|default:"--" }}</strong></div>
+                                        <div>Días operativos: <strong>{{ total_dias_operativos|default:0 }}</strong></div>
                                     </div>
                                 </div>
 
-                                <div class="legend">
-                                    <div class="legend-row"><span class="dot green"></span><span>En estancia</span><strong>{{ ninos_en_estancia|default:0 }}</strong></div>
-                                    <div class="legend-row"><span class="dot amber"></span><span>Ausentes</span><strong>{{ ninos_ausentes|default:0 }}</strong></div>
-                                    <div class="legend-row"><span class="dot blue"></span><span>Entregados</span><strong>{{ ninos_entregados|default:0 }}</strong></div>
+                                <div class="month-events">
+                                    <h4><i class="bi bi-calendar-event-fill"></i> Festivos, inhábiles o eventos del mes</h4>
+                                    <div class="events-list">
+                                        {% for dia in dias_festivos_mes|slice:":5" %}
+                                            <div class="event-item">
+                                                <div class="event-icon"><i class="bi bi-calendar-x-fill"></i></div>
+                                                <div><strong>{{ dia.titulo|default:dia.nombre|default:"Día inhábil" }}</strong><span>{{ dia.fecha|date:"d/m/Y" }} · {{ dia.descripcion|default:dia.estado|default:"Evento registrado" }}</span></div>
+                                                <span class="status warn">Mes</span>
+                                            </div>
+                                        {% empty %}
+                                            {% for dia in calendario_mes_panel|slice:":5" %}
+                                                {% if not dia.es_habil or dia.titulo %}
+                                                    <div class="event-item">
+                                                        <div class="event-icon"><i class="bi bi-calendar-event-fill"></i></div>
+                                                        <div><strong>{{ dia.titulo|default:dia.estado|default:"Registro del mes" }}</strong><span>{{ dia.fecha|date:"d/m/Y" }}</span></div>
+                                                        <span class="status info">Mes</span>
+                                                    </div>
+                                                {% endif %}
+                                            {% empty %}
+                                                <div class="live-empty"><i class="bi bi-check-circle me-1"></i>No hay festivos, inhábiles o eventos registrados este mes.</div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="room-summary-box" style="margin-top:12px;">
+                                <h4><i class="bi bi-diagram-3-fill"></i> Niñas y niños por sala de la sede</h4>
+                                <div class="room-mini-list">
+                                    {% for sala in inscripciones_por_sala %}
+                                        <div class="room-mini-row">
+                                            <span>{{ sala.nombre|default:sala.sala }}</span>
+                                            <strong>{{ sala.total|default:sala.total_alumnos|default:0 }} inscritos</strong>
+                                        </div>
+                                    {% empty %}
+                                        {% for sala in salas_resumen %}
+                                            <div class="room-mini-row">
+                                                <span>{{ sala.nombre }}</span>
+                                                <strong>{{ sala.total_alumnos|default:0 }} inscritos</strong>
+                                            </div>
+                                        {% empty %}
+                                            <div class="live-empty">Sin salas configuradas para esta sede.</div>
+                                        {% endfor %}
+                                    {% endfor %}
                                 </div>
                             </div>
                         </article>
 
+                        <article class="card pad requests-card">
+                            <div class="requests-head">
+                                <div>
+                                    <h2><i class="bi bi-inbox-fill"></i> Solicitudes de ingreso activas</h2>
+                                    <p>Listado de solicitudes vigentes de la sede consultada.</p>
+                                </div>
+                                <span class="mini-tag"><i class="bi bi-lightning-charge-fill"></i> {% firstof total_solicitudes_ingreso_activas solicitudes_ingreso_activas|length 0 %}</span>
+                            </div>
+
+                            <div class="requests-list">
+                                {% for solicitud in solicitudes_ingreso_activas|slice:":6" %}
+                                    <div class="request-item">
+                                        <div class="request-icon"><i class="bi bi-file-earmark-person-fill"></i></div>
+                                        <div>
+                                            <strong>{% firstof solicitud.nombre_menor solicitud.alumno solicitud.nombre "Solicitud de ingreso" %}</strong>
+                                            <span>{% firstof solicitud.folio solicitud.codigo solicitud.pk "Sin folio" %} · {% firstof solicitud.sala solicitud.sala_solicitada "Sala pendiente" %}</span>
+                                            <div class="request-meta">
+                                                <span class="mini-tag"><i class="bi bi-calendar2-week"></i> {{ solicitud.fecha_solicitud|date:"d/m/Y"|default:solicitud.creado_en|date:"d/m/Y"|default:"Fecha pendiente" }}</span>
+                                                <span class="mini-tag"><i class="bi bi-pin-map-fill"></i> {% firstof solicitud.sede.nombre solicitud.sede sede_seleccionada.nombre "Sede" %}</span>
+                                                <span class="status info">{% firstof solicitud.get_estado_display solicitud.estado "Activa" %}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="empty-state">
+                                        <strong>Sin solicitudes activas</strong>
+                                        Cuando exista una solicitud de ingreso vigente para esta sede, aparecerá en este listado.
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="grid two-col" style="margin-top:18px;">
                         <article class="card pad">
                             <div class="card-title">
                                 <div>
@@ -1529,6 +1885,22 @@
                                     <div class="bar-meta"><span>Psicológicas</span><strong>{{ inc_psicologica|default:0 }}</strong></div>
                                     <div class="bar-track"><div class="bar-fill purple" style="--w:{% widthratio inc_psicologica incidencias_total 100 %}%;"></div></div>
                                 </div>
+                            </div>
+                        </article>
+
+                        <article class="card pad">
+                            <div class="card-title">
+                                <div>
+                                    <h2>Asistencia general</h2>
+                                    <p>El porcentaje se calcula por día: asistencias registradas contra inscritos activos. Para el mes se promedian únicamente los días válidos consultados.</p>
+                                </div>
+                                <span class="mini-tag">Total: <strong data-live="total_ninos">{{ total_ninos|default:0 }}</strong></span>
+                            </div>
+                            <div class="legend">
+                                <div class="legend-row"><span class="dot green"></span><span>Niños en estancia</span><strong data-live="ninos_en_estancia">{{ ninos_en_estancia|default:0 }}</strong></div>
+                                <div class="legend-row"><span class="dot amber"></span><span>Niños con salida anticipada</span><strong data-live="ninos_ausentes">{{ ninos_ausentes|default:0 }}</strong></div>
+                                <div class="legend-row"><span class="dot blue"></span><span>Niños fuera de la estancia</span><strong data-live="ninos_entregados">{{ ninos_entregados|default:0 }}</strong></div>
+                                <div class="legend-row"><span class="dot purple"></span><span>Promedio mensual de asistencia</span><strong>{% firstof promedio_asistencia_mes porcentaje_asistencia_mensual asistencia_mensual_promedio 0 %}%</strong></div>
                             </div>
                         </article>
                     </div>
@@ -1585,70 +1957,11 @@
                     </div>
                 </section>
 
-                <section class="section-panel" id="section-asistencia" data-section="asistencia">
-                    <div class="section-heading">
-                        <div>
-                            <h2>Asistencia de niñas y niños</h2>
-                            <p>Consulta detallada por menor, sala, hora de entrada, salida y estado del día.</p>
-                        </div>
-                        <span class="mini-tag">Total: {{ alumnos_panel|length }}</span>
-                    </div>
-
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h3>Detalle de asistencia</h3>
-                            <input class="search-box" type="search" data-search="tabla-asistencia" placeholder="Buscar menor, sala o tutor...">
-                        </div>
-                        <div class="table-wrap">
-                            <table id="tabla-asistencia">
-                                <thead>
-                                    <tr>
-                                        <th>Menor</th>
-                                        <th>Folio</th>
-                                        <th>Sala</th>
-                                        <th>Tutor</th>
-                                        <th>Estado</th>
-                                        <th>Entrada</th>
-                                        <th>Salida</th>
-                                        <th>Incidencias</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for alumno in alumnos_panel %}
-                                        <tr>
-                                            <td><strong>{{ alumno.nombre }}</strong></td>
-                                            <td>{{ alumno.folio|default:"--" }}</td>
-                                            <td>{{ alumno.sala|default:"Sin sala" }}</td>
-                                            <td>{{ alumno.tutor|default:"Sin tutor" }}</td>
-                                            <td>
-                                                {% if alumno.estado_dia == "En estancia" %}
-                                                    <span class="status ok">● {{ alumno.estado_dia }}</span>
-                                                {% elif alumno.estado_dia == "Ausente" %}
-                                                    <span class="status warn">● {{ alumno.estado_dia }}</span>
-                                                {% elif alumno.estado_dia == "Fuera de estancia" %}
-                                                    <span class="status info">● {{ alumno.estado_dia }}</span>
-                                                {% else %}
-                                                    <span class="status">● {{ alumno.estado_dia }}</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ alumno.hora_entrada|default:"--" }}</td>
-                                            <td>{{ alumno.hora_salida|default:"--" }}</td>
-                                            <td>{{ alumno.total_incidencias|default:0 }}</td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr><td colspan="8"><div class="empty-state"><strong>Sin alumnos para mostrar</strong>No hay menores finalizados o asignados al semestre seleccionado.</div></td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
                 <section class="section-panel" id="section-salas" data-section="salas">
                     <div class="section-heading">
                         <div>
                             <h2>Salas y actividades</h2>
-                            <p>Consulta de ocupación, responsables, actividad actual y estado operativo por sala.</p>
+                            <p>Consulta al día de ocupación, responsables, actividad actual y estado operativo por sala.</p>
                         </div>
                         <span class="mini-tag">{{ salas_resumen|length }} salas</span>
                     </div>
@@ -1672,7 +1985,7 @@
 
                                 <div class="room-stats">
                                     <div class="room-stat"><strong>{{ sala.presentes }}</strong><span>Presentes</span></div>
-                                    <div class="room-stat"><strong>{{ sala.ausentes }}</strong><span>Ausentes</span></div>
+                                    <div class="room-stat"><strong>{{ sala.ausentes }}</strong><span>Salida anticipada</span></div>
                                     <div class="room-stat"><strong>{{ sala.salieron }}</strong><span>Salieron</span></div>
                                 </div>
 
@@ -1765,415 +2078,6 @@
                     </div>
                 </section>
 
-                <section class="section-panel" id="section-suplencias" data-section="suplencias">
-                    <div class="section-heading">
-                        <div>
-                            <h2>Bitácora de suplencias y movimientos</h2>
-                            <p>Consulta de autorizaciones temporales, acciones realizadas por suplencia y registros pendientes de revisión por el área titular.</p>
-                        </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-                            <span class="status purple">Suplencias activas: {{ suplencias_activas|length|default:0 }}</span>
-                            <span class="status warn">Pendientes titular: {{ suplencias_pendientes_revision|default:0 }}</span>
-                            <span class="status ok">Validadas: {{ suplencias_validadas|default:0 }}</span>
-                        </div>
-                    </div>
-
-                    <div class="suplencia-note">
-                        <div class="note-icon"><i class="bi bi-shield-check"></i></div>
-                        <div>
-                            <strong>Consulta de movimientos autorizados por Dirección</strong>
-                            <span>
-                                Esta sección es solo lectura. La supervisora puede verificar quién cubrió un área, qué acción realizó,
-                                quién autorizó la suplencia y si el registro quedó pendiente de revisión por la persona titular.
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="grid audit-grid">
-                        <article class="card kpi-card">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-calendar-check-fill"></i></span><span class="mini-tag">Hoy</span></div>
-                            <div class="kpi-value">{{ suplencias_hoy|default:0 }}</div>
-                            <div class="kpi-label">Suplencias del día</div>
-                            <div class="kpi-note">Autorizaciones registradas para la jornada actual.</div>
-                        </article>
-
-                        <article class="card kpi-card amber">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-hourglass-split"></i></span><span class="mini-tag">Pendientes</span></div>
-                            <div class="kpi-value">{{ suplencias_pendientes_revision|default:0 }}</div>
-                            <div class="kpi-label">Pendientes de titular</div>
-                            <div class="kpi-note">Registros que requieren revisión posterior del área original.</div>
-                        </article>
-
-                        <article class="card kpi-card green">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-check-circle-fill"></i></span><span class="mini-tag">Validadas</span></div>
-                            <div class="kpi-value">{{ suplencias_validadas|default:0 }}</div>
-                            <div class="kpi-label">Movimientos validados</div>
-                            <div class="kpi-note">Acciones revisadas o aceptadas por la titular o Dirección.</div>
-                        </article>
-
-                        <article class="card kpi-card purple">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-person-fill-lock"></i></span><span class="mini-tag">Control</span></div>
-                            <div class="kpi-value">{{ total_movimientos_suplencia|default:0 }}</div>
-                            <div class="kpi-label">Movimientos auditados</div>
-                            <div class="kpi-note">Incidencias, dictámenes o proceso social hechos por cobertura.</div>
-                        </article>
-                    </div>
-
-
-
-                    <div class="table-card" style="margin-top:18px;">
-                        <div class="table-header">
-                            <h3>Expedientes en atención en tiempo real</h3>
-                            <input class="search-box" type="search" data-search="tabla-bloqueos-suplencias" placeholder="Buscar área, usuario o expediente...">
-                        </div>
-                        <div class="table-wrap">
-                            <table id="tabla-bloqueos-suplencias">
-                                <thead>
-                                    <tr>
-                                        <th>Área</th>
-                                        <th>Expediente</th>
-                                        <th>Usuario</th>
-                                        <th>Origen</th>
-                                        <th>Última actividad</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for bloqueo in bloqueos_edicion_activos %}
-                                    <tr>
-                                        <td><span class="origin-chip"><i class="bi bi-person-lock"></i>{% firstof bloqueo.get_area_display bloqueo.get_area_cubierta_display bloqueo.area_display bloqueo.area bloqueo.area_cubierta "Área" %}</span></td>
-                                        <td>
-                                            <strong>{% firstof bloqueo.objeto_label bloqueo.alumno_nombre bloqueo.expediente_nombre bloqueo.modelo "Expediente" %}</strong><br>
-                                            <span class="muted">{% firstof bloqueo.modelo bloqueo.tipo_objeto "Registro" %} #{{ bloqueo.objeto_id|default:bloqueo.pk }}</span>
-                                        </td>
-                                        <td>{% firstof bloqueo.usuario_nombre bloqueo.usuario.nombre_completo bloqueo.usuario.email bloqueo.usuario "Usuario" %}</td>
-                                        <td>
-                                            {% if bloqueo.autorizacion_suplencia or bloqueo.autorizacion %}
-                                                <span class="origin-chip"><i class="bi bi-arrow-left-right"></i> Suplencia</span>
-                                            {% else %}
-                                                <span class="status ok">Titular</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{% if bloqueo.ultimo_ping %}{{ bloqueo.ultimo_ping|timesince }}{% else %}--{% endif %}</td>
-                                        <td><span class="status warn"><i class="bi bi-lock-fill"></i> Reservado</span></td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr><td colspan="6"><div class="empty-state"><strong>Sin expedientes bloqueados</strong>No hay expedientes en edición temporal en este momento.</div></td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="table-card" style="margin-top:18px;">
-                        <div class="table-header">
-                            <h3>Detalle de autorizaciones y movimientos por suplencia</h3>
-                            <input class="search-box" type="search" data-search="tabla-suplencias" placeholder="Buscar área, suplente, titular, expediente o acción...">
-                        </div>
-                        <div class="table-wrap">
-                            <table id="tabla-suplencias">
-                                <thead>
-                                    <tr>
-                                        <th>Fecha y hora</th>
-                                        <th>Área cubierta</th>
-                                        <th>Acción / Proceso</th>
-                                        <th>Titular ausente</th>
-                                        <th>Realizó</th>
-                                        <th>Autorizó</th>
-                                        <th>Menor / Expediente</th>
-                                        <th>Estado</th>
-                                        <th>Observaciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if movimientos_suplencia %}
-                                        {% for mov in movimientos_suplencia %}
-                                            <tr>
-                                                <td>
-                                                    {% if mov.fecha_hora %}
-                                                        {{ mov.fecha_hora|date:"d/m/Y H:i" }}
-                                                    {% elif mov.creado_en %}
-                                                        {{ mov.creado_en|date:"d/m/Y H:i" }}
-                                                    {% elif mov.inicio %}
-                                                        {{ mov.inicio|date:"d/m/Y H:i" }}
-                                                    {% elif mov.fecha %}
-                                                        {{ mov.fecha|date:"d/m/Y" }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <span class="origin-chip">
-                                                        <i class="bi bi-arrow-left-right"></i>
-                                                        {% if mov.area_cubierta %}
-                                                            {{ mov.get_area_cubierta_display }}
-                                                        {% else %}
-                                                            --
-                                                        {% endif %}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    {% if mov.accion %}
-                                                        {{ mov.get_accion_display|default:mov.accion }}
-                                                    {% elif mov.tipo_cobertura %}
-                                                        {{ mov.get_tipo_cobertura_display|default:mov.tipo_cobertura }}
-                                                    {% else %}
-                                                        Autorización de suplencia
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.titular_ausente %}
-                                                        {{ mov.titular_ausente }}
-                                                    {% elif mov.titular_area %}
-                                                        {{ mov.titular_area }}
-                                                    {% elif mov.autorizacion.titular_ausente %}
-                                                        {{ mov.autorizacion.titular_ausente }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.usuario %}
-                                                        {{ mov.usuario }}
-                                                    {% elif mov.suplente %}
-                                                        {{ mov.suplente }}
-                                                    {% elif mov.realizado_por %}
-                                                        {{ mov.realizado_por }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.autorizada_por %}
-                                                        {{ mov.autorizada_por }}
-                                                    {% elif mov.autorizacion.autorizada_por %}
-                                                        {{ mov.autorizacion.autorizada_por }}
-                                                    {% else %}
-                                                        Dirección
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.alumno %}
-                                                        {{ mov.alumno }}
-                                                    {% elif mov.solicitud %}
-                                                        {{ mov.solicitud }}
-                                                    {% elif mov.inscripcion %}
-                                                        {{ mov.inscripcion }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.estado == "VALIDADO" or mov.estado == "REVISADO" or mov.estado == "ACTIVA" %}
-                                                        <span class="status ok">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% elif mov.estado == "PENDIENTE" or mov.estado == "PENDIENTE_REVISION" %}
-                                                        <span class="status warn">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% elif mov.estado == "CANCELADA" %}
-                                                        <span class="status bad">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% elif mov.estado == "AJUSTADO" or mov.estado == "FINALIZADA" %}
-                                                        <span class="status info">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% else %}
-                                                        <span class="status purple">{{ mov.get_estado_display|default:mov.estado|default:"Registrado" }}</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <div class="text-clip" title="{% if mov.observaciones %}{{ mov.observaciones }}{% elif mov.descripcion %}{{ mov.descripcion }}{% elif mov.motivo %}{{ mov.motivo }}{% endif %}">
-                                                        {% if mov.observaciones %}
-                                                            {{ mov.observaciones }}
-                                                        {% elif mov.descripcion %}
-                                                            {{ mov.descripcion }}
-                                                        {% elif mov.motivo %}
-                                                            {{ mov.motivo }}
-                                                        {% else %}
-                                                            --
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    {% elif bitacora_suplencias %}
-                                        {% for mov in bitacora_suplencias %}
-                                            <tr>
-                                                <td>
-                                                    {% if mov.fecha_hora %}
-                                                        {{ mov.fecha_hora|date:"d/m/Y H:i" }}
-                                                    {% elif mov.creado_en %}
-                                                        {{ mov.creado_en|date:"d/m/Y H:i" }}
-                                                    {% elif mov.inicio %}
-                                                        {{ mov.inicio|date:"d/m/Y H:i" }}
-                                                    {% elif mov.fecha %}
-                                                        {{ mov.fecha|date:"d/m/Y" }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <span class="origin-chip">
-                                                        <i class="bi bi-arrow-left-right"></i>
-                                                        {% if mov.area_cubierta %}
-                                                            {{ mov.get_area_cubierta_display }}
-                                                        {% else %}
-                                                            --
-                                                        {% endif %}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    {% if mov.accion %}
-                                                        {{ mov.get_accion_display|default:mov.accion }}
-                                                    {% elif mov.tipo_cobertura %}
-                                                        {{ mov.get_tipo_cobertura_display|default:mov.tipo_cobertura }}
-                                                    {% else %}
-                                                        Autorización de suplencia
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.titular_ausente %}
-                                                        {{ mov.titular_ausente }}
-                                                    {% elif mov.titular_area %}
-                                                        {{ mov.titular_area }}
-                                                    {% elif mov.autorizacion.titular_ausente %}
-                                                        {{ mov.autorizacion.titular_ausente }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.usuario %}
-                                                        {{ mov.usuario }}
-                                                    {% elif mov.suplente %}
-                                                        {{ mov.suplente }}
-                                                    {% elif mov.realizado_por %}
-                                                        {{ mov.realizado_por }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.autorizada_por %}
-                                                        {{ mov.autorizada_por }}
-                                                    {% elif mov.autorizacion.autorizada_por %}
-                                                        {{ mov.autorizacion.autorizada_por }}
-                                                    {% else %}
-                                                        Dirección
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.alumno %}
-                                                        {{ mov.alumno }}
-                                                    {% elif mov.solicitud %}
-                                                        {{ mov.solicitud }}
-                                                    {% elif mov.inscripcion %}
-                                                        {{ mov.inscripcion }}
-                                                    {% else %}
-                                                        --
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if mov.estado == "VALIDADO" or mov.estado == "REVISADO" or mov.estado == "ACTIVA" %}
-                                                        <span class="status ok">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% elif mov.estado == "PENDIENTE" or mov.estado == "PENDIENTE_REVISION" %}
-                                                        <span class="status warn">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% elif mov.estado == "CANCELADA" %}
-                                                        <span class="status bad">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% elif mov.estado == "AJUSTADO" or mov.estado == "FINALIZADA" %}
-                                                        <span class="status info">{{ mov.get_estado_display|default:mov.estado }}</span>
-                                                    {% else %}
-                                                        <span class="status purple">{{ mov.get_estado_display|default:mov.estado|default:"Registrado" }}</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <div class="text-clip" title="{% if mov.observaciones %}{{ mov.observaciones }}{% elif mov.descripcion %}{{ mov.descripcion }}{% elif mov.motivo %}{{ mov.motivo }}{% endif %}">
-                                                        {% if mov.observaciones %}
-                                                            {{ mov.observaciones }}
-                                                        {% elif mov.descripcion %}
-                                                            {{ mov.descripcion }}
-                                                        {% elif mov.motivo %}
-                                                            {{ mov.motivo }}
-                                                        {% else %}
-                                                            --
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <tr>
-                                            <td colspan="9">
-                                                <div class="empty-state">
-                                                    <strong>Sin movimientos por suplencia</strong>
-                                                    Cuando Dirección autorice una cobertura temporal o se realice una acción por suplencia, aparecerá aquí para consulta de Supervisión.
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-
-                <section class="section-panel" id="section-apoyos-sala" data-section="apoyos-sala">
-                    <div class="section-heading">
-                        <div>
-                            <h2>Apoyos temporales de sala</h2>
-                            <p>Consulta de apoyos entre maestras. Supervisión solo observa; no crea, edita ni cancela apoyos.</p>
-                        </div>
-                        <span class="mini-tag">Activos: <strong data-live="total_apoyos_sala_activos">{{ total_apoyos_sala_activos|default:0 }}</strong></span>
-                    </div>
-
-                    <div class="grid audit-grid" style="margin-bottom:18px;">
-                        <article class="card kpi-card green">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-activity"></i></span><span class="mini-tag">Ahora</span></div>
-                            <div class="kpi-value">{{ total_apoyos_sala_activos|default:0 }}</div>
-                            <div class="kpi-label">Apoyos activos</div>
-                        </article>
-                        <article class="card kpi-card">
-                            <div class="kpi-top"><span class="kpi-icon"><i class="bi bi-calendar-check-fill"></i></span><span class="mini-tag">Hoy</span></div>
-                            <div class="kpi-value">{{ total_apoyos_sala_hoy|default:0 }}</div>
-                            <div class="kpi-label">Apoyos del día</div>
-                        </article>
-                    </div>
-
-                    <article class="table-card">
-                        <div class="table-header">
-                            <h3>Bitácora de apoyos de sala</h3>
-                            <input class="search-box" type="search" data-search="tabla-apoyos-sala" placeholder="Buscar maestra, sala o estado">
-                        </div>
-                        <div class="table-wrap">
-                            <table id="tabla-apoyos-sala">
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Maestra apoyo</th>
-                                        <th>Sala apoyada</th>
-                                        <th>Titular</th>
-                                        <th>Inicio</th>
-                                        <th>Fin</th>
-                                        <th>Estado</th>
-                                        <th>Motivo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for apoyo in apoyos_sala_maestras %}
-                                        <tr>
-                                            <td>{{ apoyo.fecha|date:"d/m/Y" }}</td>
-                                            <td>{{ apoyo.maestra_apoyo_nombre }}</td>
-                                            <td>{{ apoyo.sala_apoyada.sala.nombre|default:apoyo.sala_apoyada }}</td>
-                                            <td>{{ apoyo.maestra_titular_nombre }}</td>
-                                            <td>{{ apoyo.inicio|date:"H:i" }}</td>
-                                            <td>{% if apoyo.fin %}{{ apoyo.fin|date:"H:i" }}{% else %}<span class="status ok">Activo</span>{% endif %}</td>
-                                            <td><span class="status {% if apoyo.estado == 'ACTIVO' %}ok{% else %}info{% endif %}">{{ apoyo.get_estado_display|default:apoyo.estado }}</span></td>
-                                            <td class="text-clip">{{ apoyo.motivo|default:"Sin motivo registrado" }}</td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr><td colspan="8"><div class="empty-state"><strong>Sin apoyos registrados</strong>No existen apoyos temporales de sala en el periodo consultado.</div></td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </article>
-                </section>
-
                 <section class="section-panel" id="section-personal" data-section="personal">
                     <div class="section-heading">
                         <div>
@@ -2256,10 +2160,10 @@
                             </div>
                             <div class="legend">
                                 <div class="legend-row"><span class="dot green"></span><span>Niños en estancia</span><strong>{{ ninos_en_estancia }}</strong></div>
-                                <div class="legend-row"><span class="dot amber"></span><span>Niños ausentes</span><strong>{{ ninos_ausentes }}</strong></div>
-                                <div class="legend-row"><span class="dot blue"></span><span>Niños entregados</span><strong>{{ ninos_entregados }}</strong></div>
-                                <div class="legend-row"><span class="dot red"></span><span>Incidencias abiertas</span><strong>{{ incidencias_abiertas }}</strong></div>
-                                <div class="legend-row"><span class="dot purple"></span><span>Movimientos por suplencia</span><strong>{{ total_movimientos_suplencia|default:0 }}</strong></div>
+                                <div class="legend-row"><span class="dot amber"></span><span>Niños con salida anticipada</span><strong>{{ ninos_ausentes }}</strong></div>
+                                <div class="legend-row"><span class="dot blue"></span><span>Niños fuera de la estancia</span><strong>{{ ninos_entregados }}</strong></div>
+                                <div class="legend-row"><span class="dot red"></span><span>Incidencias registradas</span><strong>{{ incidencias_total|default:incidencias_abiertas }}</strong></div>
+                                <div class="legend-row"><span class="dot purple"></span><span>Solicitudes de ingreso activas</span><strong>{% firstof total_solicitudes_ingreso_activas solicitudes_ingreso_activas|length 0 %}</strong></div>
                             </div>
                         </article>
 
@@ -2308,6 +2212,96 @@
                 </section>
             </section>
         </main>
+    </div>
+
+
+
+    {% if messages %}
+        <div class="toast-stack" id="toastStack">
+            {% for message in messages %}
+                <div class="toast-item">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="profile-modal-backdrop" id="profileModal" aria-hidden="true">
+        <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+            <div class="profile-hero">
+                <button class="profile-close" type="button" data-close-profile aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <span class="profile-visible-pill"><i class="bi bi-person-badge-fill"></i> Perfil visible de supervisora</span>
+                <h2 id="profileModalTitle">Personaliza tu foto de perfil</h2>
+                <p>Esta imagen aparecerá únicamente en tu usuario y en tus vistas del panel de supervisión.</p>
+            </div>
+
+            <div class="profile-body">
+                <div class="profile-preview-card">
+                    <div class="profile-big-avatar" id="profilePreviewBox">
+                        {% if request.user.foto_perfil %}
+                            <img id="profilePreviewImg" src="{{ request.user.foto_perfil.url }}" alt="Foto actual de supervisora">
+                        {% elif request.user.perfil.foto %}
+                            <img id="profilePreviewImg" src="{{ request.user.perfil.foto.url }}" alt="Foto actual de supervisora">
+                        {% else %}
+                            <i id="profilePreviewIcon" class="bi bi-person-fill"></i>
+                            <img id="profilePreviewImg" src="" alt="Vista previa de foto" style="display:none;">
+                        {% endif %}
+                        <span class="profile-camera"><i class="bi bi-camera-fill"></i></span>
+                    </div>
+                    <div class="profile-name">
+                        <h3>{{ request.user.get_full_name|default:request.user.email|default:request.user.username }}</h3>
+                        <span class="status info"><i class="bi bi-shield-check"></i> {{ rol_panel|default:"Supervisora General" }}</span>
+                        <p>Puedes subir una foto clara de rostro. Si no agregas imagen, el sistema seguirá usando el icono profesional de perfil.</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" action="" id="profilePhotoForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion_supervisor_foto" value="guardar_foto">
+                    <div class="upload-panel">
+                        <div class="upload-row">
+                            <div class="upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                            <div class="upload-title">
+                                <strong>Selecciona una foto para tu perfil</strong>
+                                <span>Arrastra o selecciona una imagen desde tu equipo.</span>
+                            </div>
+                            <label class="choose-file-btn" for="fotoPerfilInput"><i class="bi bi-image-fill"></i> Elegir foto</label>
+                            <input class="file-input" id="fotoPerfilInput" type="file" name="foto_perfil" accept="image/jpeg,image/jpg,image/png,image/webp">
+                        </div>
+
+                        <div class="upload-rules">
+                            <div class="rule-card"><i class="bi bi-filetype-jpg"></i> JPG o JPEG</div>
+                            <div class="rule-card"><i class="bi bi-filetype-png"></i> PNG / WEBP</div>
+                            <div class="rule-card"><i class="bi bi-hdd-fill"></i> Máximo 3 MB</div>
+                        </div>
+                        <div class="profile-feedback" id="profileFeedback"></div>
+                    </div>
+
+                    <div class="profile-footer">
+                        <div class="profile-note"><i class="bi bi-shield-check"></i> Tu foto es opcional y tiene límite para proteger el servidor.</div>
+                        <div class="profile-actions">
+                            <button class="btn-danger-soft" type="button" data-open-delete-photo><i class="bi bi-trash3-fill"></i> Eliminar foto</button>
+                            <button class="btn-soft" type="button" data-close-profile>Cancelar</button>
+                            <button class="btn-primary" type="submit"><i class="bi bi-check-circle-fill"></i> Guardar foto</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-modal-backdrop" id="deletePhotoModal" aria-hidden="true">
+        <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deletePhotoTitle">
+            <div class="confirm-icon"><i class="bi bi-trash3-fill"></i></div>
+            <h3 id="deletePhotoTitle">¿Eliminar foto de perfil?</h3>
+            <p>La imagen se quitará de tu perfil de supervisora y volverá a mostrarse el icono profesional predeterminado.</p>
+            <div class="confirm-actions">
+                <button class="btn-soft" type="button" data-close-delete-photo>Cancelar</button>
+                <form method="post" action="" style="margin:0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion_supervisor_foto" value="eliminar_foto">
+                    <button class="btn-danger-soft" type="submit"><i class="bi bi-trash3-fill"></i> Sí, eliminar foto</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -2360,6 +2354,93 @@
                     });
                 });
             });
+
+            const profileModal = document.getElementById('profileModal');
+            const deletePhotoModal = document.getElementById('deletePhotoModal');
+            const profileInput = document.getElementById('fotoPerfilInput');
+            const profileFeedback = document.getElementById('profileFeedback');
+            const profilePreviewImg = document.getElementById('profilePreviewImg');
+            const profilePreviewIcon = document.getElementById('profilePreviewIcon');
+            const maxPhotoSize = 3 * 1024 * 1024;
+
+            function openModal(modal) {
+                if (!modal) return;
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeModal(modal) {
+                if (!modal) return;
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            document.querySelectorAll('[data-open-profile]').forEach(btn => {
+                btn.addEventListener('click', () => openModal(profileModal));
+            });
+
+            document.querySelectorAll('[data-close-profile]').forEach(btn => {
+                btn.addEventListener('click', () => closeModal(profileModal));
+            });
+
+            document.querySelectorAll('[data-open-delete-photo]').forEach(btn => {
+                btn.addEventListener('click', () => openModal(deletePhotoModal));
+            });
+
+            document.querySelectorAll('[data-close-delete-photo]').forEach(btn => {
+                btn.addEventListener('click', () => closeModal(deletePhotoModal));
+            });
+
+            [profileModal, deletePhotoModal].forEach(modal => {
+                if (!modal) return;
+                modal.addEventListener('click', event => {
+                    if (event.target === modal) closeModal(modal);
+                });
+            });
+
+            function setProfileFeedback(message) {
+                if (!profileFeedback) return;
+                if (!message) {
+                    profileFeedback.classList.remove('show');
+                    profileFeedback.textContent = '';
+                    return;
+                }
+                profileFeedback.textContent = message;
+                profileFeedback.classList.add('show');
+            }
+
+            if (profileInput) {
+                profileInput.addEventListener('change', () => {
+                    const file = profileInput.files && profileInput.files[0];
+                    setProfileFeedback('');
+                    if (!file) return;
+
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        profileInput.value = '';
+                        setProfileFeedback('Formato no permitido. Usa JPG, JPEG, PNG o WEBP.');
+                        return;
+                    }
+
+                    if (file.size > maxPhotoSize) {
+                        profileInput.value = '';
+                        setProfileFeedback('La imagen supera el máximo permitido de 3 MB. Selecciona una foto más ligera.');
+                        return;
+                    }
+
+                    if (profilePreviewImg) {
+                        profilePreviewImg.src = URL.createObjectURL(file);
+                        profilePreviewImg.style.display = 'block';
+                    }
+                    if (profilePreviewIcon) profilePreviewIcon.style.display = 'none';
+                });
+            }
+
+            setTimeout(() => {
+                const toastStack = document.getElementById('toastStack');
+                if (toastStack) toastStack.style.display = 'none';
+            }, 5200);
+
 
             function updateLiveData(data) {
                 if (!data || !data.ok) return;

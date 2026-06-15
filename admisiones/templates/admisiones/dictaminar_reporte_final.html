@@ -50,14 +50,13 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(255,255,255,.88);
-            backdrop-filter: blur(18px);
+            background: rgba(255,255,255,.94);
             border-bottom: 1px solid rgba(219, 231, 251, .92);
             box-shadow: 0 12px 34px rgba(15, 39, 95, .07);
         }
 
         .topbar-inner {
-            min-height: 86px;
+            min-height: 132px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -68,27 +67,29 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 18px;
             min-width: 0;
         }
 
         .logo-box {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
+            width: 276px;
+            height: 112px;
+            border-radius: 28px;
             display: grid;
             place-items: center;
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 48%, #0f2f7a 100%);
-            box-shadow: 0 16px 28px rgba(37,99,235,.25);
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #0f766e 130%);
+            box-shadow: 0 18px 36px rgba(37,99,235,.24);
             overflow: hidden;
+            padding: 10px 14px;
             flex: 0 0 auto;
         }
 
         .logo-box img {
-            width: 82%;
-            height: 82%;
+            width: 125%;
+            height: 125%;
             object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
+            filter: none;
+            display: block;
         }
 
         .brand h1 {
@@ -148,15 +149,24 @@
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
             display: grid;
             place-items: center;
             background: linear-gradient(135deg, #dbeafe, #bfdbfe);
             color: var(--azul-700);
             font-size: 1.15rem;
             flex: 0 0 auto;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(37,99,235,.08);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .user-name {
@@ -772,10 +782,11 @@
 
         @media (max-width: 768px) {
             .top-shell, .page { width: min(100% - 24px, 1450px); }
-            .topbar-inner { align-items: flex-start; }
+            .topbar-inner { align-items: flex-start; flex-direction: column; }
+            .brand { width: 100%; align-items: center; }
             .brand h1 { font-size: 1.05rem; }
             .brand p { font-size: .78rem; }
-            .logo-box { width: 54px; height: 54px; border-radius: 16px; }
+            .logo-box { width: 220px; height: 88px; border-radius: 24px; padding: 8px 12px; }
             .top-actions { justify-content: flex-start; }
             .user-pill { width: 100%; justify-content: flex-start; }
             .hero { grid-template-columns: 1fr; padding: 24px; }
@@ -1167,6 +1178,216 @@
   .ts-action-btn{width:100%;}
 }
 
+
+/* =========================================================
+   Modal personalizado para confirmar Reporte Final
+   Reemplaza las alertas genéricas del navegador.
+   ========================================================= */
+.reporte-final-confirm-modal .modal-dialog{
+  max-width:560px;
+}
+.reporte-final-confirm-content{
+  border:0;
+  border-radius:28px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 30px 90px rgba(15,23,42,.34);
+}
+.reporte-final-confirm-hero{
+  position:relative;
+  padding:26px 28px 64px;
+  color:#fff;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(255,255,255,.24) 0 94px, transparent 95px),
+    linear-gradient(135deg,#2563eb,#0891b2);
+}
+.reporte-final-confirm-hero.danger{
+  background:
+    radial-gradient(circle at 92% 0%, rgba(255,255,255,.22) 0 94px, transparent 95px),
+    linear-gradient(135deg,#dc2626,#f97316);
+}
+.reporte-final-confirm-hero::after{
+  content:"";
+  position:absolute;
+  right:-46px;
+  top:-76px;
+  width:220px;
+  height:220px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+}
+.reporte-final-confirm-badge{
+  position:relative;
+  z-index:2;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid rgba(255,255,255,.34);
+  background:rgba(255,255,255,.14);
+  border-radius:999px;
+  padding:8px 13px;
+  font-size:.82rem;
+  font-weight:950;
+}
+.reporte-final-confirm-close{
+  position:absolute;
+  right:22px;
+  top:22px;
+  z-index:3;
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:999px;
+  color:#fff;
+  background:rgba(255,255,255,.13);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.18s ease;
+}
+.reporte-final-confirm-close:hover{
+  background:rgba(255,255,255,.24);
+  transform:rotate(90deg);
+}
+.reporte-final-confirm-title{
+  position:relative;
+  z-index:2;
+  margin:18px 0 0;
+  max-width:420px;
+  font-size:1.55rem;
+  line-height:1.08;
+  font-weight:950;
+  letter-spacing:-.04em;
+}
+.reporte-final-confirm-body{
+  position:relative;
+  margin-top:-38px;
+  padding:0 28px 26px;
+  background:#fff;
+}
+.reporte-final-confirm-card{
+  position:relative;
+  z-index:2;
+  border:1px solid #dbe7fb;
+  border-radius:24px;
+  background:#fff;
+  padding:20px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:15px;
+  align-items:flex-start;
+  box-shadow:0 16px 40px rgba(22,53,108,.12);
+}
+.reporte-final-confirm-icon{
+  width:58px;
+  height:58px;
+  border-radius:19px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#dcfce7;
+  color:#16a34a;
+  font-size:1.65rem;
+  flex:0 0 auto;
+}
+.reporte-final-confirm-icon.danger{
+  background:#fee2e2;
+  color:#dc2626;
+}
+.reporte-final-confirm-card h5{
+  margin:0 0 6px;
+  color:var(--azul-900);
+  font-weight:950;
+  font-size:1.1rem;
+}
+.reporte-final-confirm-card p{
+  margin:0;
+  color:#475569;
+  font-weight:720;
+  line-height:1.48;
+}
+.reporte-final-confirm-note{
+  margin-top:14px;
+  border-radius:17px;
+  padding:13px 15px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1e3a8a;
+  font-weight:780;
+  line-height:1.45;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.reporte-final-confirm-note.danger{
+  background:#fff7ed;
+  border-color:#fed7aa;
+  color:#9a3412;
+}
+.reporte-final-confirm-footer{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.reporte-final-confirm-btn-light,
+.reporte-final-confirm-btn-primary{
+  min-height:46px;
+  border-radius:999px;
+  padding:0 20px;
+  font-weight:950;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:0;
+}
+.reporte-final-confirm-btn-light{
+  background:#fff;
+  color:#526681;
+  border:1px solid #cad8ee;
+}
+.reporte-final-confirm-btn-light:hover{
+  background:#f8fafc;
+  color:var(--azul-900);
+}
+.reporte-final-confirm-btn-primary{
+  color:#fff;
+  background:linear-gradient(135deg,#16a34a,#15803d);
+  box-shadow:0 14px 28px rgba(22,163,74,.22);
+}
+.reporte-final-confirm-btn-primary.danger{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  box-shadow:0 14px 28px rgba(220,38,38,.20);
+}
+.reporte-final-inline-error{
+  display:none;
+  margin-top:10px;
+  border-radius:14px;
+  padding:10px 12px;
+  background:#fff1f2;
+  border:1px solid #fecdd3;
+  color:#991b1b;
+  font-weight:850;
+  line-height:1.4;
+}
+.reporte-final-inline-error.show{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+}
+@media(max-width:576px){
+  .reporte-final-confirm-modal .modal-dialog{max-width:calc(100vw - 20px);margin:10px auto;}
+  .reporte-final-confirm-hero{padding:24px 22px 62px;}
+  .reporte-final-confirm-body{padding:0 18px 22px;}
+  .reporte-final-confirm-card{grid-template-columns:1fr;}
+  .reporte-final-confirm-icon{margin:0 auto;}
+  .reporte-final-confirm-footer{flex-direction:column-reverse;}
+  .reporte-final-confirm-btn-light,.reporte-final-confirm-btn-primary{width:100%;}
+}
+
 </style>
 </head>
 <body>
@@ -1189,19 +1410,34 @@
                 Regresar
             </a>
 
-            <div class="user-pill" title="Trabajadora Social">
+            <div class="user-pill" title="Usuario activo">
                 <div class="user-avatar">
-                    <i class="bi bi-person-heart"></i>
+                    {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+                        <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                    {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% else %}
+                        <i class="bi bi-person-heart"></i>
+                    {% endif %}
                 </div>
                 <div>
                     <div class="user-name">
+                        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            Cubriendo TS ·
+                        {% endif %}
                         {% if request.user.get_full_name %}
                             {{ request.user.get_full_name }}
                         {% else %}
                             {{ request.user.username }}
                         {% endif %}
                     </div>
-                    <span class="user-role">Trabajadora Social</span>
+                    <span class="user-role">
+                        {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                            Cobertura temporal
+                        {% else %}
+                            Trabajadora Social
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
@@ -1237,7 +1473,7 @@
     </a>
   </div>
 </section>
-{% elif bloqueo_edicion_temporal %}
+{% elif bloqueo_edicion_temporal and suplencia_trabajo_social_activa or bloqueo_edicion_temporal and cobertura_trabajo_social_activa or bloqueo_edicion_temporal and modo_suplencia_trabajo_social or bloqueo_edicion_temporal and solo_consulta_suplencia %}
 <section class="ts-edit-lock-panel mine" id="bloqueo-edicion-trabajo-social" data-bloqueo-id="{{ bloqueo_edicion_temporal.id }}">
   <div class="ts-lock-head">
     <div>
@@ -1280,7 +1516,7 @@
 {% endif %}
 
 
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>
@@ -1535,8 +1771,9 @@
         </div>
 
         <aside class="right-column">
-            <form method="post" class="panel-card decision-card">
+            <form method="post" class="panel-card decision-card" id="formReporteFinalDecision">
                 {% csrf_token %}
+                <input type="hidden" name="accion_reporte_final" id="accionReporteFinalSeleccionada" value="">
 
         {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
           <input type="hidden" name="es_suplencia" value="1">
@@ -1563,31 +1800,32 @@
                     <div class="mb-3">
                         <label class="form-label">Motivos / observaciones del Reporte Final</label>
                         <textarea
+                            id="reporteFinalMotivos"
                             name="reporte_final_motivos"
                             class="form-control"
                             placeholder="Escribe aquí los motivos si se rechaza, o una observación general si se acepta.">{{ inscripcion.reporte_final_motivos|default:"" }}</textarea>
                         <div class="form-text mt-2">
                             Si rechazas la inscripción, este campo es obligatorio.
                         </div>
+                        <div class="reporte-final-inline-error" id="reporteFinalInlineError" aria-live="polite">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>Para rechazar la inscripción debes escribir el motivo u observación del Reporte Final.</span>
+                        </div>
                     </div>
 
                     <div class="decision-actions">
                         <button
-                            type="submit"
-                            name="accion_reporte_final"
-                            value="ACEPTAR"
-                            class="btn btn-action btn-accept"
-                            onclick="return confirm('¿Confirmas aceptar la inscripción y enviarla a Dirección?');">
+                            type="button"
+                            class="btn btn-action btn-accept js-report-decision"
+                            data-action="ACEPTAR">
                             <i class="bi bi-check-circle"></i>
                             Aceptar y enviar a Dirección
                         </button>
 
                         <button
-                            type="submit"
-                            name="accion_reporte_final"
-                            value="RECHAZAR"
-                            class="btn btn-action btn-reject"
-                            onclick="return confirm('¿Confirmas rechazar la inscripción desde Trabajo Social?');">
+                            type="button"
+                            class="btn btn-action btn-reject js-report-decision"
+                            data-action="RECHAZAR">
                             <i class="bi bi-x-circle"></i>
                             Rechazar inscripción
                         </button>
@@ -1631,7 +1869,150 @@
     </section>
 </main>
 
+
+<div class="modal fade reporte-final-confirm-modal" id="confirmarReporteFinalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content reporte-final-confirm-content">
+            <div class="reporte-final-confirm-hero" id="reporteFinalConfirmHero">
+                <span class="reporte-final-confirm-badge" id="reporteFinalConfirmBadge">
+                    <i class="bi bi-shield-check"></i>
+                    Confirmación segura
+                </span>
+                <button type="button" class="reporte-final-confirm-close" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <h2 class="reporte-final-confirm-title" id="reporteFinalConfirmTitle">Confirmar acción</h2>
+            </div>
+            <div class="reporte-final-confirm-body">
+                <section class="reporte-final-confirm-card">
+                    <div class="reporte-final-confirm-icon" id="reporteFinalConfirmIcon">
+                        <i class="bi bi-send-check-fill"></i>
+                    </div>
+                    <div>
+                        <h5 id="reporteFinalConfirmSubtitle">Enviar expediente a Dirección</h5>
+                        <p id="reporteFinalConfirmText">El expediente continuará al siguiente paso del proceso.</p>
+                    </div>
+                </section>
+                <div class="reporte-final-confirm-note" id="reporteFinalConfirmNote">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span id="reporteFinalConfirmNoteText">Revisa que la observación capturada sea correcta antes de continuar.</span>
+                </div>
+                <div class="reporte-final-confirm-footer">
+                    <button type="button" class="reporte-final-confirm-btn-light" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-left"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="reporte-final-confirm-btn-primary" id="reporteFinalConfirmSubmit">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('formReporteFinalDecision');
+    const hiddenAction = document.getElementById('accionReporteFinalSeleccionada');
+    const motivos = document.getElementById('reporteFinalMotivos');
+    const inlineError = document.getElementById('reporteFinalInlineError');
+    const modalElement = document.getElementById('confirmarReporteFinalModal');
+    const modal = modalElement ? new bootstrap.Modal(modalElement) : null;
+    const hero = document.getElementById('reporteFinalConfirmHero');
+    const icon = document.getElementById('reporteFinalConfirmIcon');
+    const title = document.getElementById('reporteFinalConfirmTitle');
+    const subtitle = document.getElementById('reporteFinalConfirmSubtitle');
+    const text = document.getElementById('reporteFinalConfirmText');
+    const note = document.getElementById('reporteFinalConfirmNote');
+    const noteText = document.getElementById('reporteFinalConfirmNoteText');
+    const submitBtn = document.getElementById('reporteFinalConfirmSubmit');
+    let actionPending = '';
+
+    const configs = {
+      ACEPTAR: {
+        danger:false,
+        icon:'bi-send-check-fill',
+        title:'¿Enviar expediente a Dirección?',
+        subtitle:'Aceptar reporte final de Trabajo Social',
+        text:'Se aceptará el reporte final y el expediente pasará a la bandeja de veredicto final de Dirección.',
+        note:'Dirección podrá revisar el expediente, consultar el reporte final y emitir el veredicto correspondiente.',
+        button:'Sí, enviar a Dirección'
+      },
+      RECHAZAR: {
+        danger:true,
+        icon:'bi-x-octagon-fill',
+        title:'¿Rechazar inscripción?',
+        subtitle:'Rechazo desde Trabajo Social',
+        text:'Se registrará el rechazo del Reporte Final con los motivos capturados en el campo de observaciones.',
+        note:'Esta acción debe quedar justificada. Verifica que el motivo esté claro antes de confirmar.',
+        button:'Sí, rechazar inscripción'
+      }
+    };
+
+    function setInlineError(show){
+      if(!inlineError || !motivos){ return; }
+      inlineError.classList.toggle('show', !!show);
+      motivos.classList.toggle('is-invalid', !!show);
+    }
+
+    function applyConfig(action){
+      const cfg = configs[action] || configs.ACEPTAR;
+      actionPending = action;
+      if(hero){ hero.classList.toggle('danger', cfg.danger); }
+      if(icon){
+        icon.classList.toggle('danger', cfg.danger);
+        icon.innerHTML = '<i class="bi ' + cfg.icon + '"></i>';
+      }
+      if(note){ note.classList.toggle('danger', cfg.danger); }
+      if(title){ title.textContent = cfg.title; }
+      if(subtitle){ subtitle.textContent = cfg.subtitle; }
+      if(text){ text.textContent = cfg.text; }
+      if(noteText){ noteText.textContent = cfg.note; }
+      if(submitBtn){
+        submitBtn.classList.toggle('danger', cfg.danger);
+        submitBtn.innerHTML = '<i class="bi ' + (cfg.danger ? 'bi-x-circle-fill' : 'bi-check-circle-fill') + '"></i>' + cfg.button;
+      }
+    }
+
+    document.querySelectorAll('.js-report-decision').forEach(function(button){
+      button.addEventListener('click', function(){
+        const action = this.dataset.action;
+        if(action === 'RECHAZAR' && motivos && !motivos.value.trim()){
+          setInlineError(true);
+          motivos.focus();
+          motivos.scrollIntoView({behavior:'smooth', block:'center'});
+          return;
+        }
+        setInlineError(false);
+        applyConfig(action);
+        if(modal){ modal.show(); }
+      });
+    });
+
+    if(motivos){
+      motivos.addEventListener('input', function(){
+        if(this.value.trim()){ setInlineError(false); }
+      });
+    }
+
+    if(submitBtn){
+      submitBtn.addEventListener('click', function(){
+        if(!form || !hiddenAction || !actionPending){ return; }
+        hiddenAction.value = actionPending;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Procesando...';
+        form.submit();
+      });
+    }
+  });
+})();
+</script>
+
 
 
 <script>
@@ -1648,7 +2029,7 @@
       el.classList.add('suplencia-ts-muted-action');
     });
 
-    document.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn){
+    document.querySelectorAll('button[type="submit"], input[type="submit"], .js-report-decision').forEach(function(btn){
       btn.setAttribute('disabled','disabled');
       btn.classList.add('suplencia-ts-muted-action');
       if(!btn.dataset.originalText){ btn.dataset.originalText = btn.innerHTML || btn.value || ''; }

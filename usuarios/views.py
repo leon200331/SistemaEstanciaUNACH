@@ -423,7 +423,7 @@ def root_redirect_view(request):
         return redirect("panel_supervisor")
 
     if getattr(user, "tipo_persona", "") == "BENEFICIARIO":
-        return redirect("portal_padres_home")
+        return redirect(reverse("portal_padres_home") + "#inicio")
 
     if user.is_staff:
         # Primero revisamos area_operativa, pero conservamos compatibilidad con grupos.
@@ -744,6 +744,16 @@ def dashboard_admin(request):
         messages.error(request, "Acceso denegado. Área exclusiva de Trabajo Social.")
         return redirect("login")
 
+    if request.method == "POST":
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        accion = request.POST.get("action_type")
+
+        if accion in ["actualizar_foto_trabajo_social", "eliminar_foto_trabajo_social"]:
+            return procesar_foto_perfil_trabajo_social_panel(request, accion, is_ajax=is_ajax)
+
+        messages.warning(request, "Acción no válida para el panel de Trabajo Social.")
+        return redirect("dashboard_admin")
+
     semestre_context = contexto_semestre_operativo()
     semestre_activo = semestre_context.get("semestre_activo_operativo")
 
@@ -952,6 +962,513 @@ def dashboard_medico(request):
     return render(request, "dashboard/home_medico.html", context)
 
 
+
+# =======================================================
+# FOTO DE PERFIL - PORTAL DE PADRES / BENEFICIARIO
+# =======================================================
+def obtener_url_foto_perfil_usuario(user):
+    """
+    Devuelve la URL pública de la foto de perfil del usuario autenticado.
+    Si el modelo no tiene campo de foto o no hay archivo guardado, regresa cadena vacía.
+    """
+    campo_foto = obtener_campo_foto_perfil_usuario(user)
+
+    if not campo_foto:
+        return ""
+
+    try:
+        archivo = getattr(user, campo_foto, None)
+        if archivo and getattr(archivo, "url", None):
+            return archivo.url
+    except Exception:
+        return ""
+
+    return ""
+
+
+def responder_accion_beneficiario_foto(request, status, mensaje):
+    """
+    Responde a las acciones de foto de perfil del Portal de Padres.
+    El HTML del portal muestra estos mensajes con una notificación personalizada.
+    """
+    if status == "success":
+        messages.success(request, mensaje)
+    else:
+        messages.error(request, mensaje)
+
+    return redirect(reverse("portal_padres_home") + "#inicio")
+
+
+def procesar_foto_perfil_beneficiario_panel(request, accion):
+    """
+    Guarda o elimina la foto de perfil del beneficiario desde portal/home_padres.html.
+
+    Acciones esperadas desde el HTML:
+    - actualizar_foto_beneficiario
+    - eliminar_foto_beneficiario
+
+    Reglas:
+    - JPG, JPEG, PNG o WEBP.
+    - Máximo 3 MB.
+    """
+    if not request.user or not getattr(request.user, "is_authenticated", False):
+        return responder_accion_beneficiario_foto(
+            request,
+            "error",
+            "Debes iniciar sesión para modificar tu foto de perfil.",
+        )
+
+    if getattr(request.user, "tipo_persona", "") != "BENEFICIARIO":
+        return responder_accion_beneficiario_foto(
+            request,
+            "error",
+            "Esta foto de perfil solo puede modificarse desde una cuenta de beneficiario.",
+        )
+
+    campo_foto = obtener_campo_foto_perfil_usuario(request.user)
+
+    if not campo_foto:
+        return responder_accion_beneficiario_foto(
+            request,
+            "error",
+            "El modelo de usuarios no tiene configurado un campo de foto de perfil.",
+        )
+
+    if accion == "eliminar_foto_beneficiario":
+        try:
+            archivo_actual = getattr(request.user, campo_foto, None)
+
+            if archivo_actual:
+                if hasattr(request.user, "eliminar_foto_perfil"):
+                    request.user.eliminar_foto_perfil(guardar=True)
+                else:
+                    try:
+                        archivo_actual.delete(save=False)
+                    except Exception:
+                        pass
+
+                    setattr(request.user, campo_foto, None)
+
+                    try:
+                        request.user.save(update_fields=[campo_foto])
+                    except Exception:
+                        request.user.save()
+
+            try:
+                AccessLog.objects.create(
+                    usuario=request.user,
+                    accion="PERFIL: Eliminó su foto de perfil del Portal de Padres.",
+                )
+            except Exception:
+                pass
+
+            return responder_accion_beneficiario_foto(
+                request,
+                "success",
+                "Foto de perfil del beneficiario eliminada correctamente.",
+            )
+
+        except Exception as exc:
+            return responder_accion_beneficiario_foto(
+                request,
+                "error",
+                f"No se pudo eliminar la foto de perfil: {exc}",
+            )
+
+    if accion == "actualizar_foto_beneficiario":
+        archivo = request.FILES.get("foto_perfil_beneficiario") or request.FILES.get("foto_perfil")
+        es_valido, mensaje_validacion = validar_archivo_foto_perfil_admin(archivo)
+
+        if not es_valido:
+            return responder_accion_beneficiario_foto(
+                request,
+                "error",
+                mensaje_validacion,
+            )
+
+        try:
+            archivo_actual = getattr(request.user, campo_foto, None)
+
+            if archivo_actual:
+                try:
+                    archivo_actual.delete(save=False)
+                except Exception:
+                    pass
+
+            setattr(request.user, campo_foto, archivo)
+
+            try:
+                request.user.save(update_fields=[campo_foto])
+            except Exception:
+                request.user.save()
+
+            try:
+                AccessLog.objects.create(
+                    usuario=request.user,
+                    accion="PERFIL: Actualizó su foto de perfil del Portal de Padres.",
+                )
+            except Exception:
+                pass
+
+            return responder_accion_beneficiario_foto(
+                request,
+                "success",
+                "Foto de perfil del beneficiario actualizada correctamente.",
+            )
+
+        except Exception as exc:
+            return responder_accion_beneficiario_foto(
+                request,
+                "error",
+                f"No se pudo guardar la foto de perfil: {exc}",
+            )
+
+    return responder_accion_beneficiario_foto(
+        request,
+        "error",
+        "Acción de foto de perfil no válida.",
+    )
+
+
+
+# =======================================================
+# FOTO DE PERFIL - ADMINISTRADOR DEL SISTEMA / PANEL TI
+# =======================================================
+MAX_FOTO_PERFIL_ADMIN_MB = 3
+MAX_FOTO_PERFIL_ADMIN_BYTES = MAX_FOTO_PERFIL_ADMIN_MB * 1024 * 1024
+EXTENSIONES_FOTO_PERFIL_ADMIN = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+def obtener_campo_foto_perfil_usuario(user):
+    """
+    Detecta de forma segura el campo real de foto de perfil del modelo Usuario.
+    Actualmente el proyecto usa foto_perfil, pero se dejan alias para evitar romper
+    si el nombre cambia después.
+    """
+    if not user:
+        return ""
+
+    posibles = [
+        "foto_perfil",
+        "foto",
+        "avatar",
+        "imagen_perfil",
+        "foto_usuario",
+        "imagen",
+    ]
+
+    for campo in posibles:
+        try:
+            field = user._meta.get_field(campo)
+            if field.get_internal_type() in ["ImageField", "FileField"]:
+                return campo
+        except Exception:
+            continue
+
+    return ""
+
+
+def responder_accion_panel_ti_foto(request, is_ajax, status, mensaje):
+    """
+    Devuelve JSON cuando el panel envía AJAX y usa messages cuando entra por POST normal.
+    """
+    if is_ajax:
+        return JsonResponse({"status": status, "msg": mensaje})
+
+    if status == "success":
+        messages.success(request, mensaje)
+    else:
+        messages.warning(request, mensaje)
+
+    return redirect("panel_gobierno_ti")
+
+
+def validar_archivo_foto_perfil_admin(archivo):
+    """
+    Validación backend para que la foto del Administrador no sature el servidor.
+    Aunque el HTML valide, esta validación protege si alguien modifica el navegador.
+    """
+    if not archivo:
+        return False, "Selecciona una imagen para actualizar tu foto de perfil."
+
+    extension = os.path.splitext(getattr(archivo, "name", "") or "")[1].lower()
+
+    if extension not in EXTENSIONES_FOTO_PERFIL_ADMIN:
+        return False, "Formato no permitido. Usa JPG, JPEG, PNG o WEBP."
+
+    tamano = getattr(archivo, "size", 0) or 0
+
+    if tamano <= 0:
+        return False, "La imagen está vacía. Selecciona un archivo válido."
+
+    if tamano > MAX_FOTO_PERFIL_ADMIN_BYTES:
+        peso_mb = round(tamano / (1024 * 1024), 2)
+        return False, f"La foto pesa {peso_mb} MB y supera el límite permitido de {MAX_FOTO_PERFIL_ADMIN_MB} MB."
+
+    return True, "Imagen válida."
+
+
+def procesar_foto_perfil_admin_panel_ti(request, accion, is_ajax=False):
+    """
+    Guarda o elimina la foto de perfil del Administrador del Sistema desde panel_ti.html.
+
+    Acciones esperadas desde el HTML:
+    - actualizar_foto_admin
+    - eliminar_foto_admin
+    """
+    if not usuario_es_admin_sistema(request.user):
+        return responder_accion_panel_ti_foto(
+            request,
+            is_ajax,
+            "error",
+            "No tienes permiso para modificar la foto de perfil del Administrador.",
+        )
+
+    campo_foto = obtener_campo_foto_perfil_usuario(request.user)
+
+    if not campo_foto:
+        return responder_accion_panel_ti_foto(
+            request,
+            is_ajax,
+            "error",
+            "El modelo de usuarios no tiene configurado un campo de foto de perfil.",
+        )
+
+    if accion == "eliminar_foto_admin":
+        try:
+            if hasattr(request.user, "eliminar_foto_perfil"):
+                request.user.eliminar_foto_perfil(guardar=True)
+            else:
+                archivo_actual = getattr(request.user, campo_foto, None)
+                if archivo_actual:
+                    try:
+                        archivo_actual.delete(save=False)
+                    except Exception:
+                        pass
+
+                setattr(request.user, campo_foto, None)
+                try:
+                    request.user.save(update_fields=[campo_foto])
+                except Exception:
+                    request.user.save()
+
+            try:
+                AccessLog.objects.create(
+                    usuario=request.user,
+                    accion="PERFIL: Eliminó su foto de perfil de Administrador.",
+                )
+            except Exception:
+                pass
+
+            return responder_accion_panel_ti_foto(
+                request,
+                is_ajax,
+                "success",
+                "Foto de perfil eliminada correctamente.",
+            )
+
+        except Exception as exc:
+            return responder_accion_panel_ti_foto(
+                request,
+                is_ajax,
+                "error",
+                f"No se pudo eliminar la foto de perfil: {exc}",
+            )
+
+    if accion == "actualizar_foto_admin":
+        archivo = request.FILES.get("foto_perfil_admin") or request.FILES.get("foto_perfil")
+        es_valido, mensaje_validacion = validar_archivo_foto_perfil_admin(archivo)
+
+        if not es_valido:
+            return responder_accion_panel_ti_foto(
+                request,
+                is_ajax,
+                "error",
+                mensaje_validacion,
+            )
+
+        try:
+            setattr(request.user, campo_foto, archivo)
+            try:
+                request.user.save(update_fields=[campo_foto])
+            except Exception:
+                request.user.save()
+
+            try:
+                AccessLog.objects.create(
+                    usuario=request.user,
+                    accion="PERFIL: Actualizó su foto de perfil de Administrador.",
+                )
+            except Exception:
+                pass
+
+            return responder_accion_panel_ti_foto(
+                request,
+                is_ajax,
+                "success",
+                "Foto de perfil actualizada correctamente.",
+            )
+
+        except Exception as exc:
+            return responder_accion_panel_ti_foto(
+                request,
+                is_ajax,
+                "error",
+                f"No se pudo guardar la foto de perfil: {exc}",
+            )
+
+    return responder_accion_panel_ti_foto(
+        request,
+        is_ajax,
+        "error",
+        "Acción de foto de perfil no válida.",
+    )
+
+
+# =======================================================
+# FOTO DE PERFIL - TRABAJO SOCIAL / PANEL PRINCIPAL
+# =======================================================
+def responder_accion_trabajo_social_foto(request, is_ajax, status, mensaje):
+    """
+    Responde a las acciones de foto de perfil de Trabajo Social.
+    En POST normal usa messages para mostrar la notificación con el diseño del HTML.
+    """
+    if is_ajax:
+        return JsonResponse({"status": status, "msg": mensaje})
+
+    if status == "success":
+        messages.success(request, mensaje)
+    else:
+        messages.error(request, mensaje)
+
+    return redirect("dashboard_admin")
+
+
+def procesar_foto_perfil_trabajo_social_panel(request, accion, is_ajax=False):
+    """
+    Guarda o elimina la foto de perfil de la Trabajadora Social desde panel_admin.html.
+
+    Acciones esperadas desde el HTML:
+    - actualizar_foto_trabajo_social
+    - eliminar_foto_trabajo_social
+    """
+    if not getattr(request.user, "is_staff", False) or not usuario_es_trabajadora_social(request.user):
+        return responder_accion_trabajo_social_foto(
+            request,
+            is_ajax,
+            "error",
+            "No tienes permiso para modificar la foto de perfil de Trabajo Social.",
+        )
+
+    campo_foto = obtener_campo_foto_perfil_usuario(request.user)
+
+    if not campo_foto:
+        return responder_accion_trabajo_social_foto(
+            request,
+            is_ajax,
+            "error",
+            "El modelo de usuarios no tiene configurado un campo de foto de perfil.",
+        )
+
+    if accion == "eliminar_foto_trabajo_social":
+        try:
+            archivo_actual = getattr(request.user, campo_foto, None)
+
+            if not archivo_actual:
+                return responder_accion_trabajo_social_foto(
+                    request,
+                    is_ajax,
+                    "success",
+                    "No había foto de perfil para eliminar.",
+                )
+
+            if hasattr(request.user, "eliminar_foto_perfil"):
+                request.user.eliminar_foto_perfil(guardar=True)
+            else:
+                try:
+                    archivo_actual.delete(save=False)
+                except Exception:
+                    pass
+
+                setattr(request.user, campo_foto, None)
+                try:
+                    request.user.save(update_fields=[campo_foto])
+                except Exception:
+                    request.user.save()
+
+            try:
+                AccessLog.objects.create(
+                    usuario=request.user,
+                    accion="PERFIL: Eliminó su foto de perfil de Trabajo Social.",
+                )
+            except Exception:
+                pass
+
+            return responder_accion_trabajo_social_foto(
+                request,
+                is_ajax,
+                "success",
+                "Foto de perfil eliminada correctamente.",
+            )
+
+        except Exception as exc:
+            return responder_accion_trabajo_social_foto(
+                request,
+                is_ajax,
+                "error",
+                f"No se pudo eliminar la foto de perfil: {exc}",
+            )
+
+    if accion == "actualizar_foto_trabajo_social":
+        archivo = request.FILES.get("foto_perfil_trabajo_social") or request.FILES.get("foto_perfil")
+        es_valido, mensaje_validacion = validar_archivo_foto_perfil_admin(archivo)
+
+        if not es_valido:
+            return responder_accion_trabajo_social_foto(
+                request,
+                is_ajax,
+                "error",
+                mensaje_validacion,
+            )
+
+        try:
+            setattr(request.user, campo_foto, archivo)
+            try:
+                request.user.save(update_fields=[campo_foto])
+            except Exception:
+                request.user.save()
+
+            try:
+                AccessLog.objects.create(
+                    usuario=request.user,
+                    accion="PERFIL: Actualizó su foto de perfil de Trabajo Social.",
+                )
+            except Exception:
+                pass
+
+            return responder_accion_trabajo_social_foto(
+                request,
+                is_ajax,
+                "success",
+                "Foto de perfil actualizada correctamente.",
+            )
+
+        except Exception as exc:
+            return responder_accion_trabajo_social_foto(
+                request,
+                is_ajax,
+                "error",
+                f"No se pudo guardar la foto de perfil: {exc}",
+            )
+
+    return responder_accion_trabajo_social_foto(
+        request,
+        is_ajax,
+        "error",
+        "Acción de foto de perfil no válida.",
+    )
+
+
 @login_required
 def panel_gobierno_ti(request):
     User = get_user_model()
@@ -967,7 +1484,10 @@ def panel_gobierno_ti(request):
         response_data = {"status": "success", "msg": "Acción realizada"}
 
         try:
-            if accion == "create_user":
+            if accion in ["actualizar_foto_admin", "eliminar_foto_admin"]:
+                return procesar_foto_perfil_admin_panel_ti(request, accion, is_ajax=is_ajax)
+
+            elif accion == "create_user":
                 email = limpiar_correo(request.POST.get("email", ""))
                 password = request.POST.get("password")
                 nombre = request.POST.get("nombre", "").strip()
@@ -1666,14 +2186,42 @@ def descargar_reporte_ciclo_pdf(request, ciclo_id):
 
 @login_required
 def portal_padres_home(request):
+    if getattr(request.user, "tipo_persona", "") != "BENEFICIARIO":
+        logout(request)
+        messages.error(request, "Acceso denegado. Área exclusiva para beneficiarios.")
+        return redirect("login")
+
+    if request.method == "POST":
+        accion = (request.POST.get("action_type") or "").strip()
+
+        if accion in ["actualizar_foto_beneficiario", "eliminar_foto_beneficiario"]:
+            return procesar_foto_perfil_beneficiario_panel(request, accion)
+
+        messages.warning(request, "Acción no válida para el Portal de Padres.")
+        return redirect(reverse("portal_padres_home") + "#inicio")
+
     solicitud_activa = None
+    mi_inscripcion = None
     semestre_activo = obtener_semestre_activo_operativo()
     ciclo_activo = bool(semestre_activo)
 
     try:
-        # Si no hay semestre activo, el beneficiario puede iniciar sesión,
-        # pero no se debe crear una nueva operación/solicitud automática.
-        if ciclo_activo:
+        # Primero se intenta encontrar el expediente propio del beneficiario.
+        # Esto evita mostrar datos de otro tutor por tomar simplemente la última solicitud del sistema.
+        mi_inscripcion = (
+            SolicitudInscripcion.objects
+            .select_related("solicitud_ingreso", "usuario_tutor")
+            .filter(usuario_tutor=request.user)
+            .order_by("-updated_at", "-id")
+            .first()
+        )
+
+        if mi_inscripcion and getattr(mi_inscripcion, "solicitud_ingreso", None):
+            solicitud_activa = mi_inscripcion.solicitud_ingreso
+
+        # Si el proyecto todavía no tiene una inscripción ligada al usuario,
+        # se conserva el comportamiento anterior como respaldo para no romper el flujo.
+        if not solicitud_activa and ciclo_activo:
             solicitud_activa = Solicitud.objects.order_by("-id").first()
 
             if not solicitud_activa:
@@ -1686,6 +2234,7 @@ def portal_padres_home(request):
 
     except Exception:
         solicitud_activa = None
+        mi_inscripcion = None
 
     solicitud_id = solicitud_activa.id if solicitud_activa else None
     folio = getattr(solicitud_activa, "folio", None) if solicitud_activa else None
@@ -1693,8 +2242,11 @@ def portal_padres_home(request):
     context = {
         "solicitud_id": solicitud_id,
         "folio": folio,
+        "mi_inscripcion": mi_inscripcion,
         "ciclo_activo": ciclo_activo,
         "semestre_activo_operativo": semestre_activo,
+        "foto_perfil_beneficiario_url": obtener_url_foto_perfil_usuario(request.user),
+        "perfil_beneficiario_soporta_foto": bool(obtener_campo_foto_perfil_usuario(request.user)),
     }
     context.update(contexto_semestre_operativo())
 
@@ -1705,10 +2257,12 @@ def portal_padres_home(request):
     )
 
 
+
+
 @login_required
 def registro_inscripcion(request):
     messages.info(
         request,
         "La pantalla de registro de inscripción directa está desactivada. Usa el portal de padres.",
     )
-    return redirect("portal_padres_home")
+    return redirect(reverse("portal_padres_home") + "#inicio")

@@ -57,21 +57,21 @@
     .brand-area{
       display:flex;
       align-items:center;
-      gap:16px;
+      gap:18px;
       min-width:0;
     }
 
     .brand-logo{
-      width:72px;
-      height:72px;
-      border-radius:20px;
+      width:276px;
+      height:112px;
+      border-radius:28px;
       display:flex;
       align-items:center;
       justify-content:center;
-      background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 50%,#1e40af 100%);
-      box-shadow:0 16px 32px rgba(37,99,235,.25);
+      background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);
+      box-shadow:0 18px 36px rgba(37,99,235,.24);
       overflow:hidden;
-      padding:9px;
+      padding:10px 14px;
       flex:0 0 auto;
       position:relative;
     }
@@ -81,13 +81,13 @@
       position:absolute;
       inset:7px;
       border:1px solid rgba(255,255,255,.22);
-      border-radius:16px;
+      border-radius:22px;
       pointer-events:none;
     }
 
     .brand-logo img{
-      width:100%;
-      height:100%;
+      width:125%;
+      height:125%;
       object-fit:contain;
       display:block;
       position:relative;
@@ -133,16 +133,25 @@
       white-space:nowrap;
     }
 
-    .worker-chip i{
-      width:38px;
-      height:38px;
-      border-radius:15px;
+    .worker-avatar-box{
+      width:44px;
+      height:44px;
+      border-radius:16px;
       display:grid;
       place-items:center;
       background:linear-gradient(135deg,#dbeafe,#eff6ff);
       color:#2563eb;
-      font-size:1.2rem;
+      font-size:1.25rem;
       box-shadow:inset 0 0 0 1px rgba(37,99,235,.08);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+
+    .worker-avatar-box img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .worker-chip small{
@@ -707,6 +716,7 @@
 
     @media (max-width: 992px){
       .top-header{ align-items:flex-start; flex-direction:column; }
+      .brand-area{ width:100%; align-items:center; }
       .header-actions{ justify-content:flex-start; width:100%; }
       .summary-grid{ grid-template-columns:1fr; }
       .tools-header{ align-items:flex-start; flex-direction:column; }
@@ -718,7 +728,7 @@
 
     @media (max-width: 560px){
       .page-shell{ width:min(100% - 24px, 1480px); padding-top:18px; }
-      .brand-logo{ width:60px; height:60px; border-radius:17px; }
+      .brand-logo{ width:220px; height:88px; border-radius:24px; padding:8px 12px; }
       .page-title h1{ font-size:1.42rem; }
       .hero-panel{ padding:24px 20px; border-radius:20px; }
       .hero-panel h2{ font-size:1.58rem; }
@@ -1112,65 +1122,7 @@
 <body>
   <main class="page-shell">
 
-{% if coberturas_trabajo_social_activas or cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social or bloqueos_edicion_activos %}
-<section class="ts-live-coverage-panel" id="trabajo-social-coberturas-tiempo-real">
-  <div class="ts-live-head">
-    <div>
-      <h2 class="ts-live-title">
-        <i class="bi bi-broadcast-pin"></i>
-        Estado de cobertura y expedientes en atención
-      </h2>
-      <p class="ts-live-subtitle">
-        La titular y la persona suplente pueden trabajar al mismo tiempo en expedientes diferentes. Si un expediente ya está siendo atendido, queda bloqueado temporalmente para evitar duplicidad.
-      </p>
-    </div>
-    <span class="ts-live-chip"><i class="bi bi-shield-check"></i> Control activo</span>
-  </div>
-
-  <div class="ts-live-grid">
-    {% if coberturas_trabajo_social_activas %}
-      {% for cobertura in coberturas_trabajo_social_activas %}
-      <div class="ts-live-card">
-        <div class="ts-card-title"><i class="bi bi-person-badge"></i> Cobertura de Trabajo Social</div>
-        <div class="ts-card-meta">
-          <strong>Cubre:</strong> {{ cobertura.suplente.nombre_visible|default:cobertura.suplente|default:"No registrado" }}<br>
-          <strong>Titular:</strong> {{ cobertura.titular_ausente.nombre_visible|default:cobertura.titular_ausente|default:"No registrado" }}<br>
-          <strong>Vigencia:</strong> {{ cobertura.inicio|date:"d/m/Y H:i" }}{% if cobertura.fin %} - {{ cobertura.fin|date:"d/m/Y H:i" }}{% endif %}
-        </div>
-      </div>
-      {% endfor %}
-    {% elif cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social %}
-      <div class="ts-live-card">
-        <div class="ts-card-title"><i class="bi bi-person-check"></i> Cobertura temporal vigente</div>
-        <div class="ts-card-meta">
-          Hay una cobertura activa para Trabajo Social. Las acciones realizadas quedarán registradas con usuario, hora y autorización.
-        </div>
-      </div>
-    {% endif %}
-
-    {% if bloqueos_edicion_activos %}
-      {% for bloqueo in bloqueos_edicion_activos %}
-      <div class="ts-live-card">
-        <div class="ts-card-title"><i class="bi bi-lock-fill"></i> Expediente ocupado</div>
-        <div class="ts-card-meta">
-          <strong>Atiende:</strong> {{ bloqueo.usuario.nombre_visible|default:bloqueo.usuario.get_full_name|default:bloqueo.usuario.username|default:"Usuario" }}<br>
-          <strong>Área:</strong> {{ bloqueo.area|default:"Trabajo Social" }}<br>
-          <strong>Actividad:</strong> {{ bloqueo.motivo|default:"Edición temporal" }}<br>
-          <strong>Última señal:</strong> {{ bloqueo.ultimo_ping|date:"d/m/Y H:i" }}
-        </div>
-      </div>
-      {% endfor %}
-    {% endif %}
-  </div>
-
-  <div class="ts-lock-note">
-    <strong>Regla del sistema:</strong> no se bloquea todo Trabajo Social. Solo se reserva el expediente que alguien está modificando; los demás expedientes siguen disponibles.
-  </div>
-</section>
-{% endif %}
-
-
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+{% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>
@@ -1258,10 +1210,24 @@
       </div>
 
       <div class="header-actions">
-        <div class="worker-chip" title="Trabajadora Social">
-          <i class="bi bi-person-heart"></i>
+        <div class="worker-chip" title="Usuario activo">
+          <div class="worker-avatar-box">
+            {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+              <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+            {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+              <i class="bi bi-person-check-fill"></i>
+            {% else %}
+              <i class="bi bi-person-heart"></i>
+            {% endif %}
+          </div>
           <div>
-            <small>Trabajo Social</small>
+            <small>
+              {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                Cubriendo Trabajo Social
+              {% else %}
+                Trabajo Social
+              {% endif %}
+            </small>
             <span>
               {% if request.user.nombre %}
                 {{ request.user.nombre }} {{ request.user.apellido_paterno|default:"" }}
@@ -1278,16 +1244,64 @@
       </div>
     </header>
 
-
-
-    {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
-    <div class="suplencia-ts-note" style="margin-bottom:18px;">
-      <i class="bi bi-person-check-fill"></i>
-      <strong>Cobertura especial de Trabajo Social:</strong> puedes continuar el flujo social autorizado por Dirección. El sistema dejará evidencia para revisión de la trabajadora social titular y consulta de Supervisora.
+{% if cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social %}
+<section class="ts-live-coverage-panel" id="trabajo-social-coberturas-tiempo-real">
+  <div class="ts-live-head">
+    <div>
+      <h2 class="ts-live-title">
+        <i class="bi bi-broadcast-pin"></i>
+        Estado de cobertura y expedientes en atención
+      </h2>
+      <p class="ts-live-subtitle">
+        La titular y la persona suplente pueden trabajar al mismo tiempo en expedientes diferentes. Si un expediente ya está siendo atendido, queda bloqueado temporalmente para evitar duplicidad.
+      </p>
     </div>
+    <span class="ts-live-chip"><i class="bi bi-shield-check"></i> Control activo</span>
+  </div>
+
+  <div class="ts-live-grid">
+    {% if coberturas_trabajo_social_activas %}
+      {% for cobertura in coberturas_trabajo_social_activas %}
+      <div class="ts-live-card">
+        <div class="ts-card-title"><i class="bi bi-person-badge"></i> Cobertura de Trabajo Social</div>
+        <div class="ts-card-meta">
+          <strong>Cubre:</strong> {{ cobertura.suplente.nombre_visible|default:cobertura.suplente|default:"No registrado" }}<br>
+          <strong>Titular:</strong> {{ cobertura.titular_ausente.nombre_visible|default:cobertura.titular_ausente|default:"No registrado" }}<br>
+          <strong>Vigencia:</strong> {{ cobertura.inicio|date:"d/m/Y H:i" }}{% if cobertura.fin %} - {{ cobertura.fin|date:"d/m/Y H:i" }}{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% elif cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social %}
+      <div class="ts-live-card">
+        <div class="ts-card-title"><i class="bi bi-person-check"></i> Cobertura temporal vigente</div>
+        <div class="ts-card-meta">
+          Hay una cobertura activa para Trabajo Social. Las acciones realizadas quedarán registradas con usuario, hora y autorización.
+        </div>
+      </div>
     {% endif %}
 
-    <section class="hero-panel">
+    {% if bloqueos_edicion_activos %}
+      {% for bloqueo in bloqueos_edicion_activos %}
+      <div class="ts-live-card">
+        <div class="ts-card-title"><i class="bi bi-lock-fill"></i> Expediente ocupado</div>
+        <div class="ts-card-meta">
+          <strong>Atiende:</strong> {{ bloqueo.usuario.nombre_visible|default:bloqueo.usuario.get_full_name|default:bloqueo.usuario.username|default:"Usuario" }}<br>
+          <strong>Área:</strong> {{ bloqueo.area|default:"Trabajo Social" }}<br>
+          <strong>Actividad:</strong> {{ bloqueo.motivo|default:"Edición temporal" }}<br>
+          <strong>Última señal:</strong> {{ bloqueo.ultimo_ping|date:"d/m/Y H:i" }}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div class="ts-lock-note">
+    <strong>Regla del sistema:</strong> no se bloquea todo Trabajo Social. Solo se reserva el expediente que alguien está modificando; los demás expedientes siguen disponibles.
+  </div>
+</section>
+{% endif %}
+
+<section class="hero-panel">
       <div class="hero-content">
         <div class="hero-kicker">
           <i class="bi bi-clipboard2-check"></i>

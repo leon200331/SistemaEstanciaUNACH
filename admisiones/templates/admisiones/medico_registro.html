@@ -24,7 +24,7 @@
     --rojo:#ef4444;
     --naranja:#f59e0b;
     --morado:#14b8a6;
-    --topbar:96px;
+    --topbar:142px;
 }
 
 *{box-sizing:border-box;}
@@ -41,7 +41,7 @@ body{
    ========================= */
 .topbar{
     min-height:var(--topbar);
-    background:#fff;
+    background:rgba(255,255,255,.96);
     border-bottom:1px solid var(--borde);
     box-shadow:0 8px 24px rgba(15,23,42,.04);
     position:sticky;
@@ -53,7 +53,7 @@ body{
     max-width:1320px;
     min-height:var(--topbar);
     margin:0 auto;
-    padding:16px 28px;
+    padding:14px 28px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -63,26 +63,27 @@ body{
 .header-left{
     display:flex;
     align-items:center;
-    gap:16px;
+    gap:18px;
     min-width:0;
 }
 
 .logo-frame{
-    width:82px;
-    height:62px;
-    border-radius:20px;
-    background:linear-gradient(135deg,#2563eb,#0f5f59 58%,#0f766e);
+    width:276px;
+    height:112px;
+    border-radius:28px;
+    background:linear-gradient(135deg,#1d4ed8 0%,#0f5f59 56%,#0f766e 120%);
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:9px;
-    box-shadow:0 14px 28px rgba(124,58,237,.24);
+    padding:10px 14px;
+    box-shadow:0 18px 36px rgba(15,118,110,.24);
     flex-shrink:0;
+    overflow:hidden;
 }
 
 .logo-frame img{
-    width:100%;
-    height:100%;
+    width:125%;
+    height:125%;
     object-fit:contain;
     display:block;
 }
@@ -133,21 +134,22 @@ body{
 }
 
 .profile-pill{
-    min-height:48px;
-    border-radius:15px;
+    min-height:58px;
+    border-radius:20px;
     background:#f0fdfa;
     border:1px solid #99f6e4;
-    padding:0 15px;
+    padding:8px 16px 8px 10px;
     display:flex;
     align-items:center;
-    gap:10px;
-    max-width:340px;
+    gap:12px;
+    max-width:410px;
+    box-shadow:0 12px 26px rgba(15,23,42,.06);
 }
 
 .profile-icon{
-    width:36px;
-    height:36px;
-    border-radius:50%;
+    width:48px;
+    height:48px;
+    border-radius:18px;
     background:#ccfbf1;
     color:#0f5f59;
     display:flex;
@@ -155,10 +157,31 @@ body{
     justify-content:center;
     font-size:1.25rem;
     flex-shrink:0;
+    overflow:hidden;
+    border:3px solid #ecfeff;
+    box-shadow:0 10px 20px rgba(15,118,110,.16);
+}
+
+.profile-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.profile-role{
+    display:block;
+    color:#64748b;
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:950;
+    line-height:1;
+    margin-bottom:4px;
 }
 
 .profile-name{
-    font-weight:900;
+    font-weight:950;
     color:#134e4a;
     white-space:nowrap;
     overflow:hidden;
@@ -318,8 +341,36 @@ body{
     font-weight:850;
 }
 
-.legend{display:flex;flex-direction:column;gap:12px;}
-.legend-item{display:flex;align-items:center;gap:10px;font-weight:800;color:#334155;}
+.legend{display:flex;flex-direction:column;gap:12px;min-width:220px;}
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    color:#334155;
+    flex-wrap:wrap;
+}
+.legend-percent{
+    margin-left:auto;
+    padding:4px 9px;
+    border-radius:999px;
+    background:#f1f5f9;
+    border:1px solid #e2e8f0;
+    color:#134e4a;
+    font-size:.78rem;
+    font-weight:950;
+}
+.legend-help{
+    margin-top:4px;
+    padding:9px 11px;
+    border-radius:14px;
+    background:#f0fdfa;
+    border:1px solid #99f6e4;
+    color:#0f5f59;
+    font-size:.78rem;
+    font-weight:800;
+    line-height:1.35;
+}
 .legend-color{width:14px;height:14px;border-radius:5px;display:inline-block;}
 .legend-color.green{background:#22c55e;}
 .legend-color.red{background:#ef4444;}
@@ -483,6 +534,16 @@ body{
     .kpi-grid,.summary-list{grid-template-columns:1fr;}
     .donut-wrap{flex-direction:column;}
 }
+
+@media(max-width:900px){
+    .logo-frame{
+        width:220px;
+        height:88px;
+        border-radius:24px;
+        padding:8px 12px;
+    }
+}
+
 </style>
 </head>
 
@@ -505,14 +566,32 @@ body{
                 <i class="bi bi-arrow-left"></i> Regresar
             </a>
 
-            <div class="profile-pill" title="Perfil">
-                <div class="profile-icon"><i class="bi bi-person-circle"></i></div>
-                <div class="profile-name">
-                    {% if request.user.get_full_name %}
-                        {{ request.user.get_full_name }}
+            <div class="profile-pill" title="Perfil médico">
+                <div class="profile-icon">
+                    {% if tiene_suplencia_medica %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% elif foto_perfil_medico_url %}
+                        <img src="{{ foto_perfil_medico_url }}" alt="Foto de perfil médico">
                     {% else %}
-                        {{ request.user.username }}
+                        <i class="bi bi-heart-pulse-fill"></i>
                     {% endif %}
+                </div>
+                <div class="min-w-0">
+                    <span class="profile-role">
+                        {% if tiene_suplencia_medica %}
+                            Cobertura temporal
+                        {% else %}
+                            Área médica
+                        {% endif %}
+                    </span>
+                    <div class="profile-name">
+                        {% if tiene_suplencia_medica %}Cubriendo área médica · {% endif %}
+                        {% if request.user.get_full_name %}
+                            {{ request.user.get_full_name }}
+                        {% else %}
+                            {{ request.user.username }}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -522,13 +601,15 @@ body{
 <main class="main">
 
 
-    {% if tiene_suplencia_activa %}
+    {% if tiene_suplencia_medica %}
     <div class="suplencia-historial-banner">
         <div class="suplencia-historial-icon"><i class="bi bi-person-badge-fill"></i></div>
         <div>
-            <h5>Cubriendo temporalmente</h5>
+            <h5>Cobertura temporal del área médica</h5>
             <p>
-                Tienes una autorización temporal activa. Los dictámenes realizados bajo suplencia quedan identificados en el historial y podrán revisarse después por el área titular.
+                Esta viñeta solo aparece cuando otra persona está autorizada por Dirección para cubrir el área médica.
+                Suplente activo: <strong>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</strong>.
+                Los dictámenes realizados bajo suplencia quedan identificados en el historial y podrán revisarse después por la titular.
             </p>
         </div>
     </div>
@@ -580,17 +661,27 @@ body{
             </div>
 
             <div class="donut-wrap">
-                <div class="donut" data-donut-resultados data-aprobados="{{ aprobados|length }}" data-rechazados="{{ rechazados|length }}">
+                <div class="donut" data-donut-resultados data-aprobados="{{ aprobados|length }}" data-rechazados="{{ rechazados|length }}" data-total="{{ total_registros }}">
                     <div class="donut-center">
                         <div class="donut-percent" data-donut-percent>0%</div>
                         <div class="donut-label">aprobados</div>
+                        <div class="donut-label" data-donut-total-label>Total: {{ total_registros }}</div>
                     </div>
                 </div>
 
                 <div class="legend">
-                    <div class="legend-item"><span class="legend-color green"></span> Aprobados: {{ aprobados|length }}</div>
-                    <div class="legend-item"><span class="legend-color red"></span> Rechazados: {{ rechazados|length }}</div>
-                    <div class="legend-item"><span class="legend-color blue"></span> Total: {{ total_registros }}</div>
+                    <div class="legend-item">
+                        <span class="legend-color green"></span>
+                        Aprobados: {{ aprobados|length }}
+                        <span class="legend-percent" data-aprobados-percent>{{ porcentaje_aprobados|default:0 }}%</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color red"></span>
+                        Rechazados: {{ rechazados|length }}
+                        <span class="legend-percent" data-rechazados-percent>{{ porcentaje_rechazados|default:0 }}%</span>
+                    </div>
+                    <div class="legend-item"><span class="legend-color blue"></span> Total dictaminados: {{ total_registros }}</div>
+
                 </div>
             </div>
         </section>
@@ -615,9 +706,9 @@ body{
                 </div>
 
                 <div class="summary-box">
-                    <div class="small-label">Observaciones</div>
+                    <div class="small-label">Total dictaminados</div>
                     <div class="big-value">{{ total_registros }}</div>
-                    <div class="mini-text">Cada dictamen conserva sus observaciones y responsable médico.</div>
+                    <div class="mini-text">Suma de aprobados y rechazados ya finalizados.</div>
                 </div>
 
                 <div class="summary-box">
@@ -779,12 +870,27 @@ document.addEventListener('DOMContentLoaded', function(){
     const aprobados = parseInt(donut.dataset.aprobados || '0', 10);
     const rechazados = parseInt(donut.dataset.rechazados || '0', 10);
     const total = aprobados + rechazados;
-    const aprobadosPercent = total > 0 ? Math.round((aprobados / total) * 100) : 0;
 
-    donut.style.background = `conic-gradient(#22c55e 0 ${aprobadosPercent}%, #ef4444 ${aprobadosPercent}% 100%)`;
+    const aprobadosPercent = total > 0 ? Math.round((aprobados / total) * 100) : 0;
+    const rechazadosPercent = total > 0 ? Math.round((rechazados / total) * 100) : 0;
+
+    if(total > 0){
+        donut.style.background = `conic-gradient(#22c55e 0 ${aprobadosPercent}%, #ef4444 ${aprobadosPercent}% 100%)`;
+    }else{
+        donut.style.background = `conic-gradient(#e5e7eb 0 100%)`;
+    }
 
     const percentText = document.querySelector('[data-donut-percent]');
     if(percentText) percentText.textContent = aprobadosPercent + '%';
+
+    const totalLabel = document.querySelector('[data-donut-total-label]');
+    if(totalLabel) totalLabel.textContent = 'Total: ' + total;
+
+    const aprobadosBadge = document.querySelector('[data-aprobados-percent]');
+    const rechazadosBadge = document.querySelector('[data-rechazados-percent]');
+
+    if(aprobadosBadge) aprobadosBadge.textContent = aprobadosPercent + '%';
+    if(rechazadosBadge) rechazadosBadge.textContent = rechazadosPercent + '%';
 });
 </script>
 </body>

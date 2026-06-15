@@ -49,16 +49,16 @@
             position: sticky;
             top: 0;
             z-index: 50;
-            background: rgba(255, 255, 255, .84);
+            background: rgba(255, 255, 255, .94);
             border-bottom: 1px solid rgba(219, 230, 246, .95);
-            backdrop-filter: blur(18px);
             box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
         }
 
         .topbar-inner {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 18px 22px;
+            min-height: 132px;
+            padding: 14px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -73,23 +73,24 @@
         }
 
         .logo-box {
-            width: 74px;
-            height: 58px;
+            width: 276px;
+            height: 112px;
             flex: 0 0 auto;
-            border-radius: 18px;
+            border-radius: 28px;
             display: grid;
             place-items: center;
-            background: linear-gradient(135deg, var(--azul-unach), var(--azul-vivo));
-            box-shadow: 0 12px 26px rgba(22, 119, 255, .22);
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 58%, #0f766e 130%);
+            box-shadow: 0 18px 36px rgba(37, 99, 235, .24);
             overflow: hidden;
-            padding: 8px;
+            padding: 10px 14px;
         }
 
         .logo-box img {
-            width: 100%;
-            height: 100%;
+            width: 125%;
+            height: 125%;
             object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .18));
+            filter: none;
+            display: block;
         }
 
         .brand-kicker {
@@ -155,14 +156,23 @@
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
             display: grid;
             place-items: center;
             background: linear-gradient(135deg, var(--morado-ts), var(--azul-vivo));
             color: #fff;
             box-shadow: 0 8px 18px rgba(124, 58, 237, .22);
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .page-shell {
@@ -717,6 +727,18 @@
                 flex-direction: column;
             }
 
+            .brand-wrap {
+                width: 100%;
+                align-items: center;
+            }
+
+            .logo-box {
+                width: 248px;
+                height: 100px;
+                border-radius: 25px;
+                padding: 9px 12px;
+            }
+
             .top-actions {
                 width: 100%;
                 justify-content: flex-start;
@@ -754,8 +776,10 @@
             }
 
             .logo-box {
-                width: 62px;
-                height: 52px;
+                width: 220px;
+                height: 88px;
+                border-radius: 24px;
+                padding: 8px 12px;
             }
 
             .stats-grid {
@@ -1172,8 +1196,21 @@
                 <i class="bi bi-arrow-left me-1"></i> Regresar
             </a>
             <div class="user-chip" title="Usuario activo">
-                <span class="user-avatar"><i class="bi bi-person-hearts"></i></span>
-                <span>{% firstof request.user.get_full_name request.user.username request.user.email "Trabajadora Social" %}</span>
+                <span class="user-avatar">
+                    {% if request.user.foto_perfil_url and not suplencia_trabajo_social_activa and not cobertura_trabajo_social_activa and not modo_suplencia_trabajo_social %}
+                        <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                    {% elif suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        <i class="bi bi-person-check-fill"></i>
+                    {% else %}
+                        <i class="bi bi-person-hearts"></i>
+                    {% endif %}
+                </span>
+                <span>
+                    {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
+                        Cubriendo TS ·
+                    {% endif %}
+                    {% firstof request.user.get_full_name request.user.username request.user.email "Trabajadora Social" %}
+                </span>
             </div>
         </div>
     </div>
@@ -1181,7 +1218,7 @@
 
 <main class="page-shell">
 
-{% if coberturas_trabajo_social_activas or cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social or bloqueos_edicion_activos %}
+{% if cobertura_trabajo_social_activa or suplencia_trabajo_social_activa or modo_suplencia_trabajo_social %}
 <section class="ts-live-coverage-panel" id="trabajo-social-coberturas-tiempo-real">
   <div class="ts-live-head">
     <div>
@@ -1239,7 +1276,7 @@
 {% endif %}
 
 
-  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social or solo_consulta_suplencia or registro_bloqueado_por_estado %}
+  {% if suplencia_trabajo_social_activa or cobertura_trabajo_social_activa or modo_suplencia_trabajo_social %}
   <section class="suplencia-ts-panel {% if solo_consulta_suplencia or registro_bloqueado_por_estado %}suplencia-ts-locked{% endif %}" id="cobertura-trabajo-social">
     <div class="suplencia-ts-head">
       <div>

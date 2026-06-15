@@ -2,6 +2,49 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+import os
+
+# =========================================================
+# VALIDACIÓN DE FOTO DE PERFIL
+# =========================================================
+MAX_FOTO_PERFIL_MB = 3
+MAX_FOTO_PERFIL_BYTES = MAX_FOTO_PERFIL_MB * 1024 * 1024
+EXTENSIONES_FOTO_PERFIL_PERMITIDAS = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+def validar_foto_perfil(archivo):
+    """
+    Valida la foto de perfil del personal.
+
+    Reglas:
+    - Formatos permitidos: JPG, JPEG, PNG o WEBP.
+    - Tamaño máximo: 3 MB.
+
+    Esto evita subir imágenes demasiado pesadas que puedan afectar el sistema.
+    """
+    if not archivo:
+        return
+
+    nombre = getattr(archivo, "name", "") or ""
+    extension = os.path.splitext(nombre)[1].lower()
+
+    if extension not in EXTENSIONES_FOTO_PERFIL_PERMITIDAS:
+        raise ValidationError(
+            "Formato no permitido para la foto de perfil. "
+            "Usa una imagen JPG, JPEG, PNG o WEBP."
+        )
+
+    tamano = getattr(archivo, "size", 0) or 0
+
+    if tamano > MAX_FOTO_PERFIL_BYTES:
+        peso_mb = round(tamano / (1024 * 1024), 2)
+        raise ValidationError(
+            f"La foto de perfil pesa {peso_mb} MB y supera el límite permitido "
+            f"de {MAX_FOTO_PERFIL_MB} MB."
+        )
+
+    if tamano <= 0:
+        raise ValidationError("La foto de perfil está vacía. Selecciona una imagen válida.")
 
 
 class Usuario(AbstractUser):
@@ -128,6 +171,22 @@ class Usuario(AbstractUser):
         null=True
     )
 
+
+    # =========================================================
+    # 4.1 FOTO DE PERFIL
+    # =========================================================
+    # Cada usuario guarda su propia foto.
+    # Ejemplo: si una maestra sube su foto, solo se muestra en su sesión
+    # porque los templates la leen desde request.user.foto_perfil.
+    foto_perfil = models.ImageField(
+        upload_to='usuarios/fotos_perfil/',
+        blank=True,
+        null=True,
+        validators=[validar_foto_perfil],
+        verbose_name='Foto de perfil',
+        help_text='Imagen opcional del usuario. Formatos: JPG, JPEG, PNG o WEBP. Tamaño máximo: 3 MB.'
+    )
+
     # =========================================================
     # 5. ÁREA OPERATIVA DEL PERSONAL
     # =========================================================
@@ -187,6 +246,40 @@ class Usuario(AbstractUser):
     # =========================================================
     # 6. PROPIEDADES DE APOYO
     # =========================================================
+
+
+    @property
+    def foto_perfil_url(self):
+        """
+        Devuelve la URL segura de la foto de perfil.
+        Si el usuario no tiene foto, devuelve cadena vacía para que el HTML
+        muestre el icono profesional por defecto.
+        """
+        try:
+            if self.foto_perfil and hasattr(self.foto_perfil, 'url'):
+                return self.foto_perfil.url
+        except Exception:
+            pass
+
+        return ''
+
+    def eliminar_foto_perfil(self, guardar=True):
+        """
+        Elimina físicamente la foto de perfil y limpia el campo.
+        Se usa cuando el usuario decide quitar su foto desde el panel.
+        """
+        try:
+            if self.foto_perfil:
+                self.foto_perfil.delete(save=False)
+        except Exception:
+            pass
+
+        self.foto_perfil = None
+
+        if guardar:
+            self.save(update_fields=['foto_perfil'])
+
+
     @property
     def nombre_completo(self):
         """
@@ -503,6 +596,14 @@ class Usuario(AbstractUser):
     # 9. NORMALIZACIÓN ANTES DE GUARDAR
     # =========================================================
     def save(self, *args, **kwargs):
+        foto_anterior = None
+
+        if self.pk:
+            try:
+                foto_anterior = Usuario.objects.only('foto_perfil').get(pk=self.pk).foto_perfil
+            except Usuario.DoesNotExist:
+                foto_anterior = None
+
         if self.nombre:
             self.nombre = self.nombre.title().strip()
             self.first_name = self.nombre
@@ -536,6 +637,13 @@ class Usuario(AbstractUser):
             self.area_operativa = None
 
         super().save(*args, **kwargs)
+
+        # Si se reemplazó la foto, elimina el archivo anterior para no llenar media/.
+        try:
+            if foto_anterior and self.foto_perfil and foto_anterior.name != self.foto_perfil.name:
+                foto_anterior.delete(save=False)
+        except Exception:
+            pass
 
     class Meta:
         verbose_name = 'Usuario'

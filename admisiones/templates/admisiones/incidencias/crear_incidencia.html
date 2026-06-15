@@ -48,45 +48,47 @@
         }
 
         .topbar{
-            background:rgba(255,255,255,.92);
+            background:rgba(255,255,255,.96);
             border:1px solid rgba(226,232,240,.95);
             border-radius:26px;
             box-shadow:0 18px 46px rgba(15,23,42,.08);
-            padding:18px 20px;
+            padding:14px 20px;
             display:flex;
             align-items:center;
             justify-content:space-between;
             gap:18px;
             margin-bottom:22px;
-            backdrop-filter:blur(16px);
+            min-height:142px;
         }
 
         .brand{
             display:flex;
             align-items:center;
-            gap:14px;
+            gap:18px;
             min-width:0;
         }
 
         .brand-logo{
-            width:74px;
-            height:74px;
-            background:linear-gradient(135deg,#1d4ed8,#2563eb);
+            width:276px;
+            height:112px;
+            background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);
             border:1px solid rgba(255,255,255,.35);
-            border-radius:20px;
-            box-shadow:0 18px 34px rgba(37,99,235,.24);
+            border-radius:28px;
+            box-shadow:0 18px 36px rgba(37,99,235,.24);
             display:flex;
             align-items:center;
             justify-content:center;
             flex-shrink:0;
-            padding:8px;
+            padding:10px 14px;
+            overflow:hidden;
         }
 
         .brand-logo img{
-            width:100%;
-            height:100%;
+            width:125%;
+            height:125%;
             object-fit:contain;
-            filter:drop-shadow(0 8px 14px rgba(0,0,0,.16));
+            display:block;
+            filter:none;
         }
 
         .brand-title{
@@ -164,24 +166,33 @@
         .type-general{background:linear-gradient(135deg,#2563eb,#0891b2);}
 
         .profile-area-pill{
-            min-height:54px;
-            border-radius:18px;
+            min-height:58px;
+            border-radius:20px;
             background:#fff;
             border:1px solid var(--border);
             box-shadow:0 14px 30px rgba(15,23,42,.08);
-            padding:8px 14px 8px 8px;
+            padding:8px 16px 8px 10px;
             display:flex;
             align-items:center;
-            gap:10px;
-            max-width:360px;
+            gap:12px;
+            max-width:410px;
         }
 
         .profile-area-pill .type-icon{
-            width:42px;
-            height:42px;
-            border-radius:14px;
-            font-size:1.05rem;
-            box-shadow:none;
+            width:48px;
+            height:48px;
+            border-radius:18px;
+            font-size:1.18rem;
+            box-shadow:0 10px 20px rgba(37,99,235,.13);
+            overflow:hidden;
+            border:3px solid #eff6ff;
+        }
+
+        .profile-area-pill .type-icon img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
         }
 
         .profile-area-text{
@@ -207,7 +218,47 @@
             white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;
-            max-width:250px;
+            max-width:290px;
+        }
+
+        .suplencia-psicologia-panel{
+            border-radius:22px;
+            background:linear-gradient(135deg,#eff6ff,#ffffff);
+            border:1px solid #bfdbfe;
+            border-left:7px solid #2563eb;
+            box-shadow:0 16px 36px rgba(37,99,235,.12);
+            padding:17px 19px;
+            margin-bottom:18px;
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+        }
+
+        .suplencia-psicologia-icon{
+            width:46px;
+            height:46px;
+            border-radius:16px;
+            background:linear-gradient(135deg,#1d4ed8,#2563eb,#0891b2);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            font-size:1.25rem;
+            box-shadow:0 10px 20px rgba(37,99,235,.18);
+        }
+
+        .suplencia-psicologia-panel h5{
+            margin:0 0 5px;
+            color:#1e3a8a;
+            font-weight:950;
+        }
+
+        .suplencia-psicologia-panel p{
+            margin:0;
+            color:#52627c;
+            font-weight:700;
+            line-height:1.48;
         }
 
         .alert-custom{
@@ -754,6 +805,8 @@
         @media(max-width:760px){
             .page{width:min(100% - 28px, 1420px);padding-top:14px;}
             .topbar{flex-direction:column;align-items:flex-start;border-radius:22px;}
+            .brand{flex-direction:column;align-items:flex-start;}
+            .brand-logo{width:220px;height:88px;border-radius:24px;padding:8px 12px;}
             .top-actions,.btn-soft,.btn-main{width:100%;}
             .type-icon{width:100%;}
             .profile-area-pill{width:100%;max-width:100%;}
@@ -797,7 +850,13 @@
 
             {% if tipo_forzado == "PEDAGOGICA" %}
                 <div class="profile-area-pill" title="Responsable del área pedagógica">
-                    <span class="type-icon type-pedagogica"><i class="bi bi-easel2-fill"></i></span>
+                    <span class="type-icon type-pedagogica">
+                        {% if request.user.foto_perfil_url and not tiene_suplencia_activa %}
+                            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                        {% else %}
+                            <i class="bi bi-easel2-fill"></i>
+                        {% endif %}
+                    </span>
                     <span class="profile-area-text">
                         <span class="profile-area-role">Área pedagógica</span>
                         <span class="profile-area-name">
@@ -817,7 +876,13 @@
                 </div>
             {% elif tipo_forzado == "NUTRICIONAL" %}
                 <div class="profile-area-pill" title="Nutrióloga responsable">
-                    <span class="type-icon type-nutricional"><i class="bi bi-egg-fried"></i></span>
+                    <span class="type-icon type-nutricional">
+                        {% if request.user.foto_perfil_url and not tiene_suplencia_activa %}
+                            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                        {% else %}
+                            <i class="bi bi-egg-fried"></i>
+                        {% endif %}
+                    </span>
                     <span class="profile-area-text">
                         <span class="profile-area-role">Nutrióloga</span>
                         <span class="profile-area-name">
@@ -833,7 +898,13 @@
                 </div>
             {% elif tipo_forzado == "MEDICA" %}
                 <div class="profile-area-pill" title="Médica responsable">
-                    <span class="type-icon type-medica"><i class="bi bi-heart-pulse-fill"></i></span>
+                    <span class="type-icon type-medica">
+                        {% if request.user.foto_perfil_url and not tiene_suplencia_activa %}
+                            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                        {% else %}
+                            <i class="bi bi-heart-pulse-fill"></i>
+                        {% endif %}
+                    </span>
                     <span class="profile-area-text">
                         <span class="profile-area-role">Médica</span>
                         <span class="profile-area-name">
@@ -851,10 +922,27 @@
                 </div>
             {% elif tipo_forzado == "PSICOLOGICA" %}
                 <div class="profile-area-pill" title="Psicóloga responsable">
-                    <span class="type-icon type-psicologica"><i class="bi bi-person-hearts"></i></span>
+                    <span class="type-icon type-psicologica">
+                        {% if tiene_suplencia_psicologia or suplencia_psicologia_activa or cobertura_psicologia_activa %}
+                            <i class="bi bi-person-check-fill"></i>
+                        {% elif request.user.foto_perfil_url %}
+                            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil de Psicología">
+                        {% else %}
+                            <i class="bi bi-person-hearts"></i>
+                        {% endif %}
+                    </span>
                     <span class="profile-area-text">
-                        <span class="profile-area-role">Psicóloga</span>
+                        <span class="profile-area-role">
+                            {% if tiene_suplencia_psicologia or suplencia_psicologia_activa or cobertura_psicologia_activa %}
+                                Cobertura temporal
+                            {% else %}
+                                Psicóloga
+                            {% endif %}
+                        </span>
                         <span class="profile-area-name">
+                            {% if tiene_suplencia_psicologia or suplencia_psicologia_activa or cobertura_psicologia_activa %}
+                                Cubriendo Psicología ·
+                            {% endif %}
                             {% if psicologa_asignada %}
                                 {{ psicologa_asignada }}
                             {% elif request.user.get_full_name %}
@@ -867,7 +955,13 @@
                 </div>
             {% else %}
                 <div class="profile-area-pill" title="Responsable del registro">
-                    <span class="type-icon type-general"><i class="bi bi-clipboard2-pulse-fill"></i></span>
+                    <span class="type-icon type-general">
+                        {% if request.user.foto_perfil_url and not tiene_suplencia_activa %}
+                            <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil">
+                        {% else %}
+                            <i class="bi bi-clipboard2-pulse-fill"></i>
+                        {% endif %}
+                    </span>
                     <span class="profile-area-text">
                         <span class="profile-area-role">Responsable</span>
                         <span class="profile-area-name">
@@ -883,10 +977,31 @@
         </div>
     </header>
 
+
+    {% if tipo_forzado == "PSICOLOGICA" %}
+        {% if tiene_suplencia_psicologia or suplencia_psicologia_activa or cobertura_psicologia_activa %}
+            <div class="suplencia-psicologia-panel">
+                <div class="suplencia-psicologia-icon"><i class="bi bi-person-check-fill"></i></div>
+                <div>
+                    <h5>Cobertura temporal de Psicología</h5>
+                    <p>
+                        Esta viñeta solo aparece cuando otra persona está autorizada por Dirección para cubrir el área de Psicología.
+                        Suplente activo:
+                        <strong>{% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</strong>.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
     {% if messages %}
         <div class="mb-3">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">{{ message }}</div>
+                {% with texto_mensaje=message|stringformat:"s" %}
+                    {% if "Foto de perfil" not in texto_mensaje %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} alert-custom mb-2">{{ message }}</div>
+                    {% endif %}
+                {% endwith %}
             {% endfor %}
         </div>
     {% endif %}

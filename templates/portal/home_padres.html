@@ -1152,7 +1152,575 @@
     .security-role-note i{font-size:1.25rem; margin-top:2px;}
     .security-role-note strong{display:block; color:#0f2f67; margin-bottom:2px;}
 
+
+    /* ===== AJUSTE PORTAL PADRES: logo grande, perfil y avance ===== */
+    .portal-sidebar{width:320px;}
+    .portal-main{margin-left:320px;}
+    .brand-wrap{flex-direction:column;align-items:flex-start;gap:10px;padding-bottom:20px;}
+    .logo-frame{width:276px;height:112px;min-width:276px;border-radius:28px;padding:10px 14px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0f766e 130%);box-shadow:0 18px 36px rgba(37,99,235,.24);overflow:hidden;}
+    .logo-frame::before,.logo-frame::after{display:none;}
+    .logo-frame img{width:125%;height:125%;object-fit:contain;filter:none;position:relative;z-index:2;}
+    .brand-title{font-size:1.08rem;line-height:1.08;letter-spacing:-.03em;white-space:nowrap;}
+    .user-chip{min-height:58px;border-radius:20px;background:rgba(255,255,255,.94);border:1px solid #dbeafe;padding:8px 16px 8px 10px;box-shadow:0 14px 30px rgba(15,23,42,.07);cursor:pointer;transition:.18s ease;text-align:left;}
+    .user-chip:hover{transform:translateY(-2px);box-shadow:0 18px 34px rgba(37,99,235,.13);}
+    .avatar-circle{width:50px;height:50px;border-radius:18px;overflow:hidden;border:3px solid #eff6ff;box-shadow:0 10px 20px rgba(37,99,235,.14);position:relative;flex-shrink:0;}
+    .avatar-circle img{width:100%;height:100%;object-fit:cover;display:block;}
+    .profile-camera-dot{position:absolute;right:-4px;bottom:-4px;width:23px;height:23px;border-radius:999px;background:#2563eb;color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;z-index:3;}
+    .profile-notice-stack{position:fixed;top:20px;right:22px;z-index:2200;display:grid;gap:10px;max-width:min(420px,calc(100vw - 34px));}
+.delete-confirm-box.show{
+        display:block !important;
+    }
+
+
+/* =========================================================
+   RESTAURACIÓN PORTAL PADRES: MODAL FOTO + ESTATUS PROCESO
+   ========================================================= */
+
+/* Modal atractivo de foto de perfil */
+.profile-modal .modal-dialog{
+    max-width: 760px;
+}
+
+.profile-modal .modal-content{
+    border:0 !important;
+    border-radius:30px !important;
+    overflow:hidden !important;
+    box-shadow:0 28px 90px rgba(15,23,42,.28) !important;
+    background:#fff !important;
+}
+
+.profile-modal .profile-modal-head{
+    background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 58%,#0891b2 130%) !important;
+    color:#fff !important;
+    padding:24px 26px 72px !important;
+    position:relative !important;
+    overflow:hidden !important;
+}
+
+.profile-modal .profile-modal-head::after{
+    content:"";
+    position:absolute;
+    right:-45px;
+    top:-45px;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:rgba(255,255,255,.16);
+}
+
+.profile-modal .profile-modal-head .badge{
+    border-radius:999px !important;
+    background:rgba(255,255,255,.16) !important;
+    border:1px solid rgba(255,255,255,.28) !important;
+    color:#fff !important;
+    padding:.48rem .78rem !important;
+    font-weight:950 !important;
+    position:relative;
+    z-index:2;
+}
+
+.profile-modal .profile-modal-title{
+    margin:16px 0 5px !important;
+    font-size:1.58rem !important;
+    line-height:1.08 !important;
+    font-weight:950 !important;
+    letter-spacing:-.04em !important;
+    position:relative;
+    z-index:2;
+}
+
+.profile-modal .profile-modal-subtitle{
+    margin:0 !important;
+    color:rgba(255,255,255,.90) !important;
+    font-weight:750 !important;
+    position:relative;
+    z-index:2;
+}
+
+.profile-modal .profile-modal-body{
+    padding:0 26px 22px !important;
+    background:#fff !important;
+}
+
+.profile-modal .profile-summary-card{
+    margin-top:-48px !important;
+    background:#fff !important;
+    border:1px solid #e2e8f0 !important;
+    border-radius:26px !important;
+    padding:18px !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:18px !important;
+    box-shadow:0 18px 48px rgba(15,23,42,.12) !important;
+    position:relative !important;
+    z-index:2 !important;
+}
+
+.profile-modal .profile-preview{
+    width:112px !important;
+    height:112px !important;
+    min-width:112px !important;
+    max-width:112px !important;
+    border-radius:28px !important;
+    background:#dbeafe !important;
+    border:5px solid #eff6ff !important;
+    overflow:hidden !important;
+    color:#2563eb !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:3rem !important;
+    flex-shrink:0 !important;
+    position:relative !important;
+    box-shadow:0 12px 28px rgba(37,99,235,.14) !important;
+}
+
+.profile-modal .profile-preview img{
+    width:100% !important;
+    height:100% !important;
+    max-width:100% !important;
+    max-height:100% !important;
+    object-fit:cover !important;
+    display:block !important;
+}
+
+.profile-modal .profile-preview-camera{
+    position:absolute !important;
+    right:7px !important;
+    bottom:7px !important;
+    width:34px !important;
+    height:34px !important;
+    border-radius:999px !important;
+    background:#2563eb !important;
+    color:#fff !important;
+    border:3px solid #fff !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:1rem !important;
+    z-index:3 !important;
+}
+
+.profile-modal .profile-upload-zone{
+    margin-top:16px !important;
+    border:1.5px dashed #93c5fd !important;
+    background:linear-gradient(180deg,#f8fbff,#fff) !important;
+    border-radius:24px !important;
+    padding:16px !important;
+}
+
+.profile-modal .profile-file-row{
+    display:flex !important;
+    justify-content:space-between !important;
+    gap:14px !important;
+    align-items:center !important;
+    flex-wrap:wrap !important;
+}
+
+.profile-modal .profile-choose-btn{
+    min-height:44px !important;
+    border-radius:999px !important;
+    background:#fff !important;
+    border:1px solid #bfdbfe !important;
+    color:#1d4ed8 !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    padding:0 16px !important;
+    font-weight:950 !important;
+    cursor:pointer !important;
+    box-shadow:0 8px 18px rgba(37,99,235,.08) !important;
+}
+
+.profile-modal .profile-rules{
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:10px !important;
+    margin-top:14px !important;
+}
+
+.profile-modal .profile-rule{
+    border:1px solid #e2e8f0 !important;
+    background:#fff !important;
+    border-radius:15px !important;
+    padding:10px !important;
+    color:#334155 !important;
+    font-weight:850 !important;
+    font-size:.82rem !important;
+}
+
+.profile-modal .profile-rule i{
+    color:#2563eb !important;
+    margin-right:6px !important;
+}
+
+.profile-modal .profile-modal-actions{
+    padding-top:16px !important;
+    display:flex !important;
+    justify-content:space-between !important;
+    align-items:center !important;
+    gap:10px !important;
+    flex-wrap:wrap !important;
+}
+
+.profile-modal .profile-alert{
+    display:none;
+    margin-top:12px !important;
+    border-radius:16px !important;
+    padding:10px 12px !important;
+    font-weight:800 !important;
+}
+
+.profile-modal .profile-alert.show{display:block !important;}
+.profile-modal .profile-alert.error{background:#fff1f2 !important;color:#be123c !important;border:1px solid #fecdd3 !important;}
+.profile-modal .profile-alert.ok{background:#f0fdf4 !important;color:#166534 !important;border:1px solid #bbf7d0 !important;}
+
+.profile-modal .delete-confirm-box{
+    display:none;
+    margin-top:14px !important;
+    border-radius:20px !important;
+    background:#fff7ed !important;
+    border:1px solid #fed7aa !important;
+    padding:14px !important;
+    color:#9a3412 !important;
+    font-weight:800 !important;
+}
+
+.profile-modal .delete-confirm-box.show{
+    display:block !important;
+}
+
+.profile-modal .delete-confirm-actions{
+    display:flex !important;
+    gap:8px !important;
+    flex-wrap:wrap !important;
+    margin-top:10px !important;
+}
+
+/* Estatus del proceso con barra de avance */
+.status-process-card{
+    overflow:hidden;
+}
+
+.process-progress-top{
+    display:grid !important;
+    grid-template-columns:auto minmax(0,1fr) auto !important;
+    gap:14px !important;
+    align-items:center !important;
+    padding:16px 18px !important;
+    margin-bottom:18px !important;
+    border-radius:22px !important;
+    background:linear-gradient(135deg,#eff6ff,#ffffff) !important;
+    border:1px solid #dbeafe !important;
+    box-shadow:0 12px 28px rgba(37,99,235,.08) !important;
+}
+
+.process-current-icon{
+    width:52px !important;
+    height:52px !important;
+    border-radius:18px !important;
+    display:grid !important;
+    place-items:center !important;
+    color:#2563eb !important;
+    background:#dbeafe !important;
+    border:1px solid #bfdbfe !important;
+    font-size:1.4rem !important;
+}
+
+.process-current-title{
+    color:#0b2a68 !important;
+    font-weight:950 !important;
+    font-size:1.05rem !important;
+    line-height:1.15 !important;
+}
+
+.process-current-text{
+    color:#60749d !important;
+    font-weight:750 !important;
+    font-size:.86rem !important;
+    margin-top:3px !important;
+}
+
+.process-percent{
+    min-width:72px !important;
+    text-align:center !important;
+    border-radius:18px !important;
+    padding:10px 12px !important;
+    background:#fff !important;
+    border:1px solid #bfdbfe !important;
+    color:#1d4ed8 !important;
+    font-weight:950 !important;
+    box-shadow:0 10px 22px rgba(37,99,235,.08) !important;
+}
+
+.process-bar{
+    height:12px !important;
+    border-radius:999px !important;
+    background:#e2e8f0 !important;
+    overflow:hidden !important;
+    margin-bottom:18px !important;
+}
+
+.process-bar-fill{
+    height:100% !important;
+    border-radius:999px !important;
+    background:linear-gradient(90deg,#16a34a,#2563eb) !important;
+    width:var(--process-progress,0%) !important;
+    transition:width .3s ease !important;
+}
+
+.timeline{
+    display:grid !important;
+    gap:10px !important;
+}
+
+.timeline-item{
+    position:relative !important;
+    display:grid !important;
+    grid-template-columns:44px minmax(0,1fr) !important;
+    gap:12px !important;
+    align-items:flex-start !important;
+    padding:12px !important;
+    border:1px solid #eef2f7 !important;
+    border-radius:18px !important;
+    background:#fff !important;
+}
+
+.timeline-item.current-step{
+    border-color:#93c5fd !important;
+    background:linear-gradient(135deg,#eff6ff,#fff) !important;
+    box-shadow:0 12px 26px rgba(37,99,235,.10) !important;
+}
+
+.timeline-item.done-step{
+    background:#fbfffd !important;
+}
+
+.timeline-item.pending-step{
+    opacity:.88 !important;
+}
+
+.timeline-dot{
+    width:40px !important;
+    height:40px !important;
+    border-radius:15px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    flex-shrink:0 !important;
+}
+
+.timeline-dot.done{
+    background:#dcfce7 !important;
+    color:#16a34a !important;
+    border:1px solid #bbf7d0 !important;
+}
+
+.timeline-dot.current{
+    background:#dbeafe !important;
+    color:#2563eb !important;
+    border:2px solid #93c5fd !important;
+    box-shadow:0 0 0 4px rgba(37,99,235,.10) !important;
+}
+
+.timeline-dot.pending{
+    background:#f1f5f9 !important;
+    color:#94a3b8 !important;
+    border:1px solid #e2e8f0 !important;
+}
+
+@media(max-width:780px){
+    .profile-modal .profile-summary-card{
+        flex-direction:column !important;
+        align-items:flex-start !important;
+    }
+
+    .profile-modal .profile-rules{
+        grid-template-columns:1fr !important;
+    }
+
+    .process-progress-top{
+        grid-template-columns:1fr !important;
+    }
+
+    .process-percent{
+        width:max-content !important;
+    }
+}
+
     </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    function hideNotice(notice){
+        if(!notice) return;
+        notice.classList.add('is-hiding');
+        window.setTimeout(function(){
+            if(notice && notice.parentNode){
+                notice.parentNode.removeChild(notice);
+            }
+        }, 300);
+    }
+
+    document.querySelectorAll('[data-close-notice]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            hideNotice(btn.closest('[data-profile-notice]'));
+        });
+    });
+
+    window.setTimeout(function(){
+        document.querySelectorAll('[data-profile-notice]').forEach(function(notice){
+            hideNotice(notice);
+        });
+    }, 4200);
+
+    document.querySelectorAll('.timeline-dot.current').forEach(function(dot){
+        const item = dot.closest('.timeline-item');
+        if(item) item.classList.add('current-step');
+    });
+
+    document.querySelectorAll('.timeline-dot.done').forEach(function(dot){
+        const item = dot.closest('.timeline-item');
+        if(item && !item.classList.contains('current-step')){
+            item.classList.add('done-step');
+        }
+    });
+
+    document.querySelectorAll('.timeline-dot.pending').forEach(function(dot){
+        const item = dot.closest('.timeline-item');
+        if(item) item.classList.add('pending-step');
+    });
+
+    const form = document.getElementById('formFotoBeneficiario');
+    const input = document.getElementById('fotoPerfilBeneficiarioInput');
+    const preview = document.getElementById('profilePreviewBeneficiario');
+    const nameBox = document.getElementById('fotoPerfilBeneficiarioName');
+    const alertBox = document.getElementById('fotoPerfilBeneficiarioAlert');
+    const btnDelete = document.getElementById('btnMostrarEliminarBeneficiario');
+    const confirmDelete = document.getElementById('confirmEliminarFotoBeneficiario');
+    const btnCancelDelete = document.getElementById('btnCancelarEliminarBeneficiario');
+
+    function showProfileAlert(message, type){
+        if(!alertBox) return;
+        alertBox.className = 'profile-alert show ' + (type || 'error');
+        alertBox.textContent = message;
+    }
+
+    function validateProfileFile(file){
+        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        const maxBytes = 3 * 1024 * 1024;
+
+        if(!file){
+            showProfileAlert('Selecciona una imagen antes de guardar la foto de perfil.', 'error');
+            return false;
+        }
+
+        if(!allowed.includes(file.type)){
+            showProfileAlert('Formato no permitido. Usa JPG, JPEG, PNG o WEBP.', 'error');
+            return false;
+        }
+
+        if(file.size > maxBytes){
+            showProfileAlert('La foto no debe superar 3 MB. Selecciona una imagen más ligera.', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    if(input){
+        input.addEventListener('change', function(){
+            const file = input.files && input.files[0];
+
+            if(!validateProfileFile(file)){
+                input.value = '';
+                return;
+            }
+
+            if(nameBox){
+                nameBox.textContent = file.name + ' · ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            showProfileAlert('Imagen lista para guardar.', 'ok');
+
+            if(preview){
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    preview.innerHTML = '<img src="' + e.target.result + '" alt="Vista previa"><span class="profile-preview-camera"><i class="bi bi-camera-fill"></i></span>';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if(form){
+        form.addEventListener('submit', function(event){
+            const file = input && input.files ? input.files[0] : null;
+
+            if(!validateProfileFile(file)){
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
+
+    if(btnDelete && confirmDelete){
+        btnDelete.addEventListener('click', function(){
+            confirmDelete.classList.add('show');
+            /* No mover el scroll del panel al mostrar la confirmación. */
+        });
+    }
+
+    if(btnCancelDelete && confirmDelete){
+        btnCancelDelete.addEventListener('click', function(){
+            confirmDelete.classList.remove('show');
+        });
+    }
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.timeline-dot.current').forEach(function(dot){
+        const item = dot.closest('.timeline-item');
+        if(item) item.classList.add('current-step');
+    });
+
+    document.querySelectorAll('.timeline-dot.done').forEach(function(dot){
+        const item = dot.closest('.timeline-item');
+        if(item && !item.classList.contains('current-step')){
+            item.classList.add('done-step');
+        }
+    });
+
+    document.querySelectorAll('.timeline-dot.pending').forEach(function(dot){
+        const item = dot.closest('.timeline-item');
+        if(item) item.classList.add('pending-step');
+    });
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    const hayMensajeFoto = Array.from(document.querySelectorAll('.toast, .alert, [data-profile-notice], .profile-notice, .messages, .toast-body'))
+        .some(function(el){
+            return (el.textContent || '').toLowerCase().includes('foto de perfil');
+        });
+
+    if (hayMensajeFoto || window.location.hash === '#inicio') {
+        window.setTimeout(function(){
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        }, 60);
+    }
+});
+</script>
+
 {% endblock %}
 
 {% block content %}
@@ -1212,44 +1780,33 @@
                 <div class="page-subtitle">Seguimiento familiar del proceso de inscripción</div>
             </div>
 
-            <div class="user-chip">
+            <button type="button" class="user-chip" title="Personalizar foto de perfil" data-bs-toggle="modal" data-bs-target="#modalFotoBeneficiario">
                 <div class="avatar-circle">
-                    {% if mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}
+                    {% if foto_perfil_beneficiario_url %}
+                        <img src="{{ foto_perfil_beneficiario_url }}" alt="Foto de perfil del beneficiario">
+                    {% elif mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}
                         {{ mi_inscripcion.solicitud_ingreso.nombres_tutor|slice:":1"|upper }}
                     {% else %}
                         <i class="bi bi-person-heart"></i>
                     {% endif %}
+                    <span class="profile-camera-dot"><i class="bi bi-camera-fill"></i></span>
                 </div>
                 <div>
                     <div class="user-name">
                         {% if mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}
                             {{ mi_inscripcion.solicitud_ingreso.nombres_tutor }}
+                        {% elif request.user.get_full_name %}
+                            {{ request.user.get_full_name }}
                         {% else %}
                             Beneficiario
                         {% endif %}
                     </div>
                     <div class="user-role">{{ request.user.email|default:"Tutor" }}</div>
                 </div>
-            </div>
+            </button>
         </header>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
 
-
-    <div class="security-role-note">
-        <i class="bi bi-shield-lock-fill"></i>
-        <div>
-            <strong>Portal protegido para beneficiarios</strong>
-            Este acceso es personal. El sistema valida que solo puedas consultar tu propio expediente y comprobante.
-        </div>
-    </div>
 
     <section class="hero-card">
             <div class="hero-content">
@@ -1576,8 +2133,68 @@
                             {% endif %}
                         </div>
                         <div class="panel-body">
+                            {% with estado_actual=mi_inscripcion.estado|default:"SIN_INICIAR" %}
+                                {% if estado_actual == "NUEVA" or estado_actual == "EN_PROCESO" or estado_actual == "DEVUELTA" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-folder-check"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Expediente documental</div><div class="process-current-text">Completa o corrige tus datos y documentos desde Mi expediente.</div></div>
+                                        <div class="process-percent">28%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:28%;"></div></div>
+                                {% elif estado_actual == "EN_REVISION" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-search"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Revisión de expediente</div><div class="process-current-text">Trabajo Social está verificando tu expediente antes de enviarlo a filtros.</div></div>
+                                        <div class="process-percent">42%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:42%;"></div></div>
+                                {% elif estado_actual == "FILTROS" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-heart-pulse"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Filtros institucionales</div><div class="process-current-text">Psicología, Nutrición y Médico revisan el expediente y emiten dictamen.</div></div>
+                                        <div class="process-percent">58%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:58%;"></div></div>
+                                {% elif estado_actual == "REVISION_FINAL_TS" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-file-earmark-text"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Reporte final</div><div class="process-current-text">Trabajo Social integra el reporte final con base en los filtros.</div></div>
+                                        <div class="process-percent">72%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:72%;"></div></div>
+                                {% elif estado_actual == "ESPERANDO_DIRECTORA" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-person-check"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Autorización final</div><div class="process-current-text">Dirección revisa el reporte final y autoriza la continuidad del trámite.</div></div>
+                                        <div class="process-percent">84%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:84%;"></div></div>
+                                {% elif estado_actual == "ACEPTADO_ESPERANDO_PAGO" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-receipt"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Pago y cierre</div><div class="process-current-text">Ya puedes subir tu comprobante de pago para concluir el proceso.</div></div>
+                                        <div class="process-percent">92%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:92%;"></div></div>
+                                {% elif estado_actual == "FINALIZADA" %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-check-circle"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Proceso finalizado</div><div class="process-current-text">Tu inscripción fue concluida correctamente.</div></div>
+                                        <div class="process-percent">100%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:100%;"></div></div>
+                                {% else %}
+                                    <div class="process-progress-top">
+                                        <div class="process-current-icon"><i class="bi bi-pencil-square"></i></div>
+                                        <div><div class="process-current-title">Ahora estás en: Inicio del trámite</div><div class="process-current-text">Ingresa a Mi expediente para comenzar o continuar tu captura.</div></div>
+                                        <div class="process-percent">12%</div>
+                                    </div>
+                                    <div class="process-bar"><div class="process-bar-fill" style="--process-progress:12%;"></div></div>
+                                {% endif %}
+                            {% endwith %}
+
                             <div class="timeline">
-                                <div class="timeline-item">
+                                <div class="timeline-item done-step">
                                     <div class="timeline-dot done">
                                         <i class="bi bi-check"></i>
                                     </div>
@@ -1713,6 +2330,18 @@
 </div>
 
 {% endwith %}
+
+
+<div class="modal fade profile-modal" id="modalFotoBeneficiario" tabindex="-1" aria-labelledby="modalFotoBeneficiarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+        <div class="profile-modal-head"><button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button><span class="badge"><i class="bi bi-stars me-1"></i> Perfil visible del beneficiario</span><h2 class="profile-modal-title" id="modalFotoBeneficiarioLabel">Personaliza tu foto de perfil</h2><p class="profile-modal-subtitle">Esta imagen aparecerá únicamente en tu usuario del Portal de Padres.</p></div>
+        <div class="profile-modal-body">
+            <div class="profile-summary-card"><div class="profile-preview" id="profilePreviewBeneficiario">{% if foto_perfil_beneficiario_url %}<img src="{{ foto_perfil_beneficiario_url }}" alt="Foto actual del beneficiario">{% else %}<i class="bi bi-person-fill"></i>{% endif %}<span class="profile-preview-camera"><i class="bi bi-camera-fill"></i></span></div><div><h5 class="mb-1 fw-black">{% if mi_inscripcion and mi_inscripcion.solicitud_ingreso.nombres_tutor %}{{ mi_inscripcion.solicitud_ingreso.nombres_tutor }}{% elif request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}Beneficiario{% endif %}</h5><span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-person-heart me-1"></i> Portal de Padres</span><p class="mt-3 mb-0 text-muted fw-semibold">Puedes subir una foto clara. Si no agregas imagen, el sistema seguirá usando la inicial del beneficiario.</p></div></div>
+            <form method="post" enctype="multipart/form-data" id="formFotoBeneficiario" class="profile-upload-form">{% csrf_token %}<input type="hidden" name="action_type" value="actualizar_foto_beneficiario"><input type="file" name="foto_perfil_beneficiario" id="fotoPerfilBeneficiarioInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="d-none"><div class="profile-upload-zone"><div class="profile-file-row"><div><div class="fw-black text-dark">Selecciona una foto para tu perfil</div><div class="text-muted small fw-semibold" id="fotoPerfilBeneficiarioName">Arrastra o selecciona una imagen desde tu equipo.</div></div><label for="fotoPerfilBeneficiarioInput" class="profile-choose-btn"><i class="bi bi-image-fill"></i> Elegir foto</label></div><div class="profile-rules"><div class="profile-rule"><i class="bi bi-filetype-jpg"></i> JPG o JPEG</div><div class="profile-rule"><i class="bi bi-filetype-png"></i> PNG / WEBP</div><div class="profile-rule"><i class="bi bi-hdd-fill"></i> Máximo 3 MB</div></div><div class="profile-alert" id="fotoPerfilBeneficiarioAlert"></div></div><div class="profile-modal-actions"><div class="d-flex gap-2 flex-wrap">{% if foto_perfil_beneficiario_url %}<button type="button" class="btn btn-outline-danger rounded-pill fw-bold" id="btnMostrarEliminarBeneficiario"><i class="bi bi-trash3-fill me-1"></i> Eliminar foto</button>{% endif %}</div><div class="d-flex gap-2 flex-wrap"><button type="button" class="btn btn-outline-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary rounded-pill fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Guardar foto</button></div></div></form>
+            {% if foto_perfil_beneficiario_url %}<div class="delete-confirm-box" id="confirmEliminarFotoBeneficiario"><div class="fw-black"><i class="bi bi-exclamation-triangle-fill me-1"></i> ¿Deseas eliminar tu foto de perfil?</div><div class="small mt-1">Se quitará la imagen actual y volverá a mostrarse la inicial del beneficiario.</div><form method="post" class="delete-confirm-actions">{% csrf_token %}<input type="hidden" name="action_type" value="eliminar_foto_beneficiario"><button type="button" class="btn btn-light rounded-pill fw-bold" id="btnCancelarEliminarBeneficiario">Conservar foto</button><button type="submit" class="btn btn-danger rounded-pill fw-bold"><i class="bi bi-trash3-fill me-1"></i> Sí, eliminar</button></form></div>{% endif %}
+        </div>
+    </div></div>
+</div>
 
 <script>
 (function() {

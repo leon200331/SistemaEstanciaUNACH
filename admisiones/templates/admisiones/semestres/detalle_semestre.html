@@ -1643,7 +1643,209 @@
             }
         }
 
-    </style>
+
+
+        /* =========================================================
+           AJUSTE TI: LOGO, BOTÓN INICIO Y FOTO DE PERFIL
+           ========================================================= */
+        .topbar .brand-logo{
+            width:132px !important;
+            height:74px !important;
+            border-radius:18px !important;
+            padding:10px 12px !important;
+            background:linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+            box-shadow:0 14px 28px rgba(37,99,235,.24) !important;
+            border:1px solid rgba(255,255,255,.22) !important;
+        }
+
+        .topbar .brand-logo img{
+            width:100% !important;
+            height:100% !important;
+            object-fit:contain !important;
+            padding:0 !important;
+            border:0 !important;
+            background:transparent !important;
+            box-shadow:none !important;
+        }
+
+        .topbar .brand > img{
+            height:70px !important;
+            max-width:150px !important;
+            width:auto !important;
+            object-fit:contain !important;
+            border-radius:18px !important;
+            background:linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+            padding:10px 12px !important;
+            box-shadow:0 14px 28px rgba(37,99,235,.24) !important;
+            border:1px solid rgba(255,255,255,.22) !important;
+        }
+
+        .topbar .top-actions,
+        .topbar .topbar-actions{
+            gap:12px !important;
+        }
+
+        .btn-home-ti,
+        .btn-return.btn-home-ti,
+        .btn-nav.btn-home-ti,
+        .btn.btn-top.btn-home-ti{
+            border:1px solid #bfdbfe !important;
+            background:#eff6ff !important;
+            color:#1d4ed8 !important;
+            border-radius:14px !important;
+            padding:10px 16px !important;
+            font-weight:950 !important;
+            text-decoration:none !important;
+            display:inline-flex !important;
+            align-items:center !important;
+            gap:8px !important;
+            box-shadow:0 8px 18px rgba(37,99,235,.08) !important;
+            white-space:nowrap !important;
+        }
+
+        .btn-home-ti:hover,
+        .btn-return.btn-home-ti:hover,
+        .btn-nav.btn-home-ti:hover,
+        .btn.btn-top.btn-home-ti:hover{
+            transform:translateY(-1px) !important;
+            background:#dbeafe !important;
+            border-color:#93c5fd !important;
+            color:#1e40af !important;
+        }
+
+        .admin-chip,
+        .user-menu{
+            display:flex !important;
+            align-items:center !important;
+            gap:10px !important;
+        }
+
+        .admin-icon,
+        .user-avatar{
+            width:44px !important;
+            height:44px !important;
+            border-radius:999px !important;
+            overflow:hidden !important;
+            flex:0 0 auto !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+        }
+
+        .admin-icon img,
+        .user-avatar img{
+            width:100% !important;
+            height:100% !important;
+            object-fit:cover !important;
+            display:block !important;
+            border-radius:999px !important;
+        }
+
+        @media(max-width:576px){
+            .topbar .brand-logo{
+                width:112px !important;
+                height:64px !important;
+            }
+
+            .topbar .brand > img{
+                height:62px !important;
+                max-width:128px !important;
+            }
+        }
+
+
+        /* =========================================================
+           AJUSTE FINAL SOLICITADO: LOGO MÁS GRANDE SIN SALIRSE
+           ========================================================= */
+        .topbar .brand{
+            gap:18px !important;
+        }
+
+        .topbar .brand > img{
+            width:172px !important;
+            height:78px !important;
+            max-width:172px !important;
+            min-width:172px !important;
+            flex:0 0 172px !important;
+            object-fit:contain !important;
+            object-position:center !important;
+            display:block !important;
+            padding:4px 8px !important;
+            border-radius:18px !important;
+            background:linear-gradient(135deg, #1d4ed8 0%, #2563eb 52%, #1e40af 100%) !important;
+            border:1px solid rgba(255,255,255,.24) !important;
+            box-shadow:0 14px 28px rgba(37,99,235,.24) !important;
+            overflow:hidden !important;
+        }
+
+        @media(max-width:576px){
+            .topbar .brand > img{
+                width:150px !important;
+                height:70px !important;
+                max-width:150px !important;
+                min-width:150px !important;
+                flex-basis:150px !important;
+                padding:4px 7px !important;
+            }
+        }
+
+
+
+        /* =========================================================
+           AJUSTE FINAL: MISMO TAMAÑO DEL LOGO DEL PANEL DIRECTORA
+           Medida tomada del panel directivo: logo de 300px.
+           ========================================================= */
+        .topbar .brand{
+            gap:18px !important;
+            min-width:0 !important;
+        }
+
+        .topbar .brand > img{
+            width:300px !important;
+            height:auto !important;
+            max-width:300px !important;
+            min-width:300px !important;
+            flex:0 0 300px !important;
+            object-fit:contain !important;
+            object-position:center center !important;
+            display:block !important;
+            padding:0 !important;
+            margin:0 !important;
+            border:0 !important;
+            border-radius:24px !important;
+            background:linear-gradient(135deg,#2c62df,#133fba) !important;
+            box-shadow:0 14px 28px rgba(39,87,215,.28) !important;
+            overflow:hidden !important;
+        }
+
+        @media(max-width:900px){
+            .topbar-inner{
+                flex-direction:column !important;
+                align-items:flex-start !important;
+            }
+
+            .topbar .brand > img{
+                width:min(300px, 100%) !important;
+                max-width:100% !important;
+                min-width:0 !important;
+                flex:0 1 auto !important;
+            }
+        }
+
+        @media(max-width:420px){
+            .topbar .brand{
+                width:100% !important;
+                flex-direction:column !important;
+                align-items:flex-start !important;
+            }
+
+            .topbar .brand > img{
+                width:100% !important;
+                max-width:300px !important;
+            }
+        }
+
+</style>
 </head>
 <body>
 
@@ -1665,7 +1867,11 @@
 
             <div class="user-menu">
                 <div class="user-avatar">
-                    <i class="bi bi-person-fill"></i>
+                    {% if request.user.foto_perfil_url %}
+                        <img src="{{ request.user.foto_perfil_url }}" alt="Foto de perfil de {{ request.user.nombre_visible|default:request.user.username }}">
+                    {% else %}
+                        <i class="bi bi-person-fill"></i>
+                    {% endif %}
                 </div>
                 <span>Administrador(a)</span>
                 <i class="bi bi-chevron-down small"></i>
